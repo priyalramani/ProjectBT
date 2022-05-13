@@ -36,7 +36,7 @@ const Sidebar = () => {
                     },
                     {
                       name: "Routes",
-                      link: "/",
+                      link: "/routes",
                     },
                     {
                       name: "Counter Categories",
