@@ -28,7 +28,7 @@ const Sidebar = () => {
                     },
                     {
                       name: "Categories",
-                      link: "/",
+                      link: "/itemCategories",
                     },
                     {
                       name: "Counter",

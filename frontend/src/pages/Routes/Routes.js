@@ -64,7 +64,7 @@ function Table({ itemsDetails }) {
             <thead>
                 <tr>
                     <th>S.N</th>
-                    <th colSpan={3}>Routes Title</th>
+                    <th colSpan={2}>Routes Title</th>
                     <th>Sort Order</th>
                     
                 </tr>
@@ -74,7 +74,7 @@ function Table({ itemsDetails }) {
 
                     <tr key={Math.random()} style={{height:"30px"}}>
                         <td>{i + 1}</td>
-                        <td colSpan={3}>{item.route_title}</td>
+                        <td colSpan={2}>{item.route_title}</td>
                         <td >{item.sort_order}</td>
                       
                     </tr>

@@ -8,12 +8,14 @@ import {
 } from "react-router-dom";
 import MainAdmin from './pages/MainAdmin/MainAdmin';
 import RoutesPage from './pages/Routes/Routes';
+import ItemCategories from './pages/ItemCategories/ItemCategories';
 function App() {
   return (
     <div className="App">
      <Routes>
        <Route path='/admin' element={<MainAdmin/>}/>
        <Route path='/routes' element={<RoutesPage/>}/>
+       <Route path='/itemCategories' element={<ItemCategories/>}/>
        <Route path="*" element={<Navigate replace to="/admin" />} />
      </Routes>
     </div>
