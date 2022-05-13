@@ -39,8 +39,8 @@ const Sidebar = () => {
                       link: "/routes",
                     },
                     {
-                      name: "Counter Categories",
-                      link: "/",
+                      name: "Counter Group",
+                      link: "/counterGroup",
                     },
                     {
                       name: "Item Categories",
