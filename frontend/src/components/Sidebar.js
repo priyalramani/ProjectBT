@@ -43,8 +43,8 @@ const Sidebar = () => {
                       link: "/counterGroup",
                     },
                     {
-                      name: "Item Categories",
-                      link: "/",
+                      name: "Item Group",
+                      link: "/itemGroup",
                     },
                     {
                       name: "Users",

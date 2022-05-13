@@ -3,19 +3,19 @@ import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 
 import axios from "axios";
-const CounterGroup = () => {
-    const [counterGroup, setCounterGroup] = useState([]);
+const ItemGroup = () => {
+    const [itemGroup, setItemGroup] = useState([]);
     const [popupForm, setPopupForm] = useState(false);
     const getCounterGroup = async () => {
       const response = await axios({
         method: "get",
-        url: "/counterGroup/getCounterGroup",
+        url: "/itemGroup/getItemGroup",
   
         headers: {
           "Content-Type": "application/json",
         },
       });
-      if (response.data.success) setCounterGroup(response.data.result);
+      if (response.data.success) setItemGroup(response.data.result);
     };
 
     useEffect(() => {
@@ -29,7 +29,7 @@ const CounterGroup = () => {
         <Header />
         <div className="item-sales-container orders-report-container">
           <div id="heading">
-            <h2>Counter Group</h2>
+            <h2>Item Group</h2>
           </div>
           <div id="item-sales-top">
             <div id="date-input-container" style={{ overflow: "visible" }}>
@@ -42,14 +42,14 @@ const CounterGroup = () => {
             </div>
           </div>
           <div className="table-container-user item-sales-container">
-            <Table itemsDetails={counterGroup} />
+            <Table itemsDetails={itemGroup} />
           </div>
         </div>
         {popupForm ? (
           <NewUserForm
             onSave={() => setPopupForm(false)}
          
-            setRoutesData={setCounterGroup}
+            setRoutesData={setItemGroup}
           />
         ) : (
           ""
@@ -58,7 +58,7 @@ const CounterGroup = () => {
     );
 }
 
-export default CounterGroup
+export default ItemGroup
 function Table({ itemsDetails }) {
     return (
       <table
@@ -68,7 +68,7 @@ function Table({ itemsDetails }) {
         <thead>
           <tr>
             <th>S.N</th>
-            <th colSpan={2}>Counter Group Title</th>
+            <th colSpan={2}>Item Group Title</th>
            
           </tr>
         </thead>
@@ -77,7 +77,7 @@ function Table({ itemsDetails }) {
             ?.map((item, i) => (
               <tr key={Math.random()} style={{ height: "30px" }}>
                 <td>{i + 1}</td>
-                <td colSpan={2}>{item.counter_group_title}</td>
+                <td colSpan={2}>{item.item_group_title}</td>
                 
               </tr>
             ))}
@@ -90,7 +90,7 @@ function Table({ itemsDetails }) {
     const [errMassage, setErrorMassage] = useState("");
     const submitHandler = async (e) => {
       e.preventDefault();
-      if(!data.counter_group_title){
+      if(!data.item_group_title){
         setErrorMassage("Please insert Group Title");
         return;
   
@@ -98,7 +98,7 @@ function Table({ itemsDetails }) {
       if (popupInfo?.type === "edit") {
         const response = await axios({
           method: "put",
-          url: "/counterGroup/putCounterGroup",
+          url: "/itemGroup/putItemGroup",
           data,
           headers: {
             "Content-Type": "application/json",
@@ -113,7 +113,7 @@ function Table({ itemsDetails }) {
       } else {
         const response = await axios({
           method: "post",
-          url: "/counterGroup/postCounterGroup",
+          url: "/itemGroup/postItemGroup",
           data,
           headers: {
             "Content-Type": "application/json",
@@ -143,22 +143,22 @@ function Table({ itemsDetails }) {
             <div style={{ overflowY: "scroll" }}>
               <form className="form" onSubmit={submitHandler}>
                 <div className="row">
-                  <h1>Add Counter Group</h1>
+                  <h1>Add Item Group</h1>
                 </div>
   
                 <div className="formGroup">
                   <div className="row">
                     <label className="selectLabel">
-                      Counter Group Title
+                      Item Group Title
                       <input
                         type="text"
                         name="route_title"
                         className="numberInput"
-                        value={data?.counter_group_title}
+                        value={data?.item_group_title}
                         onChange={(e) =>
                           setdata({
                             ...data,
-                            counter_group_title: e.target.value,
+                            item_group_title: e.target.value,
                           })
                         }
                         maxLength={42}
