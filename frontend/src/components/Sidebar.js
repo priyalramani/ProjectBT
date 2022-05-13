@@ -14,7 +14,7 @@ const Sidebar = () => {
   return (
     <div className="left-panel" style={{ position: "relative" }}>
      
-      <div className="nav"  style={{marginTop:"70px"}}>
+      <div className="nav"  style={{paddingTop:"70px",height:"100vh",backgroundColor:"#f2f2f2"}}>
       
                 <NavLink
                   title={"Master"}
