@@ -16,7 +16,7 @@ const NavLink = ({ title,
         onClick={ () => { }}
       >
         <div
-          className={`nav-link ${ 1===1?'active' : ''}`}
+          className={`nav-link`}
           draggable={draggable}
         //   onClick={categoryFilterHandler}
           id={`item-category-${title?.toLowerCase()}`}
