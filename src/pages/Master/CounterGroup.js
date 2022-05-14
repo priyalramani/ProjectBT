@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
-
+import {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  MenuAlt2Icon,
+} from "@heroicons/react/solid";
 import axios from "axios";
 const CounterGroup = () => {
     const [counterGroup, setCounterGroup] = useState([]);
@@ -60,6 +64,8 @@ const CounterGroup = () => {
 
 export default CounterGroup
 function Table({ itemsDetails }) {
+  const [items, setItems] = useState("counter_group_title");
+  const [order, setOrder] = useState("asc");
     return (
       <table
         className="user-table"
@@ -68,12 +74,43 @@ function Table({ itemsDetails }) {
         <thead>
           <tr>
             <th>S.N</th>
-            <th colSpan={2}>Counter Group Title</th>
+            <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Counter Group Title</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("counter_group_title");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("counter_group_title");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div></th>
            
           </tr>
         </thead>
         <tbody>
           {itemsDetails
+           .filter((a) => a.counter_group_title)
+           .sort((a, b) =>
+             order === "asc"
+               ? typeof a[items] === "string"
+                 ? a[items].localeCompare(b[items])
+                 : a[items] - b[items]
+               : typeof a[items] === "string"
+               ? b[items].localeCompare(a[items])
+               : b[items] - a[items]
+           )
             ?.map((item, i) => (
               <tr key={Math.random()} style={{ height: "30px" }}>
                 <td>{i + 1}</td>

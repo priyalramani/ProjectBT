@@ -63,7 +63,7 @@ const RoutesPage = () => {
 export default RoutesPage;
 function Table({ itemsDetails }) {
   const [items, setItems] = useState("sort_order");
-  const [order, setOrder] = useState("");
+  const [order, setOrder] = useState("asc");
   return (
     <table
       className="user-table"
