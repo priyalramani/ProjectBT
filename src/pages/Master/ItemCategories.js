@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
-
+import {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  MenuAlt2Icon,
+} from "@heroicons/react/solid";
 import axios from "axios";
 const ItemCompanies = () => {
   const [itemCategories, setItemCategories] = useState([]);
@@ -16,7 +20,7 @@ const ItemCompanies = () => {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setItemCategories(response.data.result);
+    if (response.data.success) setItemCategories(response.data.result.map(b=>({...b,company_title:companies.find(a=>a.company_uuid===b.company_uuid)?.company_title||"-"})));
   };
   const getCompanies = async () => {
     const response = await axios({
@@ -31,7 +35,7 @@ const ItemCompanies = () => {
   };
   useEffect(() => {
     getItemCategories();
-  }, [popupForm]);
+  }, [popupForm,companies]);
   useEffect(() => {
     getCompanies();
   }, []);
@@ -73,6 +77,8 @@ const ItemCompanies = () => {
 
 export default ItemCompanies;
 function Table({ itemsDetails,companies }) {
+  const [items, setItems] = useState("sort_order");
+  const [order,setOrder]=useState("")
   return (
     <table
       className="user-table"
@@ -81,18 +87,66 @@ function Table({ itemsDetails,companies }) {
       <thead>
         <tr>
           <th>S.N</th>
-          <th colSpan={2}>Company</th>
-          <th colSpan={2}>Category Title</th>
+          <th colSpan={2}><div className="t-head-element">
+              <span>Company Title</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() =>{
+                    setItems("company_title")
+                    setOrder("asc")}
+                  }
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() =>
+                    {setItems(
+                      "company_title"
+                    )
+                  setOrder("desc")}
+                  }
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div></th>
+          <th colSpan={2}> <div className="t-head-element">
+              <span>Category Title</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() =>{
+                    setItems(
+                      "category_title")
+                       setOrder("asc")}
+                  }
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() =>
+                    {setItems(
+                      "category_title"
+                      
+                    )
+                    setOrder("desc")}
+                  }
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div></th>
        
         </tr>
       </thead>
       <tbody>
         {itemsDetails
-          .sort((a, b) => a.sort_order - b.sort_order)
+           .sort((a, b) =>order==="asc"
+           ? typeof(a[items])==="string"?a[items].localeCompare(b[items]): a[items] - b[items]:
+           typeof(a[items])==="string"?b[items].localeCompare(a[items]): b[items] - a[items])   
           ?.map((item, i) => (
             <tr key={Math.random()} style={{ height: "30px" }}>
               <td>{i + 1}</td>
-              <td colSpan={2}>{companies.find(a=>a.company_uuid===item.company_uuid)?.company_title||"-"}</td>
+              <td colSpan={2}>{item.company_title}</td>
               <td colSpan={2}>{item.category_title}</td>
             </tr>
           ))}
