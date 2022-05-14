@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
-
+import {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  MenuAlt2Icon,
+} from "@heroicons/react/solid";
 import axios from "axios";
 const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
@@ -28,11 +32,22 @@ const ItemsPage = () => {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setItemsData(response.data.result);
+    if (response.data.success)
+      setItemsData(
+        response.data.result.map((b) => ({
+          ...b,
+          company_title:
+            companies.find((a) => a.company_uuid === b.company_uuid)
+              ?.company_title || "-",
+          category_title:
+            itemCategories.find((a) => a.category_uuid === b.category_uuid)
+              ?.category_title || "-",
+        }))
+      );
   };
   useEffect(() => {
     getItemsData();
-  }, [popupForm]);
+  }, [popupForm, itemCategories, companies]);
   const getCompanies = async () => {
     const response = await axios({
       method: "get",
@@ -90,7 +105,10 @@ const ItemsPage = () => {
 
 export default ItemsPage;
 function Table({ itemsDetails, companies, categories }) {
-  console.log(itemsDetails)
+  const [items, setItems] = useState("sort_order");
+  const [order,setOrder]=useState("")
+  
+  console.log(items);
   return (
     <table
       className="user-table"
@@ -99,32 +117,204 @@ function Table({ itemsDetails, companies, categories }) {
       <thead>
         <tr>
           <th>S.N</th>
-          <th colSpan={2}>Company Title</th>
-          <th colSpan={2}>Category Title</th>
-          <th colSpan={2}>Item Title</th>
-          <th colSpan={2}>MRP</th>
-          <th colSpan={2}>Selling Price</th>
-          <th colSpan={2}>Conversion</th>
-          <th colSpan={2}>GST(%)</th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Company Title</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() =>{
+                    setItems("company_title")
+                    setOrder("asc")}
+                  }
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() =>
+                    {setItems(
+                      "company_title"
+                    )
+                  setOrder("desc")}
+                  }
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Category Title</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() =>{
+                    setItems(
+                      "category_title")
+                       setOrder("asc")}
+                  }
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() =>
+                    {setItems(
+                      "category_title"
+                      
+                    )
+                    setOrder("desc")}
+                  }
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Item Title</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() =>
+                    {setItems("item_title"
+                      
+                    ) 
+                    setOrder("asc")}
+                  }
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() =>{
+                    setItems("item_title"
+                    )
+                    setOrder("desc")}
+                  }
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>MRP</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() =>
+                   { setItems("mrp")
+                   setOrder("asc")}
+                  }
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() =>
+                    {setItems("mrp")
+                    setOrder("desc")}
+                  }
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Selling Price</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() =>
+                    {setItems("item_price"
+                      
+                    )
+                  
+                    setOrder("asc")}
+                  }
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() =>
+                   { 
+                     setItems("item_price")
+                     setOrder("desc")}
+                     
+                  }
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Conversion</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() =>
+                    {setItems("conversion"
+                    )
+                    setOrder("asc")}
+                  }
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() =>
+                   { setItems("conversion"
+                    )
+                    setOrder("desc")}
+                  }
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>GST(%)</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() =>
+                   { setItems("item_gst"
+                    )
+                    setOrder("asc")}
+                  }
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() =>
+                    {setItems("item_gst"
+                    )
+                    setOrder("desc")}
+                  }
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
           <th colSpan={2}>Group</th>
-   
         </tr>
       </thead>
       <tbody>
         {itemsDetails
-          .sort((a, b) => a.sort_order - b.sort_order)
+        .sort((a, b) =>order==="asc"
+        ? typeof(a[items])==="string"?a[items].localeCompare(b[items]): a[items] - b[items]:
+        typeof(a[items])==="string"?b[items].localeCompare(a[items]): b[items] - a[items])
           ?.map((item, i) => (
             <tr key={Math.random()} style={{ height: "30px" }}>
               <td>{i + 1}</td>
-              <td colSpan={2}>{companies.find(a=>a.company_uuid===item.company_uuid)?.company_title||"-"}</td>
-              <td colSpan={2}>{categories.find(a=>a.category_uuid===item.category_uuid)?.category_title||"-"}</td>
+              <td colSpan={2}>{item.company_title}</td>
+              <td colSpan={2}>{item.category_title}</td>
               <td colSpan={2}>{item.item_title}</td>
               <td colSpan={2}>{item.mrp}</td>
               <td colSpan={2}>{item.item_price}</td>
               <td colSpan={2}>{item.conversion}</td>
               <td colSpan={2}>{item.item_gst}</td>
               <td colSpan={2}>-</td>
-     
             </tr>
           ))}
       </tbody>
