@@ -69,7 +69,7 @@ const Counter = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={counter} routesData={routesData} />
+          <Table itemsDetails={counter} routesData={routesData} setPopupForm={setPopupForm}/>
         </div>
       </div>
       {popupForm ? (
@@ -77,6 +77,7 @@ const Counter = () => {
           onSave={() => setPopupForm(false)}
           routesData={routesData}
           setCounters={setCounter}
+          popupInfo={popupForm}
         />
       ) : (
         ""
@@ -86,7 +87,7 @@ const Counter = () => {
 };
 
 export default Counter;
-function Table({ itemsDetails, routesData }) {
+function Table({ itemsDetails, routesData,setPopupForm }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
   return (
@@ -180,7 +181,7 @@ function Table({ itemsDetails, routesData }) {
               : b[items] - a[items]
           )
           ?.map((item, i) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
+            <tr key={Math.random()} style={{ height: "30px" }} onClick={()=>setPopupForm({type:"edit",data:item})}>
               <td>{i + 1}</td>
               <td colSpan={2}>{item.route_title}</td>
               <td colSpan={2}>{item.counter_title}</td>
@@ -194,6 +195,8 @@ function Table({ itemsDetails, routesData }) {
 function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
+useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
+  
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!data.counter_title) {
@@ -255,7 +258,7 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
-                <h1>Add Counter </h1>
+                <h1>{popupInfo.type==="edit"?"Edit":"Add"} Counter </h1>
               </div>
 
               <div className="form">

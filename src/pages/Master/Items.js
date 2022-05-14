@@ -345,7 +345,7 @@ useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
     if (popupInfo?.type === "edit") {
       const response = await axios({
         method: "put",
-        url: "/routes/putRoute",
+        url: "/items/putItem",
         data,
         headers: {
           "Content-Type": "application/json",

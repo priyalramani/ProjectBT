@@ -46,13 +46,13 @@ const ItemGroup = () => {
             </div>
           </div>
           <div className="table-container-user item-sales-container">
-            <Table itemsDetails={itemGroup} />
+            <Table itemsDetails={itemGroup} setPopupForm={setPopupForm}/>
           </div>
         </div>
         {popupForm ? (
           <NewUserForm
             onSave={() => setPopupForm(false)}
-         
+         popupInfo={popupForm}
             setRoutesData={setItemGroup}
           />
         ) : (
@@ -63,7 +63,7 @@ const ItemGroup = () => {
 }
 
 export default ItemGroup
-function Table({ itemsDetails }) {
+function Table({ itemsDetails,setPopupForm }) {
   const [items, setItems] = useState("item_group_title");
   const [order, setOrder] = useState("asc");
     return (
@@ -112,7 +112,7 @@ function Table({ itemsDetails }) {
               : b[items] - a[items]
           )
             ?.map((item, i) => (
-              <tr key={Math.random()} style={{ height: "30px" }}>
+              <tr key={Math.random()} style={{ height: "30px" }} onClick={()=>setPopupForm({type:"edit",data:item})}>
                 <td>{i + 1}</td>
                 <td colSpan={2}>{item.item_group_title}</td>
                 
@@ -125,6 +125,7 @@ function Table({ itemsDetails }) {
   function NewUserForm({ onSave, popupInfo, setRoutesData }) {
     const [data, setdata] = useState({});
     const [errMassage, setErrorMassage] = useState("");
+    useEffect(()=>popupInfo.type==="edit"?setdata(popupInfo.data):{},[])
     const submitHandler = async (e) => {
       e.preventDefault();
       if(!data.item_group_title){
@@ -180,7 +181,7 @@ function Table({ itemsDetails }) {
             <div style={{ overflowY: "scroll" }}>
               <form className="form" onSubmit={submitHandler}>
                 <div className="row">
-                  <h1>Add Item Group</h1>
+                  <h1>{popupInfo.type==="edit"?"Edit":"Add"} Item Group</h1>
                 </div>
   
                 <div className="formGroup">

@@ -45,13 +45,14 @@ const RoutesPage = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={routesData} />
+          <Table itemsDetails={routesData} setPopupForm={setPopupForm}/>
         </div>
       </div>
       {popupForm ? (
         <NewUserForm
           onSave={() => setPopupForm(false)}
           setRoutesData={setRoutesData}
+          popupInfo={popupForm}
         />
       ) : (
         ""
@@ -61,7 +62,7 @@ const RoutesPage = () => {
 };
 
 export default RoutesPage;
-function Table({ itemsDetails }) {
+function Table({ itemsDetails ,setPopupForm}) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("asc");
   return (
@@ -111,7 +112,7 @@ function Table({ itemsDetails }) {
               : b[items] - a[items]
           )
           ?.map((item, i) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
+            <tr key={Math.random()} style={{ height: "30px" }} onClick={()=>setPopupForm({type:"edit",data:item})}>
               <td>{i + 1}</td>
               <td colSpan={2}>{item.route_title}</td>
             </tr>
@@ -124,6 +125,8 @@ function NewUserForm({ onSave, popupInfo, setRoutesData }) {
   const [data, setdata] = useState({});
 
   const [errMassage, setErrorMassage] = useState("");
+useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
+
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!data.route_title) {
@@ -178,7 +181,7 @@ function NewUserForm({ onSave, popupInfo, setRoutesData }) {
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
-                <h1>Add Route</h1>
+                <h1>{popupInfo.type==="edit"?"Edit":"Add"} Route</h1>
               </div>
 
               <div className="formGroup">

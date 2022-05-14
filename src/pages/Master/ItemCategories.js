@@ -67,7 +67,7 @@ const ItemCompanies = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={itemCategories} companies={companies} />
+          <Table itemsDetails={itemCategories} companies={companies} setPopupForm={setPopupForm}/>
         </div>
       </div>
       {popupForm ? (
@@ -75,6 +75,7 @@ const ItemCompanies = () => {
           onSave={() => setPopupForm(false)}
           companies={companies}
           setRoutesData={setItemCategories}
+          popupInfo={popupForm}
         />
       ) : (
         ""
@@ -84,7 +85,7 @@ const ItemCompanies = () => {
 };
 
 export default ItemCompanies;
-function Table({ itemsDetails, companies }) {
+function Table({ itemsDetails, setPopupForm }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
   return (
@@ -156,7 +157,7 @@ function Table({ itemsDetails, companies }) {
               : b[items] - a[items]
           )
           ?.map((item, i) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
+            <tr key={Math.random()} style={{ height: "30px" }} onClick={()=>setPopupForm({type:"edit",data:item})}>
               <td>{i + 1}</td>
               <td colSpan={2}>{item.company_title}</td>
               <td colSpan={2}>{item.category_title}</td>
@@ -169,6 +170,8 @@ function Table({ itemsDetails, companies }) {
 function NewUserForm({ onSave, popupInfo, setRoutesData, companies }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
+useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
+
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!data.company_uuid) {
@@ -226,7 +229,7 @@ function NewUserForm({ onSave, popupInfo, setRoutesData, companies }) {
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
-                <h1>Add Category</h1>
+                <h1>{popupInfo.type==="edit"?"Edit":"Add"} Category</h1>
               </div>
 
               <div className="formGroup">

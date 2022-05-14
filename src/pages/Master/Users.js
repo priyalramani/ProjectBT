@@ -49,13 +49,13 @@ const Users = () => {
             </div>
           </div>
           <div className="table-container-user item-sales-container">
-            <Table itemsDetails={users} />
+            <Table itemsDetails={users} setPopupForm={setPopupForm}/>
           </div>
         </div>
         {popupForm ? (
           <NewUserForm
             onSave={() => setPopupForm(false)}
-         
+         popupInfo={popupForm}
             setUsers={setUsers}
           />
         ) : (
@@ -66,7 +66,7 @@ const Users = () => {
 }
 
 export default Users
-function Table({ itemsDetails }) {
+function Table({ itemsDetails,setPopupForm }) {
   const [items, setItems] = useState("user_title");
   const [order, setOrder] = useState("asc");
     return (
@@ -178,7 +178,7 @@ function Table({ itemsDetails }) {
               : b[items] - a[items]
           )
             ?.map((item, i) => (
-              <tr key={Math.random()} style={{ height: "30px" }}>
+              <tr key={Math.random()} style={{ height: "30px" }} onClick={()=>setPopupForm({type:"edit",data:item})}>
                 <td>{i + 1}</td>
                 <td colSpan={2}>{item.user_title}</td>
                 <td colSpan={2}>{item.login_username}</td>
@@ -197,6 +197,8 @@ function Table({ itemsDetails }) {
   function NewUserForm({ onSave, popupInfo, setUsers }) {
     const [data, setdata] = useState({user_mobile:"",user_type:"1",status:"1"});
     const [errMassage, setErrorMassage] = useState("");
+useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
+
     const submitHandler = async (e) => {
       e.preventDefault();
       if(!data.user_title||!data.login_password||!data.login_username){
@@ -259,7 +261,7 @@ function Table({ itemsDetails }) {
             <div style={{ overflowY: "scroll" }}>
               <form className="form" onSubmit={submitHandler}>
                 <div className="row">
-                  <h1>Add User </h1>
+                  <h1>{popupInfo.type==="edit"?"Edit":"Add"} User </h1>
                 </div>
   
                 <div className="form">
