@@ -20,7 +20,15 @@ const ItemCompanies = () => {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setItemCategories(response.data.result.map(b=>({...b,company_title:companies.find(a=>a.company_uuid===b.company_uuid)?.company_title||"-"})));
+    if (response.data.success)
+      setItemCategories(
+        response.data.result.map((b) => ({
+          ...b,
+          company_title:
+            companies.find((a) => a.company_uuid === b.company_uuid)
+              ?.company_title || "-",
+        }))
+      );
   };
   const getCompanies = async () => {
     const response = await axios({
@@ -35,7 +43,7 @@ const ItemCompanies = () => {
   };
   useEffect(() => {
     getItemCategories();
-  }, [popupForm,companies]);
+  }, [popupForm, companies]);
   useEffect(() => {
     getCompanies();
   }, []);
@@ -59,7 +67,7 @@ const ItemCompanies = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={itemCategories} companies={companies}/>
+          <Table itemsDetails={itemCategories} companies={companies} />
         </div>
       </div>
       {popupForm ? (
@@ -76,9 +84,9 @@ const ItemCompanies = () => {
 };
 
 export default ItemCompanies;
-function Table({ itemsDetails,companies }) {
+function Table({ itemsDetails, companies }) {
   const [items, setItems] = useState("sort_order");
-  const [order,setOrder]=useState("")
+  const [order, setOrder] = useState("");
   return (
     <table
       className="user-table"
@@ -87,62 +95,66 @@ function Table({ itemsDetails,companies }) {
       <thead>
         <tr>
           <th>S.N</th>
-          <th colSpan={2}><div className="t-head-element">
+          <th colSpan={2}>
+            <div className="t-head-element">
               <span>Company Title</span>
               <div className="sort-buttons-container">
                 <button
-                  onClick={() =>{
-                    setItems("company_title")
-                    setOrder("asc")}
-                  }
+                  onClick={() => {
+                    setItems("company_title");
+                    setOrder("asc");
+                  }}
                 >
                   <ChevronUpIcon className="sort-up sort-button" />
                 </button>
                 <button
-                  onClick={() =>
-                    {setItems(
-                      "company_title"
-                    )
-                  setOrder("desc")}
-                  }
+                  onClick={() => {
+                    setItems("company_title");
+                    setOrder("desc");
+                  }}
                 >
                   <ChevronDownIcon className="sort-down sort-button" />
                 </button>
               </div>
-            </div></th>
-          <th colSpan={2}> <div className="t-head-element">
+            </div>
+          </th>
+          <th colSpan={2}>
+            {" "}
+            <div className="t-head-element">
               <span>Category Title</span>
               <div className="sort-buttons-container">
                 <button
-                  onClick={() =>{
-                    setItems(
-                      "category_title")
-                       setOrder("asc")}
-                  }
+                  onClick={() => {
+                    setItems("category_title");
+                    setOrder("asc");
+                  }}
                 >
                   <ChevronUpIcon className="sort-up sort-button" />
                 </button>
                 <button
-                  onClick={() =>
-                    {setItems(
-                      "category_title"
-                      
-                    )
-                    setOrder("desc")}
-                  }
+                  onClick={() => {
+                    setItems("category_title");
+                    setOrder("desc");
+                  }}
                 >
                   <ChevronDownIcon className="sort-down sort-button" />
                 </button>
               </div>
-            </div></th>
-       
+            </div>
+          </th>
         </tr>
       </thead>
       <tbody>
         {itemsDetails
-           .sort((a, b) =>order==="asc"
-           ? typeof(a[items])==="string"?a[items].localeCompare(b[items]): a[items] - b[items]:
-           typeof(a[items])==="string"?b[items].localeCompare(a[items]): b[items] - a[items])   
+          .sort((a, b) =>
+            order === "asc"
+              ? typeof a[items] === "string"
+                ? a[items].localeCompare(b[items])
+                : a[items] - b[items]
+              : typeof a[items] === "string"
+              ? b[items].localeCompare(a[items])
+              : b[items] - a[items]
+          )
           ?.map((item, i) => (
             <tr key={Math.random()} style={{ height: "30px" }}>
               <td>{i + 1}</td>
@@ -162,10 +174,9 @@ function NewUserForm({ onSave, popupInfo, setRoutesData, companies }) {
     if (!data.company_uuid) {
       setErrorMassage("Please insert Company");
       return;
-    }else if(!data.category_title){
+    } else if (!data.category_title) {
       setErrorMassage("Please insert Category Title");
       return;
-
     }
     if (popupInfo?.type === "edit") {
       const response = await axios({
