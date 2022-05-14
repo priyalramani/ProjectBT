@@ -1073,6 +1073,7 @@ input#item-sales-searchbar {
   }
   
   .submit {
+    margin-top: 20px;
     padding: 0.5rem 1.5rem;
     font-size: large;
     background-color: #44cd4a;

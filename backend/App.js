@@ -7,6 +7,7 @@ const Companies = require("./Routes/Companies");
 const CounterGroup = require("./Routes/CounterGroup");
 const ItemGroup = require("./Routes/ItemGroup");
 const Counter = require("./Routes/Counters");
+const Users = require("./Routes/Users");
 
 app = express();
 app.use(express.json());
@@ -19,6 +20,7 @@ app.use("/companies", Companies);
 app.use("/counterGroup", CounterGroup);
 app.use("/itemGroup", ItemGroup);
 app.use("/counters", Counter);
+app.use("/users", Users);
 
 
 module.exports = app;

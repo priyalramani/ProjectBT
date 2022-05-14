@@ -48,7 +48,7 @@ const Sidebar = () => {
                     },
                     {
                       name: "Users",
-                      link: "/",
+                      link: "/users",
                     },
 
                   ]}

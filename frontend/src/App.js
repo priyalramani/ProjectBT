@@ -12,6 +12,7 @@ import ItemCategories from './pages/ItemCategories/ItemCategories';
 import CounterGroup from './pages/CounterGroup/CounterGroup';
 import ItemGroup from './pages/ItemGroup/ItemGroup';
 import Counter from './pages/Counters/Counter';
+import Users from './pages/Users/Users';
 function App() {
   return (
     <div className="App">
@@ -22,6 +23,7 @@ function App() {
        <Route path='/counterGroup' element={<CounterGroup/>}/>
        <Route path='/itemGroup' element={<ItemGroup/>}/>
        <Route path='/counter' element={<Counter/>}/>
+       <Route path='/users' element={<Users/>}/>
        <Route path="*" element={<Navigate replace to="/admin" />} />
      </Routes>
     </div>

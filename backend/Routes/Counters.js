@@ -21,7 +21,7 @@ router.post("/postCounter", async (req, res) => {
     let response = await Counter.create( value );
     if (response) {
       res.json({ success: true, result: response });
-    } else res.json({ success: false, message: "Routes Not created" });
+    } else res.json({ success: false, message: "Counter Not created" });
   } catch (err) {
     res.status(500).json({ success: false, message: err });
   }
@@ -29,10 +29,10 @@ router.post("/postCounter", async (req, res) => {
 
 router.get("/getCounters", async (req, res) => {
   try {
-    let data = await Routes.find({});
+    let data = await Counter.find({});
 
     if (data.length) res.json({ success: true, result: data });
-    else res.json({ success: false, message: "Routes Not found" });
+    else res.json({ success: false, message: "Counters Not found" });
   } catch (err) {
     res.status(500).json({ success: false, message: err });
   }
