@@ -9,7 +9,7 @@ const RoutesPage = () => {
     const getRoutesData=async()=>{
         const response= await axios({
             method: "get",
-            url: "/routes/getRoutes",
+            url: "/routes/GetRouteList",
             
             headers: {
               "Content-Type": "application/json",
@@ -65,8 +65,6 @@ function Table({ itemsDetails }) {
                 <tr>
                     <th>S.N</th>
                     <th colSpan={2}>Routes Title</th>
-                    <th>Sort Order</th>
-                    
                 </tr>
             </thead>
             <tbody>
@@ -75,8 +73,6 @@ function Table({ itemsDetails }) {
                     <tr key={Math.random()} style={{height:"30px"}}>
                         <td>{i + 1}</td>
                         <td colSpan={2}>{item.route_title}</td>
-                        <td >{item.sort_order}</td>
-                      
                     </tr>
                 )}
             </tbody>

@@ -11,7 +11,7 @@ const Users = () => {
     const getUsers = async () => {
       const response = await axios({
         method: "get",
-        url: "/users/getUsers",
+        url: "/users/GetUserList",
   
         headers: {
           "Content-Type": "application/json",
@@ -70,10 +70,11 @@ function Table({ itemsDetails }) {
         <thead>
           <tr>
             <th>S.N</th>
-            <th colSpan={2}>User Name</th>
-            <th >Mobile</th>
-      
-            <th >Status</th>
+            <th colSpan={2}>User Title</th>
+            <th colSpan={2}>Login Id</th>
+            <th colSpan={2}>Permission</th>
+            <th colSpan={2}>Mobile</th>
+            <th colSpan={2}>Status</th>
            
           </tr>
         </thead>
@@ -83,9 +84,12 @@ function Table({ itemsDetails }) {
               <tr key={Math.random()} style={{ height: "30px" }}>
                 <td>{i + 1}</td>
                 <td colSpan={2}>{item.user_title}</td>
-                <td>{item.user_mobile||"-"}</td>
+                <td colSpan={2}>{item.login_username}</td>
+                <td colSpan={2}>{item?.user_role?.map((a,i)=>i===0?a:","+a)||"-"}</td>
+
+                <td colSpan={2}>{item.user_mobile||"-"}</td>
                 
-                <td>{item.status}</td>
+                <td colSpan={2}>{item.status}</td>
                 
               </tr>
             ))}

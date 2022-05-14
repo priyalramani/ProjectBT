@@ -10,7 +10,7 @@ const ItemCompanies = () => {
   const getItemCategories = async () => {
     const response = await axios({
       method: "get",
-      url: "/itemCategories/getItemCategories",
+      url: "/itemCategories/GetItemCategoryList",
 
       headers: {
         "Content-Type": "application/json",
@@ -81,9 +81,9 @@ function Table({ itemsDetails,companies }) {
       <thead>
         <tr>
           <th>S.N</th>
+          <th colSpan={2}>Company</th>
           <th colSpan={2}>Category Title</th>
-          <th>Company</th>
-          <th>Sort Order</th>
+       
         </tr>
       </thead>
       <tbody>
@@ -92,9 +92,8 @@ function Table({ itemsDetails,companies }) {
           ?.map((item, i) => (
             <tr key={Math.random()} style={{ height: "30px" }}>
               <td>{i + 1}</td>
-              <td colSpan={2}>{item.category_title}</td>
               <td colSpan={2}>{companies.find(a=>a.company_uuid===item.company_uuid)?.company_title||"-"}</td>
-              <td>{item.sort_order}</td>
+              <td colSpan={2}>{item.category_title}</td>
             </tr>
           ))}
       </tbody>

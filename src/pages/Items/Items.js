@@ -11,7 +11,7 @@ const ItemsPage = () => {
   const getItemCategories = async () => {
     const response = await axios({
       method: "get",
-      url: "/itemCategories/getItemCategories",
+      url: "/itemCategories/GetItemCategoryList",
 
       headers: {
         "Content-Type": "application/json",
@@ -22,7 +22,7 @@ const ItemsPage = () => {
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
-      url: "/items/getItems",
+      url: "/items/GetItemList",
 
       headers: {
         "Content-Type": "application/json",
@@ -90,6 +90,7 @@ const ItemsPage = () => {
 
 export default ItemsPage;
 function Table({ itemsDetails, companies, categories }) {
+  console.log(itemsDetails)
   return (
     <table
       className="user-table"
@@ -98,10 +99,15 @@ function Table({ itemsDetails, companies, categories }) {
       <thead>
         <tr>
           <th>S.N</th>
+          <th colSpan={2}>Company Title</th>
+          <th colSpan={2}>Category Title</th>
           <th colSpan={2}>Item Title</th>
-          <th colSpan={2}>Companies</th>
-          <th colSpan={2}>Item Categories</th>
-          <th>Sort Order</th>
+          <th colSpan={2}>MRP</th>
+          <th colSpan={2}>Selling Price</th>
+          <th colSpan={2}>Conversion</th>
+          <th colSpan={2}>GST(%)</th>
+          <th colSpan={2}>Group</th>
+   
         </tr>
       </thead>
       <tbody>
@@ -110,10 +116,15 @@ function Table({ itemsDetails, companies, categories }) {
           ?.map((item, i) => (
             <tr key={Math.random()} style={{ height: "30px" }}>
               <td>{i + 1}</td>
-              <td colSpan={2}>{item.item_title}</td>
               <td colSpan={2}>{companies.find(a=>a.company_uuid===item.company_uuid)?.company_title||"-"}</td>
               <td colSpan={2}>{categories.find(a=>a.category_uuid===item.category_uuid)?.category_title||"-"}</td>
-              <td>{item.sort_order}</td>
+              <td colSpan={2}>{item.item_title}</td>
+              <td colSpan={2}>{item.mrp}</td>
+              <td colSpan={2}>{item.item_price}</td>
+              <td colSpan={2}>{item.conversion}</td>
+              <td colSpan={2}>{item.item_gst}</td>
+              <td colSpan={2}>-</td>
+     
             </tr>
           ))}
       </tbody>
