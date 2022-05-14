@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
-
+import {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  MenuAlt2Icon,
+} from "@heroicons/react/solid";
 import axios from "axios";
 const ItemGroup = () => {
     const [itemGroup, setItemGroup] = useState([]);
@@ -60,6 +64,8 @@ const ItemGroup = () => {
 
 export default ItemGroup
 function Table({ itemsDetails }) {
+  const [items, setItems] = useState("item_group_title");
+  const [order, setOrder] = useState("asc");
     return (
       <table
         className="user-table"
@@ -68,12 +74,43 @@ function Table({ itemsDetails }) {
         <thead>
           <tr>
             <th>S.N</th>
-            <th colSpan={2}>Item Group Title</th>
+            <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Item Group Title</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("item_group_title");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("item_group_title");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div></th>
            
           </tr>
         </thead>
         <tbody>
           {itemsDetails
+          .filter((a) => a.item_group_title)
+          .sort((a, b) =>
+            order === "asc"
+              ? typeof a[items] === "string"
+                ? a[items].localeCompare(b[items])
+                : a[items] - b[items]
+              : typeof a[items] === "string"
+              ? b[items].localeCompare(a[items])
+              : b[items] - a[items]
+          )
             ?.map((item, i) => (
               <tr key={Math.random()} style={{ height: "30px" }}>
                 <td>{i + 1}</td>
