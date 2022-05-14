@@ -2,6 +2,11 @@ import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import axios from "axios";
+import {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  MenuAlt2Icon,
+} from "@heroicons/react/solid";
 const Users = () => {
     const [users, setUsers] = useState([]);
     const [popupForm, setPopupForm] = useState(false);
@@ -62,6 +67,8 @@ const Users = () => {
 
 export default Users
 function Table({ itemsDetails }) {
+  const [items, setItems] = useState("user_title");
+  const [order, setOrder] = useState("asc");
     return (
       <table
         className="user-table"
@@ -70,16 +77,106 @@ function Table({ itemsDetails }) {
         <thead>
           <tr>
             <th>S.N</th>
-            <th colSpan={2}>User Title</th>
-            <th colSpan={2}>Login Id</th>
+            <th colSpan={2}> <div className="t-head-element">
+              <span>User Title</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("user_title");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("user_title");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div></th>
+            <th colSpan={2}> <div className="t-head-element">
+              <span>Login Id</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("login_username");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("login_username");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div></th>
             <th colSpan={2}>Permission</th>
-            <th colSpan={2}>Mobile</th>
-            <th colSpan={2}>Status</th>
+            <th colSpan={2}> <div className="t-head-element">
+              <span>Mobile</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("user_mobile");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("user_mobile");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div></th>
+            <th colSpan={2}> <div className="t-head-element">
+              <span>Status</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("status");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("status");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div></th>
            
           </tr>
         </thead>
         <tbody>
           {itemsDetails
+          .filter((a) => a.user_title)
+          .sort((a, b) =>
+            order === "asc"
+              ? typeof a[items] === "string"
+                ? a[items].localeCompare(b[items])
+                : a[items] - b[items]
+              : typeof a[items] === "string"
+              ? b[items].localeCompare(a[items])
+              : b[items] - a[items]
+          )
             ?.map((item, i) => (
               <tr key={Math.random()} style={{ height: "30px" }}>
                 <td>{i + 1}</td>
