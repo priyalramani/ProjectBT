@@ -7,14 +7,14 @@ import {
   Routes,
 } from "react-router-dom";
 import MainAdmin from './pages/MainAdmin/MainAdmin';
-import RoutesPage from './pages/Routes/Routes';
-import ItemCategories from './pages/ItemCategories/ItemCategories';
-import CounterGroup from './pages/CounterGroup/CounterGroup';
-import ItemGroup from './pages/ItemGroup/ItemGroup';
-import Counter from './pages/Counters/Counter';
-import Users from './pages/Users/Users';
+import RoutesPage from './pages/Master/Routes';
+import ItemCategories from './pages/Master/ItemCategories';
+import CounterGroup from './pages/Master/CounterGroup';
+import ItemGroup from './pages/Master/ItemGroup';
+import Counter from './pages/Master/Counter';
+import Users from './pages/Master/Users';
 
-import ItemsPage from './pages/Items/Items';
+import ItemsPage from './pages/Master/Items';
 function App() {
   return (
     <div className="App">
