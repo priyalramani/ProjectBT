@@ -17,6 +17,10 @@
     text-align: left;
     border-bottom: 1px solid #d0cece;
     color: #4f4f4f;
+    cursor: pointer;
+  }
+  .user-table tbody  :hover{
+background: rgba(0, 0, 0, 0.175);
   }
   
   .user-table thead {

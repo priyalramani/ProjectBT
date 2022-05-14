@@ -86,6 +86,7 @@ const ItemsPage = () => {
             itemsDetails={itemsData}
             categories={itemCategories}
             companies={companies}
+            setPopupForm={setPopupForm}
           />
         </div>
       </div>
@@ -95,6 +96,7 @@ const ItemsPage = () => {
           setItemsData={setItemsData}
           companies={companies}
           itemCategories={itemCategories}
+          popupInfo={popupForm}
         />
       ) : (
         ""
@@ -104,7 +106,7 @@ const ItemsPage = () => {
 };
 
 export default ItemsPage;
-function Table({ itemsDetails, companies, categories }) {
+function Table({ itemsDetails, setPopupForm }) {
   const [items, setItems] = useState("sort_order");
   const [order,setOrder]=useState("")
   
@@ -305,7 +307,7 @@ function Table({ itemsDetails, companies, categories }) {
         ? typeof(a[items])==="string"?a[items].localeCompare(b[items]): a[items] - b[items]:
         typeof(a[items])==="string"?b[items].localeCompare(a[items]): b[items] - a[items])
           ?.map((item, i) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
+            <tr key={Math.random()} style={{ height: "30px" }} onClick={()=>setPopupForm({type:"edit",data:item})}>
               <td>{i + 1}</td>
               <td colSpan={2}>{item.company_title}</td>
               <td colSpan={2}>{item.category_title}</td>
@@ -331,7 +333,8 @@ function NewUserForm({
   const [data, setdata] = useState({ company_uuid: companies[0].company_uuid });
 
   const [errMassage, setErrorMassage] = useState("");
-
+  console.log(popupInfo)
+useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!data.item_title) {
@@ -387,7 +390,7 @@ function NewUserForm({
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
-                <h1>Add Items</h1>
+                <h1>{popupInfo.type==="edit"?"Edit":"Add"} Items</h1>
               </div>
 
               <div className="formGroup">
@@ -563,7 +566,7 @@ function NewUserForm({
                     />
                   </label>
                   <label className="selectLabel">
-                    Sort Order
+                    Barcode
                     <textarea
                       type="number"
                       name="sort_order"
