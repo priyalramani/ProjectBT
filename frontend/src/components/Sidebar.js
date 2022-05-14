@@ -24,7 +24,7 @@ const Sidebar = () => {
                   menuList={[
                     {
                       name: "Items",
-                      link: "/",
+                      link: "/items",
                     },
                     {
                       name: "Categories",
