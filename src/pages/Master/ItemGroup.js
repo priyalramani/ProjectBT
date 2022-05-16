@@ -10,6 +10,8 @@ import {
 import axios from "axios";
 const ItemGroup = () => {
   const [itemGroup, setItemGroup] = useState([]);
+  const [itemGroupTitle, setItemGroupTitle] = useState("");
+  const [filterItemGroup, setFilterItemGroup] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
   const [addItems, setAddItems] = useState(false);
   const getCounterGroup = async () => {
@@ -27,7 +29,21 @@ const ItemGroup = () => {
   useEffect(() => {
     getCounterGroup();
   }, [popupForm]);
-
+  useEffect(
+    () =>
+      setFilterItemGroup(
+        itemGroup
+          .filter((a) => a.item_group_title)
+          .filter(
+            (a) =>
+              !itemGroupTitle ||
+              a.item_group_title
+                ?.toLocaleLowerCase()
+                ?.includes(itemGroupTitle.toLocaleLowerCase())
+          )
+      ),
+    [itemGroup, itemGroupTitle]
+  );
   return (
     <>
       <Sidebar />
@@ -37,18 +53,37 @@ const ItemGroup = () => {
           <h2>Item Group</h2>
         </div>
         <div id="item-sales-top">
-          <div id="date-input-container" style={{ overflow: "visible" }}>
+        <div
+            id="date-input-container"
+            style={{
+              overflow: "visible",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
             <button
               className="item-sales-search"
               onClick={() => setPopupForm(true)}
             >
               Add
             </button>
+
+            <input
+              type="text"
+              onChange={(e) => setItemGroupTitle(e.target.value)}
+              value={itemGroupTitle}
+              placeholder="Search Item Group Title..."
+              className="searchInput"
+            />
+
+            <div>Total Items: {filterItemGroup.length}</div>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-            itemsDetails={itemGroup}
+            itemsDetails={filterItemGroup}
             setPopupForm={setPopupForm}
             setAddItems={setAddItems}
           />

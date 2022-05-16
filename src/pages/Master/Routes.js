@@ -10,6 +10,8 @@ import {
 } from "@heroicons/react/solid";
 const RoutesPage = () => {
   const [routesData, setRoutesData] = useState([]);
+  const [filterRoutesData, setFilterRoutesData] = useState([]);
+  const [filterRoutesTitle, setFilterRouteTitle] = useState("");
   const [popupForm, setPopupForm] = useState(false);
   const getRoutesData = async () => {
     const response = await axios({
@@ -25,7 +27,21 @@ const RoutesPage = () => {
   useEffect(() => {
     getRoutesData();
   }, [popupForm]);
-
+  useEffect(
+    () =>
+      setFilterRoutesData(
+        routesData
+          .filter((a) => a.route_title)
+          .filter(
+            (a) =>
+              !filterRoutesTitle ||
+              a.route_title
+                ?.toLocaleLowerCase()
+                ?.includes(filterRoutesTitle.toLocaleLowerCase())
+          )
+      ),
+    [routesData, filterRoutesTitle]
+  );
   return (
     <>
       <Sidebar />
@@ -35,17 +51,36 @@ const RoutesPage = () => {
           <h2>Routes</h2>
         </div>
         <div id="item-sales-top">
-          <div id="date-input-container" style={{ overflow: "visible" }}>
+        <div
+            id="date-input-container"
+            style={{
+              overflow: "visible",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
             <button
               className="item-sales-search"
               onClick={() => setPopupForm(true)}
             >
               Add
             </button>
+
+            <input
+              type="text"
+              onChange={(e) => setFilterRouteTitle(e.target.value)}
+              value={filterRoutesTitle}
+              placeholder="Search Route Title..."
+              className="searchInput"
+            />
+
+            <div>Total Items: {filterRoutesData.length}</div>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={routesData} setPopupForm={setPopupForm}/>
+          <Table itemsDetails={filterRoutesData} setPopupForm={setPopupForm}/>
         </div>
       </div>
       {popupForm ? (

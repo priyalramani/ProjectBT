@@ -9,6 +9,10 @@ import {
 import axios from "axios";
 const ItemCompanies = () => {
   const [itemCategories, setItemCategories] = useState([]);
+  const [filterItemCategories, setFilterItemCategories] = useState([]);
+  const [filterItemCategoriesTitle, setFilterItemCategoriesTitle] =
+    useState("");
+
   const [companies, setCompanies] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
   const getItemCategories = async () => {
@@ -47,7 +51,22 @@ const ItemCompanies = () => {
   useEffect(() => {
     getCompanies();
   }, []);
-
+  useEffect(
+    () =>
+      setFilterItemCategories(
+        itemCategories
+          .filter((a) => a.category_title)
+          .filter(
+            (a) =>
+              !filterItemCategoriesTitle ||
+              a.category_title
+                .toLocaleLowerCase()
+                .includes(filterItemCategoriesTitle.toLocaleLowerCase())
+          )
+      ),
+    [itemCategories, filterItemCategoriesTitle]
+  );
+ 
   return (
     <>
       <Sidebar />
@@ -57,17 +76,40 @@ const ItemCompanies = () => {
           <h2>Item Categories</h2>
         </div>
         <div id="item-sales-top">
-          <div id="date-input-container" style={{ overflow: "visible" }}>
+          <div
+            id="date-input-container"
+            style={{
+              overflow: "visible",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
             <button
               className="item-sales-search"
               onClick={() => setPopupForm(true)}
             >
               Add
             </button>
+
+            <input
+              type="text"
+              onChange={(e) => setFilterItemCategoriesTitle(e.target.value)}
+              value={filterItemCategoriesTitle}
+              placeholder="Search Category Title..."
+              className="searchInput"
+            />
+
+            <div>Total Items: {filterItemCategories.length}</div>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={itemCategories} companies={companies} setPopupForm={setPopupForm}/>
+          <Table
+            itemsDetails={filterItemCategories}
+            companies={companies}
+            setPopupForm={setPopupForm}
+          />
         </div>
       </div>
       {popupForm ? (
@@ -157,7 +199,11 @@ function Table({ itemsDetails, setPopupForm }) {
               : b[items] - a[items]
           )
           ?.map((item, i) => (
-            <tr key={Math.random()} style={{ height: "30px" }} onClick={()=>setPopupForm({type:"edit",data:item})}>
+            <tr
+              key={Math.random()}
+              style={{ height: "30px" }}
+              onClick={() => setPopupForm({ type: "edit", data: item })}
+            >
               <td>{i + 1}</td>
               <td colSpan={2}>{item.company_title}</td>
               <td colSpan={2}>{item.category_title}</td>
@@ -170,7 +216,10 @@ function Table({ itemsDetails, setPopupForm }) {
 function NewUserForm({ onSave, popupInfo, setRoutesData, companies }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
-useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
+  useEffect(
+    popupInfo?.type === "edit" ? () => setdata(popupInfo.data) : () => {},
+    []
+  );
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -229,7 +278,7 @@ useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
-                <h1>{popupInfo.type==="edit"?"Edit":"Add"} Category</h1>
+                <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Category</h1>
               </div>
 
               <div className="formGroup">

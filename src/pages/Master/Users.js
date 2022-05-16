@@ -9,6 +9,8 @@ import {
 } from "@heroicons/react/solid";
 const Users = () => {
     const [users, setUsers] = useState([]);
+    const [filterUsers, setFilterUsers] = useState([]);
+    const [usersTitle, setUsersTitle] = useState("");
     const [popupForm, setPopupForm] = useState(false);
     
  
@@ -29,8 +31,22 @@ const Users = () => {
     useEffect(() => {
       getUsers();
     }, [popupForm]);
-  
-  
+    useEffect(
+      () =>
+        setFilterUsers(
+          users
+            .filter((a) => a.user_title)
+            .filter(
+              (a) =>
+                !usersTitle ||
+                a.user_title
+                  ?.toLocaleLowerCase()
+                  ?.includes(usersTitle.toLocaleLowerCase())
+            )
+        ),
+      [users, filterUsers]
+    );
+  console.log(users,filterUsers)
     return (
       <>
         <Sidebar />
@@ -40,17 +56,36 @@ const Users = () => {
             <h2>Users </h2>
           </div>
           <div id="item-sales-top">
-            <div id="date-input-container" style={{ overflow: "visible" }}>
-              <button
-                className="item-sales-search"
-                onClick={() => setPopupForm(true)}
-              >
-                Add
-              </button>
-            </div>
+          <div
+            id="date-input-container"
+            style={{
+              overflow: "visible",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
+            <button
+              className="item-sales-search"
+              onClick={() => setPopupForm(true)}
+            >
+              Add
+            </button>
+
+            <input
+              type="text"
+              onChange={(e) => setUsersTitle(e.target.value)}
+              value={usersTitle}
+              placeholder="Search User Title..."
+              className="searchInput"
+            />
+
+            <div>Total Items: {filterUsers.length}</div>
+          </div>
           </div>
           <div className="table-container-user item-sales-container">
-            <Table itemsDetails={users} setPopupForm={setPopupForm}/>
+            <Table itemsDetails={filterUsers} setPopupForm={setPopupForm}/>
           </div>
         </div>
         {popupForm ? (

@@ -9,6 +9,8 @@ import {
 import axios from "axios";
 const CounterGroup = () => {
   const [counterGroup, setCounterGroup] = useState([]);
+  const [filterCounterGroup, setFilterCounterGroup] = useState([]);
+  const [filterCounterGroupTitle, setFilterCounterGroupTitle] = useState("");
   const [popupForm, setPopupForm] = useState(false);
   const getCounterGroup = async () => {
     const response = await axios({
@@ -25,7 +27,10 @@ const CounterGroup = () => {
   useEffect(() => {
     getCounterGroup();
   }, [popupForm]);
+  useEffect(()=>setFilterCounterGroup(counterGroup.filter(a=>a.counter_group_title)
+    .filter(a=>!filterCounterGroupTitle||a.counter_group_title.toLocaleLowerCase().includes(filterCounterGroupTitle.toLocaleLowerCase()))
 
+  ),[counterGroup,filterCounterGroupTitle])
   return (
     <>
       <Sidebar />
@@ -35,17 +40,36 @@ const CounterGroup = () => {
           <h2>Counter Group</h2>
         </div>
         <div id="item-sales-top">
-          <div id="date-input-container" style={{ overflow: "visible" }}>
+        <div
+            id="date-input-container"
+            style={{
+              overflow: "visible",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
             <button
               className="item-sales-search"
               onClick={() => setPopupForm(true)}
             >
               Add
             </button>
+
+            <input
+              type="text"
+              onChange={(e) => setFilterCounterGroupTitle(e.target.value)}
+              value={filterCounterGroupTitle}
+              placeholder="Search Counter Title..."
+              className="searchInput"
+            />
+            
+            <div>Total Items: {filterCounterGroup.length}</div>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={counterGroup} setPopupForm={setPopupForm} />
+          <Table itemsDetails={filterCounterGroup} setPopupForm={setPopupForm} />
         </div>
       </div>
       {popupForm ? (

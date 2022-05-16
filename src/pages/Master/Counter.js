@@ -9,6 +9,9 @@ import {
 } from "@heroicons/react/solid";
 const Counter = () => {
   const [counter, setCounter] = useState([]);
+  const [filterCounter, setFilterCounter] = useState([]);
+  const [filterCounterTitle, setFilterCounterTitle] = useState("");
+  const [filterRoute, setFilterRoute] = useState("");
   const [popupForm, setPopupForm] = useState(false);
   const [routesData, setRoutesData] = useState([]);
   const getRoutesData = async () => {
@@ -49,7 +52,28 @@ const Counter = () => {
   useEffect(() => {
     getCounter();
   }, [popupForm, routesData]);
-
+  useEffect(
+    () =>
+      setFilterCounter(
+        counter
+          .filter((a) => a.counter_title)
+          .filter(
+            (a) =>
+              !filterCounterTitle ||
+              a.counter_title
+                .toLocaleLowerCase()
+                .includes(filterCounterTitle.toLocaleLowerCase())
+          )
+          .filter(
+            (a) =>
+              !filterRoute ||
+              a.route_title
+                .toLocaleLowerCase()
+                .includes(filterRoute.toLocaleLowerCase())
+          )
+      ),
+    [counter, filterCounterTitle, filterRoute]
+  );
   return (
     <>
       <Sidebar />
@@ -59,17 +83,46 @@ const Counter = () => {
           <h2>Counter </h2>
         </div>
         <div id="item-sales-top">
-          <div id="date-input-container" style={{ overflow: "visible" }}>
+          <div
+            id="date-input-container"
+            style={{
+              overflow: "visible",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
             <button
               className="item-sales-search"
               onClick={() => setPopupForm(true)}
             >
               Add
             </button>
+
+            <input
+              type="text"
+              onChange={(e) => setFilterCounterTitle(e.target.value)}
+              value={filterCounterTitle}
+              placeholder="Search Counter Title..."
+              className="searchInput"
+            />
+            <input
+              type="text"
+              onChange={(e) => setFilterRoute(e.target.value)}
+              value={filterRoute}
+              placeholder="Search Route Title..."
+              className="searchInput"
+            />
+            <div>Total Items: {filterCounter.length}</div>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={counter} routesData={routesData} setPopupForm={setPopupForm}/>
+          <Table
+            itemsDetails={filterCounter}
+            routesData={routesData}
+            setPopupForm={setPopupForm}
+          />
         </div>
       </div>
       {popupForm ? (
@@ -87,7 +140,7 @@ const Counter = () => {
 };
 
 export default Counter;
-function Table({ itemsDetails, routesData,setPopupForm }) {
+function Table({ itemsDetails, routesData, setPopupForm }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
   return (
@@ -181,7 +234,11 @@ function Table({ itemsDetails, routesData,setPopupForm }) {
               : b[items] - a[items]
           )
           ?.map((item, i) => (
-            <tr key={Math.random()} style={{ height: "30px" }} onClick={()=>setPopupForm({type:"edit",data:item})}>
+            <tr
+              key={Math.random()}
+              style={{ height: "30px" }}
+              onClick={() => setPopupForm({ type: "edit", data: item })}
+            >
               <td>{i + 1}</td>
               <td colSpan={2}>{item.route_title}</td>
               <td colSpan={2}>{item.counter_title}</td>
@@ -195,8 +252,11 @@ function Table({ itemsDetails, routesData,setPopupForm }) {
 function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
-useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
-  
+  useEffect(
+    () => (popupInfo?.type === "edit" ? setdata(popupInfo.data) : {}),
+    []
+  );
+
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!data.counter_title) {
@@ -258,7 +318,7 @@ useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
-                <h1>{popupInfo.type==="edit"?"Edit":"Add"} Counter </h1>
+                <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Counter </h1>
               </div>
 
               <div className="form">
