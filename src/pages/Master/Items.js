@@ -9,9 +9,13 @@ import {
 import axios from "axios";
 const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
+  const [filterItemsData, setFilterItemsData] = useState([]);
   const [itemCategories, setItemCategories] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
+  const [filterTitle,setFilterTitle]=useState("")
+  const [filterCategory,setFilterCategory]=useState("")
+  const [filterCompany,setFilterCompany]=useState("")
   const getItemCategories = async () => {
     const response = await axios({
       method: "get",
@@ -48,6 +52,11 @@ const ItemsPage = () => {
   useEffect(() => {
     getItemsData();
   }, [popupForm, itemCategories, companies]);
+  useEffect(()=>setFilterItemsData(itemsData.filter(a=>a.item_title)
+    .filter(a=>!filterTitle||a.item_title.toLocaleLowerCase().includes(filterTitle.toLocaleLowerCase()))
+    .filter(a=>!filterCompany||a.company_title.toLocaleLowerCase().includes(filterCompany.toLocaleLowerCase()))
+    .filter(a=>!filterCategory||a.category_title.toLocaleLowerCase().includes(filterCategory.toLocaleLowerCase()))
+  ),[itemsData,filterTitle,filterCategory,filterCompany])
   const getCompanies = async () => {
     const response = await axios({
       method: "get",
@@ -72,18 +81,40 @@ const ItemsPage = () => {
           <h2>Items</h2>
         </div>
         <div id="item-sales-top">
-          <div id="date-input-container" style={{ overflow: "visible" }}>
+          <div id="date-input-container" style={{ overflow: "visible",display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%" }}>
             <button
               className="item-sales-search"
               onClick={() => setPopupForm(true)}
             >
               Add
             </button>
+            <input
+        type="text"
+        onChange={(e) => setFilterTitle(e.target.value)}
+        value={filterTitle}
+        placeholder="Search Item Title..."
+        className="searchInput"
+      />
+            <input
+        type="text"
+        onChange={(e) => setFilterCompany(e.target.value)}
+        value={filterCompany}
+        placeholder="Search Company..."
+        className="searchInput"
+      />
+            <input
+        type="text"
+        onChange={(e) => setFilterCategory(e.target.value)}
+        value={filterCategory}
+        placeholder="Search Category..."
+        className="searchInput"
+      />
+      <div>Total Items: {filterItemsData.length}</div>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-            itemsDetails={itemsData}
+            itemsDetails={filterItemsData}
             categories={itemCategories}
             companies={companies}
             setPopupForm={setPopupForm}
