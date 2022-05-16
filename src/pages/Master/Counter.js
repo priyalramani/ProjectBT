@@ -222,7 +222,7 @@ function Table({ itemsDetails, routesData, setPopupForm }) {
           </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody className="tbody">
         {itemsDetails
           .sort((a, b) =>
             order === "asc"

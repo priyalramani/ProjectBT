@@ -153,7 +153,7 @@ function Table({ itemsDetails, setPopupForm, setAddItems }) {
           <th></th>
         </tr>
       </thead>
-      <tbody>
+      <tbody className="tbody">
         {itemsDetails
           .filter((a) => a.item_group_title)
           .sort((a, b) =>

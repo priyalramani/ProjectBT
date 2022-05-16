@@ -201,7 +201,7 @@ function Table({ itemsDetails,setPopupForm }) {
            
           </tr>
         </thead>
-        <tbody>
+        <tbody className="tbody">
           {itemsDetails
           .filter((a) => a.user_title)
           .sort((a, b) =>

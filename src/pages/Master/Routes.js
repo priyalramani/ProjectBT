@@ -134,7 +134,7 @@ function Table({ itemsDetails ,setPopupForm}) {
           </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody className="tbody">
         {itemsDetails
           .filter((a) => a.route_title)
           .sort((a, b) =>

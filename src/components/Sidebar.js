@@ -54,13 +54,16 @@ const Sidebar = () => {
                   ]}
                 />
                 <NavLink
-                  title={"Reports"}
+                  title={"Others"}
                   icon={<ReportsIcon sx={{ fontSize: 50 }} />}
                   isActive={false}
                   
 
                   menuList={[
-                  
+                    {
+                      name: "Auto Increase Quantity",
+                      link: "/autoIncreaseQty",
+                    },
                     
                   ]}
                 />

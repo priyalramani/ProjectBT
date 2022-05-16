@@ -332,7 +332,7 @@ function Table({ itemsDetails, setPopupForm }) {
           <th colSpan={2}>Group</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody className="tbody">
         {itemsDetails
         .sort((a, b) =>order==="asc"
         ? typeof(a[items])==="string"?a[items].localeCompare(b[items]): a[items] - b[items]:
