@@ -22,6 +22,7 @@ const Users = () => {
           "Content-Type": "application/json",
         },
       });
+      console.log("users",response)
       if (response.data.success) setUsers(response.data.result);
     };
 

@@ -16,7 +16,9 @@ import Users from './pages/Master/Users';
 
 
 import ItemsPage from './pages/Master/Items';
+import axios from 'axios';
 function App() {
+  axios.defaults.baseURL= "http://localhost:5001"
   return (
     <div className="App">
      <Routes>

@@ -96,6 +96,7 @@ function Table({ itemsDetails,setPopupForm }) {
                 </button>
               </div>
             </div></th>
+            <th></th>
            
           </tr>
         </thead>
@@ -112,9 +113,10 @@ function Table({ itemsDetails,setPopupForm }) {
               : b[items] - a[items]
           )
             ?.map((item, i) => (
-              <tr key={Math.random()} style={{ height: "30px" }} onClick={()=>setPopupForm({type:"edit",data:item})}>
+              <tr key={Math.random()} style={{ height: "30px" }} onClick={(e)=>{e.stopPropagation();setPopupForm({type:"edit",data:item})}}>
                 <td>{i + 1}</td>
                 <td colSpan={2}>{item.item_group_title}</td>
+                <td><button type="button" onClick={(e)=>{e.stopPropagation();}} className="fieldEditButton">Action</button></td>
                 
               </tr>
             ))}
