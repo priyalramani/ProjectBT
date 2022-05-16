@@ -53,7 +53,7 @@ const ItemGroup = () => {
           <h2>Item Group</h2>
         </div>
         <div id="item-sales-top">
-        <div
+          <div
             id="date-input-container"
             style={{
               overflow: "visible",
@@ -242,7 +242,7 @@ function NewUserForm({ onSave, popupInfo, setRoutesData }) {
     <div className="overlay">
       <div
         className="modal"
-        style={{ height: "fit-content", width: "fit-content" }}
+        style={{ height: "fit-content", width: "max-content" }}
       >
         <div
           className="content"
@@ -298,8 +298,21 @@ function NewUserForm({ onSave, popupInfo, setRoutesData }) {
 
 function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
   const [pattern, setPattern] = useState("");
-  const [items, setItems] = useState();
+  const [items, setItems] = useState([]);
+  const [company, setCompany] = useState([]);
+  const [Category, setCategory] = useState([]);
   const [itemGroupings, setItemGroupings] = useState([]);
+  const getItemCategories = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/itemCategories/GetItemCategoryList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCategory(response.data.result);
+  };
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
@@ -311,8 +324,21 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
     });
     if (response.data.success) setItems(response.data.result);
   };
+  const getCompanies = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/companies/getCompanies",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCompany(response.data.result);
+  };
   useEffect(() => {
     getItemsData();
+    getItemCategories();
+    getCompanies();
   }, []);
   useEffect(
     items?.length
@@ -342,15 +368,30 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
     [searchedItems]
   );
 
-  const handleItemIncludeToggle = (item_uuid) => {
-    let data1 = items.find((a) => a.item_uuid === item_uuid);
-    let data = toggleArrayItem(itemGroupings, data1);
-    console.log(data);
+  const handleItemIncludeToggle = (item_uuid, type) => {
+    let data = items.find((a) => a.item_uuid === item_uuid);
+    if (type === "remove") {
+      data = toggleRemoveItem(itemGroupings, data);
+    } else {
+      data = toggleAddItem(itemGroupings, data);
+    }
+    console.log(data, ItemGroup.item_group_uuid);
 
     setItemGroupings(data);
   };
-
-  const toggleArrayItem = (arr, item) =>
+  const toggleRemoveItem = (arr, item) =>
+    arr.map((a) =>
+      a?.item_uuid === item.item_uuid
+        ? {
+            ...a,
+            item_group_uuid: a.item_group_uuid.filter((b) => {
+              console.log("----", b, ItemGroup.item_group_uuid);
+              return b !== ItemGroup.item_group_uuid;
+            }),
+          }
+        : a
+    );
+  const toggleAddItem = (arr, item) =>
     arr?.filter((i) => i?.item_uuid === item?.item_uuid)?.length
       ? [
           ...arr?.filter((i) => i !== item).map((a) => ({ ...a, one: true })),
@@ -359,11 +400,9 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
             .map((a) => ({
               ...a,
               one: true,
-              item_group_uuid:item?.item_group_uuid?.length
-              ?item.item_group_uuid.filter(a=>a===ItemGroup.item_group_uuid).length 
-              ?item.item_group_uuid.filter(a=>a!==ItemGroup.item_group_uuid)
-              :[...item.item_group_uuid, ItemGroup.item_group_uuid]
-              : [ItemGroup.item_group_uuid],
+              item_group_uuid: item?.item_group_uuid?.length
+                ? [...item.item_group_uuid, ItemGroup.item_group_uuid]
+                : [ItemGroup.item_group_uuid],
             }))[0],
         ]
       : arr?.length
@@ -387,18 +426,16 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
           },
         ];
   const submitHandler = async () => {
-   
     const response = await axios({
       method: "put",
       url: "/items/putItem",
-      data:itemGroupings,
+      data: itemGroupings,
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.success) {
-      setItemsModalIndex(null)
-    
+      setItemsModalIndex(null);
     }
   };
   return (
@@ -424,8 +461,10 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
         onItemIncludeToggle={handleItemIncludeToggle}
         includesArray={itemGroupings}
         itemGroup={ItemGroup}
+        company={company}
+        Category={Category}
       />
-      <div >
+      <div>
         <button
           type="button"
           className="fieldEditButton"
@@ -439,10 +478,13 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
 }
 function ItemsTable({
   items,
-itemGroup,
+  itemGroup,
   includesArray,
   onItemIncludeToggle,
+  company,
+  Category,
 }) {
+  console.log(items, company, Category);
   return (
     <div
       style={{
@@ -453,11 +495,17 @@ itemGroup,
       <table className="table">
         <thead>
           <tr>
-            <th className="description" style={{ width: "60%" }}>
+            <th className="description" style={{ width: "25%" }}>
               Item
             </th>
+            <th className="description" style={{ width: "25%" }}>
+              Company
+            </th>
+            <th className="description" style={{ width: "25%" }}>
+              Category
+            </th>
 
-            <th style={{ width: "4rem" }}>Action</th>
+            <th style={{ width: "25%" }}>Action</th>
           </tr>
         </thead>
 
@@ -467,11 +515,20 @@ itemGroup,
             .map((item, index) => {
               return (
                 <tr key={item.item_uuid}>
-                  <td
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <span>{item.item_title}</span>
-                    <span style={{ color: "blue" }}></span>
+                  <td>{item.item_title}</td>
+                  <td>
+                    {
+                      company.find(
+                        (a) => a?.company_uuid === item?.company_uuid
+                      )?.company_title
+                    }
+                  </td>
+                  <td>
+                    {
+                      Category.find(
+                        (a) => a?.company_uuid === item?.company_uuid
+                      )?.category_title
+                    }
                   </td>
 
                   <td>
@@ -480,17 +537,38 @@ itemGroup,
                       className="noBgActionButton"
                       style={{
                         backgroundColor: includesArray?.filter(
-                          (a) => a?.item_uuid === item?.item_uuid&&a.item_group_uuid.filter(a=>a===itemGroup.item_group_uuid).length
+                          (a) =>
+                            a?.item_uuid === item?.item_uuid &&
+                            a.item_group_uuid.filter(
+                              (a) => a === itemGroup.item_group_uuid
+                            ).length
                         )?.length
                           ? "red"
                           : "var(--mainColor)",
                         width: "150px",
                         fontSize: "large",
                       }}
-                      onClick={(event) => onItemIncludeToggle(item.item_uuid)}
+                      onClick={(event) =>
+                        onItemIncludeToggle(
+                          item.item_uuid,
+                          includesArray?.filter(
+                            (a) =>
+                              a?.item_uuid === item?.item_uuid &&
+                              a.item_group_uuid.filter(
+                                (a) => a === itemGroup.item_group_uuid
+                              ).length
+                          )?.length
+                            ? "remove"
+                            : "add"
+                        )
+                      }
                     >
                       {includesArray?.filter(
-                        (a) => a?.item_uuid === item?.item_uuid&&a.item_group_uuid.filter(a=>a===itemGroup.item_group_uuid).length
+                        (a) =>
+                          a?.item_uuid === item?.item_uuid &&
+                          a.item_group_uuid.filter(
+                            (a) => a === itemGroup.item_group_uuid
+                          ).length
                       )?.length
                         ? "Remove"
                         : "Add"}

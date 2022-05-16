@@ -25,7 +25,7 @@ const Counter = () => {
     });
     if (response.data.success) setRoutesData(response.data.result);
   };
-  console.log(routesData);
+ 
   useEffect(() => {
     getRoutesData();
   }, []);
@@ -274,14 +274,14 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
       const response = await axios({
         method: "put",
         url: "/counters/putCounter",
-        data,
+        data:[data],
         headers: {
           "Content-Type": "application/json",
         },
       });
       if (response.data.success) {
         setCounters((prev) =>
-          prev.map((i) => (i.user_uuid === data.user_uuid ? data : i))
+          prev.map((i) => (i.counter_uuid === data.counter_uuid ? data : i))
         );
         onSave();
       }

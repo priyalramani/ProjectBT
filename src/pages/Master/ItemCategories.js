@@ -6,10 +6,12 @@ import {
   ChevronDownIcon,
   MenuAlt2Icon,
 } from "@heroicons/react/solid";
+
 import axios from "axios";
 const ItemCompanies = () => {
   const [itemCategories, setItemCategories] = useState([]);
   const [filterItemCategories, setFilterItemCategories] = useState([]);
+
   const [filterItemCategoriesTitle, setFilterItemCategoriesTitle] =
     useState("");
 
