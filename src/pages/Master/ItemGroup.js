@@ -324,9 +324,11 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
             .map((a) => ({
               ...a,
               one: true,
-              item_group_uuid: a.item_group_uuid.filter(
-                (b) => b !== ItemGroup.item_group_uuid
-              ),
+              item_group_uuid:item?.item_group_uuid?.length
+              ?item.item_group_uuid.filter(a=>a===ItemGroup.item_group_uuid).length 
+              ?item.item_group_uuid.filter(a=>a!==ItemGroup.item_group_uuid)
+              :[...item.item_group_uuid, ItemGroup.item_group_uuid]
+              : [ItemGroup.item_group_uuid],
             }))[0],
         ]
       : arr?.length
@@ -386,6 +388,7 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
         items={searchedItems}
         onItemIncludeToggle={handleItemIncludeToggle}
         includesArray={itemGroupings}
+        itemGroup={ItemGroup}
       />
       <div >
         <button
@@ -401,7 +404,7 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
 }
 function ItemsTable({
   items,
-
+itemGroup,
   includesArray,
   onItemIncludeToggle,
 }) {
@@ -442,7 +445,7 @@ function ItemsTable({
                       className="noBgActionButton"
                       style={{
                         backgroundColor: includesArray?.filter(
-                          (a) => a?.item_uuid === item?.item_uuid
+                          (a) => a?.item_uuid === item?.item_uuid&&a.item_group_uuid.filter(a=>a===itemGroup.item_group_uuid).length
                         )?.length
                           ? "red"
                           : "var(--mainColor)",
@@ -452,7 +455,7 @@ function ItemsTable({
                       onClick={(event) => onItemIncludeToggle(item.item_uuid)}
                     >
                       {includesArray?.filter(
-                        (a) => a?.item_uuid === item?.item_uuid
+                        (a) => a?.item_uuid === item?.item_uuid&&a.item_group_uuid.filter(a=>a===itemGroup.item_group_uuid).length
                       )?.length
                         ? "Remove"
                         : "Add"}
