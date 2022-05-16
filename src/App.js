@@ -19,7 +19,7 @@ function App() {
   return (
     <div className="App">
      <Routes>
-       <Route path='/admin' element={<MainAdmin/>}/>
+       <Route path='/' element={<MainAdmin/>}/>
        <Route path='/routes' element={<RoutesPage/>}/>
        <Route path='/itemCategories' element={<ItemCategories/>}/>
        <Route path='/counterGroup' element={<CounterGroup/>}/>
@@ -27,7 +27,7 @@ function App() {
        <Route path='/counter' element={<Counter/>}/>
        <Route path='/users' element={<Users/>}/>
        <Route path='/items' element={<ItemsPage/>}/>
-       <Route path="*" element={<Navigate replace to="/admin" />} />
+       <Route path="*" element={<Navigate replace to="/" />} />
      </Routes>
     </div>
   );
