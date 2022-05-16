@@ -346,12 +346,12 @@ useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
       const response = await axios({
         method: "put",
         url: "/items/putItem",
-        data,
+        data:[data],
         headers: {
           "Content-Type": "application/json",
         },
       });
-      if (response.data.success) {
+      if (response.data.result[0].success) {
         setItemsData((prev) =>
           prev.map((i) => (i.user_uuid === data.user_uuid ? data : i))
         );

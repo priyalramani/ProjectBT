@@ -46,7 +46,7 @@ background: rgba(0, 0, 0, 0.175);
     text-overflow: ellipsis;
   }
   
-  .user-table tbody .fieldEditButton {
+ .fieldEditButton {
     border: none;
     text-decoration: none;
     padding: 10px;
@@ -1305,5 +1305,537 @@ input#item-sales-searchbar {
   
   .closeButton:hover {
     background-color: var(--mainColor);
+  }
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table th {
+    text-align: left;
+    background-color: #deffe1;
+    border-bottom: 1px solid rgb(208, 206, 206);
+    padding: 10px;
+    overflow: auto;
+    text-overflow: ellipsis;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    font-size: larger;
+    color: slategrey;
+  }
+  
+  .table tr {
+    border-bottom: 1px solid rgb(208, 206, 206);
+    color: rgb(79, 79, 79);
+    max-height: 300px;
+  }
+  
+  .table tr.row {
+    border-bottom: 1px solid rgb(208, 206, 206);
+    color: rgb(79, 79, 79);
+  }
+  
+  .table tr.collapse {
+    overflow: scroll;
+  }
+  
+  .table tr.collapse table {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .table tr.collapse table thead .collapse-nav {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  
+  .table tr.collapse>td {
+    display: none;
+  }
+  
+  .table tr.collapse td.active {
+    display: table-cell;
+  }
+  
+  .table td {
+    padding: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  
+  .table td button {
+    padding: 5px;
+    outline: none;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    border-radius: 1.5rem;
+  }
+  
+  .table tbody {
+    padding: 30px;
+    background-color: white;
+    text-align: left;
+  }
+  
+  .table tbody td {
+    text-align: left;
+  }
+  
+  .description {
+    width: 100%;
+    resize: horizontal;
+  }
+  
+  .actionButton {
+    background-color: #44cd4a !important;
+    color: white !important;
+    padding: 0.4rem 2rem !important;
+    font-size: medium !important;
+    border-radius: 0.5rem;
+  }
+  
+  .noBgActionButton {
+    color: white !important;
+    padding: 0.4rem 2rem !important;
+    border-radius: 0.5rem;
+  }
+  
+  .dragIcon {
+    width: 16px;
+    opacity: 0.5;
+  }
+  
+  .dragColumn {
+    width: 4rem;
+  }
+  
+  .titleColumn {
+    width: 24rem;
+  }
+  
+  .sort_order {
+    width: 80px;
+    height: 30px;
+    border: none;
+    outline: none;
+    background: rgb(243, 243, 243);
+    padding: 10px;
+    border-radius: 5px;
+    color: #757575;
+  }
+  
+  .statusColumn {
+    width: 8rem;
+  }
+  
+  .selectColumn {
+    width: 10rem;
+  }
+  
+  .actionColumn {
+    width: 8rem;
+  }
+  
+  .mealTitleInput {
+    padding: 0.6rem;
+    font-size: medium;
+    width: 80%;
+  }
+  
+  .mealTitleSelect {
+    font-style: none;
+    font-size: medium;
+    width: 100%;
+  }
+  
+  .mealTitleOption {
+    margin: 5px 0;
+    padding: 0 5px;
+    cursor: pointer;
+  }
+  .form {
+    display: flex;
+    flex-direction: column;
+    /* gap: 1.2rem; */
+    justify-content: space-between;
+    height: 100%;
+    height: fit-content;
+    overflow: hidden;
+  }
+  
+  .formContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 2rem;
+    overflow: auto;
+  }
+  
+  .generalTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    font-size: 20px;
+    margin: 10px 0 20px;
+  }
+  
+  #top_content {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    gap: 15px;
+    align-items: flex-end;
+  }
+  
+  #top_content>div>label {
+    min-width: 8rem;
+    height: 8rem;
+    background: #80808029;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    overflow: hidden;
+  }
+  
+  #top_content>div>label>span {
+    display: block;
+    width: 8rem;
+    height: 100%;
+    text-align: center;
+    padding: 45px 0;
+    color: grey;
+    font-size: 17px;
+    font-weight: 600;
+  }
+  
+  .brand_invoice_logo {
+    object-fit: cover;
+    width: auto;
+    max-width: 35rem;
+  }
+  
+  #delete_logo {
+    margin: auto;
+    margin-top: -34px;
+    width: 34px;
+    height: 34px;
+    padding: 6px;
+    background: #e91000e8;
+    color: white;
+    border-radius: 100%;
+    transition: all .3s;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  #delete_logo:hover {
+    padding: 3px;
+  }
+  
+  .noSpaceForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    height: 100%;
+  }
+  
+  .formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border: green solid 2px;
+    border-radius: 1rem;
+    padding: 1.2rem;
+    position: relative;
+  }
+  
+  .formGroup>h2 {
+    font-weight: 600;
+  }
+  
+  .selectLabel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  
+  .selectLabel>input,
+  .selectLabel>select,
+  .selectLabel>textarea {
+    border-radius: 1rem;
+    padding: 5px 10px;
+    outline: none;
+    border: 0.5px solid grey;
+    letter-spacing: 0.5px;
+  
+  }
+  
+  .checkboxLabel {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 1rem;
+    align-items: center;
+  }
+  
+  .select,
+  .multiSelect,
+  .numberInput {
+    padding: 0.2rem;
+    font-size: medium;
+  }
+  
+  .select,
+  .numberInput {
+    height: 2.4rem;
+  }
+  
+  .select,
+  .multiSelect,
+  .numberInput,
+  .messageTextarea {
+    outline-color: var(--mainColor);
+  }
+  
+  .messageTextarea {
+    height: 5rem;
+    font-family: sans-serif;
+    resize: vertical;
+  }
+  
+  .multiSelect,
+  .messageTextarea,
+  .emptyCol {
+    width: 16rem;
+  }
+  
+  .select {
+    width: 12rem;
+  }
+  
+  .row {
+    display: flex;
+    gap: 1rem;
+    position: relative;
+    align-items: flex-end;
+  }
+  
+  .row>h1 {
+    text-align: center;
+    width: 100%;
+    font-weight: 600;
+  }
+  
+  .submit {
+    padding: 0.5rem 1.5rem;
+    font-size: large;
+    background-color: #44cd4a;
+    color: white;
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    letter-spacing: 1px;
+    height: 40px;
+  }
+  
+  .multiSelect {
+    height: 5rem;
+  }
+  
+  @media (max-width: 1024px) {
+    .row {
+      flex-direction: column;
+    }
+  }
+  
+  .addMealButton {
+    width: 2.4rem;
+    height: 2.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--mainColor);
+    border: none;
+    border-radius: 0.2rem;
+  }
+  
+  .addMealButton>img {
+    width: 70%;
+    height: 70%;
+  }
+  
+  .groupLabel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .fieldCustomizationButton {
+    padding: 15px 20px;
+    font-size: large;
+    background-color: #00b0f0;
+    color: white;
+    border: none;
+    font-weight: 500;
+    letter-spacing: 1px;
+    border-radius: 2rem;
+    cursor: pointer;
+    width: fit-content;
+    height: fit-content;
+  }
+  
+  .bottom_cover {
+    margin-bottom: 18px;
+  }
+  
+  .itemGroupingButton {
+    padding: 0.2rem;
+    font-size: medium;
+    background-color: #00b0f0;
+    color: white;
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    padding: 0 1rem;
+    height: 2.2rem;
+    margin-left: 2rem;
+  }
+  
+  .blueButtonGroup {
+    display: flex;
+    justify-content: end;
+    position: absolute;
+    right: 1rem;
+  }
+  
+  .selections {
+    border: 1px solid black;
+    padding: 2px;
+    width: 16rem;
+  }
+  
+  .option {
+    cursor: pointer;
+    vertical-align: center;
+    padding: 1px;
+  }
+  
+  .option:hover {
+    color: white;
+    background: #44cd4a;
+  }
+  
+  .selected {
+    color: white;
+    padding: 1px;
+    cursor: pointer;
+    background: #14bd1c;
+  }
+  
+  .deleteBtn {
+    background: none;
+    width: fit-content;
+    height: fit-content;
+    padding: 2px;
+    color: white;
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: red;
+    border: none;
+    border-radius: 0.2rem;
+    cursor: pointer;
+  }
+  
+  .deleteBtn:hover {
+    background-color: black;
+    color: red;
+  }
+  
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 55px;
+    margin-right: 0.5rem;
+    height: 28px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    border-radius: 34px;
+  }
+  
+  .slider:before {
+    border-radius: 50%;
+  }
+  
+  .heading {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: black;
+    color: white;
+    font-size: medium;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+    position: sticky;
+  }
+  
+  .heading>h1 {
+    margin: 10px 0;
+    font-weight: 500;
+    letter-spacing: 1px;
+    padding: 0 4rem;
+  }
+  
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex: 1;
+  }
+  
+  .content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 1rem;
+    padding: 1rem;
+    overflow-y: scroll;
+  }
+  
+  .searchInput {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: medium;
+    max-width: 32rem;
   }
   
