@@ -7,7 +7,7 @@ const MainAdmin = () => {
   <Sidebar/>
   <div className="right-side">
       <Header/>
-      MainAdmin
+      
       </div>
     </>
   )
