@@ -347,6 +347,7 @@ function NewUserForm({ onSave }) {
                       <td colSpan={4} style={{ textAlign: "center" }}>
                         If quantity of base item is
                         <input
+                        type="number"
                           className="searchInput"
                           style={{
                             border: "none",
@@ -375,6 +376,7 @@ function NewUserForm({ onSave }) {
                             borderRadius: "0px",
                             width: "80px",
                           }}
+                          type="number"
                           value={item.add_qty}
                           onChange={(e) =>
                             setObgData((prev) => ({
