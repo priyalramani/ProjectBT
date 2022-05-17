@@ -5,7 +5,6 @@ import SetupModal from "../../components/setupModel/SetupModel";
 import {
   ChevronUpIcon,
   ChevronDownIcon,
-  MenuAlt2Icon,
 } from "@heroicons/react/solid";
 import axios from "axios";
 const ItemGroup = () => {

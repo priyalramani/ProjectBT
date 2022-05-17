@@ -140,7 +140,7 @@ const Counter = () => {
 };
 
 export default Counter;
-function Table({ itemsDetails, routesData, setPopupForm }) {
+function Table({ itemsDetails, setPopupForm }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
   return (

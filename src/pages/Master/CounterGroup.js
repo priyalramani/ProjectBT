@@ -6,12 +6,10 @@ import SetupModal from "../../components/setupModel/SetupModel";
 import {
   ChevronUpIcon,
   ChevronDownIcon,
-  MenuAlt2Icon,
 } from "@heroicons/react/solid";
 import axios from "axios";
 const CounterGroup = () => {
   const [counterGroup, setCounterGroup] = useState([]);
-  const [filterCounterGroup, setFilterCounterGroup] = useState([]);
   const [filterCounterGroupTitle, setFilterCounterGroupTitle] = useState("");
   const [popupForm, setPopupForm] = useState(false);
   const [addItems, setAddItems] = useState(false);
@@ -30,21 +28,7 @@ const CounterGroup = () => {
   useEffect(() => {
     getCounterGroup();
   }, [popupForm]);
-  useEffect(
-    () =>
-      setFilterCounterGroup(
-        counterGroup
-          .filter((a) => a.counter_group_title)
-          .filter(
-            (a) =>
-              !filterCounterGroupTitle ||
-              a.counter_group_title
-                .toLocaleLowerCase()
-                .includes(filterCounterGroupTitle.toLocaleLowerCase())
-          )
-      ),
-    [counterGroup, filterCounterGroupTitle]
-  );
+
   return (
     <>
       <Sidebar />
@@ -79,12 +63,26 @@ const CounterGroup = () => {
               className="searchInput"
             />
 
-            <div>Total Items: {filterCounterGroup.length}</div>
+            <div>Total Items: {counterGroup.filter((a) => a.counter_group_title)
+              .filter(
+                (a) =>
+                  !filterCounterGroupTitle ||
+                  a.counter_group_title
+                    .toLocaleLowerCase()
+                    .includes(filterCounterGroupTitle.toLocaleLowerCase())
+              ).length}</div>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-            itemsDetails={filterCounterGroup}
+            itemsDetails={counterGroup.filter((a) => a.counter_group_title)
+              .filter(
+                (a) =>
+                  !filterCounterGroupTitle ||
+                  a.counter_group_title
+                    .toLocaleLowerCase()
+                    .includes(filterCounterGroupTitle.toLocaleLowerCase())
+              )}
             setPopupForm={setPopupForm}
             setAddItems={setAddItems}
           />

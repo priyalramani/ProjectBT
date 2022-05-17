@@ -2,9 +2,6 @@ import React from 'react'
 import "./style.css"
 import  NavLink  from './Navlink'
 import {
-    Add as VouchersIcon,
-    Redeem as InventoryIcon,
-    AccountBalanceWalletOutlined as AccountIcon,
     AutoAwesomeMosaicOutlined as MasterIcon,
     AssessmentOutlined as ReportsIcon,
     FlashOn as QuickAccessIcon,

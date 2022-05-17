@@ -19,22 +19,32 @@ import ItemsPage from './pages/Master/Items';
 import axios from 'axios';
 import AutoIncreaseQuantity from './pages/others/AutoIncreaseQuantity';
 import AutoIncreaseItem from './pages/others/AutoIncreaseItem';
+import Main from './users/Main';
+import LoginPage from './users/LoginPage';
+import Orders from './users/Orders';
 function App() {
-  axios.defaults.baseURL= "http://localhost:5000"
+  axios.defaults.baseURL= "http://localhost:9000"
   return (
     <div className="App">
      <Routes>
-       <Route path='/' element={<MainAdmin/>}/>
+       {/* admin Routes */}
+       <Route path='/admin' element={<MainAdmin/>}/>
        <Route path='/routes' element={<RoutesPage/>}/>
        <Route path='/itemCategories' element={<ItemCategories/>}/>
        <Route path='/counterGroup' element={<CounterGroup/>}/>
        <Route path='/itemGroup' element={<ItemGroup/>}/>
        <Route path='/counter' element={<Counter/>}/>
-       <Route path='/users' element={<Users/>}/>
+       <Route path='/adminUsers' element={<Users/>}/>
        <Route path='/items' element={<ItemsPage/>}/>
        <Route path='/autoIncreaseQty' element={<AutoIncreaseQuantity/>}/>
        <Route path='/autoIncreaseItem' element={<AutoIncreaseItem/>}/>
-       <Route path="*" element={<Navigate replace to="/" />} />
+       <Route path="*" element={<Navigate replace to="/admin" />} />
+
+       {/* users routes */}
+       <Route path='/users' element={<Main/>}/>
+       <Route path='/login' element={<LoginPage/>}/>
+       <Route path='/users/orders' element={<Orders/>}/>
+
      </Routes>
     </div>
   );
