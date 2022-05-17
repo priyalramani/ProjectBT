@@ -1,14 +1,14 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { openDB } from "idb";
 const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState({
     login_username: "",
     login_password: "",
   });
-  const Navigate=useNavigate()
+  const Navigate = useNavigate();
   const loginHandler = async () => {
     setIsLoading(true);
     const response = await axios({
@@ -19,15 +19,63 @@ const LoginPage = () => {
         "Content-Type": "application/json",
       },
     });
-    if(response.data.success){
-        let data=response.data.result
-        localStorage.setItem("user_uuid",data.user_uuid)
-        localStorage.setItem("user_title",data.user_title)
-        localStorage.setItem("user_role",JSON.stringify(data.user_role||[]))
-        localStorage.setItem("user_mobile",data.user_mobile)
+    if (response.data.success) {
+      let data = response.data.result;
+      localStorage.setItem("user_uuid", data.user_uuid);
+      localStorage.setItem("user_title", data.user_title);
+      localStorage.setItem("user_role", JSON.stringify(data.user_role || []));
+      localStorage.setItem("user_mobile", data.user_mobile);
+      const result = await axios({
+        method: "get",
+        url: "/users/getDetails",
+        data: userData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      data = result.data.result;
+
+      const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
+        upgrade(db) {
+          for (const property in data) {
+            db.createObjectStore(property, {
+              keyPath: "IDENTIFIER",
+            });
+          }
+        },
+      });
+
+      let store;
+      for (const property in data) {
+        store = await db
+          .transaction(property, "readwrite")
+          .objectStore(property);
+        for (let item of data[property]) {
+          let IDENTIFIER =
+            item[
+              property === "autobill"
+                ? "auto_uuid"
+                : property === "companies"
+                ? "company_uuid"
+                : property === "counter"
+                ? "counter_uuid"
+                : property === "counter_groups"
+                ? "counter_group_uuid"
+                : property === "item_category"
+                ? "category_uuid"
+                : property === "items"
+                ? "item_uuid"
+                : property === "routes"
+                ? "route_uuid"
+                : ""
+            ];
+          console.log({ ...item, IDENTIFIER });
+          await store.put({ ...item, IDENTIFIER });
+        }
+      }
+      setIsLoading(false)
+      Navigate("/users")
     }
-    setIsLoading(false)
-    Navigate("/users")
   };
   return (
     <div
