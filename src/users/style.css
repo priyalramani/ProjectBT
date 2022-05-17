@@ -1,0 +1,68 @@
+.servicePage {
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 75vh;
+  height: 100%;
+  width: 100%;
+}
+
+#loading-services {
+  width: 100vw;
+  height:100vh;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fff;
+  z-index: 100;
+}
+
+#loading-services>img {
+  width: 50px;
+  height: 50px;
+}
+
+.servicesContainer {
+  padding: 1rem;
+  max-width: 500px;
+  flex-wrap: wrap;
+  gap: 2rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.service {
+  padding: 1.5rem;
+  width: 7rem;
+  height: 7rem;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1rem;
+  border: 2px solid #000;
+}
+
+.service>img {
+  filter: brightness(50%) sepia(1);
+  max-width: 3.5rem;
+}
+
+.service>span {
+  font-size: 16px;
+  font-weight: bold;
+  padding-top: 0.5rem;
+  color: var(--mainColor);
+  text-align: center;
+  line-height: 1;
+}
+
+.unavailable-text {
+  width: 7rem;
+  display: block;
+  text-align: center;
+}

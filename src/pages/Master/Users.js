@@ -44,9 +44,9 @@ const Users = () => {
                   ?.includes(usersTitle.toLocaleLowerCase())
             )
         ),
-      [users, filterUsers]
+      [users, usersTitle]
     );
-  console.log(users,filterUsers)
+
     return (
       <>
         <Sidebar />
@@ -240,19 +240,14 @@ useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
       if(!data.user_title||!data.login_password||!data.login_username){
         setErrorMassage("Please insert user_title login_username login_password");
         return;
-  
       }else if(!(data.user_mobile===""|| data.user_mobile?.length===10)){
         setErrorMassage("Please enter 10 Numbers in Mobile");
         return;
-  
       }
-      
-     
-      
       if (popupInfo?.type === "edit") {
         const response = await axios({
           method: "put",
-          url: "/counters/putCounter",
+          url: "/users/putUser",
           data,
           headers: {
             "Content-Type": "application/json",
