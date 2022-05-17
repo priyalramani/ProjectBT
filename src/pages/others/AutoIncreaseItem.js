@@ -12,9 +12,28 @@ import axios from "axios";
 const DEFAULT = {
   base_qty: "",
   add_items: [],
+  unit:"p"
 };
 const AutoIncreaseItem = () => {
   const [popupForm, setPopupForm] = useState(false);
+  const [itemsData, setItemsData] = useState([]);
+  const getItemsData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/autoBill/autoBillItem",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success)
+      setItemsData(
+        response.data.result
+      );
+  };
+  useEffect(() => {
+    getItemsData();
+  }, [popupForm]);
   return (
     <>
       <Sidebar />
@@ -44,14 +63,14 @@ const AutoIncreaseItem = () => {
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-          // itemsDetails={filterCounterGroup}
-          // setPopupForm={setPopupForm}
+          itemsDetails={itemsData}
+          setPopupForm={setPopupForm}
           // setAddItems={setAddItems}
           />
         </div>
       </div>
       {popupForm ? (
-        <NewUserForm onSave={() => setPopupForm(false)} popupInfo={popupForm} />
+        <NewUserForm onSave={() => setPopupForm(false)} popupForm={popupForm} />
       ) : (
         ""
       )}
@@ -62,7 +81,7 @@ const AutoIncreaseItem = () => {
 export default AutoIncreaseItem;
 
 function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
-  const [items, setItems] = useState("counter_group_title");
+  const [items, setItems] = useState("auto_title");
   const [order, setOrder] = useState("asc");
   return (
     <table
@@ -74,11 +93,11 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
           <th>S.N</th>
           <th colSpan={2}>
             <div className="t-head-element">
-              <span></span>
+              <span>Auto Title</span>
               <div className="sort-buttons-container">
                 <button
                   onClick={() => {
-                    setItems("counter_group_title");
+                    setItems("auto_title");
                     setOrder("asc");
                   }}
                 >
@@ -86,7 +105,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
                 </button>
                 <button
                   onClick={() => {
-                    setItems("counter_group_title");
+                    setItems("auto_title");
                     setOrder("desc");
                   }}
                 >
@@ -100,7 +119,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
       </thead>
       <tbody className="tbody">
         {itemsDetails
-          .filter((a) => a.counter_group_title)
+          .filter((a) => a.auto_title)
           .sort((a, b) =>
             order === "asc"
               ? typeof a[items] === "string"
@@ -117,7 +136,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
               onClick={() => setPopupForm({ type: "edit", data: item })}
             >
               <td>{i + 1}</td>
-              <td colSpan={2}>{item.counter_group_title}</td>
+              <td colSpan={2}>{item.auto_title}</td>
               <td>
                 <button
                   type="button"
@@ -137,7 +156,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
   );
 }
 
-function NewUserForm({ onSave }) {
+function NewUserForm({ onSave,popupForm }) {
   const [objData, setObgData] = useState({
     type: "auto-item-add",
     auto_title: "",
@@ -148,6 +167,7 @@ function NewUserForm({ onSave }) {
     counter_groups: [],
     qty_details: [{ ...DEFAULT, uuid: uuid() }],
   });
+  useEffect(popupForm?.type==="edit"?()=>setObgData(popupForm.data):()=>{},[])
   const [ui, setUi] = useState(1);
   const [items, setItems] = useState([]);
   const [company, setCompany] = useState([]);
@@ -278,19 +298,34 @@ function NewUserForm({ onSave }) {
   }, []);
   const submitHandler = async (e) => {
     e.preventDefault();
-    console.log(objData);
-    const response = await axios({
-      method: "post",
-      url: "/autoBill/CreateAutoQty",
-      data: objData,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-    if (response.data.success) {
-      onSave();
-    }
+    let data= {...objData,qty_details:objData.qty_details.map(a=>({...a,add_items:a.add_items.map(b=>({...b,unit:a.unit}))}))}
+    if(popupForm?.type==="edit"){
+        const response = await axios({
+          method: "put",
+          url: "/autoBill/UpdateAutoQty",
+          data,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        console.log(response)
+        if (response.data.success) {
+          onSave();
+        }
+      }else{
+        const response = await axios({
+          method: "post",
+          url: "/autoBill/CreateAutoQty",
+          data,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        console.log(response)
+        if (response.data.success) {
+          onSave();
+        }
+      }
   };
 
   return (
@@ -345,9 +380,9 @@ function NewUserForm({ onSave }) {
                             }))
                           }
                         />
-                        <b style={{marginLeft:"50px"}}>Min Range : </b>
+                        <b style={{ marginLeft: "50px" }}>Min Range : </b>
                         <input
-                        type="number"
+                          type="number"
                           className="searchInput"
                           style={{
                             border: "none",
@@ -404,6 +439,31 @@ function NewUserForm({ onSave }) {
                             onClick={() => setItemPopupId(item.uuid)}
                           />
                         </td>
+                        <td>
+                        <select
+                           value={item.unit}
+                          className="select"
+                          style={{
+                            border: "none",
+                            borderBottom: "2px solid black",
+                            borderRadius: "0px",
+                            width: "80px",
+                          }}
+                          onChange={(e) =>
+                            setObgData((prev) => ({
+                              ...prev,
+                              qty_details: prev.qty_details.map((i) =>
+                                i.uuid === item.uuid
+                                  ? { ...i, unit: e.target.value }
+                                  : i
+                              ),
+                            }))
+                          }
+                        >
+                          <option value="p">Pcs</option>
+                          <option value="b">Box</option>
+                        </select>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -413,7 +473,7 @@ function NewUserForm({ onSave }) {
                   onClick={(e) =>
                     setObgData((prev) => ({
                       ...prev,
-                      qty_details: [...prev.qty_details, DEFAULT],
+                      qty_details: [...prev.qty_details, {...DEFAULT,uuid:uuid()}],
                     }))
                   }
                 >
@@ -880,7 +940,7 @@ function NewUserForm({ onSave }) {
                   Back
                 </button>
                 <button className="fieldEditButton" onClick={submitHandler}>
-                  Save
+                {popupForm?.type==="edit"?"Update":"Save"}
                 </button>
               </div>
             )}
@@ -980,14 +1040,15 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, setObgData }) => {
                       Item
                     </th>
                     <th className="description" style={{ width: "20%" }}>
-                          Company
-                        </th>
-                        <th className="description" style={{ width: "20%" }}>
-                          Category
-                        </th>
-                    
+                      Company
+                    </th>
+                    <th className="description" style={{ width: "20%" }}>
+                      Category
+                    </th>
 
-                    <th style={{ textAlign:"center" }} colSpan={3}>Action</th>
+                    <th style={{ textAlign: "center" }} colSpan={3}>
+                      Action
+                    </th>
                   </tr>
                 </thead>
 
@@ -1020,7 +1081,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, setObgData }) => {
                         <tr key={item.item_uuid}>
                           <td>{item.item_title}</td>
                           <td>{item.company_title}</td>
-                              <td>{item.category_title}</td>
+                          <td>{item.category_title}</td>
                           <td>
                             <button
                               type="button"
@@ -1055,65 +1116,35 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, setObgData }) => {
                                 : "Add"}
                             </button>
                           </td>
-                            {value.filter((a) => a.item_uuid === item.item_uuid)
-                              ?.length ? (<>
-                          <td>
+                          {value.filter((a) => a.item_uuid === item.item_uuid)
+                            ?.length ? (
+                            <td>
                               <input
                                 type="number"
-                                style={{width:"100px"}}
+                                style={{ width: "100px" }}
                                 onChange={(e) =>
-                                    setValue((prev) =>
+                                  setValue((prev) =>
                                     prev.map((a) =>
-                                    a.item_uuid === item.item_uuid
-                                    ? { ...a, add_qty: e.target.value }
-                                    : a
+                                      a.item_uuid === item.item_uuid
+                                        ? { ...a, add_qty: e.target.value }
+                                        : a
                                     )
-                                    )
+                                  )
                                 }
                                 value={
-                                    value.find(
-                                        (a) => a.item_uuid === item.item_uuid
-                                        )?.add_qty
-                                    }
-                                    placeholder="Item Qty..."
-                                    className="searchInput"
-                                    />
-                          </td>
-                          <td>
-                        <select
-                          value={
-                            value.find(
-                                (a) => a.item_uuid === item.item_uuid
-                                )?.add_qty
-                            }
-                          className="select"
-                          style={{
-                            border: "none",
-                            borderBottom: "2px solid black",
-                            borderRadius: "0px",
-                            width: "80px",
-                          }}
-                          onChange={(e) =>
-                            setValue((prev) =>
-                            prev.map((a) =>
-                            a.item_uuid === item.item_uuid
-                            ? { ...a, unit: e.target.value }
-                            : a
-                            )
-                            )
-                        }
-                        >
-                          <option value="p">Pcs</option>
-                          <option value="b">Box</option>
-                        </select>
-                      </td>
-                                    </>
-                            ) : (
-                             <td colSpan={2}/>
-                            )}
-
+                                  value.find(
+                                    (a) => a.item_uuid === item.item_uuid
+                                  )?.add_qty
+                                }
+                                placeholder="Item Qty..."
+                                className="searchInput"
+                              />
+                            </td>
+                          ) : (
+                            <td />
+                          )}
                         </tr>
-                      )
+                      );
                     })}
                 </tbody>
               </table>

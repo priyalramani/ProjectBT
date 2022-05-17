@@ -16,6 +16,24 @@ const DEFAULT = {
 };
 const AutoIncreaseQuantity = () => {
   const [popupForm, setPopupForm] = useState(false);
+  const [itemsData, setItemsData] = useState([]);
+  const getItemsData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/autoBill/autoBillQty",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success)
+      setItemsData(
+        response.data.result
+      );
+  };
+  useEffect(() => {
+    getItemsData();
+  }, [popupForm]);
   return (
     <>
       <Sidebar />
@@ -45,14 +63,14 @@ const AutoIncreaseQuantity = () => {
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-          // itemsDetails={filterCounterGroup}
-          // setPopupForm={setPopupForm}
+          itemsDetails={itemsData}
+          setPopupForm={setPopupForm}
           // setAddItems={setAddItems}
           />
         </div>
       </div>
       {popupForm ? (
-        <NewUserForm onSave={() => setPopupForm(false)} popupInfo={popupForm} />
+        <NewUserForm onSave={() => setPopupForm(false)} popupForm={popupForm} />
       ) : (
         ""
       )}
@@ -62,7 +80,7 @@ const AutoIncreaseQuantity = () => {
 
 export default AutoIncreaseQuantity;
 function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
-  const [items, setItems] = useState("counter_group_title");
+  const [items, setItems] = useState("auto_title");
   const [order, setOrder] = useState("asc");
   return (
     <table
@@ -74,11 +92,11 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
           <th>S.N</th>
           <th colSpan={2}>
             <div className="t-head-element">
-              <span></span>
+              <span>Auto Title</span>
               <div className="sort-buttons-container">
                 <button
                   onClick={() => {
-                    setItems("counter_group_title");
+                    setItems("auto_title");
                     setOrder("asc");
                   }}
                 >
@@ -86,7 +104,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
                 </button>
                 <button
                   onClick={() => {
-                    setItems("counter_group_title");
+                    setItems("auto_title");
                     setOrder("desc");
                   }}
                 >
@@ -100,7 +118,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
       </thead>
       <tbody className="tbody">
         {itemsDetails
-          .filter((a) => a.counter_group_title)
+          .filter((a) => a.auto_title)
           .sort((a, b) =>
             order === "asc"
               ? typeof a[items] === "string"
@@ -117,7 +135,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
               onClick={() => setPopupForm({ type: "edit", data: item })}
             >
               <td>{i + 1}</td>
-              <td colSpan={2}>{item.counter_group_title}</td>
+              <td colSpan={2}>{item.auto_title}</td>
               <td>
                 <button
                   type="button"
@@ -137,7 +155,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
   );
 }
 
-function NewUserForm({ onSave }) {
+function NewUserForm({ onSave,popupForm }) {
   const [objData, setObgData] = useState({
     type: "auto-increase-qty",
     auto_title:"",
@@ -147,6 +165,8 @@ function NewUserForm({ onSave }) {
     counter_groups: [],
     qty_details: [{ ...DEFAULT, uuid: uuid() }],
   });
+  console.log(popupForm)
+  useEffect(popupForm?.type==="edit"?()=>setObgData(popupForm.data):()=>{},[])
   const [ui, setUi] = useState(1);
   const [items, setItems] = useState([]);
   const [company, setCompany] = useState([]);
@@ -278,7 +298,21 @@ function NewUserForm({ onSave }) {
   const submitHandler = async (e) => {
     e.preventDefault();
     console.log(objData)
-    const response = await axios({
+    if(popupForm?.type==="edit"){
+      const response = await axios({
+        method: "put",
+        url: "/autoBill/UpdateAutoQty",
+        data:objData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response)
+      if (response.data.success) {
+        onSave();
+      }
+    }else{
+      const response = await axios({
         method: "post",
         url: "/autoBill/CreateAutoQty",
         data:objData,
@@ -288,9 +322,9 @@ function NewUserForm({ onSave }) {
       });
       console.log(response)
       if (response.data.success) {
-     
         onSave();
       }
+    }
   };
 
   return (
@@ -888,7 +922,7 @@ function NewUserForm({ onSave }) {
                 Back
               </button>
               <button className="fieldEditButton" onClick={submitHandler}>
-                Save
+              {popupForm?.type==="edit"?"Update":"Save"}
               </button>
             </div>
           )}
