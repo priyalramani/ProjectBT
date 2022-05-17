@@ -20,7 +20,7 @@ import axios from 'axios';
 import AutoIncreaseQuantity from './pages/others/AutoIncreaseQuantity';
 import AutoIncreaseItem from './pages/others/AutoIncreaseItem';
 function App() {
-  axios.defaults.baseURL= "http://localhost:5001"
+  axios.defaults.baseURL= "http://localhost:5000"
   return (
     <div className="App">
      <Routes>
