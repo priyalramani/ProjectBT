@@ -22,10 +22,7 @@ const AutoIncreaseQuantity = () => {
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading">
-          <h2 style={{ width: "100%" }}>AutoIncreaseQuantity </h2>
-          <h3 style={{ width: "100%" }}>
-            (Calculate Individual Item Quantity)
-          </h3>
+          <h2 style={{ width: "100%" }}>Auto Increase Quantity </h2>
         </div>
         <div id="item-sales-top">
           <div
@@ -143,6 +140,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
 function NewUserForm({ onSave }) {
   const [objData, setObgData] = useState({
     type: "auto-increase-qty",
+    auto_title:"",
     items: [],
     item_groups: [],
     counters: [],
@@ -320,6 +318,30 @@ function NewUserForm({ onSave }) {
                 }}
               >
                 <tbody>
+                  <tr><td colSpan={2} style={{width:"50vw",
+                display:"flex",
+                alignItems:"center",
+                justifyContent:"center",
+               }}> 
+                    <b>Auto Title : </b>
+                  <input
+                          className="searchInput"
+                          style={{
+                            border: "none",
+                            borderBottom: "2px solid black",
+                            borderRadius: "0px",
+                            
+                          }}
+                          placeholder="Title"
+                          value={objData.auto_title}
+                          onChange={(e) =>
+                            setObgData((prev) => ({
+                              ...prev,
+                              auto_title:e.target.value
+                            }))
+                          }
+                        />
+                    </td></tr>
                   {objData.qty_details?.map((item, i) => (
                     <tr key={Math.random()} style={{ height: "30px" }}>
                       <td colSpan={4} style={{ textAlign: "center" }}>
