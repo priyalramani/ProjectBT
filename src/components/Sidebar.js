@@ -64,6 +64,10 @@ const Sidebar = () => {
                       name: "Auto Increase Quantity",
                       link: "/autoIncreaseQty",
                     },
+                    {
+                      name: "Auto Increase Item",
+                      link: "/autoIncreaseItem",
+                    },
                     
                   ]}
                 />

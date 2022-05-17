@@ -18,6 +18,7 @@ import Users from './pages/Master/Users';
 import ItemsPage from './pages/Master/Items';
 import axios from 'axios';
 import AutoIncreaseQuantity from './pages/others/AutoIncreaseQuantity';
+import AutoIncreaseItem from './pages/others/AutoIncreaseItem';
 function App() {
   axios.defaults.baseURL= "http://localhost:5001"
   return (
@@ -32,6 +33,7 @@ function App() {
        <Route path='/users' element={<Users/>}/>
        <Route path='/items' element={<ItemsPage/>}/>
        <Route path='/autoIncreaseQty' element={<AutoIncreaseQuantity/>}/>
+       <Route path='/autoIncreaseItem' element={<AutoIncreaseItem/>}/>
        <Route path="*" element={<Navigate replace to="/" />} />
      </Routes>
     </div>
