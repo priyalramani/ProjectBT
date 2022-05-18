@@ -2,11 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import axios from "axios";
-import {
-  ChevronUpIcon,
-  ChevronDownIcon,
-  MenuAlt2Icon,
-} from "@heroicons/react/solid";
+import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 const Counter = () => {
   const [counter, setCounter] = useState([]);
   const [filterCounter, setFilterCounter] = useState([]);
@@ -14,6 +10,8 @@ const Counter = () => {
   const [filterRoute, setFilterRoute] = useState("");
   const [popupForm, setPopupForm] = useState(false);
   const [routesData, setRoutesData] = useState([]);
+  const [itemPopup, setItemPopup] = useState(false);
+
   const getRoutesData = async () => {
     const response = await axios({
       method: "get",
@@ -25,7 +23,7 @@ const Counter = () => {
     });
     if (response.data.success) setRoutesData(response.data.result);
   };
- 
+
   useEffect(() => {
     getRoutesData();
   }, []);
@@ -122,6 +120,7 @@ const Counter = () => {
             itemsDetails={filterCounter}
             routesData={routesData}
             setPopupForm={setPopupForm}
+            setItemPopup={setItemPopup}
           />
         </div>
       </div>
@@ -135,12 +134,17 @@ const Counter = () => {
       ) : (
         ""
       )}
+      {itemPopup ? (
+        <ItemPopup onSave={() => setItemPopup(false)} itemPopup={itemPopup} />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default Counter;
-function Table({ itemsDetails, setPopupForm }) {
+function Table({ itemsDetails, setPopupForm, setItemPopup }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
   return (
@@ -220,6 +224,7 @@ function Table({ itemsDetails, setPopupForm }) {
               </div>
             </div>
           </th>
+          <th colSpan={3}>Actions</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -237,12 +242,51 @@ function Table({ itemsDetails, setPopupForm }) {
             <tr
               key={Math.random()}
               style={{ height: "30px" }}
-              onClick={() => setPopupForm({ type: "edit", data: item })}
+              onClick={(e) => {
+                e.stopPropagation();
+                setPopupForm({ type: "edit", data: item });
+              }}
             >
               <td>{i + 1}</td>
               <td colSpan={2}>{item.route_title}</td>
               <td colSpan={2}>{item.counter_title}</td>
               <td colSpan={2}>{item.mobile}</td>
+              <td>
+                <button
+                  type="button"
+                  className="fieldEditButton"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setItemPopup({ item, type: "company_discount" });
+                  }}
+                >
+                  Company Discount
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  className="fieldEditButton"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setItemPopup({ item, type: "item_special_price" });
+                  }}
+                >
+                  Item Special Prices
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  className="fieldEditButton"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setItemPopup({ item, type: "item_special_discount" });
+                  }}
+                >
+                  Item Special Discounts
+                </button>
+              </td>
             </tr>
           ))}
       </tbody>
@@ -274,7 +318,7 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
       const response = await axios({
         method: "put",
         url: "/counters/putCounter",
-        data:[data],
+        data: [data],
         headers: {
           "Content-Type": "application/json",
         },
@@ -412,3 +456,361 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
     </div>
   );
 }
+const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
+  const [companies, setCompanies] = useState([]);
+  const [itemsData, setItemsData] = useState([]);
+  const [itemCategories, setItemCategories] = useState([]);
+  const [value, setValue] = useState([]);
+  const [filterTitle, setFilterTitle] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterCompany, setFilterCompany] = useState("");
+  useEffect(()=>setValue(itemPopup.item[itemPopup.type]?itemPopup.item[itemPopup.type]:[]),[])
+  console.log(value)
+  const getItemCategories = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/itemCategories/GetItemCategoryList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setItemCategories(response.data.result);
+  };
+  const getItemsData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/items/GetItemList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success)
+      setItemsData(
+        response.data.result.map((b) => ({
+          ...b,
+          company_title:
+            companies.find((a) => a.company_uuid === b.company_uuid)
+              ?.company_title || "-",
+          category_title:
+            itemCategories.find((a) => a.category_uuid === b.category_uuid)
+              ?.category_title || "-",
+        }))
+      );
+  };
+  useEffect(() => {
+    getItemsData();
+  }, [itemCategories, companies]);
+
+  const getCompanies = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/companies/getCompanies",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCompanies(response.data.result);
+  };
+  useEffect(() => {
+    getCompanies();
+    getItemCategories();
+  }, []);
+  const submitHandler = async() => {
+    const response = await axios({
+      method: "put",
+      url: "/counters/putCounter",
+      data: [{
+        counter_uuid:itemPopup.item.counter_uuid,
+        [itemPopup.type]:value
+      }],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+  
+      onSave();
+    }
+  };
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                overflowY: "scroll",
+                height: "45vh",
+              }}
+            >
+              {itemPopup?.type !== "company_discount" ? (
+                <input
+                  type="text"
+                  onChange={(e) => setFilterTitle(e.target.value)}
+                  value={filterTitle}
+                  placeholder="Search Item Title..."
+                  className="searchInput"
+                />
+              ) : (
+                ""
+              )}
+              <input
+                type="text"
+                onChange={(e) => setFilterCompany(e.target.value)}
+                value={filterCompany}
+                placeholder="Search Company Title..."
+                className="searchInput"
+              />
+
+              {itemPopup?.type !== "company_discount" ? (
+                <input
+                  type="text"
+                  onChange={(e) => setFilterCategory(e.target.value)}
+                  value={filterCategory}
+                  placeholder="Search Category Title..."
+                  className="searchInput"
+                />
+              ) : (
+                ""
+              )}
+
+              <table className="table">
+                <thead>
+                  <tr>
+                    {itemPopup?.type !== "company_discount" ? (
+                      <th className="description" style={{ width: "20%" }}>
+                        Item
+                      </th>
+                    ) : (
+                      ""
+                    )}
+                    <th className="description" style={{ width: "20%" }}>
+                      Company
+                    </th>
+                    {itemPopup?.type !== "company_discount" ? (
+                      <th className="description" style={{ width: "20%" }}>
+                        Category
+                      </th>
+                    ) : (
+                      ""
+                    )}
+
+                    <th style={{ textAlign: "center" }} colSpan={3}>
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {itemPopup?.type !== "company_discount" ?itemsData
+                    ?.filter((a) => a.item_uuid)
+                    .filter(
+                      (a) =>
+                        !filterTitle ||
+                        a.item_title
+                          .toLocaleLowerCase()
+                          .includes(filterTitle.toLocaleLowerCase())
+                    )
+                    .filter(
+                      (a) =>
+                        !filterCompany ||
+                        a?.company_title
+                          .toLocaleLowerCase()
+                          .includes(filterCompany.toLocaleLowerCase())
+                    )
+                    .filter(
+                      (a) =>
+                        !filterCategory ||
+                        a?.category_title
+                          .toLocaleLowerCase()
+                          .includes(filterCategory.toLocaleLowerCase())
+                    )
+                    .map((item, index) => {
+                      return (
+                        <tr key={item.item_uuid}>
+                          <td>{item.item_title}</td>
+                          <td>{item.company_title}</td>
+                          <td>{item.category_title}</td>
+                          <td>
+                            <button
+                              type="button"
+                              className="noBgActionButton"
+                              style={{
+                                backgroundColor: value.filter(
+                                  (a) => a.item_uuid === item.item_uuid
+                                )?.length
+                                  ? "red"
+                                  : "var(--mainColor)",
+                                width: "150px",
+                                fontSize: "large",
+                              }}
+                              onClick={(event) =>
+                                setValue((prev) =>
+                                  value.filter(
+                                    (a) => a.item_uuid === item.item_uuid
+                                  )?.length
+                                    ? value.filter(
+                                        (a) => a.item_uuid !== item.item_uuid
+                                      )
+                                    : prev.length
+                                    ? [...prev, { item_uuid: item.item_uuid }]
+                                    : [{ item_uuid: item.item_uuid }]
+                                )
+                              }
+                            >
+                              {value.filter(
+                                (a) => a.item_uuid === item.item_uuid
+                              )?.length
+                                ? "Remove"
+                                : "Add"}
+                            </button>
+                          </td>
+                          {value.filter((a) => a.item_uuid === item.item_uuid)
+                            ?.length ? (
+                            <td>
+                              <input
+                                type="number"
+                                style={{ width: "100px" }}
+                                onChange={(e) =>
+                                  setValue((prev) =>
+                                    prev.map((a) =>
+                                      a.item_uuid === item.item_uuid
+                                        ? { ...a, [itemPopup?.type==="item_special_price"?"price":"discount"]: e.target.value }
+                                        : a
+                                    )
+                                  )
+                                }
+                                value={
+                                  value.find(
+                                    (a) => a.item_uuid === item.item_uuid
+                                  )[itemPopup?.type==="item_special_price"?"price":"discount"]
+                                }
+                                placeholder={itemPopup?.type==="item_special_price"?"price...":"discount..."}
+                                className="searchInput"
+                              />
+                            </td>
+                          ) : (
+                            <td />
+                          )}
+                        </tr>
+                      );
+                    }):companies.filter(
+                      (a) =>
+                        !filterCompany ||
+                        a?.company_title
+                          .toLocaleLowerCase()
+                          .includes(filterCompany.toLocaleLowerCase())
+                    ).map((item, index) => {
+                      return (
+                        <tr key={item.item_uuid}>
+                       
+                          <td>{item.company_title}</td>
+                      
+                          <td>
+                            <button
+                              type="button"
+                              className="noBgActionButton"
+                              style={{
+                                backgroundColor: value.filter(
+                                  (a) => a.company_uuid === item.company_uuid
+                                )?.length
+                                  ? "red"
+                                  : "var(--mainColor)",
+                                width: "150px",
+                                fontSize: "large",
+                              }}
+                              onClick={(event) =>
+                                setValue((prev) =>
+                                  value.filter(
+                                    (a) => a.company_uuid === item.company_uuid
+                                  )?.length
+                                    ? value.filter(
+                                        (a) => a.company_uuid !== item.company_uuid
+                                      )
+                                    : prev.length
+                                    ? [...prev, { company_uuid: item.company_uuid }]
+                                    : [{ company_uuid: item.company_uuid }]
+                                )
+                              }
+                            >
+                              {value.filter(
+                                (a) => a.company_uuid === item.company_uuid
+                              )?.length
+                                ? "Remove"
+                                : "Add"}
+                            </button>
+                          </td>
+                          {value.filter((a) => a.company_uuid === item.company_uuid)
+                            ?.length ? (
+                            <td>
+                              <input
+                                type="number"
+                                style={{ width: "100px" }}
+                                onChange={(e) =>
+                                  setValue((prev) =>
+                                    prev.map((a) =>
+                                      a.company_uuid === item.company_uuid
+                                        ? { ...a, discount: e.target.value }
+                                        : a
+                                    )
+                                  )
+                                }
+                                value={
+                                  value.find(
+                                    (a) => a.company_uuid === item.company_uuid
+                                  )?.discount
+                                }
+                                placeholder="Discount..."
+                                className="searchInput"
+                              />
+                            </td>
+                          ) : (
+                            <td />
+                          )}
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <button className="fieldEditButton" onClick={submitHandler}>
+              Save
+            </button>
+          </div>
+
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
