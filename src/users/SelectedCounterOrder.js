@@ -10,6 +10,7 @@ const SelectedCounterOrder = () => {
   const [filterCompany, setFilterCompany] = useState("");
   const [itemsCategory, setItemsCategory] = useState([]);
   const [companies, setCompanies] = useState([]);
+  const [popupForm,setPopupForm]=useState(false)
   const Navigate = useNavigate();
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
@@ -38,7 +39,7 @@ const SelectedCounterOrder = () => {
       setItems(prev=>prev.map(a=>({...a,item_price:counter.item_special_price.find(b=>b.item_uuid===a.item_uuid)?.price||a.item_price})))
   }
   , [counter]);
-  return (
+  return (<>
     <div>
       <nav className="user_nav">
         <div className="user_menubar">
@@ -100,7 +101,8 @@ const SelectedCounterOrder = () => {
                           )
                           ?.map((item) => {
                             return (
-                              <div key={item?.item_uuid} className="menu">
+                              <div key={item?.item_uuid} className="menu" onClick={e=>{e.stopPropagation(); 
+                                setItems(prev=>prev.map(a=>a.item_uuid===item.item_uuid?({...a,quantity:{...(a?.quantity||{box:0}),pcs:(a?.quantity?.pcs||0)+(item.one_pack|| 1)}}):a))}}>
                                 <div className="menuItemDetails">
                                   <h1 className="item-name">
                                     {item?.item_title}
@@ -113,50 +115,10 @@ const SelectedCounterOrder = () => {
                                   </div>
                                 </div>
                                 <div className="menuleft">
-                                  {/* {state?.find(
-                        (s) => s?.item_uuid === menu_item?.item_uuid
-                      ) ? (
-                        <button className={`addToCart activeAddCartBtn`}>
-                          <span
-                            className="fas fa-minus"
-                            onClick={(e) =>
-                              cartAmountDecreaseHandler(e, menu_item)
-                            }
-                          ></span>
-                          <span className="count">
-                            {
-                              state?.find(
-                                (s) => s?.item_uuid == menu_item?.item_uuid
-                              )?.quantity
-                            }
-                          </span>
-                          <span
-                            className="fas fa-plus"
-                            onClick={(e) =>
-                              cartAmountIncreaseHandler(e, menu_item)
-                            }
-                          ></span>
-                        </button>
-                      ) : ( */}
-                                  <button
-                                    className="addButton"
-                                    //   onClick={() => {
-                                    //     (menu_item?.menu_item_addons?.length > 0 ||
-                                    //       menu_item?.menu_item_multi?.length > 0) &&
-                                    //       setIsCustomMenuOpen(!isCustomMenuOpen);
-                                    //     menu_item?.menu_item_addons?.length > 0 ||
-                                    //       menu_item?.menu_item_multi?.length > 0
-                                    //       ? setCustomItem(menu_item)
-                                    //       : addToCart(menu_item, [], []);
-                                    //   }}
-                                  >
-                                    Add
-                                  </button>
-                                  {/* )} */}
-                                  {/* {(menu_item?.menu_item_addons?.length > 0 ||
-                        menu_item?.menu_item_multi?.length > 0) && (
-                          <h4>customizable</h4>
-                        )} */}
+                               
+                                  <input style={{width:"50px"}}
+                                   value={item?.quantity?`${item?.quantity.box} : ${item?.quantity.pcs}`:""} onClick={(e)=>{e.stopPropagation(); setPopupForm(item)}}/>
+                                  
                                 </div>
                               </div>
                             );
@@ -169,7 +131,106 @@ const SelectedCounterOrder = () => {
         </div>
       </div>
     </div>
+    {popupForm ? (
+        <NewUserForm
+          onSave={() => setPopupForm(false)}
+          setItems={setItems}
+     
+          popupInfo={popupForm}
+        />
+      ) : (
+        ""
+      )}
+    </>
   );
 };
 
 export default SelectedCounterOrder;
+
+function NewUserForm({ onSave, popupInfo,setItems  }) {
+    const [data, setdata] = useState({});
+    const [errMassage, setErrorMassage] = useState("");
+    useEffect(
+      () => ( setdata({box:popupInfo?.quantity?.box||0,pcs:popupInfo?.quantity?.pcs||0}) ),
+      []
+    );
+    const submitHandler = async (e) => {
+      e.preventDefault();
+      setItems(prev=>prev.map(a=>a.item_uuid===popupInfo.item_uuid?({...a,quantity:data}):a))
+      onSave()
+    };
+  
+    return (
+      <div className="overlay">
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "max-content" }}
+        >
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "20px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form" onSubmit={submitHandler}>
+               
+  
+                <div className="formGroup">
+                  <div className="row" style={{flexDirection:"row",alignItems:"flex-start"}}>
+                    <label className="selectLabel flex" style={{width:"100px"}}>
+                     Box
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.box}
+                        style={{width:"100px"}}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            box: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                      />
+                      {popupInfo.conversion||0}
+                    </label>
+                    <label className="selectLabel flex" style={{width:"100px"}}>
+                     Pcs
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.pcs}
+                        style={{width:"100px"}}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            pcs: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                      />
+                    </label>
+                  </div>
+                </div>
+                <i style={{ color: "red" }}>
+                  {errMassage === "" ? "" : "Error: " + errMassage}
+                </i>
+  
+                <button type="submit" className="submit">
+                  Save changes
+                </button>
+              </form>
+            </div>
+            <button onClick={onSave} className="closeButton">
+              x
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
