@@ -13,9 +13,9 @@ const ItemsPage = () => {
   const [itemCategories, setItemCategories] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
-  const [filterTitle,setFilterTitle]=useState("")
-  const [filterCategory,setFilterCategory]=useState("")
-  const [filterCompany,setFilterCompany]=useState("")
+  const [filterTitle, setFilterTitle] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterCompany, setFilterCompany] = useState("");
   const getItemCategories = async () => {
     const response = await axios({
       method: "get",
@@ -52,11 +52,35 @@ const ItemsPage = () => {
   useEffect(() => {
     getItemsData();
   }, [popupForm, itemCategories, companies]);
-  useEffect(()=>setFilterItemsData(itemsData.filter(a=>a.item_title)
-    .filter(a=>!filterTitle||a.item_title.toLocaleLowerCase().includes(filterTitle.toLocaleLowerCase()))
-    .filter(a=>!filterCompany||a.company_title.toLocaleLowerCase().includes(filterCompany.toLocaleLowerCase()))
-    .filter(a=>!filterCategory||a.category_title.toLocaleLowerCase().includes(filterCategory.toLocaleLowerCase()))
-  ),[itemsData,filterTitle,filterCategory,filterCompany])
+  useEffect(
+    () =>
+      setFilterItemsData(
+        itemsData
+          .filter((a) => a.item_title)
+          .filter(
+            (a) =>
+              !filterTitle ||
+              a.item_title
+                .toLocaleLowerCase()
+                .includes(filterTitle.toLocaleLowerCase())
+          )
+          .filter(
+            (a) =>
+              !filterCompany ||
+              a.company_title
+                .toLocaleLowerCase()
+                .includes(filterCompany.toLocaleLowerCase())
+          )
+          .filter(
+            (a) =>
+              !filterCategory ||
+              a.category_title
+                .toLocaleLowerCase()
+                .includes(filterCategory.toLocaleLowerCase())
+          )
+      ),
+    [itemsData, filterTitle, filterCategory, filterCompany]
+  );
   const getCompanies = async () => {
     const response = await axios({
       method: "get",
@@ -81,7 +105,16 @@ const ItemsPage = () => {
           <h2>Items</h2>
         </div>
         <div id="item-sales-top">
-          <div id="date-input-container" style={{ overflow: "visible",display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%" }}>
+          <div
+            id="date-input-container"
+            style={{
+              overflow: "visible",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
             <button
               className="item-sales-search"
               onClick={() => setPopupForm(true)}
@@ -89,27 +122,27 @@ const ItemsPage = () => {
               Add
             </button>
             <input
-        type="text"
-        onChange={(e) => setFilterTitle(e.target.value)}
-        value={filterTitle}
-        placeholder="Search Item Title..."
-        className="searchInput"
-      />
+              type="text"
+              onChange={(e) => setFilterTitle(e.target.value)}
+              value={filterTitle}
+              placeholder="Search Item Title..."
+              className="searchInput"
+            />
             <input
-        type="text"
-        onChange={(e) => setFilterCompany(e.target.value)}
-        value={filterCompany}
-        placeholder="Search Company..."
-        className="searchInput"
-      />
+              type="text"
+              onChange={(e) => setFilterCompany(e.target.value)}
+              value={filterCompany}
+              placeholder="Search Company..."
+              className="searchInput"
+            />
             <input
-        type="text"
-        onChange={(e) => setFilterCategory(e.target.value)}
-        value={filterCategory}
-        placeholder="Search Category..."
-        className="searchInput"
-      />
-      <div>Total Items: {filterItemsData.length}</div>
+              type="text"
+              onChange={(e) => setFilterCategory(e.target.value)}
+              value={filterCategory}
+              placeholder="Search Category..."
+              className="searchInput"
+            />
+            <div>Total Items: {filterItemsData.length}</div>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
@@ -139,8 +172,8 @@ const ItemsPage = () => {
 export default ItemsPage;
 function Table({ itemsDetails, setPopupForm }) {
   const [items, setItems] = useState("sort_order");
-  const [order,setOrder]=useState("")
-  
+  const [order, setOrder] = useState("");
+
   console.log(items);
   return (
     <table
@@ -155,20 +188,18 @@ function Table({ itemsDetails, setPopupForm }) {
               <span>Company Title</span>
               <div className="sort-buttons-container">
                 <button
-                  onClick={() =>{
-                    setItems("company_title")
-                    setOrder("asc")}
-                  }
+                  onClick={() => {
+                    setItems("company_title");
+                    setOrder("asc");
+                  }}
                 >
                   <ChevronUpIcon className="sort-up sort-button" />
                 </button>
                 <button
-                  onClick={() =>
-                    {setItems(
-                      "company_title"
-                    )
-                  setOrder("desc")}
-                  }
+                  onClick={() => {
+                    setItems("company_title");
+                    setOrder("desc");
+                  }}
                 >
                   <ChevronDownIcon className="sort-down sort-button" />
                 </button>
@@ -180,22 +211,18 @@ function Table({ itemsDetails, setPopupForm }) {
               <span>Category Title</span>
               <div className="sort-buttons-container">
                 <button
-                  onClick={() =>{
-                    setItems(
-                      "category_title")
-                       setOrder("asc")}
-                  }
+                  onClick={() => {
+                    setItems("category_title");
+                    setOrder("asc");
+                  }}
                 >
                   <ChevronUpIcon className="sort-up sort-button" />
                 </button>
                 <button
-                  onClick={() =>
-                    {setItems(
-                      "category_title"
-                      
-                    )
-                    setOrder("desc")}
-                  }
+                  onClick={() => {
+                    setItems("category_title");
+                    setOrder("desc");
+                  }}
                 >
                   <ChevronDownIcon className="sort-down sort-button" />
                 </button>
@@ -207,21 +234,18 @@ function Table({ itemsDetails, setPopupForm }) {
               <span>Item Title</span>
               <div className="sort-buttons-container">
                 <button
-                  onClick={() =>
-                    {setItems("item_title"
-                      
-                    ) 
-                    setOrder("asc")}
-                  }
+                  onClick={() => {
+                    setItems("item_title");
+                    setOrder("asc");
+                  }}
                 >
                   <ChevronUpIcon className="sort-up sort-button" />
                 </button>
                 <button
-                  onClick={() =>{
-                    setItems("item_title"
-                    )
-                    setOrder("desc")}
-                  }
+                  onClick={() => {
+                    setItems("item_title");
+                    setOrder("desc");
+                  }}
                 >
                   <ChevronDownIcon className="sort-down sort-button" />
                 </button>
@@ -233,18 +257,18 @@ function Table({ itemsDetails, setPopupForm }) {
               <span>MRP</span>
               <div className="sort-buttons-container">
                 <button
-                  onClick={() =>
-                   { setItems("mrp")
-                   setOrder("asc")}
-                  }
+                  onClick={() => {
+                    setItems("mrp");
+                    setOrder("asc");
+                  }}
                 >
                   <ChevronUpIcon className="sort-up sort-button" />
                 </button>
                 <button
-                  onClick={() =>
-                    {setItems("mrp")
-                    setOrder("desc")}
-                  }
+                  onClick={() => {
+                    setItems("mrp");
+                    setOrder("desc");
+                  }}
                 >
                   <ChevronDownIcon className="sort-down sort-button" />
                 </button>
@@ -256,23 +280,19 @@ function Table({ itemsDetails, setPopupForm }) {
               <span>Selling Price</span>
               <div className="sort-buttons-container">
                 <button
-                  onClick={() =>
-                    {setItems("item_price"
-                      
-                    )
-                  
-                    setOrder("asc")}
-                  }
+                  onClick={() => {
+                    setItems("item_price");
+
+                    setOrder("asc");
+                  }}
                 >
                   <ChevronUpIcon className="sort-up sort-button" />
                 </button>
                 <button
-                  onClick={() =>
-                   { 
-                     setItems("item_price")
-                     setOrder("desc")}
-                     
-                  }
+                  onClick={() => {
+                    setItems("item_price");
+                    setOrder("desc");
+                  }}
                 >
                   <ChevronDownIcon className="sort-down sort-button" />
                 </button>
@@ -284,20 +304,18 @@ function Table({ itemsDetails, setPopupForm }) {
               <span>Conversion</span>
               <div className="sort-buttons-container">
                 <button
-                  onClick={() =>
-                    {setItems("conversion"
-                    )
-                    setOrder("asc")}
-                  }
+                  onClick={() => {
+                    setItems("conversion");
+                    setOrder("asc");
+                  }}
                 >
                   <ChevronUpIcon className="sort-up sort-button" />
                 </button>
                 <button
-                  onClick={() =>
-                   { setItems("conversion"
-                    )
-                    setOrder("desc")}
-                  }
+                  onClick={() => {
+                    setItems("conversion");
+                    setOrder("desc");
+                  }}
                 >
                   <ChevronDownIcon className="sort-down sort-button" />
                 </button>
@@ -309,20 +327,41 @@ function Table({ itemsDetails, setPopupForm }) {
               <span>GST(%)</span>
               <div className="sort-buttons-container">
                 <button
-                  onClick={() =>
-                   { setItems("item_gst"
-                    )
-                    setOrder("asc")}
-                  }
+                  onClick={() => {
+                    setItems("item_gst");
+                    setOrder("asc");
+                  }}
                 >
                   <ChevronUpIcon className="sort-up sort-button" />
                 </button>
                 <button
-                  onClick={() =>
-                    {setItems("item_gst"
-                    )
-                    setOrder("desc")}
-                  }
+                  onClick={() => {
+                    setItems("item_gst");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>One Pack</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("one_pack");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("one_pack");
+                    setOrder("desc");
+                  }}
                 >
                   <ChevronDownIcon className="sort-down sort-button" />
                 </button>
@@ -334,11 +373,21 @@ function Table({ itemsDetails, setPopupForm }) {
       </thead>
       <tbody className="tbody">
         {itemsDetails
-        .sort((a, b) =>order==="asc"
-        ? typeof(a[items])==="string"?a[items].localeCompare(b[items]): a[items] - b[items]:
-        typeof(a[items])==="string"?b[items].localeCompare(a[items]): b[items] - a[items])
+          .sort((a, b) =>
+            order === "asc"
+              ? typeof a[items] === "string"
+                ? a[items].localeCompare(b[items])
+                : a[items] - b[items]
+              : typeof a[items] === "string"
+              ? b[items].localeCompare(a[items])
+              : b[items] - a[items]
+          )
           ?.map((item, i) => (
-            <tr key={Math.random()} style={{ height: "30px" }} onClick={()=>setPopupForm({type:"edit",data:item})}>
+            <tr
+              key={Math.random()}
+              style={{ height: "30px" }}
+              onClick={() => setPopupForm({ type: "edit", data: item })}
+            >
               <td>{i + 1}</td>
               <td colSpan={2}>{item.company_title}</td>
               <td colSpan={2}>{item.category_title}</td>
@@ -347,6 +396,7 @@ function Table({ itemsDetails, setPopupForm }) {
               <td colSpan={2}>{item.item_price}</td>
               <td colSpan={2}>{item.conversion}</td>
               <td colSpan={2}>{item.item_gst}</td>
+              <td colSpan={2}>{item.one_pack}</td>
               <td colSpan={2}>-</td>
             </tr>
           ))}
@@ -364,8 +414,14 @@ function NewUserForm({
   const [data, setdata] = useState({ company_uuid: companies[0].company_uuid });
 
   const [errMassage, setErrorMassage] = useState("");
-  console.log(popupInfo)
-useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
+  console.log(popupInfo);
+  useEffect(
+    () =>
+      popupInfo?.type === "edit"
+        ? setdata({ one_pack: "1", ...popupInfo.data })
+        : { one_pack: "1" },
+    []
+  );
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!data.item_title) {
@@ -377,7 +433,7 @@ useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
       const response = await axios({
         method: "put",
         url: "/items/putItem",
-        data:[data],
+        data: [data],
         headers: {
           "Content-Type": "application/json",
         },
@@ -421,7 +477,7 @@ useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
-                <h1>{popupInfo.type==="edit"?"Edit":"Add"} Items</h1>
+                <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Items</h1>
               </div>
 
               <div className="formGroup">
@@ -596,6 +652,25 @@ useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
                       maxLength={5}
                     />
                   </label>
+                  <label className="selectLabel">
+                    One Pack
+                    <input
+                      type="text"
+                      name="one_pack"
+                      className="numberInput"
+                      value={data?.one_pack}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          one_pack: e.target.value,
+                        })
+                      }
+                      maxLength={5}
+                    />
+                  </label>
+                </div>
+
+                <div className="row">
                   <label className="selectLabel">
                     Barcode
                     <textarea
