@@ -37,7 +37,7 @@ const NavLink = ({
         </>
         {/* Submenu popup*/}
         {menuList && (
-          <div className="menu">
+          <div className="menuItems">
             {menuList
               .filter((a) => a)
               .map((menu) => (
