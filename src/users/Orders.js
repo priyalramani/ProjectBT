@@ -1,10 +1,12 @@
 import { openDB } from "idb";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Orders = () => {
   const [counters, setCounters] = useState([]);
   const [counterFilter, setCounterFilter] = useState("");
   const [routes, setRoutes] = useState([]);
+ const Navigate=useNavigate()
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = await db
@@ -19,19 +21,7 @@ const Orders = () => {
     setRoutes(route);
   };
   useEffect(() => getIndexedDbData(), []);
-  console.log(
-    routes,
-    counters,
-    counters
-      .filter((a) => a.counter_title)
-      .filter(
-        (a) =>
-          !counterFilter ||
-          a.counter_title
-            .toLocaleLowerCase()
-            .includes(counterFilter.toLocaleLowerCase())
-      )
-  );
+
   return (
     <div
       className="item-sales-container orders-report-container"
@@ -74,7 +64,7 @@ const Orders = () => {
                   )
                   .map((item, index) => {
                     return (
-                      <tr key={item.counter_uuid} style={{ width: "100%" }}>
+                      <tr key={item.counter_uuid} style={{ width: "100%",cursor:"pointer" }} onClick={()=>Navigate("/users/orders/"+item.counter_uuid)}>
                         <td style={{ width: "50%" }}>{item.counter_title}</td>
                         <td style={{ width: "50%" }}>
                           {
