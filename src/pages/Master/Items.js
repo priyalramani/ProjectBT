@@ -418,8 +418,8 @@ function NewUserForm({
   useEffect(
     () =>
       popupInfo?.type === "edit"
-        ? setdata({ one_pack: "1", ...popupInfo.data })
-        : { one_pack: "1" },
+        ? setdata({ one_pack: "1",conversion:"1", ...popupInfo.data })
+        : { one_pack: "1",conversion:"1" },
     []
   );
   const submitHandler = async (e) => {
