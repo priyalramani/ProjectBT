@@ -36,14 +36,21 @@ const Main = () => {
 
   useEffect(() => {
     let user_uuid = localStorage.getItem("user_uuid");
-    
+
     if (!user_uuid) {
-        Navigate("/login");
+      Navigate("/login");
     }
-    let user_roles = JSON.parse(localStorage.getItem("user_role")||[]);
+    let user_roles = localStorage.getItem("user_role");
+    console.log("user_roles",typeof user_roles);
+    if (user_roles) {
+      user_roles = JSON.parse(user_roles);
+    }
+    console.log("user_roles", user_roles);
     setUserRole(user_roles || []);
+    return ()=>setUserRole([])
+    
   }, []);
-  console.log(typeof userRole)
+  console.log(typeof userRole);
   return (
     <div className="servicePage">
       <div className="servicesContainer">

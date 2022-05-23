@@ -2,8 +2,10 @@ import { AiOutlineArrowLeft, AiOutlineSearch } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import { openDB } from "idb";
 import { useNavigate, useParams } from "react-router-dom";
+import { AutoAdd } from "../functions";
 const SelectedCounterOrder = () => {
   const [items, setItems] = useState([]);
+  const [counters, setCounters] = useState([]);
   const [counter, setCounter] = useState({});
   const params = useParams();
   const [filterItemTitle, setFilterItemTile] = useState("");
@@ -29,12 +31,18 @@ const SelectedCounterOrder = () => {
     let route = await store.getAll();
     setItemsCategory(route);
     store = await db
-      .transaction("counters", "readwrite")
-      .objectStore("counters");
-    let counters = await store.getAll();
-    setCounter(counters.find((a) => params.counter_uuid === a.counter_uuid));
+      .transaction("counter", "readwrite")
+      .objectStore("counter");
+    let countersData = await store.getAll();
+    setCounters(countersData)
   };
-  useEffect(() => getIndexedDbData(), []);
+  useEffect(() => {
+    getIndexedDbData()
+  }, []);
+  useEffect(()=>{
+    if(counters.length)
+    setCounter(counters?.find((a) => params.counter_uuid === a.counter_uuid));
+  },[counters])
   useEffect(() => {
     setItems((prev) =>
       prev.map((a) => ({
@@ -182,6 +190,8 @@ const SelectedCounterOrder = () => {
       ) : (
         ""
       )}
+      {console.log(params,counters,counter)}
+       <button type="button" className="autoBtn" onClick={()=>AutoAdd(counter)}>Auto</button>
     </>
   );
 };

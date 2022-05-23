@@ -20,7 +20,10 @@ const Orders = () => {
     let route = await store.getAll();
     setRoutes(route);
   };
-  useEffect(() => getIndexedDbData(), []);
+  useEffect(() => {
+    getIndexedDbData()
+    return ()=>setCounters([])
+  }, []);
 
   return (
     <div
@@ -55,14 +58,14 @@ const Orders = () => {
               <tbody style={{ width: "100%" }}>
                 {counters
                   ?.filter((a) => a.counter_title)
-                  .filter(
+                  ?.filter(
                     (a) =>
                       !counterFilter ||
                       a.counter_title
                         .toLocaleLowerCase()
                         .includes(counterFilter.toLocaleLowerCase())
                   )
-                  .map((item, index) => {
+                  ?.map((item, index) => {
                     return (
                       <tr key={item.counter_uuid} style={{ width: "100%",cursor:"pointer" }} onClick={()=>Navigate("/users/orders/"+item.counter_uuid)}>
                         <td style={{ width: "50%" }}>{item.counter_title}</td>
@@ -82,6 +85,7 @@ const Orders = () => {
         ) : (
           ""
         )}
+       
       </div>
     </div>
   );
