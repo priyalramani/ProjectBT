@@ -22,8 +22,9 @@ import AutoIncreaseItem from './pages/others/AutoIncreaseItem';
 import Main from './users/Main';
 import LoginPage from './users/LoginPage';
 import Orders from './users/Orders';
+import SelectedCounterOrder from './users/SelectedCounterOrder';
 function App() {
-  axios.defaults.baseURL= "http://api.btgondia.anandradiohouse.com"
+  axios.defaults.baseURL= "http://localhost:9000"
   return (
     <div className="App">
      <Routes>
@@ -44,6 +45,7 @@ function App() {
        <Route path='/users' element={<Main/>}/>
        <Route path='/login' element={<LoginPage/>}/>
        <Route path='/users/orders' element={<Orders/>}/>
+       <Route path='/users/orders/:counter_uuid' element={<SelectedCounterOrder/>}/>
 
      </Routes>
     </div>
