@@ -419,6 +419,21 @@ function NewUserForm({ onSave, popupInfo, setUsers }) {
                       <option value="4">Delivery</option>
                     </select>
                   </label>
+                  <label className="selectLabel" style={{ height: "100px",flexDirection:"row",alignItems:"center" }}>
+                    Status
+                    <input
+                      type="radio"
+                      name="sort_order"
+                      className="numberInput"
+                      checked={+data?.status===1}
+                      onClick={(e) =>
+                        setdata(prev=>({
+                          ...data,
+                          status: +prev.status===1?0:1,
+                        }))
+                      }
+                    />
+                  </label>
                 </div>
               </div>
               <i style={{ color: "red" }}>
