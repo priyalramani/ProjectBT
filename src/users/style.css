@@ -670,6 +670,6 @@ h6 {
   color: #fff;
   position: fixed;
   bottom: 10px;
-  width: 100px;
+  /* width: 100px; */
   left: 50vw;
 }
