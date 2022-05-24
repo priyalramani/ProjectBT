@@ -26,10 +26,7 @@ const AutoIncreaseQuantity = () => {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success)
-      setItemsData(
-        response.data.result
-      );
+    if (response.data.success) setItemsData(response.data.result);
   };
   useEffect(() => {
     getItemsData();
@@ -63,9 +60,9 @@ const AutoIncreaseQuantity = () => {
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-          itemsDetails={itemsData}
-          setPopupForm={setPopupForm}
-          // setAddItems={setAddItems}
+            itemsDetails={itemsData}
+            setPopupForm={setPopupForm}
+            // setAddItems={setAddItems}
           />
         </div>
       </div>
@@ -155,18 +152,21 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
   );
 }
 
-function NewUserForm({ onSave,popupForm }) {
+function NewUserForm({ onSave, popupForm }) {
   const [objData, setObgData] = useState({
     type: "auto-increase-qty",
-    auto_title:"",
+    auto_title: "",
     items: [],
     item_groups: [],
     counters: [],
     counter_groups: [],
     qty_details: [{ ...DEFAULT, uuid: uuid() }],
   });
-  console.log(popupForm)
-  useEffect(popupForm?.type==="edit"?()=>setObgData(popupForm.data):()=>{},[])
+  console.log(popupForm);
+  useEffect(
+    popupForm?.type === "edit" ? () => setObgData(popupForm.data) : () => {},
+    []
+  );
   const [ui, setUi] = useState(1);
   const [items, setItems] = useState([]);
   const [company, setCompany] = useState([]);
@@ -297,30 +297,30 @@ function NewUserForm({ onSave,popupForm }) {
   }, []);
   const submitHandler = async (e) => {
     e.preventDefault();
-    console.log(objData)
-    if(popupForm?.type==="edit"){
+    console.log(objData);
+    if (popupForm?.type === "edit") {
       const response = await axios({
         method: "put",
         url: "/autoBill/UpdateAutoQty",
-        data:objData,
+        data: objData,
         headers: {
           "Content-Type": "application/json",
         },
       });
-      console.log(response)
+      console.log(response);
       if (response.data.success) {
         onSave();
       }
-    }else{
+    } else {
       const response = await axios({
         method: "post",
         url: "/autoBill/CreateAutoQty",
-        data:objData,
+        data: objData,
         headers: {
           "Content-Type": "application/json",
         },
       });
-      console.log(response)
+      console.log(response);
       if (response.data.success) {
         onSave();
       }
@@ -352,36 +352,41 @@ function NewUserForm({ onSave,popupForm }) {
                 }}
               >
                 <tbody>
-                  <tr><td colSpan={2} style={{width:"50vw",
-                display:"flex",
-                alignItems:"center",
-                justifyContent:"center",
-               }}> 
-                    <b>Auto Title : </b>
-                  <input
-                          className="searchInput"
-                          style={{
-                            border: "none",
-                            borderBottom: "2px solid black",
-                            borderRadius: "0px",
-                            
-                          }}
-                          placeholder="Title"
-                          value={objData.auto_title}
-                          onChange={(e) =>
-                            setObgData((prev) => ({
-                              ...prev,
-                              auto_title:e.target.value
-                            }))
-                          }
-                        />
-                    </td></tr>
+                  <tr>
+                    <td
+                      colSpan={2}
+                      style={{
+                        width: "50vw",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <b>Auto Title : </b>
+                      <input
+                        className="searchInput"
+                        style={{
+                          border: "none",
+                          borderBottom: "2px solid black",
+                          borderRadius: "0px",
+                        }}
+                        placeholder="Title"
+                        value={objData.auto_title}
+                        onChange={(e) =>
+                          setObgData((prev) => ({
+                            ...prev,
+                            auto_title: e.target.value,
+                          }))
+                        }
+                      />
+                    </td>
+                  </tr>
                   {objData.qty_details?.map((item, i) => (
                     <tr key={Math.random()} style={{ height: "30px" }}>
                       <td colSpan={4} style={{ textAlign: "center" }}>
                         If quantity of base item is
                         <input
-                        type="number"
+                          type="number"
                           className="searchInput"
                           style={{
                             border: "none",
@@ -401,7 +406,7 @@ function NewUserForm({ onSave,popupForm }) {
                             }))
                           }
                         />
-                        ,make it input
+                        , add / remove
                         <input
                           className="searchInput"
                           style={{
@@ -727,11 +732,12 @@ function NewUserForm({ onSave,popupForm }) {
                                 type="button"
                                 className="noBgActionButton"
                                 style={{
-                                  backgroundColor: objData.counter_groups.filter(
-                                    (a) => a === item.counter_group_uuid
-                                  )?.length
-                                    ? "red"
-                                    : "var(--mainColor)",
+                                  backgroundColor:
+                                    objData.counter_groups.filter(
+                                      (a) => a === item.counter_group_uuid
+                                    )?.length
+                                      ? "red"
+                                      : "var(--mainColor)",
                                   width: "150px",
                                   fontSize: "large",
                                 }}
@@ -922,7 +928,7 @@ function NewUserForm({ onSave,popupForm }) {
                 Back
               </button>
               <button className="fieldEditButton" onClick={submitHandler}>
-              {popupForm?.type==="edit"?"Update":"Save"}
+                {popupForm?.type === "edit" ? "Update" : "Save"}
               </button>
             </div>
           )}
