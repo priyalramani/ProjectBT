@@ -191,7 +191,11 @@ const SelectedCounterOrder = () => {
         ""
       )}
       {console.log(params,counters,counter)}
-       <button type="button" className="autoBtn" onClick={()=>AutoAdd(counter)}>Auto</button>
+       <button type="button" className="autoBtn" onClick={async()=>{
+
+         setItems(await AutoAdd(counter,items))
+         
+         }}>Auto</button>
     </>
   );
 };
