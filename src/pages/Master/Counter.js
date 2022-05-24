@@ -297,7 +297,7 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
   useEffect(
-    () => (popupInfo?.type === "edit" ? setdata(popupInfo.data) : {}),
+    popupInfo?.type === "edit" ? () =>{ setdata(popupInfo.data)} :() =>  {},
     []
   );
 
@@ -307,7 +307,7 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
       setErrorMassage("Please insert  Title");
       return;
     }
-    if (data.mobile.length !== 10) {
+    if (data?.mobile?.length !== 10) {
       setErrorMassage("Please enter 10 Numbers in Mobile");
       return;
     }
