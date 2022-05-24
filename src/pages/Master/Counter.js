@@ -91,12 +91,6 @@ const Counter = () => {
               width: "100%",
             }}
           >
-            <button
-              className="item-sales-search"
-              onClick={() => setPopupForm(true)}
-            >
-              Add
-            </button>
 
             <input
               type="text"
@@ -113,6 +107,12 @@ const Counter = () => {
               className="searchInput"
             />
             <div>Total Items: {filterCounter.length}</div>
+            <button
+              className="item-sales-search"
+              onClick={() => setPopupForm(true)}
+            >
+              Add
+            </button>
           </div>
         </div>
         <div className="table-container-user item-sales-container">

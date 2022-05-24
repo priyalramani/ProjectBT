@@ -45,12 +45,6 @@ const CounterGroup = () => {
               width: "100%",
             }}
           >
-            <button
-              className="item-sales-search"
-              onClick={() => setPopupForm(true)}
-            >
-              Add
-            </button>
 
             <input
               type="text"
@@ -74,6 +68,12 @@ const CounterGroup = () => {
                   ).length
               }
             </div>
+            <button
+              className="item-sales-search"
+              onClick={() => setPopupForm(true)}
+            >
+              Add
+            </button>
           </div>
         </div>
         <div className="table-container-user item-sales-container">

@@ -46,7 +46,7 @@ const AutoIncreaseQuantity = () => {
               overflow: "visible",
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
+              justifyContent: "flex-end",
               width: "100%",
             }}
           >
