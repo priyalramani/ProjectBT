@@ -21,31 +21,31 @@ const Sidebar = () => {
                   menuList={[
                     {
                       name: "Items",
-                      link: "/items",
+                      link: "/admin/items",
                     },
                     {
                       name: "Categories",
-                      link: "/itemCategories",
+                      link: "/admin/itemCategories",
                     },
                     {
                       name: "Counter",
-                      link: "/counter",
+                      link: "/admin/counter",
                     },
                     {
                       name: "Routes",
-                      link: "/routes",
+                      link: "/admin/routes",
                     },
                     {
                       name: "Counter Group",
-                      link: "/counterGroup",
+                      link: "/admin/counterGroup",
                     },
                     {
                       name: "Item Group",
-                      link: "/itemGroup",
+                      link: "/admin/itemGroup",
                     },
                     {
                       name: "Users",
-                      link: "/adminUsers",
+                      link: "/admin/adminUsers",
                     },
 
                   ]}
@@ -59,11 +59,11 @@ const Sidebar = () => {
                   menuList={[
                     {
                       name: "Auto Increase Quantity",
-                      link: "/autoIncreaseQty",
+                      link: "/admin/autoIncreaseQty",
                     },
                     {
                       name: "Auto Increase Item",
-                      link: "/autoIncreaseItem",
+                      link: "/admin/autoIncreaseItem",
                     },
                     
                   ]}

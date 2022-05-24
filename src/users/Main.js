@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import "./style.css";
 import { Link, useLocation } from "react-router-dom";
 
@@ -41,38 +41,47 @@ const Main = () => {
       Navigate("/login");
     }
     let user_roles = localStorage.getItem("user_role");
-    console.log("user_roles",typeof user_roles);
+    console.log("user_roles", typeof user_roles);
     if (user_roles) {
       user_roles = JSON.parse(user_roles);
     }
     console.log("user_roles", user_roles);
     setUserRole(user_roles || []);
-    return ()=>setUserRole([])
-    
+    return () => setUserRole([]);
   }, []);
   console.log(typeof userRole);
   return (
-    <div className="servicePage">
-      <div className="servicesContainer">
-        {userRole?.map((data, i) => (
-          <Link
-            key={i}
-            to={pathname + rolesArray.find((a) => +a.type === +data)?.link}
-            onClick={() => {
-              //   props.setPath(pathname);
-              //   outletDetailsDispatch({
-              //     type: Actions.SHOW_SIDE_MENU,
-              //     payload: false,
-              //   });
-            }}
-          >
-            <div className="service">
-              <span>{rolesArray.find((a) => +a.type === +data)?.name}</span>
+    
+          <div className="servicePage">
+            <div className="servicesContainer">
+              {userRole?.map((data, i) => (
+                <Link
+                  key={i}
+                  to={
+                    pathname + rolesArray.find((a) => +a.type === +data)?.link
+                  }
+                  onClick={() => {
+                    //   props.setPath(pathname);
+                    //   outletDetailsDispatch({
+                    //     type: Actions.SHOW_SIDE_MENU,
+                    //     payload: false,
+                    //   });
+                  }}
+                >
+                  <div className="service">
+                    <span>
+                      {rolesArray.find((a) => +a.type === +data)?.name}
+                    </span>
+                  </div>
+                </Link>
+              ))}
             </div>
-          </Link>
-        ))}
-      </div>
-    </div>
+          </div>
+        
+ 
+
+      
+
   );
 };
 

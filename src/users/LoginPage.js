@@ -1,16 +1,29 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { openDB } from "idb";
+const id = "240522";
 const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState({
     login_username: "",
     login_password: "",
   });
+  const location = useLocation();
   const Navigate = useNavigate();
   const loginHandler = async () => {
     setIsLoading(true);
+    if (location.pathname.includes("adminLogin")) {
+      if (userData.login_username === id) {
+        localStorage.setItem("AdminId", id);
+        Navigate("/admin");
+      } else {
+        alert("Wrong Id");
+      }
+      setIsLoading(false);
+     
+      return;
+    }
     const response = await axios({
       method: "post",
       url: "/users/login",
@@ -73,8 +86,8 @@ const LoginPage = () => {
           await store.put({ ...item, IDENTIFIER });
         }
       }
-      setIsLoading(false)
-      Navigate("/users")
+      setIsLoading(false);
+      Navigate("/users");
     }
   };
   return (
@@ -85,10 +98,12 @@ const LoginPage = () => {
       {/* <div className="foodDoAdmin"><img src={foodDoAdmin} alt="" /></div> */}
 
       <div className="form">
-        <h1>Sign In</h1>
+        <h1>
+          {location.pathname.includes("adminLogin") ? "Admin Login" : "Sign In"}
+        </h1>
         <div className="input-container">
           <label htmlFor="username" className="form-label">
-            Username
+            {location.pathname.includes("adminLogin") ? "Admin Id" : "Username"}
           </label>
           <input
             type="username"
@@ -106,28 +121,31 @@ const LoginPage = () => {
             required
           />
         </div>
-
-        <div className="input-container">
-          <label htmlFor="password" className="form-label">
-            Password
-          </label>
-          <input
-            type="password"
-            className="form-input"
-            name="password"
-            id="password"
-            value={userData.login_password}
-            onChange={(e) =>
-              setUserData((prev) => ({
-                ...prev,
-                login_password: e.target.value,
-              }))
-            }
-            minLength="5"
-            autoComplete="off"
-            required
-          />
-        </div>
+        {!location.pathname.includes("adminLogin") ? (
+          <div className="input-container">
+            <label htmlFor="password" className="form-label">
+              Password
+            </label>
+            <input
+              type="password"
+              className="form-input"
+              name="password"
+              id="password"
+              value={userData.login_password}
+              onChange={(e) =>
+                setUserData((prev) => ({
+                  ...prev,
+                  login_password: e.target.value,
+                }))
+              }
+              minLength="5"
+              autoComplete="off"
+              required
+            />
+          </div>
+        ) : (
+          ""
+        )}
 
         {!isLoading ? (
           <button className="submit-btn" onClick={loginHandler}>
