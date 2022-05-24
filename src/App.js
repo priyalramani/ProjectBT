@@ -29,7 +29,7 @@ function App() {
     <div className="App">
      <Routes>
        {/* admin Routes */}
-       <Route path='/'>
+
        <Route path='admin' element={<MainAdmin/>}/>
        <Route path='routes' element={<RoutesPage/>}/>
        <Route path='itemCategories' element={<ItemCategories/>}/>
@@ -47,7 +47,7 @@ function App() {
        <Route path='/login' element={<LoginPage/>}/>
        <Route path='/users/orders' element={<Orders/>}/>
        <Route path='/users/orders/:counter_uuid' element={<SelectedCounterOrder/>}/>
-       </Route>
+
      </Routes>
     </div>
   );
