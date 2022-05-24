@@ -24,7 +24,7 @@ import LoginPage from './users/LoginPage';
 import Orders from './users/Orders';
 import SelectedCounterOrder from './users/SelectedCounterOrder';
 function App() {
-  axios.defaults.baseURL= "http://localhost:9000"
+  axios.defaults.baseURL= "http://15.207.39.69:9000"
   return (
     <div className="App">
      <Routes>
