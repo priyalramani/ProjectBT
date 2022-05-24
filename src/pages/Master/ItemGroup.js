@@ -2,10 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import SetupModal from "../../components/setupModel/SetupModel";
-import {
-  ChevronUpIcon,
-  ChevronDownIcon,
-} from "@heroicons/react/solid";
+import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import axios from "axios";
 const ItemGroup = () => {
   const [itemGroup, setItemGroup] = useState([]);
@@ -197,7 +194,11 @@ function NewUserForm({ onSave, popupInfo, setRoutesData }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
   useEffect(
-    () => (popupInfo.type === "edit" ? setdata(popupInfo.data) : {}),
+    popupInfo.type === "edit"
+      ? () => {
+          setdata(popupInfo.data);
+        }
+      : () => {},
     []
   );
   const submitHandler = async (e) => {

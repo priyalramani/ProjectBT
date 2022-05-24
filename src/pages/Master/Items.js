@@ -416,10 +416,13 @@ function NewUserForm({
   const [errMassage, setErrorMassage] = useState("");
   console.log(popupInfo);
   useEffect(
-    () =>
-      popupInfo?.type === "edit"
-        ? setdata({ one_pack: "1",conversion:"1", ...popupInfo.data })
-        : { one_pack: "1",conversion:"1" },
+    popupInfo?.type === "edit"
+      ? () => {
+          setdata({ one_pack: "1", conversion: "1", ...popupInfo.data });
+        }
+      : () => {
+          setdata({ one_pack: "1", conversion: "1" });
+        },
     []
   );
   const submitHandler = async (e) => {

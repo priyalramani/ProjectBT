@@ -219,7 +219,7 @@ function NewUserForm({ onSave, popupInfo, setRoutesData, companies }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
   useEffect(
-    popupInfo?.type === "edit" ? () => setdata(popupInfo.data) : () => {},
+    popupInfo?.type === "edit" ? () => {setdata(popupInfo.data)} : () => {},
     []
   );
 

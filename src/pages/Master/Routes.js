@@ -160,7 +160,7 @@ function NewUserForm({ onSave, popupInfo, setRoutesData }) {
   const [data, setdata] = useState({});
 
   const [errMassage, setErrorMassage] = useState("");
-useEffect(()=>popupInfo?.type==="edit"?setdata(popupInfo.data):{},[])
+useEffect(popupInfo?.type==="edit"?()=>{setdata(popupInfo.data)}:()=>{},[])
 
   const submitHandler = async (e) => {
     e.preventDefault();

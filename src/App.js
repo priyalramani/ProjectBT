@@ -29,16 +29,17 @@ function App() {
     <div className="App">
      <Routes>
        {/* admin Routes */}
-       <Route path='/admin' element={<MainAdmin/>}/>
-       <Route path='/routes' element={<RoutesPage/>}/>
-       <Route path='/itemCategories' element={<ItemCategories/>}/>
-       <Route path='/counterGroup' element={<CounterGroup/>}/>
-       <Route path='/itemGroup' element={<ItemGroup/>}/>
-       <Route path='/counter' element={<Counter/>}/>
-       <Route path='/adminUsers' element={<Users/>}/>
-       <Route path='/items' element={<ItemsPage/>}/>
-       <Route path='/autoIncreaseQty' element={<AutoIncreaseQuantity/>}/>
-       <Route path='/autoIncreaseItem' element={<AutoIncreaseItem/>}/>
+       <Route path='/'>
+       <Route path='admin' element={<MainAdmin/>}/>
+       <Route path='routes' element={<RoutesPage/>}/>
+       <Route path='itemCategories' element={<ItemCategories/>}/>
+       <Route path='counterGroup' element={<CounterGroup/>}/>
+       <Route path='itemGroup' element={<ItemGroup/>}/>
+       <Route path='counter' element={<Counter/>}/>
+       <Route path='adminUsers' element={<Users/>}/>
+       <Route path='items' element={<ItemsPage/>}/>
+       <Route path='autoIncreaseQty' element={<AutoIncreaseQuantity/>}/>
+       <Route path='autoIncreaseItem' element={<AutoIncreaseItem/>}/>
        <Route path="*" element={<Navigate replace to="/admin" />} />
 
        {/* users routes */}
@@ -46,7 +47,7 @@ function App() {
        <Route path='/login' element={<LoginPage/>}/>
        <Route path='/users/orders' element={<Orders/>}/>
        <Route path='/users/orders/:counter_uuid' element={<SelectedCounterOrder/>}/>
-
+       </Route>
      </Routes>
     </div>
   );

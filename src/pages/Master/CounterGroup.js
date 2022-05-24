@@ -3,10 +3,7 @@ import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 
 import SetupModal from "../../components/setupModel/SetupModel";
-import {
-  ChevronUpIcon,
-  ChevronDownIcon,
-} from "@heroicons/react/solid";
+import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import axios from "axios";
 const CounterGroup = () => {
   const [counterGroup, setCounterGroup] = useState([]);
@@ -63,19 +60,26 @@ const CounterGroup = () => {
               className="searchInput"
             />
 
-            <div>Total Items: {counterGroup.filter((a) => a.counter_group_title)
-              .filter(
-                (a) =>
-                  !filterCounterGroupTitle ||
-                  a.counter_group_title
-                    .toLocaleLowerCase()
-                    .includes(filterCounterGroupTitle.toLocaleLowerCase())
-              ).length}</div>
+            <div>
+              Total Items:{" "}
+              {
+                counterGroup
+                  .filter((a) => a.counter_group_title)
+                  .filter(
+                    (a) =>
+                      !filterCounterGroupTitle ||
+                      a.counter_group_title
+                        .toLocaleLowerCase()
+                        .includes(filterCounterGroupTitle.toLocaleLowerCase())
+                  ).length
+              }
+            </div>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-            itemsDetails={counterGroup.filter((a) => a.counter_group_title)
+            itemsDetails={counterGroup
+              .filter((a) => a.counter_group_title)
               .filter(
                 (a) =>
                   !filterCounterGroupTitle ||
@@ -194,7 +198,11 @@ function NewUserForm({ onSave, popupInfo, setRoutesData }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
   useEffect(
-    () => (popupInfo?.type === "edit" ? setdata(popupInfo.data) : {}),
+    popupInfo?.type === "edit"
+      ? () => {
+          setdata(popupInfo.data);
+        }
+      : () => {},
     []
   );
 

@@ -464,7 +464,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
   const [filterTitle, setFilterTitle] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
-  useEffect(()=>setValue(itemPopup.item[itemPopup.type]?itemPopup.item[itemPopup.type]:[]),[])
+  useEffect(()=>{setValue(itemPopup.item[itemPopup.type]?itemPopup.item[itemPopup.type]:[])},[])
   console.log(value)
   const getItemCategories = async () => {
     const response = await axios({
