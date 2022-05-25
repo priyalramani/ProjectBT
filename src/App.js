@@ -22,11 +22,24 @@ import AutoIncreaseItem from "./pages/others/AutoIncreaseItem";
 import Main from "./users/Main";
 import LoginPage from "./users/LoginPage";
 import { useEffect } from "react";
+
 const id = "240522";
 function App() {
-
-  
   axios.defaults.baseURL = "http://localhost:9000";
+  useEffect(() => {
+    if (
+      localStorage.getItem("user_uuid") &&
+      localStorage.getItem("user_uuid") !== id &&
+      !window.location.pathname.includes("users")
+    ) {
+      window.location.assign("/users");
+    } else if (
+      localStorage.getItem("user_uuid") === id &&
+      !window.location.pathname.includes("admin")
+    ) {
+      window.location.assign("/admin");
+    }
+  });
   return (
     <div className="App">
       <Router>
