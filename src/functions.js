@@ -211,6 +211,7 @@ export const Billing = async (counter, items, others) => {
   let newPriceItems = [];
 
   for (let item of items) {
+    let charges_discount = [];
     let price =
       counter.item_special_price.find((a) => a.item_uuid === item.item_uuid)
         ?.price || 0;
@@ -224,6 +225,10 @@ export const Billing = async (counter, items, others) => {
     if (price) item = { ...item, item_price: price };
 
     if (special_discount_percentage) {
+      charges_discount.push({
+        title: "Special Discount",
+        value: special_discount_percentage,
+      });
       item = {
         ...item,
         special_discount_percentage,
@@ -231,7 +236,11 @@ export const Billing = async (counter, items, others) => {
           item.item_price * ((100 - special_discount_percentage) / 100),
       };
     }
-    if (company_discount_percentage)
+    if (company_discount_percentage) {
+      charges_discount.push({
+        title: "Company Discount",
+        value: company_discount_percentage,
+      });
       item = {
         ...item,
         company_discount_percentage,
@@ -239,8 +248,11 @@ export const Billing = async (counter, items, others) => {
           ? item.item_total * ((100 - company_discount_percentage) / 100)
           : item.item_price * ((100 - company_discount_percentage) / 100),
       };
+    }
+
     if (!special_discount_percentage && !company_discount_percentage)
       item = { ...item, item_total: item.item_price };
+    item = { ...item, charges_discount };
     newPriceItems.push(item);
   }
 
