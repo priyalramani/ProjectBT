@@ -100,7 +100,7 @@ const SelectedCounterOrder = () => {
               onClick={() => (cartPage ? Navigate(-1) : setCartPage(false))}
             />
           </div>
-
+{cartPage?<h1>Cart</h1>:""}
           <div className="user_searchbar flex">
             <AiOutlineSearch className="user_search_icon" />
             <input
