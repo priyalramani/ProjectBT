@@ -194,7 +194,7 @@ const SelectedCounterOrder = () => {
         className="autoBtn"
         style={{left:"40vw"}}
         onClick={async () => {
-console.log(await Billing(counter,items))
+console.log(await Billing(counter,items,filterCompany))
         }}
       >
         Bill
