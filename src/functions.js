@@ -191,7 +191,7 @@ export const AutoAddItem = async (counter, items) => {
   }
   return items;
 };
-export const Billing = async (counter, items, company_uuid) => {
+export const Billing = async (counter, items) => {
   let newPriceItems = [];
   for (let item of items) {
     let price =
@@ -201,7 +201,7 @@ export const Billing = async (counter, items, company_uuid) => {
       counter.item_special_discount.find((a) => a.item_uuid === item.item_uuid)
         ?.discount || 0;
     let company_discount_percentage =
-      counter.company_discount.find((a) => a.company_uuid === company_uuid)
+      counter.company_discount.find((a) => a.company_uuid === item.company_uuid)
         ?.discount || 0;
     if (price) item = { ...item, item_price: price };
 
