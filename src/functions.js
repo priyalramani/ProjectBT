@@ -1,7 +1,6 @@
 import { openDB } from "idb";
 
 export const AutoAdd = async (counter, items) => {
-  
   let eligibleItems = items;
   const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
   let tx = await db
@@ -22,41 +21,41 @@ export const AutoAdd = async (counter, items) => {
 
   for (let autobill of data) {
     eligibleItems = eligibleItems.map((a) => {
-      if( autobill.items.length === 0 ||
+      if (
+        autobill.items.length === 0 ||
         autobill.items.filter((b) => b === a.item_uuid).length ||
         autobill.item_groups.filter(
           (b) => a.item_group_uuid.filter((c) => c === b).length
-        ).length){
-
-    
-      let base_qty_arr = autobill.qty_details.filter(
-        (b) => b.unit === "b" && +b.base_qty <= +a.box
-      );
-      base_qty_arr =
-        base_qty_arr.length > 1
-          ? base_qty_arr.reduce((a, b) => Math.max(a.base_qty, b.base_qty))
-          : base_qty_arr.length === 1
-          ? base_qty_arr[0]
-          : {};
-      let pice_qty_arr = autobill.qty_details.filter(
-        (b) => b.unit === "p" && +b.base_qty <= +a.pcs
-      );
-      pice_qty_arr =
-        pice_qty_arr.length > 1
-          ? pice_qty_arr.reduce((a, b) => Math.max(a.base_qty, b.base_qty))
-          : pice_qty_arr.length === 1
-          ? pice_qty_arr[0]
-          : {};
-      pice_qty_arr = base_qty_arr ? {} : pice_qty_arr;
-      return {
-        ...a,
-        box: +a.box + (base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0),
-        pcs: +a.pcs + (pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0),
-      };}else return a
+        ).length
+      ) {
+        let base_qty_arr = autobill.qty_details.filter(
+          (b) => b.unit === "b" && +b.base_qty <= +a.box
+        );
+        base_qty_arr =
+          base_qty_arr.length > 1
+            ? base_qty_arr.reduce((a, b) => Math.max(a.base_qty, b.base_qty))
+            : base_qty_arr.length === 1
+            ? base_qty_arr[0]
+            : {};
+        let pice_qty_arr = autobill.qty_details.filter(
+          (b) => b.unit === "p" && +b.base_qty <= +a.pcs
+        );
+        pice_qty_arr =
+          pice_qty_arr.length > 1
+            ? pice_qty_arr.reduce((a, b) => Math.max(a.base_qty, b.base_qty))
+            : pice_qty_arr.length === 1
+            ? pice_qty_arr[0]
+            : {};
+        pice_qty_arr = base_qty_arr ? {} : pice_qty_arr;
+        return {
+          ...a,
+          box: +a.box + (base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0),
+          pcs: +a.pcs + (pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0),
+        };
+      } else return a;
     });
-  
   }
-   data = autobills.filter(
+  data = autobills.filter(
     (a) =>
       a.type === "auto-item-add" &&
       (a.counters.filter((b) => b === counter.counter_uuid) ||
@@ -175,12 +174,12 @@ export const AutoAdd = async (counter, items) => {
         : [];
     }
   }
-  console.log(eligibleItems)
+  console.log(eligibleItems);
 
-    return ({counter_uuid:counter.counter_uuid,items: eligibleItems,});
+  return { counter_uuid: counter.counter_uuid, items: eligibleItems };
 };
 
-export const Billing = async (counter, items,others) => {
+export const Billing = async (counter, items, others) => {
   let newPriceItems = [];
   for (let item of items) {
     let price =
@@ -192,14 +191,29 @@ export const Billing = async (counter, items,others) => {
     let company_discount_percentage =
       counter.company_discount.find((a) => a.company_uuid === item.company_uuid)
         ?.discount || 0;
+    item = { ...item, qty: +item.conversion * +item.box + item.pcs };
     if (price) item = { ...item, item_price: price };
 
-    if (special_discount_percentage)
-      item = { ...item, special_discount_percentage };
+    if (special_discount_percentage) {
+      item = {
+        ...item,
+        special_discount_percentage,
+        item_total:
+          item.item_price * ((100 - special_discount_percentage) / 100),
+      };
+    }
     if (company_discount_percentage)
-      item = { ...item, company_discount_percentage };
+      item = {
+        ...item,
+        company_discount_percentage,
+        item_total: item.item_total
+          ? item.item_total * ((100 - company_discount_percentage) / 100)
+          : item.item_price * ((100 - company_discount_percentage) / 100),
+      };
+    if (!special_discount_percentage && !company_discount_percentage)
+      item = { ...item, item_total: item.item_price };
     newPriceItems.push(item);
   }
-  
-  return ({counter_uuid:counter.counter_uuid,items: newPriceItems,others});
+
+  return { counter_uuid: counter.counter_uuid, items: newPriceItems, others };
 };
