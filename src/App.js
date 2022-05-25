@@ -1,10 +1,10 @@
 import "./App.css";
 import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
   Navigate,
   useNavigate,
-  Route,
-  Routes,
-  BrowserRouter as Router,
 } from "react-router-dom";
 import MainAdmin from "./pages/MainAdmin/MainAdmin";
 import RoutesPage from "./pages/Master/Routes";
@@ -25,7 +25,10 @@ import { useEffect } from "react";
 
 const id = "240522";
 function App() {
-  axios.defaults.baseURL = "http://15.207.39.69:9000";
+  axios.defaults.baseURL = "https://btgondia.com";
+  // axios.defaults.baseURL = "http://15.207.39.69:9000";
+  // axios.defaults.baseURL = "http://localhost:9000";
+
   useEffect(() => {
     if (
       localStorage.getItem("user_uuid") &&
@@ -40,69 +43,42 @@ function App() {
       window.location.assign("/admin");
     }
   });
+
   return (
     <div className="App">
       <Router>
         <Routes>
+          <Route path="/login" element={<LoginPage />} />
           {localStorage.getItem("user_uuid") ? (
             <>
               {localStorage.getItem("user_uuid") === id ? (
                 <>
+                  {/* admin Routes */}
                   <Route path="/admin" element={<MainAdmin />} />
                   <Route path="/admin/routes" element={<RoutesPage />} />
-                  <Route
-                    path="/admin/itemCategories"
-                    element={<ItemCategories />}
-                  />
-                  <Route
-                    path="/admin/counterGroup"
-                    element={<CounterGroup />}
-                  />
+                  <Route path="/admin/itemCategories" element={<ItemCategories />} />
+                  <Route path="/admin/counterGroup" element={<CounterGroup />} />
                   <Route path="/admin/itemGroup" element={<ItemGroup />} />
                   <Route path="/admin/counter" element={<Counter />} />
                   <Route path="/admin/adminUsers" element={<Users />} />
                   <Route path="/admin/items" element={<ItemsPage />} />
-                  <Route
-                    path="/admin/autoIncreaseQty"
-                    element={<AutoIncreaseQuantity />}
-                  />
-                  <Route
-                    path="/admin/autoIncreaseItem"
-                    element={<AutoIncreaseItem />}
-                  />
+                  <Route path="/admin/autoIncreaseQty" element={<AutoIncreaseQuantity />} />
+                  <Route path="/admin/autoIncreaseItem" element={<AutoIncreaseItem />} />
+                  <Route path="*" element={<Navigate replace to={"/admin"} />} />
                 </>
               ) : (
-                ""
+                <>
+                  {/* users routes */}
+                  <Route path="/users" element={<Main />} />
+                  <Route path="/users/orders" element={<Orders />} />
+                  <Route path="/users/orders/:counter_uuid" element={<SelectedCounterOrder />} />
+                  <Route path="*" element={<Navigate replace to={"/users"} />} />
+                </>
               )}
-              {/* users routes */}
-              <Route path="/users" element={<Main />} />
-              <Route path="/users/orders" element={<Orders />} />
-              <Route
-                path="/users/orders/:counter_uuid"
-                element={<SelectedCounterOrder />}
-              />
             </>
-          ) : (
-            ""
-          )}
-          {/* admin Routes */}
-
-          <Route
-            path="*"
-            element={
-              <Navigate
-                replace
-                to={
-                  localStorage.getItem("user_uuid")
-                    ? localStorage.getItem("user_uuid") === id
-                      ? "/admin"
-                      : "/users"
-                    : "/login"
-                }
-              />
-            }
-          />
-          <Route path="/login" element={<LoginPage />} />
+          ) : !window.location.pathname.includes('/login') ? (
+            <Route path="*" element={<Navigate replace to={"/login"} />} />
+          ) : ''}
         </Routes>
       </Router>
     </div>
