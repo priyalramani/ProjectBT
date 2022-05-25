@@ -2,6 +2,7 @@ import { openDB } from "idb";
 
 export const AutoAdd = async (counter, items) => {
   let eligibleItems = items;
+  let auto_added = [];
   const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
   let tx = await db
     .transaction("autobill", "readwrite")
@@ -47,6 +48,12 @@ export const AutoAdd = async (counter, items) => {
             ? pice_qty_arr[0]
             : {};
         pice_qty_arr = base_qty_arr ? {} : pice_qty_arr;
+        if (base_qty_arr || pice_qty_arr)
+          auto_added.push({
+            item_uuid: a.item_uuid,
+            box: base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0,
+            pcs: pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0,
+          });
         return {
           ...a,
           box: +a.box + (base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0),
@@ -115,11 +122,19 @@ export const AutoAdd = async (counter, items) => {
           base_qty_arr?.add_items.filter((b) => b.item_uuid === a.item_uuid)
             .length
       );
-      dataItems = dataItems.map((a) => ({
-        ...a,
-        box: base_qty_arr?.add_items.filter((b) => b.item_uuid === a.item_uuid)
-          .add_qty,
-      }));
+      dataItems = dataItems.map((a) => {
+        if (base_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)) {
+          let data = base_qty_arr?.add_items.find(
+            (b) => b.item_uuid === a.item_uuid
+          );
+          auto_added.push({ ...data, q: data.add_qty || 0 });
+        }
+        return {
+          ...a,
+          box: base_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)
+            .add_qty,
+        };
+      });
       let nonFiltered = eligibleItems.filter(
         (a) => dataItems.filter((b) => a.item_uuid !== b.item_uuid).length
       );
@@ -127,12 +142,14 @@ export const AutoAdd = async (counter, items) => {
         .filter(
           (a) => dataItems.filter((b) => a.item_uuid === b.item_uuid).length
         )
-        .map((a) => ({
-          ...a,
-          box:
-            +(a?.box || 0) +
-            (dataItems.find((b) => a.item_uuid !== b.item_uuid)?.box || 0),
-        }));
+        .map((a) => {
+          return {
+            ...a,
+            box:
+              +(a?.box || 0) +
+              (dataItems.find((b) => a.item_uuid !== b.item_uuid)?.box || 0),
+          };
+        });
       items = nonFiltered.length
         ? Filtered.length
           ? [...nonFiltered, ...Filtered]
@@ -147,11 +164,19 @@ export const AutoAdd = async (counter, items) => {
           pice_qty_arr?.add_items.filter((b) => b.item_uuid === a.item_uuid)
             .length
       );
-      dataItems = dataItems.map((a) => ({
-        ...a,
-        pcs: pice_qty_arr?.add_items.filter((b) => b.item_uuid === a.item_uuid)
-          .add_qty,
-      }));
+      dataItems = dataItems.map((a) => {
+        if (pice_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)) {
+          let data = pice_qty_arr?.add_items.find(
+            (b) => b.item_uuid === a.item_uuid
+          );
+          auto_added.push({ ...data, p: data.add_qty || 0 });
+        }
+        return {
+          ...a,
+          pcs: pice_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)
+            .add_qty,
+        };
+      });
       let nonFiltered = eligibleItems.filter(
         (a) => dataItems.filter((b) => a.item_uuid !== b.item_uuid).length
       );
@@ -174,13 +199,17 @@ export const AutoAdd = async (counter, items) => {
         : [];
     }
   }
-  console.log(eligibleItems);
 
-  return { counter_uuid: counter.counter_uuid, items: eligibleItems };
+  return {
+    counter_uuid: counter.counter_uuid,
+    auto_added,
+    items: eligibleItems,
+  };
 };
 
 export const Billing = async (counter, items, others) => {
   let newPriceItems = [];
+
   for (let item of items) {
     let price =
       counter.item_special_price.find((a) => a.item_uuid === item.item_uuid)
