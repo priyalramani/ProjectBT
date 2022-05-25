@@ -1,13 +1,15 @@
 import { openDB } from "idb";
 
-export const AutoAddQty = async (counter, items) => {
+export const AutoAdd = async (counter, items) => {
+  
   let eligibleItems = items;
   const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
   let tx = await db
     .transaction("autobill", "readwrite")
     .objectStore("autobill");
   let autobills = await tx.getAll();
-
+  let store = await db.transaction("items", "readwrite").objectStore("items");
+  let dbItems = await store.getAll();
   let data = autobills.filter(
     (a) =>
       a.type === "auto-increase-qty" &&
@@ -19,15 +21,14 @@ export const AutoAddQty = async (counter, items) => {
   );
 
   for (let autobill of data) {
-    eligibleItems = items?.filter(
-      (a) =>
-        autobill.items.length === 0 ||
+    eligibleItems = eligibleItems.map((a) => {
+      if( autobill.items.length === 0 ||
         autobill.items.filter((b) => b === a.item_uuid).length ||
         autobill.item_groups.filter(
           (b) => a.item_group_uuid.filter((c) => c === b).length
-        ).length
-    );
-    eligibleItems = eligibleItems.map((a) => {
+        ).length){
+
+    
       let base_qty_arr = autobill.qty_details.filter(
         (b) => b.unit === "b" && +b.base_qty <= +a.box
       );
@@ -51,26 +52,11 @@ export const AutoAddQty = async (counter, items) => {
         ...a,
         box: +a.box + (base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0),
         pcs: +a.pcs + (pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0),
-      };
+      };}else return a
     });
-    // console.log("eligibleItems",eligibleItems,autobill.qty_details);
+  
   }
-  return items.map((a) =>
-    eligibleItems.filter((b) => a.item_uuid === b.item_uuid).length
-      ? eligibleItems.find((b) => a.item_uuid === b.item_uuid)
-      : a
-  );
-};
-export const AutoAddItem = async (counter, items) => {
-  let eligibleItems = items;
-  const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
-  let tx = await db
-    .transaction("autobill", "readwrite")
-    .objectStore("autobill");
-  let autobills = await tx.getAll();
-  let store = await db.transaction("items", "readwrite").objectStore("items");
-  let dbItems = await store.getAll();
-  let data = autobills.filter(
+   data = autobills.filter(
     (a) =>
       a.type === "auto-item-add" &&
       (a.counters.filter((b) => b === counter.counter_uuid) ||
@@ -81,7 +67,7 @@ export const AutoAddItem = async (counter, items) => {
   );
 
   for (let autobill of data) {
-    eligibleItems = items?.filter(
+    eligibleItems = eligibleItems?.filter(
       (a) =>
         autobill.items.length === 0 ||
         autobill.items.filter((b) => b === a.item_uuid).length ||
@@ -135,7 +121,7 @@ export const AutoAddItem = async (counter, items) => {
         box: base_qty_arr?.add_items.filter((b) => b.item_uuid === a.item_uuid)
           .add_qty,
       }));
-      let nonFiltered = items.filter(
+      let nonFiltered = eligibleItems.filter(
         (a) => dataItems.filter((b) => a.item_uuid !== b.item_uuid).length
       );
       let Filtered = items
@@ -167,10 +153,10 @@ export const AutoAddItem = async (counter, items) => {
         pcs: pice_qty_arr?.add_items.filter((b) => b.item_uuid === a.item_uuid)
           .add_qty,
       }));
-      let nonFiltered = items.filter(
+      let nonFiltered = eligibleItems.filter(
         (a) => dataItems.filter((b) => a.item_uuid !== b.item_uuid).length
       );
-      let Filtered = items
+      let Filtered = eligibleItems
         .filter(
           (a) => dataItems.filter((b) => a.item_uuid === b.item_uuid).length
         )
@@ -180,7 +166,7 @@ export const AutoAddItem = async (counter, items) => {
             +(a?.pcs || 0) +
             (dataItems.find((b) => a.item_uuid !== b.item_uuid)?.pcs || 0),
         }));
-      items = nonFiltered.length
+      eligibleItems = nonFiltered.length
         ? Filtered.length
           ? [...nonFiltered, ...Filtered]
           : [...nonFiltered]
@@ -189,9 +175,12 @@ export const AutoAddItem = async (counter, items) => {
         : [];
     }
   }
-  return items;
+  console.log(eligibleItems)
+
+    return ({counter_uuid:counter.counter_uuid,items: eligibleItems,});
 };
-export const Billing = async (counter, items) => {
+
+export const Billing = async (counter, items,others) => {
   let newPriceItems = [];
   for (let item of items) {
     let price =
@@ -211,6 +200,6 @@ export const Billing = async (counter, items) => {
       item = { ...item, company_discount_percentage };
     newPriceItems.push(item);
   }
-  console.log(counter);
-  return newPriceItems;
+  
+  return ({counter_uuid:counter.counter_uuid,items: newPriceItems,others});
 };
