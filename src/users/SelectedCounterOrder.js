@@ -193,10 +193,10 @@ const SelectedCounterOrder = () => {
         type="button"
         className="autoBtn"
         onClick={async () => {
-          setItems(await AutoAddQty(counter, items));
+
         }}
       >
-        Auto Quantity
+        Bill
       </button>
       <button
         type="button"
@@ -204,9 +204,10 @@ const SelectedCounterOrder = () => {
         style={{left:"40vw"}}
         onClick={async () => {
           setItems(await AutoAddItem(counter, items));
+          setItems(await AutoAddQty(counter, items));
         }}
       >
-        Auto Item
+        Auto
       </button>
     </>
   );
