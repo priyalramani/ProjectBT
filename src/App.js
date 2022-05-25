@@ -24,17 +24,16 @@ import LoginPage from "./users/LoginPage";
 import { useEffect } from "react";
 const id = "240522";
 function App() {
-  axios.defaults.baseURL = "http://15.207.39.69:9000";
 
   
+  axios.defaults.baseURL = "http://localhost:9000";
   return (
     <div className="App">
       <Router>
         <Routes>
-          {/* admin Routes */}
-          {window.location.pathname.includes("admin") ? (
+          {localStorage.getItem("user_uuid") ? (
             <>
-              {localStorage.getItem("AdminId") === id ? (
+              {localStorage.getItem("user_uuid") === id ? (
                 <>
                   <Route path="/admin" element={<MainAdmin />} />
                   <Route path="/admin/routes" element={<RoutesPage />} />
@@ -62,48 +61,35 @@ function App() {
               ) : (
                 ""
               )}
+              {/* users routes */}
+              <Route path="/users" element={<Main />} />
+              <Route path="/users/orders" element={<Orders />} />
               <Route
-                path="*"
-                element={
-                  <Navigate
-                    replace
-                    to={
-                      localStorage.getItem("AdminId") === id
-                        ? "/admin"
-                        : "/adminLogin"
-                    }
-                  />
-                }
+                path="/users/orders/:counter_uuid"
+                element={<SelectedCounterOrder />}
               />
-              <Route path="/adminLogin" element={<LoginPage />} />
             </>
           ) : (
-            <>
-              {/* users routes */}
-              {localStorage.getItem("user_uuid") ? (
-                <>
-                  <Route path="/users" element={<Main />} />
-                  <Route path="/users/orders" element={<Orders />} />
-                  <Route
-                    path="/users/orders/:counter_uuid"
-                    element={<SelectedCounterOrder />}
-                  />
-                </>
-              ) : (
-                ""
-              )}
-              <Route
-                path="*"
-                element={
-                  <Navigate
-                    replace
-                    to={localStorage.getItem("user_uuid") ? "/users" : "/login"}
-                  />
+            ""
+          )}
+          {/* admin Routes */}
+
+          <Route
+            path="*"
+            element={
+              <Navigate
+                replace
+                to={
+                  localStorage.getItem("user_uuid")
+                    ? localStorage.getItem("user_uuid") === id
+                      ? "/admin"
+                      : "/users"
+                    : "/login"
                 }
               />
-              <Route path="/login" element={<LoginPage />} />
-            </>
-          )}
+            }
+          />
+          <Route path="/login" element={<LoginPage />} />
         </Routes>
       </Router>
     </div>
