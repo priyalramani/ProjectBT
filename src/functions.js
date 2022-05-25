@@ -191,3 +191,11 @@ export const AutoAddItem = async (counter, items) => {
   }
   return items;
 };
+export const Billing = async (counter, items) => {
+  let newPriceItems= []
+  for(let item of items){
+    let price = counter.item_special_price.find(a=>a.item_uuid===item.item_uuid)?.price||0
+    newPriceItems.push({...item,item_price:price?price:item.item_price})
+  }
+  return newPriceItems
+};
