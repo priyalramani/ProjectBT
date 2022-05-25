@@ -34,7 +34,7 @@ function App() {
       window.location.assign("/users");
     } else if (
       localStorage.getItem("AdminId") &&
-      !window.location.pathname.includes("admin")
+      !window.location.pathname.includes("admin")&&!window.location.pathname.includes("users")
     ) {
       window.location.assign("/admin");
     }
@@ -44,52 +44,7 @@ function App() {
       <Router>
         <Routes>
           {/* admin Routes */}
-          {window.location.pathname.includes("admin") ? (
-            <>
-              {localStorage.getItem("AdminId") === id ? (
-                <>
-                  <Route path="/admin" element={<MainAdmin />} />
-                  <Route path="/admin/routes" element={<RoutesPage />} />
-                  <Route
-                    path="/admin/itemCategories"
-                    element={<ItemCategories />}
-                  />
-                  <Route
-                    path="/admin/counterGroup"
-                    element={<CounterGroup />}
-                  />
-                  <Route path="/admin/itemGroup" element={<ItemGroup />} />
-                  <Route path="/admin/counter" element={<Counter />} />
-                  <Route path="/admin/adminUsers" element={<Users />} />
-                  <Route path="/admin/items" element={<ItemsPage />} />
-                  <Route
-                    path="/admin/autoIncreaseQty"
-                    element={<AutoIncreaseQuantity />}
-                  />
-                  <Route
-                    path="/admin/autoIncreaseItem"
-                    element={<AutoIncreaseItem />}
-                  />
-                </>
-              ) : (
-                ""
-              )}
-              <Route
-                path="*"
-                element={
-                  <Navigate
-                    replace
-                    to={
-                      localStorage.getItem("AdminId") === id
-                        ? "/admin"
-                        : "/adminLogin"
-                    }
-                  />
-                }
-              />
-              <Route path="/adminLogin" element={<LoginPage />} />
-            </>
-          ) : (
+         
             <>
               {/* users routes */}
               {localStorage.getItem("user_uuid") ? (
@@ -115,7 +70,53 @@ function App() {
               />
               <Route path="/login" element={<LoginPage />} />
             </>
-          )}
+            {window.location.pathname.includes("admin") ? (
+            <>
+              {localStorage.getItem("AdminId") === id ? (
+                <>
+                  <Route path="/admin" element={<MainAdmin />} />
+                  <Route path="/admin/routes" element={<RoutesPage />} />
+                  <Route
+                    path="/admin/itemCategories"
+                    element={<ItemCategories />}
+                  />
+                  <Route
+                    path="/admin/counterGroup"
+                    element={<CounterGroup />}
+                  />
+                  <Route path="/admin/itemGroup" element={<ItemGroup />} />
+                  <Route path="/admin/counter" element={<Counter />} />
+                  <Route path="/admin/adminUsers" element={<Users />} />
+                  <Route path="/admin/items" element={<ItemsPage />} />
+                  <Route
+                    path="/admin/autoIncreaseQty"
+                    element={<AutoIncreaseQuantity />}
+                  />
+                  <Route
+                    path="/admin/autoIncreaseItem"
+                    element={<AutoIncreaseItem />}
+                  />
+                  
+                </>
+              ) : (
+                ""
+              )}
+              <Route
+                path="*"
+                element={
+                  <Navigate
+                    replace
+                    to={
+                      localStorage.getItem("AdminId") === id
+                        ? "/admin"
+                        : "/adminLogin"
+                    }
+                  />
+                }
+              />
+              <Route path="/adminLogin" element={<LoginPage />} />
+            </>
+          ) : ("")}
         </Routes>
       </Router>
     </div>

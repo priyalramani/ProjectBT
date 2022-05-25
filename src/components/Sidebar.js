@@ -68,16 +68,14 @@ const Sidebar = () => {
                     
                   ]}
                 />
-                {/* <NavLink
+                <NavLink
                   
-
-                  title={"Quick Access"}
+                  menuList={[]}
+                  title={"Users"}
                   icon={<QuickAccessIcon sx={{ fontSize: 50 }} />}
                   isActive={false}
-                  menuList={ [
-                   
-                  ]}
-                /> */}
+                  href="/users"
+                />
                 <NavLink
                   title="Setup"
                   icon={<SettingsIcon sx={{ fontSize: 50 }} />}

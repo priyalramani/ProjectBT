@@ -6,9 +6,10 @@ const NavLink = ({
   icon,
   menuList,
   draggable,
+  href
 }) => {
   return (
-    <Link to={"/"} className="nav_link_container" onClick={() => {}}>
+    <Link to={{pathname:href}} className="nav_link_container" onClick={() => {}}>
       <div
         className={`nav-link`}
         draggable={draggable}
