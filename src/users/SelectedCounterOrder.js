@@ -2,7 +2,7 @@ import { AiOutlineArrowLeft, AiOutlineSearch } from "react-icons/ai";
 import { useState, useEffect } from "react";
 import { openDB } from "idb";
 import { useNavigate, useParams } from "react-router-dom";
-import { AutoAddItem, AutoAddQty } from "../functions";
+import { AutoAddItem, AutoAddQty, Billing } from "../functions";
 const SelectedCounterOrder = () => {
   const [items, setItems] = useState([]);
   const [counters, setCounters] = useState([]);
@@ -192,8 +192,9 @@ const SelectedCounterOrder = () => {
       <button
         type="button"
         className="autoBtn"
+        style={{left:"40vw"}}
         onClick={async () => {
-
+console.log(await Billing(counter,items))
         }}
       >
         Bill
@@ -201,7 +202,7 @@ const SelectedCounterOrder = () => {
       <button
         type="button"
         className="autoBtn"
-        style={{left:"40vw"}}
+        
         onClick={async () => {
           setItems(await AutoAddItem(counter, items));
           setItems(await AutoAddQty(counter, items));
