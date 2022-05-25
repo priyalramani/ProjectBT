@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import { openDB } from "idb";
 const id = "240522";
 const LoginPage = () => {
@@ -9,19 +9,14 @@ const LoginPage = () => {
     login_username: "",
     login_password: "",
   });
-  const location = useLocation();
+
   const Navigate = useNavigate();
   const loginHandler = async () => {
     setIsLoading(true);
-    if (location.pathname.includes("adminLogin")) {
-      if (userData.login_username === id) {
-        localStorage.setItem("AdminId", id);
-        Navigate("/admin");
-      } else {
-        alert("Wrong Id");
-      }
-      setIsLoading(false);
-     
+
+    if (userData.login_username === id) {
+      localStorage.setItem("user_uuid", id);
+      window.location.assign("/admin");
       return;
     }
     const response = await axios({
@@ -87,7 +82,7 @@ const LoginPage = () => {
         }
       }
       setIsLoading(false);
-      Navigate("/users");
+      window.location.assign("/users");
     }
   };
   return (
@@ -98,12 +93,10 @@ const LoginPage = () => {
       {/* <div className="foodDoAdmin"><img src={foodDoAdmin} alt="" /></div> */}
 
       <div className="form">
-        <h1>
-          {location.pathname.includes("adminLogin") ? "Admin Login" : "Sign In"}
-        </h1>
+        <h1>Sign In</h1>
         <div className="input-container">
           <label htmlFor="username" className="form-label">
-            {location.pathname.includes("adminLogin") ? "Admin Id" : "Username"}
+            Username
           </label>
           <input
             type="username"
@@ -121,7 +114,7 @@ const LoginPage = () => {
             required
           />
         </div>
-        {!location.pathname.includes("adminLogin") ? (
+
           <div className="input-container">
             <label htmlFor="password" className="form-label">
               Password
@@ -143,9 +136,7 @@ const LoginPage = () => {
               required
             />
           </div>
-        ) : (
-          ""
-        )}
+       
 
         {!isLoading ? (
           <button className="submit-btn" onClick={loginHandler}>

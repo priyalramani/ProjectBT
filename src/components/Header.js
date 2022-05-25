@@ -12,7 +12,7 @@ const Header = () => {
           className="header_right_link"
           onClick={() => {
             localStorage.clear();
-            Navigate("/adminLogin");
+            Navigate("/login");
           }}
         >
           Logout
