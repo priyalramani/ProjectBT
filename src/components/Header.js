@@ -7,7 +7,7 @@ const Header = () => {
     <div className="header">
       <h1>Bharat Traders</h1>
       <div className="header_right">
-        <div className="header_right_link">Dashboard</div>
+        <div className="header_right_link" onClick={()=>Navigate("/admin")}>Dashboard</div>
         <div
           className="header_right_link"
           onClick={() => {

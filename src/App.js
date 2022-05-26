@@ -57,6 +57,7 @@ function App() {
                 <>
                   {/* admin Routes */}
                   <Route path="/admin" element={<MainAdmin />} />
+                  <Route path="/trip" element={<MainAdmin />} />
                   <Route path="/admin/routes" element={<RoutesPage />} />
                   <Route path="/admin/itemCategories" element={<ItemCategories />} />
                   <Route path="/admin/counterGroup" element={<CounterGroup />} />
