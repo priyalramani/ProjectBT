@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { openDB } from "idb";
 const id = "240522";
 const LoginPage = () => {
@@ -12,77 +12,85 @@ const LoginPage = () => {
 
   const Navigate = useNavigate();
   const loginHandler = async () => {
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    if (userData.login_username === id) {
-      localStorage.setItem("user_uuid", id);
-      window.location.assign("/admin");
-      return;
-    }
-    const response = await axios({
-      method: "post",
-      url: "/users/login",
-      data: userData,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) {
-      let data = response.data.result;
-      localStorage.setItem("user_uuid", data.user_uuid);
-      localStorage.setItem("user_title", data.user_title);
-      localStorage.setItem("user_role", JSON.stringify(data.user_role || []));
-      localStorage.setItem("user_mobile", data.user_mobile);
-      const result = await axios({
-        method: "get",
-        url: "/users/getDetails",
+      if (userData.login_username === id) {
+        localStorage.setItem("user_uuid", id);
+        window.location.assign("/admin");
+        return;
+      }
+      const response = await axios({
+        method: "post",
+        url: "/users/login",
         data: userData,
         headers: {
           "Content-Type": "application/json",
         },
       });
-      data = result.data.result;
 
-      const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
-        upgrade(db) {
-          for (const property in data) {
-            db.createObjectStore(property, {
-              keyPath: "IDENTIFIER",
-            });
-          }
-        },
-      });
+      if (!response.status !== 200)
+        return setIsLoading(false);
 
-      let store;
-      for (const property in data) {
-        store = await db
-          .transaction(property, "readwrite")
-          .objectStore(property);
-        for (let item of data[property]) {
-          let IDENTIFIER =
-            item[
+      if (response.data.success) {
+        let data = response.data.result;
+        localStorage.setItem("user_uuid", data.user_uuid);
+        localStorage.setItem("user_title", data.user_title);
+        localStorage.setItem("user_role", JSON.stringify(data.user_role || []));
+        localStorage.setItem("user_mobile", data.user_mobile);
+        const result = await axios({
+          method: "get",
+          url: "/users/getDetails",
+          data: userData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        data = result.data.result;
+
+        const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
+          upgrade(db) {
+            for (const property in data) {
+              db.createObjectStore(property, {
+                keyPath: "IDENTIFIER",
+              });
+            }
+          },
+        });
+
+        let store;
+        for (const property in data) {
+          store = await db
+            .transaction(property, "readwrite")
+            .objectStore(property);
+          for (let item of data[property]) {
+            let IDENTIFIER =
+              item[
               property === "autobill"
                 ? "auto_uuid"
                 : property === "companies"
-                ? "company_uuid"
-                : property === "counter"
-                ? "counter_uuid"
-                : property === "counter_groups"
-                ? "counter_group_uuid"
-                : property === "item_category"
-                ? "category_uuid"
-                : property === "items"
-                ? "item_uuid"
-                : property === "routes"
-                ? "route_uuid"
-                : ""
-            ];
-          console.log({ ...item, IDENTIFIER });
-          await store.put({ ...item, IDENTIFIER });
+                  ? "company_uuid"
+                  : property === "counter"
+                    ? "counter_uuid"
+                    : property === "counter_groups"
+                      ? "counter_group_uuid"
+                      : property === "item_category"
+                        ? "category_uuid"
+                        : property === "items"
+                          ? "item_uuid"
+                          : property === "routes"
+                            ? "route_uuid"
+                            : ""
+              ];
+            console.log({ ...item, IDENTIFIER });
+            await store.put({ ...item, IDENTIFIER });
+          }
         }
+        setIsLoading(false);
+        window.location.assign("/users");
       }
+    } catch (error) {
       setIsLoading(false);
-      window.location.assign("/users");
     }
   };
   return (
@@ -115,28 +123,28 @@ const LoginPage = () => {
           />
         </div>
 
-          <div className="input-container">
-            <label htmlFor="password" className="form-label">
-              Password
-            </label>
-            <input
-              type="password"
-              className="form-input"
-              name="password"
-              id="password"
-              value={userData.login_password}
-              onChange={(e) =>
-                setUserData((prev) => ({
-                  ...prev,
-                  login_password: e.target.value,
-                }))
-              }
-              minLength="5"
-              autoComplete="off"
-              required
-            />
-          </div>
-       
+        <div className="input-container">
+          <label htmlFor="password" className="form-label">
+            Password
+          </label>
+          <input
+            type="password"
+            className="form-input"
+            name="password"
+            id="password"
+            value={userData.login_password}
+            onChange={(e) =>
+              setUserData((prev) => ({
+                ...prev,
+                login_password: e.target.value,
+              }))
+            }
+            minLength="5"
+            autoComplete="off"
+            required
+          />
+        </div>
+
 
         {!isLoading ? (
           <button className="submit-btn" onClick={loginHandler}>
