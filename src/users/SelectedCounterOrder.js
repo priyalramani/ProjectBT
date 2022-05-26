@@ -54,6 +54,7 @@ const SelectedCounterOrder = () => {
             ?.price || a.item_price,
         box: 0,
         pcs: 0,
+        status: 0,
       }))
     );
   }, [counter]);
@@ -69,6 +70,7 @@ const SelectedCounterOrder = () => {
         p: a.pcs,
         unit_price: a.price,
         gst_percentage: a.item_gst,
+        status:0
       })),
       status: [
         {
@@ -100,7 +102,7 @@ const SelectedCounterOrder = () => {
               onClick={() => (cartPage ? Navigate(-1) : setCartPage(false))}
             />
           </div>
-{cartPage?<h1>Cart</h1>:""}
+          {cartPage ? <h1>Cart</h1> : ""}
           <div className="user_searchbar flex">
             <AiOutlineSearch className="user_search_icon" />
             <input
@@ -397,7 +399,7 @@ const SelectedCounterOrder = () => {
           <button
             type="button"
             className="autoBtn"
-            style={{ left: "40vw" }}
+            style={{ left: "20vw" }}
             onClick={async () => {
               Billing(counter, order.items, {
                 stage: 1,
