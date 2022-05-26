@@ -2441,3 +2441,222 @@ body {
   .rbc-row-segment {
     position: relative !important;
   }
+  .itemavilablelity {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    left: -100px;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.301);
+    z-index: 90;
+  }
+  
+  .itemavilabelitycontainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: fit-content;
+    border-radius: 1.5rem;
+    margin: 10px;
+    background: #e6ebef;
+  }
+  
+  #item-availiblilty-done-button {
+    display: block;
+    position: absolute;
+    bottom: 8%;
+  }
+  
+  #item-availiblilty-done-button>button {
+    padding: 10px 25px;
+    border-radius: 5px;
+    font-size: 20px;
+    border: none;
+    color: white;
+    background: #4ac959;
+  }
+  
+  .orderDetailsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: fit-content;
+    margin: 10px;
+    background: #e6ebef;
+    border: 1px solid black;
+    box-shadow: rgb(0 0 0 / 70%) 0px 10px 20px, rgb(0 0 0 / 23%) 0px 6px 6px;
+  }
+  
+  .itemavilablelity_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    width: 100%;
+    color: #fff;
+    background: #000;
+    border-top-left-radius: 1.5rem;
+    border-top-right-radius: 1.5rem;
+  }
+  
+  .itemavilablelity_header>h2 {
+    flex: 1;
+    text-align: center;
+    letter-spacing: 1.5px;
+  }
+  
+  .xiconbtn {
+    color: #fff;
+    width: 1.5rem;
+    cursor: pointer;
+  }
+  
+  .xiconOrder {
+    color: black;
+    width: 1.5rem;
+    cursor: pointer;
+    position: absolute;
+    margin-left: -30px;
+    z-index: 100;
+  }
+  
+  .availablecontainer {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    overflow-y: hidden;
+    height: 100%;
+    width: 100%;
+    margin: 10px;
+    padding: 0 1.5rem;
+  }
+  
+  .itemavilablelitybox {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    flex-direction: column;
+    width: 60vw;
+  }
+  
+  .searchtable {
+    display: flex;
+    align-items: center;
+    margin: 10px;
+  }
+  
+  .searchtable>input {
+    border: 2px solid rgb(189, 189, 189);
+    outline: none;
+    font-size: 1rem;
+    border-radius: 999px;
+    text-align: center;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    transition: all 250ms ease-in-out;
+  }
+  
+  .searchtable>input:hover {
+    transform: scale(1.03);
+  }
+  
+  .items_table {
+    display: flex;
+    flex-direction: column;
+    height: 55vh;
+    overflow: auto;
+    padding-right: 4px;
+    width: 100%;
+    background: #fff;
+  }
+  
+  .items_table>table {
+    font-weight: 500;
+    color: darkslategrey;
+    letter-spacing: 1.1px;
+    border: 2px solid rgb(189, 189, 189);
+    /* border-right: 2px solid rgb(189, 189, 189); */
+  }
+  
+  .items_table>table>thead>tr>th, .items_table>table>tfoot>tr>th {
+    background-color: #deffe1;
+    color: #4f4f4f;
+    white-space: nowrap;
+    /* border-top: 2px solid rgb(189, 189, 189); */
+    height: 40px;
+  }
+  
+  .items_table>table>tfoot>tr>td {
+    background-color: #deffe1;
+    color: #4f4f4f;
+    border-bottom: 2px solid rgb(189, 189, 189);
+  }
+  
+  .items_table>table>thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  
+  .items_table>table>tfoot {
+    position: sticky;
+    bottom: 0;
+    /* z-index: 1; */
+  }
+  
+  .savebtn {
+    background-color: var(--mainColor);
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: 1.2px;
+    border: none;
+    border-radius: 999px;
+    padding: 0.7rem 3rem;
+    margin: 1rem 0;
+    cursor: pointer;
+    transition: all 250ms ease-in-out;
+  }
+  
+  .savebtn:hover {
+    transform: scale(1.03);
+  }
+  
+  .conditionalButton {
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #000;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: inset 0.5px 1px 3px #000;
+    background-color: #000;
+    border-radius: 10px;
+  }
+  
+  .conditionalButton:hover {
+    box-shadow: none;
+  }
+  
+  @media only screen and (max-width: 1000px) {
+    .itemavilablelity {
+      height: 100vh;
+    }
+  
+    .itemavilabelitycontainer {
+      height: inherit;
+    }
+  
+    .availablecontainer {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  
+    .itemavilablelitybox {
+      height: inherit;
+    }
+  }

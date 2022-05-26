@@ -6,7 +6,9 @@ import "./style.css";
 import Card from "../../components/Card";
 import { AiOutlineReload } from "react-icons/ai";
 import VerticalTabs from "../../components/VerticalTabs";
+import ItemAvilibility from "../../components/ItemAvilibility";
 const MainAdmin = () => {
+  const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
   const [orders, setOrders] = useState([]);
   const [routesData, setRoutesData] = useState([]);
@@ -83,7 +85,7 @@ const MainAdmin = () => {
   }, [btn]);
   return (
     <>
-      <Sidebar />
+      <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen}/>
       <div className="right-side">
         <Header />
         <AiOutlineReload
@@ -410,6 +412,12 @@ const MainAdmin = () => {
               />
             </div>
           </div>
+          {isItemAvilableOpen && (
+              <ItemAvilibility
+                isItemAvilableOpen={isItemAvilableOpen}
+                setIsItemAvilableOpen={setIsItemAvilableOpen}
+              />
+            )}
         </div>
       </div>
       {popupForm ? (

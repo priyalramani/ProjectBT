@@ -6,10 +6,15 @@ const NavLink = ({
   icon,
   menuList,
   draggable,
-  href
+  href,
+  setIsItemAvilableOpen,
 }) => {
   return (
-    <Link to={{pathname:href}} className="nav_link_container" onClick={() => {}}>
+    <Link
+      to={{ pathname: href }}
+      className="nav_link_container"
+      onClick={() => {}}
+    >
       <div
         className={`nav-link`}
         draggable={draggable}
@@ -28,9 +33,7 @@ const NavLink = ({
                 }}
               />
             )}
-            <span
-              className={`nav_title`}
-            >
+            <span className={`nav_title`}>
               {title?.slice(0, 31)}
               {title?.length > 32 && "..."}
             </span>
@@ -45,7 +48,11 @@ const NavLink = ({
                 <div
                   className="item"
                   key={Math.random()}
-                  
+                  onClick={() => {
+                    return menu.name === "Trips"
+                      ? setIsItemAvilableOpen((prev) => !prev)
+                      : "";
+                  }}
                 >
                   {<Link to={menu.link}>{menu.name}</Link>}
                 </div>
