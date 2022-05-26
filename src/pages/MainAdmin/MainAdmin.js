@@ -82,7 +82,7 @@ const MainAdmin = () => {
     ) {
       getRunningOrders();
     }
-  }, [btn]);
+  }, [btn,popupForm]);
   return (
     <>
       <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} />
