@@ -536,6 +536,7 @@ function NewUserForm({ onSave, popupInfo, orders, trips }) {
                         value={data}
                         onChange={(e) => setdata(e.target.value)}
                         maxLength={42}
+                        style={{width:"200px"}}
                       >
                         <option value="">None</option>
                         {trips
