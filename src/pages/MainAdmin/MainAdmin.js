@@ -257,7 +257,7 @@ const MainAdmin = () => {
               <>
                 <button
                   className="item-sales-search"
-                  onClick={() => setPopupForm()}
+                  onClick={() => setPopupForm(true)}
                   style={{ position: "absolute", left: "50vw", top: "60px" }}
                 >
                   Add

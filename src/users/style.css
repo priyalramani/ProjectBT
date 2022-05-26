@@ -27,12 +27,13 @@
 }
 
 .servicesContainer {
-  padding: 1rem;
+  /* padding: 1rem; */
   max-width: 500px;
   flex-wrap: wrap;
   gap: 2rem;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  
 }
 
 .service {
