@@ -23,11 +23,9 @@ const Processing = () => {
       <div
         className="servicesContainer"
         style={{
-       
           gridAutoFlow: "row",
           gridAutoRows: "20%",
-     
-          
+
           overflow: "scroll",
         }}
       >
@@ -41,11 +39,7 @@ const Processing = () => {
                 // pathname + rolesArray.find((a) => +a.type === +data)?.link
               }
               onClick={() => {
-                //   props.setPath(pathname);
-                //   outletDetailsDispatch({
-                //     type: Actions.SHOW_SIDE_MENU,
-                //     payload: false,
-                //   });
+                window.location.assign("/users/processing/" + data.trip_uuid);
               }}
             >
               <div className="service">
