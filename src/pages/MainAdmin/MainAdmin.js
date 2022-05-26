@@ -4,7 +4,7 @@ import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./style.css";
 import Card from "../../components/Card";
-
+import { AiOutlineReload } from "react-icons/ai";
 import VerticalTabs from "../../components/VerticalTabs";
 const MainAdmin = () => {
   const [popupForm, setPopupForm] = useState(false);
@@ -61,6 +61,7 @@ const MainAdmin = () => {
   useEffect(() => {
     getRoutesData();
     getCounter();
+    setInterval(getRunningOrders, 180000);
   }, []);
   const getRunningOrders = async () => {
     const response = await axios({
@@ -72,9 +73,12 @@ const MainAdmin = () => {
   };
 
   useEffect(() => {
-    if (window.location.pathname.includes("admin")||window.location.pathname.includes("trip")) {
+    if (
+      window.location.pathname.includes("admin") ||
+      window.location.pathname.includes("trip")
+    ) {
       getRunningOrders();
-      setInterval(getRunningOrders, 180000);
+      
     }
   }, [btn]);
   return (
@@ -82,6 +86,17 @@ const MainAdmin = () => {
       <Sidebar />
       <div className="right-side">
         <Header />
+        <AiOutlineReload
+          style={{
+            position: "fixed",
+            fontSize: "20px",
+            zIndex: "99999",
+            top: "10px",
+            right: "250px",
+            cursor:"pointer"
+          }}
+          onClick={() => setBtn((prev) => !prev)}
+        />
         <div style={{ display: "flex", height: "100%" }}>
           <VerticalTabs />
 
@@ -308,60 +323,60 @@ const MainAdmin = () => {
                       //   orders.filter((a) => a.trip_uuid === trip.trip_uuid)
                       //     .length
                       // )
-                        return (
-                          <div key={Math.random()} className="sectionDiv">
-                            <h1>{trip.trip_title}</h1>
-                            <div className="content" id="seats_container">
-                              {orders
-                                .filter((a) => a.trip_uuid === trip.trip_uuid)
-                                .map((item) => {
-                                  return (
-                                    <div
-                                      className={`seatSearchTarget`}
-                                      key={Math.random()}
-                                      seat-name={item.seat_name}
-                                      seat-code={item.seat_uuid}
-                                      seat={item.seat_uuid}
-                                      // section={section.section_uuid}
-                                      // section-name={section?.section_name}
-                                      // outlet={outletIdState}
-                                      // onClick={e => {
-                                      //   switch (e.detail) {
-                                      //     case 2:
-                                      //       menuOpenHandler(item);
-                                      //       break;
-                                      //     default:
-                                      //       seatClickHandler(e.currentTarget.querySelector('.card-focus'), item?.seat_uuid, e.detail);
-                                      //       return;
-                                      //   }
-                                      // }}
-                                    >
-                                      <span
-                                        className="dblClickTrigger"
-                                        style={{ display: "none" }}
-                                        // onClick={() =>
-                                        //   menuOpenHandler(item)
-                                        // }
-                                      />
-                                      <Card
-                                        // on_order={on_order && on_order}
-                                        // key={item.seat_uuid}
-                                        title1={item?.invoice_number || ""}
-                                        // title2={item.seat_name}
-                                        // color={item.color}
-                                        // price={item.price}
-                                        // visibleContext={visibleContext}
-                                        // setVisibleContext={setVisibleContext}
-                                        // isMouseInsideContext={isMouseInsideContext}
-                                        // seats={seatsState.filter(s => +s.seat_status === 1)}
-                                        rounded
-                                      />
-                                    </div>
-                                  );
-                                })}
-                            </div>
+                      return (
+                        <div key={Math.random()} className="sectionDiv">
+                          <h1>{trip.trip_title}</h1>
+                          <div className="content" id="seats_container">
+                            {orders
+                              .filter((a) => a.trip_uuid === trip.trip_uuid)
+                              .map((item) => {
+                                return (
+                                  <div
+                                    className={`seatSearchTarget`}
+                                    key={Math.random()}
+                                    seat-name={item.seat_name}
+                                    seat-code={item.seat_uuid}
+                                    seat={item.seat_uuid}
+                                    // section={section.section_uuid}
+                                    // section-name={section?.section_name}
+                                    // outlet={outletIdState}
+                                    // onClick={e => {
+                                    //   switch (e.detail) {
+                                    //     case 2:
+                                    //       menuOpenHandler(item);
+                                    //       break;
+                                    //     default:
+                                    //       seatClickHandler(e.currentTarget.querySelector('.card-focus'), item?.seat_uuid, e.detail);
+                                    //       return;
+                                    //   }
+                                    // }}
+                                  >
+                                    <span
+                                      className="dblClickTrigger"
+                                      style={{ display: "none" }}
+                                      // onClick={() =>
+                                      //   menuOpenHandler(item)
+                                      // }
+                                    />
+                                    <Card
+                                      // on_order={on_order && on_order}
+                                      // key={item.seat_uuid}
+                                      title1={item?.invoice_number || ""}
+                                      // title2={item.seat_name}
+                                      // color={item.color}
+                                      // price={item.price}
+                                      // visibleContext={visibleContext}
+                                      // setVisibleContext={setVisibleContext}
+                                      // isMouseInsideContext={isMouseInsideContext}
+                                      // seats={seatsState.filter(s => +s.seat_status === 1)}
+                                      rounded
+                                    />
+                                  </div>
+                                );
+                              })}
                           </div>
-                        );
+                        </div>
+                      );
                     })}
                   </>
                 ) : (
