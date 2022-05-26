@@ -15,6 +15,7 @@ const MainAdmin = () => {
   const [tripData, setTripData] = useState([]);
   const [counter, setCounter] = useState([]);
   const [btn, setBtn] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState([]);
   const getCounter = async () => {
     const response = await axios({
       method: "get",
@@ -73,19 +74,18 @@ const MainAdmin = () => {
 
     if (response.data.success) setOrders(response.data.result);
   };
-
+  console.log(selectedOrder);
   useEffect(() => {
     if (
       window.location.pathname.includes("admin") ||
       window.location.pathname.includes("trip")
     ) {
       getRunningOrders();
-      
     }
   }, [btn]);
   return (
     <>
-      <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen}/>
+      <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} />
       <div className="right-side">
         <Header />
         <AiOutlineReload
@@ -95,7 +95,7 @@ const MainAdmin = () => {
             zIndex: "99999",
             top: "10px",
             right: "250px",
-            cursor:"pointer"
+            cursor: "pointer",
           }}
           onClick={() => setBtn((prev) => !prev)}
         />
@@ -257,11 +257,22 @@ const MainAdmin = () => {
               <>
                 <button
                   className="item-sales-search"
-                  onClick={() => setPopupForm(true)}
+                  onClick={() => setPopupForm()}
                   style={{ position: "absolute", left: "50vw", top: "60px" }}
                 >
                   Add
                 </button>
+                {selectedOrder.length ? (
+                  <button
+                    className="item-sales-search"
+                    onClick={() => setPopupForm({ type: "edit" })}
+                    style={{ position: "absolute", left: "70vw", top: "60px" }}
+                  >
+                    Assign
+                  </button>
+                ) : (
+                  ""
+                )}
                 {orders.filter((a) => !a?.trip_uuid).length ? (
                   <div key={Math.random()} className="sectionDiv">
                     <h1>UnKnown</h1>
@@ -279,16 +290,19 @@ const MainAdmin = () => {
                               // section={section.section_uuid}
                               // section-name={section?.section_name}
                               // outlet={outletIdState}
-                              // onClick={e => {
-                              //   switch (e.detail) {
-                              //     case 2:
-                              //       menuOpenHandler(item);
-                              //       break;
-                              //     default:
-                              //       seatClickHandler(e.currentTarget.querySelector('.card-focus'), item?.seat_uuid, e.detail);
-                              //       return;
-                              //   }
-                              // }}
+                              onClick={(e) => {
+                                setSelectedOrder(
+                                  selectedOrder.filter(
+                                    (a) => a.order_uuid === item.order_uuid
+                                  ).length
+                                    ? selectedOrder.filter(
+                                        (a) => a.order_uuid !== item.order_uuid
+                                      )
+                                    : selectedOrder.length
+                                    ? [...selectedOrder, item]
+                                    : [item]
+                                );
+                              }}
                             >
                               <span
                                 className="dblClickTrigger"
@@ -301,6 +315,11 @@ const MainAdmin = () => {
                                 // on_order={order}
                                 // key={item.seat_uuid}
                                 title1={item?.invoice_number || ""}
+                                selectedOrder={
+                                  selectedOrder.filter(
+                                    (a) => a.order_uuid === item.order_uuid
+                                  ).length
+                                }
                                 // title2={item.seat_name}
                                 // color={item.color}
                                 // price={item.price}
@@ -342,16 +361,21 @@ const MainAdmin = () => {
                                     // section={section.section_uuid}
                                     // section-name={section?.section_name}
                                     // outlet={outletIdState}
-                                    // onClick={e => {
-                                    //   switch (e.detail) {
-                                    //     case 2:
-                                    //       menuOpenHandler(item);
-                                    //       break;
-                                    //     default:
-                                    //       seatClickHandler(e.currentTarget.querySelector('.card-focus'), item?.seat_uuid, e.detail);
-                                    //       return;
-                                    //   }
-                                    // }}
+                                    onClick={(e) => {
+                                      setSelectedOrder((prev) =>
+                                        prev.filter(
+                                          (a) =>
+                                            a.order_uuid === item.order_uuid
+                                        ).length
+                                          ? prev.filter(
+                                              (a) =>
+                                                a.order_uuid !== item.order_uuid
+                                            )
+                                          : prev.length
+                                          ? [...prev, item]
+                                          : [item]
+                                      );
+                                    }}
                                   >
                                     <span
                                       className="dblClickTrigger"
@@ -364,6 +388,12 @@ const MainAdmin = () => {
                                       // on_order={on_order && on_order}
                                       // key={item.seat_uuid}
                                       title1={item?.invoice_number || ""}
+                                      selectedOrder={
+                                        selectedOrder.filter(
+                                          (a) =>
+                                            a.order_uuid === item.order_uuid
+                                        ).length
+                                      }
                                       // title2={item.seat_name}
                                       // color={item.color}
                                       // price={item.price}
@@ -413,18 +443,20 @@ const MainAdmin = () => {
             </div>
           </div>
           {isItemAvilableOpen && (
-              <ItemAvilibility
-                isItemAvilableOpen={isItemAvilableOpen}
-                setIsItemAvilableOpen={setIsItemAvilableOpen}
-              />
-            )}
+            <ItemAvilibility
+              isItemAvilableOpen={isItemAvilableOpen}
+              setIsItemAvilableOpen={setIsItemAvilableOpen}
+            />
+          )}
         </div>
       </div>
       {popupForm ? (
         <NewUserForm
-          onSave={() => setPopupForm(false)}
+          onSave={() => {setPopupForm(false);setSelectedOrder([])}}
           setRoutesData={setRoutesData}
           popupInfo={popupForm}
+          orders={selectedOrder}
+          trips={tripData}
         />
       ) : (
         ""
@@ -434,30 +466,18 @@ const MainAdmin = () => {
 };
 
 export default MainAdmin;
-function NewUserForm({ onSave, popupInfo }) {
-  const [data, setdata] = useState({});
-
+function NewUserForm({ onSave, popupInfo, orders, trips }) {
+  const [data, setdata] = useState(popupInfo?.type==="edit"?"":{});
   const [errMassage, setErrorMassage] = useState("");
-  useEffect(
-    popupInfo?.type === "edit"
-      ? () => {
-          setdata(popupInfo.data);
-        }
-      : () => {},
-    []
-  );
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    if (!data.trip_title) {
-      setErrorMassage("Please insert Trip Title");
-      return;
-    }
     if (popupInfo?.type === "edit") {
+      console.log(data)
       const response = await axios({
         method: "put",
-        url: "/routes/putRoute",
-        data,
+        url: "/orders/putOrders",
+        data: orders.map((a) => ({ ...a, trip_uuid: data })),
         headers: {
           "Content-Type": "application/json",
         },
@@ -466,6 +486,11 @@ function NewUserForm({ onSave, popupInfo }) {
         onSave();
       }
     } else {
+      if (!data.trip_title) {
+        setErrorMassage("Please insert Trip Title");
+        return;
+      }
+
       const response = await axios({
         method: "post",
         url: "/trips/postTrip",
@@ -503,20 +528,37 @@ function NewUserForm({ onSave, popupInfo }) {
               <div className="formGroup">
                 <div className="row">
                   <label className="selectLabel">
-                    Trip Title
-                    <input
-                      type="text"
-                      name="route_title"
-                      className="numberInput"
-                      value={data?.trip_title}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          trip_title: e.target.value,
-                        })
-                      }
-                      maxLength={42}
-                    />
+                    {popupInfo.type === "edit" ? "Trip" : "Trip Title"}
+                    {popupInfo.type === "edit" ? (
+                      <select
+                        name="route_title"
+                        className="numberInput"
+                        value={data}
+                        onChange={(e) => setdata(e.target.value)}
+                        maxLength={42}
+                      >
+                        <option value="">None</option>
+                        {trips
+                          .filter((a) => a.trip_uuid)
+                          .map((a) => (
+                            <option value={a.trip_uuid}>{a.trip_title}</option>
+                          ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.trip_title}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            trip_title: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                      />
+                    )}
                   </label>
                 </div>
               </div>

@@ -2,22 +2,20 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 
 
 
-const Card = ({ title2, title1, caption, color, price, rounded, item, onclickFunction, on_order, cursorItemRef, index, seats, visibleContext, setVisibleContext, isMouseInsideContext }) => {
-
+const Card = ({ title2, title1, selectedOrder, color, price, rounded, item, onclickFunction, on_order, cursorItemRef, index, seats, visibleContext, setVisibleContext, isMouseInsideContext }) => {
+console.log(selectedOrder)
   return (
 
 
         <>
           <div>
             <button
-            //   ref={itemRef}
-              className={`card-focus ${rounded ? 'rounded' : ''}`}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                if (on_order) {
-                  setVisibleContext({ id: on_order.seat_uuid, elemProperties: e.currentTarget.getBoundingClientRect() });
-                }
-              }}
+            className={
+              `card-focus 
+            ${rounded ? 'rounded' : ''} 
+            ${selectedOrder? "selected-seat" : ""}
+            `}
+              style={{margin:"10px"}}
             >
               <div className={`card ${rounded ? 'rounded' : ''}`}>
                 <p className='title2' >{title1 ? title1 : title2}</p>

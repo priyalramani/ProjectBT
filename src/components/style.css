@@ -843,6 +843,7 @@ body {
   }
   
   .card-focus.selected-seat {
+   
     outline: 3px solid rgba(0, 141, 0, 0.794);
   }
   
