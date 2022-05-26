@@ -29,7 +29,7 @@ const LoginPage = () => {
         },
       });
 
-      if (!response.status !== 200)
+      if (response.status !== 200)
         return setIsLoading(false);
 
       if (response.data.success) {
