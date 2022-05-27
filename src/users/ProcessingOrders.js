@@ -11,7 +11,7 @@ const ProcessingOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState();
   const { speak } = useSpeechSynthesis();
   const [orderSpeech, setOrderSpeech] = useState("");
-  const [oneTime, setOneTime] = useState(false);
+
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = await db.transaction("items", "readwrite").objectStore("items");
@@ -34,22 +34,27 @@ const ProcessingOrders = () => {
     getIndexedDbData();
   }, []);
   const PlayAudio = async () => {
-    if (oneTime) {
+    let item = selectedOrder?.item_details?.filter((a) => !a.status)[0];
+    if (!item) {
       await speak({ text: "Order Completed" });
 
       return;
     }
-    for (let item of selectedOrder.item_details) {
-      setOrderSpeech(item.item_uuid);
-      let detail = items.find((a) => a.item_uuid === item.item_uuid);
-      console.log(detail);
-      let data = `${detail.pronounce} ${item.b ? `${item.b} box` : ""} ${
-        item.p ? `${item.p} pcs` : ""
-      }`;
-      await speak({ text: data });
-      setTimeout(() => setOrderSpeech(""), 3000);
-    }
-    setOneTime(true);
+
+    setOrderSpeech(item.item_uuid);
+    let detail = items.find((a) => a.item_uuid === item.item_uuid);
+    console.log(detail);
+    let data = `${detail.pronounce} ${item.b ? `${item.b} box` : ""} ${
+      item.p ? `${item.p} pcs` : ""
+    }`;
+    await speak({ text: data });
+    setTimeout(() => setOrderSpeech(""), 3000);
+    setSelectedOrder((prev) => ({
+      ...prev,
+      item_details: prev.item_details.map((a) =>
+        a.item_uuid === item.item_uuid ? { ...a, status: 1 } : a
+      ),
+    }));
   };
   return (
     <div
