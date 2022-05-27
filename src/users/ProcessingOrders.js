@@ -45,7 +45,7 @@ const ProcessingOrders = () => {
     let detail = items.find((a) => a.item_uuid === item.item_uuid);
     console.log(detail);
     let data = `${detail.pronounce} ${item.b ? `${item.b} box` : ""} ${
-      item.p ? `${item.p} pcs` : ""
+      item.p ? `${item.p} pieces` : ""
     }`;
     await speak({ text: data });
     setTimeout(() => setOrderSpeech(""), 3000);
