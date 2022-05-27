@@ -8,6 +8,7 @@ const ProcessingOrders = () => {
   const [orders, setOrders] = useState([]);
   const params = useParams();
   const [items, setItems] = useState([]);
+  const [playCount, setPlayCount] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState();
   const { speak } = useSpeechSynthesis();
   const [orderSpeech, setOrderSpeech] = useState("");
@@ -71,9 +72,29 @@ const ProcessingOrders = () => {
             <button
               className="item-sales-search"
               style={{ width: "max-content" }}
-              onClick={() => PlayAudio()}
+              onClick={() => {
+                for (let i = 0; i < playCount; i++) {
+                  if (i === 0) PlayAudio();
+                  else if(selectedOrder?.item_details?.filter((a) => !a.status).length){
+                    
+                    setTimeout(playCount, 3000);
+                  }
+                }
+              }}
             >
               Play
+            </button>
+            <button
+              className="item-sales-search"
+              style={{
+                width: "max-content",
+                position: "fixed",
+                top: 0,
+                left: 0,
+              }}
+              onClick={() => setPlayCount((prev) => prev + 1)}
+            >
+              {playCount}
             </button>
           </div>
         </>
@@ -123,7 +144,26 @@ const ProcessingOrders = () => {
           <tbody className="tbody">
             {selectedOrder
               ? selectedOrder.item_details?.map((item, i) => (
-                  <tr key={Math.random()} style={{ height: "30px",backgroundColor:+item.status===1?"green":+item.status===2?"yellow":+item.status===3?"red":"#fff",color:+item.status===1||+item.status===2||+item.status===3?"#fff":"#000" }} >
+                  <tr
+                    key={Math.random()}
+                    style={{
+                      height: "30px",
+                      backgroundColor:
+                        +item.status === 1
+                          ? "green"
+                          : +item.status === 2
+                          ? "yellow"
+                          : +item.status === 3
+                          ? "red"
+                          : "#fff",
+                      color:
+                        +item.status === 1 ||
+                        +item.status === 2 ||
+                        +item.status === 3
+                          ? "#fff"
+                          : "#000",
+                    }}
+                  >
                     {selectedOrder ? (
                       <td
                         style={{
