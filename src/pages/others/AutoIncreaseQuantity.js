@@ -393,8 +393,9 @@ function NewUserForm({ onSave, popupForm }) {
                             borderBottom: "2px solid black",
                             borderRadius: "0px",
                             width: "50px",
+                            padding:"0 5px"
                           }}
-                          value={item.base_qty}
+                          value={item?.base_qty}
                           onChange={(e) =>
                             setObgData((prev) => ({
                               ...prev,
@@ -414,6 +415,7 @@ function NewUserForm({ onSave, popupForm }) {
                             borderBottom: "2px solid black",
                             borderRadius: "0px",
                             width: "80px",
+                            padding:"0 5px"
                           }}
                           type="number"
                           value={item.add_qty}
@@ -433,7 +435,7 @@ function NewUserForm({ onSave, popupForm }) {
                       <td>
                         <select
                           value={item.unit}
-                          className="input"
+                          className="select"
                           style={{
                             border: "none",
                             borderBottom: "2px solid black",
