@@ -34,8 +34,8 @@ const ProcessingOrders = () => {
     getTripOrders();
     getIndexedDbData();
   }, []);
-  const PlayAudio = async () => {
-    let item = selectedOrder?.item_details?.filter((a) => !a.status)[0];
+  const PlayAudio = async (item) => {
+
     if (!item) {
       await speak({ text: "Order Completed" });
 
@@ -73,11 +73,12 @@ const ProcessingOrders = () => {
               className="item-sales-search"
               style={{ width: "max-content" }}
               onClick={() => {
+                let items = selectedOrder?.item_details?.filter((a) => !a.status)
                 for (let i = 0; i < playCount; i++) {
-                  if (i === 0) PlayAudio();
-                  else if(selectedOrder?.item_details?.filter((a) => !a.status).length){
+                  if (i === 0) PlayAudio(items[0]);
+                  else if(items[i]){
                     
-                    setTimeout(playCount, 3000);
+                    setTimeout(()=>PlayAudio(items[i]), 3000);
                   }
                 }
               }}
@@ -148,7 +149,7 @@ const ProcessingOrders = () => {
             {selectedOrder
               ? selectedOrder.item_details?.map((item, i) => (
                   <tr
-                    key={Math.random()}
+                    key={item.item_uuid}
                     style={{
                       height: "30px",
                       backgroundColor:
