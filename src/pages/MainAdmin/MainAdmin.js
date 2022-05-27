@@ -85,7 +85,7 @@ const MainAdmin = () => {
       getRunningOrders();
     }
   }, [btn, popupForm]);
-  const postOrderData=async()=>{
+  const postOrderData = async () => {
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
@@ -95,10 +95,10 @@ const MainAdmin = () => {
       },
     });
     if (response.data.success) {
-      setSelectedOrder([])
-      setSelectedTrip("")
+      setSelectedOrder([]);
+      setSelectedTrip("");
     }
-  }
+  };
   return (
     <>
       <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} />
@@ -294,14 +294,18 @@ const MainAdmin = () => {
                 >
                   Assign
                 </button>
-                {console.log(selectedOrder.length,selectedTrip)}
-               {selectedOrder.length&&selectedTrip? <button
-                  className="item-sales-search"
-                  onClick={() => postOrderData()}
-                  style={{ position: "absolute", right: "0", top: "60px" }}
-                >
-                  Done
-                </button>:""}
+
+                {selectedOrder.length && selectedTrip ? (
+                  <button
+                    className="item-sales-search"
+                    onClick={() => postOrderData()}
+                    style={{ position: "absolute", right: "0", top: "60px" }}
+                  >
+                    Done
+                  </button>
+                ) : (
+                  ""
+                )}
                 {orders.filter((a) => !a?.trip_uuid).length ? (
                   <div key={Math.random()} className="sectionDiv">
                     <h1>UnKnown</h1>
@@ -327,19 +331,22 @@ const MainAdmin = () => {
                               // section={section.section_uuid}
                               // section-name={section?.section_name}
                               // outlet={outletIdState}
-                              onClick={(e) => {
-                                setSelectedOrder(
-                                  selectedOrder.filter(
-                                    (a) => a.order_uuid === item.order_uuid
-                                  ).length
-                                    ? selectedOrder.filter(
-                                        (a) => a.order_uuid !== item.order_uuid
-                                      )
-                                    : selectedOrder.length
-                                    ? [...selectedOrder, item]
-                                    : [item]
-                                );
-                              }}
+                              onClick={(e) =>
+                                selectedTrip
+                                  ? setSelectedOrder(
+                                      selectedOrder.filter(
+                                        (a) => a.order_uuid === item.order_uuid
+                                      ).length
+                                        ? selectedOrder.filter(
+                                            (a) =>
+                                              a.order_uuid !== item.order_uuid
+                                          )
+                                        : selectedOrder.length
+                                        ? [...selectedOrder, item]
+                                        : [item]
+                                    )
+                                  : setSelectedRouteOrder(item.order_uuid)
+                              }
                             >
                               <span
                                 className="dblClickTrigger"
@@ -353,9 +360,11 @@ const MainAdmin = () => {
                                 // key={item.seat_uuid}
                                 title1={item?.invoice_number || ""}
                                 selectedOrder={
-                                  selectedOrder.filter(
-                                    (a) => a.order_uuid === item.order_uuid
-                                  ).length
+                                  selectedTrip
+                                    ? selectedOrder.filter(
+                                        (a) => a.order_uuid === item.order_uuid
+                                      ).length
+                                    : selectedRouteOrder === item.order_uuid
                                 }
                                 title2={item?.counter_title || ""}
                                 // color={item.color}
@@ -406,22 +415,27 @@ const MainAdmin = () => {
                                       // section={section.section_uuid}
                                       // section-name={section?.section_name}
                                       // outlet={outletIdState}
-                                      onClick={(e) => {
-                                        setSelectedOrder((prev) =>
-                                          prev.filter(
-                                            (a) =>
-                                              a.order_uuid === item.order_uuid
-                                          ).length
-                                            ? prev.filter(
+                                      onClick={(e) =>
+                                        selectedTrip
+                                          ? setSelectedOrder((prev) =>
+                                              prev.filter(
                                                 (a) =>
-                                                  a.order_uuid !==
+                                                  a.order_uuid ===
                                                   item.order_uuid
-                                              )
-                                            : prev.length
-                                            ? [...prev, item]
-                                            : [item]
-                                        );
-                                      }}
+                                              ).length
+                                                ? prev.filter(
+                                                    (a) =>
+                                                      a.order_uuid !==
+                                                      item.order_uuid
+                                                  )
+                                                : prev.length
+                                                ? [...prev, item]
+                                                : [item]
+                                            )
+                                          : setSelectedRouteOrder(
+                                              item.order_uuid
+                                            )
+                                      }
                                     >
                                       <span
                                         className="dblClickTrigger"
@@ -435,10 +449,14 @@ const MainAdmin = () => {
                                         // key={item.seat_uuid}
                                         title1={item?.invoice_number || ""}
                                         selectedOrder={
-                                          selectedOrder.filter(
-                                            (a) =>
-                                              a.order_uuid === item.order_uuid
-                                          ).length
+                                          selectedTrip
+                                            ? selectedOrder.filter(
+                                                (a) =>
+                                                  a.order_uuid ===
+                                                  item.order_uuid
+                                              ).length
+                                            : selectedRouteOrder ===
+                                              item.order_uuid
                                         }
                                         title2={item?.counter_title || ""}
                                         // color={item.color}
@@ -517,7 +535,13 @@ const MainAdmin = () => {
 };
 
 export default MainAdmin;
-function NewUserForm({ onSave, popupInfo, setSelectedTrip,selectedTrip, trips }) {
+function NewUserForm({
+  onSave,
+  popupInfo,
+  setSelectedTrip,
+  selectedTrip,
+  trips,
+}) {
   const [data, setdata] = useState(popupInfo?.type === "edit" ? "" : {});
   const [errMassage, setErrorMassage] = useState("");
 
