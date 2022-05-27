@@ -166,7 +166,7 @@ const MainAdmin = () => {
                                 selectedOrder={
                                   selectedRouteOrder === item.order_uuid
                                 }
-                                // title2={item.seat_name}
+                                title2={item?.counter_title||""}
                                 // color={item.color}
                                 // price={item.price}
                                 // visibleContext={visibleContext}
@@ -241,7 +241,7 @@ const MainAdmin = () => {
                                         selectedOrder={
                                           selectedRouteOrder === item.order_uuid
                                         }
-                                        // title2={item.seat_name}
+                                        title2={item?.counter_title||""}
                                         // color={item.color}
                                         // price={item.price}
                                         // visibleContext={visibleContext}
@@ -337,7 +337,7 @@ const MainAdmin = () => {
                                     (a) => a.order_uuid === item.order_uuid
                                   ).length
                                 }
-                                // title2={item.seat_name}
+                                title2={item?.counter_title||""}
                                 // color={item.color}
                                 // price={item.price}
                                 // visibleContext={visibleContext}
@@ -420,7 +420,7 @@ const MainAdmin = () => {
                                               a.order_uuid === item.order_uuid
                                           ).length
                                         }
-                                        // title2={item.seat_name}
+                                        title2={item?.counter_title||""}
                                         // color={item.color}
                                         // price={item.price}
                                         // visibleContext={visibleContext}
