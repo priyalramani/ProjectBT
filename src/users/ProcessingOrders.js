@@ -4,17 +4,20 @@ import { useParams } from "react-router-dom";
 import { AiFillPlayCircle } from "react-icons/ai";
 import { openDB } from "idb";
 import { useSpeechSynthesis } from "react-speech-kit";
+import { Billing } from "../functions";
 const ProcessingOrders = () => {
   const [orders, setOrders] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
   const params = useParams();
   const [items, setItems] = useState([]);
   const [companies, setCompanies] = useState([]);
+  const [counters, setCounters] = useState([]);
   const [itemCategories, setItemsCategory] = useState([]);
   const [playCount, setPlayCount] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState();
   const { speak } = useSpeechSynthesis();
   const [orderSpeech, setOrderSpeech] = useState("");
+  const [updateBilling, setUpdateBilling] = useState(false);
   useEffect(() => {
     let data = sessionStorage.getItem("playCount");
     if (data) {
@@ -36,6 +39,9 @@ const ProcessingOrders = () => {
       .objectStore("item_category");
     let route = await store.getAll();
     setItemsCategory(route);
+    store = await db.transaction("counter", "readwrite").objectStore("counter");
+    let countersData = await store.getAll();
+    setCounters(countersData);
   };
   const getTripOrders = async () => {
     const response = await axios({
@@ -76,6 +82,17 @@ const ProcessingOrders = () => {
   };
   const postOrderData = async () => {
     let data = [selectedOrder];
+    if (updateBilling) {
+      let billingData = await Billing(
+        counters.find((a) => a.counter_uuid === selectedOrder.counter_uuid),
+        selectedOrder.item_details
+      );
+      setSelectedOrder({
+        ...selectedOrder,
+        ...billingData,
+        item_details: billingData.items,
+      });
+    }
     if (
       !selectedOrder.item_details.filter(
         (a) => +a.status === 0 || +a.status === 2
@@ -83,12 +100,14 @@ const ProcessingOrders = () => {
     )
       data = data.map((a) => ({
         ...a,
-        status: a.status.length
+        status: a.status.filter((a) => +a.stage === 2).length
+          ? a.status
+          : a.status.length
           ? [
               ...a.status,
               {
                 stage: "2",
-                time: (new Date()).getTime(),
+                time: new Date().getTime(),
                 user_uuid: localStorage.getItem("user_uuid"),
               },
             ]
@@ -395,6 +414,7 @@ const ProcessingOrders = () => {
           setOrder={setSelectedOrder}
           popupInfo={popupForm}
           order={selectedOrder}
+          setUpdateBilling={setUpdateBilling}
         />
       ) : (
         ""
@@ -404,7 +424,7 @@ const ProcessingOrders = () => {
 };
 
 export default ProcessingOrders;
-function NewUserForm({ onSave, popupInfo, setOrder, order }) {
+function NewUserForm({ onSave, popupInfo, setOrder, order, setUpdateBilling }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
   useEffect(() => {
@@ -450,6 +470,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
             },
           ],
     }));
+    setUpdateBilling(true);
     onSave();
   };
 

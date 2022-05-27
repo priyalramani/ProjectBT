@@ -207,7 +207,7 @@ export const AutoAdd = async (counter, items) => {
   };
 };
 
-export const Billing = async (counter, items, others) => {
+export const Billing = async (counter={}, items=[], others={}) => {
   let newPriceItems = [];
 
   for (let item of items) {
