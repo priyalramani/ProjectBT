@@ -15,9 +15,9 @@ const ProcessingOrders = () => {
   const { speak } = useSpeechSynthesis();
   const [orderSpeech, setOrderSpeech] = useState("");
   useEffect(() => {
-    let data= sessionStorage.getItem("playCount")
-    if(data){
-      setPlayCount(data)
+    let data = sessionStorage.getItem("playCount");
+    if (data) {
+      setPlayCount(data);
     }
   }, []);
   const getIndexedDbData = async () => {
@@ -74,18 +74,37 @@ const ProcessingOrders = () => {
     }));
   };
   const postOrderData = async () => {
+    let data = [selectedOrder];
+    if (
+      !selectedOrder.item_details.filter(
+        (a) => +a.status === 0 || +a.status === 2
+      ).length
+    )
+      data = data.map((a) => ({
+        ...a,
+        status: a.status.length?[...a.status,{
+          stage: "2",
+          time: (new Date()).getTime(),
+          user_uuid: localStorage.getItem("user_uuid"),
+        }]:[{
+          stage: "2",
+          time: (new Date()).getTime(),
+          user_uuid: localStorage.getItem("user_uuid"),
+        }],
+      }));
+
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
-      data: [selectedOrder],
+      data,
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.success) {
-      sessionStorage.setItem("playCount",playCount)
+      sessionStorage.setItem("playCount", playCount);
       setSelectedOrder(false);
-      getTripOrders()
+      getTripOrders();
     }
   };
   return (
@@ -333,7 +352,13 @@ const ProcessingOrders = () => {
                     >
                       <td>{i + 1}</td>
                       <td colSpan={2}>{item.counter_title}</td>
-                      <td colSpan={2}>{item?.item_details?.filter(a=>+a.status===1)?.length}/{item?.item_details?.length || 0}</td>
+                      <td colSpan={2}>
+                        {
+                          item?.item_details?.filter((a) => +a.status === 1)
+                            ?.length
+                        }
+                        /{item?.item_details?.length || 0}
+                      </td>
                     </tr>
                   ))}
           </tbody>
