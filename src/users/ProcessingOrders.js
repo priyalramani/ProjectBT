@@ -10,12 +10,16 @@ const ProcessingOrders = () => {
   const [items, setItems] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [itemCategories, setItemsCategory] = useState([]);
-  const [counters, setCounters] = useState([]);
   const [playCount, setPlayCount] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState();
   const { speak } = useSpeechSynthesis();
   const [orderSpeech, setOrderSpeech] = useState("");
-
+  useEffect(() => {
+    let data= sessionStorage.getItem("playCount")
+    if(data){
+      setPlayCount(data)
+    }
+  }, []);
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = await db.transaction("items", "readwrite").objectStore("items");
@@ -26,15 +30,11 @@ const ProcessingOrders = () => {
       .objectStore("companies");
     let company = await store.getAll();
     setCompanies(company);
-
     store = await db
       .transaction("item_category", "readwrite")
       .objectStore("item_category");
     let route = await store.getAll();
     setItemsCategory(route);
-    store = await db.transaction("counter", "readwrite").objectStore("counter");
-    let countersData = await store.getAll();
-    setCounters(countersData);
   };
   const getTripOrders = async () => {
     const response = await axios({
@@ -83,7 +83,8 @@ const ProcessingOrders = () => {
       },
     });
     if (response.data.success) {
-      window.location.assign("/users");
+      sessionStorage.setItem("playCount",playCount)
+      setSelectedOrder(false);
     }
   };
   return (
