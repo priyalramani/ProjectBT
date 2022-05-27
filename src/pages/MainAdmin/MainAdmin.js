@@ -89,7 +89,7 @@ const MainAdmin = () => {
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
-      data: orders.map((a) => ({ ...a, trip_uuid: selectedTrip })),
+      data: selectedOrder.map((a) => ({ ...a, trip_uuid:+selectedTrip===0? "":selectedTrip })),
       headers: {
         "Content-Type": "application/json",
       },
@@ -97,6 +97,7 @@ const MainAdmin = () => {
     if (response.data.success) {
       setSelectedOrder([]);
       setSelectedTrip("");
+      setBtn(prev=>!prev)
     }
   };
   return (
@@ -542,7 +543,7 @@ function NewUserForm({
   selectedTrip,
   trips,
 }) {
-  const [data, setdata] = useState(popupInfo?.type === "edit" ? "" : {});
+  const [data, setdata] = useState(popupInfo?.type === "edit" ? setSelectedTrip("0") : {});
   const [errMassage, setErrorMassage] = useState("");
 
   const submitHandler = async (e) => {
@@ -604,7 +605,7 @@ function NewUserForm({
                         maxLength={42}
                         style={{ width: "200px" }}
                       >
-                        <option value="">None</option>
+                        <option value="0">None</option>
                         {trips
                           .filter((a) => a.trip_uuid && a.status)
                           .map((a) => (
