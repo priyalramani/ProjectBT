@@ -26,24 +26,9 @@ import ProcessingOrders from "./users/ProcessingOrders";
 const id = "240522";
 function App() {
 
-  // axios.defaults.baseURL = "https://api.btgondia.com";
-  axios.defaults.baseURL = "http://15.207.39.69:9000";
+  axios.defaults.baseURL = "https://api.btgondia.com";
+  // axios.defaults.baseURL = "http://15.207.39.69:9000";
   // axios.defaults.baseURL = "http://localhost:9000";
-
-  // useEffect(() => {
-  //   if (
-  //     localStorage.getItem("user_uuid") &&
-  //     localStorage.getItem("user_uuid") !== id &&
-  //     !window.location.pathname.includes("users")
-  //   ) {
-  //     window.location.assign("/users");
-  //   } else if (
-  //     localStorage.getItem("user_uuid") === id &&
-  //     !window.location.pathname.includes("admin")
-  //   ) {
-  //     window.location.assign("/admin");
-  //   }
-  // });
 
   return (
     <div className="App">
