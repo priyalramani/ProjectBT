@@ -30,7 +30,7 @@ const Processing = () => {
         }}
       >
         {tripData
-          ?.filter((a) => a.trip_title)
+          ?.filter((a) => a.trip_title&&a.orderLength)
           .map((data, i) => (
             <Link
               key={i}
