@@ -617,6 +617,7 @@ function NewUserForm({
                       type="number"
                       name="route_title"
                       className="numberInput"
+                      step="0.001"
                       value={data?.item_price}
                       onChange={(e) =>
                         setdata({
