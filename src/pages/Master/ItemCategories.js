@@ -319,7 +319,7 @@ function NewUserForm({ onSave, popupInfo, setRoutesData, companies }) {
                 </div>
                 <div className="row">
                   <label className="selectLabel">
-                    User Type
+                    Company
                     <select
                       name="user_type"
                       className="select"

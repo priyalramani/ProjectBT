@@ -307,10 +307,10 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
       setErrorMassage("Please insert  Title");
       return;
     }
-    if (data?.mobile?.length !== 10) {
-      setErrorMassage("Please enter 10 Numbers in Mobile");
-      return;
-    }
+    // if (data?.mobile?.length !== 10) {
+    //   setErrorMassage("Please enter 10 Numbers in Mobile");
+    //   return;
+    // }
     if (!data.route_uuid) {
       setdata({ ...data, route_uuid: "0" });
     }

@@ -411,7 +411,7 @@ function NewUserForm({
   companies,
   itemCategories,
 }) {
-  const [data, setdata] = useState({ company_uuid: companies[0].company_uuid });
+  const [data, setdata] = useState({});
 
   const [errMassage, setErrorMassage] = useState("");
   console.log(popupInfo);
@@ -421,7 +421,14 @@ function NewUserForm({
           setdata({ one_pack: "1", conversion: "1", ...popupInfo.data });
         }
       : () => {
-          setdata({ one_pack: "1", conversion: "1" });
+          setdata({
+            one_pack: "1",
+            conversion: "1",
+            company_uuid: companies[0].company_uuid,
+            category_uuid: itemCategories.filter(
+              (a) => a.company_uuid === companies[0].company_uuid
+            )[0],
+          });
         },
     []
   );
@@ -532,7 +539,7 @@ function NewUserForm({
                         })
                       }
                     >
-                      <option value="">None</option>
+            
                       {companies
                         .sort((a, b) => a.sort_order - b.sort_order)
                         .map((a) => (
@@ -555,7 +562,7 @@ function NewUserForm({
                         })
                       }
                     >
-                      <option value="">None</option>
+               
                       {itemCategories
                         .filter((a) => a.company_uuid === data.company_uuid)
                         .sort((a, b) => a.sort_order - b.sort_order)
