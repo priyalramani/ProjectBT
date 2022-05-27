@@ -128,6 +128,9 @@ const ProcessingOrders = () => {
                   <th>
                     <div className="t-head-element">Qty</div>
                   </th>
+                  <th>
+                    <div className="t-head-element">Action</div>
+                  </th>
                 </>
               ) : (
                 <>
@@ -158,11 +161,12 @@ const ProcessingOrders = () => {
                           : "#fff",
                       color:
                         +item.status === 1 ||
-                        +item.status === 2 ||
+                       
                         +item.status === 3
                           ? "#fff"
                           : "#000",
                     }}
+
                   >
                     {selectedOrder ? (
                       <td
@@ -172,6 +176,13 @@ const ProcessingOrders = () => {
                           justifyContent: "center",
                           padding: "10px",
                         }}
+                        onClick={()=>
+                        setSelectedOrder((prev) => ({
+                          ...prev,
+                          item_details: prev.item_details.map((a) =>
+                            a.item_uuid === item.item_uuid ? { ...a, status: 1 } : a
+                          ),
+                        }))}
                       >
                         {item.item_uuid === orderSpeech ? (
                           <AiFillPlayCircle
@@ -195,6 +206,31 @@ const ProcessingOrders = () => {
                       {items.find((a) => a.item_uuid === item.item_uuid)?.mrp}
                     </td>
                     <td>{item.b + ":" + item.p}</td>
+                    <td className="flex"><button
+              className="item-sales-search"
+              style={{ width: "max-content" }}
+              onClick={()=>
+                setSelectedOrder((prev) => ({
+                  ...prev,
+                  item_details: prev.item_details.map((a) =>
+                    a.item_uuid === item.item_uuid ? { ...a, status: 2 } : a
+                  ),
+                }))}
+            >
+              Hold
+            </button><button
+              className="item-sales-search"
+              style={{ width: "max-content" }}
+              onClick={()=>
+                setSelectedOrder((prev) => ({
+                  ...prev,
+                  item_details: prev.item_details.map((a) =>
+                    a.item_uuid === item.item_uuid ? { ...a, status: 3 } : a
+                  ),
+                }))}
+            >
+              Cancel
+            </button></td>
                   </tr>
                 ))
               : orders
