@@ -340,10 +340,10 @@ const MainAdmin = () => {
                 {tripData.length ? (
                   <>
                     {tripData.map((trip) => {
-                      // if (
-                      //   orders.filter((a) => a.trip_uuid === trip.trip_uuid)
-                      //     .length
-                      // )
+                      if (
+                        orders.filter((a) => a.trip_uuid === trip.trip_uuid)
+                          .length
+                      )
                       return (
                         <div key={Math.random()} className="sectionDiv">
                           <h1>{trip.trip_title}</h1>
@@ -540,7 +540,7 @@ function NewUserForm({ onSave, popupInfo, orders, trips }) {
                       >
                         <option value="">None</option>
                         {trips
-                          .filter((a) => a.trip_uuid)
+                          .filter((a) => a.trip_uuid&&a.status)
                           .map((a) => (
                             <option value={a.trip_uuid}>{a.trip_title}</option>
                           ))}

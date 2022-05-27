@@ -3,17 +3,21 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AiFillPlayCircle } from "react-icons/ai";
 import { openDB } from "idb";
+import { useSpeechSynthesis } from "react-speech-kit";
 const ProcessingOrders = () => {
   const [orders, setOrders] = useState([]);
   const params = useParams();
-  const [items,setItems]=useState([])
+  const [items, setItems] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState();
+  const { speak } = useSpeechSynthesis();
+  const [orderSpeech, setOrderSpeech] = useState("");
+  const [oneTime, setOneTime] = useState(false);
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = await db.transaction("items", "readwrite").objectStore("items");
     let item = await tx.getAll();
     setItems(item);
-}
+  };
   const getTripOrders = async () => {
     const response = await axios({
       method: "post",
@@ -27,10 +31,26 @@ const ProcessingOrders = () => {
   };
   useEffect(() => {
     getTripOrders();
-    getIndexedDbData()
+    getIndexedDbData();
   }, []);
+  const PlayAudio = async () => {
+    if (oneTime) {
+      await speak({ text: "Order Completed" });
 
-  console.log(orders);
+      return;
+    }
+    for (let item of selectedOrder.item_details) {
+      setOrderSpeech(item.item_uuid);
+      let detail = items.find((a) => a.item_uuid === item.item_uuid);
+      console.log(detail);
+      let data = `${detail.pronounce} ${item.b ? `${item.b} box` : ""} ${
+        item.p ? `${item.p} pcs` : ""
+      }`;
+      await speak({ text: data });
+      setTimeout(() => setOrderSpeech(""), 3000);
+    }
+    setOneTime(true);
+  };
   return (
     <div
       className="item-sales-container orders-report-container"
@@ -39,12 +59,18 @@ const ProcessingOrders = () => {
       {selectedOrder ? (
         <>
           <h1>{selectedOrder.counter_title}</h1>
-          <button
-            className="item-sales-search"
-            style={{ width: "max-content" }}
-          >
-            Next
-          </button>
+          <div className="flex" style={{ justifyContent: "left" }}>
+            <h2 style={{ width: "40vw", textAlign: "start" }}>
+              {selectedOrder.invoice_number}
+            </h2>
+            <button
+              className="item-sales-search"
+              style={{ width: "max-content" }}
+              onClick={() => PlayAudio()}
+            >
+              Play
+            </button>
+          </div>
         </>
       ) : (
         ""
@@ -53,21 +79,6 @@ const ProcessingOrders = () => {
         className="table-container-user item-sales-container"
         style={{ width: "100%", left: "0", top: "0", display: "flex" }}
       >
-        {selectedOrder ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "10px",
-            }}
-          >
-            <AiFillPlayCircle style={{ fontSize: "30px", cursor: "pointer" }} />
-          </div>
-        ) : (
-          ""
-        )}
-
         <table
           className="user-table"
           style={{
@@ -78,16 +89,17 @@ const ProcessingOrders = () => {
         >
           <thead>
             <tr>
+              {selectedOrder ? <th></th> : ""}
               <th>S.N</th>
               {selectedOrder ? (
                 <>
                   <th colSpan={2}>
                     <div className="t-head-element">Item Name</div>
                   </th>
-                  <th >
+                  <th>
                     <div className="t-head-element">MRP</div>
                   </th>
-                  <th >
+                  <th>
                     <div className="t-head-element">Qty</div>
                   </th>
                 </>
@@ -104,34 +116,55 @@ const ProcessingOrders = () => {
             </tr>
           </thead>
           <tbody className="tbody">
-            {selectedOrder?
-            selectedOrder.item_details
-            ?.map((item, i) => (
-              <tr
-                key={Math.random()}
-                style={{ height: "30px" }}
-                onClick={() => setSelectedOrder(item)}
-              >
-                <td>{i + 1}</td>
-                <td colSpan={2}>{items.find(a=>a.item_uuid===item.item_uuid)?.item_title}</td>
-                <td >{items.find(a=>a.item_uuid===item.item_uuid)?.mrp}</td>
-                <td >{item.b+":"+item.p}</td>
-              </tr>
-            ))
-            
-            : orders
-              .sort((a, b) => a.created_at - b.created_at)
-              ?.map((item, i) => (
-                <tr
-                  key={Math.random()}
-                  style={{ height: "30px" }}
-                  onClick={() => setSelectedOrder(item)}
-                >
-                  <td>{i + 1}</td>
-                  <td colSpan={2}>{item.counter_title}</td>
-                  <td colSpan={2}>0/{item?.item_details?.length || 0}</td>
-                </tr>
-              ))}
+            {selectedOrder
+              ? selectedOrder.item_details?.map((item, i) => (
+                  <tr key={Math.random()} style={{ height: "30px" }}>
+                    {selectedOrder ? (
+                      <td
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: "10px",
+                        }}
+                      >
+                        {item.item_uuid === orderSpeech ? (
+                          <AiFillPlayCircle
+                            style={{ fontSize: "30px", cursor: "pointer" }}
+                          />
+                        ) : (
+                          ""
+                        )}
+                      </td>
+                    ) : (
+                      ""
+                    )}
+                    <td>{i + 1}</td>
+                    <td colSpan={2}>
+                      {
+                        items.find((a) => a.item_uuid === item.item_uuid)
+                          ?.item_title
+                      }
+                    </td>
+                    <td>
+                      {items.find((a) => a.item_uuid === item.item_uuid)?.mrp}
+                    </td>
+                    <td>{item.b + ":" + item.p}</td>
+                  </tr>
+                ))
+              : orders
+                  .sort((a, b) => a.created_at - b.created_at)
+                  ?.map((item, i) => (
+                    <tr
+                      key={Math.random()}
+                      style={{ height: "30px" }}
+                      onClick={() => setSelectedOrder(item)}
+                    >
+                      <td>{i + 1}</td>
+                      <td colSpan={2}>{item.counter_title}</td>
+                      <td colSpan={2}>0/{item?.item_details?.length || 0}</td>
+                    </tr>
+                  ))}
           </tbody>
         </table>
       </div>
