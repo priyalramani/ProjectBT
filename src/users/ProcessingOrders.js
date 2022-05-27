@@ -8,6 +8,9 @@ const ProcessingOrders = () => {
   const [orders, setOrders] = useState([]);
   const params = useParams();
   const [items, setItems] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [itemCategories, setItemsCategory] = useState([]);
+  const [counters, setCounters] = useState([]);
   const [playCount, setPlayCount] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState();
   const { speak } = useSpeechSynthesis();
@@ -18,6 +21,20 @@ const ProcessingOrders = () => {
     let tx = await db.transaction("items", "readwrite").objectStore("items");
     let item = await tx.getAll();
     setItems(item);
+    let store = await db
+      .transaction("companies", "readwrite")
+      .objectStore("companies");
+    let company = await store.getAll();
+    setCompanies(company);
+
+    store = await db
+      .transaction("item_category", "readwrite")
+      .objectStore("item_category");
+    let route = await store.getAll();
+    setItemsCategory(route);
+    store = await db.transaction("counter", "readwrite").objectStore("counter");
+    let countersData = await store.getAll();
+    setCounters(countersData);
   };
   const getTripOrders = async () => {
     const response = await axios({
@@ -56,7 +73,7 @@ const ProcessingOrders = () => {
       ),
     }));
   };
-  const postOrderData=async()=>{
+  const postOrderData = async () => {
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
@@ -66,9 +83,9 @@ const ProcessingOrders = () => {
       },
     });
     if (response.data.success) {
-      window.location.assign("/users")
+      window.location.assign("/users");
     }
-  }
+  };
   return (
     <div
       className="item-sales-container orders-report-container"
@@ -100,11 +117,14 @@ const ProcessingOrders = () => {
             </button>
             <button
               className="item-sales-search"
-              style={{ width: "max-content",position: "fixed",
-              top: 0,
-              right: 0, }}
+              style={{
+                width: "max-content",
+                position: "fixed",
+                top: 0,
+                right: 0,
+              }}
               onClick={() => {
-                postOrderData()
+                postOrderData();
               }}
             >
               Save
@@ -112,7 +132,6 @@ const ProcessingOrders = () => {
             <input
               className="searchInput"
               style={{
-          
                 position: "fixed",
                 top: 0,
                 left: 0,
@@ -132,19 +151,24 @@ const ProcessingOrders = () => {
       )}
       <div
         className="table-container-user item-sales-container"
-        style={{ width: "100vw",overflow:"scroll", left: "0", top: "0", display: "flex", }}
+        style={{
+          width: "100vw",
+          overflow: "scroll",
+          left: "0",
+          top: "0",
+          display: "flex",
+        }}
       >
         <table
           className="user-table"
           style={{
-            width: selectedOrder?"max-content":"100%",
+            width: selectedOrder ? "max-content" : "100%",
             height: "fit-content",
-       
           }}
         >
           <thead>
             <tr>
-              {selectedOrder ? <th ></th> : ""}
+              {selectedOrder ? <th></th> : ""}
               <th>S.N</th>
               {selectedOrder ? (
                 <>
@@ -175,102 +199,128 @@ const ProcessingOrders = () => {
           </thead>
           <tbody className="tbody">
             {selectedOrder
-              ? selectedOrder.item_details?.map((item, i) => (
-                  <tr
-                    key={item.item_uuid}
-                    style={{
-                      height: "30px",
-                      backgroundColor:
-                        +item.status === 1
-                          ? "green"
-                          : +item.status === 2
-                          ? "yellow"
-                          : +item.status === 3
-                          ? "red"
-                          : "#fff",
-                      color:
-                        +item.status === 1 || +item.status === 3
-                          ? "#fff"
-                          : "#000",
-                    }}
-                  >
-                    {selectedOrder ? (
-                      <td
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          padding: "10px",
-                        }}
-                        onClick={() =>
-                          setSelectedOrder((prev) => ({
-                            ...prev,
-                            item_details: prev.item_details.map((a) =>
-                              a.item_uuid === item.item_uuid
-                                ? { ...a, status: 1 }
-                                : a
-                            ),
-                          }))
+              ? selectedOrder.item_details
+                  ?.sort((a, b) => {
+                    let aItem = items.find((i) => i.item_uuid === a.item_uuid);
+                    let bItem = items.find((i) => i.item_uuid === b.item_uuid);
+                    let aItemCompany = companies.find(
+                      (i) => i.company_uuid === aItem.company_uuid
+                    );
+                    let bItemCompany = companies.find(
+                      (i) => i.company_uuid === bItem.company_uuid
+                    );
+                    let aItemCategory = itemCategories.find(
+                      (i) => i.category_uuid === aItem.category_uuid
+                    );
+                    let bItemCategory = itemCategories.find(
+                      (i) => i.category_uuid === bItem.category_uuid
+                    );
+                    return (
+                      aItemCompany.company_title?.localeCompare(
+                        bItemCompany.company_title
+                      ) ||
+                      aItemCategory.category_title?.localeCompare(
+                        bItemCategory.category_title
+                      ) ||
+                      aItem.item_title?.localeCompare(bItem.item_title)
+                    );
+                  })
+                  ?.map((item, i) => (
+                    <tr
+                      key={item.item_uuid}
+                      style={{
+                        height: "30px",
+                        backgroundColor:
+                          +item.status === 1
+                            ? "green"
+                            : +item.status === 2
+                            ? "yellow"
+                            : +item.status === 3
+                            ? "red"
+                            : "#fff",
+                        color:
+                          +item.status === 1 || +item.status === 3
+                            ? "#fff"
+                            : "#000",
+                      }}
+                    >
+                      {selectedOrder ? (
+                        <td
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "10px",
+                          }}
+                          onClick={() =>
+                            setSelectedOrder((prev) => ({
+                              ...prev,
+                              item_details: prev.item_details.map((a) =>
+                                a.item_uuid === item.item_uuid
+                                  ? { ...a, status: 1 }
+                                  : a
+                              ),
+                            }))
+                          }
+                        >
+                          {item.item_uuid === orderSpeech ? (
+                            <AiFillPlayCircle
+                              style={{ fontSize: "25px", cursor: "pointer" }}
+                            />
+                          ) : (
+                            ""
+                          )}
+                        </td>
+                      ) : (
+                        ""
+                      )}
+                      <td>{i + 1}</td>
+                      <td colSpan={2}>
+                        {
+                          items.find((a) => a.item_uuid === item.item_uuid)
+                            ?.item_title
                         }
-                      >
-                        {item.item_uuid === orderSpeech ? (
-                          <AiFillPlayCircle
-                            style={{ fontSize: "25px", cursor: "pointer" }}
-                          />
-                        ) : (
-                          ""
-                        )}
                       </td>
-                    ) : (
-                      ""
-                    )}
-                    <td>{i + 1}</td>
-                    <td colSpan={2}>
-                      {
-                        items.find((a) => a.item_uuid === item.item_uuid)
-                          ?.item_title
-                      }
-                    </td>
-                    <td>
-                      {items.find((a) => a.item_uuid === item.item_uuid)?.mrp}
-                    </td>
-                    <td>{item.b + ":" + item.p}</td>
-                    <td className="flex">
-                      <button
-                        className="item-sales-search"
-                        style={{ width: "max-content" }}
-                        onClick={() =>
-                          setSelectedOrder((prev) => ({
-                            ...prev,
-                            item_details: prev.item_details.map((a) =>
-                              a.item_uuid === item.item_uuid
-                                ? { ...a, status: 2 }
-                                : a
-                            ),
-                          }))
-                        }
-                      >
-                        Hold
-                      </button>
-                      <button
-                        className="item-sales-search"
-                        style={{ width: "max-content" }}
-                        onClick={() =>
-                          setSelectedOrder((prev) => ({
-                            ...prev,
-                            item_details: prev.item_details.map((a) =>
-                              a.item_uuid === item.item_uuid
-                                ? { ...a, status: 3 }
-                                : a
-                            ),
-                          }))
-                        }
-                      >
-                        Cancel
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                      <td>
+                        {items.find((a) => a.item_uuid === item.item_uuid)?.mrp}
+                      </td>
+                      <td>{item.b + ":" + item.p}</td>
+                      <td className="flex">
+                        <button
+                          className="item-sales-search"
+                          style={{ width: "max-content" }}
+                          onClick={() =>
+                            setSelectedOrder((prev) => ({
+                              ...prev,
+                              item_details: prev.item_details.map((a) =>
+                                a.item_uuid === item.item_uuid
+                                  ? { ...a, status: 2 }
+                                  : a
+                              ),
+                            }))
+                          }
+                        >
+                          Hold
+                        </button>
+                        <button
+                          className="item-sales-search"
+                          style={{ width: "max-content" }}
+                          onClick={() =>
+                            setSelectedOrder((prev) => ({
+                              ...prev,
+                              item_details: prev.item_details.map((a) =>
+                                a.item_uuid === item.item_uuid
+                                  ? { ...a, status: 3 }
+                                  : a
+                              ),
+                            }))
+                          }
+                        >
+                          Cancel
+                        </button>
+                      </td>
+                    </tr>
+                  ))
               : orders
                   .sort((a, b) => a.created_at - b.created_at)
                   ?.map((item, i) => (
