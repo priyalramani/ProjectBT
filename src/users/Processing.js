@@ -23,10 +23,12 @@ const Processing = () => {
       <div
         className="servicesContainer"
         style={{
+          width:"90%",
+          height:"90vh",
           gridAutoFlow: "row",
           gridAutoRows: "20%",
 
-          overflow: "scroll",
+          overflowY: "scroll",
         }}
       >
         {tripData

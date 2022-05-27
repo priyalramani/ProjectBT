@@ -85,6 +85,7 @@ const ProcessingOrders = () => {
     if (response.data.success) {
       sessionStorage.setItem("playCount",playCount)
       setSelectedOrder(false);
+      getTripOrders()
     }
   };
   return (
@@ -323,7 +324,7 @@ const ProcessingOrders = () => {
                     </tr>
                   ))
               : orders
-                  .sort((a, b) => a.created_at - b.created_at)
+                  ?.sort((a, b) => a.created_at - b.created_at)
                   ?.map((item, i) => (
                     <tr
                       key={Math.random()}
@@ -332,7 +333,7 @@ const ProcessingOrders = () => {
                     >
                       <td>{i + 1}</td>
                       <td colSpan={2}>{item.counter_title}</td>
-                      <td colSpan={2}>0/{item?.item_details?.length || 0}</td>
+                      <td colSpan={2}>{item?.item_details?.filter(a=>+a.status===1)?.length}/{item?.item_details?.length || 0}</td>
                     </tr>
                   ))}
           </tbody>
