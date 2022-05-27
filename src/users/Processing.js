@@ -31,6 +31,7 @@ const Processing = () => {
       >
         {tripData
           ?.filter((a) => a.trip_title&&a.orderLength)
+          ?.sort((a,b)=>a.created_at?a.created_at-b.created_at:-1)
           .map((data, i) => (
             <Link
               key={i}
