@@ -123,7 +123,7 @@ const ProcessingOrders = () => {
           <tbody className="tbody">
             {selectedOrder
               ? selectedOrder.item_details?.map((item, i) => (
-                  <tr key={Math.random()} style={{ height: "30px" }}>
+                  <tr key={Math.random()} style={{ height: "30px",backgroundColor:+item.status===1?"green":+item.status===2?"yellow":+item.status===3?"red":"#fff",color:+item.status===1||+item.status===2||+item.status===3?"#fff":"#000" }} >
                     {selectedOrder ? (
                       <td
                         style={{
