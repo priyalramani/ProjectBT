@@ -99,7 +99,7 @@ const SelectedCounterOrder = () => {
         <nav className="user_nav">
           <div className="user_menubar">
             <AiOutlineArrowLeft
-              onClick={() => (cartPage ? Navigate(-1) : setCartPage(false))}
+              onClick={() => (!cartPage ? Navigate(-1) : setCartPage(false))}
             />
           </div>
           {cartPage ? <h1>Cart</h1> : ""}
