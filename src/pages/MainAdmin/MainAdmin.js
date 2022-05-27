@@ -17,6 +17,7 @@ const MainAdmin = () => {
   const [btn, setBtn] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState([]);
   const [selectedRouteOrder, setSelectedRouteOrder] = useState({});
+  const [selectedTrip, setSelectedTrip] = useState("");
   const getCounter = async () => {
     const response = await axios({
       method: "get",
@@ -84,6 +85,20 @@ const MainAdmin = () => {
       getRunningOrders();
     }
   }, [btn, popupForm]);
+  const postOrderData=async()=>{
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: orders.map((a) => ({ ...a, trip_uuid: selectedTrip })),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setSelectedOrder([])
+      setSelectedTrip("")
+    }
+  }
   return (
     <>
       <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} />
@@ -166,7 +181,7 @@ const MainAdmin = () => {
                                 selectedOrder={
                                   selectedRouteOrder === item.order_uuid
                                 }
-                                title2={item?.counter_title||""}
+                                title2={item?.counter_title || ""}
                                 // color={item.color}
                                 // price={item.price}
                                 // visibleContext={visibleContext}
@@ -241,7 +256,7 @@ const MainAdmin = () => {
                                         selectedOrder={
                                           selectedRouteOrder === item.order_uuid
                                         }
-                                        title2={item?.counter_title||""}
+                                        title2={item?.counter_title || ""}
                                         // color={item.color}
                                         // price={item.price}
                                         // visibleContext={visibleContext}
@@ -271,17 +286,22 @@ const MainAdmin = () => {
                 >
                   Add
                 </button>
-                {selectedOrder.length ? (
-                  <button
-                    className="item-sales-search"
-                    onClick={() => setPopupForm({ type: "edit" })}
-                    style={{ position: "absolute", left: "70vw", top: "60px" }}
-                  >
-                    Assign
-                  </button>
-                ) : (
-                  ""
-                )}
+
+                <button
+                  className="item-sales-search"
+                  onClick={() => setPopupForm({ type: "edit" })}
+                  style={{ position: "absolute", left: "70vw", top: "60px" }}
+                >
+                  Assign
+                </button>
+                {console.log(selectedOrder.length,selectedTrip)}
+               {selectedOrder.length&&selectedTrip? <button
+                  className="item-sales-search"
+                  onClick={() => postOrderData()}
+                  style={{ position: "absolute", right: "0", top: "60px" }}
+                >
+                  Done
+                </button>:""}
                 {orders.filter((a) => !a?.trip_uuid).length ? (
                   <div key={Math.random()} className="sectionDiv">
                     <h1>UnKnown</h1>
@@ -337,7 +357,7 @@ const MainAdmin = () => {
                                     (a) => a.order_uuid === item.order_uuid
                                   ).length
                                 }
-                                title2={item?.counter_title||""}
+                                title2={item?.counter_title || ""}
                                 // color={item.color}
                                 // price={item.price}
                                 // visibleContext={visibleContext}
@@ -420,7 +440,7 @@ const MainAdmin = () => {
                                               a.order_uuid === item.order_uuid
                                           ).length
                                         }
-                                        title2={item?.counter_title||""}
+                                        title2={item?.counter_title || ""}
                                         // color={item.color}
                                         // price={item.price}
                                         // visibleContext={visibleContext}
@@ -482,6 +502,8 @@ const MainAdmin = () => {
             setPopupForm(false);
             setSelectedOrder([]);
           }}
+          selectedTrip={selectedTrip}
+          setSelectedTrip={setSelectedTrip}
           setRoutesData={setRoutesData}
           popupInfo={popupForm}
           orders={selectedOrder}
@@ -495,7 +517,7 @@ const MainAdmin = () => {
 };
 
 export default MainAdmin;
-function NewUserForm({ onSave, popupInfo, orders, trips }) {
+function NewUserForm({ onSave, popupInfo, setSelectedTrip,selectedTrip, trips }) {
   const [data, setdata] = useState(popupInfo?.type === "edit" ? "" : {});
   const [errMassage, setErrorMassage] = useState("");
 
@@ -503,17 +525,7 @@ function NewUserForm({ onSave, popupInfo, orders, trips }) {
     e.preventDefault();
     if (popupInfo?.type === "edit") {
       console.log(data);
-      const response = await axios({
-        method: "put",
-        url: "/orders/putOrders",
-        data: orders.map((a) => ({ ...a, trip_uuid: data })),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.data.success) {
-        onSave();
-      }
+      onSave();
     } else {
       if (!data.trip_title) {
         setErrorMassage("Please insert Trip Title");
@@ -563,8 +575,8 @@ function NewUserForm({ onSave, popupInfo, orders, trips }) {
                       <select
                         name="route_title"
                         className="numberInput"
-                        value={data}
-                        onChange={(e) => setdata(e.target.value)}
+                        value={selectedTrip}
+                        onChange={(e) => setSelectedTrip(e.target.value)}
                         maxLength={42}
                         style={{ width: "200px" }}
                       >
