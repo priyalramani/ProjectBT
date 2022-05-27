@@ -131,7 +131,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
           )
           ?.map((item, i) => (
             <tr
-              key={Math.random()}
+              key={item.item_uuid} 
               style={{ height: "30px" }}
               onClick={() => setPopupForm({ type: "edit", data: item })}
             >
@@ -400,7 +400,7 @@ function NewUserForm({ onSave,popupForm }) {
                       </td>
                     </tr>
                     {objData.qty_details?.map((item, i) => (
-                      <tr key={Math.random()} style={{ height: "30px" }}>
+                      <tr key={item.item_uuid}  style={{ height: "30px" }}>
                         <td colSpan={4} style={{ textAlign: "center" }}>
                           If quantity of base item is
                           <input
