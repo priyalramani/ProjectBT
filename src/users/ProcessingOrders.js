@@ -87,16 +87,17 @@ const ProcessingOrders = () => {
         counters.find((a) => a.counter_uuid === selectedOrder.counter_uuid),
         selectedOrder.item_details
       );
-      setSelectedOrder({
-        ...selectedOrder,
-        ...billingData,
-        item_details: billingData.items,
-      });
+      data = [
+        {
+          ...data[0],
+          ...billingData,
+          item_details: billingData.items,
+        },
+      ];
     }
     if (
-      !selectedOrder.item_details.filter(
-        (a) => +a.status === 0 || +a.status === 2
-      ).length
+      !data?.item_details?.filter((a) => +a.status === 0 || +a.status === 2)
+        .length
     )
       data = data.map((a) => ({
         ...a,
