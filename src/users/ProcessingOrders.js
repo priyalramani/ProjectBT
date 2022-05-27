@@ -35,7 +35,6 @@ const ProcessingOrders = () => {
     getIndexedDbData();
   }, []);
   const PlayAudio = async (item) => {
-
     if (!item) {
       await speak({ text: "Order Completed" });
 
@@ -57,6 +56,19 @@ const ProcessingOrders = () => {
       ),
     }));
   };
+  const postOrderData=async()=>{
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: [selectedOrder],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      window.location.assign("/users")
+    }
+  }
   return (
     <div
       className="item-sales-container orders-report-container"
@@ -73,12 +85,13 @@ const ProcessingOrders = () => {
               className="item-sales-search"
               style={{ width: "max-content" }}
               onClick={() => {
-                let items = selectedOrder?.item_details?.filter((a) => !a.status)
+                let items = selectedOrder?.item_details?.filter(
+                  (a) => !a.status
+                );
                 for (let i = 0; i < playCount; i++) {
                   if (i === 0) PlayAudio(items[0]);
-                  else if(items[i]){
-                    
-                    setTimeout(()=>PlayAudio(items[i]), 3000);
+                  else if (items[i]) {
+                    setTimeout(() => PlayAudio(items[i]), 3000);
                   }
                 }
               }}
@@ -87,16 +100,31 @@ const ProcessingOrders = () => {
             </button>
             <button
               className="item-sales-search"
+              style={{ width: "max-content",position: "fixed",
+              top: 0,
+              right: 0, }}
+              onClick={() => {
+                postOrderData()
+              }}
+            >
+              Save
+            </button>
+            <input
+              className="searchInput"
               style={{
-                width: "max-content",
+          
                 position: "fixed",
                 top: 0,
                 left: 0,
+                border: "none",
+                borderBottom: "2px solid black",
+                borderRadius: "0px",
+                width: "50px",
+                padding: "0 5px",
               }}
-              onClick={() => setPlayCount((prev) => prev + 1)}
-            >
-              {playCount}
-            </button>
+              value={playCount}
+              onChange={(e) => setPlayCount(e.target.value)}
+            />
           </div>
         </>
       ) : (
@@ -104,19 +132,19 @@ const ProcessingOrders = () => {
       )}
       <div
         className="table-container-user item-sales-container"
-        style={{ width: "100%", left: "0", top: "0", display: "flex" }}
+        style={{ width: "100vw",overflow:"scroll", left: "0", top: "0", display: "flex", }}
       >
         <table
           className="user-table"
           style={{
-            maxWidth: "100vw",
+            width: selectedOrder?"max-content":"100%",
             height: "fit-content",
-            overflowX: "scroll",
+       
           }}
         >
           <thead>
             <tr>
-              {selectedOrder ? <th></th> : ""}
+              {selectedOrder ? <th ></th> : ""}
               <th>S.N</th>
               {selectedOrder ? (
                 <>
@@ -161,13 +189,10 @@ const ProcessingOrders = () => {
                           ? "red"
                           : "#fff",
                       color:
-                        +item.status === 1 ||
-                       
-                        +item.status === 3
+                        +item.status === 1 || +item.status === 3
                           ? "#fff"
                           : "#000",
                     }}
-
                   >
                     {selectedOrder ? (
                       <td
@@ -177,17 +202,20 @@ const ProcessingOrders = () => {
                           justifyContent: "center",
                           padding: "10px",
                         }}
-                        onClick={()=>
-                        setSelectedOrder((prev) => ({
-                          ...prev,
-                          item_details: prev.item_details.map((a) =>
-                            a.item_uuid === item.item_uuid ? { ...a, status: 1 } : a
-                          ),
-                        }))}
+                        onClick={() =>
+                          setSelectedOrder((prev) => ({
+                            ...prev,
+                            item_details: prev.item_details.map((a) =>
+                              a.item_uuid === item.item_uuid
+                                ? { ...a, status: 1 }
+                                : a
+                            ),
+                          }))
+                        }
                       >
                         {item.item_uuid === orderSpeech ? (
                           <AiFillPlayCircle
-                            style={{ fontSize: "30px", cursor: "pointer" }}
+                            style={{ fontSize: "25px", cursor: "pointer" }}
                           />
                         ) : (
                           ""
@@ -207,31 +235,40 @@ const ProcessingOrders = () => {
                       {items.find((a) => a.item_uuid === item.item_uuid)?.mrp}
                     </td>
                     <td>{item.b + ":" + item.p}</td>
-                    <td className="flex"><button
-              className="item-sales-search"
-              style={{ width: "max-content" }}
-              onClick={()=>
-                setSelectedOrder((prev) => ({
-                  ...prev,
-                  item_details: prev.item_details.map((a) =>
-                    a.item_uuid === item.item_uuid ? { ...a, status: 2 } : a
-                  ),
-                }))}
-            >
-              Hold
-            </button><button
-              className="item-sales-search"
-              style={{ width: "max-content" }}
-              onClick={()=>
-                setSelectedOrder((prev) => ({
-                  ...prev,
-                  item_details: prev.item_details.map((a) =>
-                    a.item_uuid === item.item_uuid ? { ...a, status: 3 } : a
-                  ),
-                }))}
-            >
-              Cancel
-            </button></td>
+                    <td className="flex">
+                      <button
+                        className="item-sales-search"
+                        style={{ width: "max-content" }}
+                        onClick={() =>
+                          setSelectedOrder((prev) => ({
+                            ...prev,
+                            item_details: prev.item_details.map((a) =>
+                              a.item_uuid === item.item_uuid
+                                ? { ...a, status: 2 }
+                                : a
+                            ),
+                          }))
+                        }
+                      >
+                        Hold
+                      </button>
+                      <button
+                        className="item-sales-search"
+                        style={{ width: "max-content" }}
+                        onClick={() =>
+                          setSelectedOrder((prev) => ({
+                            ...prev,
+                            item_details: prev.item_details.map((a) =>
+                              a.item_uuid === item.item_uuid
+                                ? { ...a, status: 3 }
+                                : a
+                            ),
+                          }))
+                        }
+                      >
+                        Cancel
+                      </button>
+                    </td>
                   </tr>
                 ))
               : orders
