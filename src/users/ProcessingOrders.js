@@ -449,8 +449,8 @@ function NewUserForm({ onSave, popupInfo, setOrder, order, setUpdateBilling }) {
             if (a.item_uuid === popupInfo.item_uuid)
               return {
                 ...a,
-                b: +data.b + parseInt(+data.p / +popupInfo.conversion),
-                p: +data.p % +popupInfo.conversion,
+                b: +data.b + parseInt(+data.p / (+popupInfo.conversion||1)),
+                p: +data.p % (+popupInfo.conversion||1),
               };
             else return a;
           })
@@ -459,22 +459,22 @@ function NewUserForm({ onSave, popupInfo, setOrder, order, setUpdateBilling }) {
             ...prev.item_details,
             {
               ...popupInfo,
-              b: +data.b + parseInt(+data.p / +popupInfo.conversion),
-              p: +data.p % +popupInfo.conversion,
+              b: +data.b + parseInt(+data.p / (+popupInfo.conversion||1)),
+              p: +data.p % (+popupInfo.conversion||1),
             },
           ]
         : [
             {
               ...popupInfo,
-              b: +data.b + parseInt(+data.p / +popupInfo.conversion),
-              p: +data.p % +popupInfo.conversion,
+              b: +data.b + parseInt(+data.p / (+popupInfo.conversion||1)),
+              p: +data.p % (+popupInfo.conversion||1),
             },
           ],
     }));
     setUpdateBilling(true);
     onSave();
   };
-
+console.log(popupInfo)
   return (
     <div className="overlay">
       <div
