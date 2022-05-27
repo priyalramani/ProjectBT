@@ -433,7 +433,7 @@ function NewUserForm({ onSave, popupForm }) {
                       <td>
                         <select
                           value={item.unit}
-                          className="select"
+                          className="input"
                           style={{
                             border: "none",
                             borderBottom: "2px solid black",
@@ -464,7 +464,7 @@ function NewUserForm({ onSave, popupForm }) {
                 onClick={(e) =>
                   setObgData((prev) => ({
                     ...prev,
-                    qty_details: [...prev.qty_details, DEFAULT],
+                    qty_details: [...prev.qty_details, {...DEFAULT,uuid:uuid()}],
                   }))
                 }
               >

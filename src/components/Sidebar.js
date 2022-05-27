@@ -56,7 +56,7 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               link: "/admin/autoIncreaseQty",
             },
             {
-              name: "Auto Increase Item",
+              name: "Auto Add Item",
               link: "/admin/autoIncreaseItem",
             },
           ]}

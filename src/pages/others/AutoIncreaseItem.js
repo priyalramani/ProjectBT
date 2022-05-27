@@ -40,7 +40,7 @@ const AutoIncreaseItem = () => {
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading">
-          <h2 style={{ width: "100%" }}>Auto Increase Item </h2>
+          <h2 style={{ width: "100%" }}>Auto Add Item </h2>
         </div>
         <div id="item-sales-top">
           <div
@@ -327,7 +327,6 @@ function NewUserForm({ onSave,popupForm }) {
         }
       }
   };
-
   return (
     <>
       <div className="overlay">
