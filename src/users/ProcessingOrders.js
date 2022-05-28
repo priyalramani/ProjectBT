@@ -85,7 +85,7 @@ const ProcessingOrders = () => {
     }));
   };
   const postActivity = async (others = {}) => {
-    let time =new Date()
+    let time = new Date();
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
       role: "Order",
@@ -106,49 +106,54 @@ const ProcessingOrders = () => {
     }
   };
   const postOrderData = async () => {
-    let data = [selectedOrder];
+    let data = selectedOrder;
     if (updateBilling) {
       let billingData = await Billing(
         counters.find((a) => a.counter_uuid === selectedOrder.counter_uuid),
         selectedOrder.item_details.map((a) => {
           let itemData = items.find((b) => a.item_uuid === b.item_uuid);
           return {
+            ...itemData,
             ...a,
-            conversion: itemData?.conversion,
-            item_price: itemData?.item_price,
+            price:itemData?.price||0
           };
         })
       );
-      data = [
-        {
-          ...data[0],
-          ...billingData,
-          item_details: billingData.items,
-        },
-      ];
+      data = {
+        ...data,
+        ...billingData,
+        item_details: billingData.items,
+      };
     }
-    console.log(data);
-    let time = new Date()
+
+    let time = new Date();
     if (
-      data[0]?.item_details?.filter((a) => +a.status === 1 || +a.status === 3)
-        ?.length === data[0]?.item_details.length
+      data?.item_details?.filter((a) => +a.status === 1 || +a.status === 3)
+        ?.length === data?.item_details.length
     )
-      data = data.map((a) => ({
-        ...a,
+      data = {
+        ...data,
         status: [
-          ...a.status,
+          ...data.status,
           {
             stage: "2",
             time: time.getTime(),
             user_uuid: localStorage.getItem("user_uuid"),
           },
         ],
-      }));
+      };
+    data = Object.keys(data)
+      .filter((key) => key !== "others" || key !== "items")
+      .reduce((obj, key) => {
+        obj[key] = data[key];
+        return obj;
+      }, {});
+
     console.log(data);
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
-      data,
+      data:[data],
       headers: {
         "Content-Type": "application/json",
       },
@@ -508,7 +513,6 @@ function NewUserForm({ onSave, popupInfo, setOrder, order, setUpdateBilling }) {
         (a) => a.item_uuid === popupInfo.item_uuid
       )?.length
         ? prev?.item_details?.map((a) => {
-            console.log("00000000", a);
             if (a.item_uuid === popupInfo.item_uuid)
               return {
                 ...a,
