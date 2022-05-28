@@ -138,7 +138,7 @@ const MainAdmin = () => {
                       style={{
                         flexDirection: "row",
                         flexWrap: "wrap",
-                        gap: "5",
+                        gap: "0",
                       }}
                       id="seats_container"
                     >
@@ -234,7 +234,7 @@ const MainAdmin = () => {
                               style={{
                                 flexDirection: "row",
                                 flexWrap: "wrap",
-                                gap: "5",
+                                gap: "0",
                               }}
                               id="seats_container"
                             >
@@ -351,7 +351,7 @@ const MainAdmin = () => {
                       style={{
                         flexDirection: "row",
                         flexWrap: "wrap",
-                        gap: "5",
+                        gap: "0",
                       }}
                       id="seats_container"
                     >
@@ -452,7 +452,7 @@ const MainAdmin = () => {
                               style={{
                                 flexDirection: "row",
                                 flexWrap: "wrap",
-                                gap: "5",
+                                gap: "0",
                               }}
                               id="seats_container"
                             >
