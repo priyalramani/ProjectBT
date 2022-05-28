@@ -150,6 +150,7 @@ const SelectedCounterOrder = () => {
       setOrderCreated(true);
     }
   }, [order]);
+  console.log(order)
   return (
     <>
       <div>

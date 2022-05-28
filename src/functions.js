@@ -85,28 +85,28 @@ export const AutoAdd = async (counter, items) => {
           (b) => a.item_group_uuid.filter((c) => c === b).length
         ).length
     );
-    //console.log("eligible", eligibleAddItems);
+    console.log("eligible", eligibleAddItems);
     let eligiblesBox =
       eligibleAddItems.length > 1
-        ? eligibleAddItems.reduce((a, b) => +a.box + b.box)
+        ? eligibleAddItems.map(a => a.box).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
         ? +eligibleAddItems[0].box
         : 0;
     //console.log("eligibleBox", eligiblesBox);
     let eligiblesPcs =
       eligibleAddItems.length > 1
-        ? eligibleAddItems.reduce((a, b) => +a.pcs + b.pcs)
+        ? eligibleAddItems.map(a => a.pcs).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
         ? +eligibleAddItems[0].pcs
         : 0;
-    //console.log("eligiblePcs", eligiblesPcs);
+    // console.log("eligiblePcs", eligiblesPcs);
 
     let base_qty_arr = autobill.qty_details.filter(
-      (b) => b.unit === "b" && +b.base_qty <= +eligiblesBox
+      (b) => b.unit === "b" && +b.base_qty <= eligiblesBox
     );
     //console.log("baseqtyarr", base_qty_arr);
     base_qty_arr =
-      base_qty_arr.length >= autobill.min_range
+      eligibleAddItems.length >= autobill.min_range
         ? base_qty_arr.length > 1
           ? base_qty_arr.reduce((a, b) =>
               +Math.max(a.base_qty, b.base_qty) === +a.base_qty ? a : b
@@ -117,11 +117,11 @@ export const AutoAdd = async (counter, items) => {
         : null;
     //console.log("baseqtyobj", base_qty_arr);
     let pice_qty_arr = autobill.qty_details.filter(
-      (b) => b.unit === "p" && +b.base_qty <= +eligiblesPcs
+      (b) => b.unit === "p" && +b.base_qty <= eligiblesPcs
     );
-    //console.log("piceqtyarr", pice_qty_arr);
+    console.log("piceqtyarr", pice_qty_arr);
     pice_qty_arr =
-      pice_qty_arr.length >= autobill.min_range
+    eligibleAddItems.length >= autobill.min_range
         ? pice_qty_arr.length > 1
           ? pice_qty_arr.reduce((a, b) =>
               +Math.max(a.base_qty, b.base_qty) === +a.base_qty ? a : b
@@ -130,7 +130,7 @@ export const AutoAdd = async (counter, items) => {
           ? pice_qty_arr[0]
           : null
         : null;
-    //console.log("piceqtyobj", pice_qty_arr);
+    console.log("piceqtyobj", pice_qty_arr);
 
     if (base_qty_arr?.add_items) {
       let dataItems = dbItems.filter(
@@ -152,26 +152,23 @@ export const AutoAdd = async (counter, items) => {
         };
       });
       let nonFiltered = eligibleItems.filter(
-        (a) => dataItems.filter((b) => a.item_uuid !== b.item_uuid).length
+        (a) => !(dataItems.filter((b) => a.item_uuid === b.item_uuid).length)
       );
-      let Filtered = items
-        .filter(
-          (a) => dataItems.filter((b) => a.item_uuid === b.item_uuid).length
-        )
-        .map((a) => {
-          return {
-            ...a,
-            box:
-              +(a?.box || 0) +
-              (dataItems.find((b) => a.item_uuid !== b.item_uuid)?.box || 0),
-          };
-        });
+      dataItems = dataItems.map((a) => {
+        let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
+        return {
+          ...a,
+          pcs: (data ? +a.pcs + data.pcs : a.pcs) || 0,
+          box: (data ? +a.box + data.box : a.box) || 0,
+        };
+      });
+     
       items = nonFiltered.length
-        ? Filtered.length
-          ? [...nonFiltered, ...Filtered]
-          : [...nonFiltered]
-        : Filtered.length
-        ? [...Filtered]
+        ? dataItems.length
+          ? [...nonFiltered, ...dataItems]
+          : nonFiltered
+        : dataItems.length
+        ? dataItems
         : [];
     }
     if (pice_qty_arr?.add_items) {
