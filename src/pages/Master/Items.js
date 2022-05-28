@@ -427,7 +427,7 @@ function NewUserForm({
             company_uuid: companies[0].company_uuid,
             category_uuid: itemCategories.filter(
               (a) => a.company_uuid === companies[0].company_uuid
-            )[0],
+            )[0]?.category_uuid,
           });
         },
     []
@@ -469,7 +469,7 @@ function NewUserForm({
       }
     }
   };
-
+console.log(data)
   return (
     <div className="overlay">
       <div
