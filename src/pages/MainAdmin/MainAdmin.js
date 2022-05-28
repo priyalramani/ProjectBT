@@ -173,8 +173,10 @@ const MainAdmin = () => {
                                 //   menuOpenHandler(item)
                                 // }
                               />
+                              
                               <Card
                                 // on_order={order}
+                                dateTime={item?.status[0]?.time}
                                 // key={item.seat_uuid}
                                 title1={item?.invoice_number || ""}
                                 selectedOrder={
@@ -268,6 +270,7 @@ const MainAdmin = () => {
                                       <Card
                                         // on_order={on_order && on_order}
                                         // key={item.seat_uuid}
+                                        dateTime={item?.status[0]?.time}
                                         title1={item?.invoice_number || ""}
                                         selectedOrder={
                                           selectedRouteOrder === item.order_uuid
@@ -392,8 +395,11 @@ const MainAdmin = () => {
                                 //   menuOpenHandler(item)
                                 // }
                               />
+                              
                               <Card
                                 // on_order={order}
+                                dateTime={item?.status[0]?.time}
+                                
                                 // key={item.seat_uuid}
                                 title1={item?.invoice_number || ""}
                                 selectedOrder={
@@ -501,6 +507,7 @@ const MainAdmin = () => {
                                       <Card
                                         // on_order={on_order && on_order}
                                         // key={item.seat_uuid}
+                                        dateTime={item?.status[0]?.time}
                                         title1={item?.invoice_number || ""}
                                         selectedOrder={
                                           selectedTrip

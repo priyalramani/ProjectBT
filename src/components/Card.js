@@ -4,19 +4,36 @@ const Card = ({
   selectedOrder,
   color,
   status,
-  price,
+  dateTime,
   rounded,
-  item,
-  onclickFunction,
-  on_order,
-  cursorItemRef,
-  index,
-  seats,
-  visibleContext,
-  setVisibleContext,
-  isMouseInsideContext,
 }) => {
-  console.log(selectedOrder);
+  console.log(dateTime);
+
+ 
+  var days = [
+    "Sun",
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri",
+    "Sat",
+  ];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+];
+
+function formatAMPM(date) {
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+  var ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0'+minutes : minutes;
+  var strTime = hours + ':' + minutes + ' ' + ampm;
+  return strTime;
+}
+
   return (
     <>
       <div>
@@ -36,7 +53,8 @@ const Card = ({
             ></div>
             <div className="seatTimer">
               <div>{status}</div>
-              {/* <div>(Rs.{on_order ? on_order.price : 0})</div> */}
+              <div style={{fontSize:"10px"}}>{`${days[(new Date(dateTime * 1000)).getDay()]||""} ${(new Date(dateTime).getDate())||""} ${monthNames[(new Date()).getMonth()]||""}`}</div>
+              <div style={{fontSize:"10px"}}>{formatAMPM(new Date(dateTime)) || ""}</div>
             </div>
           </div>
         </button>
