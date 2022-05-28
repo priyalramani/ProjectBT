@@ -18,6 +18,27 @@ const Processing = () => {
   useEffect(() => {
     getTripData();
   }, []);
+  const postActivity = async (trip) => {
+    let data = {
+      user_uuid: localStorage.getItem("user_uuid"),
+      role: "Processing",
+      narration:
+        trip.trip_uuid ,
+      timestamp: (new Date()).getTime(),
+      activity: "trip_open",
+    };
+    const response = await axios({
+      method: "post",
+      url: "/userActivity/postUserActivity",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      console.log(response);
+    }
+  };
   return (
     <div className="servicePage">
       <div
@@ -42,6 +63,7 @@ const Processing = () => {
                 // pathname + rolesArray.find((a) => +a.type === +data)?.link
               }
               onClick={() => {
+                postActivity(data)
                 window.location.assign("/users/processing/" + data.trip_uuid);
               }}
             >

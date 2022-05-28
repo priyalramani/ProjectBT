@@ -18,6 +18,8 @@ const ProcessingOrders = () => {
   const { speak } = useSpeechSynthesis();
   const [orderSpeech, setOrderSpeech] = useState("");
   const [updateBilling, setUpdateBilling] = useState(false);
+  const [orderCreated, setOrderCreated] = useState(false);
+  const [oneTimeState, setOneTimeState] = useState(false);
   useEffect(() => {
     let data = sessionStorage.getItem("playCount");
     if (data) {
@@ -80,6 +82,26 @@ const ProcessingOrders = () => {
       ),
     }));
   };
+  const postActivity = async (others = {}) => {
+    let data = {
+      user_uuid: localStorage.getItem("user_uuid"),
+      role: "Order",
+      narration: params.trip_uuid,
+      timestamp: (new Date()).getTime(),
+      ...others,
+    };
+    const response = await axios({
+      method: "post",
+      url: "/userActivity/postUserActivity",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      console.log(response);
+    }
+  };
   const postOrderData = async () => {
     let data = [selectedOrder];
     if (updateBilling) {
@@ -131,10 +153,35 @@ const ProcessingOrders = () => {
     });
     if (response.data.success) {
       sessionStorage.setItem("playCount", playCount);
+      let qty = `${
+        data?.item_details?.length > 1
+          ? data?.item_details?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
+          : data?.item_details?.length
+          ? data?.item_details[0]?.b
+          : 0
+      }:${
+        data?.item_details?.length > 1
+          ? data?.item_details?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
+          : data?.item_details?.length
+          ? data?.item_details[0]?.p
+          : 0
+      }`;
+      postActivity({
+        activity: "order_end",
+        range: data?.item_details?.length,
+        qty,
+        amt: data.order_grandtotal || 0,
+      });
       setSelectedOrder(false);
       getTripOrders();
     }
   };
+  useEffect(() => {
+    if (!orderCreated) {
+      postActivity({ activity: "order_start" });
+      setOrderCreated(true);
+    }
+  }, [oneTimeState]);
   return (
     <>
       <div
@@ -152,6 +199,7 @@ const ProcessingOrders = () => {
                 className="item-sales-search"
                 style={{ width: "max-content" }}
                 onClick={() => {
+                  setOneTimeState(true);
                   let items = selectedOrder?.item_details?.filter(
                     (a) => !a.status
                   );
@@ -306,7 +354,8 @@ const ProcessingOrders = () => {
                               justifyContent: "center",
                               padding: "10px",
                             }}
-                            onClick={() =>
+                            onClick={() => {
+                              setOneTimeState();
                               setSelectedOrder((prev) => ({
                                 ...prev,
                                 item_details: prev.item_details.map((a) =>
@@ -314,8 +363,8 @@ const ProcessingOrders = () => {
                                     ? { ...a, status: 1 }
                                     : a
                                 ),
-                              }))
-                            }
+                              }));
+                            }}
                           >
                             {item.item_uuid === orderSpeech ? (
                               <AiFillPlayCircle
@@ -342,11 +391,12 @@ const ProcessingOrders = () => {
                           }
                         </td>
                         <td
-                          onClick={() =>
+                          onClick={() => {
+                            setOneTimeState();
                             setPopupForm(
                               items.find((a) => a.item_uuid === item.item_uuid)
-                            )
-                          }
+                            );
+                          }}
                         >
                           {item.b + ":" + item.p}
                         </td>
@@ -354,7 +404,8 @@ const ProcessingOrders = () => {
                           <button
                             className="item-sales-search"
                             style={{ width: "max-content" }}
-                            onClick={() =>
+                            onClick={() => {
+                              setOneTimeState();
                               setSelectedOrder((prev) => ({
                                 ...prev,
                                 item_details: prev.item_details.map((a) =>
@@ -362,15 +413,16 @@ const ProcessingOrders = () => {
                                     ? { ...a, status: 2 }
                                     : a
                                 ),
-                              }))
-                            }
+                              }));
+                            }}
                           >
                             Hold
                           </button>
                           <button
                             className="item-sales-search"
                             style={{ width: "max-content" }}
-                            onClick={() =>
+                            onClick={() => {
+                              setOneTimeState();
                               setSelectedOrder((prev) => ({
                                 ...prev,
                                 item_details: prev.item_details.map((a) =>
@@ -378,8 +430,8 @@ const ProcessingOrders = () => {
                                     ? { ...a, status: 3 }
                                     : a
                                 ),
-                              }))
-                            }
+                              }));
+                            }}
                           >
                             Cancel
                           </button>
@@ -448,8 +500,8 @@ function NewUserForm({ onSave, popupInfo, setOrder, order, setUpdateBilling }) {
             if (a.item_uuid === popupInfo.item_uuid)
               return {
                 ...a,
-                b: +data.b + parseInt(+data.p / (+popupInfo.conversion||1)),
-                p: +data.p % (+popupInfo.conversion||1),
+                b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
+                p: +data.p % (+popupInfo.conversion || 1),
               };
             else return a;
           })
@@ -458,22 +510,22 @@ function NewUserForm({ onSave, popupInfo, setOrder, order, setUpdateBilling }) {
             ...prev.item_details,
             {
               ...popupInfo,
-              b: +data.b + parseInt(+data.p / (+popupInfo.conversion||1)),
-              p: +data.p % (+popupInfo.conversion||1),
+              b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
+              p: +data.p % (+popupInfo.conversion || 1),
             },
           ]
         : [
             {
               ...popupInfo,
-              b: +data.b + parseInt(+data.p / (+popupInfo.conversion||1)),
-              p: +data.p % (+popupInfo.conversion||1),
+              b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
+              p: +data.p % (+popupInfo.conversion || 1),
             },
           ],
     }));
     setUpdateBilling(true);
     onSave();
   };
-console.log(popupInfo)
+  console.log(popupInfo);
   return (
     <div className="overlay">
       <div

@@ -143,7 +143,7 @@ const SelectedCounterOrder = () => {
   };
   useEffect(() => {
     if (!orderCreated && order?.items?.length) {
-      postActivity({ activity: "Order Start" });
+      postActivity({ activity: "order_start" });
       setOrderCreated(true);
     }
   }, [order]);

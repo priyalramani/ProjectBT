@@ -33,7 +33,7 @@ const Orders = () => {
         counter.counter_uuid +
         (route.route_uuid ? ", " + route.route_uuid : ""),
       timestamp: (new Date()).getTime(),
-      activity: "Counter Open",
+      activity: "counter_open",
     };
     const response = await axios({
       method: "post",
