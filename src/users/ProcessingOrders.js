@@ -85,11 +85,12 @@ const ProcessingOrders = () => {
     }));
   };
   const postActivity = async (others = {}) => {
+    let time =new Date()
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
       role: "Order",
       narration: params.trip_uuid,
-      timestamp: (new Date()).getTime(),
+      timestamp: time.getTime(),
       ...others,
     };
     const response = await axios({
@@ -126,30 +127,22 @@ const ProcessingOrders = () => {
         },
       ];
     }
+    console.log(data);
+    let time = new Date()
     if (
-      !data?.item_details?.filter((a) => +a.status === 0 || +a.status === 2)
-        .length
+      data[0]?.item_details?.filter((a) => +a.status === 1 || +a.status === 3)
+        ?.length === data[0]?.item_details.length
     )
       data = data.map((a) => ({
         ...a,
-        status: a.status.filter((a) => +a.stage === 2).length
-          ? a.status
-          : a.status.length
-          ? [
-              ...a.status,
-              {
-                stage: "2",
-                time: (new Date()).getTime(),
-                user_uuid: localStorage.getItem("user_uuid"),
-              },
-            ]
-          : [
-              {
-                stage: "2",
-                time: (new Date()).getTime(),
-                user_uuid: localStorage.getItem("user_uuid"),
-              },
-            ],
+        status: [
+          ...a.status,
+          {
+            stage: "2",
+            time: time.getTime(),
+            user_uuid: localStorage.getItem("user_uuid"),
+          },
+        ],
       }));
     console.log(data);
     const response = await axios({
@@ -369,10 +362,9 @@ const ProcessingOrders = () => {
                         {selectedOrder ? (
                           <td
                             style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
                               padding: "10px",
+
+                              height: "50px",
                             }}
                             onClick={() => {
                               setOneTimeState();
