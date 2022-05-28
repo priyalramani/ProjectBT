@@ -89,7 +89,10 @@ const MainAdmin = () => {
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
-      data: selectedOrder.map((a) => ({ ...a, trip_uuid:+selectedTrip===0? "":selectedTrip })),
+      data: selectedOrder.map((a) => ({
+        ...a,
+        trip_uuid: +selectedTrip === 0 ? "" : selectedTrip,
+      })),
       headers: {
         "Content-Type": "application/json",
       },
@@ -97,7 +100,7 @@ const MainAdmin = () => {
     if (response.data.success) {
       setSelectedOrder([]);
       setSelectedTrip("");
-      setBtn(prev=>!prev)
+      setBtn((prev) => !prev);
     }
   };
   return (
@@ -125,9 +128,7 @@ const MainAdmin = () => {
                 {orders.filter(
                   (a) =>
                     counter.filter(
-                      (b) =>
-                        a.counter_uuid === b.counter_uuid 
-                         &&!b.route_uuid
+                      (b) => a.counter_uuid === b.counter_uuid && !b.route_uuid
                     ).length
                 ).length ? (
                   <div key={Math.random()} className="sectionDiv">
@@ -180,7 +181,24 @@ const MainAdmin = () => {
                                   selectedRouteOrder === item.order_uuid
                                 }
                                 title2={item?.counter_title || ""}
-                                // color={item.color}
+                                status={
+                                  +item.status[item.status.length - 1]
+                                    ?.stage === 1
+                                    ? "Processing"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 2
+                                    ? "Checking"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 3
+                                    ? "Delivery"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 4
+                                    ? "Complete"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 5
+                                    ? "Cancelled"
+                                    : ""
+                                }
                                 // price={item.price}
                                 // visibleContext={visibleContext}
                                 // setVisibleContext={setVisibleContext}
@@ -255,7 +273,28 @@ const MainAdmin = () => {
                                           selectedRouteOrder === item.order_uuid
                                         }
                                         title2={item?.counter_title || ""}
-                                        // color={item.color}
+                                        status={
+                                          +item.status[item.status.length - 1]
+                                            ?.stage === 1
+                                            ? "Processing"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 2
+                                            ? "Checking"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 3
+                                            ? "Delivery"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 4
+                                            ? "Complete"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 5
+                                            ? "Cancelled"
+                                            : ""
+                                        }
                                         // price={item.price}
                                         // visibleContext={visibleContext}
                                         // setVisibleContext={setVisibleContext}
@@ -365,7 +404,24 @@ const MainAdmin = () => {
                                     : selectedRouteOrder === item.order_uuid
                                 }
                                 title2={item?.counter_title || ""}
-                                // color={item.color}
+                                status={
+                                  +item.status[item.status.length - 1]
+                                    ?.stage === 1
+                                    ? "Processing"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 2
+                                    ? "Checking"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 3
+                                    ? "Delivery"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 4
+                                    ? "Complete"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 5
+                                    ? "Cancelled"
+                                    : ""
+                                }
                                 // price={item.price}
                                 // visibleContext={visibleContext}
                                 // setVisibleContext={setVisibleContext}
@@ -457,7 +513,28 @@ const MainAdmin = () => {
                                               item.order_uuid
                                         }
                                         title2={item?.counter_title || ""}
-                                        // color={item.color}
+                                        status={
+                                          +item.status[item.status.length - 1]
+                                            ?.stage === 1
+                                            ? "Processing"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 2
+                                            ? "Checking"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 3
+                                            ? "Delivery"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 4
+                                            ? "Complete"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 5
+                                            ? "Cancelled"
+                                            : ""
+                                        }
                                         // price={item.price}
                                         // visibleContext={visibleContext}
                                         // setVisibleContext={setVisibleContext}
@@ -542,9 +619,9 @@ function NewUserForm({
 }) {
   const [data, setdata] = useState("");
   const [errMassage, setErrorMassage] = useState("");
-useEffect(()=>{
-  if(popupInfo?.type === "edit")  setSelectedTrip("0") 
-},[])
+  useEffect(() => {
+    if (popupInfo?.type === "edit") setSelectedTrip("0");
+  }, []);
   const submitHandler = async (e) => {
     e.preventDefault();
     if (popupInfo?.type === "edit") {
