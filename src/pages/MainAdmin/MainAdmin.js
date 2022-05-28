@@ -126,9 +126,8 @@ const MainAdmin = () => {
                   (a) =>
                     counter.filter(
                       (b) =>
-                        a.counter_uuid === b.counter_uuid &&
-                        !routesData.filter((c) => c.route_uuid === b.route_uuid)
-                          .length
+                        a.counter_uuid === b.counter_uuid 
+                         &&!b.route_uuid
                     ).length
                 ).length ? (
                   <div key={Math.random()} className="sectionDiv">
@@ -148,9 +147,7 @@ const MainAdmin = () => {
                             counter.filter(
                               (b) =>
                                 a.counter_uuid === b.counter_uuid &&
-                                routesData.filter(
-                                  (c) => c.route_uuid !== b.route_uuid
-                                ).length
+                                !b.route_uuid
                             ).length
                         )
                         .map((item) => {
