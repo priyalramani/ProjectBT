@@ -38,17 +38,19 @@ export const AutoAdd = async (counter, items) => {
         ? base_qty_arr.reduce((a, b) => +Math.max(a.base_qty, b.base_qty)===+a.base_qty?a:b)
         : base_qty_arr.length === 1
         ? base_qty_arr[0]
-        : {};
+        : null;
         console.log("autobill.qty_details.max",base_qty_arr)
         let pice_qty_arr = autobill.qty_details.filter(
           (b) => b.unit === "p" && +b.base_qty <= +a.pcs
         );
+        console.log("autobill.qty_details.filter",pice_qty_arr)
         pice_qty_arr =
           pice_qty_arr.length > 1
             ? pice_qty_arr.reduce((a, b) => +Math.max(a.base_qty, b.base_qty)===+a.base_qty?a:b)
             : pice_qty_arr.length === 1
             ? pice_qty_arr[0]
             : {};
+            console.log("autobill.qty_details.max",base_qty_arr)
         pice_qty_arr = base_qty_arr ? {} : pice_qty_arr;
         if (base_qty_arr || pice_qty_arr)
           auto_added.push({
