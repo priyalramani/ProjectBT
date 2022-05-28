@@ -22,7 +22,13 @@ const SelectedCounterOrder = () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = await db.transaction("items", "readwrite").objectStore("items");
     let item = await tx.getAll();
-    setItems(item);
+    setItems(
+      item.map((a) => ({
+        ...a,
+        item_price: a.item_price || 0,
+        gst_percentage: a.gst_percentage || 0,
+      }))
+    );
     let store = await db
       .transaction("companies", "readwrite")
       .objectStore("companies");
@@ -58,7 +64,7 @@ const SelectedCounterOrder = () => {
       }))
     );
   }, [counter]);
-  console.log(order);
+
   const postOrder = async (orderData) => {
     console.log(orderData);
     let data = {
@@ -436,7 +442,7 @@ const SelectedCounterOrder = () => {
               Billing(counter, order.items, {
                 stage: 1,
                 user_uuid: localStorage.getItem("user_uuid"),
-                time: new Date().getTime(),
+                time: (new Date()).getTime(),
 
                 type: "NEW",
               }).then((data) => {
@@ -458,7 +464,7 @@ const SelectedCounterOrder = () => {
                 ...data,
                 items: data?.items?.map((a) => ({
                   ...a,
-                  box: +a.box +parseInt(+a.pcs / +a.conversion),
+                  box: +a.box + parseInt(+a.pcs / +a.conversion),
                   pcs: +a.pcs % +a.conversion,
                 })),
               }));

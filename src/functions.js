@@ -197,7 +197,7 @@ export const AutoAdd = async (counter, items) => {
       console.log("datapiceItems", dataItems);
 
       let nonFiltered = eligibleItems.filter(
-        (a) => !(dataItems.filter((b) => a.item_uuid === b.item_uuid).length)
+        (a) => !dataItems.filter((b) => a.item_uuid === b.item_uuid).length
       );
 
       dataItems = dataItems.map((a) => {
@@ -208,7 +208,7 @@ export const AutoAdd = async (counter, items) => {
           box: (data ? +a.box + data.box : a.box) || 0,
         };
       });
-      console.log(nonFiltered,dataItems)
+      console.log(nonFiltered, dataItems);
       eligibleItems = nonFiltered.length
         ? dataItems.length
           ? [...nonFiltered, ...dataItems]
@@ -252,7 +252,7 @@ export const Billing = async (counter = {}, items = [], others = null) => {
         ...item,
         special_discount_percentage,
         item_total:
-          item.item_price * ((100 - special_discount_percentage) / 100),
+          item.item_price * ((100 - special_discount_percentage) / 100) || 0,
       };
     }
     if (company_discount_percentage) {
@@ -265,15 +265,36 @@ export const Billing = async (counter = {}, items = [], others = null) => {
         company_discount_percentage,
         item_total: item.item_total
           ? item.item_total * ((100 - company_discount_percentage) / 100)
-          : item.item_price * ((100 - company_discount_percentage) / 100),
+          : item.item_price * ((100 - company_discount_percentage) / 100) || 0,
       };
     }
 
     if (!special_discount_percentage && !company_discount_percentage)
-      item = { ...item, item_total: (item.item_price*(others?((+item.box*+item.conversion)+item.pcs):((+item.b*+item.conversion)+item.p))).toFixed(2) };
+      item = {
+        ...item,
+        item_total:
+          (
+            item.item_price *
+            (others
+              ? +item.box * +item.conversion + item.pcs
+              : +item.b * +item.conversion + item.p)
+          ).toFixed(2) || 0,
+      };
     item = { ...item, charges_discount };
     newPriceItems.push(item);
   }
-
-  return { counter_uuid: counter.counter_uuid, items: newPriceItems, others };
+  let order_grandtotal =
+    newPriceItems.length > 1
+      ? newPriceItems.reduce(
+          (a, b) => (+a.item_total || 0) + (+b.item_total || 0)
+        )
+      : newPriceItems.length
+      ? newPriceItems.map((a) => a.item_total)[0]
+      : 0;
+  return {
+    counter_uuid: counter.counter_uuid,
+    order_grandtotal,
+    items: newPriceItems,
+    others,
+  };
 };

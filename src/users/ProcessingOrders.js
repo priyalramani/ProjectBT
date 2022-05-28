@@ -108,14 +108,14 @@ const ProcessingOrders = () => {
               ...a.status,
               {
                 stage: "2",
-                time: new Date().getTime(),
+                time: (new Date()).getTime(),
                 user_uuid: localStorage.getItem("user_uuid"),
               },
             ]
           : [
               {
                 stage: "2",
-                time: new Date().getTime(),
+                time: (new Date()).getTime(),
                 user_uuid: localStorage.getItem("user_uuid"),
               },
             ],
