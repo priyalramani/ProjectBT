@@ -453,7 +453,15 @@ const SelectedCounterOrder = () => {
             onClick={async () => {
               let data = await AutoAdd(counter, order.items);
 
-              setOrder((prev) => ({ ...prev, ...data }));
+              setOrder((prev) => ({
+                ...prev,
+                ...data,
+                items: data?.items?.map((a) => ({
+                  ...a,
+                  box: +a.box +parseInt(+a.pcs / +a.conversion),
+                  pcs: +a.pcs % +a.conversion,
+                })),
+              }));
             }}
           >
             Auto

@@ -427,7 +427,6 @@ const ProcessingOrders = () => {
 export default ProcessingOrders;
 function NewUserForm({ onSave, popupInfo, setOrder, order, setUpdateBilling }) {
   const [data, setdata] = useState({});
-  const [errMassage, setErrorMassage] = useState("");
   useEffect(() => {
     let data = order?.item_details?.find(
       (a) => a.item_uuid === popupInfo.item_uuid
