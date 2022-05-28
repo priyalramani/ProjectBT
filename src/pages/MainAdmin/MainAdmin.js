@@ -543,9 +543,11 @@ function NewUserForm({
   selectedTrip,
   trips,
 }) {
-  const [data, setdata] = useState(popupInfo?.type === "edit" ? setSelectedTrip("0") : {});
+  const [data, setdata] = useState("");
   const [errMassage, setErrorMassage] = useState("");
-
+useEffect(()=>{
+  if(popupInfo?.type === "edit")  setSelectedTrip("0") 
+},[])
   const submitHandler = async (e) => {
     e.preventDefault();
     if (popupInfo?.type === "edit") {
