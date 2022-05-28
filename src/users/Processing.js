@@ -7,7 +7,7 @@ const Processing = () => {
   const getTripData = async () => {
     const response = await axios({
       method: "get",
-      url: "/trips/GetTripList",
+      url: "/trips/GetProcessingTripList",
 
       headers: {
         "Content-Type": "application/json",
