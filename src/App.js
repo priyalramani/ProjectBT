@@ -71,6 +71,11 @@ function App() {
           ) : ''}
         </Routes>
       </Router>
+
+      {/* {window.location.pathname.split('/').at(-2) === 'processing' && <div id="console">
+        <h3>CONSOLE <button onClick={e => window.location.reload()}>Reload</button></h3>
+      </div>} */}
+
     </div>
   );
 }

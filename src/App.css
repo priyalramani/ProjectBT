@@ -1,0 +1,16 @@
+#console {
+    position: fixed;
+    bottom: 0px;
+    height: 380px;
+    background: black;
+    width: 100%;
+    color: white;
+    font-size: 15px;
+    overflow: auto;
+    border-bottom: 10px solid grey;
+}
+
+#console>* {
+    border-bottom: 1px solid grey;
+    padding: 5px;
+}
