@@ -270,7 +270,7 @@ export const Billing = async (counter = {}, items = [], others = null) => {
     }
 
     if (!special_discount_percentage && !company_discount_percentage)
-      item = { ...item, item_total: item.item_price*(others?((+item.box*+item.conversion)+item.pcs):((+item.b*+item.conversion)+item.p)) };
+      item = { ...item, item_total: (item.item_price*(others?((+item.box*+item.conversion)+item.pcs):((+item.b*+item.conversion)+item.p))).toFixed(2) };
     item = { ...item, charges_discount };
     newPriceItems.push(item);
   }
