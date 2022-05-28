@@ -1,36 +1,65 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+const Card = ({
+  title2,
+  title1,
+  selectedOrder,
+  color,
+  status,
+  dateTime,
+  rounded,
+}) => {
+  console.log(dateTime);
 
+ 
+  var days = [
+    "Sun",
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri",
+    "Sat",
+  ];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+];
 
+function formatAMPM(date) {
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+  var ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0'+minutes : minutes;
+  var strTime = hours + ':' + minutes + ' ' + ampm;
+  return strTime;
+}
 
-const Card = ({ title2, title1, selectedOrder, color, price, rounded, item, onclickFunction, on_order, cursorItemRef, index, seats, visibleContext, setVisibleContext, isMouseInsideContext }) => {
-console.log(selectedOrder)
   return (
-
-
-        <>
-          <div>
-            <button
-            className={
-              `card-focus 
-            ${rounded ? 'rounded' : ''} 
-            ${selectedOrder? "selected-seat" : ""}
+    <>
+      <div>
+        <button
+          className={`card-focus 
+            ${rounded ? "rounded" : ""} 
+            ${selectedOrder ? "selected-seat" : ""}
             `}
-              style={{margin:"10px"}}
-            >
-              <div className={`card ${rounded ? 'rounded' : ''}`}>
-                <p className='title2' >{title1 ? title1 : title2}</p>
-                <p className='caption'>{title1 ? title2 : ''}</p>
-                <div className={`horizontal-line`} style={{ background: `${color}` }}></div>
-                {color !== '#4AC959' && on_order ? <div className='seatTimer'>
-                  <div>1000</div>
-                  <div>(Rs.{on_order ? on_order.price : 0})</div>
-                </div> :
-                  <div style={{ height: "50px" }}></div>
-                }
-              </div>
-            </button>
+          style={{ margin: "10px" }}
+        >
+          <div className={`card ${rounded ? "rounded" : ""}`}>
+            <p className="title2">{title1 ? title1 : title2}</p>
+            <p className="caption">{title1 ? title2 : ""}</p>
+            <div
+              className={`horizontal-line`}
+              style={{ background: `${color}` }}
+            ></div>
+            <div className="seatTimer">
+              <div>{status}</div>
+              <div style={{fontSize:"10px"}}>{`${days[(new Date(dateTime * 1000)).getDay()]||""} ${(new Date(dateTime).getDate())||""} ${monthNames[(new Date()).getMonth()]||""}`}</div>
+              <div style={{fontSize:"10px"}}>{formatAMPM(new Date(dateTime)) || ""}</div>
+            </div>
           </div>
-          {/* {on_order && visibleContext?.id === on_order.seat_uuid &&
+        </button>
+      </div>
+      {/* {on_order && visibleContext?.id === on_order.seat_uuid &&
             <ContextMenu
             //   itemRef={itemRef}
               id={on_order?.uuid}
@@ -42,10 +71,8 @@ console.log(selectedOrder)
               currentSeat={on_order?.seat_uuid}
             />
           } */}
-        </>
-    
-     
-  )
-}
+    </>
+  );
+};
 
-export default Card
+export default Card;

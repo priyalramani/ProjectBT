@@ -305,6 +305,7 @@ function NewUserForm({ onSave, popupInfo, setRoutesData, companies }) {
                     Sort Order
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       value={data?.sort_order}
@@ -319,7 +320,7 @@ function NewUserForm({ onSave, popupInfo, setRoutesData, companies }) {
                 </div>
                 <div className="row">
                   <label className="selectLabel">
-                    User Type
+                    Company
                     <select
                       name="user_type"
                       className="select"

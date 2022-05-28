@@ -40,7 +40,7 @@ const AutoIncreaseItem = () => {
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading">
-          <h2 style={{ width: "100%" }}>Auto Increase Item </h2>
+          <h2 style={{ width: "100%" }}>Auto Add Item </h2>
         </div>
         <div id="item-sales-top">
           <div
@@ -131,7 +131,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
           )
           ?.map((item, i) => (
             <tr
-              key={Math.random()}
+              key={item.item_uuid} 
               style={{ height: "30px" }}
               onClick={() => setPopupForm({ type: "edit", data: item })}
             >
@@ -327,7 +327,6 @@ function NewUserForm({ onSave,popupForm }) {
         }
       }
   };
-
   return (
     <>
       <div className="overlay">
@@ -383,6 +382,7 @@ function NewUserForm({ onSave,popupForm }) {
                         <b style={{ marginLeft: "50px" }}>Min Range : </b>
                         <input
                           type="number"
+                          onWheel={(e) => e.target.blur()}
                           className="searchInput"
                           style={{
                             border: "none",
@@ -401,11 +401,12 @@ function NewUserForm({ onSave,popupForm }) {
                       </td>
                     </tr>
                     {objData.qty_details?.map((item, i) => (
-                      <tr key={Math.random()} style={{ height: "30px" }}>
+                      <tr key={item.item_uuid}  style={{ height: "30px" }}>
                         <td colSpan={4} style={{ textAlign: "center" }}>
                           If quantity of base item is
                           <input
                             type="number"
+                            onWheel={(e) => e.target.blur()}
                             className="searchInput"
                             style={{
                               border: "none",
@@ -435,6 +436,7 @@ function NewUserForm({ onSave,popupForm }) {
                               width: "80px",
                             }}
                             type="number"
+                            onWheel={(e) => e.target.blur()}
                             value={item.add_items.length}
                             onClick={() => setItemPopupId(item.uuid)}
                           />
@@ -1121,6 +1123,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, setObgData }) => {
                             <td>
                               <input
                                 type="number"
+                                onWheel={(e) => e.target.blur()}
                                 style={{ width: "100px" }}
                                 onChange={(e) =>
                                   setValue((prev) =>

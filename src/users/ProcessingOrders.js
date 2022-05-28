@@ -1,21 +1,57 @@
 import axios from "axios";
-import React, { useEffect, useState, useRef, createElement } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { AiFillPlayCircle } from "react-icons/ai";
 import { openDB } from "idb";
 import { useSpeechSynthesis } from "react-speech-kit";
+import { Billing } from "../functions";
+import { AiOutlineArrowLeft } from "react-icons/ai";
 
 const ProcessingOrders = () => {
-  // console.log(axios.defaults.baseURL)
   const params = useParams();
+  const [popupForm, setPopupForm] = useState(false);
   const [orders, setOrders] = useState([]);
   const [items, setItems] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [counters, setCounters] = useState([]);
+  const [itemCategories, setItemsCategory] = useState([]);
+  const [playCount, setPlayCount] = useState(1);
   const [selectedOrder, setSelectedOrder] = useState();
   const { speak } = useSpeechSynthesis();
   const [orderSpeech, setOrderSpeech] = useState("");
   const [oneTime, setOneTime] = useState(false);
   const audiosRef = useRef();
   const [currentAudioId, setCurrentAudioId] = useState('')
+
+  const [updateBilling, setUpdateBilling] = useState(false);
+  const [orderCreated, setOrderCreated] = useState(false);
+  const [oneTimeState, setOneTimeState] = useState(false);
+  const Navigate = useNavigate();
+  useEffect(() => {
+    let data = sessionStorage.getItem("playCount");
+    if (data) {
+      setPlayCount(data);
+    }
+  }, []);
+  const getIndexedDbData = async () => {
+    const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
+    let tx = await db.transaction("items", "readwrite").objectStore("items");
+    let item = await tx.getAll();
+    setItems(item);
+    let store = await db
+      .transaction("companies", "readwrite")
+      .objectStore("companies");
+    let company = await store.getAll();
+    setCompanies(company);
+    store = await db
+      .transaction("item_category", "readwrite")
+      .objectStore("item_category");
+    let route = await store.getAll();
+    setItemsCategory(route);
+    store = await db.transaction("counter", "readwrite").objectStore("counter");
+    let countersData = await store.getAll();
+    setCounters(countersData);
+  };
 
   const log = message => {
     console.log(message)
@@ -116,7 +152,7 @@ const ProcessingOrders = () => {
       const item = items.find(j => j.item_uuid === order_item.item_uuid);
       if (item) {
         const handleQty = (value, label, sufix) => value ? `${value} ${label}${value > 1 ? sufix : ''}` : '';
-        const speechString = `Item ${item.pronounce} ${item.mrp} MRP ${handleQty(order_item.b, 'Box', 'es')} ${handleQty(order_item.p, 'Piece', 's')} Audio Should Be Longer Than 5 Seconds`;
+        const speechString = `Item ${item.pronounce} ${item.mrp} MRP ${handleQty(order_item.b, 'Box', 'es')} ${handleQty(order_item.p, 'Piece', 's')}`;
         let audioElement = new Audio(`${axios.defaults.baseURL}/stream/${speechString.toLowerCase().replaceAll(' ', '_')}`);
         audioElement.id = order_item.item_uuid;
         audioElements.push(audioElement)
@@ -129,143 +165,559 @@ const ProcessingOrders = () => {
     // storeAudios()
   }, [selectedOrder])
 
-  // const PlayAudio = async () => {
-  //   if (oneTime) {
-  //     await speak({ text: "Order Completed" });
-  //     return;
-  //   }
+  const PlayAudio = async (item) => {
+    if (!item) {
+      await speak({ text: "Order Completed" });
 
-  //   for (let item of selectedOrder.item_details) {
-  //     setOrderSpeech(item.item_uuid);
-  //     let detail = items.find((a) => a.item_uuid === item.item_uuid);
-  //     console.log(detail);
-  //     let data = `${detail.pronounce} ${item.b ? `${item.b} box` : ""} ${item.p ? `${item.p} pcs` : ""
-  //       }`;
-  //     await speak({ text: data });
-  //     setTimeout(() => setOrderSpeech(""), 3000);
-  //   }
-  //   setOneTime(true);
-  // };
+      return;
+    }
 
+    setOrderSpeech(item.item_uuid);
+    let detail = items.find((a) => a.item_uuid === item.item_uuid);
+    console.log(detail);
+    let data = `${detail.pronounce} ${item.b ? `${item.b} box` : ""} ${item.p ? `${item.p} pieces` : ""
+      }`;
+    await speak({ text: data });
+    setTimeout(() => setOrderSpeech(""), 3000);
+    setSelectedOrder((prev) => ({
+      ...prev,
+      item_details: prev.item_details.map((a) =>
+        a.item_uuid === item.item_uuid ? { ...a, status: 1 } : a
+      ),
+    }));
+  };
+  const postActivity = async (others = {}) => {
+    let time = new Date();
+    let data = {
+      user_uuid: localStorage.getItem("user_uuid"),
+      role: "Order",
+      narration: +params.trip_uuid === 0 ? "Unknown" : sessionStorage.getItem("trip_title"),
+      timestamp: time.getTime(),
+      ...others,
+    };
+    const response = await axios({
+      method: "post",
+      url: "/userActivity/postUserActivity",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      console.log(response);
+    }
+  };
+  const postOrderData = async () => {
+    let data = selectedOrder;
+    if (updateBilling) {
+      let billingData = await Billing(
+        counters.find((a) => a.counter_uuid === selectedOrder.counter_uuid),
+        selectedOrder.item_details.map((a) => {
+          let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+          return {
+            ...itemData,
+            ...a,
+            price: itemData?.price || 0
+          };
+        })
+      );
+      data = {
+        ...data,
+        ...billingData,
+        item_details: billingData.items,
+      };
+    }
+
+    let time = new Date();
+    if (
+      data?.item_details?.filter((a) => +a.status === 1 || +a.status === 3)
+        ?.length === data?.item_details.length
+    )
+      data = {
+        ...data,
+        status: [
+          ...data.status,
+          {
+            stage: "2",
+            time: time.getTime(),
+            user_uuid: localStorage.getItem("user_uuid"),
+          },
+        ],
+      };
+    data = Object.keys(data)
+      .filter((key) => key !== "others" || key !== "items")
+      .reduce((obj, key) => {
+        obj[key] = data[key];
+        return obj;
+      }, {});
+
+    console.log(data);
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: [data],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      console.log(response);
+      sessionStorage.setItem("playCount", playCount);
+      let qty = `${data?.item_details?.length > 1
+        ? data?.item_details?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
+        : data?.item_details?.length
+          ? data?.item_details[0]?.b
+          : 0
+        }:${data?.item_details?.length > 1
+          ? data?.item_details?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
+          : data?.item_details?.length
+            ? data?.item_details[0]?.p
+            : 0
+        }`;
+      postActivity({
+        activity: "order_end",
+        range: data?.item_details?.length,
+        qty,
+        amt: data.order_grandtotal || 0,
+      });
+      setSelectedOrder(false);
+      getTripOrders();
+    }
+  };
+  useEffect(() => {
+    if (!orderCreated) {
+      postActivity({ activity: "order_start" });
+      setOrderCreated(true);
+    }
+  }, [oneTimeState]);
   return (
-    <div
-      className="item-sales-container orders-report-container"
-      style={{ width: "100%", left: "0", top: "0", textAlign: "center" }}
-    >
-      {selectedOrder ? (
-        <>
-          <h1>{selectedOrder.counter_title}</h1>
-          <div className="flex" style={{ justifyContent: "left" }}>
-            <h2 style={{ width: "40vw", textAlign: "start" }}>
-              {selectedOrder.invoice_number}
-            </h2>
-            <button
-              className="item-sales-search"
-              style={{ width: "max-content" }}
-              onClick={() => { audioLoopFunction({ i: 0 }) }}
-            >
-              Play
-            </button>
-          </div>
-        </>
-      ) : (
-        ""
-      )}
+    <>
+      <nav className="user_nav" style={{ top: "0" }}>
+        <div className="user_menubar">
+          <AiOutlineArrowLeft
+            onClick={() => {
+              if (selectedOrder) setSelectedOrder(false);
+              else Navigate(-1);
+            }}
+          />
+        </div>
+      </nav>
       <div
-        className="table-container-user item-sales-container"
-        style={{ width: "100%", left: "0", top: "0", display: "flex" }}
+        className="item-sales-container orders-report-container"
+        style={{ width: "100%", left: "0", top: "50px", textAlign: "center" }}
       >
-        <table
-          className="user-table"
+        {selectedOrder ? (
+          <>
+            <h1>{selectedOrder.counter_title}</h1>
+            <div className="flex" style={{ justifyContent: "left" }}>
+              <h2 style={{ width: "40vw", textAlign: "start" }}>
+                {selectedOrder.invoice_number}
+              </h2>
+              <button
+                className="item-sales-search"
+                style={{ width: "max-content" }}
+                onClick={() => {
+                  setOneTimeState(true);
+                  let items = selectedOrder?.item_details?.filter(
+                    (a) => !a.status
+                  );
+                  for (let i = 0; i < playCount; i++) {
+                    if (i === 0) PlayAudio(items[0]);
+                    else if (items[i]) {
+                      setTimeout(() => PlayAudio(items[i]), 3000);
+                    }
+                  }
+                }}
+              >
+                Play
+              </button>
+              <button
+                className="item-sales-search"
+                style={{
+                  width: "max-content",
+                  position: "fixed",
+                  top: "50px",
+                  right: 0,
+                }}
+                onClick={() => {
+                  postOrderData();
+                }}
+              >
+                Save
+              </button>
+              <input
+                className="searchInput"
+                style={{
+                  position: "fixed",
+                  top: "50px",
+                  left: 0,
+                  border: "none",
+                  borderBottom: "2px solid black",
+                  borderRadius: "0px",
+                  width: "50px",
+                  padding: "0 5px",
+                }}
+                value={playCount}
+                onChange={(e) => setPlayCount(e.target.value)}
+              />
+            </div>
+          </>
+        ) : (
+          ""
+        )}
+        <div
+          className="table-container-user item-sales-container"
           style={{
-            maxWidth: "100vw",
-            height: "fit-content",
-            overflowX: "scroll",
+            width: "100vw",
+            overflow: "scroll",
+            left: "0",
+            top: "0",
+            display: "flex",
           }}
         >
-          <thead>
-            <tr>
-              {selectedOrder ? <th></th> : ""}
-              <th>S.N</th>
-              {selectedOrder ? (
-                <>
-                  <th colSpan={2}>
-                    <div className="t-head-element">Item Name</div>
-                  </th>
-                  <th>
-                    <div className="t-head-element">MRP</div>
-                  </th>
-                  <th>
-                    <div className="t-head-element">Qty</div>
-                  </th>
-                </>
-              ) : (
-                <>
-                  <th colSpan={2}>
-                    <div className="t-head-element">Counter Title</div>
-                  </th>
-                  <th colSpan={2}>
-                    <div className="t-head-element">Progress</div>
-                  </th>
-                </>
-              )}
-            </tr>
-          </thead>
-          <tbody className="tbody">
-            {selectedOrder
-              ? selectedOrder.item_details?.map((item, i) => (
-                <tr key={Math.random()} style={{ height: "30px" }}>
-                  {selectedOrder ? (
-                    <td
+          <table
+            className="user-table"
+            style={{
+              width: selectedOrder ? "max-content" : "100%",
+              height: "fit-content",
+            }}
+          >
+            <thead>
+              <tr>
+                {selectedOrder ? <th></th> : ""}
+                <th>S.N</th>
+                {selectedOrder ? (
+                  <>
+                    <th colSpan={2}>
+                      <div className="t-head-element">Item Name</div>
+                    </th>
+                    <th>
+                      <div className="t-head-element">MRP</div>
+                    </th>
+                    <th>
+                      <div className="t-head-element">Qty</div>
+                    </th>
+                    <th>
+                      <div className="t-head-element">Action</div>
+                    </th>
+                  </>
+                ) : (
+                  <>
+                    <th colSpan={2}>
+                      <div className="t-head-element">Counter Title</div>
+                    </th>
+                    <th colSpan={2}>
+                      <div className="t-head-element">Progress</div>
+                    </th>
+                  </>
+                )}
+              </tr>
+            </thead>
+            <tbody className="tbody">
+              {selectedOrder
+                ? selectedOrder.item_details
+                  ?.sort((a, b) => {
+                    let aItem = items.find(
+                      (i) => i.item_uuid === a.item_uuid
+                    );
+                    let bItem = items.find(
+                      (i) => i.item_uuid === b.item_uuid
+                    );
+                    let aItemCompany = companies.find(
+                      (i) => i.company_uuid === aItem.company_uuid
+                    );
+                    let bItemCompany = companies.find(
+                      (i) => i.company_uuid === bItem.company_uuid
+                    );
+                    let aItemCategory = itemCategories.find(
+                      (i) => i.category_uuid === aItem.category_uuid
+                    );
+                    let bItemCategory = itemCategories.find(
+                      (i) => i.category_uuid === bItem.category_uuid
+                    );
+                    return (
+                      aItemCompany?.company_title?.localeCompare(
+                        bItemCompany?.company_title
+                      ) ||
+                      aItemCategory?.category_title?.localeCompare(
+                        bItemCategory?.category_title
+                      ) ||
+                      aItem.item_title?.localeCompare(bItem.item_title)
+                    );
+                  })
+                  ?.map((item, i) => (
+                    <tr
+                      key={item.item_uuid}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: "10px",
+                        height: "30px",
+                        backgroundColor:
+                          +item.status === 1
+                            ? "green"
+                            : +item.status === 2
+                              ? "yellow"
+                              : +item.status === 3
+                                ? "red"
+                                : "#fff",
+                        color:
+                          +item.status === 1 || +item.status === 3
+                            ? "#fff"
+                            : "#000",
                       }}
                     >
-                      {item.item_uuid === orderSpeech ? (
-                        <AiFillPlayCircle
-                          style={{ fontSize: "30px", cursor: "pointer" }}
-                        />
+                      {selectedOrder ? (
+                        <td
+                          style={{
+                            padding: "10px",
+
+                            height: "50px",
+                          }}
+                          onClick={() => {
+                            setOneTimeState();
+                            setSelectedOrder((prev) => ({
+                              ...prev,
+                              item_details: prev.item_details.map((a) =>
+                                a.item_uuid === item.item_uuid
+                                  ? { ...a, status: 1 }
+                                  : a
+                              ),
+                            }));
+                          }}
+                        >
+                          {item.item_uuid === orderSpeech ? (
+                            <AiFillPlayCircle
+                              style={{ fontSize: "25px", cursor: "pointer" }}
+                            />
+                          ) : (
+                            ""
+                          )}
+                        </td>
                       ) : (
                         ""
                       )}
-                    </td>
-                  ) : (
-                    ""
-                  )}
-                  <td>{i + 1}</td>
-                  <td colSpan={2}>
-                    {
-                      items.find((a) => a.item_uuid === item.item_uuid)
-                        ?.item_title
-                    }
-                  </td>
-                  <td>
-                    {items.find((a) => a.item_uuid === item.item_uuid)?.mrp}
-                  </td>
-                  <td>{item.b + ":" + item.p}</td>
-                </tr>
-              ))
-              : orders
-                .sort((a, b) => a.created_at - b.created_at)
-                ?.map((item, i) => (
-                  <tr
-                    key={Math.random()}
-                    style={{ height: "30px" }}
-                    onClick={() => setSelectedOrder(item)}
-                  >
-                    <td>{i + 1}</td>
-                    <td colSpan={2}>{item.counter_title}</td>
-                    <td colSpan={2}>0/{item?.item_details?.length || 0}</td>
-                  </tr>
-                ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                      <td>{i + 1}</td>
+                      <td colSpan={2}>
+                        {
+                          items.find((a) => a.item_uuid === item.item_uuid)
+                            ?.item_title
+                        }
+                      </td>
+                      <td>
+                        {
+                          items.find((a) => a.item_uuid === item.item_uuid)
+                            ?.mrp
+                        }
+                      </td>
+                      <td
+                        onClick={() => {
+                          setOneTimeState();
+                          setPopupForm(
+                            items.find((a) => a.item_uuid === item.item_uuid)
+                          );
+                        }}
+                      >
+                        {item.b + ":" + item.p}
+                      </td>
+                      <td className="flex">
+                        <button
+                          className="item-sales-search"
+                          style={{ width: "max-content" }}
+                          onClick={() => {
+                            setOneTimeState();
+                            setSelectedOrder((prev) => ({
+                              ...prev,
+                              item_details: prev.item_details.map((a) =>
+                                a.item_uuid === item.item_uuid
+                                  ? { ...a, status: 2 }
+                                  : a
+                              ),
+                            }));
+                          }}
+                        >
+                          Hold
+                        </button>
+                        <button
+                          className="item-sales-search"
+                          style={{ width: "max-content" }}
+                          onClick={() => {
+                            setOneTimeState();
+                            setSelectedOrder((prev) => ({
+                              ...prev,
+                              item_details: prev.item_details.map((a) =>
+                                a.item_uuid === item.item_uuid
+                                  ? { ...a, status: 3 }
+                                  : a
+                              ),
+                            }));
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                : orders
+                  ?.sort((a, b) => a.created_at - b.created_at)
+                  ?.map((item, i) => (
+                    <tr
+                      key={Math.random()}
+                      style={{ height: "30px" }}
+                      onClick={() => setSelectedOrder(item)}
+                    >
+                      <td>{i + 1}</td>
+                      <td colSpan={2}>{item.counter_title}</td>
+                      <td colSpan={2}>
+                        {
+                          item?.item_details?.filter((a) => +a.status === 1)
+                            ?.length
+                        }
+                        /{item?.item_details?.length || 0}
+                      </td>
+                    </tr>
+                  ))}
+            </tbody>
+          </table>
+        </div>
+      </div >
+      {
+        popupForm ? (
+          <NewUserForm
+            onSave={() => setPopupForm(false)}
+            setOrder={setSelectedOrder}
+            popupInfo={popupForm}
+            order={selectedOrder}
+            setUpdateBilling={setUpdateBilling}
+          />
+        ) : (
+          ""
+        )}
+    </>
   );
 };
 
 export default ProcessingOrders;
+function NewUserForm({ onSave, popupInfo, setOrder, order, setUpdateBilling }) {
+  const [data, setdata] = useState({});
+  useEffect(() => {
+    let data = order?.item_details?.find(
+      (a) => a.item_uuid === popupInfo.item_uuid
+    );
+    setdata({
+      b: data?.b || 0,
+      p: data?.p || 0,
+    });
+  }, []);
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    setOrder((prev) => ({
+      ...prev,
+      item_details: prev.item_details.filter(
+        (a) => a.item_uuid === popupInfo.item_uuid
+      )?.length
+        ? prev?.item_details?.map((a) => {
+          if (a.item_uuid === popupInfo.item_uuid)
+            return {
+              ...a,
+              b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
+              p: +data.p % (+popupInfo.conversion || 1),
+            };
+          else return a;
+        })
+        : prev?.item_details?.length
+          ? [
+            ...prev.item_details,
+            {
+              ...popupInfo,
+              b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
+              p: +data.p % (+popupInfo.conversion || 1),
+            },
+          ]
+          : [
+            {
+              ...popupInfo,
+              b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
+              p: +data.p % (+popupInfo.conversion || 1),
+            },
+          ],
+    }));
+    setUpdateBilling(true);
+    onSave();
+  };
+  console.log(popupInfo);
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="formGroup">
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "flex-start" }}
+                >
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    Box
+                    <input
+                      type="text"
+                      name="route_title"
+                      className="numberInput"
+                      value={data?.b}
+                      style={{ width: "100px" }}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          b: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                    />
+                    {popupInfo.conversion || 0}
+                  </label>
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    Pcs
+                    <input
+                      type="text"
+                      name="route_title"
+                      className="numberInput"
+                      value={data?.p}
+                      style={{ width: "100px" }}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          p: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

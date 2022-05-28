@@ -307,10 +307,10 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
       setErrorMassage("Please insert  Title");
       return;
     }
-    if (data?.mobile?.length !== 10) {
-      setErrorMassage("Please enter 10 Numbers in Mobile");
-      return;
-    }
+    // if (data?.mobile?.length !== 10) {
+    //   setErrorMassage("Please enter 10 Numbers in Mobile");
+    //   return;
+    // }
     if (!data.route_uuid) {
       setdata({ ...data, route_uuid: "0" });
     }
@@ -388,6 +388,7 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
                     Sort Order
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       value={data?.sort_order}
@@ -405,6 +406,7 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
                     Mobile
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       value={data?.mobile}
@@ -689,6 +691,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
                             <td>
                               <input
                                 type="number"
+                                onWheel={(e) => e.target.blur()}
                                 style={{ width: "100px" }}
                                 onChange={(e) =>
                                   setValue((prev) =>
@@ -764,6 +767,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
                             <td>
                               <input
                                 type="number"
+                                onWheel={(e) => e.target.blur()}
                                 style={{ width: "100px" }}
                                 onChange={(e) =>
                                   setValue((prev) =>

@@ -411,7 +411,7 @@ function NewUserForm({
   companies,
   itemCategories,
 }) {
-  const [data, setdata] = useState({ company_uuid: companies[0].company_uuid });
+  const [data, setdata] = useState({});
 
   const [errMassage, setErrorMassage] = useState("");
   console.log(popupInfo);
@@ -421,7 +421,14 @@ function NewUserForm({
           setdata({ one_pack: "1", conversion: "1", ...popupInfo.data });
         }
       : () => {
-          setdata({ one_pack: "1", conversion: "1" });
+          setdata({
+            one_pack: "1",
+            conversion: "1",
+            company_uuid: companies[0].company_uuid,
+            category_uuid: itemCategories.filter(
+              (a) => a.company_uuid === companies[0].company_uuid
+            )[0]?.category_uuid,
+          });
         },
     []
   );
@@ -462,12 +469,12 @@ function NewUserForm({
       }
     }
   };
-
+console.log(data)
   return (
     <div className="overlay">
       <div
         className="modal"
-        style={{ height: "fit-content", width: "fit-content" }}
+        style={{ height: "70vh", width: "fit-content" }}
       >
         <div
           className="content"
@@ -506,6 +513,7 @@ function NewUserForm({
                     Sort Order
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       value={data?.sort_order}
@@ -532,7 +540,7 @@ function NewUserForm({
                         })
                       }
                     >
-                      <option value="">None</option>
+            
                       {companies
                         .sort((a, b) => a.sort_order - b.sort_order)
                         .map((a) => (
@@ -555,7 +563,7 @@ function NewUserForm({
                         })
                       }
                     >
-                      <option value="">None</option>
+               
                       {itemCategories
                         .filter((a) => a.company_uuid === data.company_uuid)
                         .sort((a, b) => a.sort_order - b.sort_order)
@@ -589,6 +597,7 @@ function NewUserForm({
                     MRP
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       value={data?.mrp}
@@ -608,8 +617,10 @@ function NewUserForm({
                     Item Price
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="route_title"
                       className="numberInput"
+                      step="0.001"
                       value={data?.item_price}
                       onChange={(e) =>
                         setdata({
@@ -624,6 +635,7 @@ function NewUserForm({
                     GST
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       value={data?.item_gst}
@@ -678,6 +690,7 @@ function NewUserForm({
                     Barcode
                     <textarea
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       //   value={data?.barcode}

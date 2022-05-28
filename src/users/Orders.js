@@ -1,12 +1,13 @@
 import { openDB } from "idb";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { AiOutlineArrowLeft } from "react-icons/ai";
+import axios from "axios";
 const Orders = () => {
   const [counters, setCounters] = useState([]);
   const [counterFilter, setCounterFilter] = useState("");
   const [routes, setRoutes] = useState([]);
- const Navigate=useNavigate()
+  const Navigate = useNavigate();
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = await db
@@ -21,15 +22,42 @@ const Orders = () => {
     setRoutes(route);
   };
   useEffect(() => {
-    getIndexedDbData()
-    return ()=>setCounters([])
+    getIndexedDbData();
+    return () => setCounters([]);
   }, []);
-
+  const postActivity = async (counter, route) => {
+    let time =new Date()
+    let data = {
+      user_uuid: localStorage.getItem("user_uuid"),
+      role: "Order",
+      narration:
+        counter.counter_title +
+        (route.route_title ? ", " + route.route_title : ""),
+      timestamp: time.getTime(),
+      activity: "counter_open",
+    };
+    const response = await axios({
+      method: "post",
+      url: "/userActivity/postUserActivity",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      console.log(response);
+    }
+  };
   return (
     <div
       className="item-sales-container orders-report-container"
       style={{ overflow: "visible", left: "0" }}
     >
+      <nav className="user_nav" style={{ top: "0" }}>
+        <div className="user_menubar">
+          <AiOutlineArrowLeft onClick={() => Navigate(-1)} />
+        </div>
+      </nav>
       <div
         style={{
           position: "absolute",
@@ -37,7 +65,7 @@ const Orders = () => {
           justifyContent: "center",
           alignItems: "center",
           flexDirection: "column",
-          width:"100vw"
+          width: "100vw",
         }}
       >
         <input
@@ -67,7 +95,25 @@ const Orders = () => {
                   )
                   ?.map((item, index) => {
                     return (
-                      <tr key={item.counter_uuid} style={{ width: "100%",cursor:"pointer" }} onClick={()=>Navigate("/users/orders/"+item.counter_uuid)}>
+                      <tr
+                        key={item.counter_uuid}
+                        style={{ width: "100%", cursor: "pointer" }}
+                        onClick={() => {
+                          postActivity(
+                            item,
+                            routes.find(
+                              (a) => a?.route_uuid === item?.route_uuid
+                            )
+                          );
+                          sessionStorage.setItem(
+                            "route_title",
+                            routes.find(
+                              (a) => a?.route_uuid === item?.route_uuid
+                            )?.route_title
+                          );
+                          Navigate("/users/orders/" + item.counter_uuid);
+                        }}
+                      >
                         <td style={{ width: "50%" }}>{item.counter_title}</td>
                         <td style={{ width: "50%" }}>
                           {
@@ -85,7 +131,6 @@ const Orders = () => {
         ) : (
           ""
         )}
-       
       </div>
     </div>
   );

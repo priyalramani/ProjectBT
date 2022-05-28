@@ -17,12 +17,19 @@ const SelectedCounterOrder = () => {
   const [itemsCategory, setItemsCategory] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
+  const [orderCreated, setOrderCreated] = useState(false);
   const Navigate = useNavigate();
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = await db.transaction("items", "readwrite").objectStore("items");
     let item = await tx.getAll();
-    setItems(item);
+    setItems(
+      item.map((a) => ({
+        ...a,
+        item_price: a.item_price || 0,
+        gst_percentage: a.gst_percentage || 0,
+      }))
+    );
     let store = await db
       .transaction("companies", "readwrite")
       .objectStore("companies");
@@ -70,7 +77,7 @@ const SelectedCounterOrder = () => {
         p: a.pcs,
         unit_price: a.price,
         gst_percentage: a.item_gst,
-        status:0
+        status: 0,
       })),
       status: [
         {
@@ -90,16 +97,67 @@ const SelectedCounterOrder = () => {
       },
     });
     if (response.data.success) {
+      let qty = `${
+        data?.item_details?.length > 1
+          ? data?.item_details?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
+          : data?.item_details?.length
+          ? data?.item_details[0]?.b
+          : 0
+      }:${
+        data?.item_details?.length > 1
+          ? data?.item_details?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
+          : data?.item_details?.length
+          ? data?.item_details[0]?.p
+          : 0
+      }`;
+      postActivity({
+        activity: "Order End",
+        range: data?.item_details?.length,
+        qty,
+        amt: data.order_grandtotal || 0,
+      });
       Navigate("/users");
     }
   };
+  const postActivity = async (others = {}) => {
+    let time = new Date()
+    let data = {
+      user_uuid: localStorage.getItem("user_uuid"),
+      role: "Order",
+      narration:
+        counter.counter_title +
+        (sessionStorage.getItem("route_title")
+          ? ", " + sessionStorage.getItem("route_title")
+          : ""),
+      timestamp: time.getTime(),
+      ...others,
+    };
+    const response = await axios({
+      method: "post",
+      url: "/userActivity/postUserActivity",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      console.log(response);
+    }
+  };
+  useEffect(() => {
+    if (!orderCreated && order?.items?.length) {
+      postActivity({ activity: "order_start" });
+      setOrderCreated(true);
+    }
+  }, [order]);
+  console.log(order)
   return (
     <>
       <div>
         <nav className="user_nav">
           <div className="user_menubar">
             <AiOutlineArrowLeft
-              onClick={() => (cartPage ? Navigate(-1) : setCartPage(false))}
+              onClick={() => (!cartPage ? Navigate(-1) : setCartPage(false))}
             />
           </div>
           {cartPage ? <h1>Cart</h1> : ""}
@@ -173,10 +231,41 @@ const SelectedCounterOrder = () => {
                                         e.stopPropagation();
                                         setOrder((prev) => ({
                                           ...prev,
-                                          items:
-                                            prev?.items?.map((a) =>
+                                          items: prev?.items?.filter(
+                                            (a) =>
                                               a.item_uuid === item.item_uuid
-                                                ? {
+                                          )?.length
+                                            ? prev?.items?.map((a) =>
+                                                a.item_uuid === item.item_uuid
+                                                  ? {
+                                                      ...a,
+                                                      box:
+                                                        +(a.box || 0) +
+                                                        parseInt(
+                                                          ((a?.pcs || 0) +
+                                                            (+item?.one_pack ||
+                                                              1)) /
+                                                            +item.conversion
+                                                        ),
+
+                                                      pcs:
+                                                        ((a?.pcs || 0) +
+                                                          (+item?.one_pack ||
+                                                            1)) %
+                                                        +item.conversion,
+                                                    }
+                                                  : a
+                                              )
+                                            : prev?.items?.length
+                                            ? [
+                                                ...prev.items,
+                                                ...items
+                                                  ?.filter(
+                                                    (a) =>
+                                                      a.item_uuid ===
+                                                      item.item_uuid
+                                                  )
+                                                  .map((a) => ({
                                                     ...a,
                                                     box:
                                                       +(a.box || 0) +
@@ -192,29 +281,30 @@ const SelectedCounterOrder = () => {
                                                         (+item?.one_pack ||
                                                           1)) %
                                                       +item.conversion,
-                                                  }
-                                                : a
-                                            ) ||
-                                            items
-                                              ?.filter(
-                                                (a) =>
-                                                  a.item_uuid === item.item_uuid
-                                              )
-                                              .map((a) => ({
-                                                ...a,
-                                                box:
-                                                  +(a.box || 0) +
-                                                  parseInt(
-                                                    ((a?.pcs || 0) +
-                                                      (+item?.one_pack || 1)) /
-                                                      +item.conversion
-                                                  ),
+                                                  })),
+                                              ]
+                                            : items
+                                                ?.filter(
+                                                  (a) =>
+                                                    a.item_uuid ===
+                                                    item.item_uuid
+                                                )
+                                                .map((a) => ({
+                                                  ...a,
+                                                  box:
+                                                    +(a.box || 0) +
+                                                    parseInt(
+                                                      ((a?.pcs || 0) +
+                                                        (+item?.one_pack ||
+                                                          1)) /
+                                                        +item.conversion
+                                                    ),
 
-                                                pcs:
-                                                  ((a?.pcs || 0) +
-                                                    (+item?.one_pack || 1)) %
-                                                  +item.conversion,
-                                              })),
+                                                  pcs:
+                                                    ((a?.pcs || 0) +
+                                                      (+item?.one_pack || 1)) %
+                                                    +item.conversion,
+                                                })),
                                         }));
                                       }}
                                     >
@@ -401,10 +491,11 @@ const SelectedCounterOrder = () => {
             className="autoBtn"
             style={{ left: "20vw" }}
             onClick={async () => {
+              let time=new Date()
               Billing(counter, order.items, {
                 stage: 1,
                 user_uuid: localStorage.getItem("user_uuid"),
-                time: new Date().getTime(),
+                time: time.getTime(),
 
                 type: "NEW",
               }).then((data) => {
@@ -421,7 +512,15 @@ const SelectedCounterOrder = () => {
             onClick={async () => {
               let data = await AutoAdd(counter, order.items);
 
-              setOrder((prev) => ({ ...prev, ...data }));
+              setOrder((prev) => ({
+                ...prev,
+                ...data,
+                items: data?.items?.map((a) => ({
+                  ...a,
+                  box: +a.box + parseInt(+a.pcs / +a.conversion),
+                  pcs: +a.pcs % +a.conversion,
+                })),
+              }));
             }}
           >
             Auto
@@ -456,21 +555,33 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
     e.preventDefault();
     setOrder((prev) => ({
       ...prev,
-      items: prev?.items?.map((a) =>
-        a.item_uuid === popupInfo.item_uuid
-          ? {
-              ...a,
+      items: prev.items.filter((a) => a.item_uuid === popupInfo.item_uuid)
+        ?.length
+        ? prev?.items?.map((a) =>
+            a.item_uuid === popupInfo.item_uuid
+              ? {
+                  ...a,
+                  box: +data.box + parseInt(+data.pcs / +popupInfo.conversion),
+                  pcs: +data.pcs % +popupInfo.conversion,
+                }
+              : a
+          )
+        : prev?.items?.length
+        ? [
+            ...prev.items,
+            {
+              ...popupInfo,
               box: +data.box + parseInt(+data.pcs / +popupInfo.conversion),
               pcs: +data.pcs % +popupInfo.conversion,
-            }
-          : a
-      ) || [
-        {
-          ...popupInfo,
-          box: +data.box + parseInt(+data.pcs / +popupInfo.conversion),
-          pcs: +data.pcs % +popupInfo.conversion,
-        },
-      ],
+            },
+          ]
+        : [
+            {
+              ...popupInfo,
+              box: +data.box + parseInt(+data.pcs / +popupInfo.conversion),
+              pcs: +data.pcs % +popupInfo.conversion,
+            },
+          ],
     }));
     onSave();
   };

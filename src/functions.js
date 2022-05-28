@@ -13,11 +13,11 @@ export const AutoAdd = async (counter, items) => {
   let data = autobills.filter(
     (a) =>
       a.type === "auto-increase-qty" &&
-      (a.counters.filter((b) => b === counter.counter_uuid) ||
-        counter.counter_group_uuid.filter(
-          (b) => a.counter_groups.filter((c) => c === b).length
+      (a?.counters?.filter((b) => b === counter.counter_uuid)?.length ||
+        counter?.counter_group_uuid?.filter(
+          (b) => a?.counter_groups.filter((c) => c === b)?.length
         ).length ||
-        a.counter.length === 0)
+        a?.counters?.length === 0)
   );
 
   for (let autobill of data) {
@@ -34,16 +34,20 @@ export const AutoAdd = async (counter, items) => {
         );
         base_qty_arr =
           base_qty_arr.length > 1
-            ? base_qty_arr.reduce((a, b) => Math.max(a.base_qty, b.base_qty))
+            ? base_qty_arr.reduce((a, b) =>
+                +Math.max(a.base_qty, b.base_qty) === +a.base_qty ? a : b
+              )
             : base_qty_arr.length === 1
             ? base_qty_arr[0]
-            : {};
+            : null;
         let pice_qty_arr = autobill.qty_details.filter(
           (b) => b.unit === "p" && +b.base_qty <= +a.pcs
         );
         pice_qty_arr =
           pice_qty_arr.length > 1
-            ? pice_qty_arr.reduce((a, b) => Math.max(a.base_qty, b.base_qty))
+            ? pice_qty_arr.reduce((a, b) =>
+                +Math.max(a.base_qty, b.base_qty) === +a.base_qty ? a : b
+              )
             : pice_qty_arr.length === 1
             ? pice_qty_arr[0]
             : {};
@@ -51,8 +55,8 @@ export const AutoAdd = async (counter, items) => {
         if (base_qty_arr || pice_qty_arr)
           auto_added.push({
             item_uuid: a.item_uuid,
-            box: base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0,
-            pcs: pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0,
+            b: base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0,
+            p: pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0,
           });
         return {
           ...a,
@@ -65,7 +69,7 @@ export const AutoAdd = async (counter, items) => {
   data = autobills.filter(
     (a) =>
       a.type === "auto-item-add" &&
-      (a.counters.filter((b) => b === counter.counter_uuid) ||
+      (a.counters.filter((b) => b === counter.counter_uuid).length ||
         counter.counter_group_uuid.filter(
           (b) => a.counter_groups.filter((c) => c === b).length
         ).length ||
@@ -73,7 +77,7 @@ export const AutoAdd = async (counter, items) => {
   );
 
   for (let autobill of data) {
-    eligibleItems = eligibleItems?.filter(
+    let eligibleAddItems = eligibleItems?.filter(
       (a) =>
         autobill.items.length === 0 ||
         autobill.items.filter((b) => b === a.item_uuid).length ||
@@ -81,41 +85,53 @@ export const AutoAdd = async (counter, items) => {
           (b) => a.item_group_uuid.filter((c) => c === b).length
         ).length
     );
+    console.log("eligible", eligibleAddItems);
     let eligiblesBox =
-      eligibleItems.length < 1
-        ? eligibleItems.reduce((a, b) => +a.box + b.box)
-        : eligibleItems.length === 1
-        ? +eligibleItems[0].box
+      eligibleAddItems.length > 1
+        ? eligibleAddItems.map(a => a.box).reduce((a, b) => a + b)
+        : eligibleAddItems.length === 1
+        ? +eligibleAddItems[0].box
         : 0;
+    //console.log("eligibleBox", eligiblesBox);
     let eligiblesPcs =
-      eligibleItems.length < 1
-        ? eligibleItems.reduce((a, b) => +a.pcs + b.pcs)
-        : eligibleItems.length === 1
-        ? +eligibleItems[0].pcs
+      eligibleAddItems.length > 1
+        ? eligibleAddItems.map(a => a.pcs).reduce((a, b) => a + b)
+        : eligibleAddItems.length === 1
+        ? +eligibleAddItems[0].pcs
         : 0;
+    // console.log("eligiblePcs", eligiblesPcs);
 
     let base_qty_arr = autobill.qty_details.filter(
-      (b) => b.unit === "b" && +b.base_qty <= +eligiblesBox
+      (b) => b.unit === "b" && +b.base_qty <= eligiblesBox
     );
+    //console.log("baseqtyarr", base_qty_arr);
     base_qty_arr =
-      base_qty_arr.length >= autobill.min_range
+      eligibleAddItems.length >= autobill.min_range
         ? base_qty_arr.length > 1
-          ? base_qty_arr.reduce((a, b) => Math.max(a.base_qty, b.base_qty))
+          ? base_qty_arr.reduce((a, b) =>
+              +Math.max(a.base_qty, b.base_qty) === +a.base_qty ? a : b
+            )
           : base_qty_arr.length === 1
           ? base_qty_arr[0]
-          : {}
-        : {};
+          : null
+        : null;
+    //console.log("baseqtyobj", base_qty_arr);
     let pice_qty_arr = autobill.qty_details.filter(
-      (b) => b.unit === "p" && +b.base_qty <= +eligiblesPcs
+      (b) => b.unit === "p" && +b.base_qty <= eligiblesPcs
     );
+    console.log("piceqtyarr", pice_qty_arr);
     pice_qty_arr =
-      pice_qty_arr.length >= autobill.min_range
+    eligibleAddItems.length >= autobill.min_range
         ? pice_qty_arr.length > 1
-          ? pice_qty_arr.reduce((a, b) => Math.max(a.base_qty, b.base_qty))
+          ? pice_qty_arr.reduce((a, b) =>
+              +Math.max(a.base_qty, b.base_qty) === +a.base_qty ? a : b
+            )
           : pice_qty_arr.length === 1
           ? pice_qty_arr[0]
-          : {}
-        : {};
+          : null
+        : null;
+    console.log("piceqtyobj", pice_qty_arr);
+
     if (base_qty_arr?.add_items) {
       let dataItems = dbItems.filter(
         (a) =>
@@ -127,7 +143,7 @@ export const AutoAdd = async (counter, items) => {
           let data = base_qty_arr?.add_items.find(
             (b) => b.item_uuid === a.item_uuid
           );
-          auto_added.push({ ...data, q: data.add_qty || 0 });
+          auto_added.push({ ...data, b: data.add_qty || 0 });
         }
         return {
           ...a,
@@ -136,26 +152,23 @@ export const AutoAdd = async (counter, items) => {
         };
       });
       let nonFiltered = eligibleItems.filter(
-        (a) => dataItems.filter((b) => a.item_uuid !== b.item_uuid).length
+        (a) => !(dataItems.filter((b) => a.item_uuid === b.item_uuid).length)
       );
-      let Filtered = items
-        .filter(
-          (a) => dataItems.filter((b) => a.item_uuid === b.item_uuid).length
-        )
-        .map((a) => {
-          return {
-            ...a,
-            box:
-              +(a?.box || 0) +
-              (dataItems.find((b) => a.item_uuid !== b.item_uuid)?.box || 0),
-          };
-        });
+      dataItems = dataItems.map((a) => {
+        let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
+        return {
+          ...a,
+          pcs: (data ? +a.pcs + data.pcs : a.pcs) || 0,
+          box: (data ? +a.box + data.box : a.box) || 0,
+        };
+      });
+     
       items = nonFiltered.length
-        ? Filtered.length
-          ? [...nonFiltered, ...Filtered]
-          : [...nonFiltered]
-        : Filtered.length
-        ? [...Filtered]
+        ? dataItems.length
+          ? [...nonFiltered, ...dataItems]
+          : nonFiltered
+        : dataItems.length
+        ? dataItems
         : [];
     }
     if (pice_qty_arr?.add_items) {
@@ -164,6 +177,7 @@ export const AutoAdd = async (counter, items) => {
           pice_qty_arr?.add_items.filter((b) => b.item_uuid === a.item_uuid)
             .length
       );
+      //console.log("datapiceItems", dataItems);
       dataItems = dataItems.map((a) => {
         if (pice_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)) {
           let data = pice_qty_arr?.add_items.find(
@@ -177,25 +191,27 @@ export const AutoAdd = async (counter, items) => {
             .add_qty,
         };
       });
+      //console.log("datapiceItems", dataItems);
+
       let nonFiltered = eligibleItems.filter(
-        (a) => dataItems.filter((b) => a.item_uuid !== b.item_uuid).length
+        (a) => !dataItems.filter((b) => a.item_uuid === b.item_uuid).length
       );
-      let Filtered = eligibleItems
-        .filter(
-          (a) => dataItems.filter((b) => a.item_uuid === b.item_uuid).length
-        )
-        .map((a) => ({
+
+      dataItems = dataItems.map((a) => {
+        let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
+        return {
           ...a,
-          pcs:
-            +(a?.pcs || 0) +
-            (dataItems.find((b) => a.item_uuid !== b.item_uuid)?.pcs || 0),
-        }));
+          pcs: (data ? +a.pcs + data.pcs : a.pcs) || 0,
+          box: (data ? +a.box + data.box : a.box) || 0,
+        };
+      });
+      //console.log(nonFiltered, dataItems);
       eligibleItems = nonFiltered.length
-        ? Filtered.length
-          ? [...nonFiltered, ...Filtered]
-          : [...nonFiltered]
-        : Filtered.length
-        ? [...Filtered]
+        ? dataItems.length
+          ? [...nonFiltered, ...dataItems]
+          : nonFiltered
+        : dataItems.length
+        ? dataItems
         : [];
     }
   }
@@ -207,10 +223,15 @@ export const AutoAdd = async (counter, items) => {
   };
 };
 
-export const Billing = async (counter, items, others) => {
+export const Billing = async (counter = {}, items = [], others = null) => {
   let newPriceItems = [];
-
   for (let item of items) {
+    //console.log(
+    //   item,
+    //   others,
+    //   +item.conversion * +item.box + item.pcs,
+    //   +item.conversion * +item.b + item.p
+    // );
     let charges_discount = [];
     let price =
       counter.item_special_price.find((a) => a.item_uuid === item.item_uuid)
@@ -221,7 +242,13 @@ export const Billing = async (counter, items, others) => {
     let company_discount_percentage =
       counter.company_discount.find((a) => a.company_uuid === item.company_uuid)
         ?.discount || 0;
-    item = { ...item, qty: +item.conversion * +item.box + item.pcs };
+        console.log("company_discount_percentage",company_discount_percentage)
+    item = {
+      ...item,
+      qty: others
+        ? +item.conversion * +item.box + item.pcs
+        : +item.conversion * +item.b + item.p,
+    };
     if (price) item = { ...item, item_price: price };
 
     if (special_discount_percentage) {
@@ -233,7 +260,7 @@ export const Billing = async (counter, items, others) => {
         ...item,
         special_discount_percentage,
         item_total:
-          item.item_price * ((100 - special_discount_percentage) / 100),
+          ((item.item_price||0) * ((100 - special_discount_percentage) / 100)) || 0,
       };
     }
     if (company_discount_percentage) {
@@ -245,16 +272,42 @@ export const Billing = async (counter, items, others) => {
         ...item,
         company_discount_percentage,
         item_total: item.item_total
-          ? item.item_total * ((100 - company_discount_percentage) / 100)
-          : item.item_price * ((100 - company_discount_percentage) / 100),
+          ? item.item_total * ((100 - company_discount_percentage) / 100) || 0
+          : (item.item_price||0) * ((100 - company_discount_percentage) / 100) || 0,
       };
     }
 
     if (!special_discount_percentage && !company_discount_percentage)
-      item = { ...item, item_total: item.item_price };
-    item = { ...item, charges_discount };
+      item = {
+        ...item,
+        item_total:
+          (
+            (item.item_price||0) *
+            (others
+              ? +item.box * +item.conversion + item.pcs
+              : +item.b * +item.conversion + item.p)
+          ).toFixed(2) || 0,
+      };
+    item = {
+      ...item,
+      charges_discount,
+      item_total: ((item.item_total || 0) * (item.qty || 1)).toFixed(2),
+    };
+    console.log(item);
     newPriceItems.push(item);
   }
-
-  return { counter_uuid: counter.counter_uuid, items: newPriceItems, others };
+  let order_grandtotal =
+    newPriceItems.length > 1
+      ? newPriceItems.reduce(
+          (a, b) => (+a.item_total || 0) + (+b.item_total || 0)
+        )
+      : newPriceItems.length
+      ? newPriceItems.map((a) => a.item_total)[0] || 0
+      : 0;
+  return {
+    counter_uuid: counter.counter_uuid,
+    order_grandtotal,
+    items: newPriceItems,
+    others,
+  };
 };

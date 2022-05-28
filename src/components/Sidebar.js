@@ -56,7 +56,7 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               link: "/admin/autoIncreaseQty",
             },
             {
-              name: "Auto Increase Item",
+              name: "Auto Add Item",
               link: "/admin/autoIncreaseItem",
             },
           ]}
@@ -73,13 +73,13 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
             },
           ]}
         />
-        <NavLink
+        {/* <NavLink
           menuList={[]}
           title={"Users"}
           icon={<QuickAccessIcon sx={{ fontSize: 50 }} />}
           isActive={false}
           href="/users"
-        />
+        /> */}
         <NavLink
           title="Setup"
           icon={<SettingsIcon sx={{ fontSize: 50 }} />}

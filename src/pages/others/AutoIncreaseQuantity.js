@@ -12,7 +12,7 @@ import axios from "axios";
 const DEFAULT = {
   base_qty: "",
   add_qty: "",
-  value: "p",
+  unit: "p",
 };
 const AutoIncreaseQuantity = () => {
   const [popupForm, setPopupForm] = useState(false);
@@ -127,7 +127,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
           )
           ?.map((item, i) => (
             <tr
-              key={Math.random()}
+            key={item.item_uuid} 
               style={{ height: "30px" }}
               onClick={() => setPopupForm({ type: "edit", data: item })}
             >
@@ -381,20 +381,22 @@ function NewUserForm({ onSave, popupForm }) {
                       />
                     </td>
                   </tr>
-                  {objData.qty_details?.map((item, i) => (
-                    <tr key={Math.random()} style={{ height: "30px" }}>
+                  {objData?.qty_details?.map((item, i) => (
+                    <tr key={item.item_uuid} style={{ height: "30px" }}>
                       <td colSpan={4} style={{ textAlign: "center" }}>
                         If quantity of base item is
                         <input
                           type="number"
+                          onWheel={(e) => e.target.blur()}
                           className="searchInput"
                           style={{
                             border: "none",
                             borderBottom: "2px solid black",
                             borderRadius: "0px",
                             width: "50px",
+                            padding:"0 5px"
                           }}
-                          value={item.base_qty}
+                          value={item?.base_qty}
                           onChange={(e) =>
                             setObgData((prev) => ({
                               ...prev,
@@ -414,8 +416,10 @@ function NewUserForm({ onSave, popupForm }) {
                             borderBottom: "2px solid black",
                             borderRadius: "0px",
                             width: "80px",
+                            padding:"0 5px"
                           }}
                           type="number"
+                          onWheel={(e) => e.target.blur()}
                           value={item.add_qty}
                           onChange={(e) =>
                             setObgData((prev) => ({
@@ -464,7 +468,7 @@ function NewUserForm({ onSave, popupForm }) {
                 onClick={(e) =>
                   setObgData((prev) => ({
                     ...prev,
-                    qty_details: [...prev.qty_details, DEFAULT],
+                    qty_details: [...prev.qty_details, {...DEFAULT,uuid:uuid()}],
                   }))
                 }
               >

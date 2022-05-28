@@ -16,6 +16,8 @@ const MainAdmin = () => {
   const [counter, setCounter] = useState([]);
   const [btn, setBtn] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState([]);
+  const [selectedRouteOrder, setSelectedRouteOrder] = useState({});
+  const [selectedTrip, setSelectedTrip] = useState("");
   const getCounter = async () => {
     const response = await axios({
       method: "get",
@@ -82,7 +84,25 @@ const MainAdmin = () => {
     ) {
       getRunningOrders();
     }
-  }, [btn,popupForm]);
+  }, [btn, popupForm]);
+  const postOrderData = async () => {
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: selectedOrder.map((a) => ({
+        ...a,
+        trip_uuid: +selectedTrip === 0 ? "" : selectedTrip,
+      })),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setSelectedOrder([]);
+      setSelectedTrip("");
+      setBtn((prev) => !prev);
+    }
+  };
   return (
     <>
       <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} />
@@ -108,24 +128,27 @@ const MainAdmin = () => {
                 {orders.filter(
                   (a) =>
                     counter.filter(
-                      (b) =>
-                        a.counter_uuid === b.counter_uuid &&
-                        !routesData.filter((c) => c.route_uuid === b.route_uuid)
-                          .length
+                      (b) => a.counter_uuid === b.counter_uuid && !b.route_uuid
                     ).length
                 ).length ? (
                   <div key={Math.random()} className="sectionDiv">
                     <h1>UnKnown</h1>
-                    <div className="content" id="seats_container">
+                    <div
+                      className="content"
+                      style={{
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                        gap: "0",
+                      }}
+                      id="seats_container"
+                    >
                       {orders
                         .filter(
                           (a) =>
                             counter.filter(
                               (b) =>
                                 a.counter_uuid === b.counter_uuid &&
-                                routesData.filter(
-                                  (c) => c.route_uuid !== b.route_uuid
-                                ).length
+                                !b.route_uuid
                             ).length
                         )
                         .map((item) => {
@@ -139,16 +162,9 @@ const MainAdmin = () => {
                               // section={section.section_uuid}
                               // section-name={section?.section_name}
                               // outlet={outletIdState}
-                              // onClick={e => {
-                              //   switch (e.detail) {
-                              //     case 2:
-                              //       menuOpenHandler(item);
-                              //       break;
-                              //     default:
-                              //       seatClickHandler(e.currentTarget.querySelector('.card-focus'), item?.seat_uuid, e.detail);
-                              //       return;
-                              //   }
-                              // }}
+                              onClick={() =>
+                                setSelectedRouteOrder(item.order_uuid)
+                              }
                             >
                               <span
                                 className="dblClickTrigger"
@@ -157,12 +173,34 @@ const MainAdmin = () => {
                                 //   menuOpenHandler(item)
                                 // }
                               />
+                              
                               <Card
                                 // on_order={order}
+                                dateTime={item?.status[0]?.time}
                                 // key={item.seat_uuid}
                                 title1={item?.invoice_number || ""}
-                                // title2={item.seat_name}
-                                // color={item.color}
+                                selectedOrder={
+                                  selectedRouteOrder === item.order_uuid
+                                }
+                                title2={item?.counter_title || ""}
+                                status={
+                                  +item.status[item.status.length - 1]
+                                    ?.stage === 1
+                                    ? "Processing"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 2
+                                    ? "Checking"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 3
+                                    ? "Delivery"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 4
+                                    ? "Complete"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 5
+                                    ? "Cancelled"
+                                    : ""
+                                }
                                 // price={item.price}
                                 // visibleContext={visibleContext}
                                 // setVisibleContext={setVisibleContext}
@@ -193,7 +231,15 @@ const MainAdmin = () => {
                         return (
                           <div key={Math.random()} className="sectionDiv">
                             <h1>{route.route_title}</h1>
-                            <div className="content" id="seats_container">
+                            <div
+                              className="content"
+                              style={{
+                                flexDirection: "row",
+                                flexWrap: "wrap",
+                                gap: "0",
+                              }}
+                              id="seats_container"
+                            >
                               {orders
                                 .filter(
                                   (a) =>
@@ -210,16 +256,9 @@ const MainAdmin = () => {
                                       // section={section.section_uuid}
                                       // section-name={section?.section_name}
                                       // outlet={outletIdState}
-                                      // onClick={e => {
-                                      //   switch (e.detail) {
-                                      //     case 2:
-                                      //       menuOpenHandler(item);
-                                      //       break;
-                                      //     default:
-                                      //       seatClickHandler(e.currentTarget.querySelector('.card-focus'), item?.seat_uuid, e.detail);
-                                      //       return;
-                                      //   }
-                                      // }}
+                                      onClick={() =>
+                                        setSelectedRouteOrder(item.order_uuid)
+                                      }
                                     >
                                       <span
                                         className="dblClickTrigger"
@@ -231,9 +270,34 @@ const MainAdmin = () => {
                                       <Card
                                         // on_order={on_order && on_order}
                                         // key={item.seat_uuid}
+                                        dateTime={item?.status[0]?.time}
                                         title1={item?.invoice_number || ""}
-                                        // title2={item.seat_name}
-                                        // color={item.color}
+                                        selectedOrder={
+                                          selectedRouteOrder === item.order_uuid
+                                        }
+                                        title2={item?.counter_title || ""}
+                                        status={
+                                          +item.status[item.status.length - 1]
+                                            ?.stage === 1
+                                            ? "Processing"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 2
+                                            ? "Checking"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 3
+                                            ? "Delivery"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 4
+                                            ? "Complete"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 5
+                                            ? "Cancelled"
+                                            : ""
+                                        }
                                         // price={item.price}
                                         // visibleContext={visibleContext}
                                         // setVisibleContext={setVisibleContext}
@@ -262,13 +326,22 @@ const MainAdmin = () => {
                 >
                   Add
                 </button>
-                {selectedOrder.length ? (
+
+                <button
+                  className="item-sales-search"
+                  onClick={() => setPopupForm({ type: "edit" })}
+                  style={{ position: "absolute", left: "70vw", top: "60px" }}
+                >
+                  Assign
+                </button>
+
+                {selectedOrder.length && selectedTrip ? (
                   <button
                     className="item-sales-search"
-                    onClick={() => setPopupForm({ type: "edit" })}
-                    style={{ position: "absolute", left: "70vw", top: "60px" }}
+                    onClick={() => postOrderData()}
+                    style={{ position: "absolute", right: "0", top: "60px" }}
                   >
-                    Assign
+                    Done
                   </button>
                 ) : (
                   ""
@@ -276,7 +349,15 @@ const MainAdmin = () => {
                 {orders.filter((a) => !a?.trip_uuid).length ? (
                   <div key={Math.random()} className="sectionDiv">
                     <h1>UnKnown</h1>
-                    <div className="content" id="seats_container">
+                    <div
+                      className="content"
+                      style={{
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                        gap: "0",
+                      }}
+                      id="seats_container"
+                    >
                       {orders
                         .filter((a) => !a?.trip_uuid)
                         .map((item) => {
@@ -290,19 +371,22 @@ const MainAdmin = () => {
                               // section={section.section_uuid}
                               // section-name={section?.section_name}
                               // outlet={outletIdState}
-                              onClick={(e) => {
-                                setSelectedOrder(
-                                  selectedOrder.filter(
-                                    (a) => a.order_uuid === item.order_uuid
-                                  ).length
-                                    ? selectedOrder.filter(
-                                        (a) => a.order_uuid !== item.order_uuid
-                                      )
-                                    : selectedOrder.length
-                                    ? [...selectedOrder, item]
-                                    : [item]
-                                );
-                              }}
+                              onClick={(e) =>
+                                selectedTrip
+                                  ? setSelectedOrder(
+                                      selectedOrder.filter(
+                                        (a) => a.order_uuid === item.order_uuid
+                                      ).length
+                                        ? selectedOrder.filter(
+                                            (a) =>
+                                              a.order_uuid !== item.order_uuid
+                                          )
+                                        : selectedOrder.length
+                                        ? [...selectedOrder, item]
+                                        : [item]
+                                    )
+                                  : setSelectedRouteOrder(item.order_uuid)
+                              }
                             >
                               <span
                                 className="dblClickTrigger"
@@ -311,17 +395,39 @@ const MainAdmin = () => {
                                 //   menuOpenHandler(item)
                                 // }
                               />
+                              
                               <Card
                                 // on_order={order}
+                                dateTime={item?.status[0]?.time}
+                                
                                 // key={item.seat_uuid}
                                 title1={item?.invoice_number || ""}
                                 selectedOrder={
-                                  selectedOrder.filter(
-                                    (a) => a.order_uuid === item.order_uuid
-                                  ).length
+                                  selectedTrip
+                                    ? selectedOrder.filter(
+                                        (a) => a.order_uuid === item.order_uuid
+                                      ).length
+                                    : selectedRouteOrder === item.order_uuid
                                 }
-                                // title2={item.seat_name}
-                                // color={item.color}
+                                title2={item?.counter_title || ""}
+                                status={
+                                  +item.status[item.status.length - 1]
+                                    ?.stage === 1
+                                    ? "Processing"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 2
+                                    ? "Checking"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 3
+                                    ? "Delivery"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 4
+                                    ? "Complete"
+                                    : +item.status[item.status.length - 1]
+                                        ?.stage === 5
+                                    ? "Cancelled"
+                                    : ""
+                                }
                                 // price={item.price}
                                 // visibleContext={visibleContext}
                                 // setVisibleContext={setVisibleContext}
@@ -344,71 +450,111 @@ const MainAdmin = () => {
                         orders.filter((a) => a.trip_uuid === trip.trip_uuid)
                           .length
                       )
-                      return (
-                        <div key={Math.random()} className="sectionDiv">
-                          <h1>{trip.trip_title}</h1>
-                          <div className="content" id="seats_container">
-                            {orders
-                              .filter((a) => a.trip_uuid === trip.trip_uuid)
-                              .map((item) => {
-                                return (
-                                  <div
-                                    className={`seatSearchTarget`}
-                                    key={Math.random()}
-                                    seat-name={item.seat_name}
-                                    seat-code={item.seat_uuid}
-                                    seat={item.seat_uuid}
-                                    // section={section.section_uuid}
-                                    // section-name={section?.section_name}
-                                    // outlet={outletIdState}
-                                    onClick={(e) => {
-                                      setSelectedOrder((prev) =>
-                                        prev.filter(
-                                          (a) =>
-                                            a.order_uuid === item.order_uuid
-                                        ).length
-                                          ? prev.filter(
-                                              (a) =>
-                                                a.order_uuid !== item.order_uuid
+                        return (
+                          <div key={Math.random()} className="sectionDiv">
+                            <h1>{trip.trip_title}</h1>
+                            <div
+                              className="content"
+                              style={{
+                                flexDirection: "row",
+                                flexWrap: "wrap",
+                                gap: "0",
+                              }}
+                              id="seats_container"
+                            >
+                              {orders
+                                .filter((a) => a.trip_uuid === trip.trip_uuid)
+                                .map((item) => {
+                                  return (
+                                    <div
+                                      className={`seatSearchTarget`}
+                                      key={Math.random()}
+                                      seat-name={item.seat_name}
+                                      seat-code={item.seat_uuid}
+                                      seat={item.seat_uuid}
+                                      // section={section.section_uuid}
+                                      // section-name={section?.section_name}
+                                      // outlet={outletIdState}
+                                      onClick={(e) =>
+                                        selectedTrip
+                                          ? setSelectedOrder((prev) =>
+                                              prev.filter(
+                                                (a) =>
+                                                  a.order_uuid ===
+                                                  item.order_uuid
+                                              ).length
+                                                ? prev.filter(
+                                                    (a) =>
+                                                      a.order_uuid !==
+                                                      item.order_uuid
+                                                  )
+                                                : prev.length
+                                                ? [...prev, item]
+                                                : [item]
                                             )
-                                          : prev.length
-                                          ? [...prev, item]
-                                          : [item]
-                                      );
-                                    }}
-                                  >
-                                    <span
-                                      className="dblClickTrigger"
-                                      style={{ display: "none" }}
-                                      // onClick={() =>
-                                      //   menuOpenHandler(item)
-                                      // }
-                                    />
-                                    <Card
-                                      // on_order={on_order && on_order}
-                                      // key={item.seat_uuid}
-                                      title1={item?.invoice_number || ""}
-                                      selectedOrder={
-                                        selectedOrder.filter(
-                                          (a) =>
-                                            a.order_uuid === item.order_uuid
-                                        ).length
+                                          : setSelectedRouteOrder(
+                                              item.order_uuid
+                                            )
                                       }
-                                      // title2={item.seat_name}
-                                      // color={item.color}
-                                      // price={item.price}
-                                      // visibleContext={visibleContext}
-                                      // setVisibleContext={setVisibleContext}
-                                      // isMouseInsideContext={isMouseInsideContext}
-                                      // seats={seatsState.filter(s => +s.seat_status === 1)}
-                                      rounded
-                                    />
-                                  </div>
-                                );
-                              })}
+                                    >
+                                      <span
+                                        className="dblClickTrigger"
+                                        style={{ display: "none" }}
+                                        // onClick={() =>
+                                        //   menuOpenHandler(item)
+                                        // }
+                                      />
+                                      <Card
+                                        // on_order={on_order && on_order}
+                                        // key={item.seat_uuid}
+                                        dateTime={item?.status[0]?.time}
+                                        title1={item?.invoice_number || ""}
+                                        selectedOrder={
+                                          selectedTrip
+                                            ? selectedOrder.filter(
+                                                (a) =>
+                                                  a.order_uuid ===
+                                                  item.order_uuid
+                                              ).length
+                                            : selectedRouteOrder ===
+                                              item.order_uuid
+                                        }
+                                        title2={item?.counter_title || ""}
+                                        status={
+                                          +item.status[item.status.length - 1]
+                                            ?.stage === 1
+                                            ? "Processing"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 2
+                                            ? "Checking"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 3
+                                            ? "Delivery"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 4
+                                            ? "Complete"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 5
+                                            ? "Cancelled"
+                                            : ""
+                                        }
+                                        // price={item.price}
+                                        // visibleContext={visibleContext}
+                                        // setVisibleContext={setVisibleContext}
+                                        // isMouseInsideContext={isMouseInsideContext}
+                                        // seats={seatsState.filter(s => +s.seat_status === 1)}
+                                        rounded
+                                      />
+                                    </div>
+                                  );
+                                })}
+                            </div>
                           </div>
-                        </div>
-                      );
+                        );
                     })}
                   </>
                 ) : (
@@ -452,7 +598,12 @@ const MainAdmin = () => {
       </div>
       {popupForm ? (
         <NewUserForm
-          onSave={() => {setPopupForm(false);setSelectedOrder([])}}
+          onSave={() => {
+            setPopupForm(false);
+            setSelectedOrder([]);
+          }}
+          selectedTrip={selectedTrip}
+          setSelectedTrip={setSelectedTrip}
           setRoutesData={setRoutesData}
           popupInfo={popupForm}
           orders={selectedOrder}
@@ -466,25 +617,23 @@ const MainAdmin = () => {
 };
 
 export default MainAdmin;
-function NewUserForm({ onSave, popupInfo, orders, trips }) {
-  const [data, setdata] = useState(popupInfo?.type==="edit"?"":{});
+function NewUserForm({
+  onSave,
+  popupInfo,
+  setSelectedTrip,
+  selectedTrip,
+  trips,
+}) {
+  const [data, setdata] = useState("");
   const [errMassage, setErrorMassage] = useState("");
-
+  useEffect(() => {
+    if (popupInfo?.type === "edit") setSelectedTrip("0");
+  }, []);
   const submitHandler = async (e) => {
     e.preventDefault();
     if (popupInfo?.type === "edit") {
-      console.log(data)
-      const response = await axios({
-        method: "put",
-        url: "/orders/putOrders",
-        data: orders.map((a) => ({ ...a, trip_uuid: data })),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.data.success) {
-        onSave();
-      }
+      console.log(data);
+      onSave();
     } else {
       if (!data.trip_title) {
         setErrorMassage("Please insert Trip Title");
@@ -513,6 +662,7 @@ function NewUserForm({ onSave, popupInfo, orders, trips }) {
       >
         <div
           className="content"
+          // style={{ flexDirection: "row", flexWrap: "wrap", gap: "5" }}
           style={{
             height: "fit-content",
             padding: "20px",
@@ -533,14 +683,14 @@ function NewUserForm({ onSave, popupInfo, orders, trips }) {
                       <select
                         name="route_title"
                         className="numberInput"
-                        value={data}
-                        onChange={(e) => setdata(e.target.value)}
+                        value={selectedTrip}
+                        onChange={(e) => setSelectedTrip(e.target.value)}
                         maxLength={42}
-                        style={{width:"200px"}}
+                        style={{ width: "200px" }}
                       >
-                        <option value="">None</option>
+                        <option value="0">None</option>
                         {trips
-                          .filter((a) => a.trip_uuid&&a.status)
+                          .filter((a) => a.trip_uuid && a.status)
                           .map((a) => (
                             <option value={a.trip_uuid}>{a.trip_title}</option>
                           ))}
