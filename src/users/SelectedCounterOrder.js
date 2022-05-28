@@ -17,6 +17,7 @@ const SelectedCounterOrder = () => {
   const [itemsCategory, setItemsCategory] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
+  const [orderCreated, setOrderCreated] = useState(false);
   const Navigate = useNavigate();
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
@@ -96,9 +97,56 @@ const SelectedCounterOrder = () => {
       },
     });
     if (response.data.success) {
+      let qty = `${
+        data?.item_details?.length > 1
+          ? data?.item_details?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
+          : data?.item_details?.length
+          ? data?.item_details[0]?.b
+          : 0
+      }:${
+        data?.item_details?.length > 1
+          ? data?.item_details?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
+          : data?.item_details?.length
+          ? data?.item_details[0]?.p
+          : 0
+      }`;
+      postActivity({
+        activity: "Order End",
+        range: data?.item_details?.length,
+        qty,
+        amt:data.order_grandtotal||0
+      });
       Navigate("/users");
     }
   };
+  const postActivity = async (others = {}) => {
+    let data = {
+      user_uuid: localStorage.getItem("user_uuid"),
+      role: "Order",
+      narration:
+        counter.counter_uuid +
+        (counter.route_uuid ? ", " + counter.route_uuid : ""),
+      timestamp: (new Date()).getTime(),
+      ...others,
+    };
+    const response = await axios({
+      method: "post",
+      url: "/userActivity/postUserActivity",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      console.log(response);
+    }
+  };
+  useEffect(() => {
+    if (!orderCreated && order?.items?.length) {
+      postActivity({ activity: "Order Start" });
+      setOrderCreated(true);
+    }
+  }, [order]);
   return (
     <>
       <div>
