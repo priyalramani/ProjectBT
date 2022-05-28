@@ -1,7 +1,7 @@
 import { openDB } from "idb";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { AiOutlineArrowLeft } from "react-icons/ai";
 const Orders = () => {
   const [counters, setCounters] = useState([]);
   const [counterFilter, setCounterFilter] = useState("");
@@ -30,6 +30,15 @@ const Orders = () => {
       className="item-sales-container orders-report-container"
       style={{ overflow: "visible", left: "0" }}
     >
+      <nav className="user_nav" style={{top:"0"}}>
+          <div className="user_menubar">
+            <AiOutlineArrowLeft
+              onClick={() =>  Navigate(-1)}
+            />
+          </div>
+         
+          
+        </nav>
       <div
         style={{
           position: "absolute",

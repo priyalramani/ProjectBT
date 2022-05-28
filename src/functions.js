@@ -21,7 +21,7 @@ export const AutoAdd = async (counter, items) => {
   );
 
   for (let autobill of data) {
-     eligibleItems = eligibleItems.map((a) => {
+    eligibleItems = eligibleItems.map((a) => {
       if (
         autobill.items.length === 0 ||
         autobill.items.filter((b) => b === a.item_uuid).length ||
@@ -180,7 +180,7 @@ export const AutoAdd = async (counter, items) => {
           pice_qty_arr?.add_items.filter((b) => b.item_uuid === a.item_uuid)
             .length
       );
-      console.log("datapiceItems",dataItems)
+      console.log("datapiceItems", dataItems);
       dataItems = dataItems.map((a) => {
         if (pice_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)) {
           let data = pice_qty_arr?.add_items.find(
@@ -194,28 +194,28 @@ export const AutoAdd = async (counter, items) => {
             .add_qty,
         };
       });
-      console.log("datapiceItems",dataItems)
+      console.log("datapiceItems", dataItems);
 
       let nonFiltered = eligibleItems.filter(
-        (a) => dataItems.filter((b) => a.item_uuid !== b.item_uuid).length
+        (a) => !(dataItems.filter((b) => a.item_uuid === b.item_uuid).length)
       );
-      let Filtered = eligibleItems
-        .filter(
-          (a) => dataItems.filter((b) => a.item_uuid === b.item_uuid).length
-        )
-        .map((a) => ({
+
+      dataItems = dataItems.map((a) => {
+        let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
+        return {
           ...a,
-          pcs:
-            +(a?.pcs || 0) +
-            (dataItems.find((b) => a.item_uuid !== b.item_uuid)?.pcs || 0),
-        }));
+          pcs: (data ? +a.pcs + data.pcs : a.pcs) || 0,
+          box: (data ? +a.box + data.box : a.box) || 0,
+        };
+      });
+      console.log(nonFiltered,dataItems)
       eligibleItems = nonFiltered.length
-        ? Filtered.length
-          ? [...nonFiltered, ...Filtered]
-          : dataItems.length?[...nonFiltered,...dataItems]:nonFiltered
-        : Filtered.length
-        ? Filtered
-        : dataItems.length?dataItems:[];
+        ? dataItems.length
+          ? [...nonFiltered, ...dataItems]
+          : nonFiltered
+        : dataItems.length
+        ? dataItems
+        : [];
     }
   }
 
