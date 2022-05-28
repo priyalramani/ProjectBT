@@ -382,6 +382,7 @@ function NewUserForm({ onSave,popupForm }) {
                         <b style={{ marginLeft: "50px" }}>Min Range : </b>
                         <input
                           type="number"
+                          onWheel={(e) => e.target.blur()}
                           className="searchInput"
                           style={{
                             border: "none",
@@ -405,6 +406,7 @@ function NewUserForm({ onSave,popupForm }) {
                           If quantity of base item is
                           <input
                             type="number"
+                            onWheel={(e) => e.target.blur()}
                             className="searchInput"
                             style={{
                               border: "none",
@@ -434,6 +436,7 @@ function NewUserForm({ onSave,popupForm }) {
                               width: "80px",
                             }}
                             type="number"
+                            onWheel={(e) => e.target.blur()}
                             value={item.add_items.length}
                             onClick={() => setItemPopupId(item.uuid)}
                           />
@@ -1120,6 +1123,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, setObgData }) => {
                             <td>
                               <input
                                 type="number"
+                                onWheel={(e) => e.target.blur()}
                                 style={{ width: "100px" }}
                                 onChange={(e) =>
                                   setValue((prev) =>

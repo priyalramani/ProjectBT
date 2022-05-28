@@ -305,6 +305,7 @@ function NewUserForm({ onSave, popupInfo, setRoutesData, companies }) {
                     Sort Order
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       value={data?.sort_order}

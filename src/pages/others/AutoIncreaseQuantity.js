@@ -387,6 +387,7 @@ function NewUserForm({ onSave, popupForm }) {
                         If quantity of base item is
                         <input
                           type="number"
+                          onWheel={(e) => e.target.blur()}
                           className="searchInput"
                           style={{
                             border: "none",
@@ -418,6 +419,7 @@ function NewUserForm({ onSave, popupForm }) {
                             padding:"0 5px"
                           }}
                           type="number"
+                          onWheel={(e) => e.target.blur()}
                           value={item.add_qty}
                           onChange={(e) =>
                             setObgData((prev) => ({

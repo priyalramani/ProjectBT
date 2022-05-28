@@ -375,6 +375,7 @@ function NewUserForm({ onSave, popupInfo, setUsers }) {
                     Mobile
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       value={data?.user_mobile}

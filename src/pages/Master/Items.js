@@ -474,7 +474,7 @@ function NewUserForm({
     <div className="overlay">
       <div
         className="modal"
-        style={{ height: "fit-content", width: "fit-content" }}
+        style={{ height: "70vh", width: "fit-content" }}
       >
         <div
           className="content"
@@ -513,6 +513,7 @@ function NewUserForm({
                     Sort Order
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       value={data?.sort_order}
@@ -596,6 +597,7 @@ function NewUserForm({
                     MRP
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       value={data?.mrp}
@@ -615,6 +617,7 @@ function NewUserForm({
                     Item Price
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="route_title"
                       className="numberInput"
                       step="0.001"
@@ -632,6 +635,7 @@ function NewUserForm({
                     GST
                     <input
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       value={data?.item_gst}
@@ -686,6 +690,7 @@ function NewUserForm({
                     Barcode
                     <textarea
                       type="number"
+                      onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
                       //   value={data?.barcode}
