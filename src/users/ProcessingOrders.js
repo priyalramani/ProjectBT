@@ -1,10 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { AiFillPlayCircle } from "react-icons/ai";
 import { openDB } from "idb";
 import { useSpeechSynthesis } from "react-speech-kit";
 import { Billing } from "../functions";
+import { AiOutlineArrowLeft } from "react-icons/ai";
 const ProcessingOrders = () => {
   const [orders, setOrders] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
@@ -20,6 +21,7 @@ const ProcessingOrders = () => {
   const [updateBilling, setUpdateBilling] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
   const [oneTimeState, setOneTimeState] = useState(false);
+  const Navigate = useNavigate();
   useEffect(() => {
     let data = sessionStorage.getItem("playCount");
     if (data) {
@@ -107,9 +109,14 @@ const ProcessingOrders = () => {
     if (updateBilling) {
       let billingData = await Billing(
         counters.find((a) => a.counter_uuid === selectedOrder.counter_uuid),
-        selectedOrder.item_details.map(a=>{
-          let itemData= items.find(b=>a.item_uuid===b.item_uuid)
-          return{...a,conversion:itemData?.conversion,item_price:itemData?.item_price}})
+        selectedOrder.item_details.map((a) => {
+          let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+          return {
+            ...a,
+            conversion: itemData?.conversion,
+            item_price: itemData?.item_price,
+          };
+        })
       );
       data = [
         {
@@ -144,7 +151,7 @@ const ProcessingOrders = () => {
               },
             ],
       }));
-console.log(data)
+    console.log(data);
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
@@ -154,7 +161,7 @@ console.log(data)
       },
     });
     if (response.data.success) {
-      console.log(response)
+      console.log(response);
       sessionStorage.setItem("playCount", playCount);
       let qty = `${
         data?.item_details?.length > 1
@@ -187,9 +194,19 @@ console.log(data)
   }, [oneTimeState]);
   return (
     <>
+      <nav className="user_nav" style={{ top: "0" }}>
+        <div className="user_menubar">
+          <AiOutlineArrowLeft
+            onClick={() => {
+              if (selectedOrder) setSelectedOrder(false);
+              else Navigate(-1);
+            }}
+          />
+        </div>
+      </nav>
       <div
         className="item-sales-container orders-report-container"
-        style={{ width: "100%", left: "0", top: "0", textAlign: "center" }}
+        style={{ width: "100%", left: "0", top: "50px", textAlign: "center" }}
       >
         {selectedOrder ? (
           <>
@@ -221,7 +238,7 @@ console.log(data)
                 style={{
                   width: "max-content",
                   position: "fixed",
-                  top: 0,
+                  top: "50px",
                   right: 0,
                 }}
                 onClick={() => {
@@ -234,7 +251,7 @@ console.log(data)
                 className="searchInput"
                 style={{
                   position: "fixed",
-                  top: 0,
+                  top: "50px",
                   left: 0,
                   border: "none",
                   borderBottom: "2px solid black",
