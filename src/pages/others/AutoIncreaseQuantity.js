@@ -12,7 +12,7 @@ import axios from "axios";
 const DEFAULT = {
   base_qty: "",
   add_qty: "",
-  value: "p",
+  unit: "p",
 };
 const AutoIncreaseQuantity = () => {
   const [popupForm, setPopupForm] = useState(false);
