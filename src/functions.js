@@ -226,7 +226,7 @@ export const AutoAdd = async (counter, items) => {
   };
 };
 
-export const Billing = async (counter = {}, items = [], others = {}) => {
+export const Billing = async (counter = {}, items = [], others = null) => {
   let newPriceItems = [];
 
   for (let item of items) {
@@ -270,7 +270,7 @@ export const Billing = async (counter = {}, items = [], others = {}) => {
     }
 
     if (!special_discount_percentage && !company_discount_percentage)
-      item = { ...item, item_total: item.item_price };
+      item = { ...item, item_total: item.item_price*(others?((+item.box*+item.conversion)+item.pcs):((+item.b*+item.conversion)+item.p)) };
     item = { ...item, charges_discount };
     newPriceItems.push(item);
   }
