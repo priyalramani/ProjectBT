@@ -31,7 +31,7 @@ const Processing = () => {
           overflowY: "scroll",
         }}
       >
-        {tripData
+        {tripData.length? tripData
           ?.filter((a) => a.trip_title&&a.orderLength)
           ?.sort((a,b)=>a.created_at?a.created_at-b.created_at:-1)
           .map((data, i) => (
@@ -49,7 +49,7 @@ const Processing = () => {
                 <span>{data.trip_title}</span>
               </div>
             </Link>
-          ))}
+          )):<h1>No Order</h1>}
       </div>
     </div>
   );
