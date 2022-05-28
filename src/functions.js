@@ -13,13 +13,13 @@ export const AutoAdd = async (counter, items) => {
   let data = autobills.filter(
     (a) =>
       a.type === "auto-increase-qty" &&
-      (a.counters.filter((b) => b === counter.counter_uuid) ||
-        counter.counter_group_uuid.filter(
-          (b) => a.counter_groups.filter((c) => c === b).length
+      (a?.counters?.filter((b) => b === counter.counter_uuid)?.length ||
+        counter?.counter_group_uuid?.filter(
+          (b) => a?.counter_groups.filter((c) => c === b)?.length
         ).length ||
-        a.counter.length === 0)
+        a?.counters?.length === 0)
   );
-
+  
   for (let autobill of data) {
     eligibleItems = eligibleItems.map((a) => {
       if (
@@ -32,25 +32,29 @@ export const AutoAdd = async (counter, items) => {
         let base_qty_arr = autobill.qty_details.filter(
           (b) => b.unit === "b" && +b.base_qty <= +a.box
         );
-        console.log("autobill.qty_details.filter",base_qty_arr)
+        console.log("autobill.qty_details.filter", base_qty_arr);
         base_qty_arr =
-        base_qty_arr.length > 1
-        ? base_qty_arr.reduce((a, b) => +Math.max(a.base_qty, b.base_qty)===+a.base_qty?a:b)
-        : base_qty_arr.length === 1
-        ? base_qty_arr[0]
-        : null;
-        console.log("autobill.qty_details.max",base_qty_arr)
+          base_qty_arr.length > 1
+            ? base_qty_arr.reduce((a, b) =>
+                +Math.max(a.base_qty, b.base_qty) === +a.base_qty ? a : b
+              )
+            : base_qty_arr.length === 1
+            ? base_qty_arr[0]
+            : null;
+        console.log("autobill.qty_details.max", base_qty_arr);
         let pice_qty_arr = autobill.qty_details.filter(
           (b) => b.unit === "p" && +b.base_qty <= +a.pcs
         );
-        console.log("autobill.qty_details.filter",pice_qty_arr)
+        console.log("autobill.qty_details.filter", pice_qty_arr);
         pice_qty_arr =
           pice_qty_arr.length > 1
-            ? pice_qty_arr.reduce((a, b) => +Math.max(a.base_qty, b.base_qty)===+a.base_qty?a:b)
+            ? pice_qty_arr.reduce((a, b) =>
+                +Math.max(a.base_qty, b.base_qty) === +a.base_qty ? a : b
+              )
             : pice_qty_arr.length === 1
             ? pice_qty_arr[0]
             : {};
-            console.log("autobill.qty_details.max",base_qty_arr)
+        console.log("autobill.qty_details.max", base_qty_arr);
         pice_qty_arr = base_qty_arr ? {} : pice_qty_arr;
         if (base_qty_arr || pice_qty_arr)
           auto_added.push({
@@ -211,7 +215,7 @@ export const AutoAdd = async (counter, items) => {
   };
 };
 
-export const Billing = async (counter={}, items=[], others={}) => {
+export const Billing = async (counter = {}, items = [], others = {}) => {
   let newPriceItems = [];
 
   for (let item of items) {
