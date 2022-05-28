@@ -55,8 +55,8 @@ export const AutoAdd = async (counter, items) => {
         if (base_qty_arr || pice_qty_arr)
           auto_added.push({
             item_uuid: a.item_uuid,
-            box: base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0,
-            pcs: pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0,
+            b: base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0,
+            p: pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0,
           });
         return {
           ...a,
@@ -143,7 +143,7 @@ export const AutoAdd = async (counter, items) => {
           let data = base_qty_arr?.add_items.find(
             (b) => b.item_uuid === a.item_uuid
           );
-          auto_added.push({ ...data, q: data.add_qty || 0 });
+          auto_added.push({ ...data, b: data.add_qty || 0 });
         }
         return {
           ...a,
