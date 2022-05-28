@@ -20,11 +20,12 @@ const Processing = () => {
     getTripData();
   }, []);
   const postActivity = async (trip) => {
+    let time =new Date()
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
       role: "Processing",
       narration: +trip.trip_uuid === 0 ? "Unknown" : trip.trip_title,
-      timestamp: new Date().getTime(),
+      timestamp: time.getTime(),
       activity: "trip_open",
     };
     const response = await axios({

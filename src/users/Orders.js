@@ -26,13 +26,14 @@ const Orders = () => {
     return () => setCounters([]);
   }, []);
   const postActivity = async (counter, route) => {
+    let time =new Date()
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
       role: "Order",
       narration:
         counter.counter_title +
         (route.route_title ? ", " + route.route_title : ""),
-      timestamp: new Date().getTime(),
+      timestamp: time.getTime(),
       activity: "counter_open",
     };
     const response = await axios({

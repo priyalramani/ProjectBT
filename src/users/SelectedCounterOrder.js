@@ -120,6 +120,7 @@ const SelectedCounterOrder = () => {
     }
   };
   const postActivity = async (others = {}) => {
+    let time = new Date()
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
       role: "Order",
@@ -128,7 +129,7 @@ const SelectedCounterOrder = () => {
         (sessionStorage.getItem("route_title")
           ? ", " + sessionStorage.getItem("route_title")
           : ""),
-      timestamp: new Date().getTime(),
+      timestamp: time.getTime(),
       ...others,
     };
     const response = await axios({
@@ -489,10 +490,11 @@ const SelectedCounterOrder = () => {
             className="autoBtn"
             style={{ left: "20vw" }}
             onClick={async () => {
+              let time=new Date()
               Billing(counter, order.items, {
                 stage: 1,
                 user_uuid: localStorage.getItem("user_uuid"),
-                time: new Date().getTime(),
+                time: time.getTime(),
 
                 type: "NEW",
               }).then((data) => {
