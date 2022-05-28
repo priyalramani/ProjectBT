@@ -30,9 +30,9 @@ const Orders = () => {
       user_uuid: localStorage.getItem("user_uuid"),
       role: "Order",
       narration:
-        counter.counter_uuid +
-        (route.route_uuid ? ", " + route.route_uuid : ""),
-      timestamp: (new Date()).getTime(),
+        counter.counter_title +
+        (route.route_title ? ", " + route.route_title : ""),
+      timestamp: new Date().getTime(),
       activity: "counter_open",
     };
     const response = await axios({
@@ -103,6 +103,12 @@ const Orders = () => {
                             routes.find(
                               (a) => a?.route_uuid === item?.route_uuid
                             )
+                          );
+                          sessionStorage.setItem(
+                            "route_title",
+                            routes.find(
+                              (a) => a?.route_uuid === item?.route_uuid
+                            )?.route_title
                           );
                           Navigate("/users/orders/" + item.counter_uuid);
                         }}

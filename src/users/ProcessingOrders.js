@@ -89,7 +89,7 @@ const ProcessingOrders = () => {
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
       role: "Order",
-      narration: params.trip_uuid,
+      narration: +params.trip_uuid===0?"Unknown":sessionStorage.getItem("trip_title"),
       timestamp: time.getTime(),
       ...others,
     };

@@ -23,7 +23,7 @@ const Processing = () => {
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
       role: "Processing",
-      narration: +trip.trip_uuid === 0 ? "Unknown" : trip.trip_uuid,
+      narration: +trip.trip_uuid === 0 ? "Unknown" : trip.trip_title,
       timestamp: new Date().getTime(),
       activity: "trip_open",
     };
@@ -72,6 +72,7 @@ backgroundColor:"#f2f2f2",
                 }
                 onClick={() => {
                   postActivity(data);
+                  sessionStorage.setItem("trip_title",data.trip_title)
                   window.location.assign("/users/processing/" + data.trip_uuid);
                 }}
               >

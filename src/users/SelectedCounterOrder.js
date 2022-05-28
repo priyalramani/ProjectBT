@@ -114,7 +114,7 @@ const SelectedCounterOrder = () => {
         activity: "Order End",
         range: data?.item_details?.length,
         qty,
-        amt:data.order_grandtotal||0
+        amt: data.order_grandtotal || 0,
       });
       Navigate("/users");
     }
@@ -124,9 +124,11 @@ const SelectedCounterOrder = () => {
       user_uuid: localStorage.getItem("user_uuid"),
       role: "Order",
       narration:
-        counter.counter_uuid +
-        (counter.route_uuid ? ", " + counter.route_uuid : ""),
-      timestamp: (new Date()).getTime(),
+        counter.counter_title +
+        (sessionStorage.getItem("route_title")
+          ? ", " + sessionStorage.getItem("route_title")
+          : ""),
+      timestamp: new Date().getTime(),
       ...others,
     };
     const response = await axios({
@@ -490,7 +492,7 @@ const SelectedCounterOrder = () => {
               Billing(counter, order.items, {
                 stage: 1,
                 user_uuid: localStorage.getItem("user_uuid"),
-                time: (new Date()).getTime(),
+                time: new Date().getTime(),
 
                 type: "NEW",
               }).then((data) => {
