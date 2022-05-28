@@ -23,7 +23,7 @@ const Processing = () => {
       user_uuid: localStorage.getItem("user_uuid"),
       role: "Processing",
       narration:
-        trip.trip_uuid ,
+        +trip.trip_uuid===0?"Unknown":trip.trip_uuid ,
       timestamp: (new Date()).getTime(),
       activity: "trip_open",
     };

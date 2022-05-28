@@ -107,7 +107,9 @@ const ProcessingOrders = () => {
     if (updateBilling) {
       let billingData = await Billing(
         counters.find((a) => a.counter_uuid === selectedOrder.counter_uuid),
-        selectedOrder.item_details
+        selectedOrder.item_details.map(a=>{
+          let itemData= items.find(b=>a.item_uuid===b.item_uuid)
+          return{...a,conversion:itemData?.conversion,item_price:itemData?.item_price}})
       );
       data = [
         {
@@ -142,7 +144,7 @@ const ProcessingOrders = () => {
               },
             ],
       }));
-
+console.log(data)
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
@@ -152,6 +154,7 @@ const ProcessingOrders = () => {
       },
     });
     if (response.data.success) {
+      console.log(response)
       sessionStorage.setItem("playCount", playCount);
       let qty = `${
         data?.item_details?.length > 1

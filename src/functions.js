@@ -230,6 +230,7 @@ export const Billing = async (counter = {}, items = [], others = null) => {
   let newPriceItems = [];
 
   for (let item of items) {
+    console.log(item,others,((+item.conversion * +item.box) + item.pcs),((+item.conversion * +item.b) + item.p))
     let charges_discount = [];
     let price =
       counter.item_special_price.find((a) => a.item_uuid === item.item_uuid)
@@ -240,7 +241,7 @@ export const Billing = async (counter = {}, items = [], others = null) => {
     let company_discount_percentage =
       counter.company_discount.find((a) => a.company_uuid === item.company_uuid)
         ?.discount || 0;
-    item = { ...item, qty: +item.conversion * +item.box + item.pcs };
+    item = { ...item, qty: others?((+item.conversion * +item.box) + item.pcs):((+item.conversion * +item.b) + item.p) };
     if (price) item = { ...item, item_price: price };
 
     if (special_discount_percentage) {
@@ -264,8 +265,8 @@ export const Billing = async (counter = {}, items = [], others = null) => {
         ...item,
         company_discount_percentage,
         item_total: item.item_total
-          ? item.item_total * ((100 - company_discount_percentage) / 100)
-          : item.item_price * ((100 - company_discount_percentage) / 100) || 0,
+          ? (item.item_total * ((100 - company_discount_percentage) / 100))||0
+          : (item.item_price * ((100 - company_discount_percentage) / 100)) || 0,
       };
     }
 
@@ -281,6 +282,7 @@ export const Billing = async (counter = {}, items = [], others = null) => {
           ).toFixed(2) || 0,
       };
     item = { ...item, charges_discount };
+    console.log(item)
     newPriceItems.push(item);
   }
   let order_grandtotal =
@@ -289,7 +291,7 @@ export const Billing = async (counter = {}, items = [], others = null) => {
           (a, b) => (+a.item_total || 0) + (+b.item_total || 0)
         )
       : newPriceItems.length
-      ? newPriceItems.map((a) => a.item_total)[0]
+      ? newPriceItems.map((a) => a.item_total)[0]||0
       : 0;
   return {
     counter_uuid: counter.counter_uuid,
