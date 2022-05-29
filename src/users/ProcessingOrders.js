@@ -7,6 +7,7 @@ import { useSpeechSynthesis } from "react-speech-kit";
 import { Billing } from "../functions";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 
+let intervalId = 0;
 const ProcessingOrders = () => {
   const params = useParams();
   const [popupForm, setPopupForm] = useState(false);
@@ -19,20 +20,20 @@ const ProcessingOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState();
   const { speak } = useSpeechSynthesis();
   const [orderSpeech, setOrderSpeech] = useState("");
-  const [oneTime, setOneTime] = useState(false);
   const audiosRef = useRef();
-  const [currentAudioId, setCurrentAudioId] = useState('')
 
   const [updateBilling, setUpdateBilling] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
   const [oneTimeState, setOneTimeState] = useState(false);
   const Navigate = useNavigate();
+
   useEffect(() => {
     let data = sessionStorage.getItem("playCount");
     if (data) {
       setPlayCount(data);
     }
   }, []);
+
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = await db.transaction("items", "readwrite").objectStore("items");
@@ -66,8 +67,17 @@ const ProcessingOrders = () => {
     // document.querySelector('#console').scrollBy(h, h)
   }
 
-  const audioLoopFunction = ({ i, recall, forceStart }) => {
+  const audioLoopFunction = ({ i, recall, forcePlayCount }) => {
     try {
+
+      clearInterval(intervalId)
+      
+      if (audiosRef.current?.[i]?.getAttribute('played') === 'true') {
+        log(`skipped number : ${i + 1}`)
+        audioLoopFunction({ i: i + 1, recall, forcePlayCount })
+        return
+      }
+
       log(`trying to play audio number : ${i + 1}`)
 
       navigator.mediaSession.setActionHandler('play', function () {
@@ -84,15 +94,18 @@ const ProcessingOrders = () => {
 
       audiosRef.current[i].play()
         .then(res => {
-          if (!forceStart) {
+          if (!forcePlayCount) {
             audiosRef.current[i].pause()
             navigator.mediaSession.playbackState = 'paused';
+            log(`Paused ${i + 1}/${audiosRef.current.length} audios`)
           }
-          else
+          else {
+            log(`Playing ${i + 1}/${audiosRef.current.length} audios`)
             navigator.mediaSession.playbackState = 'playing';
-          log(`Playing ${i + 1}/${audiosRef.current.length} audios`)
+            console.log("forcePlayCount:", forcePlayCount)
+          }
 
-          let intervalId = setInterval(() => {
+          intervalId = setInterval(() => {
             if (audiosRef.current[i]?.duration - audiosRef.current[i].currentTime > 1)
               return log(`returning : ${audiosRef.current[i]?.duration - audiosRef.current[i].currentTime}`)
 
@@ -101,13 +114,18 @@ const ProcessingOrders = () => {
               return log(`no next audio : ${i + 1}`)
 
             setTimeout(() => {
-              audioLoopFunction({ i: i + 1, forceStart, recall })
+              setSelectedOrder((prev) => ({
+                ...prev,
+                item_details: prev.item_details.map((a) =>
+                  a.item_uuid === audiosRef.current[i].id ? { ...a, status: 1 } : a
+                ),
+              }));
+              audiosRef.current[i].setAttribute('played', 'true')
+              audioLoopFunction({ i: i + 1, forcePlayCount: forcePlayCount - 1, recall })
             }, 1000);
-
           }, 1000)
         })
         .catch(error => {
-
           if (recall)
             setTimeout(() => {
               log(`could not play ${i} audio : ${error.message} recall : ${recall}`)
@@ -144,11 +162,12 @@ const ProcessingOrders = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedOrder) return
+    if (!selectedOrder || audiosRef.current?.[0]) return
     const audioElements = [];
+    const unprocessedItems = selectedOrder?.item_details?.filter(a => !a.status) || [];
 
-    for (let i = 0; i < selectedOrder.item_details.length; i++) {
-      const order_item = selectedOrder.item_details[i];
+    for (let i = 0; i < unprocessedItems.length; i++) {
+      const order_item = unprocessedItems[i];
       const item = items.find(j => j.item_uuid === order_item.item_uuid);
       if (item) {
         const handleQty = (value, label, sufix) => value ? `${value} ${label}${value > 1 ? sufix : ''}` : '';
@@ -162,13 +181,11 @@ const ProcessingOrders = () => {
     log(audioElements)
     audiosRef.current = audioElements
     audioLoopFunction({ i: 0, recall: true })
-    // storeAudios()
   }, [selectedOrder])
 
   const PlayAudio = async (item) => {
     if (!item) {
       await speak({ text: "Order Completed" });
-
       return;
     }
 
@@ -179,13 +196,14 @@ const ProcessingOrders = () => {
       }`;
     await speak({ text: data });
     setTimeout(() => setOrderSpeech(""), 3000);
-    setSelectedOrder((prev) => ({
-      ...prev,
-      item_details: prev.item_details.map((a) =>
-        a.item_uuid === item.item_uuid ? { ...a, status: 1 } : a
-      ),
-    }));
+    // setSelectedOrder((prev) => ({
+    //   ...prev,
+    //   item_details: prev.item_details.map((a) =>
+    //     a.item_uuid === item.item_uuid ? { ...a, status: 1 } : a
+    //   ),
+    // }));
   };
+
   const postActivity = async (others = {}) => {
     let time = new Date();
     let data = {
@@ -207,6 +225,7 @@ const ProcessingOrders = () => {
       console.log(response);
     }
   };
+
   const postOrderData = async () => {
     let data = selectedOrder;
     if (updateBilling) {
@@ -284,19 +303,24 @@ const ProcessingOrders = () => {
       getTripOrders();
     }
   };
+
   useEffect(() => {
     if (!orderCreated) {
       postActivity({ activity: "order_start" });
       setOrderCreated(true);
     }
   }, [oneTimeState]);
+
   return (
     <>
       <nav className="user_nav" style={{ top: "0" }}>
         <div className="user_menubar">
           <AiOutlineArrowLeft
             onClick={() => {
-              if (selectedOrder) setSelectedOrder(false);
+              if (selectedOrder) {
+                setSelectedOrder(false);
+                audiosRef.current = null;
+              }
               else Navigate(-1);
             }}
           />
@@ -316,18 +340,7 @@ const ProcessingOrders = () => {
               <button
                 className="item-sales-search"
                 style={{ width: "max-content" }}
-                onClick={() => {
-                  setOneTimeState(true);
-                  let items = selectedOrder?.item_details?.filter(
-                    (a) => !a.status
-                  );
-                  for (let i = 0; i < playCount; i++) {
-                    if (i === 0) PlayAudio(items[0]);
-                    else if (items[i]) {
-                      setTimeout(() => PlayAudio(items[i]), 3000);
-                    }
-                  }
-                }}
+                onClick={() => audioLoopFunction({ i: 0, forcePlayCount: +playCount })}
               >
                 Play
               </button>
