@@ -55,18 +55,17 @@ const ProcessingOrders = () => {
     setCounters(countersData);
   };
 
-  const log = message => {
-    console.log(message)
-    // const elem = document.querySelector('#console')
-    // const onbottom = 363 < elem.scrollHeight - elem.scrollTop && elem.scrollHeight - elem.scrollTop < 402
-    // const child = document.createElement('p')
-    // child.innerText = JSON.stringify(message)
-    // document.querySelector('#console').append(child)
-
-    // if (!onbottom) return
-    // const h = document.querySelector('#console').scrollHeight + 10
-    // document.querySelector('#console').scrollBy(h, h)
-  }
+  // const log = message => {
+  //   console.log(message)
+  //   const elem = document.querySelector('#console')
+  //   const onbottom = 363 < elem.scrollHeight - elem.scrollTop && elem.scrollHeight - elem.scrollTop < 402
+  //   const child = document.createElement('p')
+  //   child.innerText = JSON.stringify(message)
+  //   document.querySelector('#console').append(child)
+  //   if (!onbottom) return
+  //   const h = document.querySelector('#console').scrollHeight + 10
+  //   document.querySelector('#console').scrollBy(h, h)
+  // }
 
   const audioLoopFunction = ({ i, recall, forcePlayCount }) => {
     try {
@@ -212,27 +211,6 @@ const ProcessingOrders = () => {
     }
 
   }, [selectedOrder])
-
-  const PlayAudio = async (item) => {
-    if (!item) {
-      await speak({ text: "Order Completed" });
-      return;
-    }
-
-    setOrderSpeech(item.item_uuid);
-    let detail = items.find((a) => a.item_uuid === item.item_uuid);
-    console.log(detail);
-    let data = `${detail.pronounce} ${item.b ? `${item.b} box` : ""} ${item.p ? `${item.p} pieces` : ""
-      }`;
-    await speak({ text: data });
-    setTimeout(() => setOrderSpeech(""), 3000);
-    // setSelectedOrder((prev) => ({
-    //   ...prev,
-    //   item_details: prev.item_details.map((a) =>
-    //     a.item_uuid === item.item_uuid ? { ...a, status: 1 } : a
-    //   ),
-    // }));
-  };
 
   const postActivity = async (others = {}) => {
     let time = new Date();

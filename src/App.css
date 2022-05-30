@@ -14,8 +14,3 @@
     border-bottom: 1px solid grey;
     padding: 5px;
 }
-
-#test-div {
-    max-height: 500px;
-    overflow: auto;
-}
