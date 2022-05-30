@@ -35,6 +35,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Navigate replace to={"/users"} />} />
+          <Route path="/test" element={<Test />} />
           <Route path="/login" element={<LoginPage />} />
           {localStorage.getItem("user_uuid") ? (
             <>
@@ -78,6 +79,57 @@ function App() {
 
     </div>
   );
+}
+
+const Test = () => {
+
+  // let audioElement = new Audio(`${axios.defaults.baseURL}/stream/this_is_a_test_data_for_audio_custom_api_and_client_audio_behavior`);
+  // audioElement.preload = 'none'
+
+  // let last;
+  // audioElement.onloadeddata = () => {
+  //   console.log('FULLY LOADED')
+  //   console.log(audioElement.duration)
+  // }
+
+  // const id = setInterval(() => {
+  //   if (`${audioElement.duration}` !== last) {
+  //     last = `${audioElement.duration}`
+  //     // audioElement.currentTime = Math.random()
+  //     const p = document.createElement('p')
+  //     p.innerText = `audio duration at ${Date.now()} : ${audioElement.duration} `
+  //     document.querySelector('#test-div').append(p)
+  //     // if (+audioElement.duration && audioElement.duration !== Infinity)
+  //     // clearInterval(id)
+  //   }
+  // }, 10)
+
+  // audioElement.addEventListener('loadedmetadata', () => {
+  //   if (audioElement.duration === Infinity) {
+  //     audioElement.currentTime = 1e101
+  //     audioElement.addEventListener('timeupdate', getDuration)
+  //   }
+  // })
+
+  var _player = new Audio(`${axios.defaults.baseURL}/stream/this_is_a_test_data_for_audio_custom_api_and_client_audio_behavior`);
+  _player.addEventListener("durationchange", function (e) {
+    if (this.duration != Infinity) {
+      _player.remove();
+      console.log(_player.duration);
+    };
+  }, false);
+  _player.load();
+  _player.currentTime = 24 * 60 * 60; //fake big time
+  _player.volume = 0;
+  // _player.play();
+  //waiting...
+
+  return (
+    <>
+      <h1>Test Page</h1>
+      <div id="test-div"></div>
+    </>
+  )
 }
 
 export default App;

@@ -22,6 +22,7 @@ const ProcessingOrders = () => {
   const [orderSpeech, setOrderSpeech] = useState("");
   const audiosRef = useRef();
 
+  const [playerSpeed, setPlayerSpeed] = useState(1)
   const [updateBilling, setUpdateBilling] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
   const [oneTimeState, setOneTimeState] = useState(false);
@@ -71,23 +72,21 @@ const ProcessingOrders = () => {
     try {
 
       clearInterval(intervalId)
-      
+
       if (audiosRef.current?.[i]?.getAttribute('played') === 'true') {
-        log(`skipped number : ${i + 1}`)
+        console.log(`skipped number : ${i + 1}`)
         audioLoopFunction({ i: i + 1, recall, forcePlayCount })
         return
       }
 
-      log(`trying to play audio number : ${i + 1}`)
+      console.log(`trying to play audio number : ${i + 1}`)
 
       navigator.mediaSession.setActionHandler('play', function () {
-        log('--------------plays')
         audiosRef.current[i].play()
         navigator.mediaSession.playbackState = 'playing';
       });
 
       navigator.mediaSession.setActionHandler('pause', function () {
-        log('--------------paused')
         audiosRef.current[i].pause()
         navigator.mediaSession.playbackState = 'paused';
       });
@@ -97,45 +96,45 @@ const ProcessingOrders = () => {
           if (!forcePlayCount) {
             audiosRef.current[i].pause()
             navigator.mediaSession.playbackState = 'paused';
-            log(`Paused ${i + 1}/${audiosRef.current.length} audios`)
+            console.log(`Paused ${i + 1}/${audiosRef.current.length} audios`)
           }
           else {
-            log(`Playing ${i + 1}/${audiosRef.current.length} audios`)
+            console.log(`Playing ${i + 1}/${audiosRef.current.length} audios`)
             navigator.mediaSession.playbackState = 'playing';
             console.log("forcePlayCount:", forcePlayCount)
           }
 
           intervalId = setInterval(() => {
-            if (audiosRef.current[i]?.duration - audiosRef.current[i].currentTime > 1)
-              return log(`returning : ${audiosRef.current[i]?.duration - audiosRef.current[i].currentTime}`)
+            if (audiosRef.current[i]?.duration - audiosRef.current[i].currentTime > 8.8)
+              return console.log(`returning : ${audiosRef.current[i]?.duration - audiosRef.current[i].currentTime}`)
 
             clearInterval(intervalId)
+            audiosRef.current[i].currentTime = audiosRef.current[i].duration
+            audiosRef.current[i].pause()
+            audiosRef.current[i].setAttribute('played', 'true')
+            navigator.mediaSession.playbackState = 'paused';
+
+            setSelectedOrder((prev) => ({ ...prev, item_details: prev.item_details.map((a) => a.item_uuid === audiosRef.current[i].item_uuid ? { ...a, status: 1 } : a), }));
+
             if (!audiosRef.current[i + 1])
-              return log(`no next audio : ${i + 1}`)
+              return console.log(`no next audio : ${i + 1}`)
 
             setTimeout(() => {
-              setSelectedOrder((prev) => ({
-                ...prev,
-                item_details: prev.item_details.map((a) =>
-                  a.item_uuid === audiosRef.current[i].id ? { ...a, status: 1 } : a
-                ),
-              }));
-              audiosRef.current[i].setAttribute('played', 'true')
-              audioLoopFunction({ i: i + 1, forcePlayCount: forcePlayCount - 1, recall })
+              audioLoopFunction({ i: i + 1, forcePlayCount: forcePlayCount ? forcePlayCount - 1 : 0, recall })
             }, 1000);
-          }, 1000)
+          }, 100)
         })
         .catch(error => {
           if (recall)
             setTimeout(() => {
-              log(`could not play ${i} audio : ${error.message} recall : ${recall}`)
+              console.log(`could not play ${i} audio : ${error.message} recall : ${recall}`)
               audioLoopFunction({ i, recall })
             }, 3000)
           else
-            log(`could not play ${i} audio : ${error.message}`)
+            console.log(`could not play ${i} audio : ${error.message}`)
         })
     } catch (error) {
-      log(error.message)
+      console.log(error.message)
     }
   }
 
@@ -163,24 +162,55 @@ const ProcessingOrders = () => {
 
   useEffect(() => {
     if (!selectedOrder || audiosRef.current?.[0]) return
+
     const audioElements = [];
     const unprocessedItems = selectedOrder?.item_details?.filter(a => !a.status) || [];
+    let progressCount = 0;
 
     for (let i = 0; i < unprocessedItems.length; i++) {
+
       const order_item = unprocessedItems[i];
       const item = items.find(j => j.item_uuid === order_item.item_uuid);
+
       if (item) {
+        console.log(item.item_title)
         const handleQty = (value, label, sufix) => value ? `${value} ${label}${value > 1 ? sufix : ''}` : '';
         const speechString = `Item ${item.pronounce} ${item.mrp} MRP ${handleQty(order_item.b, 'Box', 'es')} ${handleQty(order_item.p, 'Piece', 's')}`;
+
         let audioElement = new Audio(`${axios.defaults.baseURL}/stream/${speechString.toLowerCase().replaceAll(' ', '_')}`);
-        audioElement.id = order_item.item_uuid;
-        audioElements.push(audioElement)
+
+        audioElement.addEventListener("durationchange", function (e) {
+          if (audioElement.duration != Infinity) {
+            audioElement.remove();
+            console.log(audioElement.duration);
+            audioElement.item_uuid = item.item_uuid;
+            loopEndFunctioin(audioElement)
+          };
+        }, false);
+
+        audioElement.load();
+        audioElement.currentTime = 24 * 60 * 60;
+        audioElement.volume = 0;
+
+        const loopEndFunctioin = (audio) => {
+          audioElements.push(audio)
+          console.log(`${++progressCount}/${unprocessedItems?.length}`)
+
+          if (progressCount === unprocessedItems?.length) {
+            console.log(audioElements)
+            audiosRef.current = audioElements.sort(itemsSortFunction).map(i => {
+              i.volume = 1;
+              i.currentTime = 0;
+              return i;
+            })
+            audioLoopFunction({ i: 0, recall: true })
+          }
+        }
       }
+      else
+        progressCount++;
     }
 
-    log(audioElements)
-    audiosRef.current = audioElements
-    audioLoopFunction({ i: 0, recall: true })
   }, [selectedOrder])
 
   const PlayAudio = async (item) => {
@@ -311,15 +341,49 @@ const ProcessingOrders = () => {
     }
   }, [oneTimeState]);
 
+  const itemsSortFunction = (a, b) => {
+    let aItem = items.find(
+      (i) => i.item_uuid === a.item_uuid
+    );
+    let bItem = items.find(
+      (i) => i.item_uuid === b.item_uuid
+    );
+    let aItemCompany = companies.find(
+      (i) => i.company_uuid === aItem?.company_uuid
+    );
+    let bItemCompany = companies.find(
+      (i) => i.company_uuid === bItem?.company_uuid
+    );
+    let aItemCategory = itemCategories.find(
+      (i) => i.category_uuid === aItem?.category_uuid
+    );
+    let bItemCategory = itemCategories.find(
+      (i) => i.category_uuid === bItem?.category_uuid
+    );
+    return (
+      aItemCompany?.company_title?.localeCompare(
+        bItemCompany?.company_title
+      ) ||
+      aItemCategory?.category_title?.localeCompare(
+        bItemCategory?.category_title
+      ) ||
+      aItem?.item_title?.localeCompare(bItem?.item_title)
+    );
+  }
+
   return (
-    <>
+    <div>
       <nav className="user_nav" style={{ top: "0" }}>
         <div className="user_menubar">
           <AiOutlineArrowLeft
             onClick={() => {
               if (selectedOrder) {
                 setSelectedOrder(false);
+                clearInterval(intervalId)
+                audiosRef.current.forEach(audio => audio.pause())
+                navigator.mediaSession.playbackState = 'none';
                 audiosRef.current = null;
+                console.clear()
               }
               else Navigate(-1);
             }}
@@ -373,6 +437,29 @@ const ProcessingOrders = () => {
                 value={playCount}
                 onChange={(e) => setPlayCount(e.target.value)}
               />
+              <select
+                className="audioPlayerSpeed"
+                style={{
+                  position: "fixed",
+                  top: "50px",
+                  left: '60px',
+                  border: "none",
+                  borderBottom: "2px solid black",
+                  borderRadius: "0px",
+                  width: "75px",
+                  padding: "0 5px",
+                }}
+                defaultValue={playerSpeed}
+                onChange={(e) => {
+                  console.log(e.target.value)
+                  setPlayerSpeed(e.target.value)
+                  audiosRef.current.forEach(i => i.playbackRate = +e.target.value)
+                }}
+              >
+                <option value="1">1x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.50">1.50x</option>
+              </select>
             </div>
           </>
         ) : (
@@ -429,35 +516,7 @@ const ProcessingOrders = () => {
             <tbody className="tbody">
               {selectedOrder
                 ? selectedOrder.item_details
-                  ?.sort((a, b) => {
-                    let aItem = items.find(
-                      (i) => i.item_uuid === a.item_uuid
-                    );
-                    let bItem = items.find(
-                      (i) => i.item_uuid === b.item_uuid
-                    );
-                    let aItemCompany = companies.find(
-                      (i) => i.company_uuid === aItem.company_uuid
-                    );
-                    let bItemCompany = companies.find(
-                      (i) => i.company_uuid === bItem.company_uuid
-                    );
-                    let aItemCategory = itemCategories.find(
-                      (i) => i.category_uuid === aItem.category_uuid
-                    );
-                    let bItemCategory = itemCategories.find(
-                      (i) => i.category_uuid === bItem.category_uuid
-                    );
-                    return (
-                      aItemCompany?.company_title?.localeCompare(
-                        bItemCompany?.company_title
-                      ) ||
-                      aItemCategory?.category_title?.localeCompare(
-                        bItemCategory?.category_title
-                      ) ||
-                      aItem.item_title?.localeCompare(bItem.item_title)
-                    );
-                  })
+                  ?.sort(itemsSortFunction)
                   ?.map((item, i) => (
                     <tr
                       key={item.item_uuid}
@@ -603,7 +662,7 @@ const ProcessingOrders = () => {
         ) : (
           ""
         )}
-    </>
+    </div>
   );
 };
 
