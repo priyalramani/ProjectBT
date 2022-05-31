@@ -1,14 +1,17 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 const Processing = () => {
   const [tripData, setTripData] = useState([]);
   const Navigate = useNavigate();
+  const Location = useLocation();
   const getTripData = async () => {
     const response = await axios({
       method: "get",
-      url: "/trips/GetProcessingTripList",
+      url: Location.pathname.includes("checking")
+        ? "/trips/GetCheckingTripList"
+        : "/trips/GetProcessingTripList",
 
       headers: {
         "Content-Type": "application/json",
@@ -20,10 +23,10 @@ const Processing = () => {
     getTripData();
   }, []);
   const postActivity = async (trip) => {
-    let time =new Date()
+    let time = new Date();
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
-      role: "Processing",
+      role: Location.pathname.includes("checking")?"Checking":"Processing",
       narration: +trip.trip_uuid === 0 ? "Unknown" : trip.trip_title,
       timestamp: time.getTime(),
       activity: "trip_open",
@@ -51,12 +54,12 @@ const Processing = () => {
         className="servicesContainer"
         style={{
           width: "100%",
-          padding:"20px",
+          padding: "20px",
           height: "90vh",
           gridAutoFlow: "row",
           gridAutoRows: "20%",
-marginTop:"20px",
-backgroundColor:"#f2f2f2",
+          marginTop: "20px",
+          backgroundColor: "#f2f2f2",
           overflowY: "scroll",
         }}
       >
@@ -73,8 +76,8 @@ backgroundColor:"#f2f2f2",
                 }
                 onClick={() => {
                   postActivity(data);
-                  sessionStorage.setItem("trip_title",data.trip_title)
-                  window.location.assign("/users/processing/" + data.trip_uuid);
+                  sessionStorage.setItem("trip_title", data.trip_title);
+                  window.location.assign(`/users/${Location.pathname.includes("checking")?"checking":"processing"}/` + data.trip_uuid);
                 }}
               >
                 <div className="service">
