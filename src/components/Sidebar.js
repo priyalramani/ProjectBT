@@ -7,10 +7,18 @@ import {
   FlashOn as QuickAccessIcon,
   SettingsOutlined as SettingsIcon,
 } from "@mui/icons-material";
+import AddIcon from '@mui/icons-material/Add';
 const Sidebar = ({setIsItemAvilableOpen}) => {
   return (
     <div className="left-panel" style={{ position: "relative" }}>
       <div className="nav" style={{ paddingTop: "70px", height: "100vh" }}>
+      <NavLink
+          title="New Order"
+          icon={<AddIcon sx={{ fontSize: 50 }} />}
+          href="#"
+          isActive={false}
+          menuList={[]}
+        />
         <NavLink
           title={"Master"}
           icon={<MasterIcon sx={{ fontSize: 50 }} />}
@@ -46,8 +54,21 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
             },
           ]}
         />
+       
         <NavLink
-          title={"Others"}
+        setIsItemAvilableOpen={setIsItemAvilableOpen}
+          title={"Quick Access"}
+          icon={<QuickAccessIcon sx={{ fontSize: 50 }} />}
+          isActive={false}
+          menuList={[
+            {
+              name: "Trips",
+              link: "#",
+            },
+          ]}
+        />
+         <NavLink
+          title={"Setup"}
           icon={<ReportsIcon sx={{ fontSize: 50 }} />}
           isActive={false}
           menuList={[
@@ -61,18 +82,6 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
             },
           ]}
         />
-        <NavLink
-        setIsItemAvilableOpen={setIsItemAvilableOpen}
-          title={"Quick Access"}
-          icon={<QuickAccessIcon sx={{ fontSize: 50 }} />}
-          isActive={false}
-          menuList={[
-            {
-              name: "Trips",
-              link: "#",
-            },
-          ]}
-        />
         {/* <NavLink
           menuList={[]}
           title={"Users"}
@@ -80,13 +89,7 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
           isActive={false}
           href="/users"
         /> */}
-        <NavLink
-          title="Setup"
-          icon={<SettingsIcon sx={{ fontSize: 50 }} />}
-          href="/setup"
-          isActive={false}
-          menuList={[]}
-        />
+        
       </div>
     </div>
   );
