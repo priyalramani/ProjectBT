@@ -53,7 +53,7 @@ function formatAMPM(date) {
             ></div>
             <div className="seatTimer">
               <div>{status}</div>
-              <div style={{fontSize:"10px"}}>{`${days[(new Date(dateTime * 1000)).getDay()]||""} ${(new Date(dateTime).getDate())||""} ${monthNames[(new Date()).getMonth()]||""}`}</div>
+              <div style={{fontSize:"10px"}}>{`${days[(new Date(dateTime)).getDay()]||""} ${(new Date(dateTime).getDate())||""} ${monthNames[(new Date()).getMonth()]||""}`}</div>
               <div style={{fontSize:"10px"}}>{formatAMPM(new Date(dateTime)) || ""}</div>
             </div>
           </div>
