@@ -59,8 +59,8 @@ const SelectedCounterOrder = () => {
         item_price:
           counter.item_special_price?.find((b) => b.item_uuid === a.item_uuid)
             ?.price || a.item_price,
-        box: 0,
-        pcs: 0,
+        b: 0,
+        p: 0,
         status: 0,
       }))
     );
@@ -73,8 +73,8 @@ const SelectedCounterOrder = () => {
       order_uuid: uuid(),
       item_details: orderData.items.map((a) => ({
         ...a,
-        b: a.box,
-        p: a.pcs,
+        b: a.b,
+        p: a.p,
         unit_price: a.price,
         gst_percentage: a.item_gst,
         status: 0,
@@ -239,17 +239,17 @@ const SelectedCounterOrder = () => {
                                                 a.item_uuid === item.item_uuid
                                                   ? {
                                                       ...a,
-                                                      box:
-                                                        +(a.box || 0) +
+                                                      b:
+                                                        +(a.b || 0) +
                                                         parseInt(
-                                                          ((a?.pcs || 0) +
+                                                          ((a?.p || 0) +
                                                             (+item?.one_pack ||
                                                               1)) /
                                                             +item.conversion
                                                         ),
 
-                                                      pcs:
-                                                        ((a?.pcs || 0) +
+                                                      p:
+                                                        ((a?.p || 0) +
                                                           (+item?.one_pack ||
                                                             1)) %
                                                         +item.conversion,
@@ -267,17 +267,17 @@ const SelectedCounterOrder = () => {
                                                   )
                                                   .map((a) => ({
                                                     ...a,
-                                                    box:
-                                                      +(a.box || 0) +
+                                                    b:
+                                                      +(a.b || 0) +
                                                       parseInt(
-                                                        ((a?.pcs || 0) +
+                                                        ((a?.p || 0) +
                                                           (+item?.one_pack ||
                                                             1)) /
                                                           +item.conversion
                                                       ),
 
-                                                    pcs:
-                                                      ((a?.pcs || 0) +
+                                                    p:
+                                                      ((a?.p || 0) +
                                                         (+item?.one_pack ||
                                                           1)) %
                                                       +item.conversion,
@@ -291,17 +291,17 @@ const SelectedCounterOrder = () => {
                                                 )
                                                 .map((a) => ({
                                                   ...a,
-                                                  box:
-                                                    +(a.box || 0) +
+                                                  b:
+                                                    +(a.b || 0) +
                                                     parseInt(
-                                                      ((a?.pcs || 0) +
+                                                      ((a?.p || 0) +
                                                         (+item?.one_pack ||
                                                           1)) /
                                                         +item.conversion
                                                     ),
 
-                                                  pcs:
-                                                    ((a?.pcs || 0) +
+                                                  p:
+                                                    ((a?.p || 0) +
                                                       (+item?.one_pack || 1)) %
                                                     +item.conversion,
                                                 })),
@@ -326,12 +326,12 @@ const SelectedCounterOrder = () => {
                                             order?.items?.find(
                                               (a) =>
                                                 a.item_uuid === item.item_uuid
-                                            )?.box || 0
+                                            )?.b || 0
                                           } : ${
                                             order?.items?.find(
                                               (a) =>
                                                 a.item_uuid === item.item_uuid
-                                            )?.pcs || 0
+                                            )?.p || 0
                                           }`}
                                           onClick={(e) => {
                                             e.stopPropagation();
@@ -391,17 +391,17 @@ const SelectedCounterOrder = () => {
                                               a.item_uuid === item.item_uuid
                                                 ? {
                                                     ...a,
-                                                    box:
-                                                      +(a.box || 0) +
+                                                    b:
+                                                      +(a.b || 0) +
                                                       parseInt(
-                                                        ((a?.pcs || 0) +
+                                                        ((a?.p || 0) +
                                                           (+item?.one_pack ||
                                                             1)) /
                                                           +item.conversion
                                                       ),
 
-                                                    pcs:
-                                                      ((a?.pcs || 0) +
+                                                    p:
+                                                      ((a?.p || 0) +
                                                         (+item?.one_pack ||
                                                           1)) %
                                                       +item.conversion,
@@ -415,16 +415,16 @@ const SelectedCounterOrder = () => {
                                               )
                                               .map((a) => ({
                                                 ...a,
-                                                box:
-                                                  +(a.box || 0) +
+                                                b:
+                                                  +(a.b || 0) +
                                                   parseInt(
-                                                    ((a?.pcs || 0) +
+                                                    ((a?.p || 0) +
                                                       (+item?.one_pack || 1)) /
                                                       +item.conversion
                                                   ),
 
-                                                pcs:
-                                                  ((a?.pcs || 0) +
+                                                p:
+                                                  ((a?.p || 0) +
                                                     (+item?.one_pack || 1)) %
                                                   +item.conversion,
                                               })),
@@ -449,12 +449,12 @@ const SelectedCounterOrder = () => {
                                             order?.items?.find(
                                               (a) =>
                                                 a.item_uuid === item.item_uuid
-                                            )?.box || 0
+                                            )?.b || 0
                                           } : ${
                                             order?.items?.find(
                                               (a) =>
                                                 a.item_uuid === item.item_uuid
-                                            )?.pcs || 0
+                                            )?.p || 0
                                           }`}
                                           onClick={(e) => {
                                             e.stopPropagation();
@@ -517,8 +517,8 @@ const SelectedCounterOrder = () => {
                 ...data,
                 items: data?.items?.map((a) => ({
                   ...a,
-                  box: +a.box + parseInt(+a.pcs / +a.conversion),
-                  pcs: +a.pcs % +a.conversion,
+                  b: +a.b + parseInt(+a.p / +a.conversion),
+                  p: +a.p % +a.conversion,
                 })),
               }));
             }}
@@ -547,8 +547,8 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
   useEffect(() => {
     let data = order.items?.find((a) => a.item_uuid === popupInfo.item_uuid);
     setdata({
-      box: data?.box || 0,
-      pcs: data?.pcs || 0,
+      b: data?.b || 0,
+      p: data?.p || 0,
     });
   }, []);
   const submitHandler = async (e) => {
@@ -561,8 +561,8 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
             a.item_uuid === popupInfo.item_uuid
               ? {
                   ...a,
-                  box: +data.box + parseInt(+data.pcs / +popupInfo.conversion),
-                  pcs: +data.pcs % +popupInfo.conversion,
+                  b: +data.b + parseInt(+data.p / +popupInfo.conversion),
+                  p: +data.p % +popupInfo.conversion,
                 }
               : a
           )
@@ -571,15 +571,15 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
             ...prev.items,
             {
               ...popupInfo,
-              box: +data.box + parseInt(+data.pcs / +popupInfo.conversion),
-              pcs: +data.pcs % +popupInfo.conversion,
+              b: +data.b + parseInt(+data.p / +popupInfo.conversion),
+              p: +data.p % +popupInfo.conversion,
             },
           ]
         : [
             {
               ...popupInfo,
-              box: +data.box + parseInt(+data.pcs / +popupInfo.conversion),
-              pcs: +data.pcs % +popupInfo.conversion,
+              b: +data.b + parseInt(+data.p / +popupInfo.conversion),
+              p: +data.p % +popupInfo.conversion,
             },
           ],
     }));
@@ -616,12 +616,12 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
                       type="text"
                       name="route_title"
                       className="numberInput"
-                      value={data?.box}
+                      value={data?.b}
                       style={{ width: "100px" }}
                       onChange={(e) =>
                         setdata({
                           ...data,
-                          box: e.target.value,
+                          b: e.target.value,
                         })
                       }
                       maxLength={42}
@@ -637,12 +637,12 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
                       type="text"
                       name="route_title"
                       className="numberInput"
-                      value={data?.pcs}
+                      value={data?.p}
                       style={{ width: "100px" }}
                       onChange={(e) =>
                         setdata({
                           ...data,
-                          pcs: e.target.value,
+                          p: e.target.value,
                         })
                       }
                       maxLength={42}
