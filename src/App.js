@@ -23,6 +23,7 @@ import Main from "./users/Main";
 import LoginPage from "./users/LoginPage";
 import Processing from "./users/Processing";
 import ProcessingOrders from "./users/ProcessingOrders";
+
 const id = "240522";
 function App() {
 
@@ -60,8 +61,11 @@ function App() {
                   <Route path="/users" element={<Main />} />
                   <Route path="/users/orders" element={<Orders />} />
                   <Route path="/users/processing" element={<Processing />} />
+                  <Route path="/users/checking" element={<Processing />} />
                   <Route path="/users/processing/:trip_uuid" element={<ProcessingOrders />} />
                   <Route path="/users/orders/:counter_uuid" element={<SelectedCounterOrder />} />
+                  <Route path="/users/checking/:trip_uuid" element={<ProcessingOrders />} />
+
                   <Route path="*" element={<Navigate replace to={"/users"} />} />
                 </>
               )}
