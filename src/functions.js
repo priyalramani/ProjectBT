@@ -1,15 +1,9 @@
-import { openDB } from "idb";
 
-export const AutoAdd = async (counter, items) => {
+
+export const AutoAdd = async ({counter, items,dbItems,autobills}) => {
   let eligibleItems = items;
   let auto_added = [];
-  const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
-  let tx = await db
-    .transaction("autobill", "readwrite")
-    .objectStore("autobill");
-  let autobills = await tx.getAll();
-  let store = await db.transaction("items", "readwrite").objectStore("items");
-  let dbItems = await store.getAll();
+
   let data = autobills.filter(
     (a) =>
       a.type === "auto-increase-qty" &&

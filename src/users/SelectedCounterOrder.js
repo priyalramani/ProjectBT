@@ -510,7 +510,14 @@ const SelectedCounterOrder = () => {
             type="button"
             className="autoBtn"
             onClick={async () => {
-              let data = await AutoAdd(counter, order.items);
+              const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
+              let tx = await db
+                .transaction("autobill", "readwrite")
+                .objectStore("autobill");
+              let autobills = await tx.getAll();
+              let store = await db.transaction("items", "readwrite").objectStore("items");
+              let dbItems = await store.getAll();
+              let data = await AutoAdd({counter, items:order.items,dbItems,autobills});
 
               setOrder((prev) => ({
                 ...prev,
