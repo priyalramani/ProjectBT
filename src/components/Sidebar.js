@@ -15,7 +15,7 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
       <NavLink
           title="New Order"
           icon={<AddIcon sx={{ fontSize: 50 }} />}
-          href="#"
+          href="/admin/addOrder"
           isActive={false}
           menuList={[]}
         />

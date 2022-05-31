@@ -23,6 +23,7 @@ import Main from "./users/Main";
 import LoginPage from "./users/LoginPage";
 import Processing from "./users/Processing";
 import ProcessingOrders from "./users/ProcessingOrders";
+import AddOrder from "./pages/AddOrder/AddOrder";
 
 const id = "240522";
 function App() {
@@ -53,6 +54,7 @@ function App() {
                   <Route path="/admin/items" element={<ItemsPage />} />
                   <Route path="/admin/autoIncreaseQty" element={<AutoIncreaseQuantity />} />
                   <Route path="/admin/autoIncreaseItem" element={<AutoIncreaseItem />} />
+                  <Route path="/admin/addOrder" element={<AddOrder />} />
                   <Route path="*" element={<Navigate replace to={"/admin"} />} />
                 </>
               ) : (
