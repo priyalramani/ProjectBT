@@ -69,7 +69,7 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
         />
          <NavLink
           title={"Setup"}
-          icon={<ReportsIcon sx={{ fontSize: 50 }} />}
+          icon={<SettingsIcon sx={{ fontSize: 50 }} />}
           isActive={false}
           menuList={[
             {
