@@ -161,6 +161,7 @@ const ItemsPage = () => {
           companies={companies}
           itemCategories={itemCategories}
           popupInfo={popupForm}
+          items={itemsData}
         />
       ) : (
         ""
@@ -410,11 +411,13 @@ function NewUserForm({
   setItemsData,
   companies,
   itemCategories,
+  items,
 }) {
   const [data, setdata] = useState({});
 
   const [errMassage, setErrorMassage] = useState("");
-  console.log(popupInfo);
+  let findDuplicates = (arr) =>
+    arr?.filter((item, index) => arr?.indexOf(item) != index);
   useEffect(
     popupInfo?.type === "edit"
       ? () => {
@@ -432,10 +435,25 @@ function NewUserForm({
         },
     []
   );
+
   const submitHandler = async (e) => {
     e.preventDefault();
+    let barcodeChecking = items
+      ?.filter((a) => a.item_uuid !== data.item_uuid)
+      ?.filter((a) => a?.barcode?.length)
+      ?.map((a) => a?.barcode)
+      ?.filter(
+        (a) =>
+          a?.filter((b) => data?.barcode?.filter((c) => b === c)?.length)
+            ?.length
+      );
+    barcodeChecking = [].concat.apply([], barcodeChecking);
     if (!data.item_title) {
       setErrorMassage("Please insert Route Title");
+      return;
+    }
+    if (findDuplicates(data.barcode).length || barcodeChecking.length) {
+      setErrorMassage("Please insert Unique Barcode");
       return;
     }
 
@@ -469,13 +487,10 @@ function NewUserForm({
       }
     }
   };
-console.log(data)
+
   return (
     <div className="overlay">
-      <div
-        className="modal"
-        style={{ height: "70vh", width: "fit-content" }}
-      >
+      <div className="modal" style={{ height: "70vh", width: "fit-content" }}>
         <div
           className="content"
           style={{
@@ -540,7 +555,6 @@ console.log(data)
                         })
                       }
                     >
-            
                       {companies
                         .sort((a, b) => a.sort_order - b.sort_order)
                         .map((a) => (
@@ -563,7 +577,6 @@ console.log(data)
                         })
                       }
                     >
-               
                       {itemCategories
                         .filter((a) => a.company_uuid === data.company_uuid)
                         .sort((a, b) => a.sort_order - b.sort_order)
@@ -693,7 +706,7 @@ console.log(data)
                       onWheel={(e) => e.target.blur()}
                       name="sort_order"
                       className="numberInput"
-                      //   value={data?.barcode}
+                      value={data?.barcode?.toString()?.replace(/,/g, "\n")}
                       style={{ height: "50px" }}
                       onChange={(e) =>
                         setdata({
