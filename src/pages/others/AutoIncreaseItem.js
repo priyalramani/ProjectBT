@@ -12,7 +12,7 @@ import axios from "axios";
 const DEFAULT = {
   base_qty: "",
   add_items: [],
-  unit:"p"
+  unit: "p",
 };
 const AutoIncreaseItem = () => {
   const [popupForm, setPopupForm] = useState(false);
@@ -26,10 +26,7 @@ const AutoIncreaseItem = () => {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success)
-      setItemsData(
-        response.data.result
-      );
+    if (response.data.success) setItemsData(response.data.result);
   };
   useEffect(() => {
     getItemsData();
@@ -63,9 +60,9 @@ const AutoIncreaseItem = () => {
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-          itemsDetails={itemsData}
-          setPopupForm={setPopupForm}
-          // setAddItems={setAddItems}
+            itemsDetails={itemsData}
+            setPopupForm={setPopupForm}
+            // setAddItems={setAddItems}
           />
         </div>
       </div>
@@ -131,7 +128,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
           )
           ?.map((item, i) => (
             <tr
-              key={item.item_uuid} 
+              key={item.item_uuid}
               style={{ height: "30px" }}
               onClick={() => setPopupForm({ type: "edit", data: item })}
             >
@@ -156,7 +153,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
   );
 }
 
-function NewUserForm({ onSave,popupForm }) {
+function NewUserForm({ onSave, popupForm }) {
   const [objData, setObgData] = useState({
     type: "auto-item-add",
     auto_title: "",
@@ -167,7 +164,19 @@ function NewUserForm({ onSave,popupForm }) {
     counter_groups: [],
     qty_details: [{ ...DEFAULT, uuid: uuid() }],
   });
-  useEffect(popupForm?.type==="edit"?()=>setObgData(popupForm.data):()=>{},[])
+  useEffect(
+    popupForm?.type === "edit"
+      ? () =>
+          setObgData({
+            ...popupForm.data,
+            qty_details: popupForm.data.qty_details.map((a) => ({
+              ...a,
+              uuid: uuid(),
+            })),
+          })
+      : () => {},
+    []
+  );
   const [ui, setUi] = useState(1);
   const [items, setItems] = useState([]);
   const [company, setCompany] = useState([]);
@@ -298,34 +307,40 @@ function NewUserForm({ onSave,popupForm }) {
   }, []);
   const submitHandler = async (e) => {
     e.preventDefault();
-    let data= {...objData,qty_details:objData.qty_details.map(a=>({...a,add_items:a.add_items.map(b=>({...b,unit:a.unit}))}))}
-    if(popupForm?.type==="edit"){
-        const response = await axios({
-          method: "put",
-          url: "/autoBill/UpdateAutoQty",
-          data,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        console.log(response)
-        if (response.data.success) {
-          onSave();
-        }
-      }else{
-        const response = await axios({
-          method: "post",
-          url: "/autoBill/CreateAutoQty",
-          data,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        console.log(response)
-        if (response.data.success) {
-          onSave();
-        }
+    let data = {
+      ...objData,
+      qty_details: objData.qty_details.map((a) => ({
+        ...a,
+        add_items: a.add_items.map((b) => ({ ...b, unit: a.unit })),
+      })),
+    };
+    if (popupForm?.type === "edit") {
+      const response = await axios({
+        method: "put",
+        url: "/autoBill/UpdateAutoQty",
+        data,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response);
+      if (response.data.success) {
+        onSave();
       }
+    } else {
+      const response = await axios({
+        method: "post",
+        url: "/autoBill/CreateAutoQty",
+        data,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response);
+      if (response.data.success) {
+        onSave();
+      }
+    }
   };
   return (
     <>
@@ -401,7 +416,7 @@ function NewUserForm({ onSave,popupForm }) {
                       </td>
                     </tr>
                     {objData.qty_details?.map((item, i) => (
-                      <tr key={item.item_uuid}  style={{ height: "30px" }}>
+                      <tr key={item.item_uuid} style={{ height: "30px" }}>
                         <td colSpan={4} style={{ textAlign: "center" }}>
                           If quantity of base item is
                           <input
@@ -436,35 +451,36 @@ function NewUserForm({ onSave,popupForm }) {
                               width: "80px",
                             }}
                             type="number"
-                            onWheel={(e) => e.target.blur()}
+                            // onWheel={(e) => e.target.blur()}
                             value={item.add_items.length}
                             onClick={() => setItemPopupId(item.uuid)}
+                            // onChange={()=>setItemPopupId(item.uuid)}
                           />
                         </td>
                         <td>
-                        <select
-                           value={item.unit}
-                          className="select"
-                          style={{
-                            border: "none",
-                            borderBottom: "2px solid black",
-                            borderRadius: "0px",
-                            width: "80px",
-                          }}
-                          onChange={(e) =>
-                            setObgData((prev) => ({
-                              ...prev,
-                              qty_details: prev.qty_details.map((i) =>
-                                i.uuid === item.uuid
-                                  ? { ...i, unit: e.target.value }
-                                  : i
-                              ),
-                            }))
-                          }
-                        >
-                          <option value="p">Pcs</option>
-                          <option value="b">Box</option>
-                        </select>
+                          <select
+                            value={item.unit}
+                            className="select"
+                            style={{
+                              border: "none",
+                              borderBottom: "2px solid black",
+                              borderRadius: "0px",
+                              width: "80px",
+                            }}
+                            onChange={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+                                qty_details: prev.qty_details.map((i) =>
+                                  i.uuid === item.uuid
+                                    ? { ...i, unit: e.target.value }
+                                    : i
+                                ),
+                              }))
+                            }
+                          >
+                            <option value="p">Pcs</option>
+                            <option value="b">Box</option>
+                          </select>
                         </td>
                       </tr>
                     ))}
@@ -475,7 +491,10 @@ function NewUserForm({ onSave,popupForm }) {
                   onClick={(e) =>
                     setObgData((prev) => ({
                       ...prev,
-                      qty_details: [...prev.qty_details, {...DEFAULT,uuid:uuid()}],
+                      qty_details: [
+                        ...prev.qty_details,
+                        { ...DEFAULT, uuid: uuid() },
+                      ],
                     }))
                   }
                 >
@@ -942,7 +961,7 @@ function NewUserForm({ onSave,popupForm }) {
                   Back
                 </button>
                 <button className="fieldEditButton" onClick={submitHandler}>
-                {popupForm?.type==="edit"?"Update":"Save"}
+                  {popupForm?.type === "edit" ? "Update" : "Save"}
                 </button>
               </div>
             )}
