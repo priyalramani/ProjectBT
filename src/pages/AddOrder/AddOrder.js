@@ -249,7 +249,7 @@ export default function AddOrder() {
                               id="Quantity"
                               type="number"
                               className="numberInput"
-                              min={1}
+                          
                               onKeyDown={(event) => {
                                 if (
                                   event.keyCode === 38 ||
@@ -286,7 +286,7 @@ export default function AddOrder() {
                               id="Quantity"
                               type="number"
                               className="numberInput"
-                              min={1}
+                              
                               onKeyDown={(event) => {
                                 if (
                                   event.keyCode === 38 ||
