@@ -163,7 +163,7 @@ export const AutoAdd = async (counter, items) => {
         };
       });
      
-      items = nonFiltered.length
+      eligibleItems = nonFiltered.length
         ? dataItems.length
           ? [...nonFiltered, ...dataItems]
           : nonFiltered
