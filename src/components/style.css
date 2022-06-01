@@ -219,7 +219,8 @@ body {
     border-bottom: 2px solid white;
   }
   
-  .input-container>input:focus {
+  .input-container>input:focus,
+  .input-container>select:focus {
     outline: none;
   }
   

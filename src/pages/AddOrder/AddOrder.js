@@ -1,17 +1,87 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
 import { Billing, AutoAdd } from "../../functions";
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
+const list = ["item_uuid", "q", "p"];
 export default function AddOrder() {
+  const [order, setOrder] = useState({
+    counter_uuid: "",
+    item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
+  });
   const [counters, setCounters] = useState([]);
   const [itemsData, setItemsData] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
   const [popup, setPopup] = useState(false);
   const [autoBills, setAutoBills] = useState([]);
+  const [id, setId] = useState("");
+  const [selectedItem, setSelectedItem] = useState("");
+  const [counting, setCounting] = useState(0);
+  console.log(
+    document.getElementById(id),
+    id,
+    selectedItem,
+    order.item_details,
+    counting
+  );
+  const escFunction = (event) => {
+    console.log(event.key);
+    if (event.key === "Enter") {
+      if (!order.counter_uuid) {
+        document.getElementById("counter_select").focus();
+
+        setId(list[0] + order.item_details[0]?.uuid);
+      } else {
+        console.log(document.getElementById(id));
+        
+        let index = list.indexOf(id.replace((selectedItem
+          ? order.item_details.find(
+              (a) => +a.sr === +selectedItem + 1
+            )?.uuid
+          : order.item_details.find((a) => +a.sr === 1)?.uuid), ""));
+        console.log(index);
+        
+        if (counting === 3) {
+          let id=uuid()
+          setOrder((prev) => ({
+            ...prev,
+            item_details: [
+              ...prev.item_details,
+              { uuid:id, b: 0, p: 0, sr: prev.item_details.length+1 },
+            ],
+          }));
+          setSelectedItem((prev) => +prev + 1);
+          setId(
+            list[0] +
+              id
+          );
+          setCounting(0)
+        } else {
+          setCounting(prev=>prev+1)
+          setId(
+            index === 0 || index
+              ? list[index + 1] +
+                  (selectedItem
+                    ? order.item_details.find(
+                        (a) => +a.sr === +selectedItem + 1
+                      )?.uuid
+                    : order.item_details.find((a) => +a.sr === 1)?.uuid)
+              : list[0] +
+                  (selectedItem
+                    ? order.item_details.find(
+                        (a) => +a.sr === +selectedItem + 1
+                      )?.uuid
+                    : order.item_details.find((a) => +a.sr === 1)?.uuid)
+          );
+        }
+        document.getElementById(id).focus();
+      }
+    }
+  };
+
   const getAutoBill = async () => {
     let data = [];
     const response = await axios({
@@ -31,8 +101,9 @@ export default function AddOrder() {
         "Content-Type": "application/json",
       },
     });
-    if (response1.data.success) data = [...data, ...response1];
-    setAutoBills(data)
+    if (response1.data.success)
+      data = data ? response1 : [...data, ...response1];
+    setAutoBills(data);
   };
   const getItemsData = async () => {
     const response = await axios({
@@ -45,10 +116,6 @@ export default function AddOrder() {
     });
     if (response.data.success) setItemsData(response.data.result);
   };
-  const [order, setOrder] = useState({
-    counter_uuid: "",
-    item_details: [{ uuid: uuid(), b: 0, p: 0 }],
-  });
 
   const getCounter = async () => {
     const response = await axios({
@@ -65,15 +132,16 @@ export default function AddOrder() {
     getCounter();
     getItemsData();
     getAutoBill();
+    escFunction({ key: "Enter" });
   }, []);
-  console.log(order);
+
   useEffect(() => {
     setOrder((prev) => ({
       ...prev,
       item_details: prev.item_details.map((a) => ({
         ...a,
-        b: +a.b + parseInt(((+a.p || 0) / +a.conversion)||0),
-        p: +a.p % +a.conversion,
+        b: +a.b + parseInt((+a.p || 0) / +a.conversion || 0),
+        p:a.p? +a.p % +a.conversion:0,
       })),
     }));
   }, [qty_details]);
@@ -88,7 +156,7 @@ export default function AddOrder() {
         counter,
         items: order.item_details,
         dbItems: order.item_details,
-        autobills:autoBills,
+        autobills: autoBills,
       });
       data = { ...data, ...autoAdd, item_details: autoAdd.items };
     }
@@ -138,22 +206,14 @@ export default function AddOrder() {
       });
     }
   };
+
   return (
     <>
       <Sidebar />
       <div className="right-side">
         <Header />
-        <div className="inventory">
-          <form
-            className="accountGroup"
-            id="voucherForm"
-            action=""
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!order.item_details.filter((a) => a.item_uuid).length) return;
-              setPopup(true);
-            }}
-          >
+        <div className="inventory" onKeyDown={escFunction}>
+          <div className="accountGroup" id="voucherForm" action="">
             <div className="inventory_header">
               <h2>Add Order </h2>
               {/* {type === 'edit' && <XIcon className='closeicon' onClick={close} />} */}
@@ -165,6 +225,7 @@ export default function AddOrder() {
                 <select
                   required
                   value={order.counter_uuid}
+                  id="counter_select"
                   onChange={(e) =>
                     setOrder((prev) => ({
                       ...prev,
@@ -205,11 +266,13 @@ export default function AddOrder() {
                           <td className="ph2 pv1 tl bb b--black-20 bg-white">
                             <div className="inputGroup">
                               <select
+                                id={"item_uuid" + item.uuid}
                                 onChange={(e) => {
                                   setTimeout(
                                     () => setQtyDetails((prev) => !prev),
                                     2000
                                   );
+
                                   setOrder((prev) => ({
                                     ...prev,
                                     item_details: prev.item_details.map((a) =>
@@ -246,17 +309,9 @@ export default function AddOrder() {
                             style={{ textAlign: "center" }}
                           >
                             <input
-                              id="Quantity"
+                              id={"q" + item.uuid}
                               type="number"
                               className="numberInput"
-                          
-                              onKeyDown={(event) => {
-                                if (
-                                  event.keyCode === 38 ||
-                                  event.keyCode === 40
-                                )
-                                  event.preventDefault();
-                              }}
                               onWheel={(e) => e.preventDefault()}
                               value={item.b}
                               onChange={(e) => {
@@ -283,17 +338,9 @@ export default function AddOrder() {
                             style={{ textAlign: "center" }}
                           >
                             <input
-                              id="Quantity"
+                              id={"p" + item.uuid}
                               type="number"
                               className="numberInput"
-                              
-                              onKeyDown={(event) => {
-                                if (
-                                  event.keyCode === 38 ||
-                                  event.keyCode === 40
-                                )
-                                  event.preventDefault();
-                              }}
                               onWheel={(e) => e.preventDefault()}
                               value={item.p}
                               onChange={(e) => {
@@ -324,13 +371,6 @@ export default function AddOrder() {
                               type="text"
                               className="numberInput"
                               min={1}
-                              onKeyDown={(event) => {
-                                if (
-                                  event.keyCode === 38 ||
-                                  event.keyCode === 40
-                                )
-                                  event.preventDefault();
-                              }}
                               onWheel={(e) => e.preventDefault()}
                               value={"Rs " + (item?.item_price || 0)}
                             />
@@ -362,34 +402,19 @@ export default function AddOrder() {
                 )}
               </table>
             </div>
-
-            {/* <div className="topInputs">
-        <textarea
-          placeholder="Narration (Displayed)...."
-          disabled={(type !== 'edit' || editValues) ? false : true}
-          maxLength="200"
-          value={data.voucher_narration}
-          onChange={e => setData({
-            ...data,
-            voucher_narration: e.target.value,
-          })}
-        ></textarea>
-        <textarea
-          placeholder="Remarks (Not Displayed)...."
-          disabled={(type !== 'edit' || editValues) ? false : true}
-          maxLength="200"
-          value={data.voucher_remarks}
-          onChange={e => setData({
-            ...data,
-            voucher_remarks: e.target.value,
-          })}
-        ></textarea>
-      </div> */}
-
             <div className="bottomContent">
-              <button type="submit">Bill</button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!order.item_details.filter((a) => a.item_uuid).length)
+                    return;
+                  setPopup(true);
+                }}
+              >
+                Bill
+              </button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
       {popup ? (
