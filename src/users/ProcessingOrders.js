@@ -9,7 +9,7 @@ import { AiOutlineArrowLeft } from "react-icons/ai";
 
 let intervalId = 0;
 const ProcessingOrders = () => {
-  const [Barcode, setBarcode] = useState([]);
+  const [BarcodeMessage, setBarcodeMessage] = useState([]);
   const params = useParams();
   const [popupForm, setPopupForm] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -390,23 +390,13 @@ const ProcessingOrders = () => {
       aItem?.item_title?.localeCompare(bItem?.item_title)
     );
   };
-  useEffect(() => {
-    if (items.length)
-      setBarcode(
-        [].concat
-          .apply(
-            [],
-            items.map((a) => a.barcode)
-          )
-          ?.filter((a) => a)
-      );
-  }, [items]);
+
   useEffect(() => {
     if (selectedOrder)
       setBarcodeFilterState(
         items?.map((a) => ({
           item_uuid: a.item_uuid,
-          one_pack:a.one_pack,
+          one_pack: a.one_pack,
           qty: 0,
           barcode: items.find((b) => a.item_uuid === b.item_uuid)?.barcode,
         }))
@@ -424,7 +414,7 @@ const ProcessingOrders = () => {
         prev.map((a) =>
           a?.barcode?.filter((a) => a).filter((a) => a === barcodeFilter)
             ?.length
-            ? { ...a, qty: (+a.qty||0) + (+a.one_pack||1) }
+            ? { ...a, qty: (+a.qty || 0) + (+a.one_pack || 1) }
             : a
         )
       );
@@ -437,7 +427,31 @@ const ProcessingOrders = () => {
     }
     setBarcodeFilter("");
   };
-  console.log(barcodeFilterState);
+  const checkingQuantity = () => {
+    let data = [];
+    for (let a of barcodeFilterState) {
+      let orderItem = selectedOrder.item_details.find(
+        (b) => b.item_uuid === a.item_uuid
+      );
+      let ItemData = items.find((b) => b.item_uuid === a.item_uuid);
+      if (
+        (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p !==
+        a?.qty
+      ) {
+        if (orderItem)
+          data.push({
+            ...ItemData,
+            ...orderItem,
+            barcodeQty: a.qty,
+            qty:
+              (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+              orderItem?.p,
+          });
+      }
+    }
+    console.log(data);
+    if (data.length) setBarcodeMessage(data);
+  };
   return (
     <div>
       <nav className="user_nav" style={{ top: "0" }}>
@@ -500,7 +514,9 @@ const ProcessingOrders = () => {
                   right: 0,
                 }}
                 onClick={() => {
-                  postOrderData();
+                  Location.pathname.includes("checking")
+                    ? checkingQuantity()
+                    : postOrderData();
                 }}
               >
                 Save
@@ -629,6 +645,13 @@ const ProcessingOrders = () => {
                     </th>
                   </>
                 )}
+                {BarcodeMessage.length ? (
+                  <th colSpan={2}>
+                    <div className="t-head-element">Qty Difference</div>
+                  </th>
+                ) : (
+                  ""
+                )}
               </tr>
             </thead>
             <tbody className="tbody">
@@ -756,6 +779,25 @@ const ProcessingOrders = () => {
                               ""
                             )}
                           </>
+                        ) : (
+                          ""
+                        )}
+                        {BarcodeMessage.length ? (
+                          <td colSpan={2}>
+                            <div className="t-head-element">
+                              {BarcodeMessage.find(
+                                (a) => a.item_uuid === item.item_uuid
+                              )
+                                ? BarcodeMessage.find(
+                                    (a) => a.item_uuid === item.item_uuid
+                                  )?.qty +
+                                  " - " +
+                                  BarcodeMessage.find(
+                                    (a) => a.item_uuid === item.item_uuid
+                                  )?.barcodeQty
+                                : "Clear"}
+                            </div>
+                          </td>
                         ) : (
                           ""
                         )}
