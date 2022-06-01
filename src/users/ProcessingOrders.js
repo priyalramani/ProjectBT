@@ -10,6 +10,7 @@ import { AiOutlineArrowLeft } from "react-icons/ai";
 let intervalId = 0;
 const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
+  const [popupBarcode, setPopupBarcode] = useState(false);
   const params = useParams();
   const [popupForm, setPopupForm] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -180,6 +181,7 @@ const ProcessingOrders = () => {
         trip_uuid: params.trip_uuid,
       },
     });
+    console.log(response)
     if (response.data.success) setOrders(response.data.result);
     if (!response?.data?.result) return;
   };
@@ -281,6 +283,7 @@ const ProcessingOrders = () => {
   };
 
   const postOrderData = async () => {
+    setPopupBarcode(false)
     let data = selectedOrder;
     if (updateBilling) {
       let billingData = await Billing(
@@ -304,7 +307,8 @@ const ProcessingOrders = () => {
     let time = new Date();
     if (
       data?.item_details?.filter((a) => +a.status === 1 || +a.status === 3)
-        ?.length === data?.item_details.length
+        ?.length === data?.item_details.length &&
+      Location.pathname.includes("processing")
     )
       data = {
         ...data,
@@ -317,6 +321,19 @@ const ProcessingOrders = () => {
           },
         ],
       };
+    if (Location.pathname.includes("checking"))
+      data = {
+        ...data,
+        status: [
+          ...data.status,
+          {
+            stage: "3",
+            time: time.getTime(),
+            user_uuid: localStorage.getItem("user_uuid"),
+          },
+        ],
+      };
+
     data = Object.keys(data)
       .filter((key) => key !== "others" || key !== "items")
       .reduce((obj, key) => {
@@ -434,24 +451,93 @@ const ProcessingOrders = () => {
         (b) => b.item_uuid === a.item_uuid
       );
       let ItemData = items.find((b) => b.item_uuid === a.item_uuid);
+      console.log(a.qty, ItemData);
       if (
         (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p !==
         a?.qty
       ) {
         if (orderItem)
-          data.push({
-            ...ItemData,
-            ...orderItem,
-            barcodeQty: a.qty,
-            qty:
-              (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-              orderItem?.p,
-          });
+          setBarcodeMessage((prev) =>
+            prev.length
+              ? [
+                  ...prev,
+                  {
+                    ...ItemData,
+                    ...orderItem,
+                    barcodeQty: a.qty,
+                    case: 1,
+                    qty:
+                      (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+                      orderItem?.p,
+                  },
+                ]
+              : [
+                  {
+                    ...ItemData,
+                    ...orderItem,
+                    barcodeQty: a.qty,
+                    case: 1,
+                    qty:
+                      (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+                      orderItem?.p,
+                  },
+                ]
+          );
+        else if (ItemData && a?.qty)
+          setBarcodeMessage((prev) =>
+            prev.length
+              ? [
+                  ...prev,
+                  {
+                    ...ItemData,
+                    barcodeQty: a.qty,
+                    case: 2,
+                    qty:
+                      (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+                      orderItem?.p,
+                  },
+                ]
+              : [
+                  {
+                    ...ItemData,
+                    barcodeQty: a.qty,
+                    case: 2,
+                    qty:
+                      (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+                      orderItem?.p,
+                  },
+                ]
+          );
+        else if (a?.qty)
+          setBarcodeMessage((prev) =>
+            prev.length
+              ? [
+                  ...prev,
+                  {
+                    ...a,
+                    barcodeQty: a.qty,
+                    case: 3,
+                    qty:
+                      (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+                      orderItem?.p,
+                  },
+                ]
+              : [
+                  {
+                    ...a,
+                    barcodeQty: a.qty,
+                    case: 3,
+                    qty:
+                      (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+                      orderItem?.p,
+                  },
+                ]
+          );
       }
     }
-    console.log(data);
-    if (data.length) setBarcodeMessage(data);
+    setTimeout(() => setPopupBarcode(true), 2000);
   };
+  console.log(BarcodeMessage);
   return (
     <div>
       <nav className="user_nav" style={{ top: "0" }}>
@@ -645,13 +731,6 @@ const ProcessingOrders = () => {
                     </th>
                   </>
                 )}
-                {BarcodeMessage.length ? (
-                  <th colSpan={2}>
-                    <div className="t-head-element">Qty Difference</div>
-                  </th>
-                ) : (
-                  ""
-                )}
               </tr>
             </thead>
             <tbody className="tbody">
@@ -782,25 +861,6 @@ const ProcessingOrders = () => {
                         ) : (
                           ""
                         )}
-                        {BarcodeMessage.length ? (
-                          <td colSpan={2}>
-                            <div className="t-head-element">
-                              {BarcodeMessage.find(
-                                (a) => a.item_uuid === item.item_uuid
-                              )
-                                ? BarcodeMessage.find(
-                                    (a) => a.item_uuid === item.item_uuid
-                                  )?.qty +
-                                  " - " +
-                                  BarcodeMessage.find(
-                                    (a) => a.item_uuid === item.item_uuid
-                                  )?.barcodeQty
-                                : "Clear"}
-                            </div>
-                          </td>
-                        ) : (
-                          ""
-                        )}
                       </tr>
                     ))
                 : orders
@@ -837,11 +897,261 @@ const ProcessingOrders = () => {
       ) : (
         ""
       )}
+      {popupBarcode ? (
+        <CheckingValues
+          onSave={() => setPopupForm(false)}
+          BarcodeMessage={BarcodeMessage}
+          postOrderData={postOrderData}
+        />
+      ) : (
+        ""
+      )}
     </div>
   );
 };
 
 export default ProcessingOrders;
+function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <h1>Correction</h1>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            {BarcodeMessage?.filter((a) => +a.case === 1 && a.barcodeQty)
+              .length ? (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                {" "}
+                <i>Incorrect Quantity</i>
+                <table
+                  className="user-table"
+                  style={{
+                    width: "max-content",
+                    height: "fit-content",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                      <th colSpan={2}>
+                        <div className="t-head-element">Item</div>
+                      </th>
+                      <th>
+                        <div className="t-head-element">MRP</div>
+                      </th>
+                      <th style={{ backgroundColor: "green" }}>
+                        <div className="t-head-element">Order</div>
+                      </th>
+                      <th style={{ backgroundColor: "red" }}>
+                        <div className="t-head-element">Checking</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tbody">
+                    {BarcodeMessage?.filter(
+                      (a) => +a.case === 1 && a.barcodeQty
+                    )?.map((item, i) => (
+                      <tr
+                        key={item?.item_uuid || Math.random()}
+                        style={{
+                          height: "30px",
+                          color: "#fff",
+                          backgroundColor: "#7990dd",
+                        }}
+                      >
+                        <td colSpan={2}>{item.item_title}</td>
+                        <td>{item?.mrp || 0}</td>
+                        <td style={{ backgroundColor: "green" }}>
+                          {item?.b || 0}:{item?.p || 0}
+                        </td>
+                        <td style={{ backgroundColor: "red" }}>
+                          {item?.barcodeQty || 0}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              ""
+            )}
+            {BarcodeMessage?.filter((a) => +a.case === 2).length ? (
+              <div className="flex" style={{ flexDirection: "column" }}>
+                {" "}
+                <i>Remove Extra Items</i>
+                <table
+                  className="user-table"
+                  style={{
+                    width: "max-content",
+                    height: "fit-content",
+                    backgroundColor: "yellow",
+                    color: "#fff",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ color: "#fff", backgroundColor: "red" }}>
+                      <th colSpan={2}>
+                        <div className="t-head-element">Item</div>
+                      </th>
+                      <th>
+                        <div className="t-head-element">MRP</div>
+                      </th>
+                      <th>
+                        <div className="t-head-element">Checking</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tbody">
+                    {BarcodeMessage?.filter((a) => +a.case === 2)?.map(
+                      (item, i) => (
+                        <tr
+                          key={item?.item_uuid || Math.random()}
+                          style={{
+                            height: "30px",
+                            color: "#fff",
+                            backgroundColor: "red",
+                          }}
+                        >
+                          <td colSpan={2}>{item.item_title}</td>
+                          <td>{item?.mrp || 0}</td>
+                          <td>{item?.barcodeQty}</td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              ""
+            )}
+            {BarcodeMessage?.filter((a) => +a.case === 1 && !a.barcodeQty)
+              .length ? (
+              <div className="flex" style={{ flexDirection: "column" }}>
+                {" "}
+                <i>Add Items</i>
+                <table
+                  className="user-table"
+                  style={{
+                    width: "max-content",
+                    height: "fit-content",
+                    backgroundColor: "yellow",
+                    color: "#fff",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ color: "#fff", backgroundColor: "#ffbf00" }}>
+                      <th colSpan={2}>
+                        <div className="t-head-element">Item</div>
+                      </th>
+                      <th>
+                        <div className="t-head-element">MRP</div>
+                      </th>
+                      <th>
+                        <div className="t-head-element">Order</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tbody">
+                    {BarcodeMessage?.filter(
+                      (a) => +a.case === 1 && !a.barcodeQty
+                    )?.map((item, i) => (
+                      <tr
+                        key={item?.item_uuid || Math.random()}
+                        style={{
+                          height: "30px",
+                          color: "#fff",
+                          backgroundColor: "#ffbf00",
+                        }}
+                      >
+                        <td colSpan={2}>{item.item_title}</td>
+                        <td>{item?.mrp || 0}</td>
+                        <td>
+                          {item?.b || 0}:{item?.p || 0}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              ""
+            )}
+            {BarcodeMessage?.filter((a) => +a.case === 3).length ? (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                {" "}
+                <i>Unknown Barcode</i>
+                <table
+                  className="user-table"
+                  style={{
+                    width: "100%",
+                    height: "fit-content",
+                    backgroundColor: "yellow",
+                    color: "#fff",
+                    border: "2px solid #000",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ color: "#000", backgroundColor: "#fff" }}>
+                      <th colSpan={2}>
+                        <div className="t-head-element">Barcode</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tbody">
+                    {BarcodeMessage?.filter((a) => +a.case === 3)?.map(
+                      (item, i) => (
+                        <tr
+                          key={item?.item_uuid || Math.random()}
+                          style={{
+                            height: "30px",
+                            color: "#000",
+                            backgroundColor: "#fff",
+                          }}
+                        >
+                          <td colSpan={2}>{item.barcode[0]}</td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              ""
+            )}
+            <div className="flex" style={{ justifyContent: "space-between" }}>
+              <button type="button" className="submit" onClick={postOrderData}>
+                Save
+              </button>
+              <button
+                type="button"
+                style={{ backgroundColor: "red" }}
+                className="submit"
+                onClick={onSave}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 function NewUserForm({ onSave, popupInfo, setOrder, order, setUpdateBilling }) {
   const [data, setdata] = useState({});
   useEffect(() => {
