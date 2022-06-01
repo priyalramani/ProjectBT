@@ -181,7 +181,7 @@ const ProcessingOrders = () => {
         trip_uuid: params.trip_uuid,
       },
     });
-    console.log(response)
+    console.log(response);
     if (response.data.success) setOrders(response.data.result);
     if (!response?.data?.result) return;
   };
@@ -283,7 +283,7 @@ const ProcessingOrders = () => {
   };
 
   const postOrderData = async () => {
-    setPopupBarcode(false)
+    setPopupBarcode(false);
     let data = selectedOrder;
     if (updateBilling) {
       let billingData = await Billing(
@@ -893,6 +893,7 @@ const ProcessingOrders = () => {
           popupInfo={popupForm}
           order={selectedOrder}
           setUpdateBilling={setUpdateBilling}
+          deliveryPage={Location.pathname.includes("delivery")}
         />
       ) : (
         ""
@@ -1152,7 +1153,14 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
     </div>
   );
 }
-function NewUserForm({ onSave, popupInfo, setOrder, order, setUpdateBilling }) {
+function NewUserForm({
+  onSave,
+  popupInfo,
+  setOrder,
+  order,
+  setUpdateBilling,
+  deliveryPage,
+}) {
   const [data, setdata] = useState({});
   useEffect(() => {
     let data = order?.item_details?.find(
@@ -1167,6 +1175,36 @@ function NewUserForm({ onSave, popupInfo, setOrder, order, setUpdateBilling }) {
     e.preventDefault();
     setOrder((prev) => ({
       ...prev,
+      delivery_return: deliveryPage
+        ? prev.delivery_return.length
+          ? prev.delivery_return.filter(
+              (a) => a.item_uuid === popupInfo.item_uuid
+            )
+            ? prev.delivery_return.map((a) =>
+                a.item_uuid === popupInfo.item_uuid
+                  ? {
+                      item_uuid: popupInfo.item_uuid,
+                      b: +data.b - (+popupInfo.b || 0),
+                      p: +data.p - (+popupInfo.p || 0),
+                    }
+                  : a
+              )
+            : [
+                ...prev.delivery_return,
+                {
+                  item_uuid: popupInfo.item_uuid,
+                  b: +data.b - (+popupInfo.b || 0),
+                  p: +data.p - (+popupInfo.p || 0),
+                },
+              ]
+          : [
+              {
+                item_uuid: popupInfo.item_uuid,
+                b: +data.b - (+popupInfo.b || 0),
+                p: +data.p - (+popupInfo.p || 0),
+              },
+            ]
+        : [],
       item_details: prev.item_details.filter(
         (a) => a.item_uuid === popupInfo.item_uuid
       )?.length
