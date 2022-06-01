@@ -161,7 +161,7 @@ const ProcessingOrders = () => {
       console.log(error.message);
     }
   };
-
+console.log(selectedOrder)
   const getTripOrders = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = db.transaction("items", "readonly").objectStore("items");
@@ -1184,8 +1184,12 @@ function NewUserForm({
                 a.item_uuid === popupInfo.item_uuid
                   ? {
                       item_uuid: popupInfo.item_uuid,
-                      b: +data.b - (+popupInfo.b || 0),
-                      p: +data.p - (+popupInfo.p || 0),
+                      b: +data.b - (+prev?.item_details?.find(
+        (a) => a.item_uuid === popupInfo.item_uuid
+      )?.b || 0),
+                      p: +data.p - (+prev?.item_details?.find(
+        (a) => a.item_uuid === popupInfo.item_uuid
+      )?.p || 0),
                     }
                   : a
               )
@@ -1193,15 +1197,23 @@ function NewUserForm({
                 ...prev.delivery_return,
                 {
                   item_uuid: popupInfo.item_uuid,
-                  b: +data.b - (+popupInfo.b || 0),
-                  p: +data.p - (+popupInfo.p || 0),
+                  b: +data.b - (+prev?.item_details?.find(
+        (a) => a.item_uuid === popupInfo.item_uuid
+      )?.b || 0),
+                  p: +data.p - (+prev?.item_details?.find(
+        (a) => a.item_uuid === popupInfo.item_uuid
+      )?.p || 0),
                 },
               ]
           : [
               {
                 item_uuid: popupInfo.item_uuid,
-                b: +data.b - (+popupInfo.b || 0),
-                p: +data.p - (+popupInfo.p || 0),
+                b: +data.b - (+prev?.item_details?.find(
+        (a) => a.item_uuid === popupInfo.item_uuid
+      )?.b || 0),
+                p: +data.p - (+prev?.item_details?.find(
+        (a) => a.item_uuid === popupInfo.item_uuid
+      )?.p || 0),
               },
             ]
         : [],
