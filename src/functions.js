@@ -228,13 +228,13 @@ export const Billing = async (counter = {}, items = [], others = null) => {
     // );
     let charges_discount = [];
     let price =
-      counter.item_special_price.find((a) => a.item_uuid === item.item_uuid)
+      counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
         ?.price || 0;
     let special_discount_percentage =
-      counter.item_special_discount.find((a) => a.item_uuid === item.item_uuid)
+      counter?.item_special_discount?.find((a) => a.item_uuid === item.item_uuid)
         ?.discount || 0;
     let company_discount_percentage =
-      counter.company_discount.find((a) => a.company_uuid === item.company_uuid)
+      counter?.company_discount?.find((a) => a.company_uuid === item.company_uuid)
         ?.discount || 0;
         console.log("company_discount_percentage",company_discount_percentage)
     item = {

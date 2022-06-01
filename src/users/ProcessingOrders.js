@@ -586,7 +586,7 @@ const ProcessingOrders = () => {
                         }}
                       >
                         {selectedOrder &&
-                        !Location.pathname.includes("checking") ? (
+                        !(Location.pathname.includes("checking") ||Location.pathname.includes("delivery"))? (
                           <td
                             style={{
                               padding: "10px",
