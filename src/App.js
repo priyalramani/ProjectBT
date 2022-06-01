@@ -64,9 +64,11 @@ function App() {
                   <Route path="/users/orders" element={<Orders />} />
                   <Route path="/users/processing" element={<Processing />} />
                   <Route path="/users/checking" element={<Processing />} />
+                  <Route path="/users/delivery" element={<Processing />} />
                   <Route path="/users/processing/:trip_uuid" element={<ProcessingOrders />} />
                   <Route path="/users/orders/:counter_uuid" element={<SelectedCounterOrder />} />
                   <Route path="/users/checking/:trip_uuid" element={<ProcessingOrders />} />
+                  <Route path="/users/delivery/:trip_uuid" element={<ProcessingOrders />} />
 
                   <Route path="*" element={<Navigate replace to={"/users"} />} />
                 </>

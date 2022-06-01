@@ -10,7 +10,9 @@ const Processing = () => {
     const response = await axios({
       method: "get",
       url: Location.pathname.includes("checking")
-        ? "/trips/GetCheckingTripList"
+        ? "/trips/GetCheckingTripList":
+        Location.pathname.includes("delivery")
+        ? "/trips/GetDeliveryTripList"
         : "/trips/GetProcessingTripList",
 
       headers: {
@@ -26,7 +28,10 @@ const Processing = () => {
     let time = new Date();
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
-      role: Location.pathname.includes("checking")?"Checking":"Processing",
+      role: 
+      Location.pathname.includes("checking")?"Checking"
+      :Location.pathname.includes("delivery")?"Delivery"
+      :"Processing",
       narration: +trip.trip_uuid === 0 ? "Unknown" : trip.trip_title,
       timestamp: time.getTime(),
       activity: "trip_open",
@@ -77,7 +82,10 @@ const Processing = () => {
                 onClick={() => {
                   postActivity(data);
                   sessionStorage.setItem("trip_title", data.trip_title);
-                  window.location.assign(`/users/${Location.pathname.includes("checking")?"checking":"processing"}/` + data.trip_uuid);
+                  window.location.assign(`/users/${
+                    Location.pathname.includes("checking")?"checking"
+                   :Location.pathname.includes("delivery")?"delivery"
+                    :"processing"}/` + data.trip_uuid);
                 }}
               >
                 <div className="service">

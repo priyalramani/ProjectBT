@@ -168,6 +168,8 @@ const ProcessingOrders = () => {
       url: `/orders/${
         Location.pathname.includes("checking")
           ? "GetOrderCheckingList"
+        :Location.pathname.includes("delivery")
+          ? "GetOrderDeliveryList"
           : "GetOrderProcessingList"
       }`,
       data: {
@@ -414,7 +416,10 @@ const ProcessingOrders = () => {
               <h2 style={{ width: "40vw", textAlign: "start" }}>
                 {selectedOrder.invoice_number}
               </h2>
-              {!Location.pathname.includes("checking") ? (
+              {!
+              (Location.pathname.includes("checking")||
+              Location.pathname.includes("delivery"))
+               ? (
                 <button
                   className="item-sales-search"
                   style={{ width: "max-content" }}
@@ -441,7 +446,8 @@ const ProcessingOrders = () => {
               >
                 Save
               </button>
-              {!Location.pathname.includes("checking") ? (
+              {!(Location.pathname.includes("checking")||
+              Location.pathname.includes("delivery")) ? (
                 <>
                   <input
                     className="searchInput"
@@ -505,7 +511,8 @@ const ProcessingOrders = () => {
           <table
             className="user-table"
             style={{
-              width: Location.pathname.includes("checking")
+              width: (Location.pathname.includes("checking")||
+              Location.pathname.includes("delivery"))
                 ? "100"
                 : selectedOrder
                 ? "max-content"
@@ -515,7 +522,8 @@ const ProcessingOrders = () => {
           >
             <thead>
               <tr>
-                {selectedOrder && !Location.pathname.includes("checking") ? (
+                {selectedOrder && !(Location.pathname.includes("checking")||
+              Location.pathname.includes("delivery")) ? (
                   <th></th>
                 ) : (
                   ""
@@ -534,9 +542,9 @@ const ProcessingOrders = () => {
                         <th>
                           <div className="t-head-element">Qty</div>
                         </th>
-                        <th>
+                        {!Location.pathname.includes("delivery")?<th>
                           <div className="t-head-element">Action</div>
-                        </th>
+                        </th>:""}
                       </>
                     ) : (
                       ""
@@ -635,7 +643,7 @@ const ProcessingOrders = () => {
                             >
                               {item.b + ":" + item.p}
                             </td>
-                            <td className="flex">
+                            {!Location.pathname.includes("delivery")?<td className="flex">
                               <button
                                 className="item-sales-search"
                                 style={{ width: "max-content" }}
@@ -670,7 +678,7 @@ const ProcessingOrders = () => {
                               >
                                 Cancel
                               </button>
-                            </td>
+                            </td>:""}
                           </>
                         ) : (
                           ""
