@@ -9,6 +9,7 @@ import { AiOutlineArrowLeft } from "react-icons/ai";
 
 let intervalId = 0;
 const ProcessingOrders = () => {
+  const [Barcode, setBarcode] = useState([]);
   const params = useParams();
   const [popupForm, setPopupForm] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -26,6 +27,9 @@ const ProcessingOrders = () => {
   const [updateBilling, setUpdateBilling] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
   const [oneTimeState, setOneTimeState] = useState(false);
+  const [barcodeFilter, setBarcodeFilter] = useState("");
+  const [barcodeFilterState, setBarcodeFilterState] = useState("");
+
   const Navigate = useNavigate();
 
   useEffect(() => {
@@ -168,7 +172,7 @@ const ProcessingOrders = () => {
       url: `/orders/${
         Location.pathname.includes("checking")
           ? "GetOrderCheckingList"
-        :Location.pathname.includes("delivery")
+          : Location.pathname.includes("delivery")
           ? "GetOrderDeliveryList"
           : "GetOrderProcessingList"
       }`,
@@ -386,7 +390,54 @@ const ProcessingOrders = () => {
       aItem?.item_title?.localeCompare(bItem?.item_title)
     );
   };
-
+  useEffect(() => {
+    if (items.length)
+      setBarcode(
+        [].concat
+          .apply(
+            [],
+            items.map((a) => a.barcode)
+          )
+          ?.filter((a) => a)
+      );
+  }, [items]);
+  useEffect(() => {
+    if (selectedOrder)
+      setBarcodeFilterState(
+        items?.map((a) => ({
+          item_uuid: a.item_uuid,
+          one_pack:a.one_pack,
+          qty: 0,
+          barcode: items.find((b) => a.item_uuid === b.item_uuid)?.barcode,
+        }))
+      );
+  }, [selectedOrder]);
+  const barcodeFilterUpdate = () => {
+    if (
+      barcodeFilterState.find(
+        (a) =>
+          a?.barcode?.filter((a) => a).filter((a) => a === barcodeFilter)
+            ?.length
+      )
+    ) {
+      setBarcodeFilterState((prev) =>
+        prev.map((a) =>
+          a?.barcode?.filter((a) => a).filter((a) => a === barcodeFilter)
+            ?.length
+            ? { ...a, qty: (+a.qty||0) + (+a.one_pack||1) }
+            : a
+        )
+      );
+    } else {
+      setBarcodeFilterState((prev) =>
+        prev.length
+          ? [...prev, { barcode: [barcodeFilter], qty: 1 }]
+          : { barcode: [barcodeFilter], qty: 1 }
+      );
+    }
+    setBarcodeFilter("");
+  };
+  console.log(barcodeFilterState);
   return (
     <div>
       <nav className="user_nav" style={{ top: "0" }}>
@@ -416,10 +467,18 @@ const ProcessingOrders = () => {
               <h2 style={{ width: "40vw", textAlign: "start" }}>
                 {selectedOrder.invoice_number}
               </h2>
-              {!
-              (Location.pathname.includes("checking")||
-              Location.pathname.includes("delivery"))
-               ? (
+              {Location.pathname.includes("checking") ? (
+                <input
+                  type="text"
+                  onChange={(e) => setBarcodeFilter(e.target.value)}
+                  value={barcodeFilter}
+                  placeholder="Search Barcode..."
+                  className="searchInput"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") barcodeFilterUpdate();
+                  }}
+                />
+              ) : !Location.pathname.includes("delivery") ? (
                 <button
                   className="item-sales-search"
                   style={{ width: "max-content" }}
@@ -446,8 +505,10 @@ const ProcessingOrders = () => {
               >
                 Save
               </button>
-              {!(Location.pathname.includes("checking")||
-              Location.pathname.includes("delivery")) ? (
+              {!(
+                Location.pathname.includes("checking") ||
+                Location.pathname.includes("delivery")
+              ) ? (
                 <>
                   <input
                     className="searchInput"
@@ -511,19 +572,23 @@ const ProcessingOrders = () => {
           <table
             className="user-table"
             style={{
-              width: (Location.pathname.includes("checking")||
-              Location.pathname.includes("delivery"))
-                ? "100"
-                : selectedOrder
-                ? "max-content"
-                : "100%",
+              width:
+                Location.pathname.includes("checking") ||
+                Location.pathname.includes("delivery")
+                  ? "100"
+                  : selectedOrder
+                  ? "max-content"
+                  : "100%",
               height: "fit-content",
             }}
           >
             <thead>
               <tr>
-                {selectedOrder && !(Location.pathname.includes("checking")||
-              Location.pathname.includes("delivery")) ? (
+                {selectedOrder &&
+                !(
+                  Location.pathname.includes("checking") ||
+                  Location.pathname.includes("delivery")
+                ) ? (
                   <th></th>
                 ) : (
                   ""
@@ -542,9 +607,13 @@ const ProcessingOrders = () => {
                         <th>
                           <div className="t-head-element">Qty</div>
                         </th>
-                        {!Location.pathname.includes("delivery")?<th>
-                          <div className="t-head-element">Action</div>
-                        </th>:""}
+                        {!Location.pathname.includes("delivery") ? (
+                          <th>
+                            <div className="t-head-element">Action</div>
+                          </th>
+                        ) : (
+                          ""
+                        )}
                       </>
                     ) : (
                       ""
@@ -586,7 +655,10 @@ const ProcessingOrders = () => {
                         }}
                       >
                         {selectedOrder &&
-                        !(Location.pathname.includes("checking") ||Location.pathname.includes("delivery"))? (
+                        !(
+                          Location.pathname.includes("checking") ||
+                          Location.pathname.includes("delivery")
+                        ) ? (
                           <td
                             style={{
                               padding: "10px",
@@ -643,42 +715,46 @@ const ProcessingOrders = () => {
                             >
                               {item.b + ":" + item.p}
                             </td>
-                            {!Location.pathname.includes("delivery")?<td className="flex">
-                              <button
-                                className="item-sales-search"
-                                style={{ width: "max-content" }}
-                                onClick={() => {
-                                  setOneTimeState();
-                                  setSelectedOrder((prev) => ({
-                                    ...prev,
-                                    item_details: prev.item_details.map((a) =>
-                                      a.item_uuid === item.item_uuid
-                                        ? { ...a, status: 2 }
-                                        : a
-                                    ),
-                                  }));
-                                }}
-                              >
-                                Hold
-                              </button>
-                              <button
-                                className="item-sales-search"
-                                style={{ width: "max-content" }}
-                                onClick={() => {
-                                  setOneTimeState();
-                                  setSelectedOrder((prev) => ({
-                                    ...prev,
-                                    item_details: prev.item_details.map((a) =>
-                                      a.item_uuid === item.item_uuid
-                                        ? { ...a, status: 3 }
-                                        : a
-                                    ),
-                                  }));
-                                }}
-                              >
-                                Cancel
-                              </button>
-                            </td>:""}
+                            {!Location.pathname.includes("delivery") ? (
+                              <td className="flex">
+                                <button
+                                  className="item-sales-search"
+                                  style={{ width: "max-content" }}
+                                  onClick={() => {
+                                    setOneTimeState();
+                                    setSelectedOrder((prev) => ({
+                                      ...prev,
+                                      item_details: prev.item_details.map((a) =>
+                                        a.item_uuid === item.item_uuid
+                                          ? { ...a, status: 2 }
+                                          : a
+                                      ),
+                                    }));
+                                  }}
+                                >
+                                  Hold
+                                </button>
+                                <button
+                                  className="item-sales-search"
+                                  style={{ width: "max-content" }}
+                                  onClick={() => {
+                                    setOneTimeState();
+                                    setSelectedOrder((prev) => ({
+                                      ...prev,
+                                      item_details: prev.item_details.map((a) =>
+                                        a.item_uuid === item.item_uuid
+                                          ? { ...a, status: 3 }
+                                          : a
+                                      ),
+                                    }));
+                                  }}
+                                >
+                                  Cancel
+                                </button>
+                              </td>
+                            ) : (
+                              ""
+                            )}
                           </>
                         ) : (
                           ""
