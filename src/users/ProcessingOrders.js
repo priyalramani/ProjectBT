@@ -453,8 +453,8 @@ const ProcessingOrders = () => {
                     className="searchInput"
                     style={{
                       position: "fixed",
-                      top: "50px",
-                      left: 0,
+                      top: "100px",
+                      right: "80px",
                       border: "none",
                       borderBottom: "2px solid black",
                       borderRadius: "0px",
@@ -468,8 +468,8 @@ const ProcessingOrders = () => {
                     className="audioPlayerSpeed"
                     style={{
                       position: "fixed",
-                      top: "50px",
-                      left: "60px",
+                      top: "100px",
+                      right: "0px",
                       border: "none",
                       borderBottom: "2px solid black",
                       borderRadius: "0px",
