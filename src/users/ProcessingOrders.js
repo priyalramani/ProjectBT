@@ -1048,11 +1048,11 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
                     width: "max-content",
                     height: "fit-content",
                     backgroundColor: "yellow",
-                    color: "#fff",
+                    color: "#000",
                   }}
                 >
                   <thead>
-                    <tr style={{ color: "#fff", backgroundColor: "#ffbf00" }}>
+                    <tr style={{ color: "#000", backgroundColor: "#ffbf00" }}>
                       <th colSpan={2}>
                         <div className="t-head-element">Item</div>
                       </th>
@@ -1072,7 +1072,7 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
                         key={item?.item_uuid || Math.random()}
                         style={{
                           height: "30px",
-                          color: "#fff",
+                          color: "#000",
                           backgroundColor: "#ffbf00",
                         }}
                       >
