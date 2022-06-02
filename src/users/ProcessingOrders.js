@@ -287,17 +287,20 @@ const ProcessingOrders = () => {
     setPopupBarcode(false);
     let data = selectedOrder;
     if (updateBilling) {
-      let billingData = await Billing(
-        counters.find((a) => a.counter_uuid === selectedOrder.counter_uuid),
-        selectedOrder.item_details.map((a) => {
+      let billingData = await Billing({
+        replacement: data.replacement,
+        counter: counters.find(
+          (a) => a.counter_uuid === selectedOrder.counter_uuid
+        ),
+        items: selectedOrder.item_details.map((a) => {
           let itemData = items.find((b) => a.item_uuid === b.item_uuid);
           return {
             ...itemData,
             ...a,
             price: itemData?.price || 0,
           };
-        })
-      );
+        }),
+      });
       data = {
         ...data,
         ...billingData,
@@ -926,7 +929,8 @@ const ProcessingOrders = () => {
         <DiliveryPopup
           onSave={() => setPopupDelivery(false)}
           postOrderData={postOrderData}
-          order_uuid={selectedOrder.order_uuid}
+          order_uuid={selectedOrder?.order_uuid}
+          setSelectedOrder={setSelectedOrder}
         />
       ) : (
         ""
@@ -1177,10 +1181,18 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
     </div>
   );
 }
-function DiliveryPopup({ onSave, postOrderData,order_uuid }) {
+function DiliveryPopup({
+  onSave,
+  postOrderData,
+  order_uuid,
+  setSelectedOrder,
+}) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
   const [error, setError] = useState("");
+  const [popup, setPopup] = useState(false);
+  const [data, setData] = useState({});
+
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -1207,6 +1219,7 @@ function DiliveryPopup({ onSave, postOrderData,order_uuid }) {
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
+    setSelectedOrder((prev) => ({ ...prev, replacement: data.actual }));
     let obj = modes.find((a) => a.mode_title === "Cash");
     if (obj?.amt && obj?.coin === "") {
       setError("Enter Coins");
@@ -1217,7 +1230,7 @@ function DiliveryPopup({ onSave, postOrderData,order_uuid }) {
       user_uuid: localStorage.getItem("user_uuid"),
       time: time.getTime(),
       order_uuid,
-      modes
+      modes,
     };
     const response = await axios({
       method: "post",
@@ -1228,11 +1241,155 @@ function DiliveryPopup({ onSave, postOrderData,order_uuid }) {
       },
     });
     if (response.data.success) {
-     
       postOrderData();
       onSave();
     }
   };
+  return (
+    <>
+      <div className="overlay">
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "max-content" }}
+        >
+          <h1>Payments</h1>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "20px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup">
+                  {PaymentModes.map((item) => (
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                      key={item.mode_uuid}
+                    >
+                      <div style={{ width: "50px" }}>{item.mode_title}</div>
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "150px" }}
+                      >
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          value={
+                            modes.find((a) => a.mode_uuid === item.mode_uuid)
+                              ?.amt
+                          }
+                          style={{ width: "150px" }}
+                          onChange={(e) =>
+                            setModes((prev) =>
+                              prev.map((a) =>
+                                a.mode_uuid === item.mode_uuid
+                                  ? {
+                                      ...a,
+                                      amt: e.target.value,
+                                    }
+                                  : a
+                              )
+                            )
+                          }
+                          maxLength={42}
+                        />
+                        {/* {popupInfo.conversion || 0} */}
+                      </label>
+                      {item.mode_title === "Cash" ? (
+                        <label
+                          className="selectLabel flex"
+                          style={{ width: "100px" }}
+                        >
+                          <input
+                            type="number"
+                            name="route_title"
+                            className="numberInput"
+                            placeholder="Coins"
+                            value={
+                              modes.find((a) => a.mode_uuid === item.mode_uuid)
+                                ?.coin
+                            }
+                            style={{ width: "100px" }}
+                            onChange={(e) =>
+                              setModes((prev) =>
+                                prev.map((a) =>
+                                  a.mode_uuid === item.mode_uuid
+                                    ? {
+                                        ...a,
+                                        coin: e.target.value,
+                                      }
+                                    : a
+                                )
+                              )
+                            }
+                            maxLength={42}
+                          />
+                        </label>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  ))}
+
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <button
+                      type="button"
+                      className="submit"
+                      style={{ color: "#fff", backgroundColor: "#7990dd" }}
+                      onClick={() => setPopup(true)}
+                    >
+                      Replacement
+                    </button>
+                  </div>
+                  <i style={{ color: "red" }}>{error}</i>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "red" }}
+                    className="submit"
+                    onClick={onSave}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="submit"
+                    onClick={submitHandler}
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {popup ? (
+        <DiliveryReplaceMent
+          onSave={() => setPopup(false)}
+          setData={setData}
+          data={data}
+        />
+      ) : (
+        ""
+      )}
+    </>
+  );
+}
+function DiliveryReplaceMent({ onSave, data, setData }) {
   return (
     <div className="overlay">
       <div
@@ -1251,76 +1408,57 @@ function DiliveryPopup({ onSave, postOrderData,order_uuid }) {
           <div style={{ overflowY: "scroll" }}>
             <form className="form">
               <div className="formGroup">
-                {PaymentModes.map((item) => (
-                  <div
-                    className="row"
-                    style={{ flexDirection: "row", alignItems: "center" }}
-                    key={item.mode_uuid}
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                >
+                  <div style={{ width: "50px" }}>MRP</div>
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "150px" }}
                   >
-                    <div style={{ width: "50px" }}>{item.mode_title}</div>
-                    <label
-                      className="selectLabel flex"
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data.mrp}
                       style={{ width: "150px" }}
-                    >
-                      <input
-                        type="number"
-                        name="route_title"
-                        className="numberInput"
-                        value={
-                          modes.find((a) => a.mode_uuid === item.mode_uuid)?.amt
-                        }
-                        style={{ width: "150px" }}
-                        onChange={(e) =>
-                          setModes((prev) =>
-                            prev.map((a) =>
-                              a.mode_uuid === item.mode_uuid
-                                ? {
-                                    ...a,
-                                    amt: e.target.value,
-                                  }
-                                : a
-                            )
-                          )
-                        }
-                        maxLength={42}
-                      />
-                      {/* {popupInfo.conversion || 0} */}
-                    </label>
-                    {item.mode_title === "Cash" ? (
-                      <label
-                        className="selectLabel flex"
-                        style={{ width: "100px" }}
-                      >
-                        <input
-                          type="number"
-                          name="route_title"
-                          className="numberInput"
-                          placeholder="Coins"
-                          value={
-                            modes.find((a) => a.mode_uuid === item.mode_uuid)
-                              ?.coin
-                          }
-                          style={{ width: "100px" }}
-                          onChange={(e) =>
-                            setModes((prev) =>
-                              prev.map((a) =>
-                                a.mode_uuid === item.mode_uuid
-                                  ? {
-                                      ...a,
-                                      coin: e.target.value,
-                                    }
-                                  : a
-                              )
-                            )
-                          }
-                          maxLength={42}
-                        />
-                      </label>
-                    ) : (
-                      ""
-                    )}
-                  </div>
-                ))}
+                      onChange={(e) =>
+                        setData((prev) => ({
+                          mrp: e.target.value,
+                          actual: +e.target.value * 0.8,
+                        }))
+                      }
+                      maxLength={42}
+                    />
+                    {/* {popupInfo.conversion || 0} */}
+                  </label>
+                </div>
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                >
+                  <div style={{ width: "50px" }}>Actual</div>
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "150px" }}
+                  >
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data.actual}
+                      style={{ width: "150px" }}
+                      onChange={(e) =>
+                        setData((prev) => ({
+                          actual: e.target.value,
+                        }))
+                      }
+                      maxLength={42}
+                    />
+                    {/* {popupInfo.conversion || 0} */}
+                  </label>
+                </div>
 
                 <div
                   className="row"
@@ -1334,7 +1472,6 @@ function DiliveryPopup({ onSave, postOrderData,order_uuid }) {
                     Replacement
                   </button>
                 </div>
-                <i style={{color:"red"}}>{error}</i>
               </div>
 
               <div className="flex" style={{ justifyContent: "space-between" }}>
@@ -1346,11 +1483,7 @@ function DiliveryPopup({ onSave, postOrderData,order_uuid }) {
                 >
                   Cancel
                 </button>
-                <button
-                  type="button"
-                  className="submit"
-                  onClick={submitHandler}
-                >
+                <button type="button" className="submit" onClick={onSave}>
                   Save
                 </button>
               </div>

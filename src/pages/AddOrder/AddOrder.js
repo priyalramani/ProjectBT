@@ -13,6 +13,8 @@ export default function AddOrder() {
     item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
   });
   const [counters, setCounters] = useState([]);
+  const [counterFilter, setCounterFilter] = useState("");
+  const [itemFilter, setItemFilter] = useState("");
   const [itemsData, setItemsData] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
   const [popup, setPopup] = useState(false);
@@ -36,31 +38,32 @@ export default function AddOrder() {
         setId(list[0] + order.item_details[0]?.uuid);
       } else {
         console.log(document.getElementById(id));
-        
-        let index = list.indexOf(id.replace((selectedItem
-          ? order.item_details.find(
-              (a) => +a.sr === +selectedItem + 1
-            )?.uuid
-          : order.item_details.find((a) => +a.sr === 1)?.uuid), ""));
+
+        let index = list.indexOf(
+          id.replace(
+            selectedItem
+              ? order.item_details.find((a) => +a.sr === +selectedItem + 1)
+                  ?.uuid
+              : order.item_details.find((a) => +a.sr === 1)?.uuid,
+            ""
+          )
+        );
         console.log(index);
-        
+
         if (counting === 3) {
-          let id=uuid()
+          let id = uuid();
           setOrder((prev) => ({
             ...prev,
             item_details: [
               ...prev.item_details,
-              { uuid:id, b: 0, p: 0, sr: prev.item_details.length+1 },
+              { uuid: id, b: 0, p: 0, sr: prev.item_details.length + 1 },
             ],
           }));
           setSelectedItem((prev) => +prev + 1);
-          setId(
-            list[0] +
-              id
-          );
-          setCounting(0)
+          setId(list[0] + id);
+          setCounting(0);
         } else {
-          setCounting(prev=>prev+1)
+          setCounting((prev) => prev + 1);
           setId(
             index === 0 || index
               ? list[index + 1] +
@@ -78,6 +81,22 @@ export default function AddOrder() {
           );
         }
         document.getElementById(id).focus();
+      }
+    } else if (event.key.length === 1 && event.key[0].match(/[a-z]/i)) {
+      if (!order.counter_uuid) {
+        setCounterFilter((prev) => (prev ? prev + event.key : event.key));
+      } else {
+        setItemFilter((prev) => (prev ? prev + event.key : event.key));
+      }
+    } else if (event.key === "Backspace") {
+      if (!order.counter_uuid) {
+        setCounterFilter((prev) =>
+          prev ? prev.substring(0, prev.length - 1) : ""
+        );
+      } else {
+        setItemFilter((prev) =>
+          prev ? prev.substring(0, prev.length - 1) : ""
+        );
       }
     }
   };
@@ -141,7 +160,7 @@ export default function AddOrder() {
       item_details: prev.item_details.map((a) => ({
         ...a,
         b: +a.b + parseInt((+a.p || 0) / +a.conversion || 0),
-        p:a.p? +a.p % +a.conversion:0,
+        p: a.p ? +a.p % +a.conversion : 0,
       })),
     }));
   }, [qty_details]);
@@ -161,12 +180,16 @@ export default function AddOrder() {
       data = { ...data, ...autoAdd, item_details: autoAdd.items };
     }
     let time = new Date();
-    let autoBilling = await Billing(counter, data.item_details, {
-      stage: 1,
-      user_uuid: "240522",
-      time: time.getTime(),
+    let autoBilling = await Billing({
+      counter,
+      items: data.item_details,
+      others: {
+        stage: 1,
+        user_uuid: "240522",
+        time: time.getTime(),
 
-      type: "NEW",
+        type: "NEW",
+      },
     });
     data = {
       ...data,
@@ -206,7 +229,7 @@ export default function AddOrder() {
       });
     }
   };
-
+  console.log("value", document.getElementById(id));
   return (
     <>
       <Sidebar />
@@ -236,11 +259,19 @@ export default function AddOrder() {
                   <option value="" disabled>
                     Select
                   </option>
-                  {counters?.map((a, i) => (
-                    <option key={a.counter_uuid} value={a.counter_uuid}>
-                      {a.counter_title}
-                    </option>
-                  ))}
+                  {counters
+                    ?.filter(
+                      (a) =>
+                        !counterFilter ||
+                        a.counter_title
+                          .toLocaleLowerCase()
+                          .includes(counterFilter.toLocaleLowerCase())
+                    )
+                    .map((a, i) => (
+                      <option key={a.counter_uuid} value={a.counter_uuid}>
+                        {a.counter_title}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>
@@ -296,11 +327,34 @@ export default function AddOrder() {
                                 <option value="" disabled>
                                   Select
                                 </option>
-                                {itemsData.map((a, j) => (
-                                  <option value={a.item_uuid}>
-                                    {a.item_title}
-                                  </option>
-                                ))}
+                                
+                                {itemsData
+                                .sort((a, b) =>
+                                a.item_title.localeCompare(b.item_title)
+                              )
+                                  ?.filter(
+                                    (a) =>
+                                      !itemFilter ||
+                                      id.replace("item_uuid", "") !==
+                                        item.uuid ||
+                                      a.item_title
+                                        .toLocaleLowerCase()
+                                        .includes(
+                                          itemFilter.toLocaleLowerCase()
+                                        )
+                                  )
+                                  
+                                  .map((a, j) => (
+                                    <option
+                                      value={a.item_uuid}
+                                      
+                                    >
+                                      {console.log(a.item_title,a.mrp)}
+                                      {a.item_title}
+                                      {"___________________"}
+                                      {a.mrp}
+                                    </option>
+                                  ))}
                               </select>
                             </div>
                           </td>
@@ -417,6 +471,9 @@ export default function AddOrder() {
           </div>
         </div>
       </div>
+      <h1 style={{ position: "fixed", bottom: "100px", right: "50vw" }}>
+        {itemFilter}
+      </h1>
       {popup ? (
         <NewUserForm onClose={() => setPopup(false)} onSubmit={onSubmite} />
       ) : (

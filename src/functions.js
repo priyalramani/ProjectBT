@@ -1,6 +1,4 @@
-
-
-export const AutoAdd = async ({counter, items,dbItems,autobills}) => {
+export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
   let eligibleItems = items;
   let auto_added = [];
 
@@ -82,14 +80,14 @@ export const AutoAdd = async ({counter, items,dbItems,autobills}) => {
     console.log("eligible", eligibleAddItems);
     let eligiblesBox =
       eligibleAddItems.length > 1
-        ? eligibleAddItems.map(a => a.b).reduce((a, b) => a + b)
+        ? eligibleAddItems.map((a) => a.b).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
         ? +eligibleAddItems[0].b
         : 0;
     //console.log("eligibleBox", eligiblesBox);
     let eligiblesPcs =
       eligibleAddItems.length > 1
-        ? eligibleAddItems.map(a => a.p).reduce((a, b) => a + b)
+        ? eligibleAddItems.map((a) => a.p).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
         ? +eligibleAddItems[0].p
         : 0;
@@ -115,7 +113,7 @@ export const AutoAdd = async ({counter, items,dbItems,autobills}) => {
     );
     console.log("piceqtyarr", pice_qty_arr);
     pice_qty_arr =
-    eligibleAddItems.length >= autobill.min_range
+      eligibleAddItems.length >= autobill.min_range
         ? pice_qty_arr.length > 1
           ? pice_qty_arr.reduce((a, b) =>
               +Math.max(a.base_qty, b.base_qty) === +a.base_qty ? a : b
@@ -146,7 +144,7 @@ export const AutoAdd = async ({counter, items,dbItems,autobills}) => {
         };
       });
       let nonFiltered = eligibleItems.filter(
-        (a) => !(dataItems.filter((b) => a.item_uuid === b.item_uuid).length)
+        (a) => !dataItems.filter((b) => a.item_uuid === b.item_uuid).length
       );
       dataItems = dataItems.map((a) => {
         let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
@@ -156,7 +154,7 @@ export const AutoAdd = async ({counter, items,dbItems,autobills}) => {
           box: (data ? +a.b + data.b : a.b) || 0,
         };
       });
-     
+
       eligibleItems = nonFiltered.length
         ? dataItems.length
           ? [...nonFiltered, ...dataItems]
@@ -217,7 +215,12 @@ export const AutoAdd = async ({counter, items,dbItems,autobills}) => {
   };
 };
 
-export const Billing = async (counter = {}, items = [], others = null) => {
+export const Billing = async ({
+  counter = {},
+  items = [],
+  others = null,
+  replacement = 0,
+}) => {
   let newPriceItems = [];
   for (let item of items) {
     //console.log(
@@ -231,12 +234,14 @@ export const Billing = async (counter = {}, items = [], others = null) => {
       counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
         ?.price || 0;
     let special_discount_percentage =
-      counter?.item_special_discount?.find((a) => a.item_uuid === item.item_uuid)
-        ?.discount || 0;
+      counter?.item_special_discount?.find(
+        (a) => a.item_uuid === item.item_uuid
+      )?.discount || 0;
     let company_discount_percentage =
-      counter?.company_discount?.find((a) => a.company_uuid === item.company_uuid)
-        ?.discount || 0;
-        console.log("company_discount_percentage",company_discount_percentage)
+      counter?.company_discount?.find(
+        (a) => a.company_uuid === item.company_uuid
+      )?.discount || 0;
+    console.log("company_discount_percentage", company_discount_percentage);
     item = {
       ...item,
       qty: others
@@ -254,7 +259,8 @@ export const Billing = async (counter = {}, items = [], others = null) => {
         ...item,
         special_discount_percentage,
         item_total:
-          ((item.item_price||0) * ((100 - special_discount_percentage) / 100)) || 0,
+          (item.item_price || 0) *
+            ((100 - special_discount_percentage) / 100) || 0,
       };
     }
     if (company_discount_percentage) {
@@ -267,7 +273,8 @@ export const Billing = async (counter = {}, items = [], others = null) => {
         company_discount_percentage,
         item_total: item.item_total
           ? item.item_total * ((100 - company_discount_percentage) / 100) || 0
-          : (item.item_price||0) * ((100 - company_discount_percentage) / 100) || 0,
+          : (item.item_price || 0) *
+              ((100 - company_discount_percentage) / 100) || 0,
       };
     }
 
@@ -276,7 +283,7 @@ export const Billing = async (counter = {}, items = [], others = null) => {
         ...item,
         item_total:
           (
-            (item.item_price||0) *
+            (item.item_price || 0) *
             (others
               ? +item.b * +item.conversion + item.p
               : +item.b * +item.conversion + item.p)
@@ -294,9 +301,9 @@ export const Billing = async (counter = {}, items = [], others = null) => {
     newPriceItems.length > 1
       ? newPriceItems.reduce(
           (a, b) => (+a.item_total || 0) + (+b.item_total || 0)
-        )
+        ) - replacement
       : newPriceItems.length
-      ? newPriceItems.map((a) => a.item_total)[0] || 0
+      ? (newPriceItems.map((a) => a.item_total)[0] || 0) - replacement
       : 0;
   return {
     counter_uuid: counter.counter_uuid,

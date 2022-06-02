@@ -120,7 +120,7 @@ const SelectedCounterOrder = () => {
     }
   };
   const postActivity = async (others = {}) => {
-    let time = new Date()
+    let time = new Date();
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
       role: "Order",
@@ -150,7 +150,7 @@ const SelectedCounterOrder = () => {
       setOrderCreated(true);
     }
   }, [order]);
-  console.log(order)
+  console.log(order);
   return (
     <>
       <div>
@@ -491,13 +491,17 @@ const SelectedCounterOrder = () => {
             className="autoBtn"
             style={{ left: "20vw" }}
             onClick={async () => {
-              let time=new Date()
-              Billing(counter, order.items, {
-                stage: 1,
-                user_uuid: localStorage.getItem("user_uuid"),
-                time: time.getTime(),
+              let time = new Date();
+              Billing({
+                counter,
+                items: order.items,
+                others: {
+                  stage: 1,
+                  user_uuid: localStorage.getItem("user_uuid"),
+                  time: time.getTime(),
 
-                type: "NEW",
+                  type: "NEW",
+                },
               }).then((data) => {
                 setOrder((prev) => ({ ...prev, ...data }));
                 postOrder({ ...order, ...data });
@@ -510,14 +514,24 @@ const SelectedCounterOrder = () => {
             type="button"
             className="autoBtn"
             onClick={async () => {
-              const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
+              const db = await openDB(
+                "BT",
+                +localStorage.getItem("IDBVersion") || 1
+              );
               let tx = await db
                 .transaction("autobill", "readwrite")
                 .objectStore("autobill");
               let autobills = await tx.getAll();
-              let store = await db.transaction("items", "readwrite").objectStore("items");
+              let store = await db
+                .transaction("items", "readwrite")
+                .objectStore("items");
               let dbItems = await store.getAll();
-              let data = await AutoAdd({counter, items:order.items,dbItems,autobills});
+              let data = await AutoAdd({
+                counter,
+                items: order.items,
+                dbItems,
+                autobills,
+              });
 
               setOrder((prev) => ({
                 ...prev,
