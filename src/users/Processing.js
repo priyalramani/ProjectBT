@@ -24,30 +24,7 @@ const Processing = () => {
   useEffect(() => {
     getTripData();
   }, []);
-  const postActivity = async (trip) => {
-    let time = new Date();
-    let data = {
-      user_uuid: localStorage.getItem("user_uuid"),
-      role: 
-      Location.pathname.includes("checking")?"Checking"
-      :Location.pathname.includes("delivery")?"Delivery"
-      :"Processing",
-      narration: +trip.trip_uuid === 0 ? "Unknown" : trip.trip_title,
-      timestamp: time.getTime(),
-      activity: "trip_open",
-    };
-    const response = await axios({
-      method: "post",
-      url: "/userActivity/postUserActivity",
-      data,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) {
-      console.log(response);
-    }
-  };
+  
   return (
     <div className="servicePage">
       <nav className="user_nav" style={{ top: "0" }}>
@@ -80,7 +57,7 @@ const Processing = () => {
                   // pathname + rolesArray.find((a) => +a.type === +data)?.link
                 }
                 onClick={() => {
-                  postActivity(data);
+                 
                   sessionStorage.setItem("trip_title", data.trip_title);
                   window.location.assign(`/users/${
                     Location.pathname.includes("checking")?"checking"

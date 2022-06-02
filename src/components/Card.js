@@ -7,7 +7,6 @@ const Card = ({
   dateTime,
   rounded,
 }) => {
-  console.log(dateTime);
 
  
   var days = [

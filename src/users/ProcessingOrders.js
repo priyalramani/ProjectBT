@@ -383,7 +383,11 @@ const ProcessingOrders = () => {
           : 0
       }`;
       postActivity({
-        activity: "order_end",
+        activity: (Location.pathname.includes("checking")
+          ? "Checking"
+          : Location.pathname.includes("delivery")
+          ? "Delivery"
+          : "Processing") + " End",
         range: data?.item_details?.length,
         qty,
         amt: data.order_grandtotal || 0,
@@ -394,11 +398,11 @@ const ProcessingOrders = () => {
   };
 
   useEffect(() => {
-    if (!orderCreated) {
-      postActivity({ activity: "order_start" });
+    if (!orderCreated && selectedOrder) {
+      postActivity({ activity: "Order Start" });
       setOrderCreated(true);
     }
-  }, [oneTimeState]);
+  }, [oneTimeState,selectedOrder]);
 
   const itemsSortFunction = (a, b) => {
     let aItem = items.find((i) => i.item_uuid === a.item_uuid);
