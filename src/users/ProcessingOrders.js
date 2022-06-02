@@ -262,7 +262,11 @@ const ProcessingOrders = () => {
     let time = new Date();
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
-      role: "Order",
+      role: (Location.pathname.includes("checking")
+      ? "Checking"
+      : Location.pathname.includes("delivery")
+      ? "Delivery"
+      : "Processing"),
       narration:
         +params.trip_uuid === 0
           ? "Unknown"
