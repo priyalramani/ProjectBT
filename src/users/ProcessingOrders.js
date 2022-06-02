@@ -900,7 +900,7 @@ console.log(selectedOrder)
       )}
       {popupBarcode ? (
         <CheckingValues
-          onSave={() => setPopupForm(false)}
+          onSave={() => setPopupBarcode(false)}
           BarcodeMessage={BarcodeMessage}
           postOrderData={postOrderData}
         />
@@ -1135,9 +1135,6 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
               ""
             )}
             <div className="flex" style={{ justifyContent: "space-between" }}>
-              <button type="button" className="submit" onClick={postOrderData}>
-                Save
-              </button>
               <button
                 type="button"
                 style={{ backgroundColor: "red" }}
@@ -1145,6 +1142,9 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
                 onClick={onSave}
               >
                 Cancel
+              </button>
+              <button type="button" className="submit" onClick={postOrderData}>
+                Save
               </button>
             </div>
           </div>
