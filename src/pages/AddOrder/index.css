@@ -191,5 +191,6 @@
 
   .counter_select:focus,
   .inputGroup select:focus{
-border-color: #4ac959;
+    border: 2px solid #4ac959;
+
   }
