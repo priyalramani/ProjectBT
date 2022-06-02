@@ -132,7 +132,20 @@ const MainAdmin = () => {
                     ).length
                 ).length ? (
                   <div key={Math.random()} className="sectionDiv">
-                    <h1>UnKnown</h1>
+                    <h1>
+                      UnKnown (
+                      {
+                        orders.filter(
+                          (a) =>
+                            counter.filter(
+                              (b) =>
+                                a.counter_uuid === b.counter_uuid &&
+                                !b.route_uuid
+                            ).length
+                        ).length
+                      }
+                      )
+                    </h1>
                     <div
                       className="content"
                       style={{
@@ -173,7 +186,7 @@ const MainAdmin = () => {
                                 //   menuOpenHandler(item)
                                 // }
                               />
-                              
+
                               <Card
                                 // on_order={order}
                                 dateTime={item?.status[0]?.time}
@@ -230,7 +243,16 @@ const MainAdmin = () => {
                       )
                         return (
                           <div key={Math.random()} className="sectionDiv">
-                            <h1>{route.route_title}</h1>
+                            <h1>
+                              {route.route_title} (
+                              {
+                                orders.filter(
+                                  (a) =>
+                                    a.counter_uuid === counterRoute.counter_uuid
+                                ).length
+                              }
+                              )
+                            </h1>
                             <div
                               className="content"
                               style={{
@@ -348,7 +370,9 @@ const MainAdmin = () => {
                 )}
                 {orders.filter((a) => !a?.trip_uuid).length ? (
                   <div key={Math.random()} className="sectionDiv">
-                    <h1>UnKnown</h1>
+                    <h1>
+                      UnKnown ({orders.filter((a) => !a?.trip_uuid).length})
+                    </h1>
                     <div
                       className="content"
                       style={{
@@ -395,11 +419,10 @@ const MainAdmin = () => {
                                 //   menuOpenHandler(item)
                                 // }
                               />
-                              
+
                               <Card
                                 // on_order={order}
                                 dateTime={item?.status[0]?.time}
-                                
                                 // key={item.seat_uuid}
                                 title1={item?.invoice_number || ""}
                                 selectedOrder={
@@ -452,7 +475,15 @@ const MainAdmin = () => {
                       )
                         return (
                           <div key={Math.random()} className="sectionDiv">
-                            <h1>{trip.trip_title}</h1>
+                            <h1>
+                              {trip.trip_title} (
+                              {
+                                orders.filter(
+                                  (a) => a.trip_uuid === trip.trip_uuid
+                                ).length
+                              }
+                              )
+                            </h1>
                             <div
                               className="content"
                               style={{
