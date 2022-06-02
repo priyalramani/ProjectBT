@@ -10,6 +10,7 @@ import { AiOutlineArrowLeft } from "react-icons/ai";
 let intervalId = 0;
 const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
+  const [popupDelivery, setPopupDelivery] = useState(false);
   const [popupBarcode, setPopupBarcode] = useState(false);
   const params = useParams();
   const [popupForm, setPopupForm] = useState(false);
@@ -161,7 +162,7 @@ const ProcessingOrders = () => {
       console.log(error.message);
     }
   };
-console.log(selectedOrder)
+  console.log(selectedOrder);
   const getTripOrders = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = db.transaction("items", "readonly").objectStore("items");
@@ -328,6 +329,18 @@ console.log(selectedOrder)
           ...data.status,
           {
             stage: "3",
+            time: time.getTime(),
+            user_uuid: localStorage.getItem("user_uuid"),
+          },
+        ],
+      };
+    if (Location.pathname.includes("delivery"))
+      data = {
+        ...data,
+        status: [
+          ...data.status,
+          {
+            stage: "4",
             time: time.getTime(),
             user_uuid: localStorage.getItem("user_uuid"),
           },
@@ -602,6 +615,8 @@ console.log(selectedOrder)
                 onClick={() => {
                   Location.pathname.includes("checking")
                     ? checkingQuantity()
+                    : Location.pathname.includes("delivery")
+                    ? setPopupDelivery(true)
                     : postOrderData();
                 }}
               >
@@ -907,6 +922,15 @@ console.log(selectedOrder)
       ) : (
         ""
       )}
+      {popupDelivery ? (
+        <DiliveryPopup
+          onSave={() => setPopupDelivery(false)}
+          postOrderData={postOrderData}
+          order_uuid={selectedOrder.order_uuid}
+        />
+      ) : (
+        ""
+      )}
     </div>
   );
 };
@@ -1153,6 +1177,190 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
     </div>
   );
 }
+function DiliveryPopup({ onSave, postOrderData,order_uuid }) {
+  const [PaymentModes, setPaymentModes] = useState([]);
+  const [modes, setModes] = useState([]);
+  const [error, setError] = useState("");
+  const GetPaymentModes = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/paymentModes/GetPaymentModesList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setPaymentModes(response.data.result);
+  };
+  useEffect(() => {
+    GetPaymentModes();
+  }, []);
+  useEffect(() => {
+    if (PaymentModes.length)
+      setModes(
+        PaymentModes.map((a) => ({
+          ...a,
+          amt: "",
+          coin: "",
+          status: a.mode_title === "UPI" ? "0" : 1,
+        }))
+      );
+  }, [PaymentModes]);
+  const submitHandler = async () => {
+    let obj = modes.find((a) => a.mode_title === "Cash");
+    if (obj?.amt && obj?.coin === "") {
+      setError("Enter Coins");
+      return;
+    }
+    let time = new Date();
+    obj = {
+      user_uuid: localStorage.getItem("user_uuid"),
+      time: time.getTime(),
+      order_uuid,
+      modes
+    };
+    const response = await axios({
+      method: "post",
+      url: "/receipts/postReceipt",
+      data: obj,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+     
+      postOrderData();
+      onSave();
+    }
+  };
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <h1>Payments</h1>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form">
+              <div className="formGroup">
+                {PaymentModes.map((item) => (
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                    key={item.mode_uuid}
+                  >
+                    <div style={{ width: "50px" }}>{item.mode_title}</div>
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "150px" }}
+                    >
+                      <input
+                        type="number"
+                        name="route_title"
+                        className="numberInput"
+                        value={
+                          modes.find((a) => a.mode_uuid === item.mode_uuid)?.amt
+                        }
+                        style={{ width: "150px" }}
+                        onChange={(e) =>
+                          setModes((prev) =>
+                            prev.map((a) =>
+                              a.mode_uuid === item.mode_uuid
+                                ? {
+                                    ...a,
+                                    amt: e.target.value,
+                                  }
+                                : a
+                            )
+                          )
+                        }
+                        maxLength={42}
+                      />
+                      {/* {popupInfo.conversion || 0} */}
+                    </label>
+                    {item.mode_title === "Cash" ? (
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "100px" }}
+                      >
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          placeholder="Coins"
+                          value={
+                            modes.find((a) => a.mode_uuid === item.mode_uuid)
+                              ?.coin
+                          }
+                          style={{ width: "100px" }}
+                          onChange={(e) =>
+                            setModes((prev) =>
+                              prev.map((a) =>
+                                a.mode_uuid === item.mode_uuid
+                                  ? {
+                                      ...a,
+                                      coin: e.target.value,
+                                    }
+                                  : a
+                              )
+                            )
+                          }
+                          maxLength={42}
+                        />
+                      </label>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                ))}
+
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                >
+                  <button
+                    type="button"
+                    className="submit"
+                    style={{ color: "#fff", backgroundColor: "#7990dd" }}
+                  >
+                    Replacement
+                  </button>
+                </div>
+                <i style={{color:"red"}}>{error}</i>
+              </div>
+
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                <button
+                  type="button"
+                  style={{ backgroundColor: "red" }}
+                  className="submit"
+                  onClick={onSave}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="submit"
+                  onClick={submitHandler}
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 function NewUserForm({
   onSave,
   popupInfo,
@@ -1184,12 +1392,16 @@ function NewUserForm({
                 a.item_uuid === popupInfo.item_uuid
                   ? {
                       item_uuid: popupInfo.item_uuid,
-                      b: +data.b - (+prev?.item_details?.find(
-        (a) => a.item_uuid === popupInfo.item_uuid
-      )?.b || 0),
-                      p: +data.p - (+prev?.item_details?.find(
-        (a) => a.item_uuid === popupInfo.item_uuid
-      )?.p || 0),
+                      b:
+                        +data.b -
+                        (+prev?.item_details?.find(
+                          (a) => a.item_uuid === popupInfo.item_uuid
+                        )?.b || 0),
+                      p:
+                        +data.p -
+                        (+prev?.item_details?.find(
+                          (a) => a.item_uuid === popupInfo.item_uuid
+                        )?.p || 0),
                     }
                   : a
               )
@@ -1197,23 +1409,31 @@ function NewUserForm({
                 ...prev.delivery_return,
                 {
                   item_uuid: popupInfo.item_uuid,
-                  b: +data.b - (+prev?.item_details?.find(
-        (a) => a.item_uuid === popupInfo.item_uuid
-      )?.b || 0),
-                  p: +data.p - (+prev?.item_details?.find(
-        (a) => a.item_uuid === popupInfo.item_uuid
-      )?.p || 0),
+                  b:
+                    +data.b -
+                    (+prev?.item_details?.find(
+                      (a) => a.item_uuid === popupInfo.item_uuid
+                    )?.b || 0),
+                  p:
+                    +data.p -
+                    (+prev?.item_details?.find(
+                      (a) => a.item_uuid === popupInfo.item_uuid
+                    )?.p || 0),
                 },
               ]
           : [
               {
                 item_uuid: popupInfo.item_uuid,
-                b: +data.b - (+prev?.item_details?.find(
-        (a) => a.item_uuid === popupInfo.item_uuid
-      )?.b || 0),
-                p: +data.p - (+prev?.item_details?.find(
-        (a) => a.item_uuid === popupInfo.item_uuid
-      )?.p || 0),
+                b:
+                  +data.b -
+                  (+prev?.item_details?.find(
+                    (a) => a.item_uuid === popupInfo.item_uuid
+                  )?.b || 0),
+                p:
+                  +data.p -
+                  (+prev?.item_details?.find(
+                    (a) => a.item_uuid === popupInfo.item_uuid
+                  )?.p || 0),
               },
             ]
         : [],
