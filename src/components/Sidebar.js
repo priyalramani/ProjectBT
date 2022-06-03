@@ -7,11 +7,12 @@ import {
   FlashOn as QuickAccessIcon,
   SettingsOutlined as SettingsIcon,
 } from "@mui/icons-material";
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import AddIcon from '@mui/icons-material/Add';
 const Sidebar = ({setIsItemAvilableOpen}) => {
   return (
     <div className="left-panel" style={{ position: "relative" }}>
-      <div className="nav" style={{ paddingTop: "70px", height: "100vh" }}>
+      <div className="nav" style={{ height: "100vh" }}>
       <NavLink
           title="New Order"
           icon={<AddIcon sx={{ fontSize: 50 }} />}
@@ -65,6 +66,18 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Trips",
               link: "#",
             },
+          ]}
+        />
+         <NavLink
+          title={"Report"}
+          icon={<AssessmentIcon sx={{ fontSize: 50 }} />}
+          isActive={false}
+          menuList={[
+            {
+              name: "User Activity",
+              link: "/admin/userActivity",
+            },
+            
           ]}
         />
          <NavLink
