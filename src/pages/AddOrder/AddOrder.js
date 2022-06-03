@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
@@ -16,7 +16,7 @@ export default function AddOrder() {
   });
   const [counters, setCounters] = useState([]);
   const [counterFilter, setCounterFilter] = useState("");
-
+  const selectRef = useRef();
   const [itemsData, setItemsData] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
   const [popup, setPopup] = useState(false);
@@ -241,6 +241,7 @@ export default function AddOrder() {
 
     debounce: 500,
   });
+ 
   return (
     <>
       <Sidebar />
@@ -308,6 +309,7 @@ export default function AddOrder() {
                           <td className="ph2 pv1 tl bb b--black-20 bg-white">
                             <div className="inputGroup">
                               <Select
+                              ref={selectRef}
                                 id={"item_uuid" + item.uuid}
                                 options={itemsData
                                   .sort((a, b) =>
