@@ -12,6 +12,7 @@ const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
   const [popupDelivery, setPopupDelivery] = useState(false);
   const [popupBarcode, setPopupBarcode] = useState(false);
+  const [holdPopup, setHoldPopup] = useState(false);
   const params = useParams();
   const [popupForm, setPopupForm] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -262,11 +263,11 @@ const ProcessingOrders = () => {
     let time = new Date();
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
-      role: (Location.pathname.includes("checking")
-      ? "Checking"
-      : Location.pathname.includes("delivery")
-      ? "Delivery"
-      : "Processing"),
+      role: Location.pathname.includes("checking")
+        ? "Checking"
+        : Location.pathname.includes("delivery")
+        ? "Delivery"
+        : "Processing",
       narration:
         +params.trip_uuid === 0
           ? "Unknown"
@@ -387,11 +388,12 @@ const ProcessingOrders = () => {
           : 0
       }`;
       postActivity({
-        activity: (Location.pathname.includes("checking")
-          ? "Checking"
-          : Location.pathname.includes("delivery")
-          ? "Delivery"
-          : "Processing") + " End",
+        activity:
+          (Location.pathname.includes("checking")
+            ? "Checking"
+            : Location.pathname.includes("delivery")
+            ? "Delivery"
+            : "Processing") + " End",
         range: data?.item_details?.length,
         qty,
         amt: data.order_grandtotal || 0,
@@ -406,7 +408,7 @@ const ProcessingOrders = () => {
       postActivity({ activity: "Order Start" });
       setOrderCreated(true);
     }
-  }, [oneTimeState,selectedOrder]);
+  }, [oneTimeState, selectedOrder]);
 
   const itemsSortFunction = (a, b) => {
     let aItem = items.find((i) => i.item_uuid === a.item_uuid);
@@ -697,6 +699,18 @@ const ProcessingOrders = () => {
             display: "flex",
           }}
         >
+          <button
+            className="item-sales-search"
+            style={{
+              width: "max-content",
+              position: "fixed",
+              top: "0",
+              right: "0",
+            }}
+            onClick={() => setHoldPopup(true)}
+          >
+            Hold
+          </button>
           <table
             className="user-table"
             style={{
@@ -799,7 +813,7 @@ const ProcessingOrders = () => {
                                 ...prev,
                                 item_details: prev.item_details.map((a) =>
                                   a.item_uuid === item.item_uuid
-                                    ? { ...a, status: 1 }
+                                    ? { ...a, status: +a.status === 1 ? 0 : 1 }
                                     : a
                                 ),
                               }));
@@ -854,7 +868,10 @@ const ProcessingOrders = () => {
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
                                         a.item_uuid === item.item_uuid
-                                          ? { ...a, status: 2 }
+                                          ? {
+                                              ...a,
+                                              status: +a.status === 2 ? 0 : 2,
+                                            }
                                           : a
                                       ),
                                     }));
@@ -871,7 +888,10 @@ const ProcessingOrders = () => {
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
                                         a.item_uuid === item.item_uuid
-                                          ? { ...a, status: 3 }
+                                          ? {
+                                              ...a,
+                                              status: +a.status === 3 ? 0 : 3,
+                                            }
                                           : a
                                       ),
                                     }));
@@ -939,6 +959,15 @@ const ProcessingOrders = () => {
           postOrderData={postOrderData}
           order_uuid={selectedOrder?.order_uuid}
           setSelectedOrder={setSelectedOrder}
+        />
+      ) : (
+        ""
+      )}
+      {holdPopup ? (
+        <HoldPopup
+          onSave={() => setHoldPopup(false)}
+          orders={orders}
+          itemsData={items}
         />
       ) : (
         ""
@@ -1184,6 +1213,129 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
               </button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+function HoldPopup({ onSave, orders, itemsData }) {
+  const [items, setItems] = useState([]);
+  useEffect(() => {
+    let data = [].concat
+      .apply(
+        [],
+        orders.map((a) => a.item_details)
+      )
+      .filter((a) => a.status === 2)
+      .map((a) => ({
+        ...a,
+        item_title: itemsData?.find((b) => b.item_uuid === a.item_uuid)
+          ?.item_title,
+      }));
+    console.log(data);
+    let result = data.reduce((acc, curr) => {
+      let item = acc.find((item) => item.item_uuid === curr.item_uuid);
+
+      if (item) {
+        item.p = +item.p + curr.p;
+        item.b = +item.b + curr.b;
+      } else {
+        acc.push(curr);
+      }
+
+      return acc;
+    }, []);
+    console.log(result);
+    setItems(result);
+  }, []);
+
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{
+          height: "fit-content",
+          width: "max-content",
+          minWidth: "400px",
+        }}
+      >
+        <h1>Hold</h1>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            {items.length ? (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                <table
+                  className="user-table"
+                  style={{
+                    width: "100%",
+                    height: "fit-content",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                      <th colSpan={2}>
+                        <div className="t-head-element">Item</div>
+                      </th>
+                      <th>
+                        <div className="t-head-element">Qty</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tbody">
+                    {items?.map((item, i) => (
+                      <tr
+                        key={item?.item_uuid || Math.random()}
+                        style={{
+                          height: "30px",
+                          color: "#fff",
+                          backgroundColor: "#7990dd",
+                        }}
+                      >
+                        <td colSpan={2}>{item.item_title}</td>
+                        <td>
+                          {item?.b || 0} : {item?.p || 0}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                <i>No Data Present</i>
+              </div>
+            )}
+
+            {/* <div className="flex" style={{ justifyContent: "space-between" }}>
+              <button
+                type="button"
+                style={{ backgroundColor: "red" }}
+                className="submit"
+                onClick={onSave}
+              >
+                Cancel
+              </button>
+              <button type="button" className="submit" onClick={postOrderData}>
+                Save
+              </button>
+            </div> */}
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
         </div>
       </div>
     </div>
