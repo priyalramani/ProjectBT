@@ -77,6 +77,10 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "User Activity",
               link: "/admin/userActivity",
             },
+            {
+              name: "UPI Transaction",
+              link: "/admin/upiTransactionReport",
+            },
             
           ]}
         />
