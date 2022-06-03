@@ -7,6 +7,7 @@ import { Billing, AutoAdd } from "../../functions";
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import Select from "react-select";
+import { useIdleTimer } from "react-idle-timer";
 const list = ["item_uuid", "q", "p"];
 export default function AddOrder() {
   const [order, setOrder] = useState({
@@ -83,9 +84,7 @@ export default function AddOrder() {
         }
         document.getElementById(id).focus();
       }
-    } 
-   
-    
+    }
   };
 
   const getAutoBill = async () => {
@@ -216,7 +215,32 @@ export default function AddOrder() {
       });
     }
   };
+  const callBilling = async () => {
+    let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
+    let time = new Date();
+    let autoBilling = await Billing({
+      counter,
+      items: order.item_details,
+      others: {
+        stage: 1,
+        user_uuid: "240522",
+        time: time.getTime(),
 
+        type: "NEW",
+      },
+    });
+    setOrder((prev) => ({
+      ...prev,
+      ...autoBilling,
+      item_details: autoBilling.items,
+    }));
+  };
+  const { getRemainingTime, getLastActiveTime } = useIdleTimer({
+    timeout: 1000 * 5,
+    onIdle: callBilling,
+
+    debounce: 500,
+  });
   return (
     <>
       <Sidebar />
@@ -292,7 +316,7 @@ export default function AddOrder() {
                                   .map((a, j) => {
                                     return {
                                       value: a.item_uuid,
-                                      label: a.item_title+"______"+a.mrp,
+                                      label: a.item_title + "______" + a.mrp,
                                       key: a.item_uuid,
                                     };
                                   })}
@@ -309,8 +333,7 @@ export default function AddOrder() {
                                         ? {
                                             ...a,
                                             ...itemsData.find(
-                                              (b) =>
-                                                b.item_uuid === e.value
+                                              (b) => b.item_uuid === e.value
                                             ),
                                           }
                                         : a
@@ -319,16 +342,17 @@ export default function AddOrder() {
                                 }}
                                 value={
                                   itemsData
-                                  .sort((a, b) =>
-                                    a.item_title.localeCompare(b.item_title)
-                                  ).filter(a=>a.item_uuid===item.uuid)
-                                  .map((a, j) => {
-                                    return {
-                                      value: a.item_uuid,
-                                      label: a.item_title+"______"+a.mrp,
-                                      key: a.item_uuid,
-                                    };
-                                  })[0]
+                                    .sort((a, b) =>
+                                      a.item_title.localeCompare(b.item_title)
+                                    )
+                                    .filter((a) => a.item_uuid === item.uuid)
+                                    .map((a, j) => {
+                                      return {
+                                        value: a.item_uuid,
+                                        label: a.item_title + "______" + a.mrp,
+                                        key: a.item_uuid,
+                                      };
+                                    })[0]
                                 }
                                 menuPosition="fixed"
                                 menuPlacement="auto"
@@ -407,7 +431,7 @@ export default function AddOrder() {
                               type="number"
                               className="numberInput"
                               onWheel={(e) => e.preventDefault()}
-                              value={item.b}
+                              value={item.b||""}
                               onChange={(e) => {
                                 setOrder((prev) => {
                                   setTimeout(
@@ -436,7 +460,7 @@ export default function AddOrder() {
                               type="number"
                               className="numberInput"
                               onWheel={(e) => e.preventDefault()}
-                              value={item.p}
+                              value={item.p||""}
                               onChange={(e) => {
                                 setOrder((prev) => {
                                   setTimeout(
@@ -496,7 +520,7 @@ export default function AddOrder() {
                 )}
               </table>
             </div>
-            <div className="bottomContent">
+            <div className="bottomContent" >
               <button
                 type="button"
                 onClick={() => {
@@ -507,6 +531,18 @@ export default function AddOrder() {
               >
                 Bill
               </button>
+              {order?.order_grandtotal?<button
+              style={{position:"fixed",bottom:"100px",right:"0",cursor:"default"}}
+                type="button"
+                onClick={() => {
+                  if (!order.item_details.filter((a) => a.item_uuid).length)
+                    return;
+                  setPopup(true);
+                }}
+              >
+                Total: {order?.order_grandtotal||0}
+              </button>:""}
+
             </div>
           </div>
         </div>

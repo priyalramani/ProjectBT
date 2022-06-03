@@ -24,6 +24,9 @@ import LoginPage from "./users/LoginPage";
 import Processing from "./users/Processing";
 import ProcessingOrders from "./users/ProcessingOrders";
 import AddOrder from "./pages/AddOrder/AddOrder";
+import UserActivity from "./pages/Reports/UserActivity";
+import UPITransection from "./pages/Reports/UPITransection";
+import CompleteOrder from "./pages/Reports/CompleteOrder";
 
 const id = "240522";
 function App() {
@@ -55,6 +58,9 @@ function App() {
                   <Route path="/admin/autoIncreaseQty" element={<AutoIncreaseQuantity />} />
                   <Route path="/admin/autoIncreaseItem" element={<AutoIncreaseItem />} />
                   <Route path="/admin/addOrder" element={<AddOrder />} />
+                  <Route path="/admin/userActivity" element={<UserActivity />} />
+                  <Route path="/admin/upiTransactionReport" element={<UPITransection />} />
+                  <Route path="/admin/completeOrderReport" element={<CompleteOrder />} />
                   <Route path="*" element={<Navigate replace to={"/admin"} />} />
                 </>
               ) : (
