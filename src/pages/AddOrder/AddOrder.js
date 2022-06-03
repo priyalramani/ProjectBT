@@ -6,6 +6,7 @@ import "./index.css";
 import { Billing, AutoAdd } from "../../functions";
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
+import Select from "react-select";
 const list = ["item_uuid", "q", "p"];
 export default function AddOrder() {
   const [order, setOrder] = useState({
@@ -14,7 +15,7 @@ export default function AddOrder() {
   });
   const [counters, setCounters] = useState([]);
   const [counterFilter, setCounterFilter] = useState("");
-  const [itemFilter, setItemFilter] = useState([]);
+
   const [itemsData, setItemsData] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
   const [popup, setPopup] = useState(false);
@@ -82,41 +83,9 @@ export default function AddOrder() {
         }
         document.getElementById(id).focus();
       }
-    } else if (event.key.length === 1 && event.key[0].match(/[a-z]/i)) {
-      if (!order.counter_uuid) {
-        setCounterFilter((prev) => (prev ? prev + event.key : event.key));
-      } else {
-        setItemFilter((prev) =>
-          prev.map((b) => {
-            let item = order?.item_details?.find((a) => a.sr === selectedItem);
-            if (b.item_uuid === item?.item_uuid) {
-              return {
-                ...b,
-                filter: b.filter + event.key,
-              };
-            } else return b;
-          })
-        );
-      }
-    } else if (event.key === "Backspace") {
-      if (!order.counter_uuid) {
-        setCounterFilter((prev) =>
-          prev ? prev.substring(0, prev.length - 1) : ""
-        );
-      } else {
-        setItemFilter((prev) =>
-          prev.map((b) => {
-            let item = order?.item_details?.find((a) => a.sr === selectedItem);
-            if (b.item_uuid === item?.item_uuid) {
-              return {
-                ...b,
-                filter: b.filter.substring(0, b.filter.length - 1),
-              };
-            } else return b;
-          })
-        );
-      }
-    }
+    } 
+   
+    
   };
 
   const getAutoBill = async () => {
@@ -247,7 +216,7 @@ export default function AddOrder() {
       });
     }
   };
-  console.log("value", document.getElementById(id));
+
   return (
     <>
       <Sidebar />
@@ -314,7 +283,58 @@ export default function AddOrder() {
                         <tr key={i}>
                           <td className="ph2 pv1 tl bb b--black-20 bg-white">
                             <div className="inputGroup">
-                              <select
+                              <Select
+                                id={"item_uuid" + item.uuid}
+                                options={itemsData
+                                  .sort((a, b) =>
+                                    a.item_title.localeCompare(b.item_title)
+                                  )
+                                  .map((a, j) => {
+                                    return {
+                                      value: a.item_uuid,
+                                      label: a.item_title+"______"+a.mrp,
+                                      key: a.item_uuid,
+                                    };
+                                  })}
+                                onChange={(e) => {
+                                  setTimeout(
+                                    () => setQtyDetails((prev) => !prev),
+                                    2000
+                                  );
+
+                                  setOrder((prev) => ({
+                                    ...prev,
+                                    item_details: prev.item_details.map((a) =>
+                                      a.uuid === item.uuid
+                                        ? {
+                                            ...a,
+                                            ...itemsData.find(
+                                              (b) =>
+                                                b.item_uuid === e.value
+                                            ),
+                                          }
+                                        : a
+                                    ),
+                                  }));
+                                }}
+                                value={
+                                  itemsData
+                                  .sort((a, b) =>
+                                    a.item_title.localeCompare(b.item_title)
+                                  ).filter(a=>a.item_uuid===item.uuid)
+                                  .map((a, j) => {
+                                    return {
+                                      value: a.item_uuid,
+                                      label: a.item_title+"______"+a.mrp,
+                                      key: a.item_uuid,
+                                    };
+                                  })[0]
+                                }
+                                menuPosition="fixed"
+                                menuPlacement="auto"
+                                placeholder="Item"
+                              />
+                              {/* <select
                                 id={"item_uuid" + item.uuid}
                                 onChange={(e) => {
                                   setTimeout(
@@ -375,7 +395,7 @@ export default function AddOrder() {
                                       {a.mrp}
                                     </option>
                                   ))}
-                              </select>
+                              </select> */}
                             </div>
                           </td>
                           <td
@@ -491,7 +511,7 @@ export default function AddOrder() {
           </div>
         </div>
       </div>
-      
+
       {popup ? (
         <NewUserForm onClose={() => setPopup(false)} onSubmit={onSubmite} />
       ) : (
