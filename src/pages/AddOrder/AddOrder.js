@@ -14,7 +14,7 @@ export default function AddOrder() {
   });
   const [counters, setCounters] = useState([]);
   const [counterFilter, setCounterFilter] = useState("");
-  const [itemFilter, setItemFilter] = useState("");
+  const [itemFilter, setItemFilter] = useState([]);
   const [itemsData, setItemsData] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
   const [popup, setPopup] = useState(false);
@@ -86,7 +86,17 @@ export default function AddOrder() {
       if (!order.counter_uuid) {
         setCounterFilter((prev) => (prev ? prev + event.key : event.key));
       } else {
-        setItemFilter((prev) => (prev ? prev + event.key : event.key));
+        setItemFilter((prev) =>
+          prev.map((b) => {
+            let item = order?.item_details?.find((a) => a.sr === selectedItem);
+            if (b.item_uuid === item?.item_uuid) {
+              return {
+                ...b,
+                filter: b.filter + event.key,
+              };
+            } else return b;
+          })
+        );
       }
     } else if (event.key === "Backspace") {
       if (!order.counter_uuid) {
@@ -95,7 +105,15 @@ export default function AddOrder() {
         );
       } else {
         setItemFilter((prev) =>
-          prev ? prev.substring(0, prev.length - 1) : ""
+          prev.map((b) => {
+            let item = order?.item_details?.find((a) => a.sr === selectedItem);
+            if (b.item_uuid === item?.item_uuid) {
+              return {
+                ...b,
+                filter: b.filter.substring(0, b.filter.length - 1),
+              };
+            } else return b;
+          })
         );
       }
     }
@@ -327,29 +345,31 @@ export default function AddOrder() {
                                 <option value="" disabled>
                                   Select
                                 </option>
-                                
+
                                 {itemsData
-                                .sort((a, b) =>
-                                a.item_title.localeCompare(b.item_title)
-                              )
+                                  .sort((a, b) =>
+                                    a.item_title.localeCompare(b.item_title)
+                                  )
                                   ?.filter(
                                     (a) =>
-                                      !itemFilter ||
-                                      id.replace("item_uuid", "") !==
-                                        item.uuid ||
+                                      !itemFilter.find(
+                                        (b) => b.item_uuid === item.item_uuid
+                                      ) ||
                                       a.item_title
                                         .toLocaleLowerCase()
                                         .includes(
-                                          itemFilter.toLocaleLowerCase()
+                                          itemFilter
+                                            .find(
+                                              (b) =>
+                                                b.item_uuid === item.item_uuid
+                                            )
+                                            ?.filter.toLocaleLowerCase()
                                         )
                                   )
-                                  
-                                  .map((a, j) => (
-                                    <option
-                                      value={a.item_uuid}
-                                      
-                                    >
-                                      {console.log(a.item_title,a.mrp)}
+
+                                  ?.map((a, j) => (
+                                    <option value={a.item_uuid}>
+                       
                                       {a.item_title}
                                       {"___________________"}
                                       {a.mrp}
@@ -471,9 +491,7 @@ export default function AddOrder() {
           </div>
         </div>
       </div>
-      <h1 style={{ position: "fixed", bottom: "100px", right: "50vw" }}>
-        {itemFilter}
-      </h1>
+      
       {popup ? (
         <NewUserForm onClose={() => setPopup(false)} onSubmit={onSubmite} />
       ) : (
