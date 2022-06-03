@@ -76,6 +76,12 @@ export default function ItemAvilibility({
                       className="pa3 bb b--black-20 "
                       style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
                     >
+                      Order
+                    </th>
+                    <th
+                      className="pa3 bb b--black-20 "
+                      style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
+                    >
                       Action
                     </th>
                   </tr>
@@ -94,7 +100,7 @@ export default function ItemAvilibility({
                     .map((item, index) => (
                       <tr
                         key={index}
-                        style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
+                        style={{ borderBottom: "2px solid rgb(189, 189, 189)",height:"50px" }}
                       >
                         <td
                           className="ph3 bb b--black-20 tc bg-white"
@@ -112,13 +118,20 @@ export default function ItemAvilibility({
                           className="ph3 bb b--black-20 tc bg-white"
                           style={{ textAlign: "center" }}
                         >
+                          {item.orderLength}
+                        </td>
+                        <td
+                          className="ph3 bb b--black-20 tc bg-white"
+                          style={{ textAlign: "center" }}
+                        >
                           <button
                             className="item-sales-search"
-                            style={{ display: "inline" }}
+                            style={{ display: "inline",cursor:item?.orderLength?"not-allowed":"pointer" }}
                             type="button"
                             onClick={() => {
                               completeFuntion(item);
                             }}
+                            disabled={item?.orderLength}
                           >
                             Complete
                           </button>
