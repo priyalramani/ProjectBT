@@ -321,6 +321,7 @@ const ProcessingOrders = () => {
     )
       data = {
         ...data,
+        processing_canceled:data?.item_details?.filter(a=>+a.status===3),
         status: [
           ...data.status,
           {
@@ -699,7 +700,7 @@ const ProcessingOrders = () => {
             display: "flex",
           }}
         >
-          <button
+          {!selectedOrder?<button
             className="item-sales-search"
             style={{
               width: "max-content",
@@ -710,7 +711,7 @@ const ProcessingOrders = () => {
             onClick={() => setHoldPopup(true)}
           >
             Hold
-          </button>
+          </button>:""}
           <table
             className="user-table"
             style={{
