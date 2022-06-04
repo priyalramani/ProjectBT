@@ -125,7 +125,6 @@ const ItemDetails = () => {
 
 export default ItemDetails;
 function Table({ itemsDetails }) {
- 
   return (
     <table
       className="user-table"
@@ -137,7 +136,9 @@ function Table({ itemsDetails }) {
           <th colSpan={3}>Item Name</th>
           <th colSpan={2}>Sales</th>
           <th colSpan={2}>Delivery Return</th>
+          <th> %</th>
           <th colSpan={2}>Processing Canceled</th>
+          <th> %</th>
           <th colSpan={2}>Auto Add</th>
         </tr>
       </thead>
@@ -150,7 +151,9 @@ function Table({ itemsDetails }) {
               <td colSpan={3}>{item.item_title}</td>
               <td colSpan={2}>{item.sales || ""}</td>
               <td colSpan={2}>{item.deliver_return || ""}</td>
+              <td>{item.deliver_return_percentage || 0}</td>
               <td colSpan={2}>{item.processing_canceled || ""}</td>
+              <td>{item.processing_canceled_percentage || 0}</td>
               <td colSpan={2}>{item.auto_added || ""}</td>
             </tr>
           ))}
