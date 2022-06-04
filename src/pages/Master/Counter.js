@@ -56,7 +56,7 @@ const Counter = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log(response.data.result)
+    console.log(response.data.result);
     if (response.data.success) setPaymentModes(response.data.result);
   };
 
@@ -321,12 +321,22 @@ function NewUserForm({
   useEffect(
     popupInfo?.type === "edit"
       ? () => {
-          setdata(popupInfo.data);
+          setdata({
+            ...popupInfo.data,
+          });
         }
-      : () => {},
+      : () => {
+          setdata({
+            payment_modes: paymentModes.filter(
+              (a) =>
+                a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" ||
+                a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002"
+            ).map(a=>a.mode_uuid),
+          });
+        },
     []
   );
-
+console.log(data)
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!data.counter_title) {
