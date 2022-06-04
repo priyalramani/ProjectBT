@@ -844,6 +844,26 @@ const ProcessingOrders = () => {
                               height: "50px",
                             }}
                             onClick={() => {
+                              setItemChanged((prev) =>+item.status!==1?
+                              prev.filter(
+                                (a) => a.item_uuid === item.item_uuid
+                              ).length
+                                ? [
+                                    ...prev.filter(
+                                      (a) =>
+                                        !(
+                                          a.item_uuid === item.item_uuid
+                                        )
+                                    ),
+                                  ]
+                                : [
+                                    ...prev,
+                                    selectedOrder.item_details.find(
+                                      (a) =>
+                                        a.item_uuid === item.item_uuid
+                                    ),
+                                  ]:prev
+                            );
                               setOneTimeState();
                               setSelectedOrder((prev) => ({
                                 ...prev,
@@ -900,26 +920,7 @@ const ProcessingOrders = () => {
                                   style={{ width: "max-content" }}
                                   onClick={() => {
                                     setOneTimeState();
-                                    setItemChanged((prev) =>
-                                      prev.filter(
-                                        (a) => a.item_uuid === item.item_uuid
-                                      ).length
-                                        ? [
-                                            ...prev.filter(
-                                              (a) =>
-                                                !(
-                                                  a.item_uuid === item.item_uuid
-                                                )
-                                            ),
-                                          ]
-                                        : [
-                                            ...prev,
-                                            selectedOrder.item_details.find(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            ),
-                                          ]
-                                    );
+                                    
                                     setSelectedOrder((prev) => ({
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -940,26 +941,7 @@ const ProcessingOrders = () => {
                                   style={{ width: "max-content" }}
                                   onClick={() => {
                                     setOneTimeState();
-                                    setItemChanged((prev) =>
-                                      prev.filter(
-                                        (a) => a.item_uuid === item.item_uuid
-                                      ).length
-                                        ? [
-                                            ...prev.filter(
-                                              (a) =>
-                                                !(
-                                                  a.item_uuid === item.item_uuid
-                                                )
-                                            ),
-                                          ]
-                                        : [
-                                            ...prev,
-                                            selectedOrder.item_details.find(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            ),
-                                          ]
-                                    );
+                                  
                                     setSelectedOrder((prev) => ({
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
