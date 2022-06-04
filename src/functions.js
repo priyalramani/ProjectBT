@@ -52,12 +52,13 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
           });
         return {
           ...a,
-          box: +a.b + (base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0),
-          pcs: +a.p + (pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0),
+          b: +a.b + (base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0),
+          p: +a.p + (pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0),
         };
       } else return a;
     });
   }
+  console.log("eligibleitems",eligibleItems)
   data = autobills.filter(
     (a) =>
       a.type === "auto-item-add" &&
@@ -150,8 +151,8 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
         let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
         return {
           ...a,
-          pcs: (data ? +a.p + data.p : a.p) || 0,
-          box: (data ? +a.b + data.b : a.b) || 0,
+          p: (data ? +a.p + data.p : a.p) || 0,
+          b: (data ? +a.b + data.b : a.b) || 0,
         };
       });
 
@@ -179,7 +180,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
         }
         return {
           ...a,
-          pcs: pice_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)
+          p: pice_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)
             .add_qty,
         };
       });
@@ -193,8 +194,8 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
         let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
         return {
           ...a,
-          pcs: (data ? +a.p + data.p : a.p) || 0,
-          box: (data ? +a.b + data.b : a.b) || 0,
+          p: (data ? +a.p + data.p : a.p) || 0,
+          b: (data ? +a.b + data.b : a.b) || 0,
         };
       });
       //console.log(nonFiltered, dataItems);
