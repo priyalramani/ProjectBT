@@ -452,7 +452,7 @@ function NewUserForm({
       setErrorMassage("Please insert Route Title");
       return;
     }
-    if (findDuplicates(data.barcode).length || barcodeChecking.length) {
+    if (findDuplicates(data.barcode)?.length || barcodeChecking?.length) {
       setErrorMassage("Please insert Unique Barcode");
       return;
     }
