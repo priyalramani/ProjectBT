@@ -82,12 +82,16 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               link: "/admin/upiTransactionReport",
             },
             {
-              name: "Complete Order",
+              name: "Completed Orders",
               link: "/admin/completeOrderReport",
             },
             {
               name: "Items",
               link: "/admin/OrderItemReport",
+            },
+            {
+              name: "Completed Trips",
+              link: "/admin/CompletedTripsReport",
             },
             
           ]}
