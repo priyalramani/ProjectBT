@@ -181,6 +181,7 @@ const ProcessingOrders = () => {
       }`,
       data: {
         trip_uuid: params.trip_uuid,
+        user_uuid:localStorage.getItem("user_uuid")
       },
     });
     console.log(response);

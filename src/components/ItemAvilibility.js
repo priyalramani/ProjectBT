@@ -6,8 +6,22 @@ export default function ItemAvilibility({
   setIsItemAvilableOpen,
 }) {
   const [itemsData, setItemsData] = useState([]);
+  const [popup, setPopup] = useState(null);
+  const [users, setUsers] = useState([]);
   const [btn, setBtn] = useState(false);
   const [itemFilter, setItemFilter] = useState("");
+  const getUsers = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/users/GetUserList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("users", response);
+    if (response.data.success) setUsers(response.data.result);
+  };
   const getTripData = async () => {
     const response = await axios({
       method: "get",
@@ -23,11 +37,14 @@ export default function ItemAvilibility({
   useEffect(() => {
     getTripData();
   }, [btn]);
-  const completeFuntion = async (data) => {
+  useEffect(() => {
+    getUsers();
+  }, []);
+  const completeFunction = async (data) => {
     const response = await axios({
       method: "put",
       url: "/trips/putTrip",
-      data: { ...data, status: 0 },
+      data,
       headers: {
         "Content-Type": "application/json",
       },
@@ -37,115 +54,239 @@ export default function ItemAvilibility({
     }
   };
   return (
-    <div className="itemavilablelity">
-      <div className="itemavilabelitycontainer">
-        <div className="itemavilablelity_header">
-          <h2>Trips</h2>
-        </div>
+    <>
+      <div className="itemavilablelity">
+        <div className="itemavilabelitycontainer">
+          <div className="itemavilablelity_header">
+            <h2>Trips</h2>
+          </div>
 
-        <div className="availablecontainer">
-          <div className="itemavilablelitybox">
-            <input
-              className="numberInput"
-              type="text"
-              name="item_filter"
-              value={itemFilter}
-              onChange={(e) => {
-                setItemFilter(e.target.value);
-              }}
-              placeholder="Items Filter"
-              style={{ width: "200px", margin: "10px 0" }}
-            />
-            <div className="items_table">
-              <table className="f6 w-100 center" cellSpacing="0">
-                <thead className="lh-copy">
-                  <tr className="white">
-                    <th
-                      className="pa3 bb b--black-20 "
-                      style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
-                    >
-                      Created At
-                    </th>
-                    <th
-                      className="pa3 bb b--black-20 "
-                      style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
-                    >
-                      Title
-                    </th>
-                    <th
-                      className="pa3 bb b--black-20 "
-                      style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
-                    >
-                      Order
-                    </th>
-                    <th
-                      className="pa3 bb b--black-20 "
-                      style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
-                    >
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="lh-copy">
-                  {itemsData
-                    .sort((a, b) => a.trip_title.localeCompare(b.trip_title))
-                    .filter(
-                      (a) =>
-                        (itemFilter !== ""
-                          ? a.trip_title
-                              .toLowerCase()
-                              .includes(itemFilter.toLowerCase())
-                          : true) && a.trip_title
-                    )
-                    .map((item, index) => (
-                      <tr
-                        key={index}
-                        style={{ borderBottom: "2px solid rgb(189, 189, 189)",height:"50px" }}
+          <div className="availablecontainer">
+            <div className="itemavilablelitybox">
+              <input
+                className="numberInput"
+                type="text"
+                name="item_filter"
+                value={itemFilter}
+                onChange={(e) => {
+                  setItemFilter(e.target.value);
+                }}
+                placeholder="Items Filter"
+                style={{ width: "200px", margin: "10px 0" }}
+              />
+              <div className="items_table">
+                <table className="f6 w-100 center" cellSpacing="0">
+                  <thead className="lh-copy">
+                    <tr className="white">
+                      <th
+                        className="pa3 bb b--black-20 "
+                        style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
                       >
-                        <td
-                          className="ph3 bb b--black-20 tc bg-white"
-                          style={{ textAlign: "center" }}
+                        Created At
+                      </th>
+                      <th
+                        className="pa3 bb b--black-20 "
+                        style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
+                      >
+                        Title
+                      </th>
+                      <th
+                        className="pa3 bb b--black-20 "
+                        style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
+                      >
+                        Order
+                      </th>
+                      <th
+                        className="pa3 bb b--black-20 "
+                        style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
+                        colSpan={2}
+                      >
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="lh-copy">
+                    {itemsData
+                      .sort((a, b) => a.trip_title.localeCompare(b.trip_title))
+                      .filter(
+                        (a) =>
+                          (itemFilter !== ""
+                            ? a.trip_title
+                                .toLowerCase()
+                                .includes(itemFilter.toLowerCase())
+                            : true) && a.trip_title
+                      )
+                      .map((item, index) => (
+                        <tr
+                          key={index}
+                          style={{
+                            borderBottom: "2px solid rgb(189, 189, 189)",
+                            height: "50px",
+                          }}
                         >
-                          {new Date(item.created_at).toDateString()}
-                        </td>
-                        <td
-                          className="ph3 bb b--black-20 tc bg-white"
-                          style={{ textAlign: "center" }}
-                        >
-                          {item.trip_title}
-                        </td>
-                        <td
-                          className="ph3 bb b--black-20 tc bg-white"
-                          style={{ textAlign: "center" }}
-                        >
-                          {item.orderLength}
-                        </td>
-                        <td
-                          className="ph3 bb b--black-20 tc bg-white"
-                          style={{ textAlign: "center" }}
-                        >
-                          <button
-                            className="item-sales-search"
-                            style={{ display: "inline",cursor:item?.orderLength?"not-allowed":"pointer" }}
-                            type="button"
-                            onClick={() => {
-                              completeFuntion(item);
-                            }}
-                            disabled={item?.orderLength}
+                          <td
+                            className="ph3 bb b--black-20 tc bg-white"
+                            style={{ textAlign: "center" }}
                           >
-                            Complete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
+                            {new Date(item.created_at).toDateString()}
+                          </td>
+                          <td
+                            className="ph3 bb b--black-20 tc bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            {item.trip_title}
+                          </td>
+                          <td
+                            className="ph3 bb b--black-20 tc bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            {item.orderLength}
+                          </td>
+                          <td
+                            className="ph3 bb b--black-20 tc bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            <button
+                              className="item-sales-search"
+                              style={{
+                                display: "inline",
+                                cursor: item?.orderLength
+                                  ? "not-allowed"
+                                  : "pointer",
+                              }}
+                              type="button"
+                              onClick={() => {
+                                completeFunction({...item,status:0});
+                              }}
+                              disabled={item?.orderLength}
+                            >
+                              Complete
+                            </button>
+                          </td>
+                          <td
+                            className="ph3 bb b--black-20 tc bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            <button
+                              className="item-sales-search"
+                              style={{
+                                display: "inline",
+                                
+                              }}
+                              type="button"
+                              onClick={() => {
+                                setPopup(item);
+                              }}
+                            >
+                              Assign
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div onClick={() => {setIsItemAvilableOpen(false)}}>
-          <button className="savebtn">Done</button>
+          <div
+            onClick={() => {
+              setIsItemAvilableOpen(false);
+            }}
+          >
+            <button className="savebtn">Done</button>
+          </div>
+        </div>
+      </div>
+      {popup ? (
+        <NewUserForm
+          onSave={() => setPopup(false)}
+          popupInfo={popup}
+          users={users}
+          completeFunction={completeFunction}
+        />
+      ) : (
+        ""
+      )}
+    </>
+  );
+}
+function NewUserForm({ onSave, popupInfo, users,completeFunction }) {
+  const [data, setdata] = useState([]);
+  useEffect(() => {
+    setdata(popupInfo?.users||[]);
+  }, []);
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    completeFunction({...popupInfo,users:data})
+    onSave()
+  };
+  const onChangeHandler = (e) => {
+    let temp = data || [];
+    let options = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value
+    );
+    for (let i of options) {
+      if (data.filter((a) => a === i).length)
+        temp = temp.filter((a) => a !== i);
+      else temp = [...temp, i];
+    }
+    // temp = data.filter(a => options.filter(b => b === a.user_uuid).length)
+    console.log(options, temp);
+
+    setdata(temp);
+  };
+  return (
+    <div className="overlay" style={{zIndex:"999999"}}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="row">
+                <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Counter </h1>
+              </div>
+
+              <div className="form">
+                <div className="row">
+                  <label className="selectLabel">
+                    Counter Title
+                    <select
+                      className="numberInput"
+                      style={{ width: "200px",height:"200px" }}
+                      value={data.map((a) => a)}
+                      onChange={onChangeHandler}
+                      multiple
+                    >
+                      {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+                      {users.map((occ) => (
+                        <option value={occ.user_uuid} style={{marginBottom:"5px",textAlign:"center"}}>{occ.user_title}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              </div>
+            
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
         </div>
       </div>
     </div>
