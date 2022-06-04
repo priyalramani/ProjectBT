@@ -36,7 +36,7 @@ const UPITransection = () => {
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading">
-          <h2>User Activity </h2>
+          <h2>UPI Transaction </h2>
         </div>
 
         <div className="table-container-user item-sales-container">
@@ -69,9 +69,11 @@ function Table({ itemsDetails,putActivityData }) {
         <tr>
           <th>S.N</th>
           <th colSpan={3}>Counter Title</th>
+          <th colSpan={2}>Amount</th>
           <th colSpan={2}>Invoice Number</th>
           <th colSpan={2}>Order Date</th>
           <th colSpan={2}>Payment Date</th>
+          <th colSpan={3}>User</th>
           <th colSpan={2}>Action</th>
         </tr>
       </thead>
@@ -83,14 +85,18 @@ function Table({ itemsDetails,putActivityData }) {
               <td>{i + 1}</td>
 
               <td colSpan={3}>{item.counter_title || ""}</td>
+              <td colSpan={2}>{item.amt || ""}</td>
               <td colSpan={2}>{item.invoice_number || ""}</td>
 
-              <td colSpan={2}>{formatAMPM(new Date(item.order_date)) || ""}</td>
+              <td colSpan={2}>{(new Date(item.order_date)).toDateString() } -{formatAMPM(new Date(item.order_date)) || ""}</td>
               <td colSpan={2}>
-                {formatAMPM(new Date(item.payment_date)) || ""}
+              {(new Date(item.payment_date)).toDateString() } -{formatAMPM(new Date(item.payment_date)) || ""}
               </td>
-              <td>
-                  <button type="button" className="item-sales-search" onClick={()=>putActivityData(item.order_uuid)}>Complete</button>
+              <td colSpan={3}>
+              {item.user_title || ""}
+              </td>
+              <td colSpan={2}>
+                  <button type="button" className="item-sales-search"  onClick={()=>putActivityData(item.order_uuid)}>Complete</button>
               </td>
             </tr>
           ))}
