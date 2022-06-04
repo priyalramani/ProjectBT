@@ -85,6 +85,10 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Complete Order",
               link: "/admin/completeOrderReport",
             },
+            {
+              name: "Items",
+              link: "/admin/OrderItemReport",
+            },
             
           ]}
         />
