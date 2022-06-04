@@ -10,6 +10,7 @@ import { AiOutlineArrowLeft } from "react-icons/ai";
 let intervalId = 0;
 const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
+  const [itemChanged, setItemChanged] = useState([]);
   const [popupDelivery, setPopupDelivery] = useState(false);
   const [popupBarcode, setPopupBarcode] = useState(false);
   const [holdPopup, setHoldPopup] = useState(false);
@@ -127,7 +128,21 @@ const ProcessingOrders = () => {
             audiosRef.current[i].pause();
             audiosRef.current[i].setAttribute("played", "true");
             navigator.mediaSession.playbackState = "paused";
-
+            setItemChanged((prev) =>
+              prev.filter((a) => a.item_uuid === audiosRef.current[i].item_uuid)
+                .length
+                ? [
+                    ...prev.filter(
+                      (a) => !(a.item_uuid === audiosRef.current[i].item_uuid)
+                    ),
+                  ]
+                : [
+                    ...prev,
+                    selectedOrder.item_details.find(
+                      (a) => a.item_uuid === audiosRef.current[i].item_uuid
+                    ),
+                  ]
+            );
             setSelectedOrder((prev) => ({
               ...prev,
               item_details: prev.item_details.map((a) =>
@@ -181,7 +196,7 @@ const ProcessingOrders = () => {
       }`,
       data: {
         trip_uuid: params.trip_uuid,
-        user_uuid:localStorage.getItem("user_uuid")
+        user_uuid: localStorage.getItem("user_uuid"),
       },
     });
     console.log(response);
@@ -270,9 +285,11 @@ const ProcessingOrders = () => {
         ? "Delivery"
         : "Processing",
       narration:
-        +params.trip_uuid === 0
-          ? "Unknown"
-          : sessionStorage.getItem("trip_title"),
+        counters.find((a) => a.counter_uuid === selectedOrder.counter_uuid)
+          ?.counter_title +
+        (sessionStorage.getItem("route_title")
+          ? ", " + sessionStorage.getItem("route_title")
+          : ""),
       timestamp: time.getTime(),
       ...others,
     };
@@ -322,7 +339,7 @@ const ProcessingOrders = () => {
     )
       data = {
         ...data,
-        processing_canceled:data?.item_details?.filter(a=>+a.status===3),
+        processing_canceled: data?.item_details?.filter((a) => +a.status === 3),
         status: [
           ...data.status,
           {
@@ -376,17 +393,21 @@ const ProcessingOrders = () => {
     if (response.data.success) {
       console.log(response);
       sessionStorage.setItem("playCount", playCount);
+      let dataItem = Location.pathname.includes("processing")
+        ? itemChanged
+        : data?.item_details;
+
       let qty = `${
-        data?.item_details?.length > 1
-          ? data?.item_details?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
-          : data?.item_details?.length
-          ? data?.item_details[0]?.b
+        dataItem?.length > 1
+          ? dataItem?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
+          : dataItem?.length
+          ? dataItem[0]?.b
           : 0
       }:${
-        data?.item_details?.length > 1
-          ? data?.item_details?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
-          : data?.item_details?.length
-          ? data?.item_details[0]?.p
+        dataItem?.length > 1
+          ? dataItem?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
+          : dataItem?.length
+          ? dataItem[0]?.p
           : 0
       }`;
       postActivity({
@@ -396,7 +417,9 @@ const ProcessingOrders = () => {
             : Location.pathname.includes("delivery")
             ? "Delivery"
             : "Processing") + " End",
-        range: data?.item_details?.length,
+        range: Location.pathname.includes("processing")
+          ? itemChanged.length
+          : data?.item_details?.length,
         qty,
         amt: data.order_grandtotal || 0,
       });
@@ -407,7 +430,14 @@ const ProcessingOrders = () => {
 
   useEffect(() => {
     if (!orderCreated && selectedOrder) {
-      postActivity({ activity: "Order Start" });
+      postActivity({
+        activity:
+          (Location.pathname.includes("checking")
+            ? "Checking"
+            : Location.pathname.includes("delivery")
+            ? "Delivery"
+            : "Processing") + " Start",
+      });
       setOrderCreated(true);
     }
   }, [oneTimeState, selectedOrder]);
@@ -701,18 +731,22 @@ const ProcessingOrders = () => {
             display: "flex",
           }}
         >
-          {!selectedOrder?<button
-            className="item-sales-search"
-            style={{
-              width: "max-content",
-              position: "fixed",
-              top: "0",
-              right: "0",
-            }}
-            onClick={() => setHoldPopup(true)}
-          >
-            Hold
-          </button>:""}
+          {!selectedOrder ? (
+            <button
+              className="item-sales-search"
+              style={{
+                width: "max-content",
+                position: "fixed",
+                top: "0",
+                right: "0",
+              }}
+              onClick={() => setHoldPopup(true)}
+            >
+              Hold
+            </button>
+          ) : (
+            ""
+          )}
           <table
             className="user-table"
             style={{
@@ -866,6 +900,26 @@ const ProcessingOrders = () => {
                                   style={{ width: "max-content" }}
                                   onClick={() => {
                                     setOneTimeState();
+                                    setItemChanged((prev) =>
+                                      prev.filter(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      ).length
+                                        ? [
+                                            ...prev.filter(
+                                              (a) =>
+                                                !(
+                                                  a.item_uuid === item.item_uuid
+                                                )
+                                            ),
+                                          ]
+                                        : [
+                                            ...prev,
+                                            selectedOrder.item_details.find(
+                                              (a) =>
+                                                a.item_uuid === item.item_uuid
+                                            ),
+                                          ]
+                                    );
                                     setSelectedOrder((prev) => ({
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -886,6 +940,26 @@ const ProcessingOrders = () => {
                                   style={{ width: "max-content" }}
                                   onClick={() => {
                                     setOneTimeState();
+                                    setItemChanged((prev) =>
+                                      prev.filter(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      ).length
+                                        ? [
+                                            ...prev.filter(
+                                              (a) =>
+                                                !(
+                                                  a.item_uuid === item.item_uuid
+                                                )
+                                            ),
+                                          ]
+                                        : [
+                                            ...prev,
+                                            selectedOrder.item_details.find(
+                                              (a) =>
+                                                a.item_uuid === item.item_uuid
+                                            ),
+                                          ]
+                                    );
                                     setSelectedOrder((prev) => ({
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>

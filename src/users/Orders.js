@@ -34,7 +34,7 @@ const Orders = () => {
         counter.counter_title +
         (route.route_title ? ", " + route.route_title : ""),
       timestamp: time.getTime(),
-      activity: "counter_open",
+      activity: "Counter Open",
     };
     const response = await axios({
       method: "post",
