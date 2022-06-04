@@ -5,6 +5,7 @@ import axios from "axios";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 const Counter = () => {
   const [counter, setCounter] = useState([]);
+  const [paymentModes, setPaymentModes] = useState([]);
   const [filterCounter, setFilterCounter] = useState([]);
   const [filterCounterTitle, setFilterCounterTitle] = useState("");
   const [filterRoute, setFilterRoute] = useState("");
@@ -46,10 +47,25 @@ const Counter = () => {
         }))
       );
   };
+  const GetPaymentModes = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/paymentModes/GetPaymentModesList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response.data.result)
+    if (response.data.success) setPaymentModes(response.data.result);
+  };
 
   useEffect(() => {
     getCounter();
   }, [popupForm, routesData]);
+  useEffect(() => {
+    GetPaymentModes();
+  }, []);
   useEffect(
     () =>
       setFilterCounter(
@@ -91,7 +107,6 @@ const Counter = () => {
               width: "100%",
             }}
           >
-
             <input
               type="text"
               onChange={(e) => setFilterCounterTitle(e.target.value)}
@@ -130,6 +145,7 @@ const Counter = () => {
           routesData={routesData}
           setCounters={setCounter}
           popupInfo={popupForm}
+          paymentModes={paymentModes}
         />
       ) : (
         ""
@@ -293,11 +309,21 @@ function Table({ itemsDetails, setPopupForm, setItemPopup }) {
     </table>
   );
 }
-function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
+function NewUserForm({
+  onSave,
+  popupInfo,
+  setCounters,
+  routesData,
+  paymentModes,
+}) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
   useEffect(
-    popupInfo?.type === "edit" ? () =>{ setdata(popupInfo.data)} :() =>  {},
+    popupInfo?.type === "edit"
+      ? () => {
+          setdata(popupInfo.data);
+        }
+      : () => {},
     []
   );
 
@@ -344,7 +370,22 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
       }
     }
   };
+  const onChangeHandler = (e) => {
+    let temp = data.payment_modes || [];
+    let options = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value
+    );
+    for (let i of options) {
+      if (data.payment_modes.filter((a) => a === i).length)
+        temp = temp.filter((a) => a !== i);
+      else temp = [...temp, i];
+    }
+    // temp = data.filter(a => options.filter(b => b === a.user_uuid).length)
+    console.log(options, temp);
 
+    setdata((prev) => ({ ...prev, payment_modes: temp }));
+  };
   return (
     <div className="overlay">
       <div
@@ -440,6 +481,28 @@ function NewUserForm({ onSave, popupInfo, setCounters, routesData }) {
                     </select>
                   </label>
                 </div>
+                <div className="row">
+                  <label className="selectLabel" style={{ width: "50%" }}>
+                    Mobile
+                    <select
+                      className="numberInput"
+                      style={{ width: "200px", height: "100px" }}
+                      value={data?.payment_modes}
+                      onChange={onChangeHandler}
+                      multiple
+                    >
+                      {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+                      {paymentModes?.map((occ) => (
+                        <option
+                          value={occ.mode_uuid}
+                          style={{ marginBottom: "5px", textAlign: "center" }}
+                        >
+                          {occ.mode_title}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
               </div>
               <i style={{ color: "red" }}>
                 {errMassage === "" ? "" : "Error: " + errMassage}
@@ -466,8 +529,12 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
   const [filterTitle, setFilterTitle] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
-  useEffect(()=>{setValue(itemPopup.item[itemPopup.type]?itemPopup.item[itemPopup.type]:[])},[])
-  console.log(value)
+  useEffect(() => {
+    setValue(
+      itemPopup.item[itemPopup.type] ? itemPopup.item[itemPopup.type] : []
+    );
+  }, []);
+  console.log(value);
   const getItemCategories = async () => {
     const response = await axios({
       method: "get",
@@ -520,20 +587,21 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
     getCompanies();
     getItemCategories();
   }, []);
-  const submitHandler = async() => {
+  const submitHandler = async () => {
     const response = await axios({
       method: "put",
       url: "/counters/putCounter",
-      data: [{
-        counter_uuid:itemPopup.item.counter_uuid,
-        [itemPopup.type]:value
-      }],
+      data: [
+        {
+          counter_uuid: itemPopup.item.counter_uuid,
+          [itemPopup.type]: value,
+        },
+      ],
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.success) {
-  
       onSave();
     }
   };
@@ -623,176 +691,207 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
                 </thead>
 
                 <tbody>
-                  {itemPopup?.type !== "company_discount" ?itemsData
-                    ?.filter((a) => a.item_uuid)
-                    .filter(
-                      (a) =>
-                        !filterTitle ||
-                        a.item_title
-                          .toLocaleLowerCase()
-                          .includes(filterTitle.toLocaleLowerCase())
-                    )
-                    .filter(
-                      (a) =>
-                        !filterCompany ||
-                        a?.company_title
-                          .toLocaleLowerCase()
-                          .includes(filterCompany.toLocaleLowerCase())
-                    )
-                    .filter(
-                      (a) =>
-                        !filterCategory ||
-                        a?.category_title
-                          .toLocaleLowerCase()
-                          .includes(filterCategory.toLocaleLowerCase())
-                    )
-                    .map((item, index) => {
-                      return (
-                        <tr key={item.item_uuid}>
-                          <td>{item.item_title}</td>
-                          <td>{item.company_title}</td>
-                          <td>{item.category_title}</td>
-                          <td>
-                            <button
-                              type="button"
-                              className="noBgActionButton"
-                              style={{
-                                backgroundColor: value.filter(
-                                  (a) => a.item_uuid === item.item_uuid
-                                )?.length
-                                  ? "red"
-                                  : "var(--mainColor)",
-                                width: "150px",
-                                fontSize: "large",
-                              }}
-                              onClick={(event) =>
-                                setValue((prev) =>
-                                  value.filter(
+                  {itemPopup?.type !== "company_discount"
+                    ? itemsData
+                        ?.filter((a) => a.item_uuid)
+                        .filter(
+                          (a) =>
+                            !filterTitle ||
+                            a.item_title
+                              .toLocaleLowerCase()
+                              .includes(filterTitle.toLocaleLowerCase())
+                        )
+                        .filter(
+                          (a) =>
+                            !filterCompany ||
+                            a?.company_title
+                              .toLocaleLowerCase()
+                              .includes(filterCompany.toLocaleLowerCase())
+                        )
+                        .filter(
+                          (a) =>
+                            !filterCategory ||
+                            a?.category_title
+                              .toLocaleLowerCase()
+                              .includes(filterCategory.toLocaleLowerCase())
+                        )
+                        .map((item, index) => {
+                          return (
+                            <tr key={item.item_uuid}>
+                              <td>{item.item_title}</td>
+                              <td>{item.company_title}</td>
+                              <td>{item.category_title}</td>
+                              <td>
+                                <button
+                                  type="button"
+                                  className="noBgActionButton"
+                                  style={{
+                                    backgroundColor: value.filter(
+                                      (a) => a.item_uuid === item.item_uuid
+                                    )?.length
+                                      ? "red"
+                                      : "var(--mainColor)",
+                                    width: "150px",
+                                    fontSize: "large",
+                                  }}
+                                  onClick={(event) =>
+                                    setValue((prev) =>
+                                      value.filter(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      )?.length
+                                        ? value.filter(
+                                            (a) =>
+                                              a.item_uuid !== item.item_uuid
+                                          )
+                                        : prev.length
+                                        ? [
+                                            ...prev,
+                                            { item_uuid: item.item_uuid },
+                                          ]
+                                        : [{ item_uuid: item.item_uuid }]
+                                    )
+                                  }
+                                >
+                                  {value.filter(
                                     (a) => a.item_uuid === item.item_uuid
                                   )?.length
-                                    ? value.filter(
-                                        (a) => a.item_uuid !== item.item_uuid
-                                      )
-                                    : prev.length
-                                    ? [...prev, { item_uuid: item.item_uuid }]
-                                    : [{ item_uuid: item.item_uuid }]
-                                )
-                              }
-                            >
+                                    ? "Remove"
+                                    : "Add"}
+                                </button>
+                              </td>
                               {value.filter(
                                 (a) => a.item_uuid === item.item_uuid
-                              )?.length
-                                ? "Remove"
-                                : "Add"}
-                            </button>
-                          </td>
-                          {value.filter((a) => a.item_uuid === item.item_uuid)
-                            ?.length ? (
-                            <td>
-                              <input
-                                type="number"
-                                onWheel={(e) => e.target.blur()}
-                                style={{ width: "100px" }}
-                                onChange={(e) =>
-                                  setValue((prev) =>
-                                    prev.map((a) =>
-                                      a.item_uuid === item.item_uuid
-                                        ? { ...a, [itemPopup?.type==="item_special_price"?"price":"discount"]: e.target.value }
-                                        : a
+                              )?.length ? (
+                                <td>
+                                  <input
+                                    type="number"
+                                    onWheel={(e) => e.target.blur()}
+                                    style={{ width: "100px" }}
+                                    onChange={(e) =>
+                                      setValue((prev) =>
+                                        prev.map((a) =>
+                                          a.item_uuid === item.item_uuid
+                                            ? {
+                                                ...a,
+                                                [itemPopup?.type ===
+                                                "item_special_price"
+                                                  ? "price"
+                                                  : "discount"]: e.target.value,
+                                              }
+                                            : a
+                                        )
+                                      )
+                                    }
+                                    value={
+                                      value.find(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      )[
+                                        itemPopup?.type === "item_special_price"
+                                          ? "price"
+                                          : "discount"
+                                      ]
+                                    }
+                                    placeholder={
+                                      itemPopup?.type === "item_special_price"
+                                        ? "price..."
+                                        : "discount..."
+                                    }
+                                    className="searchInput"
+                                  />
+                                </td>
+                              ) : (
+                                <td />
+                              )}
+                            </tr>
+                          );
+                        })
+                    : companies
+                        .filter(
+                          (a) =>
+                            !filterCompany ||
+                            a?.company_title
+                              .toLocaleLowerCase()
+                              .includes(filterCompany.toLocaleLowerCase())
+                        )
+                        .map((item, index) => {
+                          return (
+                            <tr key={item.item_uuid}>
+                              <td>{item.company_title}</td>
+
+                              <td>
+                                <button
+                                  type="button"
+                                  className="noBgActionButton"
+                                  style={{
+                                    backgroundColor: value.filter(
+                                      (a) =>
+                                        a.company_uuid === item.company_uuid
+                                    )?.length
+                                      ? "red"
+                                      : "var(--mainColor)",
+                                    width: "150px",
+                                    fontSize: "large",
+                                  }}
+                                  onClick={(event) =>
+                                    setValue((prev) =>
+                                      value.filter(
+                                        (a) =>
+                                          a.company_uuid === item.company_uuid
+                                      )?.length
+                                        ? value.filter(
+                                            (a) =>
+                                              a.company_uuid !==
+                                              item.company_uuid
+                                          )
+                                        : prev.length
+                                        ? [
+                                            ...prev,
+                                            { company_uuid: item.company_uuid },
+                                          ]
+                                        : [{ company_uuid: item.company_uuid }]
                                     )
-                                  )
-                                }
-                                value={
-                                  value.find(
-                                    (a) => a.item_uuid === item.item_uuid
-                                  )[itemPopup?.type==="item_special_price"?"price":"discount"]
-                                }
-                                placeholder={itemPopup?.type==="item_special_price"?"price...":"discount..."}
-                                className="searchInput"
-                              />
-                            </td>
-                          ) : (
-                            <td />
-                          )}
-                        </tr>
-                      );
-                    }):companies.filter(
-                      (a) =>
-                        !filterCompany ||
-                        a?.company_title
-                          .toLocaleLowerCase()
-                          .includes(filterCompany.toLocaleLowerCase())
-                    ).map((item, index) => {
-                      return (
-                        <tr key={item.item_uuid}>
-                       
-                          <td>{item.company_title}</td>
-                      
-                          <td>
-                            <button
-                              type="button"
-                              className="noBgActionButton"
-                              style={{
-                                backgroundColor: value.filter(
-                                  (a) => a.company_uuid === item.company_uuid
-                                )?.length
-                                  ? "red"
-                                  : "var(--mainColor)",
-                                width: "150px",
-                                fontSize: "large",
-                              }}
-                              onClick={(event) =>
-                                setValue((prev) =>
-                                  value.filter(
+                                  }
+                                >
+                                  {value.filter(
                                     (a) => a.company_uuid === item.company_uuid
                                   )?.length
-                                    ? value.filter(
-                                        (a) => a.company_uuid !== item.company_uuid
-                                      )
-                                    : prev.length
-                                    ? [...prev, { company_uuid: item.company_uuid }]
-                                    : [{ company_uuid: item.company_uuid }]
-                                )
-                              }
-                            >
+                                    ? "Remove"
+                                    : "Add"}
+                                </button>
+                              </td>
                               {value.filter(
                                 (a) => a.company_uuid === item.company_uuid
-                              )?.length
-                                ? "Remove"
-                                : "Add"}
-                            </button>
-                          </td>
-                          {value.filter((a) => a.company_uuid === item.company_uuid)
-                            ?.length ? (
-                            <td>
-                              <input
-                                type="number"
-                                onWheel={(e) => e.target.blur()}
-                                style={{ width: "100px" }}
-                                onChange={(e) =>
-                                  setValue((prev) =>
-                                    prev.map((a) =>
-                                      a.company_uuid === item.company_uuid
-                                        ? { ...a, discount: e.target.value }
-                                        : a
-                                    )
-                                  )
-                                }
-                                value={
-                                  value.find(
-                                    (a) => a.company_uuid === item.company_uuid
-                                  )?.discount
-                                }
-                                placeholder="Discount..."
-                                className="searchInput"
-                              />
-                            </td>
-                          ) : (
-                            <td />
-                          )}
-                        </tr>
-                      );
-                    })}
+                              )?.length ? (
+                                <td>
+                                  <input
+                                    type="number"
+                                    onWheel={(e) => e.target.blur()}
+                                    style={{ width: "100px" }}
+                                    onChange={(e) =>
+                                      setValue((prev) =>
+                                        prev.map((a) =>
+                                          a.company_uuid === item.company_uuid
+                                            ? { ...a, discount: e.target.value }
+                                            : a
+                                        )
+                                      )
+                                    }
+                                    value={
+                                      value.find(
+                                        (a) =>
+                                          a.company_uuid === item.company_uuid
+                                      )?.discount
+                                    }
+                                    placeholder="Discount..."
+                                    className="searchInput"
+                                  />
+                                </td>
+                              ) : (
+                                <td />
+                              )}
+                            </tr>
+                          );
+                        })}
                 </tbody>
               </table>
             </div>
