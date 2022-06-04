@@ -129,14 +129,7 @@ const ProcessingOrders = () => {
             audiosRef.current[i].setAttribute("played", "true");
             navigator.mediaSession.playbackState = "paused";
             setItemChanged((prev) =>
-              prev.filter((a) => a.item_uuid === audiosRef.current[i].item_uuid)
-                .length
-                ? [
-                    ...prev.filter(
-                      (a) => !(a.item_uuid === audiosRef.current[i].item_uuid)
-                    ),
-                  ]
-                : [
+             [
                     ...prev,
                     selectedOrder.item_details.find(
                       (a) => a.item_uuid === audiosRef.current[i].item_uuid
@@ -845,18 +838,7 @@ const ProcessingOrders = () => {
                             }}
                             onClick={() => {
                               setItemChanged((prev) =>+item.status!==1?
-                              prev.filter(
-                                (a) => a.item_uuid === item.item_uuid
-                              ).length
-                                ? [
-                                    ...prev.filter(
-                                      (a) =>
-                                        !(
-                                          a.item_uuid === item.item_uuid
-                                        )
-                                    ),
-                                  ]
-                                : [
+                              [
                                     ...prev,
                                     selectedOrder.item_details.find(
                                       (a) =>
