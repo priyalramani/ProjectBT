@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
-
+let date=new Date()
 const UserActivity = () => {
   const [searchData, setSearchData] = useState({
     startDate: "",
@@ -84,6 +84,10 @@ const UserActivity = () => {
                   startDate: e.target.value,
                 }))
               }
+              max={"yy-mm-dd"
+              .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
+              .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))
+              .replace("dd", ("00" + date?.getDate().toString()).slice(-2))}
               value={searchData.startDate}
               placeholder="Search Counter Title..."
               className="searchInput"
@@ -93,6 +97,10 @@ const UserActivity = () => {
               onChange={(e) =>
                 setSearchData((prev) => ({ ...prev, endDate: e.target.value }))
               }
+              max={"yy-mm-dd"
+              .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
+              .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))
+              .replace("dd", ("00" + date?.getDate().toString()).slice(-2))}
               value={searchData.endDate}
               placeholder="Search Route Title..."
               className="searchInput"
@@ -167,6 +175,7 @@ function Table({ itemsDetails }) {
           <th>S.N</th>
           <th colSpan={3}>Time Stamp</th>
           <th colSpan={2}>Activity</th>
+          <th colSpan={2}>Role</th>
           <th colSpan={2}>Narration</th>
           <th colSpan={2}>Duration</th>
           <th colSpan={2}>Range</th>
@@ -185,6 +194,7 @@ function Table({ itemsDetails }) {
               <td>{i + 1}</td>
               <td colSpan={3}>{(new Date(item.timestamp)).toDateString() } - {formatAMPM(new Date(item.timestamp))}</td>
               <td colSpan={2}>{item.activity || ""}</td>
+              <td colSpan={2}>{item.role || ""}</td>
               <td colSpan={2}>{item.narration || ""}</td>
               <td colSpan={2}>{i!==0?format(+item.timestamp-array[i-1].timestamp) : ""}</td>
               <td colSpan={2}>{item.range || ""}</td>
