@@ -142,6 +142,7 @@ function Table({ itemsDetails }) {
           <th> %</th>
           <th> Amt</th>
           <th colSpan={2}>Auto Add</th>
+          <th> %</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -159,6 +160,7 @@ function Table({ itemsDetails }) {
               <td>{item.processing_canceled_percentage || 0}</td>
               <td>{item.processing_canceled_amt || 0}</td>
               <td colSpan={2}>{item.auto_added || ""}</td>
+              <td >{item.auto_added_percentage || ""}</td>
             </tr>
           ))}
       </tbody>
