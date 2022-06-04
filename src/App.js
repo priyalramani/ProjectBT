@@ -28,6 +28,7 @@ import UserActivity from "./pages/Reports/UserActivity";
 import UPITransection from "./pages/Reports/UPITransection";
 import CompleteOrder from "./pages/Reports/CompleteOrder";
 import ItemDetails from "./pages/Reports/ItemDetails";
+import CompletedTrips from "./pages/Reports/CompletedTrips";
 
 const id = "240522";
 function App() {
@@ -63,6 +64,7 @@ function App() {
                   <Route path="/admin/upiTransactionReport" element={<UPITransection />} />
                   <Route path="/admin/completeOrderReport" element={<CompleteOrder />} />
                   <Route path="/admin/OrderItemReport" element={<ItemDetails />} />
+                  <Route path="/admin/CompletedTripsReport" element={<CompletedTrips />} />
                   <Route path="*" element={<Navigate replace to={"/admin"} />} />
                 </>
               ) : (
