@@ -330,7 +330,7 @@ function NewUserForm({
             payment_modes: paymentModes.filter(
               (a) =>
                 a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" ||
-                a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002"
+                a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
             ).map(a=>a.mode_uuid),
           });
         },
@@ -493,7 +493,7 @@ console.log(data)
                 </div>
                 <div className="row">
                   <label className="selectLabel" style={{ width: "50%" }}>
-                    Mobile
+                    Payment Modes
                     <select
                       className="numberInput"
                       style={{ width: "200px", height: "100px" }}
