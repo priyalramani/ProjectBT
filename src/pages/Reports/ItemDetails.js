@@ -135,6 +135,7 @@ function Table({ itemsDetails }) {
           <th>S.N</th>
           <th colSpan={3}>Item Name</th>
           <th colSpan={2}>Sales</th>
+          <th >Amt</th>
           <th colSpan={2}>Delivery Return</th>
           <th> %</th>
           <th>Amt</th>
@@ -153,6 +154,7 @@ function Table({ itemsDetails }) {
               <td>{i + 1}</td>
               <td colSpan={3}>{item.item_title}</td>
               <td colSpan={2}>{item.sales || ""}</td>
+              <td >{item.sales_amt || ""}</td>
               <td colSpan={2}>{item.deliver_return || ""}</td>
               <td>{item.deliver_return_percentage || 0}</td>
               <td>{item.deliver_return_amt || 0}</td>
