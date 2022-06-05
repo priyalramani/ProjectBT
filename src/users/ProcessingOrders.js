@@ -6,7 +6,8 @@ import { openDB } from "idb";
 import { useSpeechSynthesis } from "react-speech-kit";
 import { Billing } from "../functions";
 import { AiOutlineArrowLeft } from "react-icons/ai";
-
+import { IoArrowBackOutline } from "react-icons/io5";
+import { color } from "@mui/system";
 let intervalId = 0;
 const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
@@ -589,9 +590,10 @@ const ProcessingOrders = () => {
   console.log(BarcodeMessage);
   return (
     <div>
-      <nav className="user_nav" style={{ top: "0" }}>
+      <nav className="user_nav nav_styling" style={{ top: "0" }}>
         <div className="user_menubar">
-          <AiOutlineArrowLeft
+          <IoArrowBackOutline
+            className="user_Back_icon"
             onClick={() => {
               if (selectedOrder) {
                 setSelectedOrder(false);
@@ -604,16 +606,70 @@ const ProcessingOrders = () => {
             }}
           />
         </div>
+
+        <h1 style={{ width: "100%", textAlign: "center" }}>
+          {selectedOrder ? selectedOrder.counter_title : "Trip Orders"}
+        </h1>
+        {selectedOrder&&!(
+                Location.pathname.includes("checking") ||
+                Location.pathname.includes("delivery")
+              ) ? (
+                <>
+                  <input
+                    className="searchInput"
+                    style={{
+                      
+                      border: "none",
+                      borderBottom: "2px solid #fff",
+                      borderRadius: "0px",
+                      width: "50px",
+                      padding: "0 5px",
+                      backgroundColor:"transparent",
+                      color:"#fff",
+                      marginRight:"10px"
+                    }}
+                    value={playCount}
+                    onChange={(e) => setPlayCount(e.target.value)}
+                  />
+                  <select
+                    className="audioPlayerSpeed"
+                    style={{
+                      
+                      border: "none",
+                      borderBottom: "2px solid #fff",
+                      borderRadius: "0px",
+                      width: "75px",
+                      padding: "0 5px",
+                      backgroundColor:"transparent",
+                      color:"#fff"
+                    }}
+                    defaultValue={playerSpeed}
+                    onChange={(e) => {
+                      console.log(e.target.value);
+                      setPlayerSpeed(e.target.value);
+                      audiosRef.current.forEach(
+                        (i) => (i.playbackRate = +e.target.value)
+                      );
+                    }}
+                  >
+                    <option value="1">1x</option>
+                    <option value="1.25">1.25x</option>
+                    <option value="1.50">1.50x</option>
+                  </select>
+                </>
+              ) : (
+                ""
+              )}
       </nav>
+
       <div
         className="item-sales-container orders-report-container"
-        style={{ width: "100%", left: "0", top: "50px", textAlign: "center" }}
+        style={{ width: "100vw", left: "0", top: "50px", textAlign: "center" }}
       >
         {selectedOrder ? (
           <>
-            <h1>{selectedOrder.counter_title}</h1>
-            <div className="flex" style={{ justifyContent: "left" }}>
-              <h2 style={{ width: "40vw", textAlign: "start" }}>
+            <div className="flex" style={{ justifyContent: "space-between",margin:"10px 0" }}>
+              <h2 style={{ width: "20vw", textAlign: "start" }}>
                 {selectedOrder.invoice_number}
               </h2>
               {Location.pathname.includes("checking") ? (
@@ -644,9 +700,7 @@ const ProcessingOrders = () => {
                 className="item-sales-search"
                 style={{
                   width: "max-content",
-                  position: "fixed",
-                  top: "50px",
-                  right: 0,
+                  
                 }}
                 onClick={() => {
                   Location.pathname.includes("checking")
@@ -658,55 +712,7 @@ const ProcessingOrders = () => {
               >
                 Save
               </button>
-              {!(
-                Location.pathname.includes("checking") ||
-                Location.pathname.includes("delivery")
-              ) ? (
-                <>
-                  <input
-                    className="searchInput"
-                    style={{
-                      position: "fixed",
-                      top: "100px",
-                      right: "80px",
-                      border: "none",
-                      borderBottom: "2px solid black",
-                      borderRadius: "0px",
-                      width: "50px",
-                      padding: "0 5px",
-                    }}
-                    value={playCount}
-                    onChange={(e) => setPlayCount(e.target.value)}
-                  />
-                  <select
-                    className="audioPlayerSpeed"
-                    style={{
-                      position: "fixed",
-                      top: "100px",
-                      right: "0px",
-                      border: "none",
-                      borderBottom: "2px solid black",
-                      borderRadius: "0px",
-                      width: "75px",
-                      padding: "0 5px",
-                    }}
-                    defaultValue={playerSpeed}
-                    onChange={(e) => {
-                      console.log(e.target.value);
-                      setPlayerSpeed(e.target.value);
-                      audiosRef.current.forEach(
-                        (i) => (i.playbackRate = +e.target.value)
-                      );
-                    }}
-                  >
-                    <option value="1">1x</option>
-                    <option value="1.25">1.25x</option>
-                    <option value="1.50">1.50x</option>
-                  </select>
-                </>
-              ) : (
-                ""
-              )}
+              
             </div>
           </>
         ) : (
@@ -1033,7 +1039,7 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
             width: "fit-content",
           }}
         >
-          <div style={{ overflowY: "scroll" }}>
+          <div style={{ overflowY: "scroll",width:"100%" }}>
             {BarcodeMessage?.filter((a) => +a.case === 1 && a.barcodeQty)
               .length ? (
               <div
@@ -1308,7 +1314,7 @@ function HoldPopup({ onSave, orders, itemsData }) {
             width: "fit-content",
           }}
         >
-          <div style={{ overflowY: "scroll" }}>
+          <div style={{ overflowY: "scroll",width:"100%" }}>
             {items.length ? (
               <div
                 className="flex"

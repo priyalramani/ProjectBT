@@ -1,4 +1,5 @@
 import { AiOutlineArrowLeft, AiOutlineSearch } from "react-icons/ai";
+import { IoArrowBackOutline } from "react-icons/io5";
 import { useState, useEffect } from "react";
 import { openDB } from "idb";
 import { useNavigate, useParams } from "react-router-dom";
@@ -78,7 +79,7 @@ const SelectedCounterOrder = () => {
         unit_price: a.price,
         gst_percentage: a.item_gst,
         status: 0,
-        price:a.item_price
+        price: a.item_price,
       })),
       status: [
         {
@@ -155,33 +156,44 @@ const SelectedCounterOrder = () => {
   return (
     <>
       <div>
-        <nav className="user_nav">
+        <nav className="user_nav nav_styling">
           <div className="user_menubar">
-            <AiOutlineArrowLeft
+            <IoArrowBackOutline
+              className="user_Back_icon"
               onClick={() => (!cartPage ? Navigate(-1) : setCartPage(false))}
             />
           </div>
-          {cartPage ? <h1>Cart</h1> : ""}
-          <div className="user_searchbar flex">
-            <AiOutlineSearch className="user_search_icon" />
-            <input
-              type="text"
-              placeholder="search"
-              value={filterItemTitle}
-              onChange={(e) => setFilterItemTile(e.target.value)}
-            />
-          </div>
+          {cartPage ? (
+            <h1 style={{ width: "100%", textAlign: "center" }}>Cart</h1>
+          ) : (
+            ""
+          )}
           {!cartPage ? (
-            <div>
-              <select
-                value={filterCompany}
-                onChange={(e) => setFilterCompany(e.target.value)}
-              >
-                {companies?.map((a) => (
-                  <option value={a.company_uuid}>{a.company_title}</option>
-                ))}
-              </select>
-            </div>
+            <>
+              <div className="user_searchbar flex">
+                <AiOutlineSearch className="user_search_icon" />
+                <input
+                  style={{ width: "200px" }}
+                  className="searchInput"
+                  type="text"
+                  placeholder="search"
+                  value={filterItemTitle}
+                  onChange={(e) => setFilterItemTile(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <select
+                  className="searchInput selectInput"
+                  value={filterCompany}
+                  onChange={(e) => setFilterCompany(e.target.value)}
+                >
+                  {companies?.map((a) => (
+                    <option value={a.company_uuid}>{a.company_title}</option>
+                  ))}
+                </select>
+              </div>
+            </>
           ) : (
             ""
           )}
@@ -322,7 +334,6 @@ const SelectedCounterOrder = () => {
                                       </div>
                                       <div className="menuleft">
                                         <input
-                                          style={{ width: "50px" }}
                                           value={`${
                                             order?.items?.find(
                                               (a) =>
@@ -552,8 +563,14 @@ const SelectedCounterOrder = () => {
       ) : (
         <button
           type="button"
-          onClick={() => setCartPage(true)}
-          className="autoBtn"
+          onClick={() => {
+
+            setFilterItemTile("");
+            
+            setCartPage(true);
+          }}
+          className="cartBtn"
+          disabled={!order?.items?.length}
         >
           Cart
         </button>
