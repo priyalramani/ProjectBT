@@ -190,6 +190,7 @@ export default function AddOrder() {
         unit_price: a.price,
         gst_percentage: a.item_gst,
         status: 0,
+        price:a.item_price
       })),
       status: [
         {
