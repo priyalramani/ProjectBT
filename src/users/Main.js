@@ -76,7 +76,7 @@ const Main = () => {
       <button
         type="button"
         className="item-sales-search"
-        style={{ position: "fixed", bottom: "0", left: "0" }}
+        style={{ position: "fixed", bottom: "0", left: "50vw" }}
         onClick={() => setPopupForm(true)}
       >
         Logout

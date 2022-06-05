@@ -1,6 +1,12 @@
 import axios from "axios";
-import React, { useState, useEffect, useContext } from "react";
-
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+  useRef,
+} from "react";
+import { useReactToPrint } from "react-to-print";
 export default function ItemAvilibility({
   isItemAvilableOpen,
   setIsItemAvilableOpen,
@@ -10,6 +16,29 @@ export default function ItemAvilibility({
   const [users, setUsers] = useState([]);
   const [btn, setBtn] = useState(false);
   const [itemFilter, setItemFilter] = useState("");
+  const [statementTrip, setStatementTrip] = useState();
+  const componentRef = useRef(null);
+  const reactToPrintContent = useCallback(() => {
+    return componentRef.current;
+  }, [statementTrip]);
+
+  const handlePrint = useReactToPrint({
+    content: reactToPrintContent,
+    documentTitle: "Statement",
+    removeAfterPrint: true,
+  });
+
+  function formatAMPM(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var strTime =
+      date.toDateString() + " - " + hours + ":" + minutes + " " + ampm;
+    return strTime;
+  }
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -25,7 +54,7 @@ export default function ItemAvilibility({
   const getTripData = async () => {
     const response = await axios({
       method: "get",
-      url: "/trips/GetTripList",
+      url: "/trips/GetTripListSummary",
 
       headers: {
         "Content-Type": "application/json",
@@ -99,7 +128,7 @@ export default function ItemAvilibility({
                       <th
                         className="pa3 bb b--black-20 "
                         style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
-                        colSpan={2}
+                        colSpan={3}
                       >
                         Action
                       </th>
@@ -156,7 +185,7 @@ export default function ItemAvilibility({
                               }}
                               type="button"
                               onClick={() => {
-                                completeFunction({...item,status:0});
+                                completeFunction({ ...item, status: 0 });
                               }}
                               disabled={item?.orderLength}
                             >
@@ -171,7 +200,27 @@ export default function ItemAvilibility({
                               className="item-sales-search"
                               style={{
                                 display: "inline",
-                                
+                                cursor: item?.orderLength
+                                  ? "not-allowed"
+                                  : "pointer",
+                              }}
+                              type="button"
+                              onClick={() => {
+                                setStatementTrip(item);
+                                setTimeout(handlePrint, 2000);
+                              }}
+                            >
+                              Statement
+                            </button>
+                          </td>
+                          <td
+                            className="ph3 bb b--black-20 tc bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            <button
+                              className="item-sales-search"
+                              style={{
+                                display: "inline",
                               }}
                               type="button"
                               onClick={() => {
@@ -208,19 +257,56 @@ export default function ItemAvilibility({
       ) : (
         ""
       )}
+      <div
+        ref={componentRef}
+        style={{
+          width: "21cm",
+          height: "29.7cm",
+          margin: "30mm 45mm 30mm 45mm",
+          textAlign: "center",
+          position: "fixed",
+          top: -100,
+          left: -180,
+          zIndex: "-1000",
+          padding: "100px",
+        }}
+      >
+        <TripPage
+          ref={componentRef}
+          trip_title={statementTrip?.trip_title || ""}
+          users={
+            itemsData
+              .filter(
+                (a) =>
+                  (itemFilter !== ""
+                    ? a.trip_title
+                        .toLowerCase()
+                        .includes(itemFilter.toLowerCase())
+                    : true) && a.trip_title
+              )[0]
+              ?.users.map((a) => users.find((b) => b.user_uuid === a)) || []
+          }
+          trip_uuid={statementTrip?.trip_uuid || ""}
+          created_at={formatAMPM(new Date(statementTrip?.created_at || ""))}
+          amt={statementTrip?.amt || 0}
+          coin={statementTrip?.coin || 0}
+          formatAMPM={formatAMPM}
+          
+        />
+      </div>
     </>
   );
 }
-function NewUserForm({ onSave, popupInfo, users,completeFunction }) {
+function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
   const [data, setdata] = useState([]);
   useEffect(() => {
-    setdata(popupInfo?.users||[]);
+    setdata(popupInfo?.users || []);
   }, []);
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    completeFunction({...popupInfo,users:data})
-    onSave()
+    completeFunction({ ...popupInfo, users: data });
+    onSave();
   };
   const onChangeHandler = (e) => {
     let temp = data || [];
@@ -239,7 +325,7 @@ function NewUserForm({ onSave, popupInfo, users,completeFunction }) {
     setdata(temp);
   };
   return (
-    <div className="overlay" style={{zIndex:"999999"}}>
+    <div className="overlay" style={{ zIndex: "999999" }}>
       <div
         className="modal"
         style={{ height: "fit-content", width: "fit-content" }}
@@ -264,20 +350,24 @@ function NewUserForm({ onSave, popupInfo, users,completeFunction }) {
                     Counter Title
                     <select
                       className="numberInput"
-                      style={{ width: "200px",height:"200px" }}
+                      style={{ width: "200px", height: "200px" }}
                       value={data.map((a) => a)}
                       onChange={onChangeHandler}
                       multiple
                     >
                       {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
                       {users.map((occ) => (
-                        <option value={occ.user_uuid} style={{marginBottom:"5px",textAlign:"center"}}>{occ.user_title}</option>
+                        <option
+                          value={occ.user_uuid}
+                          style={{ marginBottom: "5px", textAlign: "center" }}
+                        >
+                          {occ.user_title}
+                        </option>
                       ))}
                     </select>
                   </label>
                 </div>
               </div>
-            
 
               <button type="submit" className="submit">
                 Save changes
@@ -292,3 +382,93 @@ function NewUserForm({ onSave, popupInfo, users,completeFunction }) {
     </div>
   );
 }
+
+const TripPage = ({
+  trip_title,
+  users,
+  trip_uuid,
+  created_at,
+  btn_click,
+  coin,
+  amt,
+  formatAMPM,
+}) => {
+  console.log(users);
+  if (!trip_title) return <div />;
+  return (
+    <>
+      <table style={{ width: "100%", margin: "10px" }}>
+        <tr style={{ width: "100%" }}>
+          <td
+            colSpan={2}
+            style={{
+              width: "100%",
+              fontSize: "xx-large",
+              fontWeight: "bolder",
+            }}
+          >
+            {trip_title}
+          </td>
+        </tr>
+        <tr>
+          <td colSpan={2} style={{ fontSize: "larger", fontWeight: "bold" }}>
+            {users.map((a, i) =>
+              i === 0 ? a?.user_title : ", " + a?.user_title
+            )}
+          </td>{" "}
+        </tr>
+        <tr>
+          <td style={{ fontSize: "small", textAlign: "left" }}></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td style={{ fontSize: "small", textAlign: "left" }}>
+            Trip UUID : {trip_uuid}
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td style={{ fontSize: "small", textAlign: "left" }}>
+            Trip Created At : {created_at}
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td style={{ fontSize: "small", textAlign: "left" }}>
+            Statement Printed At : {formatAMPM(new Date())}
+          </td>
+          <td></td>
+        </tr>
+      </table>
+      <table style={{ margin: "10px" }}>
+        <tr>
+          <td style={{ fontSize: "small", textAlign: "left" }}>
+            Total Cash : {amt}
+          </td>
+        </tr>
+        <tr>
+          <td style={{ fontSize: "small", textAlign: "left" }}>
+            Coin : {coin}
+          </td>
+        </tr>
+      </table>
+      <table style={{ margin: "10px", width: "100%" }}>
+        <tr>
+          <td style={{ fontSize: "small", textAlign: "left" }}>
+            Cheque Details
+          </td>
+        </tr>
+        <tr>
+          <th style={{ border: "1px solid #000" }}>Counter</th>
+          <th style={{ border: "1px solid #000" }}>Amount</th>
+          <th style={{ border: "1px solid #000" }}>Invoice Number</th>
+        </tr>
+        <tr>
+          <td style={{ border: "1px solid #000" }}>Counter</td>
+          <td style={{ border: "1px solid #000" }}>Amount</td>
+          <td style={{ border: "1px solid #000" }}>Invoice Number</td>
+        </tr>
+      </table>
+    </>
+  );
+};

@@ -334,6 +334,7 @@ const SelectedCounterOrder = () => {
                                                 a.item_uuid === item.item_uuid
                                             )?.p || 0
                                           }`}
+                                          className="boxPcsInput"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             setPopupForm(item);

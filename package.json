@@ -21,6 +21,7 @@
     "react-scripts": "5.0.0",
     "react-select": "^5.3.2",
     "react-speech-kit": "^3.0.1",
+    "react-to-print": "^2.14.7",
     "uuid": "^8.3.2",
     "web-vitals": "^2.1.4"
   },
