@@ -128,14 +128,12 @@ const ProcessingOrders = () => {
             audiosRef.current[i].pause();
             audiosRef.current[i].setAttribute("played", "true");
             navigator.mediaSession.playbackState = "paused";
-            setItemChanged((prev) =>
-             [
-                    ...prev,
-                    selectedOrder.item_details.find(
-                      (a) => a.item_uuid === audiosRef.current[i].item_uuid
-                    ),
-                  ]
-            );
+            setItemChanged((prev) => [
+              ...prev,
+              selectedOrder.item_details.find(
+                (a) => a.item_uuid === audiosRef.current[i].item_uuid
+              ),
+            ]);
             setSelectedOrder((prev) => ({
               ...prev,
               item_details: prev.item_details.map((a) =>
@@ -837,15 +835,16 @@ const ProcessingOrders = () => {
                               height: "50px",
                             }}
                             onClick={() => {
-                              setItemChanged((prev) =>+item.status!==1?
-                              [
-                                    ...prev,
-                                    selectedOrder.item_details.find(
-                                      (a) =>
-                                        a.item_uuid === item.item_uuid
-                                    ),
-                                  ]:prev
-                            );
+                              setItemChanged((prev) =>
+                                +item.status !== 1
+                                  ? [
+                                      ...prev,
+                                      selectedOrder.item_details.find(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      ),
+                                    ]
+                                  : prev
+                              );
                               setOneTimeState();
                               setSelectedOrder((prev) => ({
                                 ...prev,
@@ -902,7 +901,7 @@ const ProcessingOrders = () => {
                                   style={{ width: "max-content" }}
                                   onClick={() => {
                                     setOneTimeState();
-                                    
+
                                     setSelectedOrder((prev) => ({
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -923,7 +922,7 @@ const ProcessingOrders = () => {
                                   style={{ width: "max-content" }}
                                   onClick={() => {
                                     setOneTimeState();
-                                  
+
                                     setSelectedOrder((prev) => ({
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -999,6 +998,7 @@ const ProcessingOrders = () => {
           postOrderData={postOrderData}
           order_uuid={selectedOrder?.order_uuid}
           setSelectedOrder={setSelectedOrder}
+          order={selectedOrder}
         />
       ) : (
         ""
@@ -1386,6 +1386,7 @@ function DiliveryPopup({
   postOrderData,
   order_uuid,
   setSelectedOrder,
+  order,
 }) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
@@ -1419,7 +1420,11 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
-    setSelectedOrder((prev) => ({ ...prev, replacement: data.actual }));
+    setSelectedOrder((prev) => ({
+      ...prev,
+      replacement: data.actual,
+      replacement_mrp: data.mrp,
+    }));
     let obj = modes.find((a) => a.mode_title === "Cash");
     if (obj?.amt && obj?.coin === "") {
       setError("Enter Coins");
@@ -1430,6 +1435,8 @@ function DiliveryPopup({
       user_uuid: localStorage.getItem("user_uuid"),
       time: time.getTime(),
       order_uuid,
+      counter_uuid: order.counter_uuid,
+      trip_uuid: order.trip_uuid,
       modes,
     };
     const response = await axios({
@@ -1659,8 +1666,6 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                     {/* {popupInfo.conversion || 0} */}
                   </label>
                 </div>
-
-               
               </div>
 
               <div className="flex" style={{ justifyContent: "space-between" }}>
