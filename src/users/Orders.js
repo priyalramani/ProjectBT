@@ -1,7 +1,7 @@
 import { openDB } from "idb";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { AiOutlineArrowLeft } from "react-icons/ai";
+import { IoArrowBackOutline } from "react-icons/io5";
 import axios from "axios";
 const Orders = () => {
   const [counters, setCounters] = useState([]);
@@ -26,7 +26,7 @@ const Orders = () => {
     return () => setCounters([]);
   }, []);
   const postActivity = async (counter, route) => {
-    let time =new Date()
+    let time = new Date();
     let data = {
       user_uuid: localStorage.getItem("user_uuid"),
       role: "Order",
@@ -53,10 +53,15 @@ const Orders = () => {
       className="item-sales-container orders-report-container"
       style={{ overflow: "visible", left: "0" }}
     >
-      <nav className="user_nav" style={{ top: "0" }}>
+      <nav className="user_nav nav_styling" style={{ top: "0" }}>
         <div className="user_menubar">
-          <AiOutlineArrowLeft onClick={() => Navigate(-1)} />
+          <IoArrowBackOutline
+            className="user_Back_icon"
+            onClick={() => Navigate(-1)}
+          />
         </div>
+
+        <h1 style={{ width: "100%", textAlign: "center" }}>Counters</h1>
       </nav>
       <div
         style={{
@@ -66,6 +71,7 @@ const Orders = () => {
           alignItems: "center",
           flexDirection: "column",
           width: "100vw",
+          top: "100px",
         }}
       >
         <input
@@ -73,13 +79,16 @@ const Orders = () => {
           onChange={(e) => setCounterFilter(e.target.value)}
           value={counterFilter}
           placeholder="Search Counter Title..."
-          className="searchInput"
+          className="searchInput counterSearch"
+          style={{ width: "200px" }}
         />
         {counterFilter.length >= 3 ? (
           <div
             style={{
               overflowY: "scroll",
-              height: "45vh",
+              height: "40vh",
+              marginTop: "100px",
+              backgroundColor: "#fff",
             }}
           >
             <table className="table" style={{ width: "100vw" }}>
@@ -97,7 +106,7 @@ const Orders = () => {
                     return (
                       <tr
                         key={item.counter_uuid}
-                        style={{ width: "100%", cursor: "pointer" }}
+                        className="counterSearch"
                         onClick={() => {
                           postActivity(
                             item,

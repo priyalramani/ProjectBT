@@ -60,12 +60,10 @@ const Main = () => {
             key={i}
             to={pathname + rolesArray.find((a) => +a.type === +data)?.link}
             onClick={() => {
-              //   props.setPath(pathname);
-              //   outletDetailsDispatch({
-              //     type: Actions.SHOW_SIDE_MENU,
-              //     payload: false,
-              //   });
+             
             }}
+            className="linkDecoration"
+            style={{textDecoration:"none"}}
           >
             <div className="service">
               <span>{rolesArray.find((a) => +a.type === +data)?.name}</span>
@@ -75,8 +73,7 @@ const Main = () => {
       </div>
       <button
         type="button"
-        className="item-sales-search"
-        style={{ position: "fixed", bottom: "0", left: "50vw" }}
+        className="cartBtn"
         onClick={() => setPopupForm(true)}
       >
         Logout
