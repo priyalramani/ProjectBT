@@ -1452,12 +1452,12 @@ function DiliveryPopup({
           className="modal"
           style={{ height: "fit-content", width: "max-content" }}
         >
-          <h1>Payments</h1>
+          <h3>Payments</h3>
           <div
             className="content"
             style={{
               height: "fit-content",
-              padding: "20px",
+              padding: "10px",
               width: "fit-content",
             }}
           >
@@ -1473,7 +1473,7 @@ function DiliveryPopup({
                       <div style={{ width: "50px" }}>{item.mode_title}</div>
                       <label
                         className="selectLabel flex"
-                        style={{ width: "150px" }}
+                        style={{ width: "80px" }}
                       >
                         <input
                           type="number"
@@ -1483,7 +1483,7 @@ function DiliveryPopup({
                             modes.find((a) => a.mode_uuid === item.mode_uuid)
                               ?.amt
                           }
-                          style={{ width: "150px" }}
+                          style={{ width: "80px" }}
                           onChange={(e) =>
                             setModes((prev) =>
                               prev.map((a) =>
@@ -1503,7 +1503,7 @@ function DiliveryPopup({
                       {item.mode_title === "Cash" ? (
                         <label
                           className="selectLabel flex"
-                          style={{ width: "100px" }}
+                          style={{ width: "80px" }}
                         >
                           <input
                             type="number"
@@ -1514,7 +1514,7 @@ function DiliveryPopup({
                               modes.find((a) => a.mode_uuid === item.mode_uuid)
                                 ?.coin
                             }
-                            style={{ width: "100px" }}
+                            style={{ width: "70px" }}
                             onChange={(e) =>
                               setModes((prev) =>
                                 prev.map((a) =>
@@ -1596,7 +1596,7 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
         className="modal"
         style={{ height: "fit-content", width: "max-content" }}
       >
-        <h1>Payments</h1>
+        <h2>Replacements</h2>
         <div
           className="content"
           style={{
@@ -1615,14 +1615,14 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                   <div style={{ width: "50px" }}>MRP</div>
                   <label
                     className="selectLabel flex"
-                    style={{ width: "150px" }}
+                    style={{ width: "100px" }}
                   >
                     <input
                       type="number"
                       name="route_title"
                       className="numberInput"
                       value={data.mrp}
-                      style={{ width: "150px" }}
+                      style={{ width: "100px" }}
                       onChange={(e) =>
                         setData((prev) => ({
                           mrp: e.target.value,
@@ -1641,14 +1641,14 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                   <div style={{ width: "50px" }}>Actual</div>
                   <label
                     className="selectLabel flex"
-                    style={{ width: "150px" }}
+                    style={{ width: "100px" }}
                   >
                     <input
                       type="number"
                       name="route_title"
                       className="numberInput"
                       value={data.actual}
-                      style={{ width: "150px" }}
+                      style={{ width: "100px" }}
                       onChange={(e) =>
                         setData((prev) => ({
                           actual: e.target.value,
@@ -1660,18 +1660,7 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                   </label>
                 </div>
 
-                <div
-                  className="row"
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <button
-                    type="button"
-                    className="submit"
-                    style={{ color: "#fff", backgroundColor: "#7990dd" }}
-                  >
-                    Replacement
-                  </button>
-                </div>
+               
               </div>
 
               <div className="flex" style={{ justifyContent: "space-between" }}>
