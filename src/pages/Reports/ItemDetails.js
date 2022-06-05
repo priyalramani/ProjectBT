@@ -3,13 +3,39 @@ import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 const ItemDetails = () => {
+  const [counterGroup, setCounterGroup] = useState([]);
+  const [itemGroupFilter, setItemGroupFilter] = useState("");
+  const [itemGroup, setItemGroup] = useState([]);
   const [searchData, setSearchData] = useState({
     startDate: "",
     endDate: "",
-    company_uuid: "0",
+    company_uuid: "",
   });
   const [companies, setCompanies] = useState([]);
   const [items, setItems] = useState([]);
+  const getItemGroup = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/itemGroup/GetItemGroupList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setItemGroup(response.data.result);
+  };
+  const getCounterGroup = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/counterGroup/GetCounterGroupList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCounterGroup(response.data.result);
+  };
+
   const getCompanies = async () => {
     const response = await axios({
       method: "get",
@@ -49,6 +75,8 @@ const ItemDetails = () => {
       endDate: curTime,
     }));
     getCompanies();
+    getCounterGroup();
+    getItemGroup();
   }, []);
 
   return (
@@ -70,43 +98,89 @@ const ItemDetails = () => {
               width: "100%",
             }}
           >
-            <input
-              type="date"
-              onChange={(e) =>
-                setSearchData((prev) => ({
-                  ...prev,
-                  startDate: e.target.value,
-                }))
-              }
-              value={searchData.startDate}
-              placeholder="Search Counter Title..."
-              className="searchInput"
-            />
-            <input
-              type="date"
-              onChange={(e) =>
-                setSearchData((prev) => ({ ...prev, endDate: e.target.value }))
-              }
-              value={searchData.endDate}
-              placeholder="Search Route Title..."
-              className="searchInput"
-            />
-            <select
-              className="searchInput"
-              onChange={(e) =>
-                setSearchData((prev) => ({
-                  ...prev,
-                  startDate: e.target.value,
-                }))
-              }
-              value={searchData.startDate}
-            >
-              <option value="0">All</option>
-              {companies.map((a) => (
-                <option value={a.company_uuid}>{a.company_title}</option>
-              ))}
-            </select>
-
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">Start</label>
+              <input
+                type="date"
+                onChange={(e) =>
+                  setSearchData((prev) => ({
+                    ...prev,
+                    startDate: e.target.value,
+                  }))
+                }
+                value={searchData.startDate}
+                placeholder="Search Counter Title..."
+                className="searchInput"
+              />
+            </div>
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">End</label>
+              <input
+                type="date"
+                onChange={(e) =>
+                  setSearchData((prev) => ({
+                    ...prev,
+                    endDate: e.target.value,
+                  }))
+                }
+                value={searchData.endDate}
+                placeholder="Search Route Title..."
+                className="searchInput"
+              />
+            </div>
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">Company</label>
+              <select
+                
+                onChange={(e) =>
+                  setSearchData((prev) => ({
+                    ...prev,
+                    company_uuid: e.target.value,
+                  }))
+                }
+                value={searchData.company_uuid}
+              >
+                <option value="">All</option>
+                {companies.map((a) => (
+                  <option value={a.company_uuid}>{a.company_title}</option>
+                ))}
+              </select>
+            </div>
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">Counter Group</label>
+              <select
+               
+                onChange={(e) =>
+                  setSearchData((prev) => ({
+                    ...prev,
+                    counter_group_uuid: e.target.value,
+                  }))
+                }
+                value={searchData.counter_group_uuid}
+              >
+                <option value="">All</option>
+                {counterGroup.filter(a=>a.counter_group_uuid).map((a) => (
+                  <option value={a.counter_group_uuid}>
+                    {a.counter_group_title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">Item Group</label>
+              <select
+                
+                onChange={(e) => setItemGroupFilter((prev) => e.target.value)}
+                value={itemGroupFilter}
+              >
+                <option value="">All</option>
+                {itemGroup.filter(a=>a.item_group_uuid).map((a) => (
+                  <option value={a.item_group_uuid}>
+                    {a.item_group_title}
+                  </option>
+                ))}
+              </select>
+            </div>
             <button
               className="item-sales-search"
               onClick={() => getActivityData()}
@@ -116,7 +190,7 @@ const ItemDetails = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={items} />
+          <Table itemsDetails={items.filter(a=>!itemGroupFilter||a?.item_group_uuid?.filter(b=>b===itemGroupFilter)?.length)} />
         </div>
       </div>
     </>
@@ -135,16 +209,16 @@ function Table({ itemsDetails }) {
           <th>S.N</th>
           <th colSpan={3}>Item Name</th>
           <th colSpan={2}>Sales</th>
-          <th >Amt</th>
+          <th colSpan={2}>Amt</th>
           <th colSpan={2}>Delivery Return</th>
-          <th> %</th>
-          <th>Amt</th>
+          <th colSpan={2}> %</th>
+          <th colSpan={2}>Amt</th>
           <th colSpan={2}>Processing Canceled</th>
-          <th> %</th>
-          <th> Amt</th>
+          <th colSpan={2}> %</th>
+          <th colSpan={2}> Amt</th>
           <th colSpan={2}>Auto Add</th>
-          <th> %</th>
-          <th> Amt</th>
+          <th colSpan={2}> %</th>
+          <th colSpan={2}> Amt</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -155,16 +229,16 @@ function Table({ itemsDetails }) {
               <td>{i + 1}</td>
               <td colSpan={3}>{item.item_title}</td>
               <td colSpan={2}>{item.sales || ""}</td>
-              <td >{item.sales_amt || ""}</td>
+              <td colSpan={2}>{item.sales_amt || ""}</td>
               <td colSpan={2}>{item.deliver_return || ""}</td>
-              <td>{item.deliver_return_percentage || 0}</td>
-              <td>{item.deliver_return_amt || 0}</td>
+              <td colSpan={2}>{item.deliver_return_percentage || 0}</td>
+              <td colSpan={2}>{item.deliver_return_amt || 0}</td>
               <td colSpan={2}>{item.processing_canceled || ""}</td>
-              <td>{item.processing_canceled_percentage || 0}</td>
-              <td>{item.processing_canceled_amt || 0}</td>
+              <td colSpan={2}>{item.processing_canceled_percentage || 0}</td>
+              <td colSpan={2}>{item.processing_canceled_amt || 0}</td>
               <td colSpan={2}>{item.auto_added || ""}</td>
-              <td >{item.auto_added_percentage || 0}</td>
-              <td >{item.auto_added_amt || 0}</td>
+              <td colSpan={2}>{item.auto_added_percentage || 0}</td>
+              <td colSpan={2}>{item.auto_added_amt || 0}</td>
             </tr>
           ))}
       </tbody>
