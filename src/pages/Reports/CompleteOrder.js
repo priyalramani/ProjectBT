@@ -7,7 +7,7 @@ const CompleteOrder = () => {
     startDate: "",
     endDate: "",
   });
-
+  const [popupOrder, setPopupOrder] = useState(null);
   const [items, setItems] = useState([]);
 
   const getCompleteOrders = async () => {
@@ -91,16 +91,26 @@ const CompleteOrder = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={items} />
+          <Table itemsDetails={items} setPopupOrder={setPopupOrder}/>
         </div>
       </div>
+     {popupOrder ? (
+        <AddOrder
+          onSave={() => {
+            setPopupOrder(null);
+          }}
+          order={popupOrder}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default CompleteOrder;
 
-function Table({ itemsDetails }) {
+function Table({ itemsDetails,setPopupOrder }) {
   function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -132,7 +142,7 @@ function Table({ itemsDetails }) {
         {itemsDetails
           ?.sort((a, b) => a.order_date - b.order_date)
           ?.map((item, i, array) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
+            <tr key={Math.random()} style={{ height: "30px" }} onClick={() => setPopupOrder(item)}>
               <td>{i + 1}</td>
               <td colSpan={2}>
                 {new Date(item.order_date).toDateString()} -{" "}
@@ -150,5 +160,134 @@ function Table({ itemsDetails }) {
           ))}
       </tbody>
     </table>
+  );
+}
+function AddOrder({ order, onSave }) {
+  const [counters, setCounters] = useState([]);
+  const [itemsData, setItemsData] = useState([]);
+console.log(order)
+  const getItemsData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/items/GetItemList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setItemsData(response.data.result);
+  };
+
+  const getCounter = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/counters/GetCounterList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCounters(response.data.result);
+  };
+  useEffect(() => {
+    getCounter();
+    getItemsData();
+  }, []);
+
+  return (
+    <>
+      <div className="overlay">
+        <div className="modal" style={{ height: "fit-content", width: "80vw" }}>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "20px",
+              width: "fit-content",
+            }}
+          ></div>
+          <div className="inventory">
+            <div
+              className="accountGroup"
+              id="voucherForm"
+              action=""
+              style={{
+                height: "max-content",
+                maxHeight: "500px",
+                overflow: "scroll",
+              }}
+            >
+              <div className="inventory_header">
+                <h2>Order Details</h2>
+              </div>
+
+              <div className="topInputs">
+                <div className="inputGroup">
+                  <h2>
+                    {counters.find((a) => a.counter_uuid === order.counter_uuid)
+                      ?.counter_title || ""}
+                  </h2>
+                </div>
+              </div>
+
+              <div
+                className="items_table"
+                style={{ flex: "1", paddingLeft: "10px" }}
+              >
+                <table className="f6 w-100 center" cellSpacing="0">
+                  <thead className="lh-copy" style={{ position: "static" }}>
+                    <tr className="white">
+                      <th className="pa2 tl bb b--black-20 w-30">Item Name</th>
+                      <th className="pa2 tc bb b--black-20">Quantity(b)</th>
+                      <th className="pa2 tc bb b--black-20">Quantity(p)</th>
+                      <th className="pa2 tc bb b--black-20 ">Price</th>
+                    </tr>
+                  </thead>
+                  
+                    <tbody className="lh-copy">
+                      {order?.item_details?.map((item, i) => {
+                        return (
+                          <tr key={i} style={{height:"50px"}}>
+                            <td className="ph2 pv1 tl bb b--black-20 bg-white">
+                              <div className="inputGroup">
+                                {itemsData.find(
+                                  (a) => a.item_uuid === item.item_uuid
+                                )?.item_title || ""}
+                              </div>
+                            </td>
+                            <td
+                              className="ph2 pv1 tc bb b--black-20 bg-white"
+                              style={{ textAlign: "center" }}
+                            >
+                              {item.b || 0}
+                            </td>
+                            <td
+                              className="ph2 pv1 tc bb b--black-20 bg-white"
+                              style={{ textAlign: "center" }}
+                            >
+                              {item.p || 0}
+                            </td>
+                            <td
+                              className="ph2 pv1 tc bb b--black-20 bg-white"
+                              style={{ textAlign: "center" }}
+                            >
+                              Rs {item?.item_price || 0}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                 
+                </table>
+              </div>
+              <div className="bottomContent"></div>
+            </div>
+            <button onClick={onSave} className="closeButton">
+              x
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

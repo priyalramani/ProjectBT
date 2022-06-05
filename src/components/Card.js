@@ -6,6 +6,7 @@ const Card = ({
   status,
   dateTime,
   rounded,
+  onDoubleClick
 }) => {
 
  
@@ -35,7 +36,7 @@ function formatAMPM(date) {
 
   return (
     <>
-      <div>
+      <div onDoubleClick={onDoubleClick}>
         <button
           className={`card-focus 
             ${rounded ? "rounded" : ""} 
