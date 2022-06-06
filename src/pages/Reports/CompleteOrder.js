@@ -48,7 +48,7 @@ const CompleteOrder = () => {
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading">
-          <h2>User Activity </h2>
+          <h2>Completed Order</h2>
         </div>
         <div id="item-sales-top">
           <div
@@ -99,6 +99,7 @@ const CompleteOrder = () => {
         <OrderDetails
           onSave={() => {
             setPopupOrder(null);
+            getCompleteOrders()
           }}
           order={popupOrder}
           orderStatus="edit"

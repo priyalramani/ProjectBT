@@ -578,6 +578,7 @@ const MainAdmin = () => {
         <OrderDetails
           onSave={() => {
             setPopupOrder(null);
+            getRunningOrders();
           }}
           order={popupOrder}
         />

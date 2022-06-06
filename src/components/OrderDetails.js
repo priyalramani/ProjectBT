@@ -3,18 +3,50 @@ import axios from "axios";
 import Select from "react-select";
 import { v4 as uuid } from "uuid";
 import { Billing, AutoAdd } from "../functions";
+import {
+  ContentCopy,
+  ReplayCircleFilledOutlined,
+  Cancel,
+} from "@mui/icons-material";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
+  const [otherDetails, setOtherDetails] = useState(false);
   const [orderData, setOrderData] = useState();
   const [popup, setPopup] = useState(false);
   const [autoBills, setAutoBills] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
+  const [uuids, setUuid] = useState();
+  const [popupDetails, setPopupDetails] = useState();
+  const [copymsg, setCopymsg] = useState();
   const [focusedInputId, setFocusedInputId] = useState(0);
   const reactInputsRef = useRef({});
-  console.log(orderData);
+  const getAutoBill = async () => {
+    let data = [];
+    const response = await axios({
+      method: "get",
+      url: "/autoBill/autoBillItem",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) data = response;
+    const response1 = await axios({
+      method: "get",
+      url: "/autoBill/autoBillQty",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response1.data.success)
+      data = data ? response1.data.result : [...data, ...response1.data.result];
+    setAutoBills(data);
+    console.log(data);
+  };
   useEffect(() => {
     setOrderData({
       ...order,
@@ -52,6 +84,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   useEffect(() => {
     getCounter();
     getItemsData();
+    getAutoBill();
   }, []);
   console.log(
     +order.status.map((a) => +a.stage || 0).reduce((c, d) => Math.max(c, d))
@@ -117,17 +150,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       });
       data = { ...data, ...autoAdd, item_details: autoAdd.items };
     }
-    let time = new Date();
+
     let autoBilling = await Billing({
       counter,
       items: data.item_details,
-      others: {
-        stage: 1,
-        user_uuid: "240522",
-        time: time.getTime(),
-
-        type: "NEW",
-      },
+      others: {},
     });
     data = {
       ...data,
@@ -135,8 +162,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       item_details: autoBilling.items,
     };
     data = {
+      ...order,
       ...data,
-      order_uuid: uuid(),
+
       item_details: data.item_details.map((a) => ({
         ...a,
         unit_price: a.price,
@@ -144,14 +172,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         status: 0,
         price: a.item_price,
       })),
-      status: [
-        {
-          stage: data.others.stage,
-          time: data.others.time,
-          user_uuid: data.others.user_uuid,
-        },
-      ],
-      orderStatus
+
+      orderStatus,
     };
     console.log(data);
     const response = await axios({
@@ -163,14 +185,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       },
     });
     if (response.data.success) {
-      setEditOrder(false)
+      setEditOrder(false);
     }
   };
   let listItemIndexCount = 0;
   return (
     <>
       <div className="overlay">
-        <div className="modal" style={{ height: "fit-content", width: "80vw" }}>
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "80vw", padding: "50px" }}
+        >
           <div className="inventory">
             <div
               className="accountGroup"
@@ -203,6 +228,13 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   <button
                     style={{ width: "fit-Content" }}
                     className="item-sales-search"
+                    onClick={() => setOtherDetails((prev) => !prev)}
+                  >
+                    Other Details
+                  </button>
+                  <button
+                    style={{ width: "fit-Content" }}
+                    className="item-sales-search"
                     onClick={() => setEditOrder((prev) => !prev)}
                   >
                     Edit
@@ -214,6 +246,128 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 className="items_table"
                 style={{ flex: "1", paddingLeft: "10px" }}
               >
+                {otherDetails ? (
+                  <table>
+                    <thead
+                      className="bb b--green"
+                      style={{ position: "sticky", top: 0, zIndex: "100" }}
+                    >
+                      <>
+                        <tr>
+                          <th>Grand Total</th>
+                          <th>{orderData?.order_grandtotal || 0}</th>
+                          <th>Payment Total</th>
+                          <th>{orderData?.payment_total || 0}</th>
+                          <th style={{ width: "12%" }}>UUID</th>
+                          <th
+                            onClick={() => {
+                              setCopymsg(true);
+                              navigator.clipboard.writeText(
+                                orderData?.order_uuid
+                              );
+                              setTimeout(() => setCopymsg(false), 1000);
+                            }}
+                            style={{
+                              cursor: "pointer",
+                              position: "relative",
+                              width: "12%",
+                            }}
+                            onMouseOver={() => setUuid(true)}
+                            onMouseLeave={() => setUuid(false)}
+                          >
+                            {orderData?.order_uuid?.substring(0, 7) + "..."}
+                            {copymsg && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: "100%",
+                                }}
+                              >
+                                <div id="talkbubble">COPIED!</div>
+                              </div>
+                            )}
+                            {"   "}
+                            <ContentCopy
+                              style={
+                                uuids
+                                  ? {
+                                      fontSize: "12px",
+                                      transform: "scale(1.5)",
+                                    }
+                                  : { fontSize: "12px" }
+                              }
+                              onClick={() => {
+                                setCopymsg(true);
+                                navigator.clipboard.writeText(
+                                  orderData?.order_uuid
+                                );
+                                setTimeout(() => setCopymsg(false), 1000);
+                              }}
+                            />
+                            {uuids && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: "100%",
+                                }}
+                              >
+                                <div id="talkbubble">
+                                  {orderData?.order_uuid}
+                                </div>
+                              </div>
+                            )}
+                          </th>
+                        </tr>
+                        <tr>
+                          <th colSpan={2} style={{ textAlign: "center" }}>
+                            <button
+                              style={{ width: "fit-Content" }}
+                              className="item-sales-search"
+                              onClick={() =>
+                                setPopupDetails({
+                                  type: "Status",
+                                  data: orderData.status,
+                                })
+                              }
+                            >
+                              Status
+                            </button>
+                          </th>
+                          <th colSpan={2} style={{ textAlign: "center" }}>
+                            <button
+                              style={{ width: "fit-Content" }}
+                              className="item-sales-search"
+                              onClick={() =>
+                                setPopupDetails({
+                                  type: "Delivery Return",
+                                  data: orderData.delivery_return,
+                                })
+                              }
+                            >
+                              Delivery Return
+                            </button>
+                          </th>
+                          <th colSpan={2} style={{ textAlign: "center" }}>
+                            <button
+                              style={{ width: "fit-Content" }}
+                              className="item-sales-search"
+                              onClick={() =>
+                                setPopupDetails({
+                                  type: "Auto Added",
+                                  data: orderData.auto_Added,
+                                })
+                              }
+                            >
+                              Auto Added
+                            </button>
+                          </th>
+                        </tr>
+                      </>
+                    </thead>
+                  </table>
+                ) : (
+                  ""
+                )}
                 <table className="f6 w-100 center" cellSpacing="0">
                   <thead className="lh-copy" style={{ position: "static" }}>
                     <tr className="white">
@@ -458,6 +612,14 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       ) : (
         ""
       )}
+      {popupDetails ? (
+        <CheckingValues
+          onSave={() => setPopupDetails(false)}
+          popupDetails={popupDetails}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 }
@@ -511,6 +673,169 @@ function NewUserForm({ onSubmit, onClose }) {
           <button onClick={onClose} className="closeButton">
             x
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function CheckingValues({ onSave, popupDetails }) {
+  return (
+    <div className="overlay" style={{ zIndex: 999999999 }}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <h1>{popupDetails.type}</h1>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll", width: "100%" }}>
+            {popupDetails.type === "Status" ? (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                <table
+                  className="user-table"
+                  style={{
+                    width: "max-content",
+                    height: "fit-content",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                      <th colSpan={2}>
+                        <div className="t-head-element">Type</div>
+                      </th>
+                      <th>
+                        <div className="t-head-element">User</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tbody">
+                    {popupDetails.data?.map((item, i) => (
+                      <tr
+                        key={item?.item_uuid || Math.random()}
+                        style={{
+                          height: "30px",
+                          color: "#fff",
+                          backgroundColor: "#7990dd",
+                        }}
+                      >
+                        <td colSpan={2}>
+                          {+item.stage === 1
+                            ? "Order Placed By"
+                            : +item.stage === 2
+                            ? "Order Processed By"
+                            : +item.stage === 3
+                            ? "Order Checked By"
+                            : +item.stage === 4
+                            ? "Order Delivered By"
+                            : ""}
+                        </td>
+                        <td>{item?.user_uuid || ""}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : popupDetails.type === "Delivery Return" ? (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                <table
+                  className="user-table"
+                  style={{
+                    width: "max-content",
+                    height: "fit-content",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                      <th colSpan={2}>
+                        <div className="t-head-element">Item</div>
+                      </th>
+                      <th>
+                        <div className="t-head-element">Quantity</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tbody">
+                    {popupDetails.data?.map((item, i) => (
+                      <tr
+                        key={item?.item_uuid || Math.random()}
+                        style={{
+                          height: "30px",
+                          color: "#fff",
+                          backgroundColor: "#7990dd",
+                        }}
+                      >
+                        <td colSpan={2}>{item.item_uuid || ""}</td>
+                        <td>
+                          {item?.b || 0}:{item.p || 0}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : popupDetails.type === "Auto Added" ? (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                <table
+                  className="user-table"
+                  style={{
+                    width: "max-content",
+                    height: "fit-content",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                      <th colSpan={2}>
+                        <div className="t-head-element">Item</div>
+                      </th>
+                      <th>
+                        <div className="t-head-element">Quantity</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tbody">
+                    {popupDetails.data?.map((item, i) => (
+                      <tr
+                        key={item?.item_uuid || Math.random()}
+                        style={{
+                          height: "30px",
+                          color: "#fff",
+                          backgroundColor: "#7990dd",
+                        }}
+                      >
+                        <td colSpan={2}>{item.item_uuid || ""}</td>
+                        <td>
+                          {item?.b || 0}:{item.p || 0}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              ""
+            )}
+
+            <div className="flex" style={{ justifyContent: "space-between" }}>
+              <button type="button" className="submit" onClick={onSave}>
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
