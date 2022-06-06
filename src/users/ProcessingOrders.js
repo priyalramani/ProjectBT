@@ -1771,17 +1771,17 @@ function ConfirmPopup({ onSave, onClose }) {
             <form className="form">
               <div
                 className="flex"
-                style={{ justifyContent: "space-between", width: "100%" }}
+                style={{ justifyContent: "space-between", width: "100%",height:"max-content" }}
               >
                 <button
-                  type="button"
+                  type="submit"
                   style={{ backgroundColor: "red" }}
                   className="submit"
-                  onClick={onClose}
+                  onClick={onSave}
                 >
                   Discard
                 </button>
-                <button type="button" className="submit" onClick={onSave}>
+                <button type="button" className="submit" onClick={onClose} style={{height:"max-content",padding:"10px"}}>
                   Save Changes
                 </button>
               </div>

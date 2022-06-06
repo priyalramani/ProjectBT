@@ -4,11 +4,15 @@ import { useState, useEffect } from "react";
 import { openDB } from "idb";
 import { useNavigate, useParams } from "react-router-dom";
 import { AutoAdd, Billing } from "../functions";
+import { Link as ScrollLink } from "react-scroll";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
+
 const SelectedCounterOrder = () => {
   const [items, setItems] = useState([]);
   const [order, setOrder] = useState([]);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [clickedId, setClickedId] = useState(false);
   const [cartPage, setCartPage] = useState(false);
   const [counters, setCounters] = useState([]);
   const [counter, setCounter] = useState({});
@@ -152,7 +156,6 @@ const SelectedCounterOrder = () => {
       setOrderCreated(true);
     }
   }, [order]);
-  console.log(order);
   return (
     <>
       <div>
@@ -212,8 +215,9 @@ const SelectedCounterOrder = () => {
                             (a) => a.category_uuid === category.category_uuid
                           )?.length > 0 && (
                             <div
-                              id={category?.category_uuid}
+                              id={!cartPage ? category?.category_uuid : ""}
                               key={category?.category_uuid}
+                              name={category?.category_uuid}
                               className="categoryItemMap"
                             >
                               <h1 className="categoryHeadline">
@@ -367,7 +371,8 @@ const SelectedCounterOrder = () => {
                             (a) => a.category_uuid === category.category_uuid
                           )?.length > 0 && (
                             <div
-                              id={category?.category_uuid}
+                              id={cartPage ? category?.category_uuid : ""}
+                              name={category?.category_uuid}
                               key={category?.category_uuid}
                               className="categoryItemMap"
                             >
@@ -457,18 +462,10 @@ const SelectedCounterOrder = () => {
                                       </div>
                                       <div className="menuleft">
                                         <input
-                                          style={{ width: "50px" }}
-                                          value={`${
-                                            order?.items?.find(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            )?.b || 0
-                                          } : ${
-                                            order?.items?.find(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            )?.p || 0
+                                          value={`${item?.b || 0} : ${
+                                            item?.p || 0
                                           }`}
+                                          className="boxPcsInput"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             setPopupForm(item);
@@ -483,6 +480,77 @@ const SelectedCounterOrder = () => {
                       )}
               </div>
             </div>
+          </div>
+        </div>
+        <div
+          className="allcategoryList"
+          style={{
+            bottom: itemsCategory?.length > 0 ? "3.5rem" : "1rem",
+          }}
+        >
+          <div className={`menulist`}>
+            <div
+              className={`${isCategoryOpen ? "showCategory" : ""} categoryList`}
+            >
+              {itemsCategory?.map((category, i) => {
+                return (
+                  (cartPage
+                    ? order?.items?.filter(
+                        (a) => a.category_uuid === category.category_uuid
+                      )?.length > 0
+                    : items.filter(
+                        (a) => a.category_uuid === category.category_uuid
+                      )?.length > 0) && (
+                    <ScrollLink
+                      id={`${i}`}
+                      onClick={() => {
+                        setIsCategoryOpen(!isCategoryOpen);
+                        setClickedId(i?.toString());
+                      }}
+                      smooth={true}
+                      duration={1000}
+                      to={category?.category_uuid}
+                      className={`${
+                        clickedId === i?.toString() ? "activeMenuList" : ""
+                      } categorybtn`}
+                      key={i}
+                    >
+                      {
+                        itemsCategory?.find(
+                          (cat) =>
+                            cat?.category_uuid === category?.category_uuid
+                        )?.category_title
+                      }
+                      <span className="categoryLength">
+                        {cartPage
+                          ? order?.items?.filter(
+                              (a) => a.category_uuid === category.category_uuid
+                            )?.length
+                          : items.filter(
+                              (a) => a.category_uuid === category.category_uuid
+                            )?.length}
+                      </span>
+                    </ScrollLink>
+                  )
+                );
+              })}
+            </div>
+            {isCategoryOpen && <div id="black-bg" />}
+            {!isCategoryOpen ? (
+              <button
+                className="showMenuListBtn"
+                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+              >
+                Categories
+              </button>
+            ) : (
+              <button
+                className="showMenuListBtn"
+                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+              >
+                <i className="fas fa-times"></i> Close
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -560,20 +628,20 @@ const SelectedCounterOrder = () => {
             Auto
           </button>
         </>
-      ) : (
+      ) : order?.items?.length ? (
         <button
           type="button"
           onClick={() => {
-
             setFilterItemTile("");
-            
+
             setCartPage(true);
           }}
           className="cartBtn"
-          disabled={!order?.items?.length}
         >
           Cart
         </button>
+      ) : (
+        ""
       )}
     </>
   );
