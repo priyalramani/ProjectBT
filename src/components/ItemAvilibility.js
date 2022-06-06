@@ -200,9 +200,7 @@ export default function ItemAvilibility({
                               className="item-sales-search"
                               style={{
                                 display: "inline",
-                                cursor: item?.orderLength
-                                  ? "not-allowed"
-                                  : "pointer",
+                                cursor: "pointer",
                               }}
                               type="button"
                               onClick={() => {
