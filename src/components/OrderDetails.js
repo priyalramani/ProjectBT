@@ -4,7 +4,7 @@ import Select from "react-select";
 import { v4 as uuid } from "uuid";
 import { Billing, AutoAdd } from "../functions";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
-export function OrderDetails({ order, onSave }) {
+export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
@@ -151,6 +151,7 @@ export function OrderDetails({ order, onSave }) {
           user_uuid: data.others.user_uuid,
         },
       ],
+      orderStatus
     };
     console.log(data);
     const response = await axios({

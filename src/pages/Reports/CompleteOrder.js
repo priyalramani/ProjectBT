@@ -101,6 +101,7 @@ const CompleteOrder = () => {
             setPopupOrder(null);
           }}
           order={popupOrder}
+          orderStatus="edit"
         />
       ) : (
         ""
