@@ -293,11 +293,12 @@ export const Billing = async ({
     item = {
       ...item,
       charges_discount,
-      item_total: ((item.item_total || 0) * (item.qty || 1)).toFixed(2),
+      item_total: ((+item.item_total || 0) * (+item.qty || 1)).toFixed(2),
     };
     console.log(item);
     newPriceItems.push(item);
   }
+  console.log("newItemPrice",newPriceItems)
   let order_grandtotal =
     newPriceItems.length > 1
       ? newPriceItems.reduce(
