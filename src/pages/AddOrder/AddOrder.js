@@ -112,8 +112,9 @@ export default function AddOrder() {
       },
     });
     if (response1.data.success)
-      data = data ? response1 : [...data, ...response1];
+      data = data ? response1.data.result : [...data, ...response1.data.result];
     setAutoBills(data);
+    console.log(data)
   };
 
   const getItemsData = async () => {
