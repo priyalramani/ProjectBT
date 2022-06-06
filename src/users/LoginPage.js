@@ -80,6 +80,8 @@ const LoginPage = () => {
                           ? "item_uuid"
                           : property === "routes"
                             ? "route_uuid"
+                          : property === "payment_modes"
+                            ? "mode_uuid"
                             : ""
               ];
             console.log({ ...item, IDENTIFIER });

@@ -5,21 +5,24 @@ import { AiFillPlayCircle } from "react-icons/ai";
 import { openDB } from "idb";
 import { useSpeechSynthesis } from "react-speech-kit";
 import { Billing } from "../functions";
-import { AiOutlineArrowLeft } from "react-icons/ai";
+import { AiOutlineReload } from "react-icons/ai";
 import { IoArrowBackOutline } from "react-icons/io5";
-import { color } from "@mui/system";
+
 let intervalId = 0;
 const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
   const [itemChanged, setItemChanged] = useState([]);
   const [popupDelivery, setPopupDelivery] = useState(false);
+  const [confirmPopup, setConfirmPopup] = useState(false);
   const [popupBarcode, setPopupBarcode] = useState(false);
+  const [deliveryMessage, setDeliveryMessage] = useState(false);
   const [holdPopup, setHoldPopup] = useState(false);
   const params = useParams();
   const [popupForm, setPopupForm] = useState(false);
   const [orders, setOrders] = useState([]);
   const [items, setItems] = useState([]);
   const [companies, setCompanies] = useState([]);
+  const [paymentModes, setPaymentModes] = useState([]);
   const [counters, setCounters] = useState([]);
   const [itemCategories, setItemsCategory] = useState([]);
   const [playCount, setPlayCount] = useState(1);
@@ -62,6 +65,11 @@ const ProcessingOrders = () => {
     store = await db.transaction("counter", "readwrite").objectStore("counter");
     let countersData = await store.getAll();
     setCounters(countersData);
+    store = await db
+      .transaction("payment_modes", "readwrite")
+      .objectStore("payment_modes");
+    let PaymentData = await store.getAll();
+    setPaymentModes(PaymentData);
   };
 
   // const log = message => {
@@ -198,7 +206,21 @@ const ProcessingOrders = () => {
 
   useEffect(() => {
     getTripOrders();
+    getIndexedDbData();
   }, []);
+  useEffect(() => {
+    if (Location.pathname.includes("delivery") && selectedOrder) {
+      let data = paymentModes?.filter(
+        (a) =>
+          !counters
+            ?.find((a) => selectedOrder?.counter_uuid === a.counter_uuid)
+            ?.payment_modes?.filter((b) => b === a.mode_uuid)?.length
+      );
+      if (data.length) {
+        setDeliveryMessage(data);
+      }
+    }
+  }, [selectedOrder]);
 
   useEffect(() => {
     if (!selectedOrder || audiosRef.current?.[0]) return;
@@ -591,75 +613,93 @@ const ProcessingOrders = () => {
   return (
     <div>
       <nav className="user_nav nav_styling" style={{ top: "0" }}>
-        <div className="user_menubar">
+        <div
+          className="user_menubar flex"
+          style={{ width: "160px", justifyContent: "space-between" }}
+        >
           <IoArrowBackOutline
             className="user_Back_icon"
             onClick={() => {
               if (selectedOrder) {
-                setSelectedOrder(false);
-                clearInterval(intervalId);
-                audiosRef.current.forEach((audio) => audio.pause());
-                navigator.mediaSession.playbackState = "none";
-                audiosRef.current = null;
-                console.clear();
+                setConfirmPopup(true);
               } else Navigate(-1);
+            }}
+          />
+          <AiOutlineReload
+            className="user_Back_icon"
+            onClick={() => {
+              if (selectedOrder) {
+                setConfirmPopup(true);
+              } else getTripOrders();
             }}
           />
         </div>
 
-        <h1 style={{ width: "100%", textAlign: "center" }}>
+        <h1 style={{ width: "100%", textAlign: "left", marginLeft: "30px" }}>
           {selectedOrder ? selectedOrder.counter_title : "Trip Orders"}
         </h1>
-        {selectedOrder&&!(
-                Location.pathname.includes("checking") ||
-                Location.pathname.includes("delivery")
-              ) ? (
-                <>
-                  <input
-                    className="searchInput"
-                    style={{
-                      
-                      border: "none",
-                      borderBottom: "2px solid #fff",
-                      borderRadius: "0px",
-                      width: "50px",
-                      padding: "0 5px",
-                      backgroundColor:"transparent",
-                      color:"#fff",
-                      marginRight:"10px"
-                    }}
-                    value={playCount}
-                    onChange={(e) => setPlayCount(e.target.value)}
-                  />
-                  <select
-                    className="audioPlayerSpeed"
-                    style={{
-                      
-                      border: "none",
-                      borderBottom: "2px solid #fff",
-                      borderRadius: "0px",
-                      width: "75px",
-                      padding: "0 5px",
-                      backgroundColor:"transparent",
-                      color:"#fff"
-                    }}
-                    defaultValue={playerSpeed}
-                    onChange={(e) => {
-                      console.log(e.target.value);
-                      setPlayerSpeed(e.target.value);
-                      audiosRef.current.forEach(
-                        (i) => (i.playbackRate = +e.target.value)
-                      );
-                    }}
-                  >
-                    <option value="1">1x</option>
-                    <option value="1.25">1.25x</option>
-                    <option value="1.50">1.50x</option>
-                  </select>
-                </>
-              ) : (
-                ""
-              )}
+        {!selectedOrder ? (
+          <button
+            className="item-sales-search"
+            style={{
+              width: "max-content",
+            }}
+            onClick={() => setHoldPopup(true)}
+          >
+            Hold
+          </button>
+        ) : (
+          ""
+        )}
+        {selectedOrder &&
+        !(
+          Location.pathname.includes("checking") ||
+          Location.pathname.includes("delivery")
+        ) ? (
+          <>
+            <input
+              className="searchInput"
+              style={{
+                border: "none",
+                borderBottom: "2px solid #fff",
+                borderRadius: "0px",
+                width: "50px",
+                padding: "0 5px",
+                backgroundColor: "transparent",
+                color: "#fff",
+                marginRight: "10px",
+              }}
+              value={playCount}
+              onChange={(e) => setPlayCount(e.target.value)}
+            />
+            <select
+              className="audioPlayerSpeed"
+              style={{
+                border: "none",
+                borderBottom: "2px solid #fff",
+                borderRadius: "0px",
+                width: "75px",
+                padding: "0 5px",
+                backgroundColor: "transparent",
+                color: "#fff",
+              }}
+              defaultValue={playerSpeed}
+              onChange={(e) => {
+                console.log(e.target.value);
+                setPlayerSpeed(e.target.value);
+                audiosRef.current.forEach(
+                  (i) => (i.playbackRate = +e.target.value)
+                );
+              }}
+            >
+              <option value="1">1x</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.50">1.50x</option>
+            </select>
+          </>
+        ) : (
+          ""
+        )}
       </nav>
 
       <div
@@ -668,7 +708,10 @@ const ProcessingOrders = () => {
       >
         {selectedOrder ? (
           <>
-            <div className="flex" style={{ justifyContent: "space-between",margin:"10px 0" }}>
+            <div
+              className="flex"
+              style={{ justifyContent: "space-between", margin: "10px 0" }}
+            >
               <h2 style={{ width: "20vw", textAlign: "start" }}>
                 {selectedOrder.invoice_number}
               </h2>
@@ -700,7 +743,6 @@ const ProcessingOrders = () => {
                 className="item-sales-search"
                 style={{
                   width: "max-content",
-                  
                 }}
                 onClick={() => {
                   Location.pathname.includes("checking")
@@ -712,7 +754,6 @@ const ProcessingOrders = () => {
               >
                 Save
               </button>
-              
             </div>
           </>
         ) : (
@@ -728,22 +769,6 @@ const ProcessingOrders = () => {
             display: "flex",
           }}
         >
-          {!selectedOrder ? (
-            <button
-              className="item-sales-search"
-              style={{
-                width: "max-content",
-                position: "fixed",
-                top: "0",
-                right: "0",
-              }}
-              onClick={() => setHoldPopup(true)}
-            >
-              Hold
-            </button>
-          ) : (
-            ""
-          )}
           <table
             className="user-table"
             style={{
@@ -1018,6 +1043,33 @@ const ProcessingOrders = () => {
       ) : (
         ""
       )}
+      {confirmPopup ? (
+        <ConfirmPopup
+          onSave={() => {
+            setConfirmPopup(false);
+            setSelectedOrder(false);
+            clearInterval(intervalId);
+            audiosRef.current.forEach((audio) => audio.pause());
+            navigator.mediaSession.playbackState = "none";
+            audiosRef.current = null;
+            console.clear();
+            getTripOrders();
+          }}
+          onClose={() => setConfirmPopup(false)}
+        />
+      ) : (
+        ""
+      )}
+      {deliveryMessage ? (
+        <DeliveryMessagePopup
+          onSave={() => {
+            setDeliveryMessage(false);
+          }}
+          data={deliveryMessage}
+        />
+      ) : (
+        ""
+      )}
     </div>
   );
 };
@@ -1039,7 +1091,7 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
             width: "fit-content",
           }}
         >
-          <div style={{ overflowY: "scroll",width:"100%" }}>
+          <div style={{ overflowY: "scroll", width: "100%" }}>
             {BarcodeMessage?.filter((a) => +a.case === 1 && a.barcodeQty)
               .length ? (
               <div
@@ -1314,7 +1366,7 @@ function HoldPopup({ onSave, orders, itemsData }) {
             width: "fit-content",
           }}
         >
-          <div style={{ overflowY: "scroll",width:"100%" }}>
+          <div style={{ overflowY: "scroll", width: "100%" }}>
             {items.length ? (
               <div
                 className="flex"
@@ -1684,6 +1736,101 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                   Cancel
                 </button>
                 <button type="button" className="submit" onClick={onSave}>
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+function ConfirmPopup({ onSave, onClose }) {
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <h2>Are you sure?</h2>
+        <h2>Changes will be discarded</h2>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+          }}
+        >
+          <div style={{ overflowY: "scroll", width: "100%" }}>
+            <form className="form">
+              <div
+                className="flex"
+                style={{ justifyContent: "space-between", width: "100%" }}
+              >
+                <button
+                  type="button"
+                  style={{ backgroundColor: "red" }}
+                  className="submit"
+                  onClick={onClose}
+                >
+                  Cancel
+                </button>
+                <button type="button" className="submit" onClick={onSave}>
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+function DeliveryMessagePopup({ onSave, data }) {
+  const [disabled, setDisabled] = useState(true);
+  useEffect(() => {
+    setTimeout(() => setDisabled(false), 5000);
+  }, []);
+  console.log("counters", data);
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <h2>
+          {data.map((a, i) =>
+            i === 0
+              ? a.mode_title
+              : data.length === i + 1
+              ? " and " + a.mode_title
+              : ", " + a.mode_title
+          )}{" "}
+          not allowed
+        </h2>
+
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+          }}
+        >
+          <div style={{ overflowY: "scroll", width: "100%" }}>
+            <form className="form">
+              <div className="flex" style={{ width: "100%" }}>
+                <button
+                  disabled={disabled}
+                  type="button"
+                  style={
+                    disabled
+                      ? { opacity: "0.5", cursor: "not-allowed" }
+                      : { opacity: "1", cursor: "pointer" }
+                  }
+                  className="submit"
+                  onClick={onSave}
+                >
                   Save
                 </button>
               </div>

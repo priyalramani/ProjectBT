@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoArrowBackOutline } from "react-icons/io5";
+import { AiOutlineReload } from "react-icons/ai";
 const Processing = () => {
   const [tripData, setTripData] = useState([]);
   const Navigate = useNavigate();
@@ -28,14 +29,20 @@ const Processing = () => {
   return (
     <div className="servicePage">
       <nav className="user_nav nav_styling" style={{ top: "0" }}>
-        <div className="user_menubar">
+        <div className="user_menubar flex" style={{width:"160px",justifyContent:"space-between"}}>
           <IoArrowBackOutline
             className="user_Back_icon"
             onClick={() => Navigate(-1)}
           />
+          <AiOutlineReload
+            className="user_Back_icon"
+            onClick={() => {
+              getTripData()
+            }}
+          />
         </div>
 
-        <h1 style={{ width: "100%", textAlign: "center" }}>Trips</h1>
+        <h1 style={{ width: "80%", textAlign: "left",marginLeft:"40px" }}>Trips</h1>
       </nav>
       
       <div
