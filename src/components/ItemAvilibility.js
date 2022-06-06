@@ -291,7 +291,9 @@ export default function ItemAvilibility({
           amt={statementTrip?.amt || 0}
           coin={statementTrip?.coin || 0}
           formatAMPM={formatAMPM}
-          
+          cheque={statementTrip?.cheque}
+          replacement={statementTrip?.replacement}
+          sales_return={statementTrip?.sales_return}
         />
       </div>
     </>
@@ -388,12 +390,18 @@ const TripPage = ({
   users,
   trip_uuid,
   created_at,
-  btn_click,
+  cheque,
+  replacement,
+  sales_return,
   coin,
   amt,
   formatAMPM,
 }) => {
-  console.log(users);
+  console.log(
+    cheque,
+    replacement,
+    sales_return,
+    );
   if (!trip_title) return <div />;
   return (
     <>
@@ -452,7 +460,7 @@ const TripPage = ({
           </td>
         </tr>
       </table>
-      <table style={{ margin: "10px", width: "100%" }}>
+      {cheque.length?<table style={{ margin: "10px", width: "100%" }}>
         <tr>
           <td style={{ fontSize: "small", textAlign: "left" }}>
             Cheque Details
@@ -463,12 +471,72 @@ const TripPage = ({
           <th style={{ border: "1px solid #000" }}>Amount</th>
           <th style={{ border: "1px solid #000" }}>Invoice Number</th>
         </tr>
+        {cheque.map((item) => (
+          <tr>
+            <td style={{ border: "1px solid #000" }}>{item.counter}</td>
+            <td style={{ border: "1px solid #000" }}>{item.amt}</td>
+            <td style={{ border: "1px solid #000" }}>{item.invoice_number}</td>
+          </tr>
+        ))}
+      </table>:""}
+      {replacement.length?<table style={{ margin: "10px", width: "100%" }}>
         <tr>
-          <td style={{ border: "1px solid #000" }}>Counter</td>
-          <td style={{ border: "1px solid #000" }}>Amount</td>
-          <td style={{ border: "1px solid #000" }}>Invoice Number</td>
+          <td style={{ fontSize: "small", textAlign: "left" }}>
+            Counter Wise Replacements:
+          </td>
         </tr>
-      </table>
+        <tr>
+          <th style={{ border: "1px solid #000" }}>Counter</th>
+          <th style={{ border: "1px solid #000" }}>Replacement MRP</th>
+          <th style={{ border: "1px solid #000" }}>Replacement</th>
+          <th style={{ border: "1px solid #000" }}>Invoice Number</th>
+        </tr>
+        {replacement.map((item) => (
+          <tr>
+            <td style={{ border: "1px solid #000" }}>{item.counter_title}</td>
+            <td style={{ border: "1px solid #000" }}>{item.replacement}</td>
+            <td style={{ border: "1px solid #000" }}>{item.replacement_mrp}</td>
+            <td style={{ border: "1px solid #000" }}>{item.invoice_number}</td>
+          </tr>
+        ))}
+        <tr style={{ fontWeight: "bold" }}>
+          <td style={{ border: "1px solid #000" }}>Total</td>
+          <td style={{ border: "1px solid #000" }}>
+            {replacement.length > 1
+              ? replacement
+                  .map((a) => +a.replacement || 0)
+                  .reduce((a, b) => a + b)
+              : replacement[0].replacement}
+          </td>
+          <td style={{ border: "1px solid #000" }}>
+            {replacement.length > 1
+              ? replacement
+                  .map((a) => +a.replacement_mrp || 0)
+                  .reduce((a, b) => a + b)
+              : replacement[0].replacement_mrp}
+          </td>
+          <td style={{ border: "1px solid #000" }}></td>
+        </tr>
+      </table>:""}
+      {sales_return.length?<table style={{ margin: "10px", width: "100%" }}>
+        <tr>
+          <td style={{ fontSize: "small", textAlign: "left" }}>
+            Sales Return Items:
+          </td>
+        </tr>
+        <tr>
+          <th style={{ border: "1px solid #000" }}>Item</th>
+          <th style={{ border: "1px solid #000" }}>Quantity</th>
+        </tr>
+        {sales_return.map((item) => (
+          <tr>
+            <td style={{ border: "1px solid #000" }}>{item.item_title}</td>
+            <td style={{ border: "1px solid #000" }}>
+              {item.b}:{item.p}
+            </td>
+          </tr>
+        ))}
+      </table>:""}
     </>
   );
 };

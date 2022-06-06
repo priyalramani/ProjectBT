@@ -9,7 +9,8 @@ const Processing = () => {
   const Location = useLocation();
   const getTripData = async () => {
     const response = await axios({
-      method: "get",
+      method: "post",
+      data:{user_uuid:localStorage.getItem("user_uuid")},
       url: Location.pathname.includes("checking")
         ? "/trips/GetCheckingTripList":
         Location.pathname.includes("delivery")

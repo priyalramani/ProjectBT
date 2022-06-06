@@ -13,6 +13,7 @@ const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
   const [itemChanged, setItemChanged] = useState([]);
   const [popupDelivery, setPopupDelivery] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [confirmPopup, setConfirmPopup] = useState(false);
   const [popupBarcode, setPopupBarcode] = useState(false);
   const [deliveryMessage, setDeliveryMessage] = useState(false);
@@ -209,15 +210,16 @@ const ProcessingOrders = () => {
     getIndexedDbData();
   }, []);
   useEffect(() => {
-    if (Location.pathname.includes("delivery") && selectedOrder) {
+    if (Location.pathname.includes("delivery") && selectedOrder && !checking) {
       let data = paymentModes?.filter(
         (a) =>
           !counters
             ?.find((a) => selectedOrder?.counter_uuid === a.counter_uuid)
             ?.payment_modes?.filter((b) => b === a.mode_uuid)?.length
       );
-      if (data.length) {
+      if (data?.length) {
         setDeliveryMessage(data);
+        setChecking(true);
       }
     }
   }, [selectedOrder]);
@@ -985,7 +987,10 @@ const ProcessingOrders = () => {
                       <tr
                         key={Math.random()}
                         style={{ height: "30px" }}
-                        onClick={() => setSelectedOrder(item)}
+                        onClick={() => {
+                          setChecking(false);
+                          setSelectedOrder(item);
+                        }}
                       >
                         <td>{i + 1}</td>
                         <td colSpan={2}>{item.counter_title}</td>
