@@ -1779,10 +1779,10 @@ function ConfirmPopup({ onSave, onClose }) {
                   className="submit"
                   onClick={onClose}
                 >
-                  Cancel
+                  Discard
                 </button>
                 <button type="button" className="submit" onClick={onSave}>
-                  Save
+                  Save Changes
                 </button>
               </div>
             </form>
