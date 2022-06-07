@@ -18,11 +18,25 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [popup, setPopup] = useState(false);
   const [autoBills, setAutoBills] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
+  const [users, setUsers] = useState([]);
   const [uuids, setUuid] = useState();
   const [popupDetails, setPopupDetails] = useState();
   const [copymsg, setCopymsg] = useState();
   const [focusedInputId, setFocusedInputId] = useState(0);
   const reactInputsRef = useRef({});
+  const getUsers = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/users/GetUserList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("users", response);
+    if (response.data.success) setUsers(response.data.result);
+  };
+
   const getAutoBill = async () => {
     let data = [];
     const response = await axios({
@@ -85,6 +99,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     getCounter();
     getItemsData();
     getAutoBill();
+    getUsers();
   }, []);
   console.log(
     +order.status.map((a) => +a.stage || 0).reduce((c, d) => Math.max(c, d))
@@ -616,6 +631,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         <CheckingValues
           onSave={() => setPopupDetails(false)}
           popupDetails={popupDetails}
+          users={users}
+          items={itemsData}
         />
       ) : (
         ""
@@ -678,7 +695,7 @@ function NewUserForm({ onSubmit, onClose }) {
     </div>
   );
 }
-function CheckingValues({ onSave, popupDetails }) {
+function CheckingValues({ onSave, popupDetails, users, items }) {
   return (
     <div className="overlay" style={{ zIndex: 999999999 }}>
       <div
@@ -708,7 +725,7 @@ function CheckingValues({ onSave, popupDetails }) {
                   }}
                 >
                   <thead>
-                    <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                    <tr>
                       <th colSpan={2}>
                         <div className="t-head-element">Type</div>
                       </th>
@@ -723,8 +740,6 @@ function CheckingValues({ onSave, popupDetails }) {
                         key={item?.item_uuid || Math.random()}
                         style={{
                           height: "30px",
-                          color: "#fff",
-                          backgroundColor: "#7990dd",
                         }}
                       >
                         <td colSpan={2}>
@@ -738,7 +753,10 @@ function CheckingValues({ onSave, popupDetails }) {
                             ? "Order Delivered By"
                             : ""}
                         </td>
-                        <td>{item?.user_uuid || ""}</td>
+                        <td>
+                          {users.find((a) => a.user_uuid === item?.user_uuid)
+                            ?.user_title || ""}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -757,7 +775,7 @@ function CheckingValues({ onSave, popupDetails }) {
                   }}
                 >
                   <thead>
-                    <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                    <tr>
                       <th colSpan={2}>
                         <div className="t-head-element">Item</div>
                       </th>
@@ -772,11 +790,12 @@ function CheckingValues({ onSave, popupDetails }) {
                         key={item?.item_uuid || Math.random()}
                         style={{
                           height: "30px",
-                          color: "#fff",
-                          backgroundColor: "#7990dd",
                         }}
                       >
-                        <td colSpan={2}>{item.item_uuid || ""}</td>
+                        <td colSpan={2}>
+                          {items.find((a) => a.item_uuid === item.item_uuid)
+                            ?.item_title || ""}
+                        </td>
                         <td>
                           {item?.b || 0}:{item.p || 0}
                         </td>
@@ -798,7 +817,7 @@ function CheckingValues({ onSave, popupDetails }) {
                   }}
                 >
                   <thead>
-                    <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                    <tr>
                       <th colSpan={2}>
                         <div className="t-head-element">Item</div>
                       </th>
@@ -813,11 +832,12 @@ function CheckingValues({ onSave, popupDetails }) {
                         key={item?.item_uuid || Math.random()}
                         style={{
                           height: "30px",
-                          color: "#fff",
-                          backgroundColor: "#7990dd",
                         }}
                       >
-                        <td colSpan={2}>{item.item_uuid || ""}</td>
+                        <td colSpan={2}>
+                          {items.find((a) => a.item_uuid === item.item_uuid)
+                            ?.item_title || ""}
+                        </td>
                         <td>
                           {item?.b || 0}:{item.p || 0}
                         </td>
