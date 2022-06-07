@@ -41,14 +41,28 @@ const ProcessingOrders = () => {
   const [barcodeFilter, setBarcodeFilter] = useState("");
   const [barcodeFilterState, setBarcodeFilterState] = useState("");
   const [tempQuantity, setTempQuantity] = useState([]);
-
+  const [users, setUsers] = useState([]);
+  const [warningPopup, setWarningPopUp] = useState(false);
   const Navigate = useNavigate();
+  const getUsers = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/users/GetUserList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("users", response);
+    if (response.data.success) setUsers(response.data.result);
+  };
 
   useEffect(() => {
     let data = sessionStorage.getItem("playCount");
     if (data) {
       setPlayCount(data);
     }
+    getUsers();
   }, []);
 
   const getIndexedDbData = async () => {
@@ -75,18 +89,6 @@ const ProcessingOrders = () => {
     let PaymentData = await store.getAll();
     setPaymentModes(PaymentData);
   };
-
-  // const log = message => {
-  //   console.log(message)
-  //   const elem = document.querySelector('#console')
-  //   const onbottom = 363 < elem.scrollHeight - elem.scrollTop && elem.scrollHeight - elem.scrollTop < 402
-  //   const child = document.createElement('p')
-  //   child.innerText = JSON.stringify(message)
-  //   document.querySelector('#console').append(child)
-  //   if (!onbottom) return
-  //   const h = document.querySelector('#console').scrollHeight + 10
-  //   document.querySelector('#console').scrollBy(h, h)
-  // }
 
   const audioLoopFunction = ({ i, recall, forcePlayCount }) => {
     try {
@@ -183,7 +185,6 @@ const ProcessingOrders = () => {
     }
   };
 
-  console.log(selectedOrder);
   const getTripOrders = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = db.transaction("items", "readonly").objectStore("items");
@@ -324,74 +325,135 @@ const ProcessingOrders = () => {
     }
   };
 
-  const postOrderData = async (data = selectedOrder) => {
+  const postOrderData = async (dataArray = [selectedOrder], hold = false) => {
     setPopupBarcode(false);
+    let finalData = [];
+    for (let orderObject of dataArray) {
+      let data = orderObject;
+      if (updateBilling) {
+        let billingData = await Billing({
+          replacement: data.replacement,
+          counter: counters.find(
+            (a) => a.counter_uuid === selectedOrder.counter_uuid
+          ),
+          items: selectedOrder.item_details.map((a) => {
+            let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+            return {
+              ...itemData,
+              ...a,
+              price: itemData?.price || 0,
+            };
+          }),
+        });
+        data = {
+          ...data,
+          ...billingData,
+          item_details: billingData.items,
+        };
+      }
 
-    if (updateBilling) {
-      let billingData = await Billing({
-        replacement: data.replacement,
-        counter: counters.find(
-          (a) => a.counter_uuid === selectedOrder.counter_uuid
-        ),
-        items: selectedOrder.item_details.map((a) => {
-          let itemData = items.find((b) => a.item_uuid === b.item_uuid);
-          return {
-            ...itemData,
-            ...a,
-            price: itemData?.price || 0,
-          };
-        }),
-      });
-      data = {
-        ...data,
-        ...billingData,
-        item_details: billingData.items,
-      };
+      let time = new Date();
+      if (
+        data?.item_details?.filter((a) => +a.status === 1 || +a.status === 3)
+          ?.length === data?.item_details.length &&
+        Location.pathname.includes("processing")
+      )
+        data = {
+          ...data,
+          processing_canceled: data?.item_details?.filter(
+            (a) => +a.status === 3
+          ),
+          status: [
+            ...data.status,
+            {
+              stage: "2",
+              time: time.getTime(),
+              user_uuid: localStorage.getItem("user_uuid"),
+            },
+          ],
+        };
+      if (Location.pathname.includes("checking"))
+        data = {
+          ...data,
+          status: [
+            ...data.status,
+            {
+              stage: "3",
+              time: time.getTime(),
+              user_uuid: localStorage.getItem("user_uuid"),
+            },
+          ],
+        };
+      if (Location.pathname.includes("delivery"))
+        data = {
+          ...data,
+          status: [
+            ...data.status,
+            {
+              stage: "4",
+              time: time.getTime(),
+              user_uuid: localStorage.getItem("user_uuid"),
+            },
+          ],
+        };
+
+      data = Object.keys(data)
+        .filter((key) => key !== "others" || key !== "items")
+        .reduce((obj, key) => {
+          obj[key] = data[key];
+          return obj;
+        }, {});
+
+      finalData.push(data);
     }
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: finalData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      console.log(response);
+      sessionStorage.setItem("playCount", playCount);
+      if (!hold) {
+        let dataItem = Location.pathname.includes("processing")
+          ? itemChanged
+          : finalData[0]?.item_details;
 
-    let time = new Date();
-    if (
-      data?.item_details?.filter((a) => +a.status === 1 || +a.status === 3)
-        ?.length === data?.item_details.length &&
-      Location.pathname.includes("processing")
-    )
-      data = {
-        ...data,
-        processing_canceled: data?.item_details?.filter((a) => +a.status === 3),
-        status: [
-          ...data.status,
-          {
-            stage: "2",
-            time: time.getTime(),
-            user_uuid: localStorage.getItem("user_uuid"),
-          },
-        ],
-      };
-    if (Location.pathname.includes("checking"))
-      data = {
-        ...data,
-        status: [
-          ...data.status,
-          {
-            stage: "3",
-            time: time.getTime(),
-            user_uuid: localStorage.getItem("user_uuid"),
-          },
-        ],
-      };
-    if (Location.pathname.includes("delivery"))
-      data = {
-        ...data,
-        status: [
-          ...data.status,
-          {
-            stage: "4",
-            time: time.getTime(),
-            user_uuid: localStorage.getItem("user_uuid"),
-          },
-        ],
-      };
-
+        let qty = `${
+          dataItem?.length > 1
+            ? dataItem?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
+            : dataItem?.length
+            ? dataItem[0]?.b
+            : 0
+        }:${
+          dataItem?.length > 1
+            ? dataItem?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
+            : dataItem?.length
+            ? dataItem[0]?.p
+            : 0
+        }`;
+        postActivity({
+          activity:
+            (Location.pathname.includes("checking")
+              ? "Checking"
+              : Location.pathname.includes("delivery")
+              ? "Delivery"
+              : "Processing") + " End",
+          range: Location.pathname.includes("processing")
+            ? itemChanged.length
+            : finalData[0]?.item_details?.length,
+          qty,
+          amt: finalData[0].order_grandtotal || 0,
+        });
+      }
+      setSelectedOrder(false);
+      getTripOrders();
+    }
+  };
+  const postOrderContained = async (data = selectedOrder, opened_by = 0) => {
     data = Object.keys(data)
       .filter((key) => key !== "others" || key !== "items")
       .reduce((obj, key) => {
@@ -403,52 +465,17 @@ const ProcessingOrders = () => {
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
-      data: [data],
+      data: [{ order_uuid: data.order_uuid, opened_by }],
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.success) {
       console.log(response);
-      sessionStorage.setItem("playCount", playCount);
-      let dataItem = Location.pathname.includes("processing")
-        ? itemChanged
-        : data?.item_details;
-
-      let qty = `${
-        dataItem?.length > 1
-          ? dataItem?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
-          : dataItem?.length
-          ? dataItem[0]?.b
-          : 0
-      }:${
-        dataItem?.length > 1
-          ? dataItem?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
-          : dataItem?.length
-          ? dataItem[0]?.p
-          : 0
-      }`;
-      postActivity({
-        activity:
-          (Location.pathname.includes("checking")
-            ? "Checking"
-            : Location.pathname.includes("delivery")
-            ? "Delivery"
-            : "Processing") + " End",
-        range: Location.pathname.includes("processing")
-          ? itemChanged.length
-          : data?.item_details?.length,
-        qty,
-        amt: data.order_grandtotal || 0,
-      });
-      setSelectedOrder(false);
-      getTripOrders();
     }
   };
   const postHoldOrders = async (orders) => {
-    for (let order of orders) {
-      await postOrderData(order);
-    }
+    await postOrderData(orders, true);
   };
   useEffect(() => {
     if (!orderCreated && selectedOrder) {
@@ -712,6 +739,7 @@ const ProcessingOrders = () => {
             onClick={() => {
               if (selectedOrder) {
                 setConfirmPopup(true);
+                setTimeout(getTripOrders,1000);
               } else Navigate(-1);
             }}
           />
@@ -932,6 +960,9 @@ const ProcessingOrders = () => {
                     </th>
                     <th colSpan={2}>
                       <div className="t-head-element">Progress</div>
+                    </th>
+                    <th>
+                      <div className="t-head-element"></div>
                     </th>
                     <th>
                       <div className="t-head-element"></div>
@@ -1186,14 +1217,23 @@ const ProcessingOrders = () => {
                 : orders
                     ?.sort((a, b) => a.created_at - b.created_at)
                     ?.map((item, i) => (
-                      <tr key={Math.random()} style={{ height: "30px" }}>
+                      <tr
+                        key={Math.random()}
+                        style={{
+                          height: "30px",
+                          backgroundColor:
+                            +item.opened_by || item.opened_by !== "0"
+                              ? "yellow"
+                              : "#fff",
+                        }}
+                      >
                         <td>{i + 1}</td>
                         <td
                           colSpan={2}
                           onClick={(e) => {
                             e.stopPropagation();
                             setChecking(false);
-                            setSelectedOrder(item);
+                            setWarningPopUp(item);
                           }}
                         >
                           {item.counter_title}
@@ -1203,7 +1243,7 @@ const ProcessingOrders = () => {
                           onClick={(e) => {
                             e.stopPropagation();
                             setChecking(false);
-                            setSelectedOrder(item);
+                            setWarningPopUp(item);
                           }}
                         >
                           {
@@ -1222,6 +1262,10 @@ const ProcessingOrders = () => {
                                 !Location.pathname.includes("checking") ||
                                 +a.status === 1
                             )?.length || 0}
+                        </td>
+                        <td>
+                          {users.find((a) => a.user_uuid === item.opened_by)
+                            ?.user_title || ""}
                         </td>
                         <td>
                           {item?.mobile ? (
@@ -1297,13 +1341,14 @@ const ProcessingOrders = () => {
         <ConfirmPopup
           onSave={() => {
             setConfirmPopup(false);
+            postOrderContained(selectedOrder);
             setSelectedOrder(false);
             clearInterval(intervalId);
             audiosRef.current.forEach((audio) => audio.pause());
             navigator.mediaSession.playbackState = "none";
             audiosRef.current = null;
             console.clear();
-            getTripOrders();
+            setTimeout(getTripOrders,1000);
           }}
           onClose={() => setConfirmPopup(false)}
         />
@@ -1316,6 +1361,22 @@ const ProcessingOrders = () => {
             setDeliveryMessage(false);
           }}
           data={deliveryMessage}
+        />
+      ) : (
+        ""
+      )}
+      {warningPopup ? (
+        <OpenWarningMessage
+          onClose={() => {
+            setWarningPopUp(false);
+          }}
+          data={warningPopup}
+          users={users}
+          onSave={() => {
+            setSelectedOrder(warningPopup);
+            postOrderContained(warningPopup, localStorage.getItem("user_uuid"));
+            setWarningPopUp(false);
+          }}
         />
       ) : (
         ""
@@ -2148,6 +2209,77 @@ function DeliveryMessagePopup({ onSave, data }) {
         </div>
       </div>
     </div>
+  );
+}
+function OpenWarningMessage({ onSave, data, users, onClose }) {
+  const [orderData, setOrderData] = useState(data);
+  const [timer, setTimer] = useState(0);
+
+  const getOrders = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/orders/GetOrder/" + data.order_uuid,
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("users", response);
+    if (response.data.result.opened_by === "0") onSave();
+    if (response.data.success) setOrderData(response.data.result);
+  };
+  useEffect(() => {
+    setTimeout(() => setTimer(true), 2000);
+    getOrders();
+  }, []);
+  console.log("counters", data);
+  return timer ? (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{
+          height: "fit-content",
+          width: "max-content",
+          paddingTop: "50px",
+        }}
+      >
+        <h2>
+          Order Already Opened By{" "}
+          {
+            users.find((a, i) => a.user_uuid === orderData.opened_by)
+              ?.user_title
+          }
+        </h2>
+
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+          }}
+        >
+          <div style={{ overflowY: "scroll", width: "100%" }}>
+            <form className="form">
+              <div className="flex" style={{ width: "100%" }}>
+                <button
+                  type="button"
+                  style={{ opacity: "1", cursor: "pointer" }}
+                  className="submit"
+                  onClick={onSave}
+                >
+                  Still Open
+                </button>
+              </div>
+            </form>
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : (
+    <div />
   );
 }
 function NewUserForm({
