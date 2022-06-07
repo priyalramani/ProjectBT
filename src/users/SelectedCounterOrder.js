@@ -7,7 +7,7 @@ import { AutoAdd, Billing } from "../functions";
 import { Link as ScrollLink } from "react-scroll";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 const SelectedCounterOrder = () => {
   const [items, setItems] = useState([]);
   const [order, setOrder] = useState([]);
@@ -183,7 +183,10 @@ const SelectedCounterOrder = () => {
                   value={filterItemTitle}
                   onChange={(e) => setFilterItemTile(e.target.value)}
                 />
-                <CloseIcon className="user_cross_icon" onClick={()=>setFilterItemTile("")}/>
+                <CloseIcon
+                  className="user_cross_icon"
+                  onClick={() => setFilterItemTile("")}
+                />
               </div>
 
               <div>
@@ -368,6 +371,16 @@ const SelectedCounterOrder = () => {
                                     </div>
                                   );
                                 })}
+                              <div className="menu">
+                                <div className="menuItemDetails">
+                                  <h1 className="item-name"></h1>
+
+                                  <div className="item-mode">
+                                    <h3 className={`item-price`}></h3>
+                                  </div>
+                                </div>
+                                <div className="menuleft"></div>
+                              </div>
                             </div>
                           )
                       )
@@ -484,6 +497,16 @@ const SelectedCounterOrder = () => {
                                     </div>
                                   );
                                 })}
+                              <div className="menu">
+                                <div className="menuItemDetails">
+                                  <h1 className="item-name"></h1>
+
+                                  <div className="item-mode">
+                                    <h3 className={`item-price`}></h3>
+                                  </div>
+                                </div>
+                                <div className="menuleft"></div>
+                              </div>
                             </div>
                           )
                       )}
@@ -513,6 +536,16 @@ const SelectedCounterOrder = () => {
                     <ScrollLink
                       id={`${i}`}
                       onClick={() => {
+                        var element = document.getElementById(category.category_uuid);
+
+                        element.scrollIntoView();
+                        element.scrollIntoView(false);
+                        element.scrollIntoView({ block: "start" });
+                        element.scrollIntoView({
+                          behavior: "smooth",
+                          block: "end",
+                          inline: "nearest",
+                        });
                         setIsCategoryOpen(!isCategoryOpen);
                         setClickedId(i?.toString());
                       }}
@@ -524,12 +557,7 @@ const SelectedCounterOrder = () => {
                       } categorybtn`}
                       key={i}
                     >
-                      {
-                        itemsCategory?.find(
-                          (cat) =>
-                            cat?.category_uuid === category?.category_uuid
-                        )?.category_title
-                      }
+                      {category?.category_title}
                       <span className="categoryLength">
                         {cartPage
                           ? order?.items?.filter(
@@ -657,6 +685,7 @@ const SelectedCounterOrder = () => {
             setCartPage(true);
           }}
           className="cartBtn"
+          style={{ padding: "3px" }}
         >
           Cart
         </button>

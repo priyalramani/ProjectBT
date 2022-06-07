@@ -9,6 +9,7 @@ import { AiOutlineReload } from "react-icons/ai";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { Phone } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 let intervalId = 0;
 const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
@@ -853,6 +854,16 @@ const ProcessingOrders = () => {
             <tbody className="tbody">
               {selectedOrder
                 ? selectedOrder.item_details
+                    .filter(
+                      (a) =>
+                        !Location.pathname.includes("delivery") ||
+                        +a.status === 1
+                    )
+                    .filter(
+                      (a) =>
+                        !Location.pathname.includes("checking") ||
+                        +a.status === 1
+                    )
                     ?.sort(itemsSortFunction)
                     ?.map((item, i) => (
                       <tr
@@ -888,31 +899,38 @@ const ProcessingOrders = () => {
 
                               height: "50px",
                             }}
-                            onClick={() => {
-                              setItemChanged((prev) =>
-                                +item.status !== 1
-                                  ? [
-                                      ...prev,
-                                      selectedOrder.item_details.find(
-                                        (a) => a.item_uuid === item.item_uuid
-                                      ),
-                                    ]
-                                  : prev
-                              );
-                              setOneTimeState();
-                              setSelectedOrder((prev) => ({
-                                ...prev,
-                                item_details: prev.item_details.map((a) =>
-                                  a.item_uuid === item.item_uuid
-                                    ? { ...a, status: +a.status === 1 ? 0 : 1 }
-                                    : a
-                                ),
-                              }));
-                            }}
                           >
                             {item.item_uuid === orderSpeech ? (
                               <AiFillPlayCircle
                                 style={{ fontSize: "25px", cursor: "pointer" }}
+                              />
+                            ) : +item.status !== 1 ? (
+                              <CheckCircleOutlineIcon
+                                onClick={() => {
+                                  setItemChanged((prev) =>
+                                    +item.status !== 1
+                                      ? [
+                                          ...prev,
+                                          selectedOrder.item_details.find(
+                                            (a) =>
+                                              a.item_uuid === item.item_uuid
+                                          ),
+                                        ]
+                                      : prev
+                                  );
+                                  setOneTimeState();
+                                  setSelectedOrder((prev) => ({
+                                    ...prev,
+                                    item_details: prev.item_details.map((a) =>
+                                      a.item_uuid === item.item_uuid
+                                        ? {
+                                            ...a,
+                                            status: +a.status === 1 ? 0 : 1,
+                                          }
+                                        : a
+                                    ),
+                                  }));
+                                }}
                               />
                             ) : (
                               ""
@@ -1029,7 +1047,18 @@ const ProcessingOrders = () => {
                             item?.item_details?.filter((a) => +a.status === 1)
                               ?.length
                           }
-                          /{item?.item_details?.length || 0}
+                          /
+                          {item?.item_details
+                            .filter(
+                              (a) =>
+                                !Location.pathname.includes("delivery") ||
+                                +a.status === 1
+                            )
+                            .filter(
+                              (a) =>
+                                !Location.pathname.includes("checking") ||
+                                +a.status === 1
+                            )?.length || 0}
                         </td>
                         <td>
                           {item?.mobile ? (
@@ -1077,6 +1106,12 @@ const ProcessingOrders = () => {
           order_uuid={selectedOrder?.order_uuid}
           setSelectedOrder={setSelectedOrder}
           order={selectedOrder}
+          allown={paymentModes?.filter(
+            (a) =>
+              counters
+                ?.find((a) => selectedOrder?.counter_uuid === a.counter_uuid)
+                ?.payment_modes?.filter((b) => b === a.mode_uuid)?.length
+          )}
         />
       ) : (
         ""
@@ -1493,6 +1528,7 @@ function DiliveryPopup({
   order_uuid,
   setSelectedOrder,
   order,
+  allowed
 }) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
@@ -1610,6 +1646,7 @@ function DiliveryPopup({
                             )
                           }
                           maxLength={42}
+                          disabled={!allowed.find(a=>a.mode_uuid===item.mode_uuid)}
                         />
                         {/* {popupInfo.conversion || 0} */}
                       </label>
@@ -1641,6 +1678,7 @@ function DiliveryPopup({
                               )
                             }
                             maxLength={42}
+                          disabled={!allowed.find(a=>a.mode_uuid===item.mode_uuid)}
                           />
                         </label>
                       ) : (
@@ -1876,7 +1914,7 @@ function DeliveryMessagePopup({ onSave, data }) {
                   className="submit"
                   onClick={onSave}
                 >
-                  Save
+                  Okay
                 </button>
               </div>
             </form>
