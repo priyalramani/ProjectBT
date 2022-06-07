@@ -40,6 +40,7 @@ const ProcessingOrders = () => {
   const [oneTimeState, setOneTimeState] = useState(false);
   const [barcodeFilter, setBarcodeFilter] = useState("");
   const [barcodeFilterState, setBarcodeFilterState] = useState("");
+  const [tempQuantity, setTempQuantity] = useState([]);
 
   const Navigate = useNavigate();
 
@@ -520,7 +521,49 @@ const ProcessingOrders = () => {
   };
   const checkingQuantity = () => {
     let data = [];
-    for (let a of barcodeFilterState) {
+    for (let a of tempQuantity) {
+      let orderItem = selectedOrder.item_details.find(
+        (b) => b.item_uuid === a.item_uuid
+      );
+      console.log(
+        (+orderItem?.b || 0) * +(+a?.conversion || 1) + orderItem?.p,
+        (+a?.b || 0) * +(+a?.conversion || 1) + a?.p
+      );
+      if (
+        (+orderItem?.b || 0) * +(+a?.conversion || 1) + orderItem?.p !==
+        (+a?.b || 0) * +(+a?.conversion || 1) + a?.p
+      )
+        setBarcodeMessage((prev) =>
+          prev.length
+            ? [
+                ...prev,
+                {
+                  ...a,
+                  ...orderItem,
+                  barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+                  case: 1,
+                  qty:
+                    (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+                    orderItem?.p,
+                },
+              ]
+            : [
+                {
+                  ...a,
+                  ...orderItem,
+                  barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+                  case: 1,
+                  qty:
+                    (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+                    orderItem?.p,
+                },
+              ]
+        );
+      else data.push(a);
+    }
+    for (let a of barcodeFilterState.filter(
+      (a) => !data.filter((b) => b.item_uuid === a.item_uuid).length
+    )) {
       let orderItem = selectedOrder.item_details.find(
         (b) => b.item_uuid === a.item_uuid
       );
@@ -609,6 +652,43 @@ const ProcessingOrders = () => {
           );
       }
     }
+
+    for (let a of tempQuantity) {
+      let orderItem = selectedOrder.item_details.find(
+        (b) => b.item_uuid === a.item_uuid
+      );
+      if (
+        (+orderItem?.b || 0) * +(+a?.conversion || 1) + orderItem?.p !==
+        (+a?.b || 0) * +(+a?.conversion || 1) + a?.p
+      )
+        setBarcodeMessage((prev) =>
+          prev.length
+            ? [
+                ...prev,
+                {
+                  ...a,
+                  ...orderItem,
+                  barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+                  case: 1,
+                  qty:
+                    (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+                    orderItem?.p,
+                },
+              ]
+            : [
+                {
+                  ...a,
+                  ...orderItem,
+                  barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+                  case: 1,
+                  qty:
+                    (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+                    orderItem?.p,
+                },
+              ]
+        );
+    }
+
     setTimeout(() => setPopupBarcode(true), 2000);
   };
   console.log(BarcodeMessage);
@@ -819,6 +899,7 @@ const ProcessingOrders = () => {
                     <th>
                       <div className="t-head-element">MRP</div>
                     </th>
+
                     {!Location.pathname.includes("checking") ? (
                       <>
                         <th>
@@ -833,7 +914,7 @@ const ProcessingOrders = () => {
                         )}
                       </>
                     ) : (
-                      ""
+                      <th>Quantity</th>
                     )}
                   </>
                 ) : (
@@ -887,6 +968,71 @@ const ProcessingOrders = () => {
                               : "#000"
                             : "#000",
                         }}
+                        onClick={() => {
+                          if (Location.pathname.includes("checking")) {
+                            setTempQuantity(
+                              tempQuantity?.filter(
+                                (a) => a.item_uuid === item.item_uuid
+                              )?.length
+                                ? tempQuantity?.map((a) =>
+                                    a.item_uuid === item.item_uuid
+                                      ? {
+                                          ...a,
+                                          b:
+                                            +(a.b || 0) +
+                                            parseInt(
+                                              ((a?.p || 0) +
+                                                (+a?.one_pack || 1)) /
+                                                +a.conversion
+                                            ),
+
+                                          p:
+                                            ((a?.p || 0) +
+                                              (+a?.one_pack || 1)) %
+                                            +a.conversion,
+                                        }
+                                      : a
+                                  )
+                                : tempQuantity?.length
+                                ? [
+                                    ...tempQuantity,
+                                    ...items
+                                      ?.filter(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      )
+                                      .map((a) => ({
+                                        ...a,
+                                        b:
+                                          +(a.b || 0) +
+                                          parseInt(
+                                            ((a?.p || 0) +
+                                              (+a?.one_pack || 1)) /
+                                              +a.conversion
+                                          ),
+
+                                        p:
+                                          ((a?.p || 0) + (+a?.one_pack || 1)) %
+                                          +a.conversion,
+                                      })),
+                                  ]
+                                : items
+                                    ?.filter(
+                                      (a) => a.item_uuid === item.item_uuid
+                                    )
+                                    .map((a) => ({
+                                      ...a,
+                                      b: (
+                                        (+a.b || 0) +
+                                        +((+a?.p || 0) + (+a?.one_pack || 1)) /
+                                          +a.conversion
+                                      ).toFixed(0),
+                                      p:
+                                        ((+a?.p || 0) + (+a?.one_pack || 1)) %
+                                        +a.conversion,
+                                    }))
+                            );
+                          }
+                        }}
                       >
                         {selectedOrder &&
                         !(
@@ -905,8 +1051,7 @@ const ProcessingOrders = () => {
                                   ? [
                                       ...prev,
                                       selectedOrder.item_details.find(
-                                        (a) =>
-                                          a.item_uuid === item.item_uuid
+                                        (a) => a.item_uuid === item.item_uuid
                                       ),
                                     ]
                                   : prev
@@ -930,9 +1075,7 @@ const ProcessingOrders = () => {
                                 style={{ fontSize: "25px", cursor: "pointer" }}
                               />
                             ) : +item.status !== 1 ? (
-                              <CheckCircleOutlineIcon
-                               
-                              />
+                              <CheckCircleOutlineIcon />
                             ) : (
                               ""
                             )}
@@ -1017,7 +1160,15 @@ const ProcessingOrders = () => {
                             )}
                           </>
                         ) : (
-                          ""
+                          <td>
+                            {tempQuantity?.find(
+                              (a) => a.item_uuid === item.item_uuid
+                            )?.b || 0}
+                            :
+                            {tempQuantity?.find(
+                              (a) => a.item_uuid === item.item_uuid
+                            )?.p || 0}
+                          </td>
                         )}
                       </tr>
                     ))
@@ -1093,7 +1244,7 @@ const ProcessingOrders = () => {
       )}
       {popupBarcode ? (
         <CheckingValues
-          onSave={() => setPopupBarcode(false)}
+          onSave={() => {setPopupBarcode(false); setBarcodeMessage([])}}
           BarcodeMessage={BarcodeMessage}
           postOrderData={postOrderData}
         />
@@ -1529,7 +1680,7 @@ function DiliveryPopup({
   order_uuid,
   setSelectedOrder,
   order,
-  allowed
+  allowed,
 }) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
@@ -1647,7 +1798,9 @@ function DiliveryPopup({
                             )
                           }
                           maxLength={42}
-                          disabled={!allowed.find(a=>a.mode_uuid===item.mode_uuid)}
+                          disabled={
+                            !allowed.find((a) => a.mode_uuid === item.mode_uuid)
+                          }
                         />
                         {/* {popupInfo.conversion || 0} */}
                       </label>
@@ -1679,7 +1832,11 @@ function DiliveryPopup({
                               )
                             }
                             maxLength={42}
-                          disabled={!allowed.find(a=>a.mode_uuid===item.mode_uuid)}
+                            disabled={
+                              !allowed.find(
+                                (a) => a.mode_uuid === item.mode_uuid
+                              )
+                            }
                           />
                         </label>
                       ) : (
