@@ -14,7 +14,6 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 
 let intervalId = 0;
 const ProcessingOrders = () => {
-
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
   const [itemChanged, setItemChanged] = useState([]);
   const [popupDelivery, setPopupDelivery] = useState(false);
@@ -127,12 +126,13 @@ const ProcessingOrders = () => {
           intervalId = setInterval(() => {
             if (
               audiosRef.current[i]?.duration -
-              audiosRef.current[i].currentTime >
+                audiosRef.current[i].currentTime >
               8.8
             )
               return console.log(
-                `returning : ${audiosRef.current[i]?.duration -
-                audiosRef.current[i].currentTime
+                `returning : ${
+                  audiosRef.current[i]?.duration -
+                  audiosRef.current[i].currentTime
                 }`
               );
 
@@ -192,12 +192,13 @@ const ProcessingOrders = () => {
 
     const response = await axios({
       method: "post",
-      url: `/orders/${Location.pathname.includes("checking")
-        ? "GetOrderCheckingList"
-        : Location.pathname.includes("delivery")
+      url: `/orders/${
+        Location.pathname.includes("checking")
+          ? "GetOrderCheckingList"
+          : Location.pathname.includes("delivery")
           ? "GetOrderDeliveryList"
           : "GetOrderProcessingList"
-        }`,
+      }`,
       data: {
         trip_uuid: params.trip_uuid,
         user_uuid: localStorage.getItem("user_uuid"),
@@ -232,10 +233,11 @@ const ProcessingOrders = () => {
     if (!selectedOrder || audiosRef.current?.[0]) return;
 
     const audioElements = [];
-    const unprocessedItems = selectedOrder?.item_details?.filter((a) => !a.status) || [];
+    const unprocessedItems =
+      selectedOrder?.item_details?.filter((a) => !a.status) || [];
     let progressCount = 0;
 
-    unprocessedItems.forEach(order_item => {
+    unprocessedItems.forEach((order_item) => {
       const item = items.find((j) => j.item_uuid === order_item.item_uuid);
 
       if (item) {
@@ -288,7 +290,7 @@ const ProcessingOrders = () => {
           }
         };
       } else progressCount++;
-    })
+    });
   }, [selectedOrder]);
 
   const postActivity = async (others = {}) => {
@@ -298,8 +300,8 @@ const ProcessingOrders = () => {
       role: Location.pathname.includes("checking")
         ? "Checking"
         : Location.pathname.includes("delivery")
-          ? "Delivery"
-          : "Processing",
+        ? "Delivery"
+        : "Processing",
       narration:
         counters.find((a) => a.counter_uuid === selectedOrder.counter_uuid)
           ?.counter_title +
@@ -322,9 +324,9 @@ const ProcessingOrders = () => {
     }
   };
 
-  const postOrderData = async () => {
+  const postOrderData = async (data = selectedOrder) => {
     setPopupBarcode(false);
-    let data = selectedOrder;
+
     if (updateBilling) {
       let billingData = await Billing({
         replacement: data.replacement,
@@ -413,24 +415,26 @@ const ProcessingOrders = () => {
         ? itemChanged
         : data?.item_details;
 
-      let qty = `${dataItem?.length > 1
-        ? dataItem?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
-        : dataItem?.length
+      let qty = `${
+        dataItem?.length > 1
+          ? dataItem?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
+          : dataItem?.length
           ? dataItem[0]?.b
           : 0
-        }:${dataItem?.length > 1
+      }:${
+        dataItem?.length > 1
           ? dataItem?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
           : dataItem?.length
-            ? dataItem[0]?.p
-            : 0
-        }`;
+          ? dataItem[0]?.p
+          : 0
+      }`;
       postActivity({
         activity:
           (Location.pathname.includes("checking")
             ? "Checking"
             : Location.pathname.includes("delivery")
-              ? "Delivery"
-              : "Processing") + " End",
+            ? "Delivery"
+            : "Processing") + " End",
         range: Location.pathname.includes("processing")
           ? itemChanged.length
           : data?.item_details?.length,
@@ -441,7 +445,11 @@ const ProcessingOrders = () => {
       getTripOrders();
     }
   };
-
+  const postHoldOrders = async (orders) => {
+    for (let order of orders) {
+      await postOrderData(order);
+    }
+  };
   useEffect(() => {
     if (!orderCreated && selectedOrder) {
       postActivity({
@@ -449,8 +457,8 @@ const ProcessingOrders = () => {
           (Location.pathname.includes("checking")
             ? "Checking"
             : Location.pathname.includes("delivery")
-              ? "Delivery"
-              : "Processing") + " Start",
+            ? "Delivery"
+            : "Processing") + " Start",
       });
       setOrderCreated(true);
     }
@@ -535,28 +543,28 @@ const ProcessingOrders = () => {
         setBarcodeMessage((prev) =>
           prev.length
             ? [
-              ...prev,
-              {
-                ...a,
-                ...orderItem,
-                barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
-                case: 1,
-                qty:
-                  (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-                  orderItem?.p,
-              },
-            ]
+                ...prev,
+                {
+                  ...a,
+                  ...orderItem,
+                  barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+                  case: 1,
+                  qty:
+                    (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+                    orderItem?.p,
+                },
+              ]
             : [
-              {
-                ...a,
-                ...orderItem,
-                barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
-                case: 1,
-                qty:
-                  (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-                  orderItem?.p,
-              },
-            ]
+                {
+                  ...a,
+                  ...orderItem,
+                  barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+                  case: 1,
+                  qty:
+                    (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+                    orderItem?.p,
+                },
+              ]
         );
       else data.push(a);
     }
@@ -576,78 +584,78 @@ const ProcessingOrders = () => {
           setBarcodeMessage((prev) =>
             prev.length
               ? [
-                ...prev,
-                {
-                  ...ItemData,
-                  ...orderItem,
-                  barcodeQty: a.qty,
-                  case: 1,
-                  qty:
-                    (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                    orderItem?.p,
-                },
-              ]
+                  ...prev,
+                  {
+                    ...ItemData,
+                    ...orderItem,
+                    barcodeQty: a.qty,
+                    case: 1,
+                    qty:
+                      (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+                      orderItem?.p,
+                  },
+                ]
               : [
-                {
-                  ...ItemData,
-                  ...orderItem,
-                  barcodeQty: a.qty,
-                  case: 1,
-                  qty:
-                    (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                    orderItem?.p,
-                },
-              ]
+                  {
+                    ...ItemData,
+                    ...orderItem,
+                    barcodeQty: a.qty,
+                    case: 1,
+                    qty:
+                      (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+                      orderItem?.p,
+                  },
+                ]
           );
         else if (ItemData && a?.qty)
           setBarcodeMessage((prev) =>
             prev.length
               ? [
-                ...prev,
-                {
-                  ...ItemData,
-                  barcodeQty: a.qty,
-                  case: 2,
-                  qty:
-                    (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                    orderItem?.p,
-                },
-              ]
+                  ...prev,
+                  {
+                    ...ItemData,
+                    barcodeQty: a.qty,
+                    case: 2,
+                    qty:
+                      (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+                      orderItem?.p,
+                  },
+                ]
               : [
-                {
-                  ...ItemData,
-                  barcodeQty: a.qty,
-                  case: 2,
-                  qty:
-                    (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                    orderItem?.p,
-                },
-              ]
+                  {
+                    ...ItemData,
+                    barcodeQty: a.qty,
+                    case: 2,
+                    qty:
+                      (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+                      orderItem?.p,
+                  },
+                ]
           );
         else if (a?.qty)
           setBarcodeMessage((prev) =>
             prev.length
               ? [
-                ...prev,
-                {
-                  ...a,
-                  barcodeQty: a.qty,
-                  case: 3,
-                  qty:
-                    (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                    orderItem?.p,
-                },
-              ]
+                  ...prev,
+                  {
+                    ...a,
+                    barcodeQty: a.qty,
+                    case: 3,
+                    qty:
+                      (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+                      orderItem?.p,
+                  },
+                ]
               : [
-                {
-                  ...a,
-                  barcodeQty: a.qty,
-                  case: 3,
-                  qty:
-                    (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                    orderItem?.p,
-                },
-              ]
+                  {
+                    ...a,
+                    barcodeQty: a.qty,
+                    case: 3,
+                    qty:
+                      (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+                      orderItem?.p,
+                  },
+                ]
           );
       }
     }
@@ -663,28 +671,28 @@ const ProcessingOrders = () => {
         setBarcodeMessage((prev) =>
           prev.length
             ? [
-              ...prev,
-              {
-                ...a,
-                ...orderItem,
-                barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
-                case: 1,
-                qty:
-                  (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-                  orderItem?.p,
-              },
-            ]
+                ...prev,
+                {
+                  ...a,
+                  ...orderItem,
+                  barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+                  case: 1,
+                  qty:
+                    (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+                    orderItem?.p,
+                },
+              ]
             : [
-              {
-                ...a,
-                ...orderItem,
-                barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
-                case: 1,
-                qty:
-                  (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-                  orderItem?.p,
-              },
-            ]
+                {
+                  ...a,
+                  ...orderItem,
+                  barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+                  case: 1,
+                  qty:
+                    (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+                    orderItem?.p,
+                },
+              ]
         );
     }
 
@@ -722,7 +730,7 @@ const ProcessingOrders = () => {
         </div>
 
         <h1 style={{ width: "100%", textAlign: "left", marginLeft: "30px" }}>
-          {selectedOrder ? selectedOrder.counter_title : "Trip Orders"}
+          {selectedOrder ? selectedOrder.counter_title : "Orders"}
         </h1>
         {!selectedOrder && window.location.pathname.includes("processing") ? (
           <>
@@ -749,10 +757,10 @@ const ProcessingOrders = () => {
           ""
         )}
         {selectedOrder &&
-          !(
-            Location.pathname.includes("checking") ||
-            Location.pathname.includes("delivery")
-          ) ? (
+        !(
+          Location.pathname.includes("checking") ||
+          Location.pathname.includes("delivery")
+        ) ? (
           <>
             <input
               className="searchInput"
@@ -845,8 +853,8 @@ const ProcessingOrders = () => {
                   Location.pathname.includes("checking")
                     ? checkingQuantity()
                     : Location.pathname.includes("delivery")
-                      ? setPopupDelivery(true)
-                      : postOrderData();
+                    ? setPopupDelivery(true)
+                    : postOrderData();
                 }}
               >
                 Save
@@ -871,21 +879,21 @@ const ProcessingOrders = () => {
             style={{
               width:
                 Location.pathname.includes("checking") ||
-                  Location.pathname.includes("delivery")
+                Location.pathname.includes("delivery")
                   ? "100"
                   : selectedOrder
-                    ? "max-content"
-                    : "100%",
+                  ? "max-content"
+                  : "100%",
               height: "fit-content",
             }}
           >
             <thead>
               <tr>
                 {selectedOrder &&
-                  !(
-                    Location.pathname.includes("checking") ||
-                    Location.pathname.includes("delivery")
-                  ) ? (
+                !(
+                  Location.pathname.includes("checking") ||
+                  Location.pathname.includes("delivery")
+                ) ? (
                   <th></th>
                 ) : (
                   ""
@@ -935,300 +943,300 @@ const ProcessingOrders = () => {
             <tbody className="tbody">
               {selectedOrder
                 ? selectedOrder.item_details
-                  .filter(
-                    (a) =>
-                      !Location.pathname.includes("delivery") ||
-                      +a.status === 1
-                  )
-                  .filter(
-                    (a) =>
-                      !Location.pathname.includes("checking") ||
-                      +a.status === 1
-                  )
-                  ?.sort(itemsSortFunction)
-                  ?.map((item, i) => (
-                    <tr
-                      key={item.item_uuid}
-                      style={{
-                        height: "30px",
-                        backgroundColor: window.location.pathname.includes(
-                          "processing"
-                        )
-                          ? +item.status === 1
-                            ? "green"
-                            : +item.status === 2
+                    .filter(
+                      (a) =>
+                        !Location.pathname.includes("delivery") ||
+                        +a.status === 1
+                    )
+                    .filter(
+                      (a) =>
+                        !Location.pathname.includes("checking") ||
+                        +a.status === 1
+                    )
+                    ?.sort(itemsSortFunction)
+                    ?.map((item, i) => (
+                      <tr
+                        key={item.item_uuid}
+                        style={{
+                          height: "30px",
+                          backgroundColor: window.location.pathname.includes(
+                            "processing"
+                          )
+                            ? +item.status === 1
+                              ? "green"
+                              : +item.status === 2
                               ? "yellow"
                               : +item.status === 3
-                                ? "red"
-                                : "#fff"
-                          : "#fff",
-                        color: window.location.pathname.includes("processing")
-                          ? +item.status === 1 || +item.status === 3
-                            ? "#fff"
-                            : "#000"
-                          : "#000",
-                      }}
-                      onClick={() => {
-                        if (Location.pathname.includes("checking")) {
-                          setTempQuantity(
-                            tempQuantity?.filter(
-                              (a) => a.item_uuid === item.item_uuid
-                            )?.length
-                              ? tempQuantity?.map((a) =>
-                                a.item_uuid === item.item_uuid
-                                  ? {
-                                    ...a,
-                                    b:
-                                      +(a.b || 0) +
-                                      parseInt(
-                                        ((a?.p || 0) +
-                                          (+a?.one_pack || 1)) /
-                                        +a.conversion
-                                      ),
+                              ? "red"
+                              : "#fff"
+                            : "#fff",
+                          color: window.location.pathname.includes("processing")
+                            ? +item.status === 1 || +item.status === 3
+                              ? "#fff"
+                              : "#000"
+                            : "#000",
+                        }}
+                        onClick={() => {
+                          if (Location.pathname.includes("checking")) {
+                            setTempQuantity(
+                              tempQuantity?.filter(
+                                (a) => a.item_uuid === item.item_uuid
+                              )?.length
+                                ? tempQuantity?.map((a) =>
+                                    a.item_uuid === item.item_uuid
+                                      ? {
+                                          ...a,
+                                          b:
+                                            +(a.b || 0) +
+                                            parseInt(
+                                              ((a?.p || 0) +
+                                                (+a?.one_pack || 1)) /
+                                                +a.conversion
+                                            ),
 
-                                    p:
-                                      ((a?.p || 0) +
-                                        (+a?.one_pack || 1)) %
-                                      +a.conversion,
-                                  }
-                                  : a
-                              )
-                              : tempQuantity?.length
+                                          p:
+                                            ((a?.p || 0) +
+                                              (+a?.one_pack || 1)) %
+                                            +a.conversion,
+                                        }
+                                      : a
+                                  )
+                                : tempQuantity?.length
                                 ? [
-                                  ...tempQuantity,
-                                  ...items
+                                    ...tempQuantity,
+                                    ...items
+                                      ?.filter(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      )
+                                      .map((a) => ({
+                                        ...a,
+                                        b:
+                                          +(a.b || 0) +
+                                          parseInt(
+                                            ((a?.p || 0) +
+                                              (+a?.one_pack || 1)) /
+                                              +a.conversion
+                                          ),
+
+                                        p:
+                                          ((a?.p || 0) + (+a?.one_pack || 1)) %
+                                          +a.conversion,
+                                      })),
+                                  ]
+                                : items
                                     ?.filter(
                                       (a) => a.item_uuid === item.item_uuid
                                     )
                                     .map((a) => ({
                                       ...a,
-                                      b:
-                                        +(a.b || 0) +
-                                        parseInt(
-                                          ((a?.p || 0) +
-                                            (+a?.one_pack || 1)) /
+                                      b: (
+                                        (+a.b || 0) +
+                                        +((+a?.p || 0) + (+a?.one_pack || 1)) /
                                           +a.conversion
-                                        ),
-
+                                      ).toFixed(0),
                                       p:
-                                        ((a?.p || 0) + (+a?.one_pack || 1)) %
+                                        ((+a?.p || 0) + (+a?.one_pack || 1)) %
                                         +a.conversion,
-                                    })),
-                                ]
-                                : items
-                                  ?.filter(
-                                    (a) => a.item_uuid === item.item_uuid
-                                  )
-                                  .map((a) => ({
-                                    ...a,
-                                    b: (
-                                      (+a.b || 0) +
-                                      +((+a?.p || 0) + (+a?.one_pack || 1)) /
-                                      +a.conversion
-                                    ).toFixed(0),
-                                    p:
-                                      ((+a?.p || 0) + (+a?.one_pack || 1)) %
-                                      +a.conversion,
-                                  }))
-                          );
-                        }
-                      }}
-                    >
-                      {selectedOrder &&
+                                    }))
+                            );
+                          }
+                        }}
+                      >
+                        {selectedOrder &&
                         !(
                           Location.pathname.includes("checking") ||
                           Location.pathname.includes("delivery")
                         ) ? (
-                        <td
-                          style={{ padding: "10px", height: "50px", }}
-                          onClick={() => {
-                            setItemChanged((prev) =>
-                              +item.status !== 1
-                                ? [
-                                  ...prev,
-                                  selectedOrder.item_details.find(
-                                    (a) => a.item_uuid === item.item_uuid
-                                  ),
-                                ]
-                                : prev
-                            );
-                            setOneTimeState();
-                            setSelectedOrder((prev) => ({
-                              ...prev,
-                              item_details: prev.item_details.map((a) =>
-                                a.item_uuid === item.item_uuid
-                                  ? {
-                                    ...a,
-                                    status: +a.status === 1 ? 0 : 1,
-                                  }
-                                  : a
-                              ),
-                            }));
-
-                            audiosRef.current?.forEach(audio => {
-                              if (audio.item_uuid === item.item_uuid) {
-                                audio.setAttribute('played', 'true')
-                              }
-                            })
-                            audioLoopFunction({ i: 0 })
-                          }}
-                        >
-                          {item.item_uuid === "" ? (
-                            <AiFillPlayCircle
-                              style={{ fontSize: "25px", cursor: "pointer" }}
-                            />
-                          ) : +item.status !== 1 ? (
-                            <CheckCircleOutlineIcon />
-                          ) : (
-                            ""
-                          )}
-                        </td>
-                      ) : (
-                        ""
-                      )}
-                      <td>{i + 1}</td>
-                      <td colSpan={2}>
-                        {
-                          items.find((a) => a.item_uuid === item.item_uuid)
-                            ?.item_title
-                        }
-                      </td>
-                      <td>
-                        {
-                          items.find((a) => a.item_uuid === item.item_uuid)
-                            ?.mrp
-                        }
-                      </td>
-                      {!Location.pathname.includes("checking") ? (
-                        <>
                           <td
+                            style={{ padding: "10px", height: "50px" }}
                             onClick={() => {
-                              setOneTimeState();
-                              setPopupForm(
-                                items.find(
-                                  (a) => a.item_uuid === item.item_uuid
-                                )
+                              setItemChanged((prev) =>
+                                +item.status !== 1
+                                  ? [
+                                      ...prev,
+                                      selectedOrder.item_details.find(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      ),
+                                    ]
+                                  : prev
                               );
+                              setOneTimeState();
+                              setSelectedOrder((prev) => ({
+                                ...prev,
+                                item_details: prev.item_details.map((a) =>
+                                  a.item_uuid === item.item_uuid
+                                    ? {
+                                        ...a,
+                                        status: +a.status === 1 ? 0 : 1,
+                                      }
+                                    : a
+                                ),
+                              }));
+
+                              audiosRef.current?.forEach((audio) => {
+                                if (audio.item_uuid === item.item_uuid) {
+                                  audio.setAttribute("played", "true");
+                                }
+                              });
+                              audioLoopFunction({ i: 0 });
                             }}
                           >
-                            {item.b + ":" + item.p}
+                            {item.item_uuid === "" ? (
+                              <AiFillPlayCircle
+                                style={{ fontSize: "25px", cursor: "pointer" }}
+                              />
+                            ) : +item.status !== 1 ? (
+                              <CheckCircleOutlineIcon />
+                            ) : (
+                              ""
+                            )}
                           </td>
-                          {!Location.pathname.includes("delivery") ? (
-                            <td className="flex">
-                              <button
-                                className="item-sales-search"
-                                style={{ width: "max-content" }}
-                                onClick={() => {
-                                  setOneTimeState();
-
-                                  setSelectedOrder((prev) => ({
-                                    ...prev,
-                                    item_details: prev.item_details.map((a) =>
-                                      a.item_uuid === item.item_uuid
-                                        ? {
-                                          ...a,
-                                          status: +a.status === 2 ? 0 : 2,
-                                        }
-                                        : a
-                                    ),
-                                  }));
-                                }}
-                              >
-                                Hold
-                              </button>
-                              <button
-                                className="item-sales-search"
-                                style={{ width: "max-content" }}
-                                onClick={() => {
-                                  setOneTimeState();
-
-                                  setSelectedOrder((prev) => ({
-                                    ...prev,
-                                    item_details: prev.item_details.map((a) =>
-                                      a.item_uuid === item.item_uuid
-                                        ? {
-                                          ...a,
-                                          status: +a.status === 3 ? 0 : 3,
-                                        }
-                                        : a
-                                    ),
-                                  }));
-                                }}
-                              >
-                                Cancel
-                              </button>
-                            </td>
-                          ) : (
-                            ""
-                          )}
-                        </>
-                      ) : (
-                        <td>
-                          {tempQuantity?.find(
-                            (a) => a.item_uuid === item.item_uuid
-                          )?.b || 0}
-                          :
-                          {tempQuantity?.find(
-                            (a) => a.item_uuid === item.item_uuid
-                          )?.p || 0}
-                        </td>
-                      )}
-                    </tr>
-                  ))
-                : orders
-                  ?.sort((a, b) => a.created_at - b.created_at)
-                  ?.map((item, i) => (
-                    <tr key={Math.random()} style={{ height: "30px" }}>
-                      <td>{i + 1}</td>
-                      <td
-                        colSpan={2}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setChecking(false);
-                          setSelectedOrder(item);
-                        }}
-                      >
-                        {item.counter_title}
-                      </td>
-                      <td
-                        colSpan={2}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setChecking(false);
-                          setSelectedOrder(item);
-                        }}
-                      >
-                        {
-                          item?.item_details?.filter((a) => +a.status === 1)
-                            ?.length
-                        }
-                        /
-                        {item?.item_details
-                          .filter(
-                            (a) =>
-                              !Location.pathname.includes("delivery") ||
-                              +a.status === 1
-                          )
-                          .filter(
-                            (a) =>
-                              !Location.pathname.includes("checking") ||
-                              +a.status === 1
-                          )?.length || 0}
-                      </td>
-                      <td>
-                        {item?.mobile ? (
-                          <a href={"tel:" + item?.mobile}>
-                            <Phone
-                              className="user_Back_icon"
-                              style={{ color: "#4ac959" }}
-                            />
-                          </a>
                         ) : (
                           ""
                         )}
-                      </td>
-                    </tr>
-                  ))}
+                        <td>{i + 1}</td>
+                        <td colSpan={2}>
+                          {
+                            items.find((a) => a.item_uuid === item.item_uuid)
+                              ?.item_title
+                          }
+                        </td>
+                        <td>
+                          {
+                            items.find((a) => a.item_uuid === item.item_uuid)
+                              ?.mrp
+                          }
+                        </td>
+                        {!Location.pathname.includes("checking") ? (
+                          <>
+                            <td
+                              onClick={() => {
+                                setOneTimeState();
+                                setPopupForm(
+                                  items.find(
+                                    (a) => a.item_uuid === item.item_uuid
+                                  )
+                                );
+                              }}
+                            >
+                              {item.b + ":" + item.p}
+                            </td>
+                            {!Location.pathname.includes("delivery") ? (
+                              <td className="flex">
+                                <button
+                                  className="item-sales-search"
+                                  style={{ width: "max-content" }}
+                                  onClick={() => {
+                                    setOneTimeState();
+
+                                    setSelectedOrder((prev) => ({
+                                      ...prev,
+                                      item_details: prev.item_details.map((a) =>
+                                        a.item_uuid === item.item_uuid
+                                          ? {
+                                              ...a,
+                                              status: +a.status === 2 ? 0 : 2,
+                                            }
+                                          : a
+                                      ),
+                                    }));
+                                  }}
+                                >
+                                  Hold
+                                </button>
+                                <button
+                                  className="item-sales-search"
+                                  style={{ width: "max-content" }}
+                                  onClick={() => {
+                                    setOneTimeState();
+
+                                    setSelectedOrder((prev) => ({
+                                      ...prev,
+                                      item_details: prev.item_details.map((a) =>
+                                        a.item_uuid === item.item_uuid
+                                          ? {
+                                              ...a,
+                                              status: +a.status === 3 ? 0 : 3,
+                                            }
+                                          : a
+                                      ),
+                                    }));
+                                  }}
+                                >
+                                  Cancel
+                                </button>
+                              </td>
+                            ) : (
+                              ""
+                            )}
+                          </>
+                        ) : (
+                          <td>
+                            {tempQuantity?.find(
+                              (a) => a.item_uuid === item.item_uuid
+                            )?.b || 0}
+                            :
+                            {tempQuantity?.find(
+                              (a) => a.item_uuid === item.item_uuid
+                            )?.p || 0}
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                : orders
+                    ?.sort((a, b) => a.created_at - b.created_at)
+                    ?.map((item, i) => (
+                      <tr key={Math.random()} style={{ height: "30px" }}>
+                        <td>{i + 1}</td>
+                        <td
+                          colSpan={2}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setChecking(false);
+                            setSelectedOrder(item);
+                          }}
+                        >
+                          {item.counter_title}
+                        </td>
+                        <td
+                          colSpan={2}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setChecking(false);
+                            setSelectedOrder(item);
+                          }}
+                        >
+                          {
+                            item?.item_details?.filter((a) => +a.status === 1)
+                              ?.length
+                          }
+                          /
+                          {item?.item_details
+                            .filter(
+                              (a) =>
+                                !Location.pathname.includes("delivery") ||
+                                +a.status === 1
+                            )
+                            .filter(
+                              (a) =>
+                                !Location.pathname.includes("checking") ||
+                                +a.status === 1
+                            )?.length || 0}
+                        </td>
+                        <td>
+                          {item?.mobile ? (
+                            <a href={"tel:" + item?.mobile}>
+                              <Phone
+                                className="user_Back_icon"
+                                style={{ color: "#4ac959" }}
+                              />
+                            </a>
+                          ) : (
+                            ""
+                          )}
+                        </td>
+                      </tr>
+                    ))}
             </tbody>
           </table>
         </div>
@@ -1247,7 +1255,10 @@ const ProcessingOrders = () => {
       )}
       {popupBarcode ? (
         <CheckingValues
-          onSave={() => { setPopupBarcode(false); setBarcodeMessage([]) }}
+          onSave={() => {
+            setPopupBarcode(false);
+            setBarcodeMessage([]);
+          }}
           BarcodeMessage={BarcodeMessage}
           postOrderData={postOrderData}
         />
@@ -1277,6 +1288,7 @@ const ProcessingOrders = () => {
           orders={orders}
           holdPopup={holdPopup}
           itemsData={items}
+          postHoldOrders={postHoldOrders}
         />
       ) : (
         ""
@@ -1554,7 +1566,7 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
     </div>
   );
 }
-function HoldPopup({ onSave, orders, itemsData, holdPopup }) {
+function HoldPopup({ onSave, orders, itemsData, holdPopup, postHoldOrders }) {
   const [items, setItems] = useState([]);
   useEffect(() => {
     let data = [].concat
@@ -1584,7 +1596,29 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup }) {
     console.log(result);
     setItems(result);
   }, []);
-
+  const postOrderData = async () => {
+    postHoldOrders(
+      orders
+        .filter(
+          (a) =>
+            a.item_details.filter(
+              (b) =>
+                items.filter((c) => c.edit && c.item_uuid === b.item_uuid)
+                  .length
+            ).length
+        )
+        .map((a) => ({
+          ...a,
+          item_details: a.item_details.map((a) => ({
+            ...a,
+            status:
+              items.find((b) => b.item_uuid === a.item_uuid)?.status ||
+              a.status,
+          })),
+        }))
+    );
+    onSave();
+  };
   return (
     <div className="overlay">
       <div
@@ -1619,10 +1653,11 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup }) {
                 >
                   <thead>
                     <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
-                      <th colSpan={2}>
+                      {holdPopup === "Hold" ? <th></th> : ""}
+                      <th colSpan={3}>
                         <div className="t-head-element">Item</div>
                       </th>
-                      <th>
+                      <th colSpan={2}>
                         <div className="t-head-element">Qty</div>
                       </th>
                     </tr>
@@ -1634,11 +1669,33 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup }) {
                         style={{
                           height: "30px",
                           color: "#fff",
-                          backgroundColor: "#7990dd",
+                          backgroundColor:
+                            +item.status === 1 ? "green" : "#7990dd",
                         }}
                       >
-                        <td colSpan={2}>{item.item_title}</td>
-                        <td>
+                        {holdPopup === "Hold" ? (
+                          <td
+                            onClick={() =>
+                              setItems((prev) =>
+                                prev.map((a) =>
+                                  a.item_uuid === item.item_uuid
+                                    ? { ...a, status: 1, edit: true }
+                                    : a
+                                )
+                              )
+                            }
+                          >
+                            {+item.status === 2 ? (
+                              <CheckCircleOutlineIcon />
+                            ) : (
+                              ""
+                            )}
+                          </td>
+                        ) : (
+                          ""
+                        )}
+                        <td colSpan={3}>{item.item_title}</td>
+                        <td colSpan={2}>
                           {item?.b || 0} : {item?.p || 0}
                         </td>
                       </tr>
@@ -1655,19 +1712,27 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup }) {
               </div>
             )}
 
-            {/* <div className="flex" style={{ justifyContent: "space-between" }}>
-              <button
+            {items.filter((a) => a.edit).length ? (
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                {/* <button
                 type="button"
                 style={{ backgroundColor: "red" }}
                 className="submit"
                 onClick={onSave}
               >
                 Cancel
-              </button>
-              <button type="button" className="submit" onClick={postOrderData}>
-                Save
-              </button>
-            </div> */}
+              </button> */}
+                <button
+                  type="button"
+                  className="submit"
+                  onClick={postOrderData}
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              ""
+            )}
           </div>
           <button onClick={onSave} className="closeButton">
             x
@@ -1793,9 +1858,9 @@ function DiliveryPopup({
                               prev.map((a) =>
                                 a.mode_uuid === item.mode_uuid
                                   ? {
-                                    ...a,
-                                    amt: e.target.value,
-                                  }
+                                      ...a,
+                                      amt: e.target.value,
+                                    }
                                   : a
                               )
                             )
@@ -1827,9 +1892,9 @@ function DiliveryPopup({
                                 prev.map((a) =>
                                   a.mode_uuid === item.mode_uuid
                                     ? {
-                                      ...a,
-                                      coin: e.target.value,
-                                    }
+                                        ...a,
+                                        coin: e.target.value,
+                                      }
                                     : a
                                 )
                               )
@@ -2048,8 +2113,8 @@ function DeliveryMessagePopup({ onSave, data }) {
             i === 0
               ? a.mode_title
               : data.length === i + 1
-                ? " and " + a.mode_title
-                : ", " + a.mode_title
+              ? " and " + a.mode_title
+              : ", " + a.mode_title
           )}{" "}
           not allowed
         </h2>
@@ -2110,11 +2175,28 @@ function NewUserForm({
       delivery_return: deliveryPage
         ? prev.delivery_return.length
           ? prev.delivery_return.filter(
-            (a) => a.item_uuid === popupInfo.item_uuid
-          )
+              (a) => a.item_uuid === popupInfo.item_uuid
+            )
             ? prev.delivery_return.map((a) =>
-              a.item_uuid === popupInfo.item_uuid
-                ? {
+                a.item_uuid === popupInfo.item_uuid
+                  ? {
+                      item_uuid: popupInfo.item_uuid,
+                      b:
+                        +data.b -
+                        (+prev?.item_details?.find(
+                          (a) => a.item_uuid === popupInfo.item_uuid
+                        )?.b || 0),
+                      p:
+                        +data.p -
+                        (+prev?.item_details?.find(
+                          (a) => a.item_uuid === popupInfo.item_uuid
+                        )?.p || 0),
+                    }
+                  : a
+              )
+            : [
+                ...prev.delivery_return,
+                {
                   item_uuid: popupInfo.item_uuid,
                   b:
                     +data.b -
@@ -2126,11 +2208,9 @@ function NewUserForm({
                     (+prev?.item_details?.find(
                       (a) => a.item_uuid === popupInfo.item_uuid
                     )?.p || 0),
-                }
-                : a
-            )
-            : [
-              ...prev.delivery_return,
+                },
+              ]
+          : [
               {
                 item_uuid: popupInfo.item_uuid,
                 b:
@@ -2145,36 +2225,21 @@ function NewUserForm({
                   )?.p || 0),
               },
             ]
-          : [
-            {
-              item_uuid: popupInfo.item_uuid,
-              b:
-                +data.b -
-                (+prev?.item_details?.find(
-                  (a) => a.item_uuid === popupInfo.item_uuid
-                )?.b || 0),
-              p:
-                +data.p -
-                (+prev?.item_details?.find(
-                  (a) => a.item_uuid === popupInfo.item_uuid
-                )?.p || 0),
-            },
-          ]
         : [],
       item_details: prev.item_details.filter(
         (a) => a.item_uuid === popupInfo.item_uuid
       )?.length
         ? prev?.item_details?.map((a) => {
-          if (a.item_uuid === popupInfo.item_uuid)
-            return {
-              ...a,
-              b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
-              p: +data.p % (+popupInfo.conversion || 1),
-            };
-          else return a;
-        })
+            if (a.item_uuid === popupInfo.item_uuid)
+              return {
+                ...a,
+                b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
+                p: +data.p % (+popupInfo.conversion || 1),
+              };
+            else return a;
+          })
         : prev?.item_details?.length
-          ? [
+        ? [
             ...prev.item_details,
             {
               ...popupInfo,
@@ -2182,7 +2247,7 @@ function NewUserForm({
               p: +data.p % (+popupInfo.conversion || 1),
             },
           ]
-          : [
+        : [
             {
               ...popupInfo,
               b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
