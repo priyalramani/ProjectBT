@@ -8,7 +8,7 @@ import { Billing } from "../functions";
 import { AiOutlineReload } from "react-icons/ai";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { Phone } from "@mui/icons-material";
-
+import CloseIcon from '@mui/icons-material/Close';
 let intervalId = 0;
 const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
@@ -241,7 +241,7 @@ const ProcessingOrders = () => {
         console.log(item.item_title);
         const handleQty = (value, label, sufix) =>
           value ? `${value} ${label}${value > 1 ? sufix : ""}` : "";
-        const speechString = `Item ${item.pronounce} ${
+        const speechString = `${item.pronounce} ${
           item.mrp
         } MRP ${handleQty(order_item.b, "Box", "es")} ${handleQty(
           order_item.p,
@@ -628,14 +628,14 @@ const ProcessingOrders = () => {
               } else Navigate(-1);
             }}
           />
-          <AiOutlineReload
+          {!selectedOrder?<AiOutlineReload
             className="user_Back_icon"
             onClick={() => {
               if (selectedOrder) {
                 setConfirmPopup(true);
               } else getTripOrders();
             }}
-          />
+          />:""}
         </div>
 
         <h1 style={{ width: "100%", textAlign: "left", marginLeft: "30px" }}>
@@ -1781,10 +1781,10 @@ function ConfirmPopup({ onSave, onClose }) {
     <div className="overlay">
       <div
         className="modal"
-        style={{ height: "fit-content", width: "max-content" }}
+        style={{ height: "fit-content", width: "max-content",padding:"30px" }}
       >
-        <h2>Are you sure?</h2>
-        <h2>Changes will be discarded</h2>
+        <h2 style={{textAlign:"center"}}>Are you sure?</h2>
+        <h2 style={{textAlign:"center"}}>Changes will be discarded</h2>
         <div
           className="content"
           style={{
@@ -1796,11 +1796,7 @@ function ConfirmPopup({ onSave, onClose }) {
             <form className="form">
               <div
                 className="flex"
-                style={{
-                  justifyContent: "space-between",
-                  width: "100%",
-                  height: "max-content",
-                }}
+                
               >
                 <button
                   type="submit"
@@ -1810,17 +1806,13 @@ function ConfirmPopup({ onSave, onClose }) {
                 >
                   Discard
                 </button>
-                <button
-                  type="button"
-                  className="submit"
-                  onClick={onClose}
-                  style={{ height: "max-content", padding: "10px" }}
-                >
-                  Save Changes
-                </button>
+               
               </div>
             </form>
           </div>
+          <button onClick={onClose} className="closeButton">
+              <CloseIcon/>
+            </button>
         </div>
       </div>
     </div>

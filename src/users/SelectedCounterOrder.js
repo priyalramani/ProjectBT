@@ -7,7 +7,7 @@ import { AutoAdd, Billing } from "../functions";
 import { Link as ScrollLink } from "react-scroll";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-
+import CloseIcon from '@mui/icons-material/Close';
 const SelectedCounterOrder = () => {
   const [items, setItems] = useState([]);
   const [order, setOrder] = useState([]);
@@ -183,6 +183,7 @@ const SelectedCounterOrder = () => {
                   value={filterItemTitle}
                   onChange={(e) => setFilterItemTile(e.target.value)}
                 />
+                <CloseIcon className="user_cross_icon" onClick={()=>setFilterItemTile("")}/>
               </div>
 
               <div>
@@ -211,9 +212,17 @@ const SelectedCounterOrder = () => {
                       ?.sort((a, b) => a - b)
                       ?.map(
                         (category) =>
-                          items.filter(
-                            (a) => a.category_uuid === category.category_uuid
-                          )?.length > 0 && (
+                          items
+                            .filter(
+                              (a) => a.category_uuid === category.category_uuid
+                            )
+                            ?.filter(
+                              (a) =>
+                                !filterItemTitle ||
+                                a.item_title
+                                  .toLocaleLowerCase()
+                                  .includes(filterItemTitle.toLocaleLowerCase())
+                            )?.length > 0 && (
                             <div
                               id={!cartPage ? category?.category_uuid : ""}
                               key={category?.category_uuid}
@@ -526,9 +535,20 @@ const SelectedCounterOrder = () => {
                           ? order?.items?.filter(
                               (a) => a.category_uuid === category.category_uuid
                             )?.length
-                          : items.filter(
-                              (a) => a.category_uuid === category.category_uuid
-                            )?.length}
+                          : items
+                              .filter(
+                                (a) =>
+                                  a.category_uuid === category.category_uuid
+                              )
+                              ?.filter(
+                                (a) =>
+                                  !filterItemTitle ||
+                                  a.item_title
+                                    .toLocaleLowerCase()
+                                    .includes(
+                                      filterItemTitle.toLocaleLowerCase()
+                                    )
+                              )?.length}
                       </span>
                     </ScrollLink>
                   )

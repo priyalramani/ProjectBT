@@ -112,6 +112,13 @@
   color: #4ac959;
   font-size: 20px;
 }
+.user_cross_icon {
+  position: absolute;
+  right: 2px;
+  z-index: 9999;
+  color: #4ac959;
+  font-size: 20px;
+}
 .user_Back_icon{
   z-index: 9999;
   color: #fff;
