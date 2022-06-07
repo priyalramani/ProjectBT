@@ -2,37 +2,38 @@ const Card = ({
   title2,
   title1,
   selectedOrder,
-  color,
+  details,
   status,
   dateTime,
   rounded,
-  onDoubleClick
+  onDoubleClick,
 }) => {
-
- 
-  var days = [
-    "Sun",
-    "Mon",
-    "Tue",
-    "Wed",
-    "Thu",
-    "Fri",
-    "Sat",
+  var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-];
 
-function formatAMPM(date) {
-  var hours = date.getHours();
-  var minutes = date.getMinutes();
-  var ampm = hours >= 12 ? 'pm' : 'am';
-  hours = hours % 12;
-  hours = hours ? hours : 12; // the hour '0' should be '12'
-  minutes = minutes < 10 ? '0'+minutes : minutes;
-  var strTime = hours + ':' + minutes + ' ' + ampm;
-  return strTime;
-}
+  function formatAMPM(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var strTime = hours + ":" + minutes + " " + ampm;
+    return strTime;
+  }
 
   return (
     <>
@@ -42,19 +43,30 @@ function formatAMPM(date) {
             ${rounded ? "rounded" : ""} 
             ${selectedOrder ? "selected-seat" : ""}
             `}
-          style={{ margin: "10px" }}
+          style={{ margin: "5px" }}
         >
-          <div className={`card ${rounded ? "rounded" : ""}`}>
+          <div
+            className={`card ${rounded ? "rounded" : ""}`}
+            style={{
+              backgroundColor:
+                (new Date(dateTime))?.getHours() > +details[0].order_time_1
+                  ? "#9c1010"
+                  : (new Date(dateTime))?.getHours() > +details[0].order_time_1
+                  ? "#f2e017"
+                  : "#fff",
+            }}
+          >
             <p className="title2">{title1 ? title1 : title2}</p>
             <p className="caption">{title1 ? title2 : ""}</p>
-            <div
-              className={`horizontal-line`}
-              style={{ background: `${color}` }}
-            ></div>
-            <div className="seatTimer">
-              <div>{status}</div>
-              <div style={{fontSize:"10px"}}>{`${days[(new Date(dateTime)).getDay()]||""} ${(new Date(dateTime).getDate())||""} ${monthNames[(new Date()).getMonth()]||""}`}</div>
-              <div style={{fontSize:"10px"}}>{formatAMPM(new Date(dateTime)) || ""}</div>
+
+            <div>{status}</div>
+            <div style={{ fontSize: "10px" }}>{`${
+              days[new Date(dateTime).getDay()] || ""
+            } ${new Date(dateTime).getDate() || ""} ${
+              monthNames[new Date().getMonth()] || ""
+            }`}</div>
+            <div style={{ fontSize: "10px" }}>
+              {formatAMPM(new Date(dateTime)) || ""}
             </div>
           </div>
         </button>

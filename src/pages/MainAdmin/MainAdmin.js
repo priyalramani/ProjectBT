@@ -12,6 +12,7 @@ const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
   const [orders, setOrders] = useState([]);
+  const [details, setDetails] = useState([]);
   const [routesData, setRoutesData] = useState([]);
   const [tripData, setTripData] = useState([]);
   const [counter, setCounter] = useState([]);
@@ -37,6 +38,20 @@ const MainAdmin = () => {
             routesData.find((a) => a.route_uuid === b.route_uuid)
               ?.route_title || "-",
         }))
+      );
+  };
+  const getDetails = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/details/GetDetails",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success)
+      setDetails(
+        response.data.result
       );
   };
 
@@ -69,6 +84,7 @@ const MainAdmin = () => {
     getRoutesData();
     getCounter();
     setInterval(getRunningOrders, 180000);
+    getDetails();
   }, []);
   const getRunningOrders = async () => {
     const response = await axios({
@@ -192,6 +208,7 @@ const MainAdmin = () => {
                                         // }
                                       />
                                       <Card
+                                      details={details}
                                         onDoubleClick={() =>
                                           setPopupOrder(item)
                                         }
@@ -336,6 +353,7 @@ const MainAdmin = () => {
                               />
 
                               <Card
+                              details={details}
                                 onDoubleClick={() => setPopupOrder(item)}
                                 // on_order={order}
                                 dateTime={item?.status[0]?.time}
@@ -464,6 +482,7 @@ const MainAdmin = () => {
                                         // }
                                       />
                                       <Card
+                                      details={details}
                                         onDoubleClick={() =>
                                           setPopupOrder(item)
                                         }
