@@ -7,6 +7,7 @@ import { useSpeechSynthesis } from "react-speech-kit";
 import { Billing } from "../functions";
 import { AiOutlineReload } from "react-icons/ai";
 import { IoArrowBackOutline } from "react-icons/io5";
+import { Phone } from "@mui/icons-material";
 
 let intervalId = 0;
 const ProcessingOrders = () => {
@@ -640,7 +641,7 @@ const ProcessingOrders = () => {
         <h1 style={{ width: "100%", textAlign: "left", marginLeft: "30px" }}>
           {selectedOrder ? selectedOrder.counter_title : "Trip Orders"}
         </h1>
-        {!selectedOrder&&window.location.pathname("Processing") ? (
+        {!selectedOrder && window.location.pathname.includes("processing") ? (
           <button
             className="item-sales-search"
             style={{
@@ -829,6 +830,9 @@ const ProcessingOrders = () => {
                     <th colSpan={2}>
                       <div className="t-head-element">Progress</div>
                     </th>
+                    <th>
+                      <div className="t-head-element"></div>
+                    </th>
                   </>
                 )}
               </tr>
@@ -984,22 +988,43 @@ const ProcessingOrders = () => {
                 : orders
                     ?.sort((a, b) => a.created_at - b.created_at)
                     ?.map((item, i) => (
-                      <tr
-                        key={Math.random()}
-                        style={{ height: "30px" }}
-                        onClick={() => {
-                          setChecking(false);
-                          setSelectedOrder(item);
-                        }}
-                      >
+                      <tr key={Math.random()} style={{ height: "30px" }}>
                         <td>{i + 1}</td>
-                        <td colSpan={2}>{item.counter_title}</td>
-                        <td colSpan={2}>
+                        <td
+                          colSpan={2}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setChecking(false);
+                            setSelectedOrder(item);
+                          }}
+                        >
+                          {item.counter_title}
+                        </td>
+                        <td
+                          colSpan={2}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setChecking(false);
+                            setSelectedOrder(item);
+                          }}
+                        >
                           {
                             item?.item_details?.filter((a) => +a.status === 1)
                               ?.length
                           }
                           /{item?.item_details?.length || 0}
+                        </td>
+                        <td>
+                          {item?.mobile ? (
+                            <a href={"tel:" + item?.mobile}>
+                              <Phone
+                                className="user_Back_icon"
+                                style={{ color: "#4ac959" }}
+                              />
+                            </a>
+                          ) : (
+                            ""
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -1771,7 +1796,11 @@ function ConfirmPopup({ onSave, onClose }) {
             <form className="form">
               <div
                 className="flex"
-                style={{ justifyContent: "space-between", width: "100%",height:"max-content" }}
+                style={{
+                  justifyContent: "space-between",
+                  width: "100%",
+                  height: "max-content",
+                }}
               >
                 <button
                   type="submit"
@@ -1781,7 +1810,12 @@ function ConfirmPopup({ onSave, onClose }) {
                 >
                   Discard
                 </button>
-                <button type="button" className="submit" onClick={onClose} style={{height:"max-content",padding:"10px"}}>
+                <button
+                  type="button"
+                  className="submit"
+                  onClick={onClose}
+                  style={{ height: "max-content", padding: "10px" }}
+                >
                   Save Changes
                 </button>
               </div>
