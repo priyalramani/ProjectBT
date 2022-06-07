@@ -640,7 +640,7 @@ const ProcessingOrders = () => {
         <h1 style={{ width: "100%", textAlign: "left", marginLeft: "30px" }}>
           {selectedOrder ? selectedOrder.counter_title : "Trip Orders"}
         </h1>
-        {!selectedOrder ? (
+        {!selectedOrder&&window.location.pathname("Processing") ? (
           <button
             className="item-sales-search"
             style={{
