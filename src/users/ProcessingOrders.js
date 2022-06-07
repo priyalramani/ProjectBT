@@ -899,6 +899,31 @@ const ProcessingOrders = () => {
 
                               height: "50px",
                             }}
+                            onClick={() => {
+                              setItemChanged((prev) =>
+                                +item.status !== 1
+                                  ? [
+                                      ...prev,
+                                      selectedOrder.item_details.find(
+                                        (a) =>
+                                          a.item_uuid === item.item_uuid
+                                      ),
+                                    ]
+                                  : prev
+                              );
+                              setOneTimeState();
+                              setSelectedOrder((prev) => ({
+                                ...prev,
+                                item_details: prev.item_details.map((a) =>
+                                  a.item_uuid === item.item_uuid
+                                    ? {
+                                        ...a,
+                                        status: +a.status === 1 ? 0 : 1,
+                                      }
+                                    : a
+                                ),
+                              }));
+                            }}
                           >
                             {item.item_uuid === orderSpeech ? (
                               <AiFillPlayCircle
@@ -906,31 +931,7 @@ const ProcessingOrders = () => {
                               />
                             ) : +item.status !== 1 ? (
                               <CheckCircleOutlineIcon
-                                onClick={() => {
-                                  setItemChanged((prev) =>
-                                    +item.status !== 1
-                                      ? [
-                                          ...prev,
-                                          selectedOrder.item_details.find(
-                                            (a) =>
-                                              a.item_uuid === item.item_uuid
-                                          ),
-                                        ]
-                                      : prev
-                                  );
-                                  setOneTimeState();
-                                  setSelectedOrder((prev) => ({
-                                    ...prev,
-                                    item_details: prev.item_details.map((a) =>
-                                      a.item_uuid === item.item_uuid
-                                        ? {
-                                            ...a,
-                                            status: +a.status === 1 ? 0 : 1,
-                                          }
-                                        : a
-                                    ),
-                                  }));
-                                }}
+                               
                               />
                             ) : (
                               ""
@@ -1106,7 +1107,7 @@ const ProcessingOrders = () => {
           order_uuid={selectedOrder?.order_uuid}
           setSelectedOrder={setSelectedOrder}
           order={selectedOrder}
-          allown={paymentModes?.filter(
+          allowed={paymentModes?.filter(
             (a) =>
               counters
                 ?.find((a) => selectedOrder?.counter_uuid === a.counter_uuid)
