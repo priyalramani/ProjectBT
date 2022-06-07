@@ -8,7 +8,7 @@ import { Billing } from "../functions";
 import { AiOutlineReload } from "react-icons/ai";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { Phone } from "@mui/icons-material";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 let intervalId = 0;
 const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
@@ -241,13 +241,11 @@ const ProcessingOrders = () => {
         console.log(item.item_title);
         const handleQty = (value, label, sufix) =>
           value ? `${value} ${label}${value > 1 ? sufix : ""}` : "";
-        const speechString = `${item.pronounce} ${
-          item.mrp
-        } MRP ${handleQty(order_item.b, "Box", "es")} ${handleQty(
-          order_item.p,
-          "Piece",
-          "s"
-        )}`;
+        const speechString = `${item.pronounce} ${item.mrp} MRP ${handleQty(
+          order_item.b,
+          "Box",
+          "es"
+        )} ${handleQty(order_item.p, "Piece", "s")}`;
 
         let audioElement = new Audio(
           `${axios.defaults.baseURL}/stream/${speechString
@@ -628,29 +626,44 @@ const ProcessingOrders = () => {
               } else Navigate(-1);
             }}
           />
-          {!selectedOrder?<AiOutlineReload
-            className="user_Back_icon"
-            onClick={() => {
-              if (selectedOrder) {
-                setConfirmPopup(true);
-              } else getTripOrders();
-            }}
-          />:""}
+          {!selectedOrder ? (
+            <AiOutlineReload
+              className="user_Back_icon"
+              onClick={() => {
+                if (selectedOrder) {
+                  setConfirmPopup(true);
+                } else getTripOrders();
+              }}
+            />
+          ) : (
+            ""
+          )}
         </div>
 
         <h1 style={{ width: "100%", textAlign: "left", marginLeft: "30px" }}>
           {selectedOrder ? selectedOrder.counter_title : "Trip Orders"}
         </h1>
         {!selectedOrder && window.location.pathname.includes("processing") ? (
-          <button
-            className="item-sales-search"
-            style={{
-              width: "max-content",
-            }}
-            onClick={() => setHoldPopup(true)}
-          >
-            Hold
-          </button>
+          <>
+            <button
+              className="item-sales-search"
+              style={{
+                width: "max-content",
+              }}
+              onClick={() => setHoldPopup("Summary")}
+            >
+              Summary
+            </button>
+            <button
+              className="item-sales-search"
+              style={{
+                width: "max-content",
+              }}
+              onClick={() => setHoldPopup("Hold")}
+            >
+              Hold
+            </button>
+          </>
         ) : (
           ""
         )}
@@ -846,18 +859,22 @@ const ProcessingOrders = () => {
                         key={item.item_uuid}
                         style={{
                           height: "30px",
-                          backgroundColor:
-                            +item.status === 1
+                          backgroundColor: window.location.pathname.includes(
+                            "processing"
+                          )
+                            ? +item.status === 1
                               ? "green"
                               : +item.status === 2
                               ? "yellow"
                               : +item.status === 3
                               ? "red"
-                              : "#fff",
-                          color:
-                            +item.status === 1 || +item.status === 3
+                              : "#fff"
+                            : "#fff",
+                          color: window.location.pathname.includes("processing")
+                            ? +item.status === 1 || +item.status === 3
                               ? "#fff"
-                              : "#000",
+                              : "#000"
+                            : "#000",
                         }}
                       >
                         {selectedOrder &&
@@ -1068,6 +1085,7 @@ const ProcessingOrders = () => {
         <HoldPopup
           onSave={() => setHoldPopup(false)}
           orders={orders}
+          holdPopup={holdPopup}
           itemsData={items}
         />
       ) : (
@@ -1346,7 +1364,7 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
     </div>
   );
 }
-function HoldPopup({ onSave, orders, itemsData }) {
+function HoldPopup({ onSave, orders, itemsData, holdPopup }) {
   const [items, setItems] = useState([]);
   useEffect(() => {
     let data = [].concat
@@ -1354,7 +1372,7 @@ function HoldPopup({ onSave, orders, itemsData }) {
         [],
         orders.map((a) => a.item_details)
       )
-      .filter((a) => a.status === 2)
+      .filter((a) => a.status === (holdPopup === "Hold" ? 2 : 0))
       .map((a) => ({
         ...a,
         item_title: itemsData?.find((b) => b.item_uuid === a.item_uuid)
@@ -1387,7 +1405,7 @@ function HoldPopup({ onSave, orders, itemsData }) {
           minWidth: "400px",
         }}
       >
-        <h1>Hold</h1>
+        <h1>{holdPopup}</h1>
         <div
           className="content"
           style={{
@@ -1781,10 +1799,10 @@ function ConfirmPopup({ onSave, onClose }) {
     <div className="overlay">
       <div
         className="modal"
-        style={{ height: "fit-content", width: "max-content",padding:"30px" }}
+        style={{ height: "fit-content", width: "max-content", padding: "30px" }}
       >
-        <h2 style={{textAlign:"center"}}>Are you sure?</h2>
-        <h2 style={{textAlign:"center"}}>Changes will be discarded</h2>
+        <h2 style={{ textAlign: "center" }}>Are you sure?</h2>
+        <h2 style={{ textAlign: "center" }}>Changes will be discarded</h2>
         <div
           className="content"
           style={{
@@ -1794,10 +1812,7 @@ function ConfirmPopup({ onSave, onClose }) {
         >
           <div style={{ overflowY: "scroll", width: "100%" }}>
             <form className="form">
-              <div
-                className="flex"
-                
-              >
+              <div className="flex">
                 <button
                   type="submit"
                   style={{ backgroundColor: "red" }}
@@ -1806,13 +1821,12 @@ function ConfirmPopup({ onSave, onClose }) {
                 >
                   Discard
                 </button>
-               
               </div>
             </form>
           </div>
           <button onClick={onClose} className="closeButton">
-              <CloseIcon/>
-            </button>
+            <CloseIcon />
+          </button>
         </div>
       </div>
     </div>
