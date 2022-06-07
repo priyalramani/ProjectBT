@@ -20,6 +20,7 @@ const MainAdmin = () => {
   const [selectedOrder, setSelectedOrder] = useState([]);
   const [selectedRouteOrder, setSelectedRouteOrder] = useState({});
   const [selectedTrip, setSelectedTrip] = useState("");
+  const [searchItems, setSearhItems] = useState("");
   const [popupOrder, setPopupOrder] = useState(null);
   const getCounter = async () => {
     const response = await axios({
@@ -49,10 +50,7 @@ const MainAdmin = () => {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success)
-      setDetails(
-        response.data.result
-      );
+    if (response.data.success) setDetails(response.data.result);
   };
 
   const getRoutesData = async () => {
@@ -143,118 +141,127 @@ const MainAdmin = () => {
           <div className="content-container" id="content-file-container">
             {window.location.pathname.includes("admin") ? (
               <>
-                
                 {routesData.length ? (
                   <>
                     {routesData.map((route) => {
                       let counterRoute = counter.find(
                         (a) => a.route_uuid === route.route_uuid
                       );
-                        return (
-                          <div key={Math.random()} className="sectionDiv">
-                            <h1>
-                              {route.route_title} (
-                              {
-                                route.orderLength
-                              }
-                              ) [ processing:{" "}
-                              {
-                                route?.processingLength
-                              }
-                              , Checking:{" "}
-                              {
-                                route.checkingLength
-                              }
-                              , Delivery:{" "}
-                              {
-                                route?.deliveryLength
-                              }
-                              ]
-                            </h1>
-                            <div
-                              className="content"
-                              style={{
-                                flexDirection: "row",
-                                flexWrap: "wrap",
-                                gap: "0",
-                              }}
-                              id="seats_container"
-                            >
-                              {orders
-                                .filter(
-                                  (a) =>
-                                    a?.counter_uuid === counterRoute?.counter_uuid
-                                )
-                                .map((item) => {
-                                  return (
-                                    <div
-                                      className={`seatSearchTarget`}
-                                      key={Math.random()}
-                                      seat-name={item.seat_name}
-                                      seat-code={item.seat_uuid}
-                                      seat={item.seat_uuid}
-                                      // section={section.section_uuid}
-                                      // section-name={section?.section_name}
-                                      // outlet={outletIdState}
-                                      onClick={() =>
-                                        setSelectedRouteOrder(item.order_uuid)
-                                      }
-                                    >
-                                      <span
-                                        className="dblClickTrigger"
-                                        style={{ display: "none" }}
-                                        // onClick={() =>
-                                        //   menuOpenHandler(item)
-                                        // }
-                                      />
-                                      <Card
+                    
+                      if(orders.filter(a=>a.route_uuid==="0"||a.counter_uuid===counterRoute.counter_uuid).filter(
+                        (a) =>
+                          !searchItems ||
+                          a.invoice_number
+                            ?.toString()
+                            ?.includes(
+                              searchItems.toLocaleLowerCase()
+                            ) ||
+                          a.counter_title
+                            ?.toLocaleLowerCase()
+                            ?.includes(
+                              searchItems.toLocaleLowerCase()
+                            )
+                      ).length)
+                      return (
+                        <div key={Math.random()} className="sectionDiv">
+                          <h1>
+                            {route.route_title} ({route.orderLength}) [
+                            processing: {route?.processingLength}, Checking:{" "}
+                            {route.checkingLength}, Delivery:{" "}
+                            {route?.deliveryLength}]
+                          </h1>
+                          <div
+                            className="content"
+                            style={{
+                              flexDirection: "row",
+                              flexWrap: "wrap",
+                              gap: "0",
+                            }}
+                            id="seats_container"
+                          >
+                            {orders
+                              .filter(
+                                (a) =>
+                                  a?.counter_uuid === counterRoute?.counter_uuid
+                              )
+                              .filter(
+                                (a) =>
+                                  !searchItems ||
+                                  a.invoice_number
+                                    ?.toString()
+                                    ?.includes(
+                                      searchItems.toLocaleLowerCase()
+                                    ) ||
+                                  a.counter_title
+                                    ?.toLocaleLowerCase()
+                                    ?.includes(
+                                      searchItems.toLocaleLowerCase()
+                                    )
+                              )
+                              .map((item) => {
+                                return (
+                                  <div
+                                    className={`seatSearchTarget`}
+                                    key={Math.random()}
+                                    seat-name={item.seat_name}
+                                    seat-code={item.seat_uuid}
+                                    seat={item.seat_uuid}
+                                    // section={section.section_uuid}
+                                    // section-name={section?.section_name}
+                                    // outlet={outletIdState}
+                                    onClick={() =>
+                                      setSelectedRouteOrder(item.order_uuid)
+                                    }
+                                  >
+                                    <span
+                                      className="dblClickTrigger"
+                                      style={{ display: "none" }}
+                                      // onClick={() =>
+                                      //   menuOpenHandler(item)
+                                      // }
+                                    />
+                                    <Card
                                       details={details}
-                                        onDoubleClick={() =>
-                                          setPopupOrder(item)
-                                        }
-                                        // on_order={on_order && on_order}
-                                        // key={item.seat_uuid}
-                                        dateTime={item?.status[0]?.time}
-                                        title1={item?.invoice_number || ""}
-                                        selectedOrder={
-                                          selectedRouteOrder === item.order_uuid
-                                        }
-                                        title2={item?.counter_title || ""}
-                                        status={
-                                          +item.status[item.status.length - 1]
-                                            ?.stage === 1
-                                            ? "Processing"
-                                            : +item.status[
-                                                item.status.length - 1
-                                              ]?.stage === 2
-                                            ? "Checking"
-                                            : +item.status[
-                                                item.status.length - 1
-                                              ]?.stage === 3
-                                            ? "Delivery"
-                                            : +item.status[
-                                                item.status.length - 1
-                                              ]?.stage === 4
-                                            ? "Complete"
-                                            : +item.status[
-                                                item.status.length - 1
-                                              ]?.stage === 5
-                                            ? "Cancelled"
-                                            : ""
-                                        }
-                                        // price={item.price}
-                                        // visibleContext={visibleContext}
-                                        // setVisibleContext={setVisibleContext}
-                                        // isMouseInsideContext={isMouseInsideContext}
-                                        // seats={seatsState.filter(s => +s.seat_status === 1)}
-                                        rounded
-                                      />
-                                    </div>
-                                  );
-                                })}
-                            </div>
+                                      onDoubleClick={() => setPopupOrder(item)}
+                                      // on_order={on_order && on_order}
+                                      // key={item.seat_uuid}
+                                      dateTime={item?.status[0]?.time}
+                                      title1={item?.invoice_number || ""}
+                                      selectedOrder={
+                                        selectedRouteOrder === item.order_uuid
+                                      }
+                                      title2={item?.counter_title || ""}
+                                      status={
+                                        +item.status[item.status.length - 1]
+                                          ?.stage === 1
+                                          ? "Processing"
+                                          : +item.status[item.status.length - 1]
+                                              ?.stage === 2
+                                          ? "Checking"
+                                          : +item.status[item.status.length - 1]
+                                              ?.stage === 3
+                                          ? "Delivery"
+                                          : +item.status[item.status.length - 1]
+                                              ?.stage === 4
+                                          ? "Complete"
+                                          : +item.status[item.status.length - 1]
+                                              ?.stage === 5
+                                          ? "Cancelled"
+                                          : ""
+                                      }
+                                      // price={item.price}
+                                      // visibleContext={visibleContext}
+                                      // setVisibleContext={setVisibleContext}
+                                      // isMouseInsideContext={isMouseInsideContext}
+                                      // seats={seatsState.filter(s => +s.seat_status === 1)}
+                                      rounded
+                                    />
+                                  </div>
+                                );
+                              })}
                           </div>
-                        );
+                        </div>
+                      );
                     })}
                   </>
                 ) : (
@@ -290,7 +297,20 @@ const MainAdmin = () => {
                 ) : (
                   ""
                 )}
-                {orders.filter((a) => !a?.trip_uuid).length ? (
+                {orders.filter(
+                          (a) =>
+                            !searchItems ||
+                            a.invoice_number
+                              ?.toString()
+                              ?.includes(
+                                searchItems.toLocaleLowerCase()
+                              ) ||
+                            a.counter_title
+                              ?.toLocaleLowerCase()
+                              ?.includes(
+                                searchItems.toLocaleLowerCase()
+                              )
+                        ).filter((a) => !a?.trip_uuid).length ? (
                   <div key={Math.random()} className="sectionDiv">
                     <h2 style={{ marginTop: "50px" }}>
                       UnKnown ({orders.filter((a) => !a?.trip_uuid).length}) [
@@ -316,6 +336,20 @@ const MainAdmin = () => {
                     >
                       {orders
                         .filter((a) => !a?.trip_uuid)
+                        .filter(
+                          (a) =>
+                            !searchItems ||
+                            a.invoice_number
+                              ?.toString()
+                              ?.includes(
+                                searchItems.toLocaleLowerCase()
+                              ) ||
+                            a.counter_title
+                              ?.toLocaleLowerCase()
+                              ?.includes(
+                                searchItems.toLocaleLowerCase()
+                              )
+                        )
                         .map((item) => {
                           return (
                             <div
@@ -353,7 +387,7 @@ const MainAdmin = () => {
                               />
 
                               <Card
-                              details={details}
+                                details={details}
                                 onDoubleClick={() => setPopupOrder(item)}
                                 // on_order={order}
                                 dateTime={item?.status[0]?.time}
@@ -404,8 +438,18 @@ const MainAdmin = () => {
                   <>
                     {tripData.map((trip) => {
                       if (
-                        orders.filter((a) => a.trip_uuid === trip.trip_uuid)
-                          .length
+                        orders
+                          .filter((a) => a.trip_uuid === trip.trip_uuid)
+                          .filter(
+                            (a) =>
+                              a.invoice_number
+                                ?.toString()
+
+                                ?.includes(searchItems.toLocaleLowerCase()) ||
+                              a.counter_title
+                                ?.toLocaleLowerCase()
+                                ?.includes(searchItems.toLocaleLowerCase())
+                          ).length
                       )
                         return (
                           <div key={Math.random()} className="sectionDiv">
@@ -416,19 +460,9 @@ const MainAdmin = () => {
                                   (a) => a.trip_uuid === trip.trip_uuid
                                 ).length
                               }
-                              ) [ processing:{" "}
-                              {
-                                trip?.processingLength
-                              }
-                              , Checking:{" "}
-                              {
-                                trip?.checkingLength
-                              }
-                              , Delivery:{" "}
-                              {
-                                trip?.deliveryLength
-                              }
-                              ]
+                              ) [ processing: {trip?.processingLength},
+                              Checking: {trip?.checkingLength}, Delivery:{" "}
+                              {trip?.deliveryLength}]
                             </h1>
                             <div
                               className="content"
@@ -441,6 +475,20 @@ const MainAdmin = () => {
                             >
                               {orders
                                 .filter((a) => a.trip_uuid === trip.trip_uuid)
+                                .filter(
+                                  (a) =>
+                                    !searchItems ||
+                                    a.invoice_number
+                                      ?.toString()
+                                      ?.includes(
+                                        searchItems.toLocaleLowerCase()
+                                      ) ||
+                                    a.counter_title
+                                      ?.toLocaleLowerCase()
+                                      ?.includes(
+                                        searchItems.toLocaleLowerCase()
+                                      )
+                                )
                                 .map((item) => {
                                   return (
                                     <div
@@ -482,7 +530,7 @@ const MainAdmin = () => {
                                         // }
                                       />
                                       <Card
-                                      details={details}
+                                        details={details}
                                         onDoubleClick={() =>
                                           setPopupOrder(item)
                                         }
@@ -551,21 +599,10 @@ const MainAdmin = () => {
               }}
             >
               <input
-                type="search"
+                type="text"
                 placeholder="Search..."
-                // value={searchState}
-                // onClick={() => setSearchInFocus(true)}
-                // onBlur={() => setSearchInFocus(false)}
-                // onChange={(e) => handleSearch(e)}
-                // onKeyDown={(e) => {
-                //   if (e.key === "+" || e.key === "-" || e.shiftKey || e.ctrlKey)
-                //     e.preventDefault();
-                //   if (e.key === "Backspace") {
-                //     e.target.value = "";
-                //     handleSearch(e);
-                //   }
-                // }}
-                // autoFocus={searchInFocus}
+                value={searchItems}
+                onChange={(e) => setSearhItems(e.target.value)}
               />
             </div>
           </div>
