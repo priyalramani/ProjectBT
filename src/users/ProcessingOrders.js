@@ -326,7 +326,7 @@ const ProcessingOrders = () => {
   };
 
   const postOrderData = async (dataArray = [selectedOrder], hold = false) => {
-    console.log(dataArray)
+    console.log(dataArray);
     setPopupBarcode(false);
     let finalData = [];
     for (let orderObject of dataArray) {
@@ -405,7 +405,7 @@ const ProcessingOrders = () => {
           return obj;
         }, {});
 
-      finalData.push(data);
+      finalData.push({ ...data, opened_by: 0 });
     }
     const response = await axios({
       method: "put",
@@ -1305,7 +1305,7 @@ const ProcessingOrders = () => {
             setBarcodeMessage([]);
           }}
           BarcodeMessage={BarcodeMessage}
-          postOrderData={()=>postOrderData()}
+          postOrderData={() => postOrderData()}
         />
       ) : (
         ""
