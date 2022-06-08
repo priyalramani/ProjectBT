@@ -170,6 +170,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       counter,
       items: data.item_details,
       others: {},
+      add_discounts:true,
     });
     data = {
       ...data,

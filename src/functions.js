@@ -58,7 +58,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
       } else return a;
     });
   }
-  console.log("eligibleitems",eligibleItems)
+  console.log("eligibleitems", eligibleItems);
   data = autobills.filter(
     (a) =>
       a.type === "auto-item-add" &&
@@ -221,6 +221,7 @@ export const Billing = async ({
   items = [],
   others = null,
   replacement = 0,
+  add_discounts,
 }) => {
   let newPriceItems = [];
   for (let item of items) {
@@ -234,14 +235,16 @@ export const Billing = async ({
     let price =
       counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
         ?.price || 0;
-    let special_discount_percentage =
-      counter?.item_special_discount?.find(
-        (a) => a.item_uuid === item.item_uuid
-      )?.discount || 0;
-    let company_discount_percentage =
-      counter?.company_discount?.find(
-        (a) => a.company_uuid === item.company_uuid
-      )?.discount || 0;
+    let special_discount_percentage = add_discounts
+      ? counter?.item_special_discount?.find(
+          (a) => a.item_uuid === item.item_uuid
+        )?.discount || 0
+      : 0;
+    let company_discount_percentage = add_discounts
+      ? counter?.company_discount?.find(
+          (a) => a.company_uuid === item.company_uuid
+        )?.discount || 0
+      : 0;
     console.log("company_discount_percentage", company_discount_percentage);
     item = {
       ...item,
@@ -298,7 +301,7 @@ export const Billing = async ({
     console.log(item);
     newPriceItems.push(item);
   }
-  console.log("newItemPrice",newPriceItems)
+  console.log("newItemPrice", newPriceItems);
   let order_grandtotal =
     newPriceItems.length > 1
       ? newPriceItems.reduce(

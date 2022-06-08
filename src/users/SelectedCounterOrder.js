@@ -631,6 +631,7 @@ const SelectedCounterOrder = () => {
 
                   type: "NEW",
                 },
+                add_discounts:true
               }).then((data) => {
                 setOrder((prev) => ({ ...prev, ...data }));
                 postOrder({ ...order, ...data });

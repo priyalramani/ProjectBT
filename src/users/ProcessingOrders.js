@@ -43,6 +43,7 @@ const ProcessingOrders = () => {
   const [tempQuantity, setTempQuantity] = useState([]);
   const [users, setUsers] = useState([]);
   const [warningPopup, setWarningPopUp] = useState(false);
+  const [update,setUpdate]=useState(false)
   const Navigate = useNavigate();
   const getUsers = async () => {
     const response = await axios({
@@ -337,6 +338,7 @@ const ProcessingOrders = () => {
           counter: counters.find(
             (a) => a.counter_uuid === selectedOrder.counter_uuid
           ),
+          add_discounts:true,
           items: selectedOrder.item_details.map((a) => {
             let itemData = items.find((b) => a.item_uuid === b.item_uuid);
             return {
@@ -726,8 +728,33 @@ const ProcessingOrders = () => {
 
     setTimeout(() => setPopupBarcode(true), 2000);
   };
+  const updateBillingAmount = async () => {
+    let billingData = await Billing({
+      replacement: selectedOrder.replacement,
+      counter: counters.find(
+        (a) => a.counter_uuid === selectedOrder.counter_uuid
+      ),
+      items: selectedOrder.item_details.map((a) => {
+        let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+        return {
+          ...itemData,
+          ...a,
+          price: itemData?.price || 0,
+        };
+      }),
+    });
+    setSelectedOrder((prev) => ({
+      ...prev,
+      ...billingData,
+      item_details: billingData.items,
+    }));
+  };
+  useEffect(() => {
+    if (Location.pathname.includes("delivery")) {
+      updateBillingAmount();
+    }
+  }, [update]);
 
-  console.log(BarcodeMessage);
   return (
     <div>
       <nav className="user_nav nav_styling" style={{ top: "0" }}>
@@ -849,6 +876,13 @@ const ProcessingOrders = () => {
               <h2 style={{ width: "20vw", textAlign: "start" }}>
                 {selectedOrder.invoice_number}
               </h2>
+              {Location.pathname.includes("delivery") ? (
+                <h2 style={{ width: "20vw", textAlign: "start" }}>
+                  Rs: {selectedOrder.order_grandtotal}
+                </h2>
+              ) : (
+                ""
+              )}
               {Location.pathname.includes("checking") ? (
                 <input
                   type="text"
@@ -1288,7 +1322,7 @@ const ProcessingOrders = () => {
       </div>
       {popupForm ? (
         <NewUserForm
-          onSave={() => setPopupForm(false)}
+          onSave={() => {setPopupForm(false);setUpdate(prev=>!prev)}}
           setOrder={setSelectedOrder}
           popupInfo={popupForm}
           order={selectedOrder}
@@ -1921,7 +1955,12 @@ function DiliveryPopup({
                           }
                           style={
                             !allowed.find((a) => a.mode_uuid === item.mode_uuid)
-                              ? { width: "80px", backgroundColor: "gray" }
+                              ? {
+                                  width: "90px",
+                                  backgroundColor: "light",
+                                  fontSize: "12px",
+                                  color: "#fff",
+                                }
                               : { width: "80px" }
                           }
                           onChange={(e) =>
@@ -2187,11 +2226,21 @@ function DeliveryMessagePopup({ onSave, data }) {
       >
         <h2>
           {data.map((a, i) =>
-            i === 0
-              ? <b style={{color:"red"}}><u>{a.mode_title}</u></b>
-              : data.length === i + 1
-              ? <> and <b style={{color:"red"}}><u>{a.mode_title}</u></b></>
-              : ", " + a.mode_title
+            i === 0 ? (
+              <b style={{ color: "red" }}>
+                <u>{a.mode_title}</u>
+              </b>
+            ) : data.length === i + 1 ? (
+              <>
+                {" "}
+                and{" "}
+                <b style={{ color: "red" }}>
+                  <u>{a.mode_title}</u>
+                </b>
+              </>
+            ) : (
+              ", " + a.mode_title
+            )
           )}{" "}
           not allowed
         </h2>
