@@ -180,7 +180,7 @@ const MainAdmin = () => {
                           .filter(
                             (a) =>
                               a.route_uuid === "0" ||
-                              a.counter_uuid === counterRoute.counter_uuid
+                              a?.counter_uuid === counterRoute?.counter_uuid
                           )
                           .filter(
                             (a) =>
