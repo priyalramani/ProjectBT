@@ -1889,13 +1889,14 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, postHoldOrders }) {
                 >
                   <thead>
                     <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
-                      {holdPopup === "Hold" ? <th></th> : ""}
+                     <th></th> 
                       <th colSpan={3}>
                         <div className="t-head-element">Item</div>
                       </th>
                       <th colSpan={2}>
                         <div className="t-head-element">Qty</div>
                       </th>
+                     <th></th> 
                     </tr>
                   </thead>
                   <tbody className="tbody">
@@ -1906,34 +1907,67 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, postHoldOrders }) {
                           height: "30px",
                           color: "#fff",
                           backgroundColor:
-                            +item.status === 1 ? "green" : "#7990dd",
+                            +item.status === 1 ? "green" :+item.status===3?"red": "#7990dd",
                         }}
                       >
-                        {holdPopup === "Hold" ? (
+                       
                           <td
                             onClick={() =>
                               setItems((prev) =>
                                 prev.map((a) =>
                                   a.item_uuid === item.item_uuid
-                                    ? { ...a, status: 1, edit: true }
+                                    ? {
+                                        ...a,
+                                        status:
+                                          a.status !==1 
+                                            ? 1
+                                            : holdPopup === "Hold"
+                                            ? 2
+                                            : 0,
+                                        edit: true,
+                                      }
                                     : a
                                 )
                               )
                             }
                           >
-                            {+item.status === 2 ? (
+                            {+item.status !== 1 ? (
                               <CheckCircleOutlineIcon />
                             ) : (
                               ""
                             )}
                           </td>
-                        ) : (
-                          ""
-                        )}
+                     
                         <td colSpan={3}>{item.item_title}</td>
                         <td colSpan={2}>
                           {item?.b || 0} : {item?.p || 0}
                         </td>
+                          <td
+                            onClick={() =>
+                              setItems((prev) =>
+                                prev.map((a) =>
+                                  a.item_uuid === item.item_uuid
+                                    ? {
+                                        ...a,
+                                        status:
+                                          a.status !== 3 
+                                            ? 3
+                                            : holdPopup === "Hold"
+                                            ? 2
+                                            : 0,
+                                        edit: true,
+                                      }
+                                    : a
+                                )
+                              )
+                            }
+                          >
+                            {+item.status !== 3 ? (
+                              <DeleteOutlineIcon />
+                            ) : (
+                              ""
+                            )}
+                          </td>
                       </tr>
                     ))}
                   </tbody>
