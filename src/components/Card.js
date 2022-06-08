@@ -40,9 +40,9 @@ const Card = ({
     var day = date.getDate() - oldDate.getDate();
     let finalHours = day * 24 + hours;
 
+
     return finalHours;
   }
-  
   return (
     <>
       <div onDoubleClick={onDoubleClick}>
@@ -58,14 +58,15 @@ const Card = ({
             style={{
               backgroundColor:
                 hours(new Date(dateTime)) >=
-                +details?.map((a) => a.order_time_1)[0]
-                  ? "#f2e017"
+                +details?.map((a) => a.order_time_2)[0]
+                  ? "#9c1010"
                   : hours(new Date(dateTime)) >=
                     +details.map((a) => a.order_time_1)[0]
-                  ? "#9c1010"
+                  ? "#f2e017"
                   : "#fff",
             }}
           >
+
             <p className="title2">{title1 ? title1 : title2}</p>
             <p className="caption" style={{ color: "#000" }}>
               {title1 ? title2 : ""}
