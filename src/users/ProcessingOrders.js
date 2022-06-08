@@ -43,7 +43,7 @@ const ProcessingOrders = () => {
   const [tempQuantity, setTempQuantity] = useState([]);
   const [users, setUsers] = useState([]);
   const [warningPopup, setWarningPopUp] = useState(false);
-  const [update,setUpdate]=useState(false)
+  const [update, setUpdate] = useState(false);
   const Navigate = useNavigate();
   const getUsers = async () => {
     const response = await axios({
@@ -338,7 +338,7 @@ const ProcessingOrders = () => {
           counter: counters.find(
             (a) => a.counter_uuid === selectedOrder.counter_uuid
           ),
-          add_discounts:true,
+          add_discounts: true,
           items: selectedOrder.item_details.map((a) => {
             let itemData = items.find((b) => a.item_uuid === b.item_uuid);
             return {
@@ -1322,7 +1322,30 @@ const ProcessingOrders = () => {
       </div>
       {popupForm ? (
         <NewUserForm
-          onSave={() => {setPopupForm(false);setUpdate(prev=>!prev)}}
+          onSave={async() => {
+            setPopupForm(false);
+            setUpdate((prev) => !prev);
+            let billingData = await Billing({
+              replacement: selectedOrder.replacement,
+              counter: counters.find(
+                (a) => a.counter_uuid === selectedOrder.counter_uuid
+              ),
+             
+              items: selectedOrder.item_details.map((a) => {
+                let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+                return {
+                  ...itemData,
+                  ...a,
+                  price: itemData?.price || 0,
+                };
+              }),
+            });
+            setSelectedOrder(prev=>({
+              ...prev,
+              ...billingData,
+              item_details: billingData.items,
+            }));
+          }}
           setOrder={setSelectedOrder}
           popupInfo={popupForm}
           order={selectedOrder}
@@ -1357,6 +1380,8 @@ const ProcessingOrders = () => {
                 ?.find((a) => selectedOrder?.counter_uuid === a.counter_uuid)
                 ?.payment_modes?.filter((b) => b === a.mode_uuid)?.length
           )}
+          counters={counters}
+          items={items}
         />
       ) : (
         ""
@@ -1843,6 +1868,8 @@ function DiliveryPopup({
   postOrderData,
   order_uuid,
   setSelectedOrder,
+counters,
+items,
   order,
   allowed,
 }) {
@@ -1850,6 +1877,7 @@ function DiliveryPopup({
   const [modes, setModes] = useState([]);
   const [error, setError] = useState("");
   const [popup, setPopup] = useState(false);
+  const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
 
   const GetPaymentModes = async () => {
@@ -1878,14 +1906,37 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
-    setSelectedOrder((prev) => ({
-      ...prev,
+    setError("")
+    let billingData = await Billing({
+      replacement: order.replacement,
+      counter: counters.find(
+        (a) => a.counter_uuid === order.counter_uuid
+      ),
+     
+      items: order.item_details.map((a) => {
+        let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+        return {
+          ...itemData,
+          ...a,
+          price: itemData?.price || 0,
+        };
+      }),
+    });
+    let Tempdata={
+      ...order,
+      ...billingData,
+      item_details: billingData.items,
       replacement: data.actual,
       replacement_mrp: data.mrp,
-    }));
+    };
+    let modeTotal=modes.map(a=>+a.amt||0)?.reduce((a,b)=>a+b)
+  if(Tempdata?.order_grandtotal!==modeTotal){
+    setError("Invoice Amount and Payment mismatch")
+    return
+  }
     let obj = modes.find((a) => a.mode_title === "Cash");
     if (obj?.amt && obj?.coin === "") {
-      setError("Enter Coins");
+      setCoinPopup(true);
       return;
     }
     let time = new Date();
@@ -1982,50 +2033,6 @@ function DiliveryPopup({
                         />
                         {/* {popupInfo.conversion || 0} */}
                       </label>
-                      {item.mode_title === "Cash" ? (
-                        <label
-                          className="selectLabel flex"
-                          style={{ width: "80px" }}
-                        >
-                          <input
-                            type="number"
-                            name="route_title"
-                            className="numberInput"
-                            placeholder="Coins"
-                            value={
-                              modes.find((a) => a.mode_uuid === item.mode_uuid)
-                                ?.coin
-                            }
-                            style={
-                              !allowed.find(
-                                (a) => a.mode_uuid === item.mode_uuid
-                              )
-                                ? { width: "70px", backgroundColor: "gray" }
-                                : { width: "70px" }
-                            }
-                            onChange={(e) =>
-                              setModes((prev) =>
-                                prev.map((a) =>
-                                  a.mode_uuid === item.mode_uuid
-                                    ? {
-                                        ...a,
-                                        coin: e.target.value,
-                                      }
-                                    : a
-                                )
-                              )
-                            }
-                            maxLength={42}
-                            disabled={
-                              !allowed.find(
-                                (a) => a.mode_uuid === item.mode_uuid
-                              )
-                            }
-                          />
-                        </label>
-                      ) : (
-                        ""
-                      )}
                     </div>
                   ))}
 
@@ -2076,6 +2083,98 @@ function DiliveryPopup({
           setData={setData}
           data={data}
         />
+      ) : (
+        ""
+      )}
+      {coinPopup ? (
+        <div className="overlay">
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "max-content" }}
+          >
+            <h3>Cash Coin</h3>
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "10px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form className="form">
+                  <div className="formGroup">
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <div style={{ width: "50px" }}>Cash</div>
+
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "80px" }}
+                      >
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          placeholder="Coins"
+                          value={
+                            modes.find(
+                              (a) =>
+                                a.mode_uuid ===
+                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                            )?.coin
+                          }
+                          style={
+                            !allowed.find(
+                              (a) =>
+                                a.mode_uuid ===
+                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                            )
+                              ? { width: "70px", backgroundColor: "gray" }
+                              : { width: "70px" }
+                          }
+                          onChange={(e) =>
+                            setModes((prev) =>
+                              prev.map((a) =>
+                                a.mode_uuid ===
+                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                                  ? {
+                                      ...a,
+                                      coin: e.target.value,
+                                    }
+                                  : a
+                              )
+                            )
+                          }
+                          maxLength={42}
+                        />
+                      </label>
+                    </div>
+
+                   
+                    
+                  </div>
+
+                  <div
+                    className="flex"
+                    style={{ justifyContent: "space-between" }}
+                  >
+                    
+                    <button
+                      type="button"
+                      className="submit"
+                      onClick={()=>setCoinPopup(false)}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
       ) : (
         ""
       )}
