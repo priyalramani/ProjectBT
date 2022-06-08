@@ -1322,7 +1322,7 @@ const ProcessingOrders = () => {
       </div>
       {popupForm ? (
         <NewUserForm
-          onSave={async() => {
+          onSave={async () => {
             setPopupForm(false);
             setUpdate((prev) => !prev);
             let billingData = await Billing({
@@ -1330,7 +1330,7 @@ const ProcessingOrders = () => {
               counter: counters.find(
                 (a) => a.counter_uuid === selectedOrder.counter_uuid
               ),
-             
+
               items: selectedOrder.item_details.map((a) => {
                 let itemData = items.find((b) => a.item_uuid === b.item_uuid);
                 return {
@@ -1340,7 +1340,7 @@ const ProcessingOrders = () => {
                 };
               }),
             });
-            setSelectedOrder(prev=>({
+            setSelectedOrder((prev) => ({
               ...prev,
               ...billingData,
               item_details: billingData.items,
@@ -1868,8 +1868,8 @@ function DiliveryPopup({
   postOrderData,
   order_uuid,
   setSelectedOrder,
-counters,
-items,
+  counters,
+  items,
   order,
   allowed,
 }) {
@@ -1879,7 +1879,7 @@ items,
   const [popup, setPopup] = useState(false);
   const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
-
+  const [outstanding, setOutstanding] = useState({});
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -1892,6 +1892,16 @@ items,
     if (response.data.success) setPaymentModes(response.data.result);
   };
   useEffect(() => {
+    let time = new Date();
+    setOutstanding({
+      order_uuid,
+      amount: "",
+      user_uuid: localStorage.getItem("user_uuid"),
+      time: time.getTime(),
+      invoice_number: order.invoice_number,
+      trip_uuid: order.trip_uuid,
+      counter_uuid: order.counter_uuid,
+    });
     GetPaymentModes();
   }, []);
   useEffect(() => {
@@ -1906,13 +1916,11 @@ items,
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
-    setError("")
+    setError("");
     let billingData = await Billing({
       replacement: order.replacement,
-      counter: counters.find(
-        (a) => a.counter_uuid === order.counter_uuid
-      ),
-     
+      counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
+
       items: order.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {
@@ -1922,18 +1930,19 @@ items,
         };
       }),
     });
-    let Tempdata={
+    let Tempdata = {
       ...order,
       ...billingData,
       item_details: billingData.items,
       replacement: data.actual,
       replacement_mrp: data.mrp,
     };
-    let modeTotal=modes.map(a=>+a.amt||0)?.reduce((a,b)=>a+b)
-  if(Tempdata?.order_grandtotal!==modeTotal){
-    setError("Invoice Amount and Payment mismatch")
-    return
-  }
+    let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
+console.log(Tempdata?.order_grandtotal , +(+modeTotal+(+outstanding?.amount||0)))
+    if (Tempdata?.order_grandtotal !== +(+modeTotal+(+outstanding?.amount||0))) {
+      setError("Invoice Amount and Payment mismatch");
+      return;
+    }
     let obj = modes.find((a) => a.mode_title === "Cash");
     if (obj?.amt && obj?.coin === "") {
       setCoinPopup(true);
@@ -1956,6 +1965,15 @@ items,
         "Content-Type": "application/json",
       },
     });
+    if (outstanding?.amount)
+      await axios({
+        method: "post",
+        url: "/Outstanding/postOutstanding",
+        data: outstanding,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     if (response.data.success) {
       postOrderData();
       onSave();
@@ -2035,7 +2053,32 @@ items,
                       </label>
                     </div>
                   ))}
-
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <div style={{ width: "50px" }}>UnPaid</div>
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "80px" }}
+                    >
+                      <input
+                        type="number"
+                        name="route_title"
+                        className="numberInput"
+                        value={outstanding?.amount}
+                        style={{ width: "80px" }}
+                        onChange={(e) =>
+                          setOutstanding((prev) => ({
+                            ...prev,
+                            amount: e.target.value,
+                          }))
+                        }
+                        maxLength={42}
+                      />
+                      {/* {popupInfo.conversion || 0} */}
+                    </label>
+                  </div>
                   <div
                     className="row"
                     style={{ flexDirection: "row", alignItems: "center" }}
@@ -2152,20 +2195,16 @@ items,
                         />
                       </label>
                     </div>
-
-                   
-                    
                   </div>
 
                   <div
                     className="flex"
                     style={{ justifyContent: "space-between" }}
                   >
-                    
                     <button
                       type="button"
                       className="submit"
-                      onClick={()=>setCoinPopup(false)}
+                      onClick={() => setCoinPopup(false)}
                     >
                       Save
                     </button>
