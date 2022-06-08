@@ -1862,7 +1862,7 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, postHoldOrders }) {
         style={{
           height: "fit-content",
           width: "max-content",
-          minWidth: "400px",
+          minWidth: "250px",
         }}
       >
         <h1>{holdPopup}</h1>
