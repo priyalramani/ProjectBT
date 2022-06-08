@@ -59,10 +59,10 @@ const Card = ({
               backgroundColor:
                 hours(new Date(dateTime)) >=
                 +details?.map((a) => a.order_time_1)[0]
-                  ? "#9c1010"
+                  ? "#f2e017"
                   : hours(new Date(dateTime)) >=
                     +details.map((a) => a.order_time_1)[0]
-                  ? "#f2e017"
+                  ? "#9c1010"
                   : "#fff",
             }}
           >
