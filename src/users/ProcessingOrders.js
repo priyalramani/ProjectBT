@@ -2358,7 +2358,7 @@ function DiliveryPopup({
                     <button
                       type="button"
                       className="submit"
-                      onClick={() => setCoinPopup(false)}
+                      onClick={() => submitHandler()}
                     >
                       Save
                     </button>
