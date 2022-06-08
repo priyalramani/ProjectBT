@@ -22,6 +22,20 @@ const MainAdmin = () => {
   const [selectedTrip, setSelectedTrip] = useState("");
   const [searchItems, setSearhItems] = useState("");
   const [popupOrder, setPopupOrder] = useState(null);
+  const [users, setUsers] = useState([]);
+  const getUsers = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/users/GetUserList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("users", response);
+    if (response.data.success) setUsers(response.data.result);
+  };
+
   const getCounter = async () => {
     const response = await axios({
       method: "get",
@@ -83,6 +97,7 @@ const MainAdmin = () => {
     getCounter();
     setInterval(getRunningOrders, 180000);
     getDetails();
+    getUsers();
   }, []);
   const getRunningOrders = async () => {
     const response = await axios({
@@ -147,121 +162,133 @@ const MainAdmin = () => {
                       let counterRoute = counter.find(
                         (a) => a.route_uuid === route.route_uuid
                       );
-                    
-                      if(orders.filter(a=>a.route_uuid==="0"||a.counter_uuid===counterRoute.counter_uuid).filter(
-                        (a) =>
-                          !searchItems ||
-                          a.invoice_number
-                            ?.toString()
-                            ?.includes(
-                              searchItems.toLocaleLowerCase()
-                            ) ||
-                          a.counter_title
-                            ?.toLocaleLowerCase()
-                            ?.includes(
-                              searchItems.toLocaleLowerCase()
-                            )
-                      ).length)
-                      return (
-                        <div key={Math.random()} className="sectionDiv">
-                          <h1>
-                            {route.route_title} ({route.orderLength}) [
-                            processing: {route?.processingLength}, Checking:{" "}
-                            {route.checkingLength}, Delivery:{" "}
-                            {route?.deliveryLength}]
-                          </h1>
-                          <div
-                            className="content"
-                            style={{
-                              flexDirection: "row",
-                              flexWrap: "wrap",
-                              gap: "0",
-                            }}
-                            id="seats_container"
-                          >
-                            {orders
-                              .filter(
-                                (a) =>
-                                  a?.counter_uuid === counterRoute?.counter_uuid
-                              )
-                              .filter(
-                                (a) =>
-                                  !searchItems ||
-                                  a.invoice_number
-                                    ?.toString()
-                                    ?.includes(
-                                      searchItems.toLocaleLowerCase()
-                                    ) ||
-                                  a.counter_title
-                                    ?.toLocaleLowerCase()
-                                    ?.includes(
-                                      searchItems.toLocaleLowerCase()
-                                    )
-                              )
-                              .map((item) => {
-                                return (
-                                  <div
-                                    className={`seatSearchTarget`}
-                                    key={Math.random()}
-                                    seat-name={item.seat_name}
-                                    seat-code={item.seat_uuid}
-                                    seat={item.seat_uuid}
-                                    // section={section.section_uuid}
-                                    // section-name={section?.section_name}
-                                    // outlet={outletIdState}
-                                    onClick={() =>
-                                      setSelectedRouteOrder(item.order_uuid)
-                                    }
-                                  >
-                                    <span
-                                      className="dblClickTrigger"
-                                      style={{ display: "none" }}
-                                      // onClick={() =>
-                                      //   menuOpenHandler(item)
-                                      // }
-                                    />
-                                    <Card
-                                      details={details}
-                                      onDoubleClick={() => setPopupOrder(item)}
-                                      // on_order={on_order && on_order}
-                                      // key={item.seat_uuid}
-                                      dateTime={item?.status[0]?.time}
-                                      title1={item?.invoice_number || ""}
-                                      selectedOrder={
-                                        selectedRouteOrder === item.order_uuid
+
+                      if (
+                        orders
+                          .filter(
+                            (a) =>
+                              a.route_uuid === "0" ||
+                              a.counter_uuid === counterRoute.counter_uuid
+                          )
+                          .filter(
+                            (a) =>
+                              !searchItems ||
+                              a.invoice_number
+                                ?.toString()
+                                ?.includes(searchItems.toLocaleLowerCase()) ||
+                              a.counter_title
+                                ?.toLocaleLowerCase()
+                                ?.includes(searchItems.toLocaleLowerCase())
+                          ).length
+                      )
+                        return (
+                          <div key={Math.random()} className="sectionDiv">
+                            <h1>
+                              {route.route_title} ({route.orderLength}) [
+                              processing: {route?.processingLength}, Checking:{" "}
+                              {route.checkingLength}, Delivery:{" "}
+                              {route?.deliveryLength}]
+                            </h1>
+                            <div
+                              className="content"
+                              style={{
+                                flexDirection: "row",
+                                flexWrap: "wrap",
+                                gap: "0",
+                                marginBottom: "50px",
+                              }}
+                              id="seats_container"
+                            >
+                              {orders
+                                .filter(
+                                  (a) =>
+                                    a?.counter_uuid ===
+                                    counterRoute?.counter_uuid
+                                )
+                                .filter(
+                                  (a) =>
+                                    !searchItems ||
+                                    a.invoice_number
+                                      ?.toString()
+                                      ?.includes(
+                                        searchItems.toLocaleLowerCase()
+                                      ) ||
+                                    a.counter_title
+                                      ?.toLocaleLowerCase()
+                                      ?.includes(
+                                        searchItems.toLocaleLowerCase()
+                                      )
+                                )
+                                .map((item) => {
+                                  return (
+                                    <div
+                                      className={`seatSearchTarget`}
+                                      key={Math.random()}
+                                      seat-name={item.seat_name}
+                                      seat-code={item.seat_uuid}
+                                      seat={item.seat_uuid}
+                                      // section={section.section_uuid}
+                                      // section-name={section?.section_name}
+                                      // outlet={outletIdState}
+                                      onClick={() =>
+                                        setSelectedRouteOrder(item.order_uuid)
                                       }
-                                      title2={item?.counter_title || ""}
-                                      status={
-                                        +item.status[item.status.length - 1]
-                                          ?.stage === 1
-                                          ? "Processing"
-                                          : +item.status[item.status.length - 1]
-                                              ?.stage === 2
-                                          ? "Checking"
-                                          : +item.status[item.status.length - 1]
-                                              ?.stage === 3
-                                          ? "Delivery"
-                                          : +item.status[item.status.length - 1]
-                                              ?.stage === 4
-                                          ? "Complete"
-                                          : +item.status[item.status.length - 1]
-                                              ?.stage === 5
-                                          ? "Cancelled"
-                                          : ""
-                                      }
-                                      // price={item.price}
-                                      // visibleContext={visibleContext}
-                                      // setVisibleContext={setVisibleContext}
-                                      // isMouseInsideContext={isMouseInsideContext}
-                                      // seats={seatsState.filter(s => +s.seat_status === 1)}
-                                      rounded
-                                    />
-                                  </div>
-                                );
-                              })}
+                                    >
+                                      <span
+                                        className="dblClickTrigger"
+                                        style={{ display: "none" }}
+                                        // onClick={() =>
+                                        //   menuOpenHandler(item)
+                                        // }
+                                      />
+                                      <Card
+                                        details={details}
+                                        onDoubleClick={() =>
+                                          setPopupOrder(item)
+                                        }
+                                        // on_order={on_order && on_order}
+                                        // key={item.seat_uuid}
+                                        dateTime={item?.status[0]?.time}
+                                        title1={item?.invoice_number || ""}
+                                        selectedOrder={
+                                          selectedRouteOrder === item.order_uuid
+                                        }
+                                        title2={item?.counter_title || ""}
+                                        status={
+                                          +item.status[item.status.length - 1]
+                                            ?.stage === 1
+                                            ? "Processing"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 2
+                                            ? "Checking"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 3
+                                            ? "Delivery"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 4
+                                            ? "Complete"
+                                            : +item.status[
+                                                item.status.length - 1
+                                              ]?.stage === 5
+                                            ? "Cancelled"
+                                            : ""
+                                        }
+                                        // price={item.price}
+                                        // visibleContext={visibleContext}
+                                        // setVisibleContext={setVisibleContext}
+                                        // isMouseInsideContext={isMouseInsideContext}
+                                        // seats={seatsState.filter(s => +s.seat_status === 1)}
+                                        rounded
+                                      />
+                                    </div>
+                                  );
+                                })}
+                            </div>
                           </div>
-                        </div>
-                      );
+                        );
                     })}
                   </>
                 ) : (
@@ -297,20 +324,18 @@ const MainAdmin = () => {
                 ) : (
                   ""
                 )}
-                {orders.filter(
-                          (a) =>
-                            !searchItems ||
-                            a.invoice_number
-                              ?.toString()
-                              ?.includes(
-                                searchItems.toLocaleLowerCase()
-                              ) ||
-                            a.counter_title
-                              ?.toLocaleLowerCase()
-                              ?.includes(
-                                searchItems.toLocaleLowerCase()
-                              )
-                        ).filter((a) => !a?.trip_uuid).length ? (
+                {orders
+                  .filter(
+                    (a) =>
+                      !searchItems ||
+                      a.invoice_number
+                        ?.toString()
+                        ?.includes(searchItems.toLocaleLowerCase()) ||
+                      a.counter_title
+                        ?.toLocaleLowerCase()
+                        ?.includes(searchItems.toLocaleLowerCase())
+                  )
+                  .filter((a) => !a?.trip_uuid).length ? (
                   <div key={Math.random()} className="sectionDiv">
                     <h2 style={{ marginTop: "50px" }}>
                       UnKnown ({orders.filter((a) => !a?.trip_uuid).length}) [
@@ -331,6 +356,7 @@ const MainAdmin = () => {
                         flexDirection: "row",
                         flexWrap: "wrap",
                         gap: "0",
+                        marginBottom: "50px",
                       }}
                       id="seats_container"
                     >
@@ -341,14 +367,10 @@ const MainAdmin = () => {
                             !searchItems ||
                             a.invoice_number
                               ?.toString()
-                              ?.includes(
-                                searchItems.toLocaleLowerCase()
-                              ) ||
+                              ?.includes(searchItems.toLocaleLowerCase()) ||
                             a.counter_title
                               ?.toLocaleLowerCase()
-                              ?.includes(
-                                searchItems.toLocaleLowerCase()
-                              )
+                              ?.includes(searchItems.toLocaleLowerCase())
                         )
                         .map((item) => {
                           return (
@@ -462,7 +484,16 @@ const MainAdmin = () => {
                               }
                               ) [ processing: {trip?.processingLength},
                               Checking: {trip?.checkingLength}, Delivery:{" "}
-                              {trip?.deliveryLength}]
+                              {trip?.deliveryLength}] [
+                              {trip?.users?.map((a, i) =>
+                                i === 0
+                                  ? users?.find((b) => b.user_uuid === a)
+                                      ?.user_title
+                                  : ", " +
+                                    users?.find((b) => b.user_uuid === a)
+                                      ?.user_title
+                              )}
+                              ]
                             </h1>
                             <div
                               className="content"
@@ -470,6 +501,7 @@ const MainAdmin = () => {
                                 flexDirection: "row",
                                 flexWrap: "wrap",
                                 gap: "0",
+                                marginBottom: "50px",
                               }}
                               id="seats_container"
                             >
@@ -694,7 +726,8 @@ function NewUserForm({
           // style={{ flexDirection: "row", flexWrap: "wrap", gap: "5" }}
           style={{
             height: "fit-content",
-            padding: "20px",
+            padding: "20p0",
+            marginBottom: "50px",
             width: "fit-content",
           }}
         >

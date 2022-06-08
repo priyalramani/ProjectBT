@@ -326,6 +326,7 @@ const ProcessingOrders = () => {
   };
 
   const postOrderData = async (dataArray = [selectedOrder], hold = false) => {
+    console.log(dataArray)
     setPopupBarcode(false);
     let finalData = [];
     for (let orderObject of dataArray) {
@@ -739,7 +740,7 @@ const ProcessingOrders = () => {
             onClick={() => {
               if (selectedOrder) {
                 setConfirmPopup(true);
-                setTimeout(getTripOrders,1000);
+                setTimeout(getTripOrders, 1000);
               } else Navigate(-1);
             }}
           />
@@ -1304,7 +1305,7 @@ const ProcessingOrders = () => {
             setBarcodeMessage([]);
           }}
           BarcodeMessage={BarcodeMessage}
-          postOrderData={postOrderData}
+          postOrderData={()=>postOrderData()}
         />
       ) : (
         ""
@@ -1348,7 +1349,7 @@ const ProcessingOrders = () => {
             navigator.mediaSession.playbackState = "none";
             audiosRef.current = null;
             console.clear();
-            setTimeout(getTripOrders,1000);
+            setTimeout(getTripOrders, 1000);
           }}
           onClose={() => setConfirmPopup(false)}
         />
@@ -1913,7 +1914,16 @@ function DiliveryPopup({
                             modes.find((a) => a.mode_uuid === item.mode_uuid)
                               ?.amt
                           }
-                          style={{ width: "80px" }}
+                          placeholder={
+                            !allowed.find((a) => a.mode_uuid === item.mode_uuid)
+                              ? "Not Allowed"
+                              : ""
+                          }
+                          style={
+                            !allowed.find((a) => a.mode_uuid === item.mode_uuid)
+                              ? { width: "80px", backgroundColor: "gray" }
+                              : { width: "80px" }
+                          }
                           onChange={(e) =>
                             setModes((prev) =>
                               prev.map((a) =>
@@ -1947,7 +1957,13 @@ function DiliveryPopup({
                               modes.find((a) => a.mode_uuid === item.mode_uuid)
                                 ?.coin
                             }
-                            style={{ width: "70px" }}
+                            style={
+                              !allowed.find(
+                                (a) => a.mode_uuid === item.mode_uuid
+                              )
+                                ? { width: "70px", backgroundColor: "gray" }
+                                : { width: "70px" }
+                            }
                             onChange={(e) =>
                               setModes((prev) =>
                                 prev.map((a) =>

@@ -34,7 +34,15 @@ const Card = ({
     var strTime = hours + ":" + minutes + " " + ampm;
     return strTime;
   }
+  function hours(oldDate) {
+    let date = new Date();
+    var hours = date.getHours() - oldDate.getHours();
+    var day = date.getDate() - oldDate.getDate();
+    let finalHours = day * 24 + hours;
 
+    return finalHours;
+  }
+  
   return (
     <>
       <div onDoubleClick={onDoubleClick}>
@@ -49,15 +57,19 @@ const Card = ({
             className={`card ${rounded ? "rounded" : ""}`}
             style={{
               backgroundColor:
-                (new Date(dateTime))?.getHours() > +details[0].order_time_1
+                hours(new Date(dateTime)) >=
+                +details?.map((a) => a.order_time_1)[0]
                   ? "#9c1010"
-                  : (new Date(dateTime))?.getHours() > +details[0].order_time_1
+                  : hours(new Date(dateTime)) >=
+                    +details.map((a) => a.order_time_1)[0]
                   ? "#f2e017"
                   : "#fff",
             }}
           >
             <p className="title2">{title1 ? title1 : title2}</p>
-            <p className="caption" style={{color:"#000"}}>{title1 ? title2 : ""}</p>
+            <p className="caption" style={{ color: "#000" }}>
+              {title1 ? title2 : ""}
+            </p>
 
             <div>{status}</div>
             <div style={{ fontSize: "10px" }}>{`${
