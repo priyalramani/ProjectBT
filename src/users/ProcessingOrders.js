@@ -11,7 +11,7 @@ import { IoArrowBackOutline } from "react-icons/io5";
 import { Phone } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 let intervalId = 0;
 const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
@@ -44,6 +44,7 @@ const ProcessingOrders = () => {
   const [users, setUsers] = useState([]);
   const [warningPopup, setWarningPopUp] = useState(false);
   const [update, setUpdate] = useState(false);
+  const [deletePopup, setDeletePopup] = useState(false);
   const Navigate = useNavigate();
   const getUsers = async () => {
     const response = await axios({
@@ -944,9 +945,7 @@ const ProcessingOrders = () => {
                 Location.pathname.includes("checking") ||
                 Location.pathname.includes("delivery")
                   ? "100"
-                  : selectedOrder
-                  ? "max-content"
-                  : "100%",
+                  : "max-content",
               height: "fit-content",
             }}
           >
@@ -997,11 +996,12 @@ const ProcessingOrders = () => {
                       <div className="t-head-element">Progress</div>
                     </th>
                     <th>
-                      <div className="t-head-element"></div>
+                      <div className="t-head-element">User</div>
                     </th>
                     <th>
                       <div className="t-head-element"></div>
                     </th>
+                    {!Location.pathname.includes("checking") ? <th></th> : ""}
                   </>
                 )}
               </tr>
@@ -1300,7 +1300,7 @@ const ProcessingOrders = () => {
                         </td>
                         <td>
                           {users.find((a) => a.user_uuid === item.opened_by)
-                            ?.user_title || ""}
+                            ?.user_title || "-"}
                         </td>
                         <td>
                           {item?.mobile ? (
@@ -1311,9 +1311,20 @@ const ProcessingOrders = () => {
                               />
                             </a>
                           ) : (
-                            ""
+                            "-"
                           )}
                         </td>
+                        {!Location.pathname.includes("checking") ? (
+                          <td>
+                            <DeleteOutlineIcon
+                              onClick={() => {
+                                setDeletePopup(item);
+                              }}
+                            />
+                          </td>
+                        ) : (
+                          ""
+                        )}
                       </tr>
                     ))}
             </tbody>
@@ -1441,11 +1452,115 @@ const ProcessingOrders = () => {
       ) : (
         ""
       )}
+      {deletePopup ? (
+        <DeleteOrderPopup
+          onSave={() => {
+            setDeletePopup(false);
+            getTripOrders();
+          }}
+          order={deletePopup}
+          counters={counters}
+          items={items}
+        />
+      ) : (
+        ""
+      )}
     </div>
   );
 };
 
 export default ProcessingOrders;
+const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
+  const [disable, setDisabled] = useState(true);
+  useEffect(() => {
+    setTimeout(() => setDisabled(false), 5000);
+  }, []);
+  const PutOrder = async () => {
+    let time = new Date();
+    let data = {
+      ...order,
+      status: [
+        ...order.status,
+        {
+          stage: 5,
+          user_uuid: localStorage.getItem("user_uuid"),
+          time: time.getTime(),
+        },
+      ],
+      processing_canceled: window.location.pathname.includes("processing")
+        ? order.processing_canceled.length
+          ? [...order.processing_canceled, ...order.item_details]
+          : order.item_details
+        : order.processing_canceled || [],
+      delivery_return: window.location.pathname.includes("delivery")
+        ? order.delivery_return.length
+          ? [...order.delivery_return, ...order.item_details]
+          : order.item_details
+        : order.delivery_return || [],
+      item_details: order.item_details.map((a) => ({ ...a, b: 0, p: 0 })),
+    };
+
+    let billingData = await Billing({
+      replacement: data.replacement,
+      counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
+
+      items: data.item_details.map((a) => {
+        let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+        return {
+          ...itemData,
+          ...a,
+          price: itemData?.price || 0,
+        };
+      }),
+    });
+    data = {
+      ...data,
+      ...billingData,
+      item_details: billingData.items,
+    };
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: [data],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+    }
+  };
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{
+          height: "fit-content",
+          width: "max-content",
+          paddingTop: "50px",
+        }}
+      >
+        <h3>Complete Order will be CANCELED</h3>
+
+        <div className="flex">
+          <button
+            type="button"
+            className="submit"
+            onClick={() => PutOrder()}
+            disabled={disable}
+            style={{ opacity: disable ? "0.5" : "1" }}
+          >
+            Confirm
+          </button>
+        </div>
+
+        <button onClick={onSave} className="closeButton">
+          x
+        </button>
+      </div>
+    </div>
+  );
+};
 function CheckingValues({ onSave, BarcodeMessage, postOrderData }) {
   return (
     <div className="overlay">
@@ -1938,8 +2053,13 @@ function DiliveryPopup({
       replacement_mrp: data.mrp,
     };
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
-console.log(Tempdata?.order_grandtotal , +(+modeTotal+(+outstanding?.amount||0)))
-    if (Tempdata?.order_grandtotal !== +(+modeTotal+(+outstanding?.amount||0))) {
+    console.log(
+      Tempdata?.order_grandtotal,
+      +(+modeTotal + (+outstanding?.amount || 0))
+    );
+    if (
+      Tempdata?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
+    ) {
       setError("Invoice Amount and Payment mismatch");
       return;
     }
