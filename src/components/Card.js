@@ -57,7 +57,7 @@ const Card = ({
             }}
           >
             <p className="title2">{title1 ? title1 : title2}</p>
-            <p className="caption">{title1 ? title2 : ""}</p>
+            <p className="caption" style={{color:"#000"}}>{title1 ? title2 : ""}</p>
 
             <div>{status}</div>
             <div style={{ fontSize: "10px" }}>{`${
