@@ -95,7 +95,14 @@ const MainAdmin = () => {
   useEffect(() => {
     getRoutesData();
     getCounter();
-    setInterval(getRunningOrders, 180000);
+    setInterval(() => {
+      getRunningOrders();
+      if (window.location.pathname.includes("admin")) {
+        getRoutesData();
+      } else if (window.location.pathname.includes("trip")) {
+        getTripData();
+      }
+    }, 180000);
     getDetails();
     getUsers();
   }, []);
@@ -114,6 +121,11 @@ const MainAdmin = () => {
       window.location.pathname.includes("trip")
     ) {
       getRunningOrders();
+    }
+    if (window.location.pathname.includes("admin")) {
+      getRoutesData();
+    } else if (window.location.pathname.includes("trip")) {
+      getTripData();
     }
   }, [btn, popupForm]);
   const postOrderData = async () => {
