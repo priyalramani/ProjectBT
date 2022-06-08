@@ -2188,9 +2188,9 @@ function DeliveryMessagePopup({ onSave, data }) {
         <h2>
           {data.map((a, i) =>
             i === 0
-              ? a.mode_title
+              ? <b style={{color:"red"}}><u>{a.mode_title}</u></b>
               : data.length === i + 1
-              ? " and " + a.mode_title
+              ? <> and <b style={{color:"red"}}><u>{a.mode_title}</u></b></>
               : ", " + a.mode_title
           )}{" "}
           not allowed
