@@ -45,6 +45,7 @@ const ProcessingOrders = () => {
   const [warningPopup, setWarningPopUp] = useState(false);
   const [update, setUpdate] = useState(false);
   const [deletePopup, setDeletePopup] = useState(false);
+  const [loading, setLoading] = useState(false);
   const Navigate = useNavigate();
   const getUsers = async () => {
     const response = await axios({
@@ -188,6 +189,7 @@ const ProcessingOrders = () => {
   };
 
   const getTripOrders = async () => {
+    setLoading(true);
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = db.transaction("items", "readonly").objectStore("items");
     let IDBItems = await tx.getAll();
@@ -208,7 +210,10 @@ const ProcessingOrders = () => {
       },
     });
     console.log(response);
-    if (response.data.success) setOrders(response.data.result);
+    if (response.data.success) {
+      setOrders(response.data.result);
+      setLoading(false);
+    }
     if (!response?.data?.result) return;
   };
 
@@ -328,6 +333,7 @@ const ProcessingOrders = () => {
   };
 
   const postOrderData = async (dataArray = [selectedOrder], hold = false) => {
+    setLoading(true);
     console.log(dataArray);
     setPopupBarcode(false);
     let finalData = [];
@@ -453,6 +459,7 @@ const ProcessingOrders = () => {
           amt: finalData[0].order_grandtotal || 0,
         });
       }
+      setLoading(false);
       setSelectedOrder(false);
       getTripOrders();
     }
@@ -558,6 +565,7 @@ const ProcessingOrders = () => {
   };
 
   const checkingQuantity = () => {
+    setLoading(true);
     let data = [];
     for (let a of tempQuantity) {
       let orderItem = selectedOrder.item_details.find(
@@ -727,7 +735,10 @@ const ProcessingOrders = () => {
         );
     }
 
-    setTimeout(() => setPopupBarcode(true), 2000);
+    setTimeout(() => {
+      setPopupBarcode(true);
+      setLoading(false);
+    }, 2000);
   };
   const updateBillingAmount = async () => {
     let billingData = await Billing({
@@ -1465,6 +1476,30 @@ const ProcessingOrders = () => {
       ) : (
         ""
       )}
+      {loading ? (
+        <div className="overlay">
+          <div className="flex" style={{ width: "40px", height: "40px" }}>
+            <svg viewBox="0 0 100 100">
+              <path
+                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                fill="#ffffff"
+                stroke="none"
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  dur="1s"
+                  repeatCount="indefinite"
+                  keyTimes="0;1"
+                  values="0 50 51;360 50 51"
+                ></animateTransform>
+              </path>
+            </svg>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
     </div>
   );
 };
@@ -1889,14 +1924,14 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, postHoldOrders }) {
                 >
                   <thead>
                     <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
-                     <th></th> 
+                      <th></th>
                       <th colSpan={3}>
                         <div className="t-head-element">Item</div>
                       </th>
                       <th colSpan={2}>
                         <div className="t-head-element">Qty</div>
                       </th>
-                     <th></th> 
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody className="tbody">
@@ -1907,67 +1942,62 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, postHoldOrders }) {
                           height: "30px",
                           color: "#fff",
                           backgroundColor:
-                            +item.status === 1 ? "green" :+item.status===3?"red": "#7990dd",
+                            +item.status === 1
+                              ? "green"
+                              : +item.status === 3
+                              ? "red"
+                              : "#7990dd",
                         }}
                       >
-                       
-                          <td
-                            onClick={() =>
-                              setItems((prev) =>
-                                prev.map((a) =>
-                                  a.item_uuid === item.item_uuid
-                                    ? {
-                                        ...a,
-                                        status:
-                                          a.status !==1 
-                                            ? 1
-                                            : holdPopup === "Hold"
-                                            ? 2
-                                            : 0,
-                                        edit: true,
-                                      }
-                                    : a
-                                )
+                        <td
+                          onClick={() =>
+                            setItems((prev) =>
+                              prev.map((a) =>
+                                a.item_uuid === item.item_uuid
+                                  ? {
+                                      ...a,
+                                      status:
+                                        a.status !== 1
+                                          ? 1
+                                          : holdPopup === "Hold"
+                                          ? 2
+                                          : 0,
+                                      edit: true,
+                                    }
+                                  : a
                               )
-                            }
-                          >
-                            {+item.status !== 1 ? (
-                              <CheckCircleOutlineIcon />
-                            ) : (
-                              ""
-                            )}
-                          </td>
-                     
+                            )
+                          }
+                        >
+                          {+item.status !== 1 ? <CheckCircleOutlineIcon /> : ""}
+                        </td>
+
                         <td colSpan={3}>{item.item_title}</td>
                         <td colSpan={2}>
                           {item?.b || 0} : {item?.p || 0}
                         </td>
-                          <td
-                            onClick={() =>
-                              setItems((prev) =>
-                                prev.map((a) =>
-                                  a.item_uuid === item.item_uuid
-                                    ? {
-                                        ...a,
-                                        status:
-                                          a.status !== 3 
-                                            ? 3
-                                            : holdPopup === "Hold"
-                                            ? 2
-                                            : 0,
-                                        edit: true,
-                                      }
-                                    : a
-                                )
+                        <td
+                          onClick={() =>
+                            setItems((prev) =>
+                              prev.map((a) =>
+                                a.item_uuid === item.item_uuid
+                                  ? {
+                                      ...a,
+                                      status:
+                                        a.status !== 3
+                                          ? 3
+                                          : holdPopup === "Hold"
+                                          ? 2
+                                          : 0,
+                                      edit: true,
+                                    }
+                                  : a
                               )
-                            }
-                          >
-                            {+item.status !== 3 ? (
-                              <DeleteOutlineIcon />
-                            ) : (
-                              ""
-                            )}
-                          </td>
+                            )
+                          }
+                        >
+                          {+item.status !== 3 ? <DeleteOutlineIcon /> : ""}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
