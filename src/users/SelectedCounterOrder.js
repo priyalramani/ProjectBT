@@ -76,6 +76,7 @@ const SelectedCounterOrder = () => {
     let data = {
       ...orderData,
       order_uuid: uuid(),
+      opened_by:0,
       item_details: orderData.items.map((a) => ({
         ...a,
         b: a.b,
