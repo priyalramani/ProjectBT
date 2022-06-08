@@ -24,6 +24,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [copymsg, setCopymsg] = useState();
   const [focusedInputId, setFocusedInputId] = useState(0);
   const reactInputsRef = useRef({});
+  const [deletePopup, setDeletePopup] = useState(false);
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -170,7 +171,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       counter,
       items: data.item_details,
       others: {},
-      add_discounts:true,
+      add_discounts: true,
     });
     data = {
       ...data,
@@ -247,6 +248,13 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     onClick={() => setOtherDetails((prev) => !prev)}
                   >
                     Other Details
+                  </button>
+                  <button
+                    style={{ width: "fit-Content", backgroundColor: "red" }}
+                    className="item-sales-search"
+                    onClick={() => setDeletePopup((prev) => true)}
+                  >
+                    Cancel Order
                   </button>
                   <button
                     style={{ width: "fit-Content" }}
@@ -638,10 +646,122 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       ) : (
         ""
       )}
+      {deletePopup ? (
+        <DeleteOrderPopup
+          onSave={() => {
+            setDeletePopup(false);
+            
+          }}
+          onDeleted={() => {
+            setDeletePopup(false);
+            onSave();
+          }}
+          order={order}
+          counters={counters}
+          items={itemsData}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 }
+const DeleteOrderPopup = ({ onSave, order, counters, items,onDeleted }) => {
+  const [disable, setDisabled] = useState(true);
+  useEffect(() => {
+    setTimeout(() => setDisabled(false), 5000);
+  }, []);
+  const PutOrder = async () => {
+    let time = new Date();
+    let stage = order?.status?.length
+      ? order?.status?.map((a) => +a.stage || 0)?.reduce((a, b) => Math.max(a, b))
+      : order?.status[0]?.stage || 0;
+    let data = {
+      ...order,
+      status: [
+        ...order.status,
+        {
+          stage: 5,
+          user_uuid: localStorage.getItem("user_uuid"),
+          time: time.getTime(),
+        },
+      ],
+      processing_canceled:
+        +stage === 2
+          ? order.processing_canceled.length
+            ? [...order.processing_canceled, ...order.item_details]
+            : order.item_details
+          : order.processing_canceled || [],
+      delivery_return:
+        +stage === 4
+          ? order.delivery_return.length
+            ? [...order.delivery_return, ...order.item_details]
+            : order.item_details
+          : order.delivery_return || [],
+      item_details: order.item_details.map((a) => ({ ...a, b: 0, p: 0 })),
+    };
 
+    let billingData = await Billing({
+      replacement: data.replacement,
+      counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
+
+      items: data.item_details.map((a) => {
+        let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+        return {
+          ...itemData,
+          ...a,
+          price: itemData?.price || 0,
+        };
+      }),
+    });
+    data = {
+      ...data,
+      ...billingData,
+      item_details: billingData.items,
+    };
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: [data],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onDeleted();
+    }
+  };
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{
+          height: "fit-content",
+          width: "max-content",
+          paddingTop: "50px",
+        }}
+      >
+        <h3>Complete Order will be CANCELED</h3>
+
+        <div className="flex">
+          <button
+            type="button"
+            className="submit"
+            onClick={() => PutOrder()}
+            disabled={disable}
+            style={{ opacity: disable ? "0.5" : "1" }}
+          >
+            Confirm
+          </button>
+        </div>
+
+        <button onClick={onSave} className="closeButton">
+          x
+        </button>
+      </div>
+    </div>
+  );
+};
 function NewUserForm({ onSubmit, onClose }) {
   return (
     <div className="overlay">
