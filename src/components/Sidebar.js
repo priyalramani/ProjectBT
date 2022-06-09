@@ -93,6 +93,10 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Completed Trips",
               link: "/admin/CompletedTripsReport",
             },
+            {
+              name: "Counter Ledger",
+              link: "/admin/CounterLeger",
+            },
             
           ]}
         />
