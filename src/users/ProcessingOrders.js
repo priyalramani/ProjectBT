@@ -2090,7 +2090,11 @@ function DiliveryPopup({
           ...a,
           amt: "",
           coin: "",
-          status: a.mode_title === "UPI" ? "0" : 1,
+          status:
+            a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
+            a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+              ? "0"
+              : 1,
         }))
       );
   }, [PaymentModes]);
