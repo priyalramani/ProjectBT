@@ -86,7 +86,7 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               link: "/admin/completeOrderReport",
             },
             {
-              name: "Items",
+              name: "Items Wise",
               link: "/admin/OrderItemReport",
             },
             {

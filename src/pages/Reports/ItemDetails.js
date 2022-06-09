@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
+import Select from "react-select";
 const ItemDetails = () => {
   const [counterGroup, setCounterGroup] = useState([]);
   const [itemGroupFilter, setItemGroupFilter] = useState("");
@@ -10,7 +11,21 @@ const ItemDetails = () => {
     startDate: "",
     endDate: "",
     company_uuid: "",
+    counter_uuid: "",
   });
+  const [counter, setCounter] = useState([]);
+
+  const getCounter = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/counters/GetCounterList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCounter(response.data.result);
+  };
   const [companies, setCompanies] = useState([]);
   const [items, setItems] = useState([]);
   const getItemGroup = async () => {
@@ -55,7 +70,12 @@ const ItemDetails = () => {
     const response = await axios({
       method: "post",
       url: "/orders/getOrderItemReport",
-      data: { company_uuid: searchData.company_uuid, startDate, endDate },
+      data: {
+        company_uuid: searchData.company_uuid,
+        startDate,
+        endDate,
+        counter_uuid: searchData.counter_uuid,
+      },
       headers: {
         "Content-Type": "application/json",
       },
@@ -77,6 +97,7 @@ const ItemDetails = () => {
     getCompanies();
     getCounterGroup();
     getItemGroup();
+    getCounter();
   }, []);
 
   return (
@@ -131,7 +152,6 @@ const ItemDetails = () => {
             <div className="inputGroup">
               <label htmlFor="Warehouse">Company</label>
               <select
-                
                 onChange={(e) =>
                   setSearchData((prev) => ({
                     ...prev,
@@ -149,7 +169,6 @@ const ItemDetails = () => {
             <div className="inputGroup">
               <label htmlFor="Warehouse">Counter Group</label>
               <select
-               
                 onChange={(e) =>
                   setSearchData((prev) => ({
                     ...prev,
@@ -159,27 +178,68 @@ const ItemDetails = () => {
                 value={searchData.counter_group_uuid}
               >
                 <option value="">All</option>
-                {counterGroup.filter(a=>a.counter_group_uuid).map((a) => (
-                  <option value={a.counter_group_uuid}>
-                    {a.counter_group_title}
-                  </option>
-                ))}
+                {counterGroup
+                  .filter((a) => a.counter_group_uuid)
+                  .map((a) => (
+                    <option value={a.counter_group_uuid}>
+                      {a.counter_group_title}
+                    </option>
+                  ))}
               </select>
             </div>
             <div className="inputGroup">
               <label htmlFor="Warehouse">Item Group</label>
               <select
-                
                 onChange={(e) => setItemGroupFilter((prev) => e.target.value)}
                 value={itemGroupFilter}
               >
                 <option value="">All</option>
-                {itemGroup.filter(a=>a.item_group_uuid).map((a) => (
-                  <option value={a.item_group_uuid}>
-                    {a.item_group_title}
-                  </option>
-                ))}
+                {itemGroup
+                  .filter((a) => a.item_group_uuid)
+                  .map((a) => (
+                    <option value={a.item_group_uuid}>
+                      {a.item_group_title}
+                    </option>
+                  ))}
               </select>
+            </div>
+            <div className="inputGroup" style={{ width: "20%" }}>
+              <label htmlFor="Warehouse">Counter</label>
+              <Select
+                options={[
+                  {
+                    value: "",
+                    label: "All",
+                  },
+                  ...counter.map((a) => ({
+                    value: a.counter_uuid,
+                    label: a.counter_title,
+                  })),
+                ]}
+                onChange={(doc) =>
+                  setSearchData((prev) => ({
+                    ...prev,
+                    counter_uuid: doc.value,
+                  }))
+                }
+                value={
+                  searchData?.counter_uuid
+                    ? {
+                        value: searchData?.counter_uuid,
+                        label: counter?.find(
+                          (j) => j.counter_uuid === searchData.counter_uuid
+                        )?.counter_title,
+                      }
+                    : {
+                        value: "",
+                        label: "All",
+                      }
+                }
+                openMenuOnFocus={true}
+                menuPosition="fixed"
+                menuPlacement="auto"
+                placeholder="Select"
+              />
             </div>
             <button
               className="item-sales-search"
@@ -190,7 +250,13 @@ const ItemDetails = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={items.filter(a=>!itemGroupFilter||a?.item_group_uuid?.filter(b=>b===itemGroupFilter)?.length)} />
+          <Table
+            itemsDetails={items.filter(
+              (a) =>
+                !itemGroupFilter ||
+                a?.item_group_uuid?.filter((b) => b === itemGroupFilter)?.length
+            )}
+          />
         </div>
       </div>
     </>
