@@ -369,4 +369,6 @@ export const updateIndexedDb = async () => {
       await store.put({ ...item, IDENTIFIER });
     }
   }
+  let time = new Date();
+  localStorage.setItem("indexed_time", time.getTime());
 };
