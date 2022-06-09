@@ -23,6 +23,7 @@ const SelectedCounterOrder = () => {
   const [companies, setCompanies] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
+  const [holdPopup, setHoldPopup] = useState(false);
   const Navigate = useNavigate();
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
@@ -76,7 +77,7 @@ const SelectedCounterOrder = () => {
     let data = {
       ...orderData,
       order_uuid: uuid(),
-      opened_by:0,
+      opened_by: 0,
       item_details: orderData.items.map((a) => ({
         ...a,
         b: a.b,
@@ -168,7 +169,18 @@ const SelectedCounterOrder = () => {
             />
           </div>
           {cartPage ? (
-            <h1 style={{ width: "100%", textAlign: "center" }}>Cart</h1>
+            <>
+              <h1 style={{ width: "100%", textAlign: "center" }}>Cart</h1>
+              <button
+                className="item-sales-search"
+                style={{
+                  width: "max-content",
+                }}
+                onClick={() => setHoldPopup("Summary")}
+              >
+                Free
+              </button>
+            </>
           ) : (
             ""
           )}
@@ -537,7 +549,9 @@ const SelectedCounterOrder = () => {
                     <ScrollLink
                       id={`${i}`}
                       onClick={() => {
-                        var element = document.getElementById(category.category_uuid);
+                        var element = document.getElementById(
+                          category.category_uuid
+                        );
 
                         element.scrollIntoView();
                         element.scrollIntoView(false);
@@ -632,7 +646,7 @@ const SelectedCounterOrder = () => {
 
                   type: "NEW",
                 },
-                add_discounts:true
+                add_discounts: true,
               }).then((data) => {
                 setOrder((prev) => ({ ...prev, ...data }));
                 postOrder({ ...order, ...data });
@@ -694,12 +708,177 @@ const SelectedCounterOrder = () => {
       ) : (
         ""
       )}
+      {holdPopup ? (
+        <HoldPopup
+          onSave={() => setHoldPopup(false)}
+          orders={order}
+          holdPopup={holdPopup}
+          itemsData={items}
+          setOrder={setOrder}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default SelectedCounterOrder;
+function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
+  const [items, setItems] = useState([]);
+  useEffect(() => {
+    setItems(itemsData.filter((a) => a.free_issue === "Y"));
+  }, []);
+  const postOrderData = async () => {
+    let data = orders;
+    let itemsdata = items.filter((a) => a.free);
+    let filterItem = data?.items?.filter(
+      (a) => !itemsdata.filter((b) => b.item_uuid === a.item_uuid).length
+    );
+    let NonFilterItem = data.items.filter(
+      (a) => itemsdata.filter((b) => b.item_uuid === a.item_uuid).length
+    );
+    NonFilterItem = itemsdata.map((a) =>
+      NonFilterItem.filter((b) => b.item_uuid === a.item_uuid).length
+        ? {
+            ...NonFilterItem.find((b) => b.item_uuid === a.item_uuid),
+            free: a.free,
+          }
+        : { ...a, b: 0, p: 0 }
+    );
+    let item_details = filterItem.length
+      ? NonFilterItem.length
+        ? [...filterItem, ...NonFilterItem]
+        : filterItem
+      : NonFilterItem.length
+      ? NonFilterItem
+      : [];
+    setOrder((prev) => ({ ...prev, items: item_details }));
+    console.log(item_details)
+    onSave();
+  };
+console.log(orders)
+  return (
+    <div className="overlay" style={{ zIndex: 999999999 }}>
+      <div
+        className="modal"
+        style={{
+          height: "fit-content",
+          width: "max-content",
+          minWidth: "250px",
+        }}
+      >
+        <h1>Free Items</h1>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll", width: "100%" }}>
+            {items.length ? (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                <table
+                  className="user-table"
+                  style={{
+                    width: "100%",
+                    height: "fit-content",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                      <th colSpan={3}>
+                        <div className="t-head-element">Item</div>
+                      </th>
+                      <th colSpan={2}>
+                        <div className="t-head-element">Qty</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tbody">
+                    {items?.map((item, i) => (
+                      <tr
+                        key={item?.item_uuid || Math.random()}
+                        style={{
+                          height: "30px",
+                          color: "#fff",
+                          backgroundColor:
+                            +item.status === 1
+                              ? "green"
+                              : +item.status === 3
+                              ? "red"
+                              : "#7990dd",
+                        }}
+                      >
+                        <td colSpan={3}>{item.item_title}</td>
+                        <td colSpan={2}>
+                          <input
+                            type="text"
+                            name="route_title"
+                            className="numberInput"
+                            value={item?.free || ""}
+                            style={{ width: "100px",backgroundColor:"transparent",color:"#fff" }}
+                            onChange={(e) =>
+                              setItems((prev) =>
+                                prev.map((a) =>
+                                  a.item_uuid === item.item_uuid
+                                    ? { ...a, free: e.target.value }
+                                    : a
+                                )
+                              )
+                            }
+                            maxLength={42}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                <i>No Data Present</i>
+              </div>
+            )}
 
+            {items.filter((a) => a.free).length ? (
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                {/* <button
+                type="button"
+                style={{ backgroundColor: "red" }}
+                className="submit"
+                onClick={onSave}
+              >
+                Cancel
+              </button> */}
+                <button
+                  type="button"
+                  className="submit"
+                  onClick={postOrderData}
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              ""
+            )}
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 function NewUserForm({ onSave, popupInfo, setOrder, order }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");

@@ -321,7 +321,8 @@ export const Billing = async ({
   };
 };
 export const updateIndexedDb = async () => {
-  await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+  let response = await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+  console.log(response)
   const result = await axios({
     method: "get",
     url: "/users/getDetails",
@@ -331,6 +332,7 @@ export const updateIndexedDb = async () => {
     },
   });
   let data = result.data.result;
+  console.log(data)
   const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
     upgrade(db) {
       for (const property in data) {
