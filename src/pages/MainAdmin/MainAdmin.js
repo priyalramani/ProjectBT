@@ -8,6 +8,7 @@ import { AiOutlineReload } from "react-icons/ai";
 import VerticalTabs from "../../components/VerticalTabs";
 import ItemAvilibility from "../../components/ItemAvilibility";
 import { OrderDetails } from "../../components/OrderDetails";
+import { ArrowDropDown, SquareFoot } from "@mui/icons-material";
 const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
@@ -23,6 +24,8 @@ const MainAdmin = () => {
   const [searchItems, setSearhItems] = useState("");
   const [popupOrder, setPopupOrder] = useState(null);
   const [users, setUsers] = useState([]);
+  const [dropdown, setDropDown] = useState(false);
+  const [selectOrder, setSelectOrder] = useState(false);
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -164,7 +167,54 @@ const MainAdmin = () => {
         />
         <div style={{ display: "flex", height: "100%" }}>
           <VerticalTabs />
-
+          <div className="inputs">
+            <div
+              id="customer-dropdown-trigger"
+              className={"active"}
+              style={{
+                position: "fixed",
+                top: "70px",
+                right: "10px",
+                transform: dropdown ? "rotate(0deg)" : "rotate(180deg)",
+                width: "30px",
+                height: "30px",
+                backgroundColor: "#fff",
+              }}
+              onClick={(e) => {
+                setDropDown((prev) => !prev);
+              }}
+            >
+              <ArrowDropDown />
+            </div>
+          </div>
+          {dropdown && (
+            <div
+              id="customer-details-dropdown"
+              className={"page1"}
+              style={{ top: "100px", width: "100px" }}
+              onMouseLeave={() => setDropDown(false)}
+            >
+              {window.location.pathname.includes("trip") ? (
+                <button
+                  className="item-sales-search"
+                  onClick={() => setPopupForm(true)}
+                  style={{ padding: "10px" }}
+                >
+                  Add
+                </button>
+              ) : (
+                ""
+              )}
+              <button
+                style={{ padding: "10px" }}
+                className="item-sales-search"
+                type="button"
+                onClick={() => setSelectOrder(true)}
+              >
+                Select
+              </button>
+            </div>
+          )}
           <div className="content-container" id="content-file-container">
             {window.location.pathname.includes("admin") ? (
               <>
@@ -200,6 +250,88 @@ const MainAdmin = () => {
                               processing: {route?.processingLength}, Checking:{" "}
                               {route.checkingLength}, Delivery:{" "}
                               {route?.deliveryLength}]
+                              {selectOrder ? (
+                                <input
+                                  type="checkbox"
+                                  style={{ marginLeft: "10px" }}
+                                  onClick={() =>
+                                    orders.filter(
+                                      (a) =>
+                                        (a.route_uuid === "0" ||
+                                          a?.counter_uuid ===
+                                            counterRoute?.counter_uuid) &&
+                                        selectedOrder.filter(
+                                          (b) => b.order_uuid === a.order_uuid
+                                        ).length
+                                    ).length ===
+                                    orders.filter(
+                                      (a) =>
+                                        a.route_uuid === "0" ||
+                                        a?.counter_uuid ===
+                                          counterRoute?.counter_uuid
+                                    ).length
+                                      ? setSelectedOrder(
+                                          selectedOrder.filter(
+                                            (b) =>
+                                              !orders.filter(
+                                                (a) =>
+                                                  (a.route_uuid === "0" ||
+                                                    a?.counter_uuid ===
+                                                      counterRoute?.counter_uuid) &&
+                                                  b.order_uuid === a.order_uuid
+                                              ).length
+                                          )
+                                        )
+                                      : setSelectedOrder(
+                                          selectedOrder.length
+                                            ? [
+                                                ...selectedOrder.filter(
+                                                  (b) =>
+                                                    !orders.filter(
+                                                      (a) =>
+                                                        (a.route_uuid === "0" ||
+                                                          a?.counter_uuid ===
+                                                            counterRoute?.counter_uuid) &&
+                                                        b.order_uuid ===
+                                                          a.order_uuid
+                                                    ).length
+                                                ),
+                                                ...orders.filter(
+                                                  (a) =>
+                                                    a.route_uuid === "0" ||
+                                                    a?.counter_uuid ===
+                                                      counterRoute?.counter_uuid
+                                                ),
+                                              ]
+                                            : orders.filter(
+                                                (a) =>
+                                                  a.route_uuid === "0" ||
+                                                  a?.counter_uuid ===
+                                                    counterRoute?.counter_uuid
+                                              )
+                                        )
+                                  }
+                                  defaultChecked={
+                                    orders.filter(
+                                      (a) =>
+                                        (a.route_uuid === "0" ||
+                                          a?.counter_uuid ===
+                                            counterRoute?.counter_uuid) &&
+                                        selectedOrder.filter(
+                                          (b) => b.order_uuid === a.order_uuid
+                                        ).length
+                                    ).length ===
+                                    orders.filter(
+                                      (a) =>
+                                        a.route_uuid === "0" ||
+                                        a?.counter_uuid ===
+                                          counterRoute?.counter_uuid
+                                    ).length
+                                  }
+                                />
+                              ) : (
+                                ""
+                              )}
                             </h1>
                             <div
                               className="content"
@@ -242,7 +374,28 @@ const MainAdmin = () => {
                                       // section={section.section_uuid}
                                       // section-name={section?.section_name}
                                       // outlet={outletIdState}
-                                      onClick={() =>
+                                      onClick={(e) =>
+                                        selectedTrip || selectOrder
+                                          ? setSelectedOrder((prev) =>
+                                              prev.filter(
+                                                (a) =>
+                                                  a.order_uuid ===
+                                                  item.order_uuid
+                                              ).length
+                                                ? prev.filter(
+                                                    (a) =>
+                                                      a.order_uuid !==
+                                                      item.order_uuid
+                                                  )
+                                                : prev.length
+                                                ? [...prev, item]
+                                                : [item]
+                                            )
+                                          : setSelectedRouteOrder(
+                                              item.order_uuid
+                                            )
+                                      }
+                                      onDoubleClick={() =>
                                         setSelectedRouteOrder(item.order_uuid)
                                       }
                                     >
@@ -263,7 +416,14 @@ const MainAdmin = () => {
                                         dateTime={item?.status[0]?.time}
                                         title1={item?.invoice_number || ""}
                                         selectedOrder={
-                                          selectedRouteOrder === item.order_uuid
+                                          selectedTrip || selectOrder
+                                            ? selectedOrder.filter(
+                                                (a) =>
+                                                  a.order_uuid ===
+                                                  item.order_uuid
+                                              ).length
+                                            : selectedRouteOrder ===
+                                              item.order_uuid
                                         }
                                         title2={item?.counter_title || ""}
                                         status={
@@ -309,15 +469,7 @@ const MainAdmin = () => {
               </>
             ) : (
               <>
-                <button
-                  className="item-sales-search"
-                  onClick={() => setPopupForm(true)}
-                  style={{ position: "absolute", left: "50vw", top: "60px" }}
-                >
-                  Add
-                </button>
-
-                <button
+                {/* <button
                   className="item-sales-search"
                   onClick={() => setPopupForm({ type: "edit" })}
                   style={{ position: "absolute", left: "70vw", top: "60px" }}
@@ -335,7 +487,7 @@ const MainAdmin = () => {
                   </button>
                 ) : (
                   ""
-                )}
+                )} */}
                 {orders
                   .filter(
                     (a) =>
@@ -361,6 +513,59 @@ const MainAdmin = () => {
                       , Delivery:{" "}
                       {tripData.find((a) => +a.trip_uuid === 0)?.deliveryLength}
                       ]
+                      {selectOrder ? (
+                        <input
+                          type="checkbox"
+                          style={{ marginLeft: "10px" }}
+                          defaultChecked={
+                            orders.filter(
+                              (a) =>
+                                !a?.trip_uuid &&
+                                selectedOrder.filter(
+                                  (b) => b.order_uuid === a.order_uuid
+                                ).length
+                            ).length ===
+                            orders.filter((a) => !a?.trip_uuid).length
+                          }
+                          onClick={() =>
+                            orders?.filter(
+                              (a) =>
+                                !a?.trip_uuid &&
+                                selectedOrder?.filter(
+                                  (b) => b.order_uuid === a.order_uuid
+                                )?.length
+                            ).length ===
+                            orders?.filter((a) => !a?.trip_uuid)?.length
+                              ? setSelectedOrder(
+                                  selectedOrder.filter(
+                                    (b) =>
+                                      !orders.filter(
+                                        (a) =>
+                                          !a?.trip_uuid &&
+                                          b.order_uuid === a.order_uuid
+                                      ).length
+                                  )
+                                )
+                              : setSelectedOrder(
+                                  selectedOrder.length
+                                    ? [
+                                        ...selectedOrder.filter(
+                                          (b) =>
+                                            !orders.filter(
+                                              (a) =>
+                                                !a?.trip_uuid &&
+                                                b.order_uuid === a.order_uuid
+                                            ).length
+                                        ),
+                                        ...orders.filter((a) => !a?.trip_uuid),
+                                      ]
+                                    : orders?.filter((a) => !a?.trip_uuid)
+                                )
+                          }
+                        />
+                      ) : (
+                        ""
+                      )}
                     </h2>
                     <div
                       className="content"
@@ -396,17 +601,17 @@ const MainAdmin = () => {
                               // section-name={section?.section_name}
                               // outlet={outletIdState}
                               onClick={(e) =>
-                                selectedTrip
-                                  ? setSelectedOrder(
-                                      selectedOrder.filter(
+                                selectedTrip || selectOrder
+                                  ? setSelectedOrder((prev) =>
+                                      prev.filter(
                                         (a) => a.order_uuid === item.order_uuid
                                       ).length
-                                        ? selectedOrder.filter(
+                                        ? prev.filter(
                                             (a) =>
                                               a.order_uuid !== item.order_uuid
                                           )
-                                        : selectedOrder.length
-                                        ? [...selectedOrder, item]
+                                        : prev.length
+                                        ? [...prev, item]
                                         : [item]
                                     )
                                   : setSelectedRouteOrder(item.order_uuid)
@@ -428,7 +633,7 @@ const MainAdmin = () => {
                                 // key={item.seat_uuid}
                                 title1={item?.invoice_number || ""}
                                 selectedOrder={
-                                  selectedTrip
+                                  selectedTrip || selectOrder
                                     ? selectedOrder.filter(
                                         (a) => a.order_uuid === item.order_uuid
                                       ).length
@@ -506,6 +711,73 @@ const MainAdmin = () => {
                                       ?.user_title
                               )}
                               ]
+                              {selectOrder ? (
+                                <input
+                                  type="checkbox"
+                                  style={{ marginLeft: "10px" }}
+                                  defaultChecked={
+                                    orders.filter(
+                                      (a) =>
+                                        a.trip_uuid === trip.trip_uuid &&
+                                        selectedOrder.filter(
+                                          (b) => b.order_uuid === a.order_uuid
+                                        ).length
+                                    ).length ===
+                                    orders.filter(
+                                      (a) => a.trip_uuid === trip.trip_uuid
+                                    ).length
+                                  }
+                                  onClick={() =>
+                                    orders?.filter(
+                                      (a) =>
+                                        a.trip_uuid === trip.trip_uuid &&
+                                        selectedOrder?.filter(
+                                          (b) => b.order_uuid === a.order_uuid
+                                        )?.length
+                                    ).length ===
+                                    orders?.filter(
+                                      (a) => a.trip_uuid === trip.trip_uuid
+                                    )?.length
+                                      ? setSelectedOrder(
+                                          selectedOrder.filter(
+                                            (b) =>
+                                              !orders.filter(
+                                                (a) =>
+                                                  a.trip_uuid ===
+                                                    trip.trip_uuid &&
+                                                  b.order_uuid === a.order_uuid
+                                              ).length
+                                          )
+                                        )
+                                      : setSelectedOrder(
+                                          selectedOrder.length
+                                            ? [
+                                                ...selectedOrder.filter(
+                                                  (b) =>
+                                                    !orders.filter(
+                                                      (a) =>
+                                                        a.trip_uuid ===
+                                                          trip.trip_uuid &&
+                                                        b.order_uuid ===
+                                                          a.order_uuid
+                                                    ).length
+                                                ),
+                                                ...orders.filter(
+                                                  (a) =>
+                                                    a.trip_uuid ===
+                                                    trip.trip_uuid
+                                                ),
+                                              ]
+                                            : orders?.filter(
+                                                (a) =>
+                                                  a.trip_uuid === trip.trip_uuid
+                                              )
+                                        )
+                                  }
+                                />
+                              ) : (
+                                ""
+                              )}
                             </h1>
                             <div
                               className="content"
@@ -545,7 +817,7 @@ const MainAdmin = () => {
                                       // section-name={section?.section_name}
                                       // outlet={outletIdState}
                                       onClick={(e) =>
-                                        selectedTrip
+                                        selectedTrip || selectOrder
                                           ? setSelectedOrder((prev) =>
                                               prev.filter(
                                                 (a) =>
@@ -583,7 +855,7 @@ const MainAdmin = () => {
                                         dateTime={item?.status[0]?.time}
                                         title1={item?.invoice_number || ""}
                                         selectedOrder={
-                                          selectedTrip
+                                          selectedTrip || selectOrder
                                             ? selectedOrder.filter(
                                                 (a) =>
                                                   a.order_uuid ===
