@@ -190,29 +190,78 @@ const MainAdmin = () => {
           {dropdown && (
             <div
               id="customer-details-dropdown"
-              className={"page1"}
-              style={{ top: "100px", width: "100px" }}
+              className={"page1 flex"}
+              style={{ top: "100px", flexDirection: "column" }}
               onMouseLeave={() => setDropDown(false)}
             >
-              {window.location.pathname.includes("trip") ? (
-                <button
-                  className="item-sales-search"
-                  onClick={() => setPopupForm(true)}
-                  style={{ padding: "10px" }}
-                >
-                  Add
-                </button>
+              {!selectOrder ? (
+                <>
+                  {window.location.pathname.includes("trip") ? (
+                    <button
+                      className="simple_Logout_button"
+                      onClick={() => {
+                        setPopupForm(true);
+                        setDropDown(false);
+                      }}
+                      // style={{ padding: "10px" }}
+                    >
+                      Add
+                    </button>
+                  ) : (
+                    ""
+                  )}
+                  <button
+                    // style={{ padding: "10px" }}
+                    className="simple_Logout_button"
+                    type="button"
+                    onClick={() => {
+                      setSelectOrder(true);
+                      setDropDown(false);
+                    }}
+                  >
+                    Select
+                  </button>
+                </>
               ) : (
-                ""
+                <>
+                  <button
+                    // style={{ padding: "10px" }}
+                    className="simple_Logout_button"
+                    type="button"
+                    onClick={() => {
+                      setSelectOrder(false);
+                      setDropDown(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  {selectedOrder.length ? (
+                    <button
+                      // style={{ padding: "10px" }}
+                      className="simple_Logout_button"
+                      type="button"
+                      onClick={() => {
+                        setPopupForm({ type: "edit" });
+                        setDropDown(false);
+                      }}
+                    >
+                      Assign
+                    </button>
+                  ) : (
+                    ""
+                  )}
+                  <button
+                    // style={{ padding: "10px" }}
+                    className="simple_Logout_button"
+                    type="button"
+                    onClick={() => {
+                      setDropDown(false);
+                    }}
+                  >
+                    Summary
+                  </button>
+                </>
               )}
-              <button
-                style={{ padding: "10px" }}
-                className="item-sales-search"
-                type="button"
-                onClick={() => setSelectOrder(true)}
-              >
-                Select
-              </button>
             </div>
           )}
           <div className="content-container" id="content-file-container">
@@ -339,7 +388,7 @@ const MainAdmin = () => {
                                 flexDirection: "row",
                                 flexWrap: "wrap",
                                 gap: "0",
-                                marginBottom: "50px",
+                                marginBottom: "10px",
                               }}
                               id="seats_container"
                             >
@@ -367,6 +416,7 @@ const MainAdmin = () => {
                                   return (
                                     <div
                                       className={`seatSearchTarget`}
+                                      style={{height:"fit-content"}}
                                       key={Math.random()}
                                       seat-name={item.seat_name}
                                       seat-code={item.seat_uuid}
@@ -469,25 +519,7 @@ const MainAdmin = () => {
               </>
             ) : (
               <>
-                {/* <button
-                  className="item-sales-search"
-                  onClick={() => setPopupForm({ type: "edit" })}
-                  style={{ position: "absolute", left: "70vw", top: "60px" }}
-                >
-                  Assign
-                </button>
-
-                {selectedOrder.length && selectedTrip ? (
-                  <button
-                    className="item-sales-search"
-                    onClick={() => postOrderData()}
-                    style={{ position: "absolute", right: "0", top: "60px" }}
-                  >
-                    Done
-                  </button>
-                ) : (
-                  ""
-                )} */}
+               
                 {orders
                   .filter(
                     (a) =>
@@ -501,7 +533,7 @@ const MainAdmin = () => {
                   )
                   .filter((a) => !a?.trip_uuid).length ? (
                   <div key={Math.random()} className="sectionDiv">
-                    <h2 style={{ marginTop: "50px" }}>
+                    <h2 >
                       UnKnown ({orders.filter((a) => !a?.trip_uuid).length}) [
                       processing:{" "}
                       {
@@ -573,7 +605,7 @@ const MainAdmin = () => {
                         flexDirection: "row",
                         flexWrap: "wrap",
                         gap: "0",
-                        marginBottom: "50px",
+                        marginBottom: "10px",
                       }}
                       id="seats_container"
                     >
@@ -593,6 +625,7 @@ const MainAdmin = () => {
                           return (
                             <div
                               className={`seatSearchTarget`}
+                              style={{height:"fit-content"}}
                               key={Math.random()}
                               seat-name={item.seat_name}
                               seat-code={item.seat_uuid}
@@ -785,7 +818,7 @@ const MainAdmin = () => {
                                 flexDirection: "row",
                                 flexWrap: "wrap",
                                 gap: "0",
-                                marginBottom: "50px",
+                                marginBottom: "10px",
                               }}
                               id="seats_container"
                             >
@@ -809,6 +842,7 @@ const MainAdmin = () => {
                                   return (
                                     <div
                                       className={`seatSearchTarget`}
+                                      style={{height:"fit-content"}}
                                       key={Math.random()}
                                       seat-name={item.seat_name}
                                       seat-code={item.seat_uuid}
@@ -934,7 +968,8 @@ const MainAdmin = () => {
         <NewUserForm
           onSave={() => {
             setPopupForm(false);
-            setSelectedOrder([]);
+            postOrderData()
+            
           }}
           selectedTrip={selectedTrip}
           setSelectedTrip={setSelectedTrip}
@@ -1011,7 +1046,7 @@ function NewUserForm({
           style={{
             height: "fit-content",
             padding: "20p0",
-            marginBottom: "50px",
+            marginBottom: "10px",
             width: "fit-content",
           }}
         >
