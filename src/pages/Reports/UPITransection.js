@@ -15,11 +15,11 @@ const UPITransection = () => {
     console.log("transactions", response);
     if (response.data.success) setItems(response.data.result);
   };
-  const putActivityData = async (order_uuid) => {
+  const putActivityData = async (order_uuid,mode_uuid) => {
     const response = await axios({
       method: "put",
       url: "/receipts/putReceiptUPIStatus",
-      data:{order_uuid,status:1},
+      data:{order_uuid,status:1,mode_uuid},
       headers: {
         "Content-Type": "application/json",
       },
@@ -100,7 +100,7 @@ function Table({ itemsDetails,putActivityData }) {
               {item.mode_title || ""}
               </td>
               <td colSpan={2}>
-                  <button type="button" className="item-sales-search"  onClick={()=>putActivityData(item.order_uuid)}>Complete</button>
+                  <button type="button" className="item-sales-search"  onClick={()=>putActivityData(item.order_uuid,item.mode_uuid)}>Complete</button>
               </td>
             </tr>
           ))}
