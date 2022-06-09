@@ -3,7 +3,7 @@ import { Route, Routes, useNavigate } from "react-router-dom";
 import "./style.css";
 import { Link, useLocation } from "react-router-dom";
 import { deleteDB } from "idb";
-
+import { updateIndexedDb } from "../functions";
 const Main = () => {
   const [userRole, setUserRole] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
@@ -59,11 +59,9 @@ const Main = () => {
           <Link
             key={i}
             to={pathname + rolesArray.find((a) => +a.type === +data)?.link}
-            onClick={() => {
-             
-            }}
+            onClick={() => {}}
             className="linkDecoration"
-            style={{textDecoration:"none",height:"fit-content"}}
+            style={{ textDecoration: "none", height: "fit-content" }}
           >
             <div className="service">
               <span>{rolesArray.find((a) => +a.type === +data)?.name}</span>
@@ -74,25 +72,41 @@ const Main = () => {
       <button
         type="button"
         className="cartBtn"
+        style={{ width: "50%" }}
         onClick={() => setPopupForm(true)}
       >
         Logout
       </button>
-      {popupForm ? <Logout onSave={() => setPopupForm(false)} /> : ""}
+      <button
+        type="button"
+        className="cartBtn"
+        style={{ width: "50%", right: "0px", left: "50vw" }}
+        onClick={() => setPopupForm("refresh")}
+      >
+        Refresh
+      </button>
+      {popupForm ? (
+        <Logout onSave={() => setPopupForm(false)} popupForm={popupForm} />
+      ) : (
+        ""
+      )}
     </div>
   );
 };
 
 export default Main;
 
-function Logout({ onSave }) {
-
-
+function Logout({ onSave, popupForm }) {
   const submitHandler = async (e) => {
     e.preventDefault();
-    await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
-    localStorage.clear()
-    window.location.assign("/login")
+    if (popupForm === "refresh") {
+      updateIndexedDb();
+      onSave();
+    } else {
+      await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+      localStorage.clear();
+      window.location.assign("/login");
+    }
   };
 
   return (
@@ -116,7 +130,7 @@ function Logout({ onSave }) {
               </div>
 
               <button type="submit" className="submit">
-                Logout
+                {popupForm === "refresh" ? "Refresh" : "Logout"}
               </button>
             </form>
           </div>
