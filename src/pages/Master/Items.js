@@ -431,6 +431,7 @@ function NewUserForm({
             category_uuid: itemCategories.filter(
               (a) => a.company_uuid === companies[0].company_uuid
             )[0]?.category_uuid,
+            free_issue:"N"
           });
         },
     []
@@ -715,6 +716,31 @@ function NewUserForm({
                         })
                       }
                     />
+                  </label>
+                  <label className="selectLabel">
+                    Free Issue
+                    <div className="flex" style={{justifyContent:"space-between"}}>
+                      <input
+                        type="radio"
+                        name="sort_order"
+                        className="numberInput"
+                        checked={data.free_issue === "Y"}
+                        style={{ height: "25px" }}
+                        onClick={() =>
+                          setdata((prev) => ({ ...prev, free_issue: "Y" }))
+                        }
+                      />
+                      <input
+                        type="radio"
+                        name="sort_order"
+                        className="numberInput"
+                        checked={data.free_issue === "N"}
+                        style={{ height: "25px" }}
+                        onClick={() =>
+                          setdata((prev) => ({ ...prev, free_issue: "N" }))
+                        }
+                      />
+                    </div>
                   </label>
                 </div>
               </div>
