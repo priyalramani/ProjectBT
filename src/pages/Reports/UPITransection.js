@@ -36,7 +36,7 @@ const UPITransection = () => {
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading">
-          <h2>UPI Transaction </h2>
+          <h2>UPI and Cheque Transaction </h2>
         </div>
 
         <div className="table-container-user item-sales-container">
@@ -74,6 +74,7 @@ function Table({ itemsDetails,putActivityData }) {
           <th colSpan={2}>Order Date</th>
           <th colSpan={2}>Payment Date</th>
           <th colSpan={3}>User</th>
+          <th colSpan={3}>Type</th>
           <th colSpan={2}>Action</th>
         </tr>
       </thead>
@@ -94,6 +95,9 @@ function Table({ itemsDetails,putActivityData }) {
               </td>
               <td colSpan={3}>
               {item.user_title || ""}
+              </td>
+              <td colSpan={3}>
+              {item.mode_title || ""}
               </td>
               <td colSpan={2}>
                   <button type="button" className="item-sales-search"  onClick={()=>putActivityData(item.order_uuid)}>Complete</button>
