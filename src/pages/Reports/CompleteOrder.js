@@ -3,14 +3,28 @@ import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
+import Select from "react-select";
 const CompleteOrder = () => {
   const [searchData, setSearchData] = useState({
     startDate: "",
     endDate: "",
+    counter_uuid: "",
   });
   const [popupOrder, setPopupOrder] = useState(null);
   const [items, setItems] = useState([]);
+  const [counter, setCounter] = useState([]);
 
+  const getCounter = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/counters/GetCounterList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCounter(response.data.result);
+  };
   const getCompleteOrders = async () => {
     let startDate = new Date(searchData.startDate + " 00:00:00 AM");
     startDate = startDate.getTime();
@@ -19,7 +33,7 @@ const CompleteOrder = () => {
     const response = await axios({
       method: "post",
       url: "/orders/getCompleteOrderList",
-      data: { startDate, endDate },
+      data: { startDate, endDate, counter_uuid: searchData.counter_uuid },
       headers: {
         "Content-Type": "application/json",
       },
@@ -39,9 +53,12 @@ const CompleteOrder = () => {
       startDate: curTime,
       endDate: curTime,
     }));
-   
+    getCounter();
   }, []);
-  console.log(searchData);
+  useEffect(() => {
+    if (counter.length)
+      setSearchData({ ...searchData, counter_uuid: counter[0].counter_uuid });
+  }, [counter]);
   return (
     <>
       <Sidebar />
@@ -72,6 +89,7 @@ const CompleteOrder = () => {
               value={searchData.startDate}
               placeholder="Search Counter Title..."
               className="searchInput"
+              pattern="\d{4}-\d{2}-\d{2}"
             />
             <input
               type="date"
@@ -81,8 +99,36 @@ const CompleteOrder = () => {
               value={searchData.endDate}
               placeholder="Search Route Title..."
               className="searchInput"
+              pattern="\d{4}-\d{2}-\d{2}"
             />
-
+            <div className="inputGroup" style={{ width: "50%" }}>
+              <Select
+                options={counter.map((a) => ({
+                  value: a.counter_uuid,
+                  label: a.counter_title,
+                }))}
+                onChange={(doc) =>
+                  setSearchData((prev) => ({
+                    ...prev,
+                    counter_uuid: doc.value,
+                  }))
+                }
+                value={
+                  searchData?.counter_uuid
+                    ? {
+                        value: searchData?.counter_uuid,
+                        label: counter?.find(
+                          (j) => j.counter_uuid === searchData.counter_uuid
+                        )?.counter_title,
+                      }
+                    : ""
+                }
+                openMenuOnFocus={true}
+                menuPosition="fixed"
+                menuPlacement="auto"
+                placeholder="Select"
+              />
+            </div>
             <button
               className="item-sales-search"
               onClick={() => getCompleteOrders()}
@@ -92,14 +138,18 @@ const CompleteOrder = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={items} setPopupOrder={setPopupOrder}/>
+          <Table
+            itemsDetails={items}
+            setPopupOrder={setPopupOrder}
+            counter={counter}
+          />
         </div>
       </div>
-     {popupOrder ? (
+      {popupOrder ? (
         <OrderDetails
           onSave={() => {
             setPopupOrder(null);
-            getCompleteOrders()
+            getCompleteOrders();
           }}
           order={popupOrder}
           orderStatus="edit"
@@ -113,7 +163,7 @@ const CompleteOrder = () => {
 
 export default CompleteOrder;
 
-function Table({ itemsDetails,setPopupOrder }) {
+function Table({ itemsDetails, setPopupOrder, counter }) {
   function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -124,7 +174,7 @@ function Table({ itemsDetails,setPopupOrder }) {
     var strTime = hours + ":" + minutes + " " + ampm;
     return strTime;
   }
- 
+
   return (
     <table
       className="user-table"
@@ -145,7 +195,11 @@ function Table({ itemsDetails,setPopupOrder }) {
         {itemsDetails
           ?.sort((a, b) => a.order_date - b.order_date)
           ?.map((item, i, array) => (
-            <tr key={Math.random()} style={{ height: "30px" }} onClick={() => setPopupOrder(item)}>
+            <tr
+              key={Math.random()}
+              style={{ height: "30px" }}
+              onClick={() => setPopupOrder(item)}
+            >
               <td>{i + 1}</td>
               <td colSpan={2}>
                 {new Date(item.order_date).toDateString()} -{" "}
@@ -155,7 +209,10 @@ function Table({ itemsDetails,setPopupOrder }) {
                 {new Date(item.delivery_date).toDateString()} -{" "}
                 {formatAMPM(new Date(item.delivery_date))}
               </td>
-              <td colSpan={3}>{item.counter_title || ""}</td>
+              <td colSpan={3}>
+                {counter.find((a) => a.counter_uuid === item.counter_uuid)?.counter_title ||
+                  ""}
+              </td>
               <td colSpan={2}>{item.invoice_number || ""}</td>
               <td colSpan={2}>{item.qty || ""}</td>
               <td colSpan={2}>{item.amt || ""}</td>
