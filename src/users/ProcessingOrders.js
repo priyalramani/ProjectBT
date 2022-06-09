@@ -230,8 +230,8 @@ const ProcessingOrders = () => {
             ?.find((a) => selectedOrder?.counter_uuid === a.counter_uuid)
             ?.payment_modes?.filter((b) => b === a.mode_uuid)?.length
       );
-      if (data?.length) {
-        setDeliveryMessage(data);
+      if (data?.length || selectedOrder.credit_allowed !== "Y") {
+        setDeliveryMessage(data || []);
         setChecking(true);
       }
     }
@@ -1443,6 +1443,7 @@ const ProcessingOrders = () => {
             setDeliveryMessage(false);
           }}
           data={deliveryMessage}
+          credit_allowed={selectedOrder.credit_allowed || ""}
         />
       ) : (
         ""
@@ -2256,12 +2257,10 @@ function DiliveryPopup({
                         className="numberInput"
                         value={outstanding?.amount}
                         placeholder={
-                          !credit_allowed==="Y"
-                            ? "Not Allowed"
-                            : ""
+                          !credit_allowed === "Y" ? "Not Allowed" : ""
                         }
                         style={
-                          !credit_allowed==="Y"
+                          !credit_allowed === "Y"
                             ? {
                                 width: "90px",
                                 backgroundColor: "light",
@@ -2276,7 +2275,7 @@ function DiliveryPopup({
                             amount: e.target.value,
                           }))
                         }
-                        disabled={credit_allowed!=="Y"}
+                        disabled={credit_allowed !== "Y"}
                         maxLength={42}
                       />
                       {/* {popupInfo.conversion || 0} */}
@@ -2553,7 +2552,7 @@ function ConfirmPopup({ onSave, onClose }) {
     </div>
   );
 }
-function DeliveryMessagePopup({ onSave, data }) {
+function DeliveryMessagePopup({ onSave, data, credit_allowed }) {
   const [disabled, setDisabled] = useState(true);
   useEffect(() => {
     setTimeout(() => setDisabled(false), 5000);
@@ -2565,26 +2564,40 @@ function DeliveryMessagePopup({ onSave, data }) {
         className="modal"
         style={{ height: "fit-content", width: "max-content" }}
       >
-        <h2>
-          {data.map((a, i) =>
-            i === 0 ? (
-              <b style={{ color: "red" }}>
-                <u>{a.mode_title}</u>
-              </b>
-            ) : data.length === i + 1 ? (
-              <>
-                {" "}
-                and{" "}
+        {data.length ? (
+          <h2>
+            {data.map((a, i) =>
+              i === 0 ? (
                 <b style={{ color: "red" }}>
                   <u>{a.mode_title}</u>
                 </b>
-              </>
-            ) : (
-              ", " + a.mode_title
-            )
-          )}{" "}
-          not allowed
-        </h2>
+              ) : data.length === i + 1 ? (
+                <>
+                  {" "}
+                  and{" "}
+                  <b style={{ color: "red" }}>
+                    <u>{a.mode_title}</u>
+                  </b>
+                </>
+              ) : (
+                ", " + a.mode_title
+              )
+            )}{" "}
+            not allowed
+          </h2>
+        ) : (
+          ""
+        )}
+        {credit_allowed !== "Y" ? (
+          <h2>
+            <b style={{ color: "red" }}>
+              <u>Credit / Unpaid </u>
+            </b>
+             not allowed
+          </h2>
+        ) : (
+          ""
+        )}
 
         <div
           className="content"
