@@ -230,6 +230,7 @@ const MainAdmin = () => {
                     type="button"
                     onClick={() => {
                       setSelectOrder(false);
+                      setSelectedOrder([])
                       setDropDown(false);
                     }}
                   >
@@ -302,7 +303,7 @@ const MainAdmin = () => {
                               {selectOrder ? (
                                 <input
                                   type="checkbox"
-                                  style={{ marginLeft: "10px" }}
+                                  style={{ marginLeft: "10px" ,transform:"scale(1.5)"}}
                                   onClick={() =>
                                     orders.filter(
                                       (a) =>
@@ -548,7 +549,7 @@ const MainAdmin = () => {
                       {selectOrder ? (
                         <input
                           type="checkbox"
-                          style={{ marginLeft: "10px" }}
+                          style={{ marginLeft: "10px" ,transform:"scale(1.5)"}}
                           defaultChecked={
                             orders.filter(
                               (a) =>
@@ -747,7 +748,7 @@ const MainAdmin = () => {
                               {selectOrder ? (
                                 <input
                                   type="checkbox"
-                                  style={{ marginLeft: "10px" }}
+                                  style={{ marginLeft: "10px" ,transform:"scale(1.5)"}}
                                   defaultChecked={
                                     orders.filter(
                                       (a) =>
