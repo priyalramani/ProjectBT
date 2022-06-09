@@ -327,16 +327,19 @@ function NewUserForm({
         }
       : () => {
           setdata({
-            payment_modes: paymentModes.filter(
-              (a) =>
-                a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" ||
-                a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
-            ).map(a=>a.mode_uuid),
+            payment_modes: paymentModes
+              .filter(
+                (a) =>
+                  a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" ||
+                  a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+              )
+              .map((a) => a.mode_uuid),
+            credit_allowed: "N",
           });
         },
     []
   );
-console.log(data)
+  console.log(data);
   const submitHandler = async (e) => {
     e.preventDefault();
     if (!data.counter_title) {
@@ -354,7 +357,12 @@ console.log(data)
       const response = await axios({
         method: "put",
         url: "/counters/putCounter",
-        data: [data],
+        data: [
+          {
+            ...data,
+            payment_modes: data.payment_modes.filter((a) => a !== "unpaid"),
+          },
+        ],
         headers: {
           "Content-Type": "application/json",
         },
@@ -497,7 +505,13 @@ console.log(data)
                     <select
                       className="numberInput"
                       style={{ width: "200px", height: "100px" }}
-                      value={data?.payment_modes}
+                      value={
+                        data.credit_allowed === "Y"
+                          ? data.payment_modes.length
+                            ? [...data?.payment_modes, "unpaid"]
+                            : "unpaid"
+                          : data?.payment_modes
+                      }
                       onChange={onChangeHandler}
                       multiple
                     >
@@ -510,6 +524,19 @@ console.log(data)
                           {occ.mode_title}
                         </option>
                       ))}
+                      <option
+                        onClick={() =>
+                          setdata((prev) => ({
+                            ...prev,
+                            credit_allowed:
+                              prev.credit_allowed === "Y" ? "N" : "Y",
+                          }))
+                        }
+                        style={{ marginBottom: "5px", textAlign: "center" }}
+                        value="unpaid"
+                      >
+                        Unpaid
+                      </option>
                     </select>
                   </label>
                 </div>

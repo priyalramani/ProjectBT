@@ -2046,7 +2046,7 @@ function DiliveryPopup({
   onSave,
   postOrderData,
   order_uuid,
-  setSelectedOrder,
+  credit_allowed,
   counters,
   items,
   order,
@@ -2255,13 +2255,28 @@ function DiliveryPopup({
                         name="route_title"
                         className="numberInput"
                         value={outstanding?.amount}
-                        style={{ width: "80px" }}
+                        placeholder={
+                          !credit_allowed==="Y"
+                            ? "Not Allowed"
+                            : ""
+                        }
+                        style={
+                          !credit_allowed==="Y"
+                            ? {
+                                width: "90px",
+                                backgroundColor: "light",
+                                fontSize: "12px",
+                                color: "#fff",
+                              }
+                            : { width: "80px" }
+                        }
                         onChange={(e) =>
                           setOutstanding((prev) => ({
                             ...prev,
                             amount: e.target.value,
                           }))
                         }
+                        disabled={credit_allowed!=="Y"}
                         maxLength={42}
                       />
                       {/* {popupInfo.conversion || 0} */}
