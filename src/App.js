@@ -29,6 +29,8 @@ import UPITransection from "./pages/Reports/UPITransection";
 import CompleteOrder from "./pages/Reports/CompleteOrder";
 import ItemDetails from "./pages/Reports/ItemDetails";
 import CompletedTrips from "./pages/Reports/CompletedTrips";
+import { useEffect } from "react";
+import { updateIndexedDb } from "./functions";
 
 const id = "240522";
 function App() {
@@ -36,6 +38,17 @@ function App() {
   axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
   // axios.defaults.baseURL = "http://localhost:9000";
+useEffect(()=>{
+  let user = localStorage.getItem("user_uuid")
+  if(user&&user!=="240522"){
+    let time =+localStorage.getItem("indexed_time")||""
+    let currTime= new Date()
+    currTime= currTime.getTime()
+    if(64800000<currTime-time){
+      updateIndexedDb();
+    }
+  }
+},[])
 
   return (
     <div className="App">
