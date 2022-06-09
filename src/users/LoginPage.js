@@ -29,8 +29,7 @@ const LoginPage = () => {
         },
       });
 
-      if (response.status !== 200)
-        return setIsLoading(false);
+      if (response.status !== 200) return setIsLoading(false);
 
       if (response.data.success) {
         let data = response.data.result;
@@ -48,15 +47,19 @@ const LoginPage = () => {
         });
         data = result.data.result;
 
-        const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
-          upgrade(db) {
-            for (const property in data) {
-              db.createObjectStore(property, {
-                keyPath: "IDENTIFIER",
-              });
-            }
-          },
-        });
+        const db = await openDB(
+          "BT",
+          +localStorage.getItem("IDBVersion") || 1,
+          {
+            upgrade(db) {
+              for (const property in data) {
+                db.createObjectStore(property, {
+                  keyPath: "IDENTIFIER",
+                });
+              }
+            },
+          }
+        );
 
         let store;
         for (const property in data) {
@@ -66,29 +69,31 @@ const LoginPage = () => {
           for (let item of data[property]) {
             let IDENTIFIER =
               item[
-              property === "autobill"
-                ? "auto_uuid"
-                : property === "companies"
+                property === "autobill"
+                  ? "auto_uuid"
+                  : property === "companies"
                   ? "company_uuid"
                   : property === "counter"
-                    ? "counter_uuid"
-                    : property === "counter_groups"
-                      ? "counter_group_uuid"
-                      : property === "item_category"
-                        ? "category_uuid"
-                        : property === "items"
-                          ? "item_uuid"
-                          : property === "routes"
-                            ? "route_uuid"
-                          : property === "payment_modes"
-                            ? "mode_uuid"
-                            : ""
+                  ? "counter_uuid"
+                  : property === "counter_groups"
+                  ? "counter_group_uuid"
+                  : property === "item_category"
+                  ? "category_uuid"
+                  : property === "items"
+                  ? "item_uuid"
+                  : property === "routes"
+                  ? "route_uuid"
+                  : property === "payment_modes"
+                  ? "mode_uuid"
+                  : ""
               ];
             console.log({ ...item, IDENTIFIER });
             await store.put({ ...item, IDENTIFIER });
           }
         }
         setIsLoading(false);
+        let time = new Date();
+        localStorage.setItem("indexed_time", time.getTime());
         window.location.assign("/users");
       }
     } catch (error) {
@@ -146,7 +151,6 @@ const LoginPage = () => {
             required
           />
         </div>
-
 
         {!isLoading ? (
           <button className="submit-btn" onClick={loginHandler}>

@@ -1,3 +1,6 @@
+import axios from "axios";
+import { deleteDB, openDB } from "idb";
+
 export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
   let eligibleItems = items;
   let auto_added = [];
@@ -316,4 +319,54 @@ export const Billing = async ({
     items: newPriceItems,
     others,
   };
+};
+export const updateIndexedDb = async () => {
+  await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+  const result = await axios({
+    method: "get",
+    url: "/users/getDetails",
+
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  let data = result.data.result;
+  const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
+    upgrade(db) {
+      for (const property in data) {
+        db.createObjectStore(property, {
+          keyPath: "IDENTIFIER",
+        });
+      }
+    },
+  });
+
+  let store;
+  for (const property in data) {
+    store = await db.transaction(property, "readwrite").objectStore(property);
+    for (let item of data[property]) {
+      let IDENTIFIER =
+        item[
+          property === "autobill"
+            ? "auto_uuid"
+            : property === "companies"
+            ? "company_uuid"
+            : property === "counter"
+            ? "counter_uuid"
+            : property === "counter_groups"
+            ? "counter_group_uuid"
+            : property === "item_category"
+            ? "category_uuid"
+            : property === "items"
+            ? "item_uuid"
+            : property === "routes"
+            ? "route_uuid"
+            : property === "payment_modes"
+            ? "mode_uuid"
+            : ""
+        ];
+      console.log({ ...item, IDENTIFIER });
+      await store.put({ ...item, IDENTIFIER });
+    }
+  }
 };
