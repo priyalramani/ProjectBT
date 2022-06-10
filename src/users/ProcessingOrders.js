@@ -256,7 +256,11 @@ const ProcessingOrders = () => {
           order_item.b,
           "Box",
           "es"
-        )} ${handleQty(order_item.p, "Piece", "s")}`;
+        )} ${handleQty(
+          (+order_item.p || 0) + (+order_item.free || 0),
+          "Piece",
+          "s"
+        )}`;
 
         let audioElement = new Audio(
           `${axios.defaults.baseURL}/stream/${speechString
@@ -483,6 +487,7 @@ const ProcessingOrders = () => {
     });
     if (response.data.success) {
       console.log(response);
+      getTripOrders()
     }
   };
   const postHoldOrders = async (orders) => {
@@ -572,11 +577,15 @@ const ProcessingOrders = () => {
         (b) => b.item_uuid === a.item_uuid
       );
       console.log(
-        (+orderItem?.b || 0) * +(+a?.conversion || 1) + orderItem?.p,
+        (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+          orderItem?.p +
+          (+orderItem?.free || 0),
         (+a?.b || 0) * +(+a?.conversion || 1) + a?.p
       );
       if (
-        (+orderItem?.b || 0) * +(+a?.conversion || 1) + orderItem?.p !==
+        (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+          orderItem?.p +
+          (+orderItem?.free || 0) !==
         (+a?.b || 0) * +(+a?.conversion || 1) + a?.p
       )
         setBarcodeMessage((prev) =>
@@ -590,7 +599,8 @@ const ProcessingOrders = () => {
                   case: 1,
                   qty:
                     (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-                    orderItem?.p,
+                    orderItem?.p +
+                    (+orderItem?.free || 0),
                 },
               ]
             : [
@@ -601,7 +611,8 @@ const ProcessingOrders = () => {
                   case: 1,
                   qty:
                     (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-                    orderItem?.p,
+                    orderItem?.p +
+                    (+orderItem?.free || 0),
                 },
               ]
         );
@@ -616,7 +627,9 @@ const ProcessingOrders = () => {
       let ItemData = items.find((b) => b.item_uuid === a.item_uuid);
       console.log(a.qty, ItemData);
       if (
-        (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p !==
+        (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+          orderItem?.p +
+          (+orderItem?.free || 0) !==
         a?.qty
       ) {
         if (orderItem)
@@ -631,7 +644,8 @@ const ProcessingOrders = () => {
                     case: 1,
                     qty:
                       (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                      orderItem?.p,
+                      orderItem?.p +
+                      (+orderItem?.free || 0),
                   },
                 ]
               : [
@@ -642,7 +656,8 @@ const ProcessingOrders = () => {
                     case: 1,
                     qty:
                       (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                      orderItem?.p,
+                      orderItem?.p +
+                      (+orderItem?.free || 0),
                   },
                 ]
           );
@@ -657,7 +672,8 @@ const ProcessingOrders = () => {
                     case: 2,
                     qty:
                       (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                      orderItem?.p,
+                      orderItem?.p +
+                      (+orderItem?.free || 0),
                   },
                 ]
               : [
@@ -667,7 +683,8 @@ const ProcessingOrders = () => {
                     case: 2,
                     qty:
                       (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                      orderItem?.p,
+                      orderItem?.p +
+                      (+orderItem?.free || 0),
                   },
                 ]
           );
@@ -682,7 +699,8 @@ const ProcessingOrders = () => {
                     case: 3,
                     qty:
                       (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                      orderItem?.p,
+                      orderItem?.p +
+                      (+orderItem?.free || 0),
                   },
                 ]
               : [
@@ -692,7 +710,8 @@ const ProcessingOrders = () => {
                     case: 3,
                     qty:
                       (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                      orderItem?.p,
+                      orderItem?.p +
+                      (+orderItem?.free || 0),
                   },
                 ]
           );
@@ -704,7 +723,9 @@ const ProcessingOrders = () => {
         (b) => b.item_uuid === a.item_uuid
       );
       if (
-        (+orderItem?.b || 0) * +(+a?.conversion || 1) + orderItem?.p !==
+        (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+          orderItem?.p +
+          (+orderItem?.free || 0) !==
         (+a?.b || 0) * +(+a?.conversion || 1) + a?.p
       )
         setBarcodeMessage((prev) =>
@@ -718,7 +739,8 @@ const ProcessingOrders = () => {
                   case: 1,
                   qty:
                     (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-                    orderItem?.p,
+                    orderItem?.p +
+                    (+orderItem?.free || 0),
                 },
               ]
             : [
@@ -729,7 +751,8 @@ const ProcessingOrders = () => {
                   case: 1,
                   qty:
                     (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-                    orderItem?.p,
+                    orderItem?.p +
+                    (+orderItem?.free || 0),
                 },
               ]
         );
@@ -779,7 +802,6 @@ const ProcessingOrders = () => {
             onClick={() => {
               if (selectedOrder) {
                 setConfirmPopup(true);
-             
               } else Navigate(-1);
             }}
           />
@@ -1196,7 +1218,16 @@ const ProcessingOrders = () => {
                                 );
                               }}
                             >
-                              {item.b + ":" + item.p}
+                              {Location.pathname.includes("delivery")
+                                ? item.b === 0 && item.p === 0 && item.free
+                                  ? item.free + "(F)"
+                                  : item.b +
+                                    ":" +
+                                    item.p +
+                                    (item.free ? "  " + item.free + "(F)" : "")
+                                : item.b +
+                                  ":" +
+                                  ((+item.p || 0) + (+item.free || 0))}
                             </td>
                             {!Location.pathname.includes("delivery") ? (
                               <td className="flex">
@@ -1430,7 +1461,7 @@ const ProcessingOrders = () => {
             navigator.mediaSession.playbackState = "none";
             audiosRef.current = null;
             console.clear();
-            setTimeout(getTripOrders, 1000);
+           
           }}
           onClose={() => setConfirmPopup(false)}
         />
@@ -2593,7 +2624,7 @@ function DeliveryMessagePopup({ onSave, data, credit_allowed }) {
             <b style={{ color: "red" }}>
               <u>Credit / Unpaid </u>
             </b>
-             not allowed
+            not allowed
           </h2>
         ) : (
           ""
