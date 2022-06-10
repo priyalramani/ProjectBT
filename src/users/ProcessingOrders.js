@@ -779,7 +779,7 @@ const ProcessingOrders = () => {
             onClick={() => {
               if (selectedOrder) {
                 setConfirmPopup(true);
-                setTimeout(getTripOrders, 1000);
+             
               } else Navigate(-1);
             }}
           />
