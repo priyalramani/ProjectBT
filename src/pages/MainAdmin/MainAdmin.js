@@ -9,6 +9,7 @@ import VerticalTabs from "../../components/VerticalTabs";
 import ItemAvilibility from "../../components/ItemAvilibility";
 import { OrderDetails } from "../../components/OrderDetails";
 import { ArrowDropDown, SquareFoot } from "@mui/icons-material";
+import Select from "react-select";
 const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
@@ -26,6 +27,19 @@ const MainAdmin = () => {
   const [users, setUsers] = useState([]);
   const [dropdown, setDropDown] = useState(false);
   const [selectOrder, setSelectOrder] = useState(false);
+  const [summaryPopup, setSumaryPopup] = useState(false);
+  const [items, setItems] = useState([]);
+  const getItemsData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/items/GetItemList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setItems(response.data.result);
+  };
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -108,6 +122,7 @@ const MainAdmin = () => {
     }, 180000);
     getDetails();
     getUsers();
+    getItemsData();
   }, []);
   const getRunningOrders = async () => {
     const response = await axios({
@@ -191,7 +206,7 @@ const MainAdmin = () => {
             <div
               id="customer-details-dropdown"
               className={"page1 flex"}
-              style={{ top: "100px", flexDirection: "column" }}
+              style={{ top: "100px", flexDirection: "column", zIndex: "200" }}
               onMouseLeave={() => setDropDown(false)}
             >
               {!selectOrder ? (
@@ -230,7 +245,7 @@ const MainAdmin = () => {
                     type="button"
                     onClick={() => {
                       setSelectOrder(false);
-                      setSelectedOrder([])
+                      setSelectedOrder([]);
                       setDropDown(false);
                     }}
                   >
@@ -256,6 +271,7 @@ const MainAdmin = () => {
                     className="simple_Logout_button"
                     type="button"
                     onClick={() => {
+                      setSumaryPopup(true);
                       setDropDown(false);
                     }}
                   >
@@ -303,7 +319,10 @@ const MainAdmin = () => {
                               {selectOrder ? (
                                 <input
                                   type="checkbox"
-                                  style={{ marginLeft: "10px" ,transform:"scale(1.5)"}}
+                                  style={{
+                                    marginLeft: "10px",
+                                    transform: "scale(1.5)",
+                                  }}
                                   onClick={() =>
                                     orders.filter(
                                       (a) =>
@@ -417,7 +436,7 @@ const MainAdmin = () => {
                                   return (
                                     <div
                                       className={`seatSearchTarget`}
-                                      style={{height:"fit-content"}}
+                                      style={{ height: "fit-content" }}
                                       key={Math.random()}
                                       seat-name={item.seat_name}
                                       seat-code={item.seat_uuid}
@@ -520,7 +539,6 @@ const MainAdmin = () => {
               </>
             ) : (
               <>
-               
                 {orders
                   .filter(
                     (a) =>
@@ -534,7 +552,7 @@ const MainAdmin = () => {
                   )
                   .filter((a) => !a?.trip_uuid).length ? (
                   <div key={Math.random()} className="sectionDiv">
-                    <h2 >
+                    <h2>
                       UnKnown ({orders.filter((a) => !a?.trip_uuid).length}) [
                       processing:{" "}
                       {
@@ -549,7 +567,10 @@ const MainAdmin = () => {
                       {selectOrder ? (
                         <input
                           type="checkbox"
-                          style={{ marginLeft: "10px" ,transform:"scale(1.5)"}}
+                          style={{
+                            marginLeft: "10px",
+                            transform: "scale(1.5)",
+                          }}
                           defaultChecked={
                             orders.filter(
                               (a) =>
@@ -626,7 +647,7 @@ const MainAdmin = () => {
                           return (
                             <div
                               className={`seatSearchTarget`}
-                              style={{height:"fit-content"}}
+                              style={{ height: "fit-content" }}
                               key={Math.random()}
                               seat-name={item.seat_name}
                               seat-code={item.seat_uuid}
@@ -748,7 +769,10 @@ const MainAdmin = () => {
                               {selectOrder ? (
                                 <input
                                   type="checkbox"
-                                  style={{ marginLeft: "10px" ,transform:"scale(1.5)"}}
+                                  style={{
+                                    marginLeft: "10px",
+                                    transform: "scale(1.5)",
+                                  }}
                                   defaultChecked={
                                     orders.filter(
                                       (a) =>
@@ -843,7 +867,7 @@ const MainAdmin = () => {
                                   return (
                                     <div
                                       className={`seatSearchTarget`}
-                                      style={{height:"fit-content"}}
+                                      style={{ height: "fit-content" }}
                                       key={Math.random()}
                                       seat-name={item.seat_name}
                                       seat-code={item.seat_uuid}
@@ -969,8 +993,7 @@ const MainAdmin = () => {
         <NewUserForm
           onSave={() => {
             setPopupForm(false);
-            postOrderData()
-            
+            postOrderData();
           }}
           selectedTrip={selectedTrip}
           setSelectedTrip={setSelectedTrip}
@@ -989,6 +1012,19 @@ const MainAdmin = () => {
             getRunningOrders();
           }}
           order={popupOrder}
+        />
+      ) : (
+        ""
+      )}
+      {summaryPopup ? (
+        <HoldPopup
+          onSave={() => {
+            setSumaryPopup(false);
+            setSelectOrder("");
+            setSelectedOrder([]);
+          }}
+          orders={selectedOrder}
+          itemsData={items}
         />
       ) : (
         ""
@@ -1103,6 +1139,216 @@ function NewUserForm({
                 Save changes
               </button>
             </form>
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function HoldPopup({ onSave, orders, itemsData }) {
+  const [items, setItems] = useState([]);
+  const [stage, setStage] = useState("");
+  const [itemStatus, setItemStatus] = useState("");
+  const stagesData = [
+    { value: 1, label: "Processing" },
+    { value: 2, label: "Checking" },
+    { value: 3, label: "Delivery" },
+  ];
+  const ItemsStatusData = [
+    { value: 0, label: "Placed" },
+    { value: 1, label: "Complete" },
+    { value: 2, label: "Hold" },
+    { value: 3, label: "Canceld" },
+  ];
+  useEffect(() => {
+    let orderStage = orders.map((a) => ({
+      ...a,
+      stage:
+        a.status.length > 1
+          ? a.status.map((b) => +b.stage || 0).reduce((c, b) => Math.max(c, b))
+          : a.status[0].status,
+    }));
+    let data = [].concat
+      .apply(
+        [],
+        orderStage.filter((a) => +a.stage === stage).map((a) => a.item_details)
+      )
+      .filter((a) => +a.status === itemStatus)
+      .map((a) => ({
+        ...a,
+        item_title: itemsData?.find((b) => b.item_uuid === a.item_uuid)
+          ?.item_title,
+      }));
+    console.log(data);
+    let result = data.reduce((acc, curr) => {
+      let item = acc.find((item) => item.item_uuid === curr.item_uuid);
+
+      if (item) {
+        item.p = +item.p + curr.p;
+        item.b = +item.b + curr.b;
+      } else {
+        acc.push(curr);
+      }
+
+      return acc;
+    }, []);
+    console.log(result);
+    setItems(result);
+  }, [stage, itemStatus]);
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{
+          height: "fit-content",
+          width: "max-content",
+          minWidth: "250px",
+        }}
+      >
+        <h1>Summary</h1>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll", width: "100%" }}>
+            {stage && (itemStatus || itemStatus === 0) ? (
+              items.length ? (
+                <div
+                  className="flex"
+                  style={{ flexDirection: "column", width: "100%" }}
+                >
+                  <table
+                    className="user-table"
+                    style={{
+                      width: "500px",
+                      height: "fit-content",
+                    }}
+                  >
+                    <thead>
+                      <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                        <th>Sr.</th>
+                        <th colSpan={3}>
+                          <div className="t-head-element">Item</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Qty</div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="tbody">
+                      {items?.map((item, i) => (
+                        <tr
+                          key={item?.item_uuid || Math.random()}
+                          style={{
+                            height: "30px",
+                            color: "#fff",
+                            backgroundColor:
+                              +item.status === 1
+                                ? "green"
+                                : +item.status === 3
+                                ? "red"
+                                : "#7990dd",
+                          }}
+                        >
+                          <td>{i + 1}</td>
+                          <td colSpan={3}>{item.item_title}</td>
+                          <td colSpan={2}>
+                            {item?.b || 0} : {item?.p || 0}
+                          </td>
+                        </tr>
+                      ))}
+                      <tr
+                        style={{
+                          height: "30px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        <td>Total</td>
+                        <td colSpan={3}></td>
+                        <td colSpan={2}>
+                          {items.length > 1
+                            ? items
+                                .map((a) => +a.b || 0)
+                                .reduce((a, b) => a + b)
+                            : items[0].b || 0}{" "}
+                          :{" "}
+                          {items.length > 1
+                            ? items
+                                .map((a) => +a.p || 0)
+                                .reduce((a, b) => a + b)
+                            : items[0].p || 0}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div
+                  className="flex"
+                  style={{ flexDirection: "column", width: "100%" }}
+                >
+                  <i>No Data Present</i>
+                </div>
+              )
+            ) : stage ? (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                <h3>Item Status</h3>
+                <Select
+                  options={ItemsStatusData}
+                  onChange={(doc) => setItemStatus(doc.value)}
+                  value={
+                    itemStatus
+                      ? {
+                          value: itemStatus,
+                          label: ItemsStatusData?.find(
+                            (j) => j.value === itemStatus
+                          )?.label,
+                        }
+                      : ""
+                  }
+                  openMenuOnFocus={true}
+                  menuPosition="fixed"
+                  menuPlacement="auto"
+                  placeholder="Select"
+                />
+              </div>
+            ) : !stage ? (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                <h3>Order Stage</h3>
+                <Select
+                  options={stagesData}
+                  onChange={(doc) => setStage(doc.value)}
+                  value={
+                    stage
+                      ? {
+                          value: stage,
+                          label: stagesData?.find((j) => j.value === stage)
+                            ?.label,
+                        }
+                      : ""
+                  }
+                  openMenuOnFocus={true}
+                  menuPosition="fixed"
+                  menuPlacement="auto"
+                  placeholder="Select"
+                />
+              </div>
+            ) : (
+              ""
+            )}
           </div>
           <button onClick={onSave} className="closeButton">
             x
