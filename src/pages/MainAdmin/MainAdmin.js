@@ -1168,12 +1168,13 @@ function HoldPopup({ onSave, orders, itemsData }) {
   const [stage, setStage] = useState("");
   const [itemStatus, setItemStatus] = useState("");
   const stagesData = [
+    { value: "all", label: "All" },
     { value: 1, label: "Processing" },
     { value: 2, label: "Checking" },
     { value: 3, label: "Delivery" },
   ];
   const ItemsStatusData = [
-    { value: 0, label: "Placed" },
+    { value: "all", label: "All" },
     { value: 1, label: "Complete" },
     { value: 2, label: "Hold" },
     { value: 3, label: "Canceld" },
@@ -1189,9 +1190,9 @@ function HoldPopup({ onSave, orders, itemsData }) {
     let data = [].concat
       .apply(
         [],
-        orderStage.filter((a) => +a.stage === stage).map((a) => a.item_details)
+        orderStage.filter((a) =>stage==="all"|| +a.stage === stage).map((a) => a.item_details)
       )
-      .filter((a) => +a.status === itemStatus)
+      .filter((a) =>itemStatus==="all"|| +a.status === itemStatus)
       .map((a) => ({
         ...a,
         item_title: itemsData?.find((b) => b.item_uuid === a.item_uuid)
@@ -1314,8 +1315,7 @@ function HoldPopup({ onSave, orders, itemsData }) {
               )
             ) : stage ? (
               <div
-                className="flex"
-                style={{ flexDirection: "column", width: "100%" }}
+                style={{  width: "400px" }}
               >
                 <h3>Item Status</h3>
                 <Select
@@ -1339,8 +1339,8 @@ function HoldPopup({ onSave, orders, itemsData }) {
               </div>
             ) : !stage ? (
               <div
-                className="flex"
-                style={{ flexDirection: "column", width: "100%" }}
+     
+                style={{  width: "400px" }}
               >
                 <h3>Order Stage</h3>
                 <Select
