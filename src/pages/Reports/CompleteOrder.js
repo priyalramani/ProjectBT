@@ -13,6 +13,7 @@ const CompleteOrder = () => {
   const [popupOrder, setPopupOrder] = useState(null);
   const [items, setItems] = useState([]);
   const [counter, setCounter] = useState([]);
+  const [invoiceNumberFilter, setInvoiceNumberFilter] = useState("");
 
   const getCounter = async () => {
     const response = await axios({
@@ -101,6 +102,15 @@ const CompleteOrder = () => {
               className="searchInput"
               pattern="\d{4}-\d{2}-\d{2}"
             />
+            <input
+              type="number"
+              onChange={(e) =>
+                setInvoiceNumberFilter( e.target.value )
+              }
+              value={invoiceNumberFilter}
+              placeholder="Search Invoice Number..."
+              className="searchInput"
+            />
             <div className="inputGroup" style={{ width: "50%" }}>
               <Select
                 options={counter.map((a) => ({
@@ -139,7 +149,13 @@ const CompleteOrder = () => {
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-            itemsDetails={items}
+            itemsDetails={items.filter(
+              (a) =>
+                !invoiceNumberFilter ||
+                a.invoice_number.toString()
+                  .toLocaleLowerCase()
+                  .includes(invoiceNumberFilter.toLocaleLowerCase())
+            )}
             setPopupOrder={setPopupOrder}
             counter={counter}
           />
