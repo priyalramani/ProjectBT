@@ -10,6 +10,7 @@ import ItemAvilibility from "../../components/ItemAvilibility";
 import { OrderDetails } from "../../components/OrderDetails";
 import { ArrowDropDown, SquareFoot } from "@mui/icons-material";
 import Select from "react-select";
+import { Billing } from "../../functions";
 const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
@@ -1035,6 +1036,7 @@ const MainAdmin = () => {
           }}
           orders={selectedOrder}
           itemsData={items}
+          counter={counter}
         />
       ) : (
         ""
@@ -1163,10 +1165,12 @@ function NewUserForm({
     </div>
   );
 }
-function HoldPopup({ onSave, orders, itemsData }) {
+function HoldPopup({ onSave, orders, itemsData, counter }) {
   const [items, setItems] = useState([]);
   const [stage, setStage] = useState("");
   const [itemStatus, setItemStatus] = useState("");
+  const [FilteredOrder, setFilteredOrder] = useState([]);
+  const [popup, setPopup] = useState(false);
   const stagesData = [
     { value: "all", label: "All" },
     { value: 1, label: "Processing" },
@@ -1186,14 +1190,17 @@ function HoldPopup({ onSave, orders, itemsData }) {
       stage:
         a.status.length > 1
           ? a.status.map((b) => +b.stage || 0).reduce((c, b) => Math.max(c, b))
-          : a.status[0].status,
+          : a.status[0].stage,
     }));
+    setFilteredOrder(orderStage);
     let data = [].concat
       .apply(
         [],
-        orderStage.filter((a) =>stage==="all"|| +a.stage === stage).map((a) => a.item_details)
+        orderStage
+          .filter((a) => stage === "all" || +a.stage === stage)
+          .map((a) => a.item_details)
       )
-      .filter((a) =>itemStatus==="all"|| +a.status === itemStatus)
+      .filter((a) => itemStatus === "all" || +a.status === itemStatus)
       .map((a) => ({
         ...a,
         item_title: itemsData?.find((b) => b.item_uuid === a.item_uuid)
@@ -1216,27 +1223,274 @@ function HoldPopup({ onSave, orders, itemsData }) {
     setItems(result);
   }, [stage, itemStatus]);
   return (
-    <div className="overlay">
-      <div
-        className="modal"
-        style={{
-          height: "fit-content",
-          width: "max-content",
-          minWidth: "250px",
-        }}
-      >
-        <h1>Summary</h1>
+    <>
+      <div className="overlay">
         <div
-          className="content"
+          className="modal"
           style={{
             height: "fit-content",
-            padding: "20px",
-            width: "fit-content",
+            width: "max-content",
+            minWidth: "250px",
           }}
         >
-          <div style={{ overflowY: "scroll", width: "100%" }}>
-            {stage && (itemStatus || itemStatus === 0) ? (
-              items.length ? (
+          <h1>Summary</h1>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "20px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll", width: "100%" }}>
+              {stage && (itemStatus || itemStatus === 0) ? (
+                items.length ? (
+                  <div
+                    className="flex"
+                    style={{ flexDirection: "column", width: "100%" }}
+                  >
+                    <table
+                      className="user-table"
+                      style={{
+                        width: "500px",
+                        height: "fit-content",
+                      }}
+                    >
+                      <thead>
+                        <tr
+                          style={{ color: "#fff", backgroundColor: "#7990dd" }}
+                        >
+                          <th>Sr.</th>
+                          <th colSpan={3}>
+                            <div className="t-head-element">Item</div>
+                          </th>
+                          <th colSpan={2}>
+                            <div className="t-head-element">Qty</div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="tbody">
+                        {items?.map((item, i) => (
+                          <tr
+                            key={item?.item_uuid || Math.random()}
+                            style={{
+                              height: "30px",
+                              color: "#fff",
+                              backgroundColor:
+                                +item.status === 1
+                                  ? "green"
+                                  : +item.status === 3
+                                  ? "red"
+                                  : "#7990dd",
+                            }}
+                            onClick={() => setPopup(item)}
+                          >
+                            <td>{i + 1}</td>
+                            <td colSpan={3}>{item.item_title}</td>
+                            <td colSpan={2}>
+                              {(item?.b || 0).toFixed(0)} : {item?.p || 0}
+                            </td>
+                          </tr>
+                        ))}
+                        <tr
+                          style={{
+                            height: "30px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          <td>Total</td>
+                          <td colSpan={3}></td>
+                          <td colSpan={2}>
+                            {(items.length > 1
+                              ? items
+                                  .map((a) => +a.b || 0)
+                                  .reduce((a, b) => a + b)
+                              : items[0].b || 0).toFixed(0)}{" "}
+                            :{" "}
+                            {items.length > 1
+                              ? items
+                                  .map((a) => +a.p || 0)
+                                  .reduce((a, b) => a + b)
+                              : items[0].p || 0}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div
+                    className="flex"
+                    style={{ flexDirection: "column", width: "100%" }}
+                  >
+                    <i>No Data Present</i>
+                  </div>
+                )
+              ) : stage ? (
+                <div style={{ width: "400px" }}>
+                  <h3>Item Status</h3>
+                  <Select
+                    options={ItemsStatusData}
+                    onChange={(doc) => setItemStatus(doc.value)}
+                    value={
+                      itemStatus
+                        ? {
+                            value: itemStatus,
+                            label: ItemsStatusData?.find(
+                              (j) => j.value === itemStatus
+                            )?.label,
+                          }
+                        : ""
+                    }
+                    openMenuOnFocus={true}
+                    menuPosition="fixed"
+                    menuPlacement="auto"
+                    placeholder="Select"
+                  />
+                </div>
+              ) : !stage ? (
+                <div style={{ width: "400px" }}>
+                  <h3>Order Stage</h3>
+                  <Select
+                    options={stagesData}
+                    onChange={(doc) => setStage(doc.value)}
+                    value={
+                      stage
+                        ? {
+                            value: stage,
+                            label: stagesData?.find((j) => j.value === stage)
+                              ?.label,
+                          }
+                        : ""
+                    }
+                    openMenuOnFocus={true}
+                    menuPosition="fixed"
+                    menuPlacement="auto"
+                    placeholder="Select"
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+            </div>
+            <button onClick={onSave} className="closeButton">
+              x
+            </button>
+          </div>
+        </div>
+      </div>
+      {popup ? (
+        <OrdersEdit
+          order={FilteredOrder}
+          onSave={() => {
+            setPopup(false);
+            onSave();
+          }}
+          items={popup}
+          counter={counter}
+          itemsData={itemsData}
+          onClose={()=>setPopup(false)}
+        />
+      ) : (
+        ""
+      )}
+    </>
+  );
+}
+
+const OrdersEdit = ({ order, onSave, items, counter, itemsData,onClose }) => {
+  const [orderEditPopup, setOrderEditPopup] = useState("");
+  const [updateOrders, setUpdateOrders] = useState([]);
+  useEffect(() => {
+    setUpdateOrders(
+      order.filter(
+        (item) =>
+          item.item_details.filter((a) => a.item_uuid === items.item_uuid)
+            ?.length
+      )
+    );
+  }, []);
+  function formatAMPM(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var strTime = hours + ":" + minutes + " " + ampm;
+    return strTime;
+  }
+  const postOrderData = async (
+    
+  ) => {
+    let dataArray = updateOrders.filter((a) => a.edit)
+    console.log(dataArray)
+    let finalData = [];
+    for (let orderObject of dataArray) {
+      let data = orderObject;
+
+      let billingData = await Billing({
+        replacement: data.replacement,
+        counter: counter.find(
+          (a) => a.counter_uuid === data.counter_uuid
+        ),
+        add_discounts: true,
+        items: data.item_details.map((a) => {
+          let itemData = itemData.find((b) => a.item_uuid === b.item_uuid);
+          return {
+            ...itemData,
+            ...a,
+            price: itemData?.price || 0,
+          };
+        }),
+      });
+      data = {
+        ...data,
+        ...billingData,
+        item_details: billingData.items,
+      };
+      data = Object.keys(data)
+        .filter((key) => key !== "others" || key !== "items")
+        .reduce((obj, key) => {
+          obj[key] = data[key];
+          return obj;
+        }, {});
+
+      finalData.push({ ...data, opened_by: 0 });
+    }
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: finalData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave()
+    }
+  };
+  return (
+    <>
+      <div className="overlay">
+        <div
+          className="modal"
+          style={{
+            height: "500px",
+            width: "max-content",
+            minWidth: "250px",
+          }}
+        >
+          <h1>Orders</h1>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "20px",
+              width: "700px",
+            }}
+          >
+            <div style={{ overflowY: "scroll", width: "100%" }}>
+              {order.length ? (
                 <div
                   className="flex"
                   style={{ flexDirection: "column", width: "100%" }}
@@ -1244,7 +1498,6 @@ function HoldPopup({ onSave, orders, itemsData }) {
                   <table
                     className="user-table"
                     style={{
-                      width: "500px",
                       height: "fit-content",
                     }}
                   >
@@ -1252,15 +1505,21 @@ function HoldPopup({ onSave, orders, itemsData }) {
                       <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
                         <th>Sr.</th>
                         <th colSpan={3}>
-                          <div className="t-head-element">Item</div>
+                          <div className="t-head-element">Date</div>
                         </th>
                         <th colSpan={2}>
-                          <div className="t-head-element">Qty</div>
+                          <div className="t-head-element">Invoice Number</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Counter</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Quantity</div>
                         </th>
                       </tr>
                     </thead>
                     <tbody className="tbody">
-                      {items?.map((item, i) => (
+                      {updateOrders?.map((item, i) => (
                         <tr
                           key={item?.item_uuid || Math.random()}
                           style={{
@@ -1275,34 +1534,37 @@ function HoldPopup({ onSave, orders, itemsData }) {
                           }}
                         >
                           <td>{i + 1}</td>
-                          <td colSpan={3}>{item.item_title}</td>
+                          <td colSpan={3}>
+                            {new Date(item?.status[0]?.time).toDateString() +
+                              " - " +
+                              formatAMPM(new Date(item?.status[0]?.time))}
+                          </td>
+                          <td colSpan={2}>{item.invoice_number}</td>
                           <td colSpan={2}>
-                            {item?.b || 0} : {item?.p || 0}
+                            {counter?.find(
+                              (a) => a.counter_uuid === item.counter_uuid
+                            )?.counter_title || "-"}
+                          </td>
+                          <td colSpan={2}>
+                            <input
+                              value={
+                                (item.item_details.find(
+                                  (a) => a.item_uuid === items.item_uuid
+                                )?.q || 0) +
+                                " : " +
+                                (item.item_details.find(
+                                  (a) => a.item_uuid === items.item_uuid
+                                )?.p || 0)
+                              }
+                              className="boxPcsInput"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOrderEditPopup(item);
+                              }}
+                            />
                           </td>
                         </tr>
                       ))}
-                      <tr
-                        style={{
-                          height: "30px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        <td>Total</td>
-                        <td colSpan={3}></td>
-                        <td colSpan={2}>
-                          {items.length > 1
-                            ? items
-                                .map((a) => +a.b || 0)
-                                .reduce((a, b) => a + b)
-                            : items[0].b || 0}{" "}
-                          :{" "}
-                          {items.length > 1
-                            ? items
-                                .map((a) => +a.p || 0)
-                                .reduce((a, b) => a + b)
-                            : items[0].p || 0}
-                        </td>
-                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -1313,58 +1575,142 @@ function HoldPopup({ onSave, orders, itemsData }) {
                 >
                   <i>No Data Present</i>
                 </div>
-              )
-            ) : stage ? (
-              <div
-                style={{  width: "400px" }}
-              >
-                <h3>Item Status</h3>
-                <Select
-                  options={ItemsStatusData}
-                  onChange={(doc) => setItemStatus(doc.value)}
-                  value={
-                    itemStatus
-                      ? {
-                          value: itemStatus,
-                          label: ItemsStatusData?.find(
-                            (j) => j.value === itemStatus
-                          )?.label,
-                        }
-                      : ""
-                  }
-                  openMenuOnFocus={true}
-                  menuPosition="fixed"
-                  menuPlacement="auto"
-                  placeholder="Select"
-                />
+              )}
+            </div>
+            <button onClick={onClose} className="closeButton">
+              x
+            </button>
+          </div>
+          {updateOrders.filter((a) => a.edit).length ? (
+            <button className="simple_Logout_button" onClick={postOrderData}>
+              Update
+            </button>
+          ) : (
+            ""
+          )}
+        </div>
+      </div>
+      {orderEditPopup ? (
+        <QuantityChanged
+          popupInfo={items}
+          order={orderEditPopup}
+          onSave={() => setOrderEditPopup("")}
+          setOrder={setUpdateOrders}
+          itemsData={itemsData}
+        />
+      ) : (
+        ""
+      )}
+    </>
+  );
+};
+function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
+  const [data, setdata] = useState({});
+
+  useEffect(() => {
+    let data = order.item_details?.find(
+      (a) => a.item_uuid === popupInfo.item_uuid
+    );
+    setdata({
+      b: data?.b || 0,
+      p: data?.p || 0,
+    });
+  }, []);
+  console.log(popupInfo);
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    let item = itemsData.find((a) => a.item_uuid === popupInfo.item_uuid);
+    setOrder((prev) =>
+      prev.map((a) =>
+        a.order_uuid === order.order_uuid
+          ? {
+              ...a,
+              edit: true,
+              item_details: a.item_details.map((b) =>
+                b.item_uuid === popupInfo.item_uuid
+                  ? {
+                      ...b,
+                      b: +data.b + +data.p / +item.conversion,
+                      p: +data.p % +item.conversion,
+                    }
+                  : b
+              ),
+            }
+          : a
+      )
+    );
+    onSave();
+  };
+
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="formGroup">
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "flex-start" }}
+                >
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    Box
+                    <input
+                      type="text"
+                      name="route_title"
+                      className="numberInput"
+                      value={data?.b}
+                      style={{ width: "100px" }}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          b: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                    />
+                    {popupInfo.conversion || 0}
+                  </label>
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    Pcs
+                    <input
+                      type="text"
+                      name="route_title"
+                      className="numberInput"
+                      value={data?.p}
+                      style={{ width: "100px" }}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          p: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                    />
+                  </label>
+                </div>
               </div>
-            ) : !stage ? (
-              <div
-     
-                style={{  width: "400px" }}
-              >
-                <h3>Order Stage</h3>
-                <Select
-                  options={stagesData}
-                  onChange={(doc) => setStage(doc.value)}
-                  value={
-                    stage
-                      ? {
-                          value: stage,
-                          label: stagesData?.find((j) => j.value === stage)
-                            ?.label,
-                        }
-                      : ""
-                  }
-                  openMenuOnFocus={true}
-                  menuPosition="fixed"
-                  menuPlacement="auto"
-                  placeholder="Select"
-                />
-              </div>
-            ) : (
-              ""
-            )}
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
           </div>
           <button onClick={onSave} className="closeButton">
             x
