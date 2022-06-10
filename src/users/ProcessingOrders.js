@@ -350,10 +350,10 @@ const ProcessingOrders = () => {
         let billingData = await Billing({
           replacement: data.replacement,
           counter: counters.find(
-            (a) => a.counter_uuid === selectedOrder.counter_uuid
+            (a) => a.counter_uuid === data.counter_uuid
           ),
           add_discounts: true,
-          items: selectedOrder.item_details.map((a) => {
+          items: data.item_details.map((a) => {
             let itemData = items.find((b) => a.item_uuid === b.item_uuid);
             return {
               ...itemData,
