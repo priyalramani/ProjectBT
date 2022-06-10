@@ -445,7 +445,7 @@ const MainAdmin = () => {
                                       // section-name={section?.section_name}
                                       // outlet={outletIdState}
                                       onClick={(e) =>
-                                        selectedTrip || selectOrder
+                                        selectOrder
                                           ? setSelectedOrder((prev) =>
                                               prev.filter(
                                                 (a) =>
@@ -487,7 +487,7 @@ const MainAdmin = () => {
                                         dateTime={item?.status[0]?.time}
                                         title1={item?.invoice_number || ""}
                                         selectedOrder={
-                                          selectedTrip || selectOrder
+                                           selectOrder
                                             ? selectedOrder.filter(
                                                 (a) =>
                                                   a.order_uuid ===
@@ -657,7 +657,7 @@ const MainAdmin = () => {
                               // section-name={section?.section_name}
                               // outlet={outletIdState}
                               onClick={(e) =>
-                                selectedTrip || selectOrder
+                                 selectOrder
                                   ? setSelectedOrder((prev) =>
                                       prev.filter(
                                         (a) => a.order_uuid === item.order_uuid
@@ -690,7 +690,7 @@ const MainAdmin = () => {
                                 // key={item.seat_uuid}
                                 title1={item?.invoice_number || ""}
                                 selectedOrder={
-                                  selectedTrip || selectOrder
+                                  selectOrder
                                     ? selectedOrder.filter(
                                         (a) => a.order_uuid === item.order_uuid
                                       ).length
@@ -878,7 +878,7 @@ const MainAdmin = () => {
                                       // section-name={section?.section_name}
                                       // outlet={outletIdState}
                                       onClick={(e) =>
-                                        selectedTrip || selectOrder
+                                         selectOrder
                                           ? setSelectedOrder((prev) =>
                                               prev.filter(
                                                 (a) =>
@@ -917,7 +917,7 @@ const MainAdmin = () => {
                                         dateTime={item?.status[0]?.time}
                                         title1={item?.invoice_number || ""}
                                         selectedOrder={
-                                          selectedTrip || selectOrder
+                                           selectOrder
                                             ? selectedOrder.filter(
                                                 (a) =>
                                                   a.order_uuid ===
@@ -1004,6 +1004,7 @@ const MainAdmin = () => {
           popupInfo={popupForm}
           orders={selectedOrder}
           trips={tripData}
+          onClose={()=>{setPopupForm(null);setSelectOrder("");setSelectedOrder([]);setSelectedTrip(null)}}
         />
       ) : (
         ""
@@ -1043,6 +1044,7 @@ function NewUserForm({
   setSelectedTrip,
   selectedTrip,
   trips,
+  onClose
 }) {
   const [data, setdata] = useState("");
   const [errMassage, setErrorMassage] = useState("");
@@ -1143,7 +1145,7 @@ function NewUserForm({
               </button>
             </form>
           </div>
-          <button onClick={onSave} className="closeButton">
+          <button type="button" onClick={()=>onClose()} className="closeButton">
             x
           </button>
         </div>
