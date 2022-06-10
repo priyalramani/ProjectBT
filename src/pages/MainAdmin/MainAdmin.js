@@ -220,7 +220,7 @@ const MainAdmin = () => {
                       }}
                       // style={{ padding: "10px" }}
                     >
-                      Add
+                      Add Trip
                     </button>
                   ) : (
                     ""
@@ -478,6 +478,7 @@ const MainAdmin = () => {
                                       />
                                       <Card
                                         details={details}
+                                        order={item}
                                         onDoubleClick={() =>
                                           setPopupOrder(item)
                                         }
@@ -682,6 +683,7 @@ const MainAdmin = () => {
 
                               <Card
                                 details={details}
+                                order={item}
                                 onDoubleClick={() => setPopupOrder(item)}
                                 // on_order={order}
                                 dateTime={item?.status[0]?.time}
@@ -906,6 +908,7 @@ const MainAdmin = () => {
                                       />
                                       <Card
                                         details={details}
+                                        order={item}
                                         onDoubleClick={() =>
                                           setPopupOrder(item)
                                         }

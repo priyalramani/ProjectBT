@@ -7,7 +7,22 @@ const Card = ({
   dateTime,
   rounded,
   onDoubleClick,
+  order,
 }) => {
+  const getQty = () => {
+    let data = order.item_details;
+
+    let result =
+      (data.length > 1
+        ? data.map((a) => +a.b || 0).reduce((a, b) => a + b)
+        : data[0].b || 0) +
+      ":" +
+      (data.length > 1
+        ? data.map((a) => +a.p || 0).reduce((a, b) => a + b)
+        : data[0].p || 0);
+
+    return result + " (" + order.order_grandtotal + ")";
+  };
   var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const monthNames = [
     "Jan",
@@ -40,7 +55,6 @@ const Card = ({
     var day = date.getDate() - oldDate.getDate();
     let finalHours = day * 24 + hours;
 
-
     return finalHours;
   }
   return (
@@ -64,23 +78,23 @@ const Card = ({
                     +details.map((a) => a.order_time_1)[0]
                   ? "#f2e017"
                   : "#fff",
+              padding: "10px 15px",
+              gap: "2px",
             }}
           >
-
             <p className="title2">{title1 ? title1 : title2}</p>
             <p className="caption" style={{ color: "#000" }}>
               {title1 ? title2 : ""}
             </p>
 
             <div>{status}</div>
-            <div style={{ fontSize: "10px" }}>{`${
-              days[new Date(dateTime).getDay()] || ""
-            } ${new Date(dateTime).getDate() || ""} ${
-              monthNames[new Date().getMonth()] || ""
-            }`}</div>
             <div style={{ fontSize: "10px" }}>
+              {`${days[new Date(dateTime).getDay()] || ""} ${
+                new Date(dateTime).getDate() || ""
+              } ${monthNames[new Date().getMonth()] || ""}`}
               {formatAMPM(new Date(dateTime)) || ""}
             </div>
+            <div style={{ fontSize: "10px" }}>{getQty()}</div>
           </div>
         </button>
       </div>
