@@ -1175,6 +1175,7 @@ function HoldPopup({ onSave, orders, itemsData }) {
   ];
   const ItemsStatusData = [
     { value: "all", label: "All" },
+    { value: 0, label: "Placed" },
     { value: 1, label: "Complete" },
     { value: 2, label: "Hold" },
     { value: 3, label: "Canceld" },
