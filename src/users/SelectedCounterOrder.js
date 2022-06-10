@@ -754,10 +754,10 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
       ? NonFilterItem
       : [];
     setOrder((prev) => ({ ...prev, items: item_details }));
-    console.log(item_details)
+    console.log(item_details);
     onSave();
   };
-console.log(orders)
+  console.log(orders);
   return (
     <div className="overlay" style={{ zIndex: 999999999 }}>
       <div
@@ -822,7 +822,11 @@ console.log(orders)
                             name="route_title"
                             className="numberInput"
                             value={item?.free || ""}
-                            style={{ width: "100px",backgroundColor:"transparent",color:"#fff" }}
+                            style={{
+                              width: "100px",
+                              backgroundColor: "transparent",
+                              color: "#fff",
+                            }}
                             onChange={(e) =>
                               setItems((prev) =>
                                 prev.map((a) =>
@@ -893,7 +897,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
     e.preventDefault();
     setOrder((prev) => ({
       ...prev,
-      items: prev.items.filter((a) => a.item_uuid === popupInfo.item_uuid)
+      items: (prev.items.filter((a) => a.item_uuid === popupInfo.item_uuid)
         ?.length
         ? prev?.items?.map((a) =>
             a.item_uuid === popupInfo.item_uuid
@@ -919,7 +923,8 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
               b: +data.b + parseInt(+data.p / +popupInfo.conversion),
               p: +data.p % +popupInfo.conversion,
             },
-          ],
+          ]
+      ).filter((a) => a.b || a.p || a.free),
     }));
     onSave();
   };
