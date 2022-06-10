@@ -487,7 +487,7 @@ const MainAdmin = () => {
                                         dateTime={item?.status[0]?.time}
                                         title1={item?.invoice_number || ""}
                                         selectedOrder={
-                                           selectOrder
+                                          selectOrder
                                             ? selectedOrder.filter(
                                                 (a) =>
                                                   a.order_uuid ===
@@ -657,7 +657,7 @@ const MainAdmin = () => {
                               // section-name={section?.section_name}
                               // outlet={outletIdState}
                               onClick={(e) =>
-                                 selectOrder
+                                selectOrder
                                   ? setSelectedOrder((prev) =>
                                       prev.filter(
                                         (a) => a.order_uuid === item.order_uuid
@@ -878,7 +878,7 @@ const MainAdmin = () => {
                                       // section-name={section?.section_name}
                                       // outlet={outletIdState}
                                       onClick={(e) =>
-                                         selectOrder
+                                        selectOrder
                                           ? setSelectedOrder((prev) =>
                                               prev.filter(
                                                 (a) =>
@@ -917,7 +917,7 @@ const MainAdmin = () => {
                                         dateTime={item?.status[0]?.time}
                                         title1={item?.invoice_number || ""}
                                         selectedOrder={
-                                           selectOrder
+                                          selectOrder
                                             ? selectedOrder.filter(
                                                 (a) =>
                                                   a.order_uuid ===
@@ -997,6 +997,7 @@ const MainAdmin = () => {
           onSave={() => {
             setPopupForm(false);
             postOrderData();
+            setSelectOrder("");
           }}
           selectedTrip={selectedTrip}
           setSelectedTrip={setSelectedTrip}
@@ -1004,7 +1005,12 @@ const MainAdmin = () => {
           popupInfo={popupForm}
           orders={selectedOrder}
           trips={tripData}
-          onClose={()=>{setPopupForm(null);setSelectOrder("");setSelectedOrder([]);setSelectedTrip(null)}}
+          onClose={() => {
+            setPopupForm(null);
+            setSelectOrder("");
+            setSelectedOrder([]);
+            setSelectedTrip(null);
+          }}
         />
       ) : (
         ""
@@ -1044,7 +1050,7 @@ function NewUserForm({
   setSelectedTrip,
   selectedTrip,
   trips,
-  onClose
+  onClose,
 }) {
   const [data, setdata] = useState("");
   const [errMassage, setErrorMassage] = useState("");
@@ -1145,7 +1151,11 @@ function NewUserForm({
               </button>
             </form>
           </div>
-          <button type="button" onClick={()=>onClose()} className="closeButton">
+          <button
+            type="button"
+            onClick={() => onClose()}
+            className="closeButton"
+          >
             x
           </button>
         </div>
