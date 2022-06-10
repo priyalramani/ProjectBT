@@ -11,6 +11,7 @@ import { OrderDetails } from "../../components/OrderDetails";
 import { ArrowDropDown, SquareFoot } from "@mui/icons-material";
 import Select from "react-select";
 import { Billing } from "../../functions";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
@@ -1305,7 +1306,8 @@ function HoldPopup({ onSave, orders, itemsData, counter }) {
                               ? items
                                   .map((a) => +a.b || 0)
                                   .reduce((a, b) => a + b)
-                              : items[0].b || 0).toFixed(0)}{" "}
+                              : items[0].b || 0
+                            ).toFixed(0)}{" "}
                             :{" "}
                             {items.length > 1
                               ? items
@@ -1388,7 +1390,7 @@ function HoldPopup({ onSave, orders, itemsData, counter }) {
           items={popup}
           counter={counter}
           itemsData={itemsData}
-          onClose={()=>setPopup(false)}
+          onClose={() => setPopup(false)}
         />
       ) : (
         ""
@@ -1397,9 +1399,10 @@ function HoldPopup({ onSave, orders, itemsData, counter }) {
   );
 }
 
-const OrdersEdit = ({ order, onSave, items, counter, itemsData,onClose }) => {
+const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
   const [orderEditPopup, setOrderEditPopup] = useState("");
   const [updateOrders, setUpdateOrders] = useState([]);
+  const [deleteItemsOrder, setDeleteItemOrders] = useState([]);
   useEffect(() => {
     setUpdateOrders(
       order.filter(
@@ -1419,23 +1422,41 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData,onClose }) => {
     var strTime = hours + ":" + minutes + " " + ampm;
     return strTime;
   }
-  const postOrderData = async (
-    
-  ) => {
-    let dataArray = updateOrders.filter((a) => a.edit)
-    console.log(dataArray)
+  const postOrderData = async (deleteItems) => {
+    let dataArray = deleteItems
+      ? updateOrders.map((a) => ({
+          ...a,
+          item_details: a.item_details.filter(
+            (b) => !(b.item_uuid === items.item_uuid)
+          ),
+        }))
+      : updateOrders
+          .filter(
+            (a) =>
+              a.edit ||
+              deleteItemsOrder.filter((b) => b === a.order_uuid).length
+          )
+          .map((a) =>
+            deleteItemsOrder.filter((b) => b === a.order_uuid).length
+              ? {
+                  ...a,
+                  item_details: a.item_details.filter(
+                    (b) => !(b.item_uuid === items.item_uuid)
+                  ),
+                }
+              : a
+          );
+    console.log(dataArray);
     let finalData = [];
     for (let orderObject of dataArray) {
       let data = orderObject;
 
       let billingData = await Billing({
         replacement: data.replacement,
-        counter: counter.find(
-          (a) => a.counter_uuid === data.counter_uuid
-        ),
+        counter: counter.find((a) => a.counter_uuid === data.counter_uuid),
         add_discounts: true,
         items: data.item_details.map((a) => {
-          let itemData = itemData.find((b) => a.item_uuid === b.item_uuid);
+          let itemData = itemsData.find((b) => a.item_uuid === b.item_uuid);
           return {
             ...itemData,
             ...a,
@@ -1466,7 +1487,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData,onClose }) => {
       },
     });
     if (response.data.success) {
-      onSave()
+      onSave();
     }
   };
   return (
@@ -1516,6 +1537,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData,onClose }) => {
                         <th colSpan={2}>
                           <div className="t-head-element">Quantity</div>
                         </th>
+                        <th></th>
                       </tr>
                     </thead>
                     <tbody className="tbody">
@@ -1525,12 +1547,11 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData,onClose }) => {
                           style={{
                             height: "30px",
                             color: "#fff",
-                            backgroundColor:
-                              +item.status === 1
-                                ? "green"
-                                : +item.status === 3
-                                ? "red"
-                                : "#7990dd",
+                            backgroundColor: +deleteItemsOrder.filter(
+                              (a) => a === item.order_uuid
+                            ).length
+                              ? "red"
+                              : "#7990dd",
                           }}
                         >
                           <td>{i + 1}</td>
@@ -1563,6 +1584,24 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData,onClose }) => {
                               }}
                             />
                           </td>
+                          <td
+                            onClick={() => {
+                              setDeleteItemOrders((prev) =>
+                                prev?.filter((a) => a === item.order_uuid)
+                                  .length
+                                  ? prev.filter((a) => !(a === item.order_uuid))
+                                  : [...(prev || []), item.order_uuid]
+                              );
+                            }}
+                          >
+                            {!deleteItemsOrder.filter(
+                              (a) => a === item.order_uuid
+                            ).length ? (
+                              <DeleteOutlineIcon />
+                            ) : (
+                              ""
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -1577,11 +1616,24 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData,onClose }) => {
                 </div>
               )}
             </div>
+            <button
+              className="simple_Logout_button"
+              style={{
+                position: "absolute",
+                right: "50px",
+                top: "0px",
+                backgroundColor: "red",
+              }}
+              onClick={() => postOrderData(true)}
+            >
+              Delete All
+            </button>
             <button onClick={onClose} className="closeButton">
               x
             </button>
           </div>
-          {updateOrders.filter((a) => a.edit).length ? (
+          {updateOrders.filter((a) => a.edit).length ||
+          deleteItemsOrder.length ? (
             <button className="simple_Logout_button" onClick={postOrderData}>
               Update
             </button>
