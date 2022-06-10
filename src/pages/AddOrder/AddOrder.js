@@ -161,7 +161,7 @@ export default function AddOrder() {
       ...order,
       item_details: order.item_details.filter((a) => a.item_uuid),
     };
-    if (type === "auto_add") {
+    if (type.autoAdd) {
       let autoAdd = await AutoAdd({
         counter,
         items: order.item_details,
@@ -198,13 +198,68 @@ export default function AddOrder() {
         status: 0,
         price: a.item_price,
       })),
-      status: [
-        {
-          stage: data.others.stage,
-          time: data.others.time,
-          user_uuid: data.others.user_uuid,
-        },
-      ],
+      status:
+        type.stage === 1
+          ? [
+              {
+                stage: 1,
+                time: data.others.time,
+                user_uuid: data.others.user_uuid,
+              },
+            ]
+          : type.stage === 2
+          ? [
+              {
+                stage: 1,
+                time: data.others.time,
+                user_uuid: data.others.user_uuid,
+              },
+              {
+                stage: 2,
+                time: data.others.time,
+                user_uuid: data.others.user_uuid,
+              },
+            ]
+          : type.stage === 3
+          ? [
+              {
+                stage: 1,
+                time: data.others.time,
+                user_uuid: data.others.user_uuid,
+              },
+              {
+                stage: 2,
+                time: data.others.time,
+                user_uuid: data.others.user_uuid,
+              },
+              {
+                stage: 3,
+                time: data.others.time,
+                user_uuid: data.others.user_uuid,
+              },
+            ]
+          : [
+              {
+                stage: 1,
+                time: data.others.time,
+                user_uuid: data.others.user_uuid,
+              },
+              {
+                stage: 2,
+                time: data.others.time,
+                user_uuid: data.others.user_uuid,
+              },
+              {
+                stage: 3,
+                time: data.others.time,
+                user_uuid: data.others.user_uuid,
+              },
+              {
+                stage: 4,
+                time: data.others.time,
+                user_uuid: data.others.user_uuid,
+              },
+            ],
     };
     console.log(data);
     const response = await axios({
@@ -585,6 +640,7 @@ export default function AddOrder() {
 }
 
 function NewUserForm({ onSubmit, onClose }) {
+  const [data, setData] = useState({ autoAdd: true, stage: 1 });
   return (
     <div className="overlay">
       <div
@@ -604,27 +660,69 @@ function NewUserForm({ onSubmit, onClose }) {
               className="form"
               onSubmit={(e) => {
                 e.preventDefault();
-                onSubmit("auto_add");
+                onSubmit(data);
                 onClose();
               }}
             >
-              <div className="row">
-                <h1> Auto Add</h1>
-              </div>
-
               <div className="formGroup">
                 <div className="row">
-                  <button type="submit" className="submit">
+                  <h3> Auto Add</h3>
+                  <div>
+                    <input
+                      type="radio"
+                      checked={data.autoAdd}
+                      onClick={() => setData({ ...data, autoAdd: true })}
+                    />
                     Yes
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onSubmit();
-                    }}
-                    className="submit"
-                  >
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      checked={!data.autoAdd}
+                      onClick={() => setData({ ...data, autoAdd: false })}
+                    />
                     No
+                  </div>
+                </div>
+                <div className="row">
+                  <h3>Stage</h3>
+                  <div>
+                    <input
+                      type="radio"
+                      checked={data.stage === 1}
+                      onClick={() => setData({ ...data, stage: 1 })}
+                    />
+                    Processing
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      checked={data.stage === 2}
+                      onClick={() => setData({ ...data, stage: 2 })}
+                    />
+                    Checking
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      checked={data.stage === 3}
+                      onClick={() => setData({ ...data, stage: 3 })}
+                    />
+                    Delivery
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      checked={data.stage === 4}
+                      onClick={() => setData({ ...data, stage: 4 })}
+                    />
+                    Complete
+                  </div>
+                </div>
+
+                <div className="row">
+                  <button type="submit" className="submit">
+                    Save
                   </button>
                 </div>
               </div>
