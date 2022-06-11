@@ -324,7 +324,7 @@ export default function AddOrder() {
         setFocusedInputId("");
         setTimeout(
           () => document.querySelector(`[index="${+index + 1}"]`).focus(),
-          250
+          10
         );
         return;
       }
