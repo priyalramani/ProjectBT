@@ -692,6 +692,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           order={order}
           counters={counters}
           items={itemsData}
+          item_details={order.item_details}
         />
       ) : (
         ""
@@ -700,7 +701,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         ref={componentRef}
         style={{
           width: "20.5cm",
-          height: "14.8cm",
+          height: "29cm",
           margin: "30mm 45mm 30mm 50mm",
           // textAlign: "center",
           position: "fixed",
@@ -708,26 +709,61 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           left: -180,
           zIndex: "-1000",
           // padding: "10px"
-          border: "1px solid black",
         }}
       >
-        <OrderPrint
-          counter={counters.find(
-            (a) => a.counter_uuid === orderData.counter_uuid
-          )}
-          order={order}
-          date={new Date(order.status[0].time)}
-          user={
-            users.find((a) => a.user_uuid === order.status[0].user_uuid)
-              ?.user_title || ""
-          }
-          itemData={itemsData}
-        />
+        <div
+          style={{
+            border: "1px solid black",
+            height: "50%",
+          }}
+        >
+          <OrderPrint
+            counter={counters.find(
+              (a) => a.counter_uuid === orderData.counter_uuid
+            )}
+            order={order}
+            date={new Date(order.status[0].time)}
+            user={
+              users.find((a) => a.user_uuid === order.status[0].user_uuid)
+                ?.user_title || ""
+            }
+            itemData={itemsData}
+            item_details={
+              order?.item_details?.length > 16
+                ? order?.item_details?.slice(0, 16)
+                : order?.item_details
+            }
+          />
+        </div>
+        {order.item_details > 16 ? (
+          <div
+            style={{
+              border: "1px solid black",
+              height: "50%",
+            }}
+          >
+            <OrderPrint
+              counter={counters.find(
+                (a) => a.counter_uuid === orderData.counter_uuid
+              )}
+              order={order}
+              date={new Date(order.status[0].time)}
+              user={
+                users.find((a) => a.user_uuid === order.status[0].user_uuid)
+                  ?.user_title || ""
+              }
+              itemData={itemsData}
+              item_details={order.item_details.slice(16, order.item.length)}
+            />
+          </div>
+        ) : (
+          ""
+        )}
       </div>
     </>
   );
 }
-const OrderPrint = ({ counter, order, date, user, itemData }) => {
+const OrderPrint = ({ counter, order, date, user, itemData, item_details }) => {
   return (
     <>
       <table style={{ borderBottom: "1px solid black", width: "100%" }}>
@@ -866,7 +902,7 @@ const OrderPrint = ({ counter, order, date, user, itemData }) => {
             </th>
           </tr>
 
-          {order.item_details.map((item, i) => {
+          {item_details.map((item, i) => {
             const itemInfo = itemData.find(
               (a) => a.item_uuid === item.item_uuid
             );
