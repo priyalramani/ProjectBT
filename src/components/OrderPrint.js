@@ -170,7 +170,10 @@ const OrderPrint = ({
               ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0));
             let dsc_amt = (+unit_price || 0) - +item.price;
             return (
-              <tr style={{ borderBottom: "1px solid #000" }} className="order_item">
+              <tr
+                style={{ borderBottom: "1px solid #000" }}
+                className="order_item"
+              >
                 <td style={{ fontSize: "x-small" }}>{i + 1}</td>
                 <td style={{ fontSize: "x-small" }} colSpan={3}>
                   {itemInfo?.item_title || ""}
@@ -437,7 +440,9 @@ const OrderPrint = ({
           <table style={{ borderBottom: "1px solid black", width: "100%" }}>
             <tr>
               <td>
-                <table style={{ borderRight: "1px solid black", width: "100%" }}>
+                <table
+                  style={{ borderRight: "1px solid black", width: "100%" }}
+                >
                   <tr>
                     <td style={{ fontSize: "x-small" }}>
                       <b> Bank:</b> Punjab National Bank, Gondia
@@ -479,7 +484,7 @@ const OrderPrint = ({
                 </table>
               </td>
               <td>
-                <table style={{  width: "100%" }}>
+                <table style={{ width: "100%" }}>
                   <tr>
                     <td style={{ fontSize: "x-small", textAlign: "right" }}>
                       0
@@ -497,7 +502,13 @@ const OrderPrint = ({
                   </tr>
 
                   <tr>
-                    <th style={{ fontSize: "x-large", fontWeight: "bolder" }}>
+                    <th
+                      style={{
+                        fontSize: "x-large",
+                        fontWeight: "bolder",
+                        textAlign: "right",
+                      }}
+                    >
                       Order Total:{" "}
                       {order.item_details.length > 1
                         ? order.item_details
