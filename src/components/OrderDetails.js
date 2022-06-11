@@ -11,6 +11,7 @@ import {
 import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 import OrderPrint from "./OrderPrint";
+import { useIdleTimer } from "react-idle-timer";
 export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
   const [itemsData, setItemsData] = useState([]);
@@ -28,6 +29,35 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
+  const callBilling = async () => {
+    if (!editOrder) return;
+    let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
+    let time = new Date();
+    let autoBilling = await Billing({
+      counter,
+      items: orderData.item_details,
+      others: {
+        stage: 1,
+        user_uuid: "240522",
+        time: time.getTime(),
+
+        type: "NEW",
+      },
+    });
+    setOrderData((prev) => ({
+      ...prev,
+      ...autoBilling,
+      item_details: autoBilling.items.map((a) => ({
+        ...(prev.item_details.find((b) => b.item_uuid === a.item_uuid) || {}),
+        ...a,
+      })),
+    }));
+  };
+  const { getRemainingTime, getLastActiveTime } = useIdleTimer({
+    timeout: 1000 * 5,
+    onIdle: callBilling,
+    debounce: 500,
+  });
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, []);
@@ -84,7 +114,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         default: true,
       })),
     });
-  }, []);
+  }, [itemsData]);
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
@@ -114,9 +144,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     getAutoBill();
     getUsers();
   }, []);
-  console.log(
-    +order.status.map((a) => +a.stage || 0).reduce((c, d) => Math.max(c, d))
-  );
+
   const jumpToNextIndex = (id) => {
     console.log(id);
     document.querySelector(`#${id}`).blur();
@@ -661,7 +689,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               onClick={() => {}}
               style={{ width: "max-content", padding: "10px 20px" }}
             >
-              OrderTotal : {order.order_grandtotal || 0}
+              OrderTotal : {orderData.order_grandtotal || 0}
             </button>
           </div>
         </div>
@@ -735,7 +763,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 ? order?.item_details?.slice(0, 16)
                 : order?.item_details
             }
-            footer={!(orderData?.item_details > 16) }
+            footer={!(orderData?.item_details > 16)}
           />
         </div>
         {order.item_details > 16 ? (
