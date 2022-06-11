@@ -1057,6 +1057,7 @@ const MainAdmin = () => {
                     ? orderData?.item_details?.slice(0, 16)
                     : orderData?.item_details
                 }
+                footer={!(orderData.item_details > 16) }
               />
             </div>
             {orderData.item_details > 16 ? (
