@@ -735,7 +735,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 ? order?.item_details?.slice(0, 16)
                 : order?.item_details
             }
-            footer={!(orderData.item_details > 16) }
+            footer={!(orderData?.item_details > 16) }
           />
         </div>
         {order.item_details > 16 ? (
