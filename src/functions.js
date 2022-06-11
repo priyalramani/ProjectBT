@@ -235,9 +235,9 @@ export const Billing = async ({
     //   +item.conversion * +item.b + item.p
     // );
     let charges_discount = [];
-    let price =
+    let price =add_discounts?
       counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
-        ?.price || 0;
+        ?.price || 0:0;
     let special_discount_percentage = add_discounts
       ? counter?.item_special_discount?.find(
           (a) => a.item_uuid === item.item_uuid
@@ -251,9 +251,8 @@ export const Billing = async ({
     console.log("company_discount_percentage", company_discount_percentage);
     item = {
       ...item,
-      qty: others
-        ? +item.conversion * +item.b + item.p
-        : +item.conversion * +item.b + item.p,
+      qty: 
+         +item.conversion * +item.b + item.p,
     };
     if (price) item = { ...item, item_price: price };
 
@@ -285,21 +284,11 @@ export const Billing = async ({
       };
     }
 
-    if (!special_discount_percentage && !company_discount_percentage)
-      item = {
-        ...item,
-        item_total:
-          (
-            (item.item_price || 0) *
-            (others
-              ? +item.b * +item.conversion + item.p
-              : +item.b * +item.conversion + item.p)
-          ).toFixed(2) || 0,
-      };
+   
     item = {
       ...item,
       charges_discount,
-      item_total: ((+item.item_total || 0) * (+item.qty || 1)).toFixed(2),
+      item_total: ((+item.item_total || +item.item_price||0) * (+item.qty || 1)).toFixed(2),
     };
     console.log(item);
     newPriceItems.push(item);
