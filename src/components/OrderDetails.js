@@ -607,14 +607,15 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   </tbody>
                 </table>
               </div>
-              <div className="bottomContent"></div>
+              
             </div>
             <button onClick={onSave} className="closeButton">
               x
             </button>
           </div>
-          {editOrder ? (
-            <div className="bottomContent" style={{ background: "white" }}>
+          
+            <div className="bottomContent" style={{ background: "white" ,justifyContent:"space-between",paddingTop:"20px"}}>
+              {editOrder ? (
               <button
                 type="button"
                 onClick={() => {
@@ -625,10 +626,21 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               >
                 Bill
               </button>
-            </div>
-          ) : (
+              
+              ) : (
             ""
           )}
+              <button
+                type="button"
+                onClick={() => {
+                 
+                }}
+                style={{width:"max-content",padding:"10px 20px"}}
+              >
+                OrderTotal : {order.order_grandtotal||0}
+              </button>
+            </div>
+         
         </div>
       </div>
       {popup ? (
