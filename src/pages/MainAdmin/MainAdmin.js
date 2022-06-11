@@ -225,20 +225,17 @@ const MainAdmin = () => {
             >
               {!selectOrder ? (
                 <>
-                  {window.location.pathname.includes("trip") ? (
-                    <button
-                      className="simple_Logout_button"
-                      onClick={() => {
-                        setPopupForm(true);
-                        setDropDown(false);
-                      }}
-                      // style={{ padding: "10px" }}
-                    >
-                      Add Trip
-                    </button>
-                  ) : (
-                    ""
-                  )}
+                  <button
+                    className="simple_Logout_button"
+                    onClick={() => {
+                      setPopupForm(true);
+                      setDropDown(false);
+                    }}
+                    // style={{ padding: "10px" }}
+                  >
+                    Add Trip
+                  </button>
+
                   <button
                     // style={{ padding: "10px" }}
                     className="simple_Logout_button"
@@ -1057,7 +1054,7 @@ const MainAdmin = () => {
                     ? orderData?.item_details?.slice(0, 16)
                     : orderData?.item_details
                 }
-                footer={!(orderData.item_details > 16) }
+                footer={!(orderData.item_details > 16)}
               />
             </div>
             {orderData.item_details > 16 ? (
