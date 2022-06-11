@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./style.css";
@@ -9,9 +9,11 @@ import VerticalTabs from "../../components/VerticalTabs";
 import ItemAvilibility from "../../components/ItemAvilibility";
 import { OrderDetails } from "../../components/OrderDetails";
 import { ArrowDropDown, SquareFoot } from "@mui/icons-material";
+import { useReactToPrint } from "react-to-print";
 import Select from "react-select";
 import { Billing } from "../../functions";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import OrderPrint from "../../components/OrderPrint";
 const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
@@ -31,6 +33,16 @@ const MainAdmin = () => {
   const [selectOrder, setSelectOrder] = useState(false);
   const [summaryPopup, setSumaryPopup] = useState(false);
   const [items, setItems] = useState([]);
+  const componentRef = useRef(null);
+  const reactToPrintContent = useCallback(() => {
+    return componentRef.current;
+  }, [selectedOrder]);
+
+  const handlePrint = useReactToPrint({
+    content: reactToPrintContent,
+    documentTitle: "Statement",
+    removeAfterPrint: true,
+  });
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
@@ -254,17 +266,29 @@ const MainAdmin = () => {
                     Cancel
                   </button>
                   {selectedOrder.length ? (
-                    <button
-                      // style={{ padding: "10px" }}
-                      className="simple_Logout_button"
-                      type="button"
-                      onClick={() => {
-                        setPopupForm({ type: "edit" });
-                        setDropDown(false);
-                      }}
-                    >
-                      Assign
-                    </button>
+                    <>
+                      <button
+                        // style={{ padding: "10px" }}
+                        className="simple_Logout_button"
+                        type="button"
+                        onClick={() => {
+                          setPopupForm({ type: "edit" });
+                          setDropDown(false);
+                        }}
+                      >
+                        Assign
+                      </button>
+                      <button
+                        // style={{ padding: "10px" }}
+                        className="simple_Logout_button"
+                        type="button"
+                        onClick={() => {
+                          handlePrint();
+                        }}
+                      >
+                        Print
+                      </button>
+                    </>
                   ) : (
                     ""
                   )}
@@ -993,6 +1017,78 @@ const MainAdmin = () => {
             />
           )}
         </div>
+      </div>
+      <div
+        ref={componentRef}
+        style={{
+          width: "20.5cm",
+          height: "29cm",
+          margin: "30mm 45mm 30mm 50mm",
+          // textAlign: "center",
+          position: "fixed",
+          top: -100,
+          left: -180,
+          zIndex: "-1000",
+          // padding: "10px"
+        }}
+      >
+        {selectedOrder.map((orderData) => (
+          <>
+            <div
+              style={{
+                border: "1px solid black",
+                height: "50%",
+              }}
+            >
+              <OrderPrint
+                counter={counter.find(
+                  (a) => a.counter_uuid === orderData.counter_uuid
+                )}
+                order={orderData}
+                date={new Date(orderData.status[0].time)}
+                user={
+                  users.find(
+                    (a) => a.user_uuid === orderData.status[0].user_uuid
+                  )?.user_title || ""
+                }
+                itemData={items}
+                item_details={
+                  orderData?.item_details?.length > 16
+                    ? orderData?.item_details?.slice(0, 16)
+                    : orderData?.item_details
+                }
+              />
+            </div>
+            {orderData.item_details > 16 ? (
+              <div
+                style={{
+                  border: "1px solid black",
+                  height: "50%",
+                }}
+              >
+                <OrderPrint
+                  counter={counter.find(
+                    (a) => a.counter_uuid === orderData.counter_uuid
+                  )}
+                  order={orderData}
+                  date={new Date(orderData.status[0].time)}
+                  user={
+                    users.find(
+                      (a) => a.user_uuid === orderData.status[0].user_uuid
+                    )?.user_title || ""
+                  }
+                  itemData={items}
+                  item_details={orderData.item_details.slice(
+                    16,
+                    orderData.item.length
+                  )}
+                />
+              </div>
+            ) : (
+              ""
+            )}{" "}
+          </>
+        ))}
       </div>
       {popupForm ? (
         <NewUserForm
