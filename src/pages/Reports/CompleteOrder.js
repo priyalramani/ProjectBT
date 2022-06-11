@@ -104,19 +104,23 @@ const CompleteOrder = () => {
             />
             <input
               type="number"
-              onChange={(e) =>
-                setInvoiceNumberFilter( e.target.value )
-              }
+              onChange={(e) => setInvoiceNumberFilter(e.target.value)}
               value={invoiceNumberFilter}
               placeholder="Search Invoice Number..."
               className="searchInput"
             />
             <div className="inputGroup" style={{ width: "50%" }}>
               <Select
-                options={counter.map((a) => ({
-                  value: a.counter_uuid,
-                  label: a.counter_title,
-                }))}
+                options={[
+                  {
+                    value: "",
+                    label: "All",
+                  },
+                  ...counter.map((a) => ({
+                    value: a.counter_uuid,
+                    label: a.counter_title,
+                  })),
+                ]}
                 onChange={(doc) =>
                   setSearchData((prev) => ({
                     ...prev,
@@ -131,7 +135,10 @@ const CompleteOrder = () => {
                           (j) => j.counter_uuid === searchData.counter_uuid
                         )?.counter_title,
                       }
-                    : ""
+                    : {
+                        value: "",
+                        label: "All",
+                      }
                 }
                 openMenuOnFocus={true}
                 menuPosition="fixed"
@@ -152,7 +159,8 @@ const CompleteOrder = () => {
             itemsDetails={items.filter(
               (a) =>
                 !invoiceNumberFilter ||
-                a.invoice_number.toString()
+                a.invoice_number
+                  .toString()
                   .toLocaleLowerCase()
                   .includes(invoiceNumberFilter.toLocaleLowerCase())
             )}
@@ -226,8 +234,8 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
                 {formatAMPM(new Date(item.delivery_date))}
               </td>
               <td colSpan={3}>
-                {counter.find((a) => a.counter_uuid === item.counter_uuid)?.counter_title ||
-                  ""}
+                {counter.find((a) => a.counter_uuid === item.counter_uuid)
+                  ?.counter_title || ""}
               </td>
               <td colSpan={2}>{item.invoice_number || ""}</td>
               <td colSpan={2}>{item.qty || ""}</td>
