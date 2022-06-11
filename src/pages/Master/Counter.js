@@ -266,7 +266,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup }) {
               <td>{i + 1}</td>
               <td colSpan={2}>{item.route_title}</td>
               <td colSpan={2}>{item.counter_title}</td>
-              <td colSpan={2}>{item.mobile}</td>
+              <td colSpan={2}>{item.mobile.map((a,i)=>i===0?a:", "+a)}</td>
               <td>
                 <button
                   type="button"
@@ -461,22 +461,23 @@ function NewUserForm({
                   </label>
                 </div>
                 <div className="row">
-                  <label className="selectLabel" style={{ width: "50%" }}>
-                    Mobile
+                <label className="selectLabel">
+                    Adress
                     <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
+                      type="text"
+                      name="route_title"
                       className="numberInput"
-                      value={data?.mobile}
+                      value={data?.address}
                       onChange={(e) =>
                         setdata({
                           ...data,
-                          mobile: e.target.value,
+                          address: e.target.value,
                         })
                       }
+                      maxLength={42}
                     />
                   </label>
+                  
                   <label className="selectLabel">
                     Route
                     <select
@@ -500,6 +501,25 @@ function NewUserForm({
                   </label>
                 </div>
                 <div className="row">
+                <label className="selectLabel" style={{ width: "50%" }}>
+                    Mobile
+                    <textarea
+                      type="number"
+                      onWheel={(e) => e.target.blur()}
+                      name="sort_order"
+                      className="numberInput"
+                      rows={7}
+                      cols={12}
+                      value={data?.mobile?.toString()?.replace(/,/g, "\n")}
+                      style={{ height: "100px" }}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          mobile: e.target.value.split("\n"),
+                        })
+                      }
+                    />
+                  </label>
                   <label className="selectLabel" style={{ width: "50%" }}>
                     Payment Modes
                     <select
