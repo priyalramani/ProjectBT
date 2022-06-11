@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { v4 as uuid } from "uuid";
@@ -8,6 +8,7 @@ import {
   ReplayCircleFilledOutlined,
   Cancel,
 } from "@mui/icons-material";
+import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
@@ -24,7 +25,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [copymsg, setCopymsg] = useState();
   const [focusedInputId, setFocusedInputId] = useState(0);
   const reactInputsRef = useRef({});
+  const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
+  const reactToPrintContent = useCallback(() => {
+    return componentRef.current;
+  }, []);
+
+  const handlePrint = useReactToPrint({
+    content: reactToPrintContent,
+    documentTitle: "Statement",
+    removeAfterPrint: true,
+  });
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -219,7 +230,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               id="voucherForm"
               action=""
               style={{
-                height: "max-content",
+                height: "400px",
                 maxHeight: "500px",
                 overflow: "scroll",
               }}
@@ -255,6 +266,15 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     onClick={() => setDeletePopup((prev) => true)}
                   >
                     Cancel Order
+                  </button>
+                  <button
+                    style={{ width: "fit-Content", backgroundColor: "black" }}
+                    className="item-sales-search"
+                    onClick={() => {
+                      handlePrint();
+                    }}
+                  >
+                    Print
                   </button>
                   <button
                     style={{ width: "fit-Content" }}
@@ -607,15 +627,21 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   </tbody>
                 </table>
               </div>
-              
             </div>
             <button onClick={onSave} className="closeButton">
               x
             </button>
           </div>
-          
-            <div className="bottomContent" style={{ background: "white" ,justifyContent:"space-between",paddingTop:"20px"}}>
-              {editOrder ? (
+
+          <div
+            className="bottomContent"
+            style={{
+              background: "white",
+              justifyContent: "space-between",
+              paddingTop: "20px",
+            }}
+          >
+            {editOrder ? (
               <button
                 type="button"
                 onClick={() => {
@@ -626,21 +652,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               >
                 Bill
               </button>
-              
-              ) : (
-            ""
-          )}
-              <button
-                type="button"
-                onClick={() => {
-                 
-                }}
-                style={{width:"max-content",padding:"10px 20px"}}
-              >
-                OrderTotal : {order.order_grandtotal||0}
-              </button>
-            </div>
-         
+            ) : (
+              ""
+            )}
+            <button
+              type="button"
+              onClick={() => {}}
+              style={{ width: "max-content", padding: "10px 20px" }}
+            >
+              OrderTotal : {order.order_grandtotal || 0}
+            </button>
+          </div>
         </div>
       </div>
       {popup ? (
@@ -662,7 +684,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         <DeleteOrderPopup
           onSave={() => {
             setDeletePopup(false);
-            
           }}
           onDeleted={() => {
             setDeletePopup(false);
@@ -675,10 +696,128 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       ) : (
         ""
       )}
+      <div
+        ref={componentRef}
+        style={{
+          width: "20.5cm",
+          height: "14.8cm",
+          margin: "30mm 45mm 30mm 50mm",
+          // textAlign: "center",
+          position: "fixed",
+          top: -100,
+          left: -180,
+          zIndex: "-1000",
+          // padding: "10px"
+          border: "1px solid black",
+        }}
+      >
+        <OrderPrint
+          counter={counters.find(
+            (a) => a.counter_uuid === orderData.counter_uuid
+          )}
+          order={order}
+          date={new Date(order.status[0].time)}
+          user={users.find(a=>a.user_uuid===order.status[0].user_uuid)?.user_title||""}
+        />
+      </div>
     </>
   );
 }
-const DeleteOrderPopup = ({ onSave, order, counters, items,onDeleted }) => {
+const OrderPrint = ({ counter, order, date, user }) => {
+  return (
+    <>
+      <table style={{ borderBottom: "1px solid black", width: "100%" }}>
+        <tr>
+          <td
+            colSpan={2}
+            style={{ textAlign: "center", fontSize: "small", width: "100%" }}
+          >
+            <b>GST INVOICE</b>
+          </td>
+        </tr>
+        <tr>
+          <td style={{ width: "50%" }}>
+            <table>
+              <tr>
+                <td
+                  style={{
+                    fontSize: "larger",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Bharat Traders
+                </td>
+              </tr>
+              <tr>
+                <td style={{ fontSize: "x-small" }}>
+                  Ganesh Nagar, Near Sharda Convent School,
+                  <br /> Ganesh Nagar, Gondia - 441601
+                </td>
+              </tr>
+              <tr>
+                <td style={{ fontSize: "x-small" }}>Phone: 9422551074</td>
+              </tr>
+              <tr>
+                <td style={{ fontSize: "x-small" }}>
+                  Email: bharattradersgondia96@gmail.com
+                </td>
+              </tr>
+              <tr>
+                <td style={{ fontSize: "x-small" }}>GSTIN: 27ABIPR1186M1Z2</td>
+              </tr>
+            </table>
+          </td>
+          <td>
+            <table>
+              <tr>
+                <td style={{ fontSize: "x-small" }}>
+                  M/S {counter?.counter_title || ""}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ fontSize: "x-small" }}>
+                  {counter?.address || ""}
+                </td>
+              </tr>
+
+              <tr>
+                <td style={{ fontSize: "x-small" }}>
+                  {counter?.mobile.map((a, i) => (i === 0 ? a : ", " + a)) ||
+                    ""}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      <table style={{ borderBottom: "1px solid black", width: "100%" }}>
+        <tr>
+          <td style={{ fontSize: "x-small" }}>
+            Invoice: {order.invoice_number}
+          </td>
+          <td style={{ fontSize: "x-small" }}>
+            Date:{" "}
+            {"dd/mm/yy"
+              .replace(
+                "mm",
+                ("00" + (date?.getMonth() + 1).toString()).slice(-2)
+              )
+              .replace(
+                "yy",
+                ("0000" + date?.getFullYear().toString()).slice(-4)
+              )
+              .replace("dd", ("00" + date?.getDate().toString()).slice(-2))}
+          </td>
+          <td style={{ fontSize: "x-small" }}>
+            S.M: {user}
+          </td>
+          <td style={{ fontSize: "x-small" }}>Memo: Cash</td>
+        </tr>
+      </table>
+    </>
+  );
+};
+const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted }) => {
   const [disable, setDisabled] = useState(true);
   useEffect(() => {
     setTimeout(() => setDisabled(false), 5000);
@@ -686,7 +825,9 @@ const DeleteOrderPopup = ({ onSave, order, counters, items,onDeleted }) => {
   const PutOrder = async () => {
     let time = new Date();
     let stage = order?.status?.length
-      ? order?.status?.map((a) => +a.stage || 0)?.reduce((a, b) => Math.max(a, b))
+      ? order?.status
+          ?.map((a) => +a.stage || 0)
+          ?.reduce((a, b) => Math.max(a, b))
       : order?.status[0]?.stage || 0;
     let data = {
       ...order,
