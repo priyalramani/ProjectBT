@@ -14,6 +14,8 @@ import Select from "react-select";
 import { Billing } from "../../functions";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import OrderPrint from "../../components/OrderPrint";
+import ChangeStage from "../../components/ChangeStage";
+import MessagePopup from "../../components/MessagePopup";
 const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
@@ -33,7 +35,9 @@ const MainAdmin = () => {
   const [selectOrder, setSelectOrder] = useState(false);
   const [summaryPopup, setSumaryPopup] = useState(false);
   const [items, setItems] = useState([]);
+  const [changesStatePopup,setChangeStatePopup]=useState(false)
   const componentRef = useRef(null);
+  const [messagePopup,setMessagePopup]=useState("")
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, [selectedOrder]);
@@ -284,6 +288,21 @@ const MainAdmin = () => {
                         }}
                       >
                         Print
+                      </button>
+                      <button
+                        // style={{ padding: "10px" }}
+                        className="simple_Logout_button"
+                        type="button"
+                        onClick={() => {
+                          let stage = selectedOrder.map(a=>a.status[a.status.length-1]?.stage)
+                          if(stage.filter((a,i)=>i===0?false:!(stage[0]===a)).length){
+                            setMessagePopup("Select Orders of Same Stage")
+                          }else{
+                            setChangeStatePopup(+stage[0])
+                          }
+                        }}
+                      >
+                        Change Stage
                       </button>
                     </>
                   ) : (
@@ -1089,6 +1108,7 @@ const MainAdmin = () => {
           </>
         ))}
       </div>
+
       {popupForm ? (
         <NewUserForm
           onSave={() => {
@@ -1123,6 +1143,16 @@ const MainAdmin = () => {
       ) : (
         ""
       )}
+      {messagePopup ? (
+        <MessagePopup
+          onClose={() => {
+            setMessagePopup("")
+          }}
+          message={messagePopup}
+        />
+      ) : (
+        ""
+      )}
       {summaryPopup ? (
         <HoldPopup
           onSave={() => {
@@ -1133,6 +1163,21 @@ const MainAdmin = () => {
           orders={selectedOrder}
           itemsData={items}
           counter={counter}
+        />
+      ) : (
+        ""
+      )}
+      {changesStatePopup ? (
+        <ChangeStage
+          onClose={() => {
+            setChangeStatePopup(false);
+            setSelectOrder("");
+            setSelectedOrder([]);
+            getRunningOrders()
+          }}
+          orders={selectedOrder}
+          stage={changesStatePopup}
+         
         />
       ) : (
         ""
