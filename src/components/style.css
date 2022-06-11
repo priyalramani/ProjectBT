@@ -2673,8 +2673,5 @@ tr:nth-child(4) {
   }
 }
 
-@media print {
-  .page-break {
-    page-break-after: always;
-  }
-}
+
+

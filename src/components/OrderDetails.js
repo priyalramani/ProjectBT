@@ -700,6 +700,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       )}
       <div
         ref={componentRef}
+        id="item-container"
         style={{
           width: "20.5cm",
           height: "29cm",
@@ -734,6 +735,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 ? order?.item_details?.slice(0, 16)
                 : order?.item_details
             }
+            footer={true}
           />
         </div>
         {order.item_details > 16 ? (

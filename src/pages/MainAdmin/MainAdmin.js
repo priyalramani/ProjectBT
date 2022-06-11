@@ -1082,6 +1082,7 @@ const MainAdmin = () => {
                     16,
                     orderData.item.length
                   )}
+                  footer={true}
                 />
               </div>
             ) : (
