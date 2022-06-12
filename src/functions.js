@@ -264,7 +264,7 @@ export const Billing = async ({
       item = {
         ...item,
         special_discount_percentage,
-        item_total:
+        item_desc_total:
           (item.item_price || 0) *
             ((100 - special_discount_percentage) / 100) || 0,
       };
@@ -277,8 +277,8 @@ export const Billing = async ({
       item = {
         ...item,
         company_discount_percentage,
-        item_total: item.item_total
-          ? item.item_total * ((100 - company_discount_percentage) / 100) || 0
+        item_desc_total: item.item_desc_total
+          ? item.item_desc_total * ((100 - company_discount_percentage) / 100) || 0
           : (item.item_price || 0) *
               ((100 - company_discount_percentage) / 100) || 0,
       };
@@ -288,7 +288,7 @@ export const Billing = async ({
     item = {
       ...item,
       charges_discount,
-      item_total: ((+item.item_total || +item.item_price||0) * (+item.qty || 1)).toFixed(2),
+      item_total: ((+item.item_desc_total || +item.item_price||0) * (+item.qty || 1)).toFixed(2),
     };
     console.log(item);
     newPriceItems.push(item);
