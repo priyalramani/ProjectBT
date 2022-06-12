@@ -105,7 +105,7 @@ const MainAdmin = () => {
   const getRoutesData = async () => {
     const response = await axios({
       method: "get",
-      url: "/routes/GetRouteList",
+      url: "/routes/GetOrderRouteList",
 
       headers: {
         "Content-Type": "application/json",
