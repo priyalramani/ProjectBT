@@ -189,7 +189,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       );
     }
   };
-  const onSubmit = async (type) => {
+  const onSubmit = async () => {
     let counter = counters.find(
       (a) => orderData?.counter_uuid === a.counter_uuid
     );
@@ -197,16 +197,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       ...orderData,
       item_details: orderData?.item_details.filter((a) => a.item_uuid),
     };
-    if (type === "auto_add") {
-      let autoAdd = await AutoAdd({
-        counter,
-        items: orderData?.item_details,
-        dbItems: orderData?.item_details,
-        autobills: autoBills,
-      });
-      data = { ...data, ...autoAdd, item_details: autoAdd.items };
-    }
-
+   
     let autoBilling = await Billing({
       counter,
       items: data.item_details,
@@ -246,6 +237,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     }
   };
   let listItemIndexCount = 0;
+  console.log(orderData)
   return (
     <>
       <div className="overlay">
@@ -673,11 +665,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             {editOrder ? (
               <button
                 type="button"
-                onClick={() => {
-                  if (!order.item_details.filter((a) => a.item_uuid).length)
-                    return;
-                  setPopup(true);
-                }}
+                onClick={onSubmit}
               >
                 Bill
               </button>
@@ -694,11 +682,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           </div>
         </div>
       </div>
-      {popup ? (
-        <NewUserForm onClose={() => setPopup(false)} onSubmit={onSubmit} />
-      ) : (
-        ""
-      )}
       {popupDetails ? (
         <CheckingValues
           onSave={() => setPopupDetails(false)}
@@ -894,60 +877,60 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted }) => {
     </div>
   );
 };
-function NewUserForm({ onSubmit, onClose }) {
-  return (
-    <div className="overlay">
-      <div
-        className="modal"
-        style={{ height: "fit-content", width: "fit-content" }}
-      >
-        <div
-          className="content"
-          style={{
-            height: "fit-content",
-            padding: "20px",
-            width: "fit-content",
-          }}
-        >
-          <div style={{ overflowY: "scroll" }}>
-            <form
-              className="form"
-              onSubmit={(e) => {
-                e.preventDefault();
-                onSubmit("auto_add");
-                onClose();
-              }}
-            >
-              <div className="row">
-                <h1> Auto Add</h1>
-              </div>
+// function NewUserForm({ onSubmit, onClose }) {
+//   return (
+//     <div className="overlay">
+//       <div
+//         className="modal"
+//         style={{ height: "fit-content", width: "fit-content" }}
+//       >
+//         <div
+//           className="content"
+//           style={{
+//             height: "fit-content",
+//             padding: "20px",
+//             width: "fit-content",
+//           }}
+//         >
+//           <div style={{ overflowY: "scroll" }}>
+//             <form
+//               className="form"
+//               onSubmit={(e) => {
+//                 e.preventDefault();
+//                 onSubmit("auto_add");
+//                 onClose();
+//               }}
+//             >
+//               <div className="row">
+//                 <h1> Auto Add</h1>
+//               </div>
 
-              <div className="formGroup">
-                <div className="row">
-                  <button type="submit" className="submit">
-                    Yes
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onSubmit();
-                    }}
-                    className="submit"
-                  >
-                    No
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-          <button onClick={onClose} className="closeButton">
-            x
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+//               <div className="formGroup">
+//                 <div className="row">
+//                   <button type="submit" className="submit">
+//                     Yes
+//                   </button>
+//                   <button
+//                     type="button"
+//                     onClick={() => {
+//                       onSubmit();
+//                     }}
+//                     className="submit"
+//                   >
+//                     No
+//                   </button>
+//                 </div>
+//               </div>
+//             </form>
+//           </div>
+//           <button onClick={onClose} className="closeButton">
+//             x
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 function CheckingValues({ onSave, popupDetails, users, items }) {
   return (
     <div className="overlay" style={{ zIndex: 999999999 }}>
