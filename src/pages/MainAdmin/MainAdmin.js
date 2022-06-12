@@ -35,9 +35,9 @@ const MainAdmin = () => {
   const [selectOrder, setSelectOrder] = useState(false);
   const [summaryPopup, setSumaryPopup] = useState(false);
   const [items, setItems] = useState([]);
-  const [changesStatePopup,setChangeStatePopup]=useState(false)
+  const [changesStatePopup, setChangeStatePopup] = useState(false);
   const componentRef = useRef(null);
-  const [messagePopup,setMessagePopup]=useState("")
+  const [messagePopup, setMessagePopup] = useState("");
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, [selectedOrder]);
@@ -294,11 +294,17 @@ const MainAdmin = () => {
                         className="simple_Logout_button"
                         type="button"
                         onClick={() => {
-                          let stage = selectedOrder.map(a=>a.status[a.status.length-1]?.stage)
-                          if(stage.filter((a,i)=>i===0?false:!(stage[0]===a)).length){
-                            setMessagePopup("Select Orders of Same Stage")
-                          }else{
-                            setChangeStatePopup(+stage[0])
+                          let stage = selectedOrder.map(
+                            (a) => a.status[a.status.length - 1]?.stage
+                          );
+                          if (
+                            stage.filter((a, i) =>
+                              i === 0 ? false : !(stage[0] === a)
+                            ).length
+                          ) {
+                            setMessagePopup("Select Orders of Same Stage");
+                          } else {
+                            setChangeStatePopup(+stage[0]);
                           }
                         }}
                       >
@@ -330,7 +336,11 @@ const MainAdmin = () => {
                   <>
                     {routesData.map((route) => {
                       let counterRoute = counter.find(
-                        (a) => a.route_uuid === route.route_uuid
+                        (a) =>
+                          a.route_uuid === route.route_uuid &&
+                          orders.filter(
+                            (b) => b?.counter_uuid === a?.counter_uuid
+                          ).length
                       );
 
                       if (
@@ -1146,7 +1156,7 @@ const MainAdmin = () => {
       {messagePopup ? (
         <MessagePopup
           onClose={() => {
-            setMessagePopup("")
+            setMessagePopup("");
           }}
           message={messagePopup}
         />
@@ -1173,11 +1183,10 @@ const MainAdmin = () => {
             setChangeStatePopup(false);
             setSelectOrder("");
             setSelectedOrder([]);
-            getRunningOrders()
+            getRunningOrders();
           }}
           orders={selectedOrder}
           stage={changesStatePopup}
-         
         />
       ) : (
         ""
