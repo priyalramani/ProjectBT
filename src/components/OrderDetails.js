@@ -35,7 +35,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     let time = new Date();
     let autoBilling = await Billing({
       counter,
-      items: orderData.item_details,
+      items: orderData?.item_details,
       others: {
         stage: 1,
         user_uuid: "240522",
@@ -191,17 +191,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   };
   const onSubmit = async (type) => {
     let counter = counters.find(
-      (a) => orderData.counter_uuid === a.counter_uuid
+      (a) => orderData?.counter_uuid === a.counter_uuid
     );
     let data = {
       ...orderData,
-      item_details: orderData.item_details.filter((a) => a.item_uuid),
+      item_details: orderData?.item_details.filter((a) => a.item_uuid),
     };
     if (type === "auto_add") {
       let autoAdd = await AutoAdd({
         counter,
-        items: orderData.item_details,
-        dbItems: orderData.item_details,
+        items: orderData?.item_details,
+        dbItems: orderData?.item_details,
         autobills: autoBills,
       });
       data = { ...data, ...autoAdd, item_details: autoAdd.items };
@@ -279,7 +279,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 >
                   <h2>
                     {counters.find(
-                      (a) => a.counter_uuid === orderData.counter_uuid
+                      (a) => a.counter_uuid === orderData?.counter_uuid
                     )?.counter_title || ""}
                   </h2>
                   <button
@@ -399,7 +399,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                               onClick={() =>
                                 setPopupDetails({
                                   type: "Status",
-                                  data: orderData.status,
+                                  data: orderData?.status,
                                 })
                               }
                             >
@@ -413,7 +413,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                               onClick={() =>
                                 setPopupDetails({
                                   type: "Delivery Return",
-                                  data: orderData.delivery_return,
+                                  data: orderData?.delivery_return,
                                 })
                               }
                             >
@@ -427,7 +427,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                               onClick={() =>
                                 setPopupDetails({
                                   type: "Auto Added",
-                                  data: orderData.auto_Added,
+                                  data: orderData?.auto_Added,
                                 })
                               }
                             >
@@ -689,7 +689,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               onClick={() => {}}
               style={{ width: "max-content", padding: "10px 20px" }}
             >
-              OrderTotal : {orderData.order_grandtotal || 0}
+              OrderTotal : {orderData?.order_grandtotal || 0}
             </button>
           </div>
         </div>
@@ -749,7 +749,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         >
           <OrderPrint
             counter={counters.find(
-              (a) => a.counter_uuid === orderData.counter_uuid
+              (a) => a.counter_uuid === orderData?.counter_uuid
             )}
             order={order}
             date={new Date(order.status[0].time)}
@@ -775,7 +775,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           >
             <OrderPrint
               counter={counters.find(
-                (a) => a.counter_uuid === orderData.counter_uuid
+                (a) => a.counter_uuid === orderData?.counter_uuid
               )}
               order={order}
               date={new Date(order.status[0].time)}
