@@ -47,6 +47,7 @@ const ProcessingOrders = () => {
   const [deletePopup, setDeletePopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const Navigate = useNavigate();
+  console.log(selectedOrder);
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -349,9 +350,7 @@ const ProcessingOrders = () => {
       if (updateBilling) {
         let billingData = await Billing({
           replacement: data.replacement,
-          counter: counters.find(
-            (a) => a.counter_uuid === data.counter_uuid
-          ),
+          counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
           add_discounts: true,
           items: data.item_details.map((a) => {
             let itemData = items.find((b) => a.item_uuid === b.item_uuid);
@@ -1074,7 +1073,7 @@ const ProcessingOrders = () => {
             </thead>
             <tbody className="tbody">
               {selectedOrder
-                ? selectedOrder.item_details
+                ? selectedOrder?.item_details
                     .filter(
                       (a) =>
                         !Location.pathname.includes("delivery") ||
@@ -1408,29 +1407,31 @@ const ProcessingOrders = () => {
       </div>
       {popupForm ? (
         <NewUserForm
-          onSave={async () => {
+          onSave={async (data) => {
             setPopupForm(false);
-            setUpdate((prev) => !prev);
-            let billingData = await Billing({
-              replacement: selectedOrder.replacement,
-              counter: counters.find(
-                (a) => a.counter_uuid === selectedOrder.counter_uuid
-              ),
+            if (data) {
+              setUpdate((prev) => !prev);
+              let billingData = await Billing({
+                replacement: data.replacement,
+                counter: counters.find(
+                  (a) => a.counter_uuid === data.counter_uuid
+                ),
 
-              items: selectedOrder.item_details.map((a) => {
-                let itemData = items.find((b) => a.item_uuid === b.item_uuid);
-                return {
-                  ...itemData,
-                  ...a,
-                  price: itemData?.price || 0,
-                };
-              }),
-            });
-            setSelectedOrder((prev) => ({
-              ...prev,
-              ...billingData,
-              item_details: billingData.items,
-            }));
+                items: data.item_details.map((a) => {
+                  let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+                  return {
+                    ...itemData,
+                    ...a,
+                    price: itemData?.price || 0,
+                  };
+                }),
+              });
+              setSelectedOrder((prev) => ({
+                ...prev,
+                ...billingData,
+                item_details: billingData.items,
+              }));
+            }
           }}
           setOrder={setSelectedOrder}
           popupInfo={popupForm}
@@ -1447,7 +1448,7 @@ const ProcessingOrders = () => {
             setPopupBarcode(false);
             setBarcodeMessage([]);
             setHoldPopup(false);
-            setTempQuantity([])
+            setTempQuantity([]);
           }}
           BarcodeMessage={BarcodeMessage}
           postOrderData={() => postOrderData()}
@@ -2073,7 +2074,7 @@ function HoldPopup({
             height: "fit-content",
             width: "max-content",
             minWidth: "250px",
-            paddingTop:"40px"
+            paddingTop: "40px",
           }}
         >
           <h1>{holdPopup}</h1>
@@ -3074,97 +3075,167 @@ function NewUserForm({
       p: data?.p || 0,
     });
   }, []);
+
   const submitHandler = async (e) => {
     e.preventDefault();
-    setOrder((prev) => ({
-      ...prev,
-      delivery_return: deliveryPage
-        ? prev.delivery_return.length
-          ? prev.delivery_return.filter(
-              (a) => a.item_uuid === popupInfo.item_uuid
-            )
-            ? prev.delivery_return.map((a) =>
-                a.item_uuid === popupInfo.item_uuid
-                  ? {
-                      item_uuid: popupInfo.item_uuid,
-                      b:
-                        +data.b -
-                        (+prev?.item_details?.find(
-                          (a) => a.item_uuid === popupInfo.item_uuid
-                        )?.b || 0),
-                      p:
-                        +data.p -
-                        (+prev?.item_details?.find(
-                          (a) => a.item_uuid === popupInfo.item_uuid
-                        )?.p || 0),
-                    }
-                  : a
+    let orderData=order
+    if (window.location.pathname.includes("delivery")) {
+      orderData={
+        ...orderData,
+        delivery_return: deliveryPage
+          ? orderData.delivery_return.length
+            ? orderData.delivery_return.filter(
+                (a) => a.item_uuid === popupInfo.item_uuid
               )
+              ? orderData.delivery_return.map((a) =>
+                  a.item_uuid === popupInfo.item_uuid
+                    ? {
+                        item_uuid: popupInfo.item_uuid,
+                        b:
+                          +data.b -
+                          (+orderData?.item_details?.find(
+                            (a) => a.item_uuid === popupInfo.item_uuid
+                          )?.b || 0),
+                        p:
+                          +data.p -
+                          (+orderData?.item_details?.find(
+                            (a) => a.item_uuid === popupInfo.item_uuid
+                          )?.p || 0),
+                      }
+                    : a
+                )
+              : [
+                  ...orderData.delivery_return,
+                  {
+                    item_uuid: popupInfo.item_uuid,
+                    b:
+                      +data.b -
+                      (+orderData?.item_details?.find(
+                        (a) => a.item_uuid === popupInfo.item_uuid
+                      )?.b || 0),
+                    p:
+                      +data.p -
+                      (+orderData?.item_details?.find(
+                        (a) => a.item_uuid === popupInfo.item_uuid
+                      )?.p || 0),
+                  },
+                ]
             : [
-                ...prev.delivery_return,
                 {
                   item_uuid: popupInfo.item_uuid,
                   b:
                     +data.b -
-                    (+prev?.item_details?.find(
+                    (+orderData?.item_details?.find(
                       (a) => a.item_uuid === popupInfo.item_uuid
                     )?.b || 0),
                   p:
                     +data.p -
-                    (+prev?.item_details?.find(
+                    (+orderData?.item_details?.find(
                       (a) => a.item_uuid === popupInfo.item_uuid
                     )?.p || 0),
                 },
               ]
-          : [
+          : [],
+        item_details: orderData.item_details.filter(
+          (a) => a.item_uuid === popupInfo.item_uuid
+        )?.length
+          ? orderData?.item_details?.map((a) => {
+              if (a.item_uuid === popupInfo.item_uuid)
+                return {
+                  ...a,
+                  b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
+                  p: +data.p % (+popupInfo.conversion || 1),
+                };
+              else return a;
+            })
+          : orderData?.item_details?.length
+          ? [
+              ...orderData.item_details,
               {
-                item_uuid: popupInfo.item_uuid,
-                b:
-                  +data.b -
-                  (+prev?.item_details?.find(
-                    (a) => a.item_uuid === popupInfo.item_uuid
-                  )?.b || 0),
-                p:
-                  +data.p -
-                  (+prev?.item_details?.find(
-                    (a) => a.item_uuid === popupInfo.item_uuid
-                  )?.p || 0),
+                ...popupInfo,
+                b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
+                p: +data.p % (+popupInfo.conversion || 1),
               },
             ]
-        : [],
-      item_details: prev.item_details.filter(
-        (a) => a.item_uuid === popupInfo.item_uuid
-      )?.length
-        ? prev?.item_details?.map((a) => {
-            if (a.item_uuid === popupInfo.item_uuid)
-              return {
+          : [
+              {
+                ...popupInfo,
+                b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
+                p: +data.p % (+popupInfo.conversion || 1),
+              },
+            ],
+      };
+    } else {
+      orderData= {
+        ...orderData,
+        processing_canceled:orderData.processing_canceled.length
+            ? orderData.processing_canceled.filter(
+                (a) => a.item_uuid === popupInfo.item_uuid
+              )
+              ? orderData.processing_canceled.map((a) =>
+                  a.item_uuid === popupInfo.item_uuid
+                    ? {
+                        item_uuid: popupInfo.item_uuid,
+                        b:
+                          +data.b -
+                          (+orderData?.item_details?.find(
+                            (a) => a.item_uuid === popupInfo.item_uuid
+                          )?.b || 0),
+                        p:
+                          +data.p -
+                          (+orderData?.item_details?.find(
+                            (a) => a.item_uuid === popupInfo.item_uuid
+                          )?.p || 0),
+                      }
+                    : a
+                )
+              : [
+                  ...orderData.processing_canceled,
+                  {
+                    item_uuid: popupInfo.item_uuid,
+                    b:
+                      +data.b -
+                      (+orderData?.item_details?.find(
+                        (a) => a.item_uuid === popupInfo.item_uuid
+                      )?.b || 0),
+                    p:
+                      +data.p -
+                      (+orderData?.item_details?.find(
+                        (a) => a.item_uuid === popupInfo.item_uuid
+                      )?.p || 0),
+                  },
+                ]
+            : [
+                {
+                  item_uuid: popupInfo.item_uuid,
+                  b:
+                    +data.b -
+                    (+orderData?.item_details?.find(
+                      (a) => a.item_uuid === popupInfo.item_uuid
+                    )?.b || 0),
+                  p:
+                    +data.p -
+                    (+orderData?.item_details?.find(
+                      (a) => a.item_uuid === popupInfo.item_uuid
+                    )?.p || 0),
+                },
+              ]
+          ,
+        item_details: orderData.item_details.map((a) =>
+          a.item_uuid === popupInfo.item_uuid
+            ? {
                 ...a,
                 b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
                 p: +data.p % (+popupInfo.conversion || 1),
-              };
-            else return a;
-          })
-        : prev?.item_details?.length
-        ? [
-            ...prev.item_details,
-            {
-              ...popupInfo,
-              b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
-              p: +data.p % (+popupInfo.conversion || 1),
-            },
-          ]
-        : [
-            {
-              ...popupInfo,
-              b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
-              p: +data.p % (+popupInfo.conversion || 1),
-            },
-          ],
-    }));
+              }
+            : a
+        ),
+      };
+    }
     setUpdateBilling(true);
-    onSave();
+    onSave(orderData);
   };
-  console.log(popupInfo);
+
   return (
     <div className="overlay">
       <div
