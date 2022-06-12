@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import "./style.css";
 import { Link, useLocation } from "react-router-dom";
-import { deleteDB } from "idb";
+import { deleteDB, openDB } from "idb";
 import { updateIndexedDb } from "../functions";
+import axios from "axios";
 const Main = () => {
   const [userRole, setUserRole] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
@@ -101,7 +102,58 @@ function Logout({ onSave, popupForm }) {
     e.preventDefault();
     console.log(popupForm)
     if (popupForm === "refresh") {
-      updateIndexedDb();
+      let response = await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+      console.log(response)
+      const result = await axios({
+        method: "get",
+        url: "/users/getDetails",
+    
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      let data = result.data.result;
+      console.log(data)
+      const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
+        upgrade(db) {
+          for (const property in data) {
+            db.createObjectStore(property, {
+              keyPath: "IDENTIFIER",
+            });
+          }
+        },
+      });
+    
+      let store;
+      for (const property in data) {
+        store = await db.transaction(property, "readwrite").objectStore(property);
+        for (let item of data[property]) {
+          let IDENTIFIER =
+            item[
+              property === "autobill"
+                ? "auto_uuid"
+                : property === "companies"
+                ? "company_uuid"
+                : property === "counter"
+                ? "counter_uuid"
+                : property === "counter_groups"
+                ? "counter_group_uuid"
+                : property === "item_category"
+                ? "category_uuid"
+                : property === "items"
+                ? "item_uuid"
+                : property === "routes"
+                ? "route_uuid"
+                : property === "payment_modes"
+                ? "mode_uuid"
+                : ""
+            ];
+          console.log({ ...item, IDENTIFIER });
+          await store.put({ ...item, IDENTIFIER });
+        }
+      }
+      let time = new Date();
+      localStorage.setItem("indexed_time", time.getTime());
       onSave();
     } else {
       await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
