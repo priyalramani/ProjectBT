@@ -7,7 +7,6 @@ import axios from "axios";
 const ItemGroup = () => {
   const [itemGroup, setItemGroup] = useState([]);
   const [itemGroupTitle, setItemGroupTitle] = useState("");
-  const [filterItemGroup, setFilterItemGroup] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
   const [addItems, setAddItems] = useState(false);
   const getCounterGroup = async () => {
@@ -25,21 +24,7 @@ const ItemGroup = () => {
   useEffect(() => {
     getCounterGroup();
   }, [popupForm]);
-  useEffect(
-    () =>
-      setFilterItemGroup(
-        itemGroup
-          .filter((a) => a.item_group_title)
-          .filter(
-            (a) =>
-              !itemGroupTitle ||
-              a.item_group_title
-                ?.toLocaleLowerCase()
-                ?.includes(itemGroupTitle.toLocaleLowerCase())
-          )
-      ),
-    [itemGroup, itemGroupTitle]
-  );
+
   return (
     <>
       <Sidebar />
@@ -59,7 +44,6 @@ const ItemGroup = () => {
               width: "100%",
             }}
           >
-
             <input
               type="text"
               onChange={(e) => setItemGroupTitle(e.target.value)}
@@ -68,7 +52,20 @@ const ItemGroup = () => {
               className="searchInput"
             />
 
-            <div>Total Items: {filterItemGroup.length}</div>
+            <div>
+              Total Items:{" "}
+              {
+                itemGroup
+                  .filter((a) => a.item_group_title)
+                  .filter(
+                    (a) =>
+                      !itemGroupTitle ||
+                      a.item_group_title
+                        ?.toLocaleLowerCase()
+                        ?.includes(itemGroupTitle.toLocaleLowerCase())
+                  ).length
+              }
+            </div>
             <button
               className="item-sales-search"
               onClick={() => setPopupForm(true)}
@@ -79,7 +76,15 @@ const ItemGroup = () => {
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-            itemsDetails={filterItemGroup}
+            itemsDetails={itemGroup
+              .filter((a) => a.item_group_title)
+              .filter(
+                (a) =>
+                  !itemGroupTitle ||
+                  a.item_group_title
+                    ?.toLocaleLowerCase()
+                    ?.includes(itemGroupTitle.toLocaleLowerCase())
+              )}
             setPopupForm={setPopupForm}
             setAddItems={setAddItems}
           />
@@ -360,13 +365,7 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
       ),
     [pattern, items, itemGroupings]
   );
-  const includesArray = useMemo(
-    () =>
-      searchedItems?.map((item) => {
-        itemGroupings[itemGroupingIndex]?.items?.includes(item.item_uuid);
-      }),
-    [searchedItems]
-  );
+
 
   const handleItemIncludeToggle = (item_uuid, type) => {
     let data = items.find((a) => a.item_uuid === item_uuid);
@@ -495,6 +494,9 @@ function ItemsTable({
       <table className="table">
         <thead>
           <tr>
+            <th className="description" style={{ width: "10%" }}>
+              S.r
+            </th>
             <th className="description" style={{ width: "25%" }}>
               Item
             </th>
@@ -515,6 +517,7 @@ function ItemsTable({
             .map((item, index) => {
               return (
                 <tr key={item.item_uuid}>
+                  <td>{index+1}</td>
                   <td>{item.item_title}</td>
                   <td>
                     {
