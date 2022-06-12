@@ -366,7 +366,6 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
     [pattern, items, itemGroupings]
   );
 
-
   const handleItemIncludeToggle = (item_uuid, type) => {
     let data = items.find((a) => a.item_uuid === item_uuid);
     if (type === "remove") {
@@ -526,18 +525,10 @@ function ItemsTable({
             .map((item, index) => {
               return (
                 <tr key={item.item_uuid}>
-                  <td>{index+1}</td>
+                  <td>{index + 1}</td>
                   <td>{item.item_title}</td>
-                  <td>
-                    {
-                      item?.company_title
-                    }
-                  </td>
-                  <td>
-                    {
-                      item?.category_title
-                    }
-                  </td>
+                  <td>{item?.company_title}</td>
+                  <td>{item?.category_title}</td>
 
                   <td>
                     <button
