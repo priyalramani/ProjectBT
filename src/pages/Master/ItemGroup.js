@@ -514,6 +514,15 @@ function ItemsTable({
         <tbody>
           {items
             ?.filter((a) => a.item_uuid)
+            .map((b) => ({
+              ...b,
+              company_title:
+                company.find((a) => a.company_uuid === b.company_uuid)
+                  ?.company_title || "-",
+              category_title:
+                Category.find((a) => a.category_uuid === b.category_uuid)
+                  ?.category_title || "-",
+            }))
             .map((item, index) => {
               return (
                 <tr key={item.item_uuid}>
@@ -521,16 +530,12 @@ function ItemsTable({
                   <td>{item.item_title}</td>
                   <td>
                     {
-                      company.find(
-                        (a) => a?.company_uuid === item?.company_uuid
-                      )?.company_title
+                      item?.company_title
                     }
                   </td>
                   <td>
                     {
-                      Category.find(
-                        (a) => a?.company_uuid === item?.company_uuid
-                      )?.category_title
+                      item?.category_title
                     }
                   </td>
 
