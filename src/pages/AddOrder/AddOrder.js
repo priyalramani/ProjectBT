@@ -429,6 +429,12 @@ export default function AddOrder() {
                               }
                               id={"item_uuid" + item.uuid}
                               options={itemsData
+                                .filter(
+                                  (a) =>
+                                    !order.item_details.filter(
+                                      (b) => a.item_uuid === b.item_uuid
+                                    ).length
+                                )
                                 .sort((a, b) =>
                                   a.item_title.localeCompare(b.item_title)
                                 )
