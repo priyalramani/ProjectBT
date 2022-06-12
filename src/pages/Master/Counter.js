@@ -266,7 +266,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup }) {
               <td>{i + 1}</td>
               <td colSpan={2}>{item.route_title}</td>
               <td colSpan={2}>{item.counter_title}</td>
-              <td colSpan={2}>{item.mobile.map((a,i)=>i===0?a:", "+a)}</td>
+              <td colSpan={2}>{item?.mobile?.map((a,i)=>i===0?a:", "+a)}</td>
               <td>
                 <button
                   type="button"
