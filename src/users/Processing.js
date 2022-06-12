@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { AiOutlineReload } from "react-icons/ai";
+
 const Processing = () => {
   const [tripData, setTripData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -37,12 +38,20 @@ const Processing = () => {
       <nav className="user_nav nav_styling" style={{ top: "0" }}>
         <div
           className="user_menubar flex"
-          style={{ width: "160px", justifyContent: "space-between" }}
+          style={{ width: "100%", justifyContent: "space-between",paddingRight:"5px" }}
         >
           <IoArrowBackOutline
             className="user_Back_icon"
             onClick={() => Navigate(-1)}
           />
+          
+  
+
+        <h1 style={{ width: "80%", textAlign: "left", marginLeft: "40px" }}>
+          Trips
+        </h1>
+        
+          
           <AiOutlineReload
             className="user_Back_icon"
             onClick={() => {
@@ -50,10 +59,6 @@ const Processing = () => {
             }}
           />
         </div>
-
-        <h1 style={{ width: "80%", textAlign: "left", marginLeft: "40px" }}>
-          Trips
-        </h1>
       </nav>
 
       <div
