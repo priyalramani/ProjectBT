@@ -417,11 +417,12 @@ export default function AddOrder() {
                   <tbody className="lh-copy">
                     {order?.item_details?.map((item, i) => (
                       <tr key={i}>
-                        <td className="ph2 pv1 tl bb b--black-20 bg-white">
+                        <td className="ph2 pv1 tl bb b--black-20 bg-white"   style={{width:"300px"}}>
                           <div
                             className="inputGroup"
                             id={`selectContainer-${item.uuid}`}
                             index={listItemIndexCount++}
+                            style={{width:"300px"}}
                           >
                             <Select
                               ref={(ref) =>
@@ -494,6 +495,7 @@ export default function AddOrder() {
                         >
                           <input
                             id={"q" + item.uuid}
+                            style={{width:"100px"}}
                             type="number"
                             className="numberInput"
                             onWheel={(e) => e.preventDefault()}
@@ -530,6 +532,7 @@ export default function AddOrder() {
                         >
                           <input
                             id={"p" + item.uuid}
+                            style={{width:"100px"}}
                             type="number"
                             className="numberInput"
                             onWheel={(e) => e.preventDefault()}
@@ -673,55 +676,31 @@ function NewUserForm({ onSubmit, onClose }) {
               <div className="formGroup">
                 <div className="row">
                   <h3> Auto Add</h3>
-                  <div>
-                    <input
-                      type="radio"
-                      checked={data.autoAdd}
-                      onClick={() => setData({ ...data, autoAdd: true })}
-                    />
+                  <div onClick={() => setData({ ...data, autoAdd: true })}>
+                    <input type="radio" checked={data.autoAdd} />
                     Yes
                   </div>
-                  <div>
-                    <input
-                      type="radio"
-                      checked={!data.autoAdd}
-                      onClick={() => setData({ ...data, autoAdd: false })}
-                    />
+                  <div onClick={() => setData({ ...data, autoAdd: false })}>
+                    <input type="radio" checked={!data.autoAdd} />
                     No
                   </div>
                 </div>
                 <div className="row">
                   <h3>Stage</h3>
-                  <div>
-                    <input
-                      type="radio"
-                      checked={data.stage === 1}
-                      onClick={() => setData({ ...data, stage: 1 })}
-                    />
+                  <div onClick={() => setData({ ...data, stage: 1 })}>
+                    <input type="radio" checked={data.stage === 1} />
                     Processing
                   </div>
-                  <div>
-                    <input
-                      type="radio"
-                      checked={data.stage === 2}
-                      onClick={() => setData({ ...data, stage: 2 })}
-                    />
+                  <div onClick={() => setData({ ...data, stage: 2 })}>
+                    <input type="radio" checked={data.stage === 2} />
                     Checking
                   </div>
-                  <div>
-                    <input
-                      type="radio"
-                      checked={data.stage === 3}
-                      onClick={() => setData({ ...data, stage: 3 })}
-                    />
+                  <div onClick={() => setData({ ...data, stage: 3 })}>
+                    <input type="radio" checked={data.stage === 3} />
                     Delivery
                   </div>
-                  <div>
-                    <input
-                      type="radio"
-                      checked={data.stage === 4}
-                      onClick={() => setData({ ...data, stage: 4 })}
-                    />
+                  <div onClick={() => setData({ ...data, stage: 4 })}>
+                    <input type="radio" checked={data.stage === 4} />
                     Complete
                   </div>
                 </div>
