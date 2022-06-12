@@ -1187,6 +1187,8 @@ const MainAdmin = () => {
           }}
           orders={selectedOrder}
           stage={changesStatePopup}
+          counters={counter}
+          items={items}
         />
       ) : (
         ""
