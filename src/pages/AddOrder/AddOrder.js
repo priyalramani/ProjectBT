@@ -9,7 +9,7 @@ import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import Select from "react-select";
 import { useIdleTimer } from "react-idle-timer";
-
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 const list = ["item_uuid", "q", "p"];
 
 export default function AddOrder() {
@@ -411,18 +411,22 @@ export default function AddOrder() {
                     <th className="pa2 tc bb b--black-20">Boxes</th>
                     <th className="pa2 tc bb b--black-20">Pcs</th>
                     <th className="pa2 tc bb b--black-20 ">Price</th>
+                    <th className="pa2 tc bb b--black-20 "></th>
                   </tr>
                 </thead>{" "}
                 {order.counter_uuid ? (
                   <tbody className="lh-copy">
                     {order?.item_details?.map((item, i) => (
                       <tr key={i}>
-                        <td className="ph2 pv1 tl bb b--black-20 bg-white"   style={{width:"300px"}}>
+                        <td
+                          className="ph2 pv1 tl bb b--black-20 bg-white"
+                          style={{ width: "300px" }}
+                        >
                           <div
                             className="inputGroup"
                             id={`selectContainer-${item.uuid}`}
                             index={listItemIndexCount++}
-                            style={{width:"300px"}}
+                            style={{ width: "300px" }}
                           >
                             <Select
                               ref={(ref) =>
@@ -495,7 +499,7 @@ export default function AddOrder() {
                         >
                           <input
                             id={"q" + item.uuid}
-                            style={{width:"100px"}}
+                            style={{ width: "100px" }}
                             type="number"
                             className="numberInput"
                             onWheel={(e) => e.preventDefault()}
@@ -532,7 +536,7 @@ export default function AddOrder() {
                         >
                           <input
                             id={"p" + item.uuid}
-                            style={{width:"100px"}}
+                            style={{ width: "100px" }}
                             type="number"
                             className="numberInput"
                             onWheel={(e) => e.preventDefault()}
@@ -574,6 +578,22 @@ export default function AddOrder() {
                             min={1}
                             onWheel={(e) => e.preventDefault()}
                             value={"Rs " + (item?.item_price || 0)}
+                          />
+                        </td>
+                        <td
+                          className="ph2 pv1 tc bb b--black-20 bg-white"
+                          style={{ textAlign: "center" }}
+                        >
+                          <DeleteOutlineIcon
+                            style={{ color: "red", cursor: "pointer" }}
+                            onClick={() =>
+                              setOrder((prev) => ({
+                                ...prev,
+                                item_details: prev.item_details.filter(
+                                  (a) => !(a.item_uuid === item.item_uuid)
+                                ),
+                              }))
+                            }
                           />
                         </td>
                       </tr>
