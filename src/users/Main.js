@@ -99,6 +99,7 @@ export default Main;
 function Logout({ onSave, popupForm }) {
   const submitHandler = async (e) => {
     e.preventDefault();
+    console.log(popupForm)
     if (popupForm === "refresh") {
       updateIndexedDb();
       onSave();
@@ -124,12 +125,12 @@ function Logout({ onSave, popupForm }) {
           }}
         >
           <div style={{ overflowY: "scroll" }}>
-            <form className="form" onSubmit={submitHandler}>
+            <form className="form" >
               <div className="row">
                 <h1>Are you Confirm </h1>
               </div>
 
-              <button type="submit" className="submit">
+              <button type="submit" onClick={submitHandler} className="submit">
                 {popupForm === "refresh" ? "Refresh" : "Logout"}
               </button>
             </form>
