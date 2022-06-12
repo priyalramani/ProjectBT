@@ -488,7 +488,7 @@ function NewUserForm({
       }
     }
   };
-
+ 
   return (
     <div className="overlay">
       <div className="modal" style={{ height: "70vh", width: "fit-content" }}>
@@ -553,6 +553,9 @@ function NewUserForm({
                         setdata({
                           ...data,
                           company_uuid: e.target.value,
+                          category_uuid: itemCategories.filter(
+                            (a) => a.company_uuid === e.target.value
+                          )[0]?.category_uuid,
                         })
                       }
                     >
