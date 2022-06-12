@@ -11,8 +11,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
       (a?.counters?.filter((b) => b === counter.counter_uuid)?.length ||
         counter?.counter_group_uuid?.filter(
           (b) => a?.counter_groups.filter((c) => c === b)?.length
-        ).length ||
-        a?.counters?.length === 0)
+        ).length )
   );
 
   for (let autobill of data) {
@@ -68,8 +67,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
       (a.counters.filter((b) => b === counter.counter_uuid).length ||
         counter.counter_group_uuid.filter(
           (b) => a.counter_groups.filter((c) => c === b).length
-        ).length ||
-        a.counter.length === 0)
+        ).length )
   );
 
   for (let autobill of data) {
