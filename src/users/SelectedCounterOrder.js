@@ -897,7 +897,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
     e.preventDefault();
     setOrder((prev) => ({
       ...prev,
-      items: (prev.items.filter((a) => a.item_uuid === popupInfo.item_uuid)
+      items: (prev?.items?.filter((a) => a.item_uuid === popupInfo.item_uuid)
         ?.length
         ? prev?.items?.map((a) =>
             a.item_uuid === popupInfo.item_uuid
@@ -910,7 +910,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
           )
         : prev?.items?.length
         ? [
-            ...prev.items,
+            ...prev?.items,
             {
               ...popupInfo,
               b: +data.b + parseInt(+data.p / +popupInfo.conversion),
