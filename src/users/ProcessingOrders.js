@@ -12,6 +12,8 @@ import { Phone } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import HomeIcon from "@mui/icons-material/Home";
+import { ArrowDropDown, SquareFoot } from "@mui/icons-material";
 let intervalId = 0;
 const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
@@ -47,6 +49,7 @@ const ProcessingOrders = () => {
   const [deletePopup, setDeletePopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [phonePopup, setPhonePopup] = useState(false);
+  const [dropdown, setDropDown] = useState(false);
   const Navigate = useNavigate();
   console.log(selectedOrder);
   const getUsers = async () => {
@@ -825,7 +828,22 @@ const ProcessingOrders = () => {
               } else Navigate(-1);
             }}
           />
-          {!selectedOrder ? (
+          <HomeIcon
+            className="user_Back_icon"
+            onClick={() => {
+              Navigate("/users");
+            }}
+          />
+        </div>
+
+        <h1 style={{ width: "100%", textAlign: "left", marginLeft: "30px" }}>
+          {selectedOrder ? selectedOrder.counter_title : "Orders"}
+        </h1>
+        {!selectedOrder ? (
+          <div
+            className="user_menubar flex"
+            style={{ width: "160px", justifyContent: "space-between" }}
+          >
             <AiOutlineReload
               className="user_Back_icon"
               onClick={() => {
@@ -834,102 +852,129 @@ const ProcessingOrders = () => {
                 } else getTripOrders();
               }}
             />
-          ) : (
-            ""
-          )}
-        </div>
+          </div>
+        ) : (
+          ""
+        )}
+        {!selectedOrder ? (
+          <>
+            <div className="inputs">
+              <div
+                id="customer-dropdown-trigger"
+                className={"active"}
+                style={{
+                  transform: dropdown ? "rotate(0deg)" : "rotate(180deg)",
+                  width: "30px",
+                  height: "30px",
+                  backgroundColor: "#fff",
+                }}
+                onClick={(e) => {
+                  setDropDown((prev) => !prev);
+                }}
+              >
+                <ArrowDropDown style={{ color: "green" }} />
+              </div>
+            </div>
 
-        <h1 style={{ width: "100%", textAlign: "left", marginLeft: "30px" }}>
-          {selectedOrder ? selectedOrder.counter_title : "Orders"}
-        </h1>
-        {!selectedOrder && Location.pathname.includes("checking") ? (
-          <button
-            className="item-sales-search"
-            style={{
-              width: "max-content",
-            }}
-            onClick={() => setHoldPopup("Checking Summary")}
-          >
-            Summary
-          </button>
-        ) : (
-          ""
-        )}
-        {!selectedOrder && window.location.pathname.includes("processing") ? (
-          <>
-            <button
-              className="item-sales-search"
-              style={{
-                width: "max-content",
-              }}
-              onClick={() => setHoldPopup("Summary")}
-            >
-              Summary
-            </button>
-            <button
-              className="item-sales-search"
-              style={{
-                width: "max-content",
-              }}
-              onClick={() => setHoldPopup("Hold")}
-            >
-              Hold
-            </button>
-          </>
-        ) : (
-          ""
-        )}
-        {selectedOrder &&
-        !(
-          Location.pathname.includes("checking") ||
-          Location.pathname.includes("delivery")
-        ) ? (
-          <>
-            <input
-              className="searchInput"
-              style={{
-                border: "none",
-                borderBottom: "2px solid #fff",
-                borderRadius: "0px",
-                width: "50px",
-                padding: "0 5px",
-                backgroundColor: "transparent",
-                color: "#fff",
-                marginRight: "10px",
-              }}
-              value={playCount}
-              onChange={(e) => setPlayCount(e.target.value)}
-            />
-            <select
-              className="audioPlayerSpeed"
-              style={{
-                border: "none",
-                borderBottom: "2px solid #fff",
-                borderRadius: "0px",
-                width: "75px",
-                padding: "0 5px",
-                backgroundColor: "transparent",
-                color: "#fff",
-              }}
-              defaultValue={playerSpeed}
-              onChange={(e) => {
-                console.log(e.target.value);
-                setPlayerSpeed(e.target.value);
-                audiosRef.current.forEach(
-                  (i) => (i.playbackRate = +e.target.value)
-                );
-              }}
-            >
-              <option value="1">1x</option>
-              <option value="1.25">1.25x</option>
-              <option value="1.50">1.50x</option>
-            </select>
+            {selectedOrder &&
+            !(
+              Location.pathname.includes("checking") ||
+              Location.pathname.includes("delivery")
+            ) ? (
+              <>
+                <input
+                  className="searchInput"
+                  style={{
+                    border: "none",
+                    borderBottom: "2px solid #fff",
+                    borderRadius: "0px",
+                    width: "50px",
+                    padding: "0 5px",
+                    backgroundColor: "transparent",
+                    color: "#fff",
+                    marginRight: "10px",
+                  }}
+                  value={playCount}
+                  onChange={(e) => setPlayCount(e.target.value)}
+                />
+                <select
+                  className="audioPlayerSpeed"
+                  style={{
+                    border: "none",
+                    borderBottom: "2px solid #fff",
+                    borderRadius: "0px",
+                    width: "75px",
+                    padding: "0 5px",
+                    backgroundColor: "transparent",
+                    color: "#fff",
+                  }}
+                  defaultValue={playerSpeed}
+                  onChange={(e) => {
+                    console.log(e.target.value);
+                    setPlayerSpeed(e.target.value);
+                    audiosRef.current.forEach(
+                      (i) => (i.playbackRate = +e.target.value)
+                    );
+                  }}
+                >
+                  <option value="1">1x</option>
+                  <option value="1.25">1.25x</option>
+                  <option value="1.50">1.50x</option>
+                </select>
+              </>
+            ) : (
+              ""
+            )}
           </>
         ) : (
           ""
         )}
       </nav>
-
+      {dropdown ? (
+        <div
+          id="customer-details-dropdown"
+          className={"page1 flex"}
+          style={{ top: "40px", flexDirection: "column", zIndex: "200" }}
+          onMouseLeave={() => setDropDown(false)}
+        >
+          {Location.pathname.includes("checking") ? (
+            <button
+              className="simple_Logout_button"
+              onClick={() => {
+                setHoldPopup("Checking Summary");
+                setDropDown(false);
+              }}
+            >
+              Summary
+            </button>
+          ) : window.location.pathname.includes("processing") ? (
+            <>
+              <button
+                className="simple_Logout_button"
+                onClick={() => {
+                  setHoldPopup("Summary");
+                  setDropDown(false);
+                }}
+              >
+                Summary
+              </button>
+              <button
+                className="simple_Logout_button"
+                onClick={() => {
+                  setHoldPopup("Hold");
+                  setDropDown(false);
+                }}
+              >
+                Hold
+              </button>
+            </>
+          ) : (
+            ""
+          )}
+        </div>
+      ) : (
+        ""
+      )}
       <div
         className="item-sales-container orders-report-container"
         style={{ width: "100vw", left: "0", top: "50px", textAlign: "center" }}
@@ -1379,22 +1424,20 @@ const ProcessingOrders = () => {
                         </td>
                         <td>
                           {item?.mobile ? (
-                            
-                              <Phone
-                                className="user_Back_icon"
-                                style={{ color: "#4ac959" }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (item.mobile.length === 1) {
-                                    window.location.assign(
-                                      "tel:" + item?.mobile[0]
-                                    );
-                                  } else {
-                                    setPhonePopup(item.mobile);
-                                  }
-                                }}
-                              />
-                 
+                            <Phone
+                              className="user_Back_icon"
+                              style={{ color: "#4ac959" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (item.mobile.length === 1) {
+                                  window.location.assign(
+                                    "tel:" + item?.mobile[0]
+                                  );
+                                } else {
+                                  setPhonePopup(item.mobile);
+                                }
+                              }}
+                            />
                           ) : (
                             "-"
                           )}
@@ -3094,9 +3137,9 @@ function NewUserForm({
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    let orderData=order
+    let orderData = order;
     if (window.location.pathname.includes("delivery")) {
-      orderData={
+      orderData = {
         ...orderData,
         delivery_return: deliveryPage
           ? orderData.delivery_return.length
@@ -3182,46 +3225,31 @@ function NewUserForm({
             ],
       };
     } else {
-      orderData= {
+      orderData = {
         ...orderData,
-        processing_canceled:orderData.processing_canceled.length
-            ? orderData.processing_canceled.filter(
-                (a) => a.item_uuid === popupInfo.item_uuid
+        processing_canceled: orderData.processing_canceled.length
+          ? orderData.processing_canceled.filter(
+              (a) => a.item_uuid === popupInfo.item_uuid
+            )
+            ? orderData.processing_canceled.map((a) =>
+                a.item_uuid === popupInfo.item_uuid
+                  ? {
+                      item_uuid: popupInfo.item_uuid,
+                      b:
+                        +data.b -
+                        (+orderData?.item_details?.find(
+                          (a) => a.item_uuid === popupInfo.item_uuid
+                        )?.b || 0),
+                      p:
+                        +data.p -
+                        (+orderData?.item_details?.find(
+                          (a) => a.item_uuid === popupInfo.item_uuid
+                        )?.p || 0),
+                    }
+                  : a
               )
-              ? orderData.processing_canceled.map((a) =>
-                  a.item_uuid === popupInfo.item_uuid
-                    ? {
-                        item_uuid: popupInfo.item_uuid,
-                        b:
-                          +data.b -
-                          (+orderData?.item_details?.find(
-                            (a) => a.item_uuid === popupInfo.item_uuid
-                          )?.b || 0),
-                        p:
-                          +data.p -
-                          (+orderData?.item_details?.find(
-                            (a) => a.item_uuid === popupInfo.item_uuid
-                          )?.p || 0),
-                      }
-                    : a
-                )
-              : [
-                  ...orderData.processing_canceled,
-                  {
-                    item_uuid: popupInfo.item_uuid,
-                    b:
-                      +data.b -
-                      (+orderData?.item_details?.find(
-                        (a) => a.item_uuid === popupInfo.item_uuid
-                      )?.b || 0),
-                    p:
-                      +data.p -
-                      (+orderData?.item_details?.find(
-                        (a) => a.item_uuid === popupInfo.item_uuid
-                      )?.p || 0),
-                  },
-                ]
             : [
+                ...orderData.processing_canceled,
                 {
                   item_uuid: popupInfo.item_uuid,
                   b:
@@ -3236,7 +3264,21 @@ function NewUserForm({
                     )?.p || 0),
                 },
               ]
-          ,
+          : [
+              {
+                item_uuid: popupInfo.item_uuid,
+                b:
+                  +data.b -
+                  (+orderData?.item_details?.find(
+                    (a) => a.item_uuid === popupInfo.item_uuid
+                  )?.b || 0),
+                p:
+                  +data.p -
+                  (+orderData?.item_details?.find(
+                    (a) => a.item_uuid === popupInfo.item_uuid
+                  )?.p || 0),
+              },
+            ],
         item_details: orderData.item_details.map((a) =>
           a.item_uuid === popupInfo.item_uuid
             ? {
