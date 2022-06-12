@@ -46,6 +46,7 @@ const ProcessingOrders = () => {
   const [update, setUpdate] = useState(false);
   const [deletePopup, setDeletePopup] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [phonePopup, setPhonePopup] = useState(false);
   const Navigate = useNavigate();
   console.log(selectedOrder);
   const getUsers = async () => {
@@ -1378,12 +1379,22 @@ const ProcessingOrders = () => {
                         </td>
                         <td>
                           {item?.mobile ? (
-                            <a href={"tel:" + item?.mobile}>
+                            
                               <Phone
                                 className="user_Back_icon"
                                 style={{ color: "#4ac959" }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (item.mobile.length === 1) {
+                                    window.location.assign(
+                                      "tel:" + item?.mobile[0]
+                                    );
+                                  } else {
+                                    setPhonePopup(item.mobile);
+                                  }
+                                }}
                               />
-                            </a>
+                 
                           ) : (
                             "-"
                           )}
@@ -1487,6 +1498,11 @@ const ProcessingOrders = () => {
           setTempQuantity={setTempQuantity}
           tempQuantity={tempQuantity}
         />
+      ) : (
+        ""
+      )}
+      {phonePopup ? (
+        <PhoneList onSave={() => setPhonePopup(false)} mobile={phonePopup} />
       ) : (
         ""
       )}
@@ -3314,3 +3330,77 @@ function NewUserForm({
     </div>
   );
 }
+const PhoneList = ({ onSave, mobile }) => {
+  return (
+    <div className="overlay" style={{ zIndex: 999999999 }}>
+      <div
+        className="modal"
+        style={{
+          height: "fit-content",
+          width: "max-content",
+          minWidth: "250px",
+        }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll", width: "100%" }}>
+            {mobile.length ? (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                <table
+                  className="user-table"
+                  style={{
+                    width: "100%",
+                    height: "fit-content",
+                  }}
+                >
+                  <tbody className="tbody">
+                    {mobile?.map((item, i) => (
+                      <tr
+                        key={item?.item_uuid || Math.random()}
+                        style={{
+                          height: "30px",
+                          width: "100%",
+                        }}
+                      >
+                        <td
+                          colSpan={3}
+                          className="flex"
+                          onClick={() => {
+                            window.location.assign("tel:" + item);
+                            onSave();
+                          }}
+                        >
+                          <Phone />
+                          {item}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                <i>No Data Present</i>
+              </div>
+            )}
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
