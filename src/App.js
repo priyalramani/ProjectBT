@@ -4,7 +4,6 @@ import {
   Routes,
   Route,
   Navigate,
-  useNavigate,
 } from "react-router-dom";
 import MainAdmin from "./pages/MainAdmin/MainAdmin";
 import RoutesPage from "./pages/Master/Routes";
@@ -39,6 +38,7 @@ function App() {
   axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
   // axios.defaults.baseURL = "http://localhost:9000";
+
 useEffect(()=>{
   let user = localStorage.getItem("user_uuid")
   if(user&&user!=="240522"){

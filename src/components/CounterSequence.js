@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, forwardRef } from "react";
 import Select from "react-select";
-import { idb } from "idb";
+import axios from "axios";
 import { CSS } from '@dnd-kit/utilities';
 import { ViewGridIcon } from "@heroicons/react/solid";
 import {
@@ -104,7 +105,16 @@ function Table({ counterData, setCounterData, onSave }) {
 
   console.log(itemsIdList)
   const handleSave = async () => {
-
+    const response = await axios({
+      method: "put",
+      url: "/counters/putCounter/sortOrder",
+      data: counterData?.map(({ counter_uuid, sort_order, ...i }) => ({ counter_uuid, sort_order })),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.ok)
+      onSave()
   }
 
   return (
