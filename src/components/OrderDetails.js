@@ -60,7 +60,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   });
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
-  }, []);
+  }, [orderData]);
 
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
@@ -750,7 +750,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 ? order?.item_details?.slice(0, 16)
                 : order?.item_details
             }
-            footer={orderData?.item_details < 16}
+            footer={!(order?.item_details?.length > 16)}
           />
         </div>
         {order.item_details > 16 ? (
