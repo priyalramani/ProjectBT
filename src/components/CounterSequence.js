@@ -80,15 +80,21 @@ function Table({ counterData }) {
         </tr>
       </thead>
       <tbody className="tbody">
-        {counterData
-          ?.sort((a, b) => +a.sort_order - b.sort_order)
-          ?.map((item, i) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
-              <td>{item.sort_order}</td>
-              <td colSpan={2}>{item.counter_title}</td>
-              <td colSpan={2}>{item?.address}</td>
-            </tr>
-          ))}
+        {counterData.length ? (
+          counterData
+            ?.sort((a, b) => +a.sort_order - b.sort_order)
+            ?.map((item, i) => (
+              <tr key={item.counter_uuid} style={{ height: "30px" }}>
+                <td>{item.sort_order}</td>
+                <td colSpan={2}>{item.counter_title}</td>
+                <td colSpan={2}>{item?.address}</td>
+              </tr>
+            ))
+        ) : (
+          <tr>
+            <td colSpan={5}>No Counter</td>
+          </tr>
+        )}
       </tbody>
     </table>
   );
