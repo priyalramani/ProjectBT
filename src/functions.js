@@ -294,17 +294,17 @@ export const Billing = async ({
         (+item.qty || 1)
       ).toFixed(2),
     };
-    console.log(item);
     newPriceItems.push(item);
   }
   console.log("newItemPrice", newPriceItems);
   let order_grandtotal =
     newPriceItems.length > 1
-      ? newPriceItems.map((a) => +a.item_price || 0).reduce((a, b) => a + b) -
+      ? newPriceItems.map((a) => +a.item_total || 0).reduce((a, b) => a + b) -
         replacement
       : newPriceItems.length
       ? (newPriceItems.map((a) => a.item_total)[0] || 0) - replacement
       : 0;
+
   return {
     counter_uuid: counter.counter_uuid,
     order_grandtotal,
