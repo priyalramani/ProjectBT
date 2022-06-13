@@ -104,7 +104,7 @@ const Orders = () => {
                     ?.filter((a) => a.counter_title)
                     ?.filter(
                       (a) =>
-                        params.route_uuid === a.route_uuid ||
+                        window.location.pathname.includes("route")? params.route_uuid === a.route_uuid :
                         !counterFilter ||
                         a.counter_title
                           .toLocaleLowerCase()
