@@ -72,6 +72,7 @@ const Processing = () => {
           marginTop: "20px",
           backgroundColor: "#f2f2f2",
           overflowY: "scroll",
+          paddingBottom:"100px",
         }}
       >
         {tripData.length ? (

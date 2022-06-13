@@ -455,6 +455,9 @@ const ProcessingOrders = () => {
             ? dataItem[0]?.p
             : 0
         }`;
+        setLoading(false);
+        setSelectedOrder(false);
+        getTripOrders();
         postActivity({
           activity:
             (Location.pathname.includes("checking")
@@ -469,9 +472,8 @@ const ProcessingOrders = () => {
           amt: finalData[0].order_grandtotal || 0,
         });
       }
-      setLoading(false);
-      setSelectedOrder(false);
-      getTripOrders();
+      
+     
     }
   };
   const postOrderContained = async (data = selectedOrder, opened_by = 0) => {
@@ -2407,7 +2409,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
                   >
                     Box
                     <input
-                      type="text"
+                      type="number"
                       name="route_title"
                       className="numberInput"
                       value={data?.b}
@@ -2428,7 +2430,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
                   >
                     Pcs
                     <input
-                      type="text"
+                      type="number"
                       name="route_title"
                       className="numberInput"
                       value={data?.p}
@@ -3321,7 +3323,7 @@ function NewUserForm({
                   >
                     Box
                     <input
-                      type="text"
+                      type="number"
                       name="route_title"
                       className="numberInput"
                       value={data?.b}
@@ -3342,7 +3344,7 @@ function NewUserForm({
                   >
                     Pcs
                     <input
-                      type="text"
+                      type="number"
                       name="route_title"
                       className="numberInput"
                       value={data?.p}

@@ -94,8 +94,8 @@ const Orders = () => {
             <div
               style={{
                 overflowY: "scroll",
-                height: "70vh",
-                marginTop: "100px",
+                height: params.route_uuid ?"90vh":"70vh",
+                marginTop:params.route_uuid ?"10px": "100px",
               }}
             >
               <table className="table" style={{ width: "100vw" }}>
@@ -104,7 +104,7 @@ const Orders = () => {
                     ?.filter((a) => a.counter_title)
                     ?.filter(
                       (a) =>
-                        params.route_uuid === a.route_uuid ||
+                        window.location.pathname.includes("route")? params.route_uuid === a.route_uuid :
                         !counterFilter ||
                         a.counter_title
                           .toLocaleLowerCase()
@@ -178,6 +178,7 @@ const Orders = () => {
                 marginTop: "20px",
                 backgroundColor: "#f2f2f2",
                 overflowY: "scroll",
+                paddingBottom:"100px",
               }}
             >
               {routes.length

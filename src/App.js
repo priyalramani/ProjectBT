@@ -31,6 +31,7 @@ import CompletedTrips from "./pages/Reports/CompletedTrips";
 import { useEffect } from "react";
 import { updateIndexedDb } from "./functions";
 import CounterLeger from "./pages/Reports/CounterLeger";
+import Outstanding from "./pages/Reports/Outstanding";
 
 const id = "240522";
 function App() {
@@ -80,6 +81,7 @@ useEffect(()=>{
                   <Route path="/admin/OrderItemReport" element={<ItemDetails />} />
                   <Route path="/admin/CompletedTripsReport" element={<CompletedTrips />} />
                   <Route path="/admin/CounterLeger" element={<CounterLeger />} />
+                  <Route path="/admin/Outstandings" element={<Outstanding />} />
                   <Route path="*" element={<Navigate replace to={"/admin"} />} />
                 </>
               ) : (
@@ -87,6 +89,7 @@ useEffect(()=>{
                   {/* users routes */}
                   <Route path="/users" element={<Main />} />
                   <Route path="/users/orders" element={<Orders />} />
+                  <Route path="/users/route/:route_uuid" element={<Orders />} />
                   <Route path="/users/processing" element={<Processing />} />
                   <Route path="/users/checking" element={<Processing />} />
                   <Route path="/users/delivery" element={<Processing />} />

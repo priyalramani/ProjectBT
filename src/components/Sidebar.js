@@ -97,6 +97,10 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Counter Ledger",
               link: "/admin/CounterLeger",
             },
+            {
+              name: "Outstandings",
+              link: "/admin/Outstandings",
+            },
             
           ]}
         />

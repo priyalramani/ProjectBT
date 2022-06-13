@@ -29,7 +29,7 @@ export default function AddOrder() {
   const [counting, setCounting] = useState(0);
   const reactInputsRef = useRef({});
   const [focusedInputId, setFocusedInputId] = useState(0);
-
+  const [edit_prices, setEditPrices] = useState([]);
   // console.log(
   //   document.getElementById(id),
   //   id,
@@ -182,6 +182,7 @@ export default function AddOrder() {
         type: "NEW",
       },
       add_discounts: true,
+      edit_prices,
     });
     data = {
       ...data,
@@ -410,10 +411,11 @@ export default function AddOrder() {
                     <th className="pa2 tl bb b--black-20 w-30">Item Name</th>
                     <th className="pa2 tc bb b--black-20">Boxes</th>
                     <th className="pa2 tc bb b--black-20">Pcs</th>
-                    <th className="pa2 tc bb b--black-20 ">Price</th>
+                    <th className="pa2 tc bb b--black-20 ">Price (pcs)</th>
+                    <th className="pa2 tc bb b--black-20 ">Price (box)</th>
                     <th className="pa2 tc bb b--black-20 "></th>
                   </tr>
-                </thead>{" "}
+                </thead>
                 {order.counter_uuid ? (
                   <tbody className="lh-copy">
                     {order?.item_details?.map((item, i) => (
@@ -571,13 +573,82 @@ export default function AddOrder() {
                           className="ph2 pv1 tc bb b--black-20 bg-white"
                           style={{ textAlign: "center" }}
                         >
-                          <input
+                          Rs:<input
                             id="Quantity"
                             type="text"
                             className="numberInput"
                             min={1}
                             onWheel={(e) => e.preventDefault()}
-                            value={"Rs " + (item?.item_price || 0)}
+                            value={ item?.item_price || 0}
+                            onChange={(e) => {
+                              setOrder((prev) => {
+                                return {
+                                  ...prev,
+                                  item_details: prev.item_details.map((a) =>
+                                    a.uuid === item.uuid
+                                      ? { ...a, item_price: e.target.value }
+                                      : a
+                                  ),
+                                };
+                              });
+                              setEditPrices((prev) =>
+                                prev.filter(
+                                  (a) => a.item_uuid === item.item_uuid
+                                ).length
+                                  ? prev.map((a) =>
+                                      a.item_uuid === item.item_uuid
+                                        ? { ...a, item_price: e.target.value }
+                                        : a
+                                    )
+                                  : prev.length
+                                  ? [
+                                      ...prev,
+                                      { ...item, item_price: e.target.value },
+                                    ]
+                                  : [{ ...item, item_price: e.target.value }]
+                              );
+                            }}
+                          />
+                        </td>
+                        <td
+                          className="ph2 pv1 tc bb b--black-20 bg-white"
+                          style={{ textAlign: "center" }}
+                        >
+                          Rs:<input
+                            id="Quantity"
+                            type="text"
+                            className="numberInput"
+                            min={1}
+                            onWheel={(e) => e.preventDefault()}
+                            value={ (item?.item_price || 0)*(+item?.conversion||1)}
+                            onChange={(e) => {
+                              setOrder((prev) => {
+                                return {
+                                  ...prev,
+                                  item_details: prev.item_details.map((a) =>
+                                    a.uuid === item.uuid
+                                      ? { ...a, item_price: e.target.value/(+item.conversion||1) }
+                                      : a
+                                  ),
+                                };
+                              });
+                              setEditPrices((prev) =>
+                                prev.filter(
+                                  (a) => a.item_uuid === item.item_uuid
+                                ).length
+                                  ? prev.map((a) =>
+                                      a.item_uuid === item.item_uuid
+                                        ? { ...a, item_price: e.target.value/(+item.conversion||1) }
+                                        : a
+                                    )
+                                  : prev.length
+                                  ? [
+                                      ...prev,
+                                      { ...item, item_price: e.target.value/(+item.conversion||1) },
+                                    ]
+                                  : [{ ...item, item_price: e.target.value/(+item.conversion||1) }]
+                              );
+                            }}
                           />
                         </td>
                         <td
