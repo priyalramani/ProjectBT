@@ -3,6 +3,7 @@ import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import axios from "axios";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
+import CounterSequence from "../../components/CounterSequence";
 const Counter = () => {
   const [counter, setCounter] = useState([]);
   const [paymentModes, setPaymentModes] = useState([]);
@@ -127,7 +128,7 @@ const Counter = () => {
               className="item-sales-search"
               onClick={() => setSequencePopup(true)}
             >
-              Sequencing
+              Sequence
             </button>
             <button
               className="item-sales-search"
@@ -159,6 +160,11 @@ const Counter = () => {
       )}
       {itemPopup ? (
         <ItemPopup onSave={() => setItemPopup(false)} itemPopup={itemPopup} />
+      ) : (
+        ""
+      )}
+      {sequencePopup ? (
+        <CounterSequence onSave={() => setSequencePopup(false)} counters={counter} routesData={routesData} />
       ) : (
         ""
       )}
