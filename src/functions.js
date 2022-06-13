@@ -286,12 +286,13 @@ export const Billing = async ({
     let edit_price = edit_prices.find(
       (a) => a.item_uuid === item.item_uuid
     )?.item_price;
+
     item = {
       ...item,
       charges_discount,
       item_total: (
         (+edit_price || +item.item_desc_total || +item.item_price || 0) *
-        (+item.qty || 1)
+        (+item.qty || 0)
       ).toFixed(2),
     };
     newPriceItems.push(item);

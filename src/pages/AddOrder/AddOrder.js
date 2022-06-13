@@ -292,6 +292,8 @@ export default function AddOrder() {
 
         type: "NEW",
       },
+      add_discounts: true,
+      edit_prices
     });
     setOrder((prev) => ({
       ...prev,
