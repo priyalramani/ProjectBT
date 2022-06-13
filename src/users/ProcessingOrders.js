@@ -51,7 +51,7 @@ const ProcessingOrders = () => {
   const [phonePopup, setPhonePopup] = useState(false);
   const [dropdown, setDropDown] = useState(false);
   const Navigate = useNavigate();
-  console.log(selectedOrder);
+
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -1465,8 +1465,9 @@ const ProcessingOrders = () => {
         <NewUserForm
           onSave={async (data) => {
             setPopupForm(false);
+            console.log(data)
             if (data) {
-              setUpdate((prev) => !prev);
+              // setUpdate((prev) => !prev);
               let billingData = await Billing({
                 replacement: data.replacement,
                 counter: counters.find(
@@ -1481,6 +1482,7 @@ const ProcessingOrders = () => {
                     price: itemData?.price || 0,
                   };
                 }),
+                add_discounts:true
               });
               setSelectedOrder((prev) => ({
                 ...prev,
@@ -3140,6 +3142,7 @@ function NewUserForm({
   const submitHandler = async (e) => {
     e.preventDefault();
     let orderData = order;
+    console.log(window.location.pathname.includes("delivery"))
     if (window.location.pathname.includes("delivery")) {
       orderData = {
         ...orderData,
@@ -3197,34 +3200,15 @@ function NewUserForm({
                 },
               ]
           : [],
-        item_details: orderData.item_details.filter(
-          (a) => a.item_uuid === popupInfo.item_uuid
-        )?.length
-          ? orderData?.item_details?.map((a) => {
-              if (a.item_uuid === popupInfo.item_uuid)
-                return {
-                  ...a,
-                  b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
-                  p: +data.p % (+popupInfo.conversion || 1),
-                };
-              else return a;
-            })
-          : orderData?.item_details?.length
-          ? [
-              ...orderData.item_details,
-              {
-                ...popupInfo,
+          item_details: orderData.item_details.map((a) =>
+          a.item_uuid === popupInfo.item_uuid
+            ? {
+                ...a,
                 b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
                 p: +data.p % (+popupInfo.conversion || 1),
-              },
-            ]
-          : [
-              {
-                ...popupInfo,
-                b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
-                p: +data.p % (+popupInfo.conversion || 1),
-              },
-            ],
+              }
+            : a
+        ),
       };
     } else {
       orderData = {
