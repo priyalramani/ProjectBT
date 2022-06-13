@@ -24,6 +24,7 @@ const SelectedCounterOrder = () => {
   const [popupForm, setPopupForm] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
   const [holdPopup, setHoldPopup] = useState(false);
+  const [loading, setLoading] = useState(false);
   const Navigate = useNavigate();
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
@@ -648,38 +649,37 @@ const SelectedCounterOrder = () => {
       ) : (
         ""
       )}
-
+      {loading ? (
+        <div className="overlay" style={{ zIndex: 9999999 }}>
+          <div className="flex" style={{ width: "40px", height: "40px" }}>
+            <svg viewBox="0 0 100 100">
+              <path
+                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                fill="#ffffff"
+                stroke="none"
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  dur="1s"
+                  repeatCount="indefinite"
+                  keyTimes="0;1"
+                  values="0 50 51;360 50 51"
+                ></animateTransform>
+              </path>
+            </svg>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
       {cartPage ? (
         <>
           <button
             type="button"
-            className="autoBtn"
-            style={{ left: "20vw" }}
+            className="cartBtn"
             onClick={async () => {
-              let time = new Date();
-              Billing({
-                counter,
-                items: order.items,
-                others: {
-                  stage: 1,
-                  user_uuid: localStorage.getItem("user_uuid"),
-                  time: time.getTime(),
-
-                  type: "NEW",
-                },
-                add_discounts: true,
-              }).then((data) => {
-                setOrder((prev) => ({ ...prev, ...data }));
-                postOrder({ ...order, ...data });
-              });
-            }}
-          >
-            Bill
-          </button>
-          <button
-            type="button"
-            className="autoBtn"
-            onClick={async () => {
+              setLoading(true);
               const db = await openDB(
                 "BT",
                 +localStorage.getItem("IDBVersion") || 1
@@ -708,9 +708,27 @@ const SelectedCounterOrder = () => {
                   p: +a.p % +a.conversion,
                 })),
               }));
+              setTimeout(async () => {
+                let time = new Date();
+                Billing({
+                  counter,
+                  items: order.items,
+                  others: {
+                    stage: 1,
+                    user_uuid: localStorage.getItem("user_uuid"),
+                    time: time.getTime(),
+
+                    type: "NEW",
+                  },
+                  add_discounts: true,
+                }).then((data) => {
+                  setOrder((prev) => ({ ...prev, ...data }));
+                  postOrder({ ...order, ...data });
+                });
+              }, 2000);
             }}
           >
-            Auto
+            Submit
           </button>
         </>
       ) : order?.items?.length ? (
