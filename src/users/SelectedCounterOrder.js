@@ -837,7 +837,7 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                         <td colSpan={3}>{item.item_title}</td>
                         <td colSpan={2}>
                           <input
-                            type="text"
+                            type="number"
                             name="route_title"
                             className="numberInput"
                             value={item?.free || ""}
@@ -975,7 +975,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
                   >
                     Box
                     <input
-                      type="text"
+                      type="number"
                       name="route_title"
                       className="numberInput"
                       value={data?.b}

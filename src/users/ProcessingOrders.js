@@ -2407,7 +2407,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
                   >
                     Box
                     <input
-                      type="text"
+                      type="number"
                       name="route_title"
                       className="numberInput"
                       value={data?.b}
@@ -2428,7 +2428,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
                   >
                     Pcs
                     <input
-                      type="text"
+                      type="number"
                       name="route_title"
                       className="numberInput"
                       value={data?.p}
@@ -3321,7 +3321,7 @@ function NewUserForm({
                   >
                     Box
                     <input
-                      type="text"
+                      type="number"
                       name="route_title"
                       className="numberInput"
                       value={data?.b}
@@ -3342,7 +3342,7 @@ function NewUserForm({
                   >
                     Pcs
                     <input
-                      type="text"
+                      type="number"
                       name="route_title"
                       className="numberInput"
                       value={data?.p}
