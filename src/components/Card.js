@@ -49,14 +49,18 @@ const Card = ({
     var strTime = hours + ":" + minutes + " " + ampm;
     return strTime;
   }
+
   function hours(oldDate) {
     let date = new Date();
     var hours = date.getHours() - oldDate.getHours();
     var day = date.getDate() - oldDate.getDate();
     let finalHours = day * 24 + hours;
-
     return finalHours;
   }
+
+  const cardColor1Height = (hours(new Date(dateTime)) * 100) / +details.map((a) => a.order_time_1)[0];
+  const cardColor2Height = (hours(new Date(dateTime)) * 100) / +details.map((a) => a.order_time_2)[0];
+
   return (
     <>
       <div onDoubleClick={onDoubleClick}>
@@ -69,18 +73,7 @@ const Card = ({
         >
           <div
             className={`card ${rounded ? "rounded" : ""}`}
-            style={{
-              backgroundColor:
-                hours(new Date(dateTime)) >=
-                +details?.map((a) => a.order_time_2)[0]
-                  ? "#9c1010"
-                  : hours(new Date(dateTime)) >=
-                    +details.map((a) => a.order_time_1)[0]
-                  ? "#f2e017"
-                  : "#fff",
-              padding: "10px 15px",
-              gap: "2px",
-            }}
+            style={{ padding: "10px 15px", gap: "2px" }}
           >
             <p
               className="title2"
@@ -110,12 +103,13 @@ const Card = ({
 
             <div>{status}</div>
             <div style={{ fontSize: "10px" }}>
-              {`${days[new Date(dateTime).getDay()] || ""} ${
-                new Date(dateTime).getDate() || ""
-              } ${monthNames[new Date().getMonth()] || ""}`}
+              {`${days[new Date(dateTime).getDay()] || ""} ${new Date(dateTime).getDate() || ""
+                } ${monthNames[new Date().getMonth()] || ""}`}
               {formatAMPM(new Date(dateTime)) || ""}
             </div>
             <div style={{ fontSize: "10px" }}>{getQty()}</div>
+            <div className="card-color-sheet" id="sheet1" style={{ height: `calc(${cardColor1Height}% + 2px)` }} />
+            <div className="card-color-sheet" id="sheet2" style={{ height: cardColor1Height >= 100 ? `calc(${cardColor2Height}% + 2px)` : 0 }} />
           </div>
         </button>
       </div>
