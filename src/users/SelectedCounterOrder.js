@@ -225,13 +225,14 @@ const SelectedCounterOrder = () => {
                 {!cartPage
                   ? itemsCategory
                       ?.filter((a) => a.company_uuid === filterCompany)
-                      ?.sort((a, b) => a - b)
+                      ?.sort((a, b) => a.sort_order - b.sort_order)
                       ?.map(
                         (category) =>
                           items
                             .filter(
                               (a) => a.category_uuid === category.category_uuid
                             )
+                            ?.sort((a, b) => a.sort_order - b.sort_order)
                             ?.filter(
                               (a) =>
                                 !filterItemTitle ||
@@ -406,7 +407,7 @@ const SelectedCounterOrder = () => {
                           )
                       )
                   : itemsCategory
-                      ?.sort((a, b) => a - b)
+                      ?.sort((a, b) => a.sort_order - b.sort_order)
                       ?.map(
                         (category) =>
                           order?.items.filter(
@@ -432,7 +433,7 @@ const SelectedCounterOrder = () => {
                                         filterItemTitle.toLocaleLowerCase()
                                       )
                                 )
-                                ?.sort((a, b) => a - b)
+                                ?.sort((a, b) => a.sort_order - b.sort_order)
                                 .filter(
                                   (a) =>
                                     a.category_uuid === category.category_uuid
@@ -555,6 +556,7 @@ const SelectedCounterOrder = () => {
             >
               {itemsCategory
                 .filter((a) => a.company_uuid === filterCompany)
+                ?.sort((a, b) => a.sort_order - b.sort_order)
                 ?.map((category, i) => {
                   return (
                     (cartPage
