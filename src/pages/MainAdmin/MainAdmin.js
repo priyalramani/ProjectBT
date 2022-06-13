@@ -277,7 +277,7 @@ const MainAdmin = () => {
                           setDropDown(false);
                         }}
                       >
-                        Assign
+                        Assign Trip
                       </button>
                       <button
                         // style={{ padding: "10px" }}
@@ -287,7 +287,7 @@ const MainAdmin = () => {
                           handlePrint();
                         }}
                       >
-                        Print
+                        Print Invoice
                       </button>
                       <button
                         // style={{ padding: "10px" }}
@@ -323,7 +323,7 @@ const MainAdmin = () => {
                       setDropDown(false);
                     }}
                   >
-                    Summary
+                    Item Summary
                   </button>
                 </>
               )}
