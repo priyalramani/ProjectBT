@@ -7,8 +7,9 @@ const OrderPrint = ({
   user,
   itemData,
   item_details,
-  footer,
+  footer
 }) => {
+
   let total_desc_amt = order.item_details.map((item) => {
     const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid);
     let itemQty =
@@ -22,17 +23,17 @@ const OrderPrint = ({
   });
   return (
     <>
-      <table style={{ borderBottom: "1px solid black", width: "100%" }}>
+      <table style={{  width: "100%" }}>
         <tr>
           <td
-            colSpan={2}
+            colSpan={26}
             style={{ textAlign: "center", fontSize: "small", width: "100%" }}
           >
             <b>GST INVOICE</b>
           </td>
         </tr>
         <tr>
-          <td style={{ width: "50%" }}>
+          <td style={{ width: "50%" }} colSpan={13}>
             <table>
               <tr>
                 <td
@@ -63,7 +64,7 @@ const OrderPrint = ({
               </tr>
             </table>
           </td>
-          <td>
+          <td colSpan={13}>
             <table>
               <tr>
                 <td style={{ fontSize: "x-small" }}>
@@ -85,13 +86,22 @@ const OrderPrint = ({
             </table>
           </td>
         </tr>
-      </table>
-      <table style={{ borderBottom: "1px solid black", width: "100%" }}>
         <tr>
-          <td style={{ fontSize: "x-small" }}>
+          <th colSpan={26}>
+            <hr
+              style={{
+                height: "1px",
+                backgroundColor: "#000",
+                width: "100%",
+              }}
+            />
+          </th>
+        </tr>
+        <tr>
+          <td style={{ fontSize: "x-small" }} colSpan={8}>
             Invoice: {order.invoice_number}
           </td>
-          <td style={{ fontSize: "x-small" }}>
+          <td style={{ fontSize: "x-small" }} colSpan={7}>
             Date:{" "}
             {"dd/mm/yy"
               .replace(
@@ -104,16 +114,20 @@ const OrderPrint = ({
               )
               .replace("dd", ("00" + date?.getDate().toString()).slice(-2))}
           </td>
-          <td style={{ fontSize: "x-small" }}>S.M: {user}</td>
+          <td style={{ fontSize: "x-small" }} colSpan={8}>S.M: {user}</td>
           <td style={{ fontSize: "x-small" }}>Memo: Cash</td>
         </tr>
-      </table>
-
-      <table
-        style={{
-          width: "100%",
-        }}
-      >
+        <tr>
+          <th colSpan={26}>
+            <hr
+              style={{
+                height: "1px",
+                backgroundColor: "#000",
+                width: "100%",
+              }}
+            />
+          </th>
+        </tr>
         <tr
           style={{
             backgroundColor: "#EDEDED",
@@ -157,7 +171,17 @@ const OrderPrint = ({
             Amount
           </th>
         </tr>
-
+        <tr>
+          <th colSpan={26}>
+            <hr
+              style={{
+                height: "1px",
+                backgroundColor: "#000",
+                width: "100%",
+              }}
+            />
+          </th>
+        </tr>
         {item_details.map((item, i) => {
           const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid);
           let itemQty =
@@ -431,13 +455,13 @@ const OrderPrint = ({
             />
           </th>
         </tr>
-      </table>
+
 
       {footer ? (
         <>
-          <table style={{ borderBottom: "1px solid black", width: "100%" }}>
+ 
             <tr>
-              <td>
+              <td colSpan={13}>
                 <table
                   style={{ borderRight: "1px solid black", width: "100%" }}
                 >
@@ -481,7 +505,7 @@ const OrderPrint = ({
                   </tr>
                 </table>
               </td>
-              <td>
+              <td colSpan={13}>
                 <table style={{ width: "100%" }}>
                   <tr>
                     <td style={{ fontSize: "x-small", textAlign: "right" }}>
@@ -518,12 +542,23 @@ const OrderPrint = ({
                 </table>
               </td>
             </tr>
-          </table>
+            <tr>
+          <th colSpan={26}>
+            <hr
+              style={{
+                height: "1px",
+                backgroundColor: "#000",
+                width: "100%",
+              }}
+            />
+          </th>
+        </tr>
         </>
       ) : (
-        <table style={{ borderBottom: "1px solid black", width: "100%" }}>
+        
           <tr>
             <td
+            colSpan={26}
               style={{
                 fontSize: "xx-large",
                 fontWeight: "bolder",
@@ -533,8 +568,9 @@ const OrderPrint = ({
               Continue...
             </td>
           </tr>
-        </table>
+         
       )}
+        </table>
     </>
   );
 };
