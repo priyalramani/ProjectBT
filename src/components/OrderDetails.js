@@ -197,7 +197,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       ...orderData,
       item_details: orderData?.item_details.filter((a) => a.item_uuid),
     };
-   
+
     let autoBilling = await Billing({
       counter,
       items: data.item_details,
@@ -237,7 +237,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     }
   };
   let listItemIndexCount = 0;
-  console.log(orderData)
+  console.log(orderData);
   return (
     <>
       <div className="overlay">
@@ -437,6 +437,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   <thead className="lh-copy" style={{ position: "static" }}>
                     <tr className="white">
                       <th className="pa2 tl bb b--black-20 w-30">Item Name</th>
+                      <th className="pa2 tl bb b--black-20 w-30">MRP</th>
                       <th className="pa2 tc bb b--black-20">Quantity(b)</th>
                       <th className="pa2 tc bb b--black-20">Quantity(p)</th>
                       <th className="pa2 tc bb b--black-20 ">Price</th>
@@ -514,6 +515,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 )?.item_title || ""
                               )}
                             </div>
+                          </td>
+                          <td
+                            className="ph2 pv1 tc bb b--black-20 bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            {item.mrp||""}
                           </td>
                           <td
                             className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -663,10 +670,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             }}
           >
             {editOrder ? (
-              <button
-                type="button"
-                onClick={onSubmit}
-              >
+              <button type="button" onClick={onSubmit}>
                 Bill
               </button>
             ) : (

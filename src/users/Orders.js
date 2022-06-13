@@ -1,6 +1,6 @@
 import { openDB } from "idb";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { IoArrowBackOutline } from "react-icons/io5";
 import axios from "axios";
 import { Phone } from "@mui/icons-material";
@@ -9,6 +9,7 @@ const Orders = () => {
   const [counterFilter, setCounterFilter] = useState("");
   const [routes, setRoutes] = useState([]);
   const [phonePopup, setPhonePopup] = useState(false);
+  const params = useParams();
   const Navigate = useNavigate();
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
@@ -77,21 +78,24 @@ const Orders = () => {
             top: "10px",
           }}
         >
-          <input
-            type="text"
-            onChange={(e) => setCounterFilter(e.target.value)}
-            value={counterFilter}
-            placeholder="Search Counter Title..."
-            className="searchInput counterSearch"
-            style={{ width: "200px" }}
-          />
-          {counterFilter.length >= 3 ? (
+          {params.route_uuid ? (
+            ""
+          ) : (
+            <input
+              type="text"
+              onChange={(e) => setCounterFilter(e.target.value)}
+              value={counterFilter}
+              placeholder="Search Counter Title..."
+              className="searchInput counterSearch"
+              style={{ width: "200px" }}
+            />
+          )}
+          {counterFilter.length >= 3 || params.route_uuid ? (
             <div
               style={{
                 overflowY: "scroll",
                 height: "70vh",
                 marginTop: "100px",
-                backgroundColor: "#fff",
               }}
             >
               <table className="table" style={{ width: "100vw" }}>
@@ -100,6 +104,7 @@ const Orders = () => {
                     ?.filter((a) => a.counter_title)
                     ?.filter(
                       (a) =>
+                        params.route_uuid === a.route_uuid ||
                         !counterFilter ||
                         a.counter_title
                           .toLocaleLowerCase()
@@ -162,7 +167,43 @@ const Orders = () => {
               </table>
             </div>
           ) : (
-            ""
+            <div
+              className="servicesContainer"
+              style={{
+                width: "100%",
+                padding: "20px",
+                height: "90vh",
+                gridAutoFlow: "row",
+                gridAutoRows: "20%",
+                marginTop: "20px",
+                backgroundColor: "#f2f2f2",
+                overflowY: "scroll",
+              }}
+            >
+              {routes.length
+                ? routes
+                    ?.sort((a, b) => a.sort_order - b.sort_order)
+                    .map((data, i) => (
+                      <Link
+                        key={i}
+                        to={
+                          "#"
+                          // pathname + rolesArray.find((a) => +a.type === +data)?.link
+                        }
+                        className="linkDecoration"
+                        onClick={() => {
+                          window.location.assign(
+                            `/users/route/` + data.route_uuid
+                          );
+                        }}
+                      >
+                        <div className="service">
+                          <span>{data.route_title}</span>
+                        </div>
+                      </Link>
+                    ))
+                : ""}
+            </div>
           )}
         </div>
       </div>

@@ -124,7 +124,7 @@ const SelectedCounterOrder = () => {
         qty,
         amt: data.order_grandtotal || 0,
       });
-      Navigate("/users");
+      Navigate(-1);
     }
   };
   const postActivity = async (others = {}) => {
