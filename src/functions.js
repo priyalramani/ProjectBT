@@ -28,9 +28,9 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
         );
         base_qty_arr =
           base_qty_arr.length > 1
-            ? base_qty_arr.map(a=>a.base_qty).reduce((a, b) =>
-                +Math.max(a, b) === a ? a : b
-              )
+            ? base_qty_arr
+                .map((a) => a.base_qty)
+                .reduce((a, b) => (+Math.max(a, b) === a ? a : b))
             : base_qty_arr.length === 1
             ? base_qty_arr[0]
             : null;
@@ -39,9 +39,9 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
         );
         pice_qty_arr =
           pice_qty_arr.length > 1
-            ? pice_qty_arr.map(a=>a.base_qty).reduce((a, b) =>
-                +Math.max(a, b) === a ? a : b
-              )
+            ? pice_qty_arr
+                .map((a) => a.base_qty)
+                .reduce((a, b) => (+Math.max(a, b) === a ? a : b))
             : pice_qty_arr.length === 1
             ? pice_qty_arr[0]
             : {};
@@ -102,9 +102,9 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
     base_qty_arr =
       eligibleAddItems.length >= autobill.min_range
         ? base_qty_arr.length > 1
-          ? base_qty_arr.map(a=>+a.base_qty||0).reduce((a, b) =>
-              +Math.max(a, b) === +a ? a : b
-            )
+          ? base_qty_arr
+              .map((a) => +a.base_qty || 0)
+              .reduce((a, b) => (+Math.max(a, b) === +a ? a : b))
           : base_qty_arr.length === 1
           ? base_qty_arr[0]
           : null
@@ -117,9 +117,9 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
     pice_qty_arr =
       eligibleAddItems.length >= autobill.min_range
         ? pice_qty_arr.length > 1
-          ? pice_qty_arr.map(a=>+a.base_qty||0).reduce((a, b) =>
-              +Math.max(a, b) === a ? a : b
-            )
+          ? pice_qty_arr
+              .map((a) => +a.base_qty || 0)
+              .reduce((a, b) => (+Math.max(a, b) === a ? a : b))
           : pice_qty_arr.length === 1
           ? pice_qty_arr[0]
           : null
@@ -223,6 +223,7 @@ export const Billing = async ({
   others = null,
   replacement = 0,
   add_discounts,
+  edit_prices = [],
 }) => {
   let newPriceItems = [];
   for (let item of items) {
@@ -282,12 +283,15 @@ export const Billing = async ({
               ((100 - company_discount_percentage) / 100) || 0,
       };
     }
-
+    let edit_price = edit_prices.find(
+      (a) => a.item_uuid === item.item_uuid
+    )?.item_price;
     item = {
       ...item,
       charges_discount,
       item_total: (
-        (+item.item_desc_total || +item.item_price || 0) * (+item.qty || 1)
+        (+edit_price || +item.item_desc_total || +item.item_price || 0) *
+        (+item.qty || 1)
       ).toFixed(2),
     };
     console.log(item);
