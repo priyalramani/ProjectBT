@@ -164,8 +164,8 @@ export default function AddOrder() {
     if (type.autoAdd) {
       let autoAdd = await AutoAdd({
         counter,
-        items: order.item_details,
-        dbItems: order.item_details,
+        items: data.item_details,
+        dbItems: data.item_details,
         autobills: autoBills,
       });
       data = { ...data, ...autoAdd, item_details: autoAdd.items };
