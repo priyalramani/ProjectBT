@@ -141,7 +141,7 @@ function Table({ counterData, setCounterData, onSave }) {
           }
         </tbody>
       </table>
-      <button id='counter-save-btn' onClick={handleSave}>Save</button>
+      <button className='counter-save-btn' onClick={handleSave}>Save</button>
     </>
   );
   function handleDragStart(event) {
