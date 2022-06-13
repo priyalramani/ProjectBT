@@ -293,7 +293,7 @@ export default function AddOrder() {
         type: "NEW",
       },
       add_discounts: true,
-      edit_prices
+      edit_prices,
     });
     setOrder((prev) => ({
       ...prev,
@@ -421,7 +421,7 @@ export default function AddOrder() {
                 {order.counter_uuid ? (
                   <tbody className="lh-copy">
                     {order?.item_details?.map((item, i) => (
-                      <tr key={i}>
+                      <tr key={item.uuid}>
                         <td
                           className="ph2 pv1 tl bb b--black-20 bg-white"
                           style={{ width: "300px" }}
@@ -583,16 +583,17 @@ export default function AddOrder() {
                             className="numberInput"
                             min={1}
                             onWheel={(e) => e.preventDefault()}
-                            value={
-                               item?.item_price || 0
-                            }
+                            value={item?.item_price || 0}
                             onChange={(e) => {
                               setOrder((prev) => {
                                 return {
                                   ...prev,
                                   item_details: prev.item_details.map((a) =>
                                     a.uuid === item.uuid
-                                      ? { ...a, item_price: (e.target.value).toFixed(2) }
+                                      ? {
+                                          ...a,
+                                          item_price: e.target.value.toFixed(2),
+                                        }
                                       : a
                                   ),
                                 };
@@ -603,15 +604,27 @@ export default function AddOrder() {
                                 ).length
                                   ? prev.map((a) =>
                                       a.item_uuid === item.item_uuid
-                                        ? { ...a, item_price: (e.target.value).toFixed(2) }
+                                        ? {
+                                            ...a,
+                                            item_price:
+                                              e.target.value.toFixed(2),
+                                          }
                                         : a
                                     )
                                   : prev.length
                                   ? [
                                       ...prev,
-                                      { ...item, item_price: (e.target.value).toFixed(2) },
+                                      {
+                                        ...item,
+                                        item_price: e.target.value.toFixed(2),
+                                      },
                                     ]
-                                  : [{ ...item, item_price: (e.target.value).toFixed(2) }]
+                                  : [
+                                      {
+                                        ...item,
+                                        item_price: e.target.value.toFixed(2),
+                                      },
+                                    ]
                               );
                             }}
                           />
@@ -688,14 +701,15 @@ export default function AddOrder() {
                         >
                           <DeleteOutlineIcon
                             style={{ color: "red", cursor: "pointer" }}
-                            onClick={() =>
-                              setOrder((prev) => ({
-                                ...prev,
-                                item_details: prev.item_details.filter(
-                                  (a) => !(a.item_uuid === item.item_uuid)
+                            onClick={() => {
+                              setOrder({
+                                ...order,
+                                item_details: order.item_details.filter(
+                                  (a) => a.uuid !== item.uuid
                                 ),
-                              }))
-                            }
+                              });
+                              console.log(item);
+                            }}
                           />
                         </td>
                       </tr>
