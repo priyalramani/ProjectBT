@@ -94,7 +94,7 @@ const Orders = () => {
             <div
               style={{
                 overflowY: "scroll",
-                height: "70vh",
+                height: params.route_uuid ?"90vh":"70vh",
                 marginTop:params.route_uuid ?"10px": "100px",
               }}
             >
