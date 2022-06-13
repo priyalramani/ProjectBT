@@ -12,6 +12,7 @@ const Counter = () => {
   const [popupForm, setPopupForm] = useState(false);
   const [routesData, setRoutesData] = useState([]);
   const [itemPopup, setItemPopup] = useState(false);
+  const [sequencePopup, setSequencePopup] = useState(false);
 
   const getRoutesData = async () => {
     const response = await axios({
@@ -122,6 +123,12 @@ const Counter = () => {
               className="searchInput"
             />
             <div>Total Items: {filterCounter.length}</div>
+            <button
+              className="item-sales-search"
+              onClick={() => setSequencePopup(true)}
+            >
+              Sequencing
+            </button>
             <button
               className="item-sales-search"
               onClick={() => setPopupForm(true)}

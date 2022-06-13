@@ -715,7 +715,7 @@ div#no_reports {
 }
 
 .t-head-element span {
-    margin: auto 10px;
+    margin: auto 0;
     white-space: nowrap;
 }
 

@@ -110,10 +110,10 @@ const UserActivity = () => {
               onChange={(e) =>
                 setSearchData((prev) => ({
                   ...prev,
-                  startDate: e.target.value,
+                  user_uuid: e.target.value,
                 }))
               }
-              value={searchData.startDate}
+              value={searchData.user_uuid}
             >
               {users
                 .filter((a) => a.user_uuid)

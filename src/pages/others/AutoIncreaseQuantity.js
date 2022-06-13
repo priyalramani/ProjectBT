@@ -269,7 +269,7 @@ function NewUserForm({ onSave, popupForm }) {
             (a) => a?.company_uuid === b?.company_uuid
           )?.company_title,
           category_title: Category.find(
-            (a) => a?.company_uuid === b?.company_uuid
+            (a) => a?.category_uuid === b?.category_uuid
           )?.category_title,
         }))
       );

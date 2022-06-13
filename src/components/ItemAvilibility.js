@@ -85,7 +85,7 @@ export default function ItemAvilibility({
   return (
     <>
       <div className="itemavilablelity">
-        <div className="itemavilabelitycontainer">
+        <div className="itemavilabelitycontainer" style={{position:"relative"}}>
           <div className="itemavilablelity_header">
             <h2>Trips</h2>
           </div>
@@ -225,7 +225,7 @@ export default function ItemAvilibility({
                                 setPopup(item);
                               }}
                             >
-                              Assign
+                              Users
                             </button>
                           </td>
                         </tr>
@@ -235,6 +235,14 @@ export default function ItemAvilibility({
               </div>
             </div>
           </div>
+            <button
+              onClick={() => {
+                setIsItemAvilableOpen(false);
+              }}
+              className="closeButton"
+            >
+              x
+            </button>
 
           <div
             onClick={() => {
@@ -503,7 +511,6 @@ const TripPage = ({
               </td>
             </tr>
           ))}
-          
         </table>
       ) : (
         ""
