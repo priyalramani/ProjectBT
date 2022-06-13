@@ -798,11 +798,11 @@ div.unsync-count-container {
   z-index: 0;
 }
 
-.card-color-sheet#sheet1{
+.card-color-sheet#sheet1 {
   background-color: #f2e017;
 }
 
-.card-color-sheet#sheet2{
+.card-color-sheet#sheet2 {
   background-color: #9c1010;
 }
 
@@ -2666,6 +2666,19 @@ tr:nth-child(4) {
 
 .conditionalButton:hover {
   box-shadow: none;
+}
+
+tr.dragTarget {
+  width: 100%;
+}
+
+button.counter-save-btn {
+  padding: 8px 15px;
+  margin-top: 10px;
+  border-radius: 5px;
+  background: var(--mainColor);
+  color: white;
+  border: none;
 }
 
 @media only screen and (max-width: 1000px) {

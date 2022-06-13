@@ -1405,11 +1405,6 @@ input#item-sales-searchbar {
     border-radius: 0.5rem;
   }
   
-  .dragIcon {
-    width: 16px;
-    opacity: 0.5;
-  }
-  
   .dragColumn {
     width: 4rem;
   }
