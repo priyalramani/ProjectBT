@@ -573,20 +573,24 @@ export default function AddOrder() {
                           className="ph2 pv1 tc bb b--black-20 bg-white"
                           style={{ textAlign: "center" }}
                         >
-                          Rs:<input
+                          Rs:
+                          <input
                             id="Quantity"
+                            style={{ width: "100px" }}
                             type="text"
                             className="numberInput"
                             min={1}
                             onWheel={(e) => e.preventDefault()}
-                            value={ item?.item_price || 0}
+                            value={
+                               item?.item_price || 0
+                            }
                             onChange={(e) => {
                               setOrder((prev) => {
                                 return {
                                   ...prev,
                                   item_details: prev.item_details.map((a) =>
                                     a.uuid === item.uuid
-                                      ? { ...a, item_price: e.target.value }
+                                      ? { ...a, item_price: (e.target.value).toFixed(2) }
                                       : a
                                   ),
                                 };
@@ -597,15 +601,15 @@ export default function AddOrder() {
                                 ).length
                                   ? prev.map((a) =>
                                       a.item_uuid === item.item_uuid
-                                        ? { ...a, item_price: e.target.value }
+                                        ? { ...a, item_price: (e.target.value).toFixed(2) }
                                         : a
                                     )
                                   : prev.length
                                   ? [
                                       ...prev,
-                                      { ...item, item_price: e.target.value },
+                                      { ...item, item_price: (e.target.value).toFixed(2) },
                                     ]
-                                  : [{ ...item, item_price: e.target.value }]
+                                  : [{ ...item, item_price: (e.target.value).toFixed(2) }]
                               );
                             }}
                           />
@@ -614,20 +618,28 @@ export default function AddOrder() {
                           className="ph2 pv1 tc bb b--black-20 bg-white"
                           style={{ textAlign: "center" }}
                         >
-                          Rs:<input
+                          Rs:
+                          <input
                             id="Quantity"
                             type="text"
                             className="numberInput"
                             min={1}
                             onWheel={(e) => e.preventDefault()}
-                            value={ (item?.item_price || 0)*(+item?.conversion||1)}
+                            value={
+                              (item?.item_price || 0) * (+item?.conversion || 1)
+                            }
                             onChange={(e) => {
                               setOrder((prev) => {
                                 return {
                                   ...prev,
                                   item_details: prev.item_details.map((a) =>
                                     a.uuid === item.uuid
-                                      ? { ...a, item_price: e.target.value/(+item.conversion||1) }
+                                      ? {
+                                          ...a,
+                                          item_price:
+                                            e.target.value /
+                                            (+item.conversion || 1),
+                                        }
                                       : a
                                   ),
                                 };
@@ -638,15 +650,32 @@ export default function AddOrder() {
                                 ).length
                                   ? prev.map((a) =>
                                       a.item_uuid === item.item_uuid
-                                        ? { ...a, item_price: e.target.value/(+item.conversion||1) }
+                                        ? {
+                                            ...a,
+                                            item_price:
+                                              e.target.value /
+                                              (+item.conversion || 1),
+                                          }
                                         : a
                                     )
                                   : prev.length
                                   ? [
                                       ...prev,
-                                      { ...item, item_price: e.target.value/(+item.conversion||1) },
+                                      {
+                                        ...item,
+                                        item_price:
+                                          e.target.value /
+                                          (+item.conversion || 1),
+                                      },
                                     ]
-                                  : [{ ...item, item_price: e.target.value/(+item.conversion||1) }]
+                                  : [
+                                      {
+                                        ...item,
+                                        item_price:
+                                          e.target.value /
+                                          (+item.conversion || 1),
+                                      },
+                                    ]
                               );
                             }}
                           />
