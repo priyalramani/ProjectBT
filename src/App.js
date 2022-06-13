@@ -87,6 +87,7 @@ useEffect(()=>{
                   {/* users routes */}
                   <Route path="/users" element={<Main />} />
                   <Route path="/users/orders" element={<Orders />} />
+                  <Route path="/users/route/:route_uuid" element={<Orders />} />
                   <Route path="/users/processing" element={<Processing />} />
                   <Route path="/users/checking" element={<Processing />} />
                   <Route path="/users/delivery" element={<Processing />} />
