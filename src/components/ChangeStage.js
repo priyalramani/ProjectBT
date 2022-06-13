@@ -90,9 +90,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
                 className="form"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (data.stage) {
-                    setDeliveryPopup(true);
-                  } else onSubmit(data);
+                   onSubmit(data);
                 }}
               >
                 <div className="formGroup">
