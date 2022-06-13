@@ -95,7 +95,7 @@ const Orders = () => {
               style={{
                 overflowY: "scroll",
                 height: "70vh",
-                marginTop: "100px",
+                marginTop:params.route_uuid ?"10px": "100px",
               }}
             >
               <table className="table" style={{ width: "100vw" }}>
