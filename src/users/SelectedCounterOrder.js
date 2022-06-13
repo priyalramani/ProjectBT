@@ -355,9 +355,17 @@ const SelectedCounterOrder = () => {
                                           {item?.item_title}
                                         </h1>
 
-                                        <div className="item-mode">
+                                        <div
+                                          className="item-mode flex"
+                                          style={{
+                                            justifyContent: "space-between",
+                                          }}
+                                        >
                                           <h3 className={`item-price`}>
-                                            Rs: {item?.item_price}
+                                            Price: {item?.item_price}
+                                          </h3>
+                                          <h3 className={`item-price`}>
+                                            MRP: {item?.mrp || ""}
                                           </h3>
                                         </div>
                                       </div>
@@ -398,7 +406,6 @@ const SelectedCounterOrder = () => {
                           )
                       )
                   : itemsCategory
-                      ?.filter((a) => a.company_uuid === filterCompany)
                       ?.sort((a, b) => a - b)
                       ?.map(
                         (category) =>
@@ -489,9 +496,17 @@ const SelectedCounterOrder = () => {
                                           {item?.item_title}
                                         </h1>
 
-                                        <div className="item-mode">
+                                        <div
+                                          className="item-mode flex"
+                                          style={{
+                                            justifyContent: "space-between",
+                                          }}
+                                        >
                                           <h3 className={`item-price`}>
-                                            Rs: {item?.item_price}
+                                            Price: {item?.item_price}
+                                          </h3>
+                                          <h3 className={`item-price`}>
+                                            MRP: {item?.mrp || ""}
                                           </h3>
                                         </div>
                                       </div>
@@ -536,67 +551,71 @@ const SelectedCounterOrder = () => {
           <div className={`menulist`}>
             <div
               className={`${isCategoryOpen ? "showCategory" : ""} categoryList`}
+              style={{ overflow: "scroll" }}
             >
-              {itemsCategory?.map((category, i) => {
-                return (
-                  (cartPage
-                    ? order?.items?.filter(
-                        (a) => a.category_uuid === category.category_uuid
-                      )?.length > 0
-                    : items.filter(
-                        (a) => a.category_uuid === category.category_uuid
-                      )?.length > 0) && (
-                    <ScrollLink
-                      id={`${i}`}
-                      onClick={() => {
-                        var element = document.getElementById(
-                          category.category_uuid
-                        );
+              {itemsCategory
+                .filter((a) => a.company_uuid === filterCompany)
+                ?.map((category, i) => {
+                  return (
+                    (cartPage
+                      ? order?.items?.filter(
+                          (a) => a.category_uuid === category.category_uuid
+                        )?.length > 0
+                      : items.filter(
+                          (a) => a.category_uuid === category.category_uuid
+                        )?.length > 0) && (
+                      <ScrollLink
+                        id={`${i}`}
+                        onClick={() => {
+                          var element = document.getElementById(
+                            category.category_uuid
+                          );
 
-                        element.scrollIntoView();
-                        element.scrollIntoView(false);
-                        element.scrollIntoView({ block: "start" });
-                        element.scrollIntoView({
-                          behavior: "smooth",
-                          block: "end",
-                          inline: "nearest",
-                        });
-                        setIsCategoryOpen(!isCategoryOpen);
-                        setClickedId(i?.toString());
-                      }}
-                      smooth={true}
-                      duration={1000}
-                      to={category?.category_uuid}
-                      className={`${
-                        clickedId === i?.toString() ? "activeMenuList" : ""
-                      } categorybtn`}
-                      key={i}
-                    >
-                      {category?.category_title}
-                      <span className="categoryLength">
-                        {cartPage
-                          ? order?.items?.filter(
-                              (a) => a.category_uuid === category.category_uuid
-                            )?.length
-                          : items
-                              .filter(
+                          element.scrollIntoView();
+                          element.scrollIntoView(false);
+                          element.scrollIntoView({ block: "start" });
+                          element.scrollIntoView({
+                            behavior: "smooth",
+                            block: "end",
+                            inline: "nearest",
+                          });
+                          setIsCategoryOpen(!isCategoryOpen);
+                          setClickedId(i?.toString());
+                        }}
+                        smooth={true}
+                        duration={1000}
+                        to={category?.category_uuid}
+                        className={`${
+                          clickedId === i?.toString() ? "activeMenuList" : ""
+                        } categorybtn`}
+                        key={i}
+                      >
+                        {category?.category_title}
+                        <span className="categoryLength">
+                          {cartPage
+                            ? order?.items?.filter(
                                 (a) =>
                                   a.category_uuid === category.category_uuid
-                              )
-                              ?.filter(
-                                (a) =>
-                                  !filterItemTitle ||
-                                  a.item_title
-                                    .toLocaleLowerCase()
-                                    .includes(
-                                      filterItemTitle.toLocaleLowerCase()
-                                    )
-                              )?.length}
-                      </span>
-                    </ScrollLink>
-                  )
-                );
-              })}
+                              )?.length
+                            : items
+                                .filter(
+                                  (a) =>
+                                    a.category_uuid === category.category_uuid
+                                )
+                                ?.filter(
+                                  (a) =>
+                                    !filterItemTitle ||
+                                    a.item_title
+                                      .toLocaleLowerCase()
+                                      .includes(
+                                        filterItemTitle.toLocaleLowerCase()
+                                      )
+                                )?.length}
+                        </span>
+                      </ScrollLink>
+                    )
+                  );
+                })}
             </div>
             {isCategoryOpen && <div id="black-bg" />}
             {!isCategoryOpen ? (

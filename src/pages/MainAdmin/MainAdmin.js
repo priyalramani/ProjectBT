@@ -343,7 +343,6 @@ const MainAdmin = () => {
                             (b) => b?.counter_uuid === a?.counter_uuid
                           ).length
                       );
-                      console.log(route.route_uuid, counterRoute);
                       if (
                         orders
                           .filter(
