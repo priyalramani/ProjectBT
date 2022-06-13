@@ -16,7 +16,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
-  const [otherDetails, setOtherDetails] = useState(false);
+
   const [orderData, setOrderData] = useState();
   const [popup, setPopup] = useState(false);
   const [autoBills, setAutoBills] = useState([]);
@@ -274,13 +274,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       (a) => a.counter_uuid === orderData?.counter_uuid
                     )?.counter_title || ""}
                   </h2>
-                  <button
-                    style={{ width: "fit-Content" }}
-                    className="item-sales-search"
-                    onClick={() => setOtherDetails((prev) => !prev)}
-                  >
-                    Other Details
-                  </button>
+                  
                   <button
                     style={{ width: "fit-Content", backgroundColor: "red" }}
                     className="item-sales-search"
@@ -311,7 +305,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 className="items_table"
                 style={{ flex: "1", paddingLeft: "10px" }}
               >
-                {otherDetails ? (
+               
                   <table>
                     <thead
                       className="bb b--green"
@@ -430,9 +424,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       </>
                     </thead>
                   </table>
-                ) : (
-                  ""
-                )}
+                
                 <table className="f6 w-100 center" cellSpacing="0">
                   <thead className="lh-copy" style={{ position: "static" }}>
                     <tr className="white">
