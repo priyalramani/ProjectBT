@@ -1,8 +1,8 @@
 import React from "react";
 
-const MessagePopup = ({ onClose, message }) => {
+const MessagePopup = ({ onClose, message, onSave, button1, button2 }) => {
   return (
-    <div className="overlay">
+    <div className="overlay" style={{position:"fixed",top:0,left:0,zIndex:9999999}}>
       <div
         className="modal"
         style={{ height: "fit-content", width: "fit-content" }}
@@ -29,13 +29,19 @@ const MessagePopup = ({ onClose, message }) => {
                 </div>
 
                 <div className="row">
-                  <button type="submit" className="submit">
-                    Okay
+                  {button2 ? (
+                    <button className="simple_Logout_button" type="button"  onClick={onSave}>
+                      {button2}
+                    </button>
+                  ) : (
+                    ""
+                  )}
+                  <button className="simple_Logout_button" type="submit" >
+                    {button1}
                   </button>
                 </div>
               </div>
             </form>
-
           </div>
         </div>
       </div>

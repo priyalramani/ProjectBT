@@ -184,7 +184,7 @@ function Table({ itemsDetails, setPopupForm }) {
       <thead>
         <tr>
           <th>S.N</th>
-          <th colSpan={2}>
+          <th colSpan={3}>
             <div className="t-head-element">
               <span>Company Title</span>
               <div className="sort-buttons-container">
@@ -207,7 +207,7 @@ function Table({ itemsDetails, setPopupForm }) {
               </div>
             </div>
           </th>
-          <th colSpan={2}>
+          <th colSpan={3}>
             <div className="t-head-element">
               <span>Category Title</span>
               <div className="sort-buttons-container">
@@ -230,7 +230,7 @@ function Table({ itemsDetails, setPopupForm }) {
               </div>
             </div>
           </th>
-          <th colSpan={2}>
+          <th colSpan={3}>
             <div className="t-head-element">
               <span>Item Title</span>
               <div className="sort-buttons-container">
@@ -390,9 +390,9 @@ function Table({ itemsDetails, setPopupForm }) {
               onClick={() => setPopupForm({ type: "edit", data: item })}
             >
               <td>{i + 1}</td>
-              <td colSpan={2}>{item.company_title}</td>
-              <td colSpan={2}>{item.category_title}</td>
-              <td colSpan={2}>{item.item_title}</td>
+              <td colSpan={3}>{item.company_title}</td>
+              <td colSpan={3}>{item.category_title}</td>
+              <td colSpan={3}>{item.item_title}</td>
               <td colSpan={2}>{item.mrp}</td>
               <td colSpan={2}>{item.item_price}</td>
               <td colSpan={2}>{item.conversion}</td>
@@ -488,7 +488,7 @@ function NewUserForm({
       }
     }
   };
- 
+
   return (
     <div className="overlay">
       <div className="modal" style={{ height: "70vh", width: "fit-content" }}>

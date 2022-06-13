@@ -1159,6 +1159,7 @@ const MainAdmin = () => {
             setMessagePopup("");
           }}
           message={messagePopup}
+          button1="Okay"
         />
       ) : (
         ""
