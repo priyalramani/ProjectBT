@@ -455,6 +455,9 @@ const ProcessingOrders = () => {
             ? dataItem[0]?.p
             : 0
         }`;
+        setLoading(false);
+        setSelectedOrder(false);
+        getTripOrders();
         postActivity({
           activity:
             (Location.pathname.includes("checking")
@@ -469,9 +472,8 @@ const ProcessingOrders = () => {
           amt: finalData[0].order_grandtotal || 0,
         });
       }
-      setLoading(false);
-      setSelectedOrder(false);
-      getTripOrders();
+      
+     
     }
   };
   const postOrderContained = async (data = selectedOrder, opened_by = 0) => {
