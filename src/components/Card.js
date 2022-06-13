@@ -82,8 +82,29 @@ const Card = ({
               gap: "2px",
             }}
           >
-            <p className="title2">{title1 ? title1 : title2}</p>
-            <p className="caption" style={{ color: "#000" }}>
+            <p
+              className="title2"
+              style={{
+                display: "inline-block",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "15ch",
+              }}
+            >
+              {title1 ? title1 : title2}
+            </p>
+            <p
+              className="caption"
+              style={{
+                color: "#000",
+                display: "inline-block",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "15ch",
+              }}
+            >
               {title1 ? title2 : ""}
             </p>
 
