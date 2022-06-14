@@ -2193,7 +2193,7 @@ function HoldPopup({
                         .map((a) => (
                           <>
                             <tr>
-                              <td>{a.category_title}</td>
+                              <td colSpan={6}>{a.category_title}</td>
                             </tr>
                             {console.log(a, items)}
                             {items
