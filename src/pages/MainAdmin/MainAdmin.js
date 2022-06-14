@@ -1053,7 +1053,7 @@ const MainAdmin = () => {
         style={{
           width: "20.5cm",
           height: "29cm",
-          margin: "35mm 40mm 30mm 55mm",
+          margin: "45mm 40mm 30mm 60mm",
           // textAlign: "center",
           position: "fixed",
           top: -100,

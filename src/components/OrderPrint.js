@@ -24,7 +24,7 @@ const OrderPrint = ({
   return (
     <>
     
-      <table style={{ width:"95%", border: "1px solid black",
+      <table style={{ width:"90%", border: "1px solid black",
               height: "47%", pageBreakAfter:"always"}}>
         <tr>
           <td
