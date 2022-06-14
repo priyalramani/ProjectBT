@@ -299,12 +299,12 @@ export const Billing = async ({
   }
   console.log("newItemPrice", newPriceItems);
   let order_grandtotal =
-    newPriceItems.length > 1
+    (newPriceItems.length > 1
       ? newPriceItems.map((a) => +a.item_total || 0).reduce((a, b) => a + b) -
         replacement
       : newPriceItems.length
       ? (newPriceItems.map((a) => a.item_total)[0] || 0) - replacement
-      : 0;
+      : 0).toFixed(0);
 
   return {
     counter_uuid: counter.counter_uuid,
