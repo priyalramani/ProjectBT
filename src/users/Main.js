@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
+import PullToRefresh from 'react-simple-pull-to-refresh';
 import "./style.css";
 import { Link, useLocation } from "react-router-dom";
 import { deleteDB, openDB } from "idb";
@@ -54,6 +55,7 @@ const Main = () => {
   }, []);
   console.log(typeof userRole);
   return (
+    <PullToRefresh onRefresh={()=>window.location.reload()}>
     <div className="servicePage" style={{ maxHeight: "100vh" }}>
       <div className="servicesContainer">
         {userRole?.map((data, i) => (
@@ -91,7 +93,7 @@ const Main = () => {
       ) : (
         ""
       )}
-    </div>
+    </div></PullToRefresh>
   );
 };
 
