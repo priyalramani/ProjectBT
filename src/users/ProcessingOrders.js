@@ -743,44 +743,6 @@ const ProcessingOrders = () => {
       }
     }
 
-    // for (let a of tempQuantity) {
-    //   let orderItem = item_details.find((b) => b.item_uuid === a.item_uuid);
-    //   if (
-    //     (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-    //       orderItem?.p +
-    //       (+orderItem?.free || 0) !==
-    //     (+a?.b || 0) * +(+a?.conversion || 1) + a?.p
-    //   )
-    //     setBarcodeMessage((prev) =>
-    //       prev.length
-    //         ? [
-    //             ...prev,
-    //             {
-    //               ...a,
-    //               ...orderItem,
-    //               barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
-    //               case: 1,
-    //               qty:
-    //                 (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-    //                 orderItem?.p +
-    //                 (+orderItem?.free || 0),
-    //             },
-    //           ]
-    //         : [
-    //             {
-    //               ...a,
-    //               ...orderItem,
-    //               barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
-    //               case: 1,
-    //               qty:
-    //                 (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-    //                 orderItem?.p +
-    //                 (+orderItem?.free || 0),
-    //             },
-    //           ]
-    //     );
-    // }
-
     setTimeout(() => {
       setPopupBarcode(true);
       setLoading(false);
@@ -977,7 +939,13 @@ const ProcessingOrders = () => {
       )}
       <div
         className="item-sales-container orders-report-container"
-        style={{ width: "100vw", left: "0", top: "50px", textAlign: "center" }}
+        style={{
+          width: "100vw",
+          left: "0",
+          top: "50px",
+          textAlign: "center",
+          height: "90vh",
+        }}
       >
         {selectedOrder ? (
           <>
@@ -1047,6 +1015,7 @@ const ProcessingOrders = () => {
             left: "0",
             top: "0",
             display: "flex",
+            height: "90vh",
           }}
         >
           <table
@@ -2051,11 +2020,14 @@ function HoldPopup({
           a.status ===
           (holdPopup === "Hold" ? 2 : holdPopup === "Checking Summary" ? 1 : 0)
       )
-      .map((a) => ({
+      .map((a) => {
+        let itemDetails= itemsData?.find((b) => b.item_uuid === a.item_uuid)
+          
+        return {
         ...a,
-        item_title: itemsData?.find((b) => b.item_uuid === a.item_uuid)
-          ?.item_title,
-      }));
+        item_title: itemDetails?.item_title,
+        mrp: itemDetails?.mrp,
+      }});
     console.log(data);
     let result = data.reduce((acc, curr) => {
       let item = acc.find((item) => item.item_uuid === curr.item_uuid);
@@ -2169,6 +2141,9 @@ function HoldPopup({
                           <div className="t-head-element">Item</div>
                         </th>
                         <th colSpan={2}>
+                          <div className="t-head-element">MRP</div>
+                        </th>
+                        <th colSpan={2}>
                           <div className="t-head-element">Qty</div>
                         </th>
                         {!window.location.pathname.includes("checking") ? (
@@ -2193,7 +2168,7 @@ function HoldPopup({
                         .map((a) => (
                           <>
                             <tr>
-                              <td colSpan={6}>{a.category_title}</td>
+                              <td colSpan={8}>{a.category_title}</td>
                             </tr>
                             {console.log(a, items)}
                             {items
@@ -2209,6 +2184,7 @@ function HoldPopup({
                                   key={item?.item_uuid || Math.random()}
                                   style={{
                                     height: "30px",
+                                    fontSize:"12px",
                                     color: "#fff",
                                     backgroundColor:
                                       +item.status === 1
@@ -2219,6 +2195,7 @@ function HoldPopup({
                                   }}
                                 >
                                   <td
+                                  style={{padding:"5px"}}
                                     onClick={() =>
                                       setItems((prev) =>
                                         prev.map((a) =>
@@ -2239,13 +2216,14 @@ function HoldPopup({
                                     }
                                   >
                                     {+item.status !== 1 ? (
-                                      <CheckCircleOutlineIcon />
+                                      <CheckCircleOutlineIcon style={{width:"15px"}}/>
                                     ) : (
                                       ""
                                     )}
                                   </td>
 
                                   <td colSpan={3}>{item.item_title}</td>
+                                  <td colSpan={2}>{item.mrp}</td>
                                   {!window.location.pathname.includes(
                                     "checking"
                                   ) ? (
@@ -2254,6 +2232,7 @@ function HoldPopup({
                                         {item?.b || 0} : {item?.p || 0}
                                       </td>
                                       <td
+                                      style={{padding:"5px"}}
                                         onClick={() =>
                                           setItems((prev) =>
                                             prev.map((a) =>
@@ -2274,7 +2253,7 @@ function HoldPopup({
                                         }
                                       >
                                         {+item.status !== 3 ? (
-                                          <DeleteOutlineIcon />
+                                          <DeleteOutlineIcon  style={{width:"15px"}}/>
                                         ) : (
                                           ""
                                         )}

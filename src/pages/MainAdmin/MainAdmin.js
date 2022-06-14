@@ -1348,11 +1348,14 @@ function HoldPopup({ onSave, orders, itemsData, counter }) {
           .map((a) => a.item_details)
       )
       .filter((a) => itemStatus === "all" || +a.status === itemStatus)
-      .map((a) => ({
+      .map((a) => {
+        let itemDetails= itemsData?.find((b) => b.item_uuid === a.item_uuid)
+          
+        return {
         ...a,
-        item_title: itemsData?.find((b) => b.item_uuid === a.item_uuid)
-          ?.item_title,
-      }));
+        item_title: itemDetails?.item_title,
+        mrp: itemDetails?.mrp,
+      }});
     console.log(data);
     let result = data.reduce((acc, curr) => {
       let item = acc.find((item) => item.item_uuid === curr.item_uuid);
@@ -1414,6 +1417,9 @@ function HoldPopup({ onSave, orders, itemsData, counter }) {
                             <div className="t-head-element">Item</div>
                           </th>
                           <th colSpan={2}>
+                            <div className="t-head-element">MRP</div>
+                          </th>
+                          <th colSpan={2}>
                             <div className="t-head-element">Qty</div>
                           </th>
                         </tr>
@@ -1436,6 +1442,7 @@ function HoldPopup({ onSave, orders, itemsData, counter }) {
                           >
                             <td>{i + 1}</td>
                             <td colSpan={3}>{item.item_title}</td>
+                            <td colSpan={2}>{item.mrp}</td>
                             <td colSpan={2}>
                               {(item?.b || 0).toFixed(0)} : {item?.p || 0}
                             </td>
