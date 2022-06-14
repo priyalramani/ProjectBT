@@ -351,6 +351,13 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               ></td>
+              <td
+                style={{
+                  fontSize: "x-small",
+                  textAlign: "center",
+                }}
+                colSpan={2}
+              ></td>
               <th
                 style={{
                   fontSize: "small",
