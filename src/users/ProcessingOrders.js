@@ -472,8 +472,6 @@ const ProcessingOrders = () => {
           amt: finalData[0].order_grandtotal || 0,
         });
       }
-      
-     
     }
   };
   const postOrderContained = async (data = selectedOrder, opened_by = 0) => {
@@ -1465,7 +1463,7 @@ const ProcessingOrders = () => {
         <NewUserForm
           onSave={async (data) => {
             setPopupForm(false);
-            console.log(data)
+            console.log(data);
             if (data) {
               // setUpdate((prev) => !prev);
               let billingData = await Billing({
@@ -1482,7 +1480,7 @@ const ProcessingOrders = () => {
                     price: itemData?.price || 0,
                   };
                 }),
-                add_discounts:true
+                add_discounts: true,
               });
               setSelectedOrder((prev) => ({
                 ...prev,
@@ -1544,6 +1542,7 @@ const ProcessingOrders = () => {
           checkingQuantity={checkingQuantity}
           setTempQuantity={setTempQuantity}
           tempQuantity={tempQuantity}
+          categories={itemCategories}
         />
       ) : (
         ""
@@ -2037,6 +2036,7 @@ function HoldPopup({
   checkingQuantity,
   setTempQuantity,
   tempQuantity,
+  categories,
 }) {
   const [items, setItems] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
@@ -2179,102 +2179,133 @@ function HoldPopup({
                       </tr>
                     </thead>
                     <tbody className="tbody">
-                      {items?.map((item, i) => (
-                        <tr
-                          key={item?.item_uuid || Math.random()}
-                          style={{
-                            height: "30px",
-                            color: "#fff",
-                            backgroundColor:
-                              +item.status === 1
-                                ? "green"
-                                : +item.status === 3
-                                ? "red"
-                                : "#7990dd",
-                          }}
-                        >
-                          <td
-                            onClick={() =>
-                              setItems((prev) =>
-                                prev.map((a) =>
-                                  a.item_uuid === item.item_uuid
-                                    ? {
-                                        ...a,
-                                        status:
-                                          a.status !== 1
-                                            ? 1
-                                            : holdPopup === "Hold"
-                                            ? 2
-                                            : 0,
-                                        edit: true,
-                                      }
-                                    : a
-                                )
+                      {categories
+                        .filter(
+                          (a) =>
+                            items?.filter(
+                              (b) =>
+                                a.category_uuid ===
+                                itemsData?.find(
+                                  (c) => b.item_uuid === c.item_uuid
+                                )?.category_uuid
+                            ).length
+                        )
+                        .map((a) => (
+                          <>
+                            <tr>
+                              <td>{a.category_title}</td>
+                            </tr>
+                            {console.log(a, items)}
+                            {items
+                              ?.filter(
+                                (b) =>
+                                  a.category_uuid ===
+                                  itemsData?.find(
+                                    (c) => b.item_uuid === c.item_uuid
+                                  )?.category_uuid
                               )
-                            }
-                          >
-                            {+item.status !== 1 ? (
-                              <CheckCircleOutlineIcon />
-                            ) : (
-                              ""
-                            )}
-                          </td>
+                              .map((item, i) => (
+                                <tr
+                                  key={item?.item_uuid || Math.random()}
+                                  style={{
+                                    height: "30px",
+                                    color: "#fff",
+                                    backgroundColor:
+                                      +item.status === 1
+                                        ? "green"
+                                        : +item.status === 3
+                                        ? "red"
+                                        : "#7990dd",
+                                  }}
+                                >
+                                  <td
+                                    onClick={() =>
+                                      setItems((prev) =>
+                                        prev.map((a) =>
+                                          a.item_uuid === item.item_uuid
+                                            ? {
+                                                ...a,
+                                                status:
+                                                  a.status !== 1
+                                                    ? 1
+                                                    : holdPopup === "Hold"
+                                                    ? 2
+                                                    : 0,
+                                                edit: true,
+                                              }
+                                            : a
+                                        )
+                                      )
+                                    }
+                                  >
+                                    {+item.status !== 1 ? (
+                                      <CheckCircleOutlineIcon />
+                                    ) : (
+                                      ""
+                                    )}
+                                  </td>
 
-                          <td colSpan={3}>{item.item_title}</td>
-                          {!window.location.pathname.includes("checking") ? (
-                            <>
-                              <td colSpan={2}>
-                                {item?.b || 0} : {item?.p || 0}
-                              </td>
-                              <td
-                                onClick={() =>
-                                  setItems((prev) =>
-                                    prev.map((a) =>
-                                      a.item_uuid === item.item_uuid
-                                        ? {
-                                            ...a,
-                                            status:
-                                              a.status !== 3
-                                                ? 3
-                                                : holdPopup === "Hold"
-                                                ? 2
-                                                : 0,
-                                            edit: true,
-                                          }
-                                        : a
-                                    )
-                                  )
-                                }
-                              >
-                                {+item.status !== 3 ? (
-                                  <DeleteOutlineIcon />
-                                ) : (
-                                  ""
-                                )}
-                              </td>
-                            </>
-                          ) : (
-                            <td colSpan={2}>
-                              <input
-                                value={`${
-                                  tempQuantity?.find(
-                                    (a) => a.item_uuid === item.item_uuid
-                                  )?.b || 0
-                                } : ${
-                                  tempQuantity?.find(
-                                    (a) => a.item_uuid === item.item_uuid
-                                  )?.p || 0
-                                }`}
-                                className="boxPcsInput"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setPopupForm(item);
-                                }}
-                              />
-                            </td>
-                          )}
-                        </tr>
-                      ))}
+                                  <td colSpan={3}>{item.item_title}</td>
+                                  {!window.location.pathname.includes(
+                                    "checking"
+                                  ) ? (
+                                    <>
+                                      <td colSpan={2}>
+                                        {item?.b || 0} : {item?.p || 0}
+                                      </td>
+                                      <td
+                                        onClick={() =>
+                                          setItems((prev) =>
+                                            prev.map((a) =>
+                                              a.item_uuid === item.item_uuid
+                                                ? {
+                                                    ...a,
+                                                    status:
+                                                      a.status !== 3
+                                                        ? 3
+                                                        : holdPopup === "Hold"
+                                                        ? 2
+                                                        : 0,
+                                                    edit: true,
+                                                  }
+                                                : a
+                                            )
+                                          )
+                                        }
+                                      >
+                                        {+item.status !== 3 ? (
+                                          <DeleteOutlineIcon />
+                                        ) : (
+                                          ""
+                                        )}
+                                      </td>
+                                    </>
+                                  ) : (
+                                    <td colSpan={2}>
+                                      <input
+                                        value={`${
+                                          tempQuantity?.find(
+                                            (a) =>
+                                              a.item_uuid === item.item_uuid
+                                          )?.b || 0
+                                        } : ${
+                                          tempQuantity?.find(
+                                            (a) =>
+                                              a.item_uuid === item.item_uuid
+                                          )?.p || 0
+                                        }`}
+                                        className="boxPcsInput"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setPopupForm(item);
+                                        }}
+                                      />
+                                    </td>
+                                  )}
+                                </tr>
+                              ))}
+                          </>
+                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -3142,7 +3173,7 @@ function NewUserForm({
   const submitHandler = async (e) => {
     e.preventDefault();
     let orderData = order;
-    console.log(window.location.pathname.includes("delivery"))
+    console.log(window.location.pathname.includes("delivery"));
     if (window.location.pathname.includes("delivery")) {
       orderData = {
         ...orderData,
@@ -3200,7 +3231,7 @@ function NewUserForm({
                 },
               ]
           : [],
-          item_details: orderData.item_details.map((a) =>
+        item_details: orderData.item_details.map((a) =>
           a.item_uuid === popupInfo.item_uuid
             ? {
                 ...a,
