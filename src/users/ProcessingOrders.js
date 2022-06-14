@@ -790,12 +790,12 @@ const ProcessingOrders = () => {
               } else Navigate(-1);
             }}
           />
-          <HomeIcon
+         {!selectedOrder? <HomeIcon
             className="user_Back_icon"
             onClick={() => {
               Navigate("/users");
             }}
-          />
+          />:""}
         </div>
 
         <h1 style={{ width: "100%", textAlign: "left", marginLeft: "30px" }}>
