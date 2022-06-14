@@ -711,7 +711,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         style={{
           width: "20.5cm",
           height: "29cm",
-          margin: "30mm 45mm 30mm 50mm",
+          margin: "35mm 40mm 30mm 55mm",
           // textAlign: "center",
           position: "fixed",
           top: -100,
