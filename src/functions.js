@@ -251,7 +251,7 @@ export const Billing = async ({
     console.log("company_discount_percentage", company_discount_percentage);
     item = {
       ...item,
-      qty: +item.conversion * +item.b + item.p,
+      qty: (+item.conversion * +item.b) + item.p,
     };
     if (price) item = { ...item, item_price: price };
 
