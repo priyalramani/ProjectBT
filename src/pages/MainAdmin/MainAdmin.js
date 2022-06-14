@@ -35,13 +35,24 @@ const MainAdmin = () => {
   const [selectOrder, setSelectOrder] = useState(false);
   const [summaryPopup, setSumaryPopup] = useState(false);
   const [items, setItems] = useState([]);
+  const [category, setCategory] = useState([]);
   const [changesStatePopup, setChangeStatePopup] = useState(false);
   const componentRef = useRef(null);
   const [messagePopup, setMessagePopup] = useState("");
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, [selectedOrder]);
+  const getItemCategories = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/itemCategories/GetItemCategoryList",
 
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCategory(response.data.result);
+  };
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
     documentTitle: "Statement",
@@ -141,6 +152,7 @@ const MainAdmin = () => {
     getDetails();
     getUsers();
     getItemsData();
+    getItemCategories();
   }, []);
   const getRunningOrders = async () => {
     const response = await axios({
@@ -470,7 +482,9 @@ const MainAdmin = () => {
                                     counter.filter(
                                       (c) =>
                                         c.counter_uuid === b.counter_uuid &&
-                                        (route.route_uuid === c.route_uuid||(!c.route_uuid&&+route.route_uuid===0))
+                                        (route.route_uuid === c.route_uuid ||
+                                          (!c.route_uuid &&
+                                            +route.route_uuid === 0))
                                     ).length
                                 )
                                 .filter(
@@ -1048,23 +1062,21 @@ const MainAdmin = () => {
         </div>
       </div>
       <div ref={componentRef}>
-      <div
-        
-        style={{
-          width: "20.5cm",
-          height: "29cm",
-          margin: "45mm 40mm 30mm 60mm",
-          // textAlign: "center",
-          position: "fixed",
-          top: -100,
-          left: -180,
-          zIndex: "-1000",
-          // padding: "10px"
-        }}
-      >
-        {selectedOrder.map((orderData) => (
-          <>
-           
+        <div
+          style={{
+            width: "20.5cm",
+            height: "29cm",
+            margin: "45mm 40mm 30mm 60mm",
+            // textAlign: "center",
+            position: "fixed",
+            top: -100,
+            left: -180,
+            zIndex: "-1000",
+            // padding: "10px"
+          }}
+        >
+          {selectedOrder.map((orderData) => (
+            <>
               <OrderPrint
                 counter={counter.find(
                   (a) => a.counter_uuid === orderData.counter_uuid
@@ -1084,9 +1096,7 @@ const MainAdmin = () => {
                 }
                 footer={!(orderData.item_details > 16)}
               />
-
-            {orderData.item_details > 16 ? (
-           
+              {orderData.item_details > 16 ? (
                 <OrderPrint
                   counter={counter.find(
                     (a) => a.counter_uuid === orderData.counter_uuid
@@ -1105,14 +1115,13 @@ const MainAdmin = () => {
                   )}
                   footer={true}
                 />
-              
-            ) : (
-              ""
-            )}{" "}
-          </>
-        ))}
+              ) : (
+                ""
+              )}{" "}
+            </>
+          ))}
+        </div>
       </div>
-</div>
       {popupForm ? (
         <NewUserForm
           onSave={() => {
@@ -1168,6 +1177,7 @@ const MainAdmin = () => {
           orders={selectedOrder}
           itemsData={items}
           counter={counter}
+          category={category}
         />
       ) : (
         ""
@@ -1312,12 +1322,13 @@ function NewUserForm({
     </div>
   );
 }
-function HoldPopup({ onSave, orders, itemsData, counter }) {
+function HoldPopup({ onSave, orders, itemsData, counter, category }) {
   const [items, setItems] = useState([]);
   const [stage, setStage] = useState("");
   const [itemStatus, setItemStatus] = useState("");
   const [FilteredOrder, setFilteredOrder] = useState([]);
   const [popup, setPopup] = useState(false);
+  const [orderTotal, setOrderTotal] = useState(0);
   const stagesData = [
     { value: "all", label: "All" },
     { value: 1, label: "Processing" },
@@ -1340,31 +1351,41 @@ function HoldPopup({ onSave, orders, itemsData, counter }) {
           : a.status[0].stage,
     }));
     setFilteredOrder(orderStage);
+    orderStage = orderStage.filter(
+      (a) => stage === "all" || +a.stage === stage
+    );
+    setOrderTotal(
+      orderStage.length > 1
+        ? orderStage
+            .map((a) => +a?.order_grandtotal || 0)
+            .reduce((a, b) => a + b)
+        : orderStage[0]?.order_grandtotal
+    );
     let data = [].concat
       .apply(
         [],
-        orderStage
-          .filter((a) => stage === "all" || +a.stage === stage)
-          .map((a) => a.item_details)
+        orderStage.map((a) => a.item_details)
       )
       .filter((a) => itemStatus === "all" || +a.status === itemStatus)
       .map((a) => {
-        let itemDetails= itemsData?.find((b) => b.item_uuid === a.item_uuid)
-          
+        let itemDetails = itemsData?.find((b) => b.item_uuid === a.item_uuid);
+
         return {
-        ...a,
-        item_title: itemDetails?.item_title,
-        mrp: itemDetails?.mrp,
-      }});
+          ...a,
+          item_title: itemDetails?.item_title,
+          mrp: itemDetails?.mrp,
+          category_uuid: itemDetails?.category_uuid,
+        };
+      });
     console.log(data);
     let result = data.reduce((acc, curr) => {
       let item = acc.find((item) => item.item_uuid === curr.item_uuid);
 
       if (item) {
         let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
-          ?.conversion
-          item.b = (+item.b + curr.b) + (+item.p + curr.p) / conversion
-          item.p = (+item.p + curr.p) % conversion
+          ?.conversion;
+        item.b = +item.b + curr.b + (+item.p + curr.p) / conversion;
+        item.p = (+item.p + curr.p) % conversion;
       } else {
         acc.push(curr);
       }
@@ -1380,12 +1401,17 @@ function HoldPopup({ onSave, orders, itemsData, counter }) {
         <div
           className="modal"
           style={{
-            height: "fit-content",
+            height: "500px",
             width: "max-content",
             minWidth: "250px",
+            paddingTop:"50px"
           }}
         >
-          <h1>Summary</h1>
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h1>Summary</h1>
+            {stage&&itemStatus?<h3>Orders Total:Rs. {orderTotal}</h3>:""}
+          </div>
+
           <div
             className="content"
             style={{
@@ -1425,29 +1451,44 @@ function HoldPopup({ onSave, orders, itemsData, counter }) {
                         </tr>
                       </thead>
                       <tbody className="tbody">
-                        {items?.map((item, i) => (
-                          <tr
-                            key={item?.item_uuid || Math.random()}
-                            style={{
-                              height: "30px",
-                              color: "#fff",
-                              backgroundColor:
-                                +item.status === 1
-                                  ? "green"
-                                  : +item.status === 3
-                                  ? "red"
-                                  : "#7990dd",
-                            }}
-                            onClick={() => setPopup(item)}
-                          >
-                            <td>{i + 1}</td>
-                            <td colSpan={3}>{item.item_title}</td>
-                            <td colSpan={2}>{item.mrp}</td>
-                            <td colSpan={2}>
-                              {(item?.b || 0).toFixed(0)} : {item?.p || 0}
-                            </td>
-                          </tr>
-                        ))}
+                        {category
+                          .filter(
+                            (a) =>
+                              items?.filter(
+                                (b) => a.category_uuid === b.category_uuid
+                              ).length
+                          )
+                          .map((a) => (
+                            <>
+                              <tr>
+                                <td colSpan={8}>{a.category_title}</td>
+                              </tr>
+
+                              {items?.map((item, i) => (
+                                <tr
+                                  key={item?.item_uuid || Math.random()}
+                                  style={{
+                                    height: "30px",
+                                    color: "#fff",
+                                    backgroundColor:
+                                      +item.status === 1
+                                        ? "green"
+                                        : +item.status === 3
+                                        ? "red"
+                                        : "#7990dd",
+                                  }}
+                                  onClick={() => setPopup(item)}
+                                >
+                                  <td>{i + 1}</td>
+                                  <td colSpan={3}>{item.item_title}</td>
+                                  <td colSpan={2}>{item.mrp}</td>
+                                  <td colSpan={2}>
+                                    {(item?.b || 0).toFixed(0)} : {item?.p || 0}
+                                  </td>
+                                </tr>
+                              ))}
+                            </>
+                          ))}
                         <tr
                           style={{
                             height: "30px",
