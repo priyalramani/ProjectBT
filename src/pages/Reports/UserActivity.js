@@ -153,16 +153,15 @@ function Table({ itemsDetails }) {
     var strTime = hours + ':' + minutes + ' ' + ampm;
     return strTime;
   }
-  function format(date) {
-    
-    var hours = (date/3600000).toFixed(0)
-    var minutes = (date/60000).toFixed(0);
-  
+  function format(time) {
 
-   
-    minutes = minutes < 10 ? '0'+minutes : minutes;
 
-    var strTime = hours + ':' + minutes;
+    var hours = time / 3600000;
+    var minutes = (+(hours-(+hours.toString().split(".")[0])) * 60).toFixed(0);
+
+    minutes = +minutes < 10 ? "0" + minutes : minutes;
+
+    var strTime = hours.toFixed(0) + ":" + minutes;
     return strTime;
   }
   return (
