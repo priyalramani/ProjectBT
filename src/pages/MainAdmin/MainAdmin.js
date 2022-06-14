@@ -1358,8 +1358,10 @@ function HoldPopup({ onSave, orders, itemsData, counter }) {
       let item = acc.find((item) => item.item_uuid === curr.item_uuid);
 
       if (item) {
-        item.p = +item.p + curr.p;
-        item.b = +item.b + curr.b;
+        let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
+          ?.conversion
+          item.b = (+item.b + curr.b) + (+item.p + curr.p) / conversion
+          item.p = (+item.p + curr.p) % conversion
       } else {
         acc.push(curr);
       }
