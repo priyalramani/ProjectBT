@@ -720,12 +720,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           // padding: "10px"
         }}
       >
-        <div
-          style={{
-            border: "1px solid black",
-            height: "50%",
-          }}
-        >
+       
           <OrderPrint
             counter={counters.find(
               (a) => a.counter_uuid === orderData?.counter_uuid
@@ -744,14 +739,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             }
             footer={!(order?.item_details?.length > 16)}
           />
-        </div>
+ 
         {order.item_details > 16 ? (
-          <div
-            style={{
-              border: "1px solid black",
-              height: "50%",
-            }}
-          >
+   
             <OrderPrint
               counter={counters.find(
                 (a) => a.counter_uuid === orderData?.counter_uuid
@@ -766,7 +756,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               item_details={order.item_details.slice(16, order.item.length)}
               footer={true}
             />
-          </div>
+         
         ) : (
           ""
         )}

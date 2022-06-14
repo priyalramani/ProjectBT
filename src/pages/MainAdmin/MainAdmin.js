@@ -1063,12 +1063,7 @@ const MainAdmin = () => {
       >
         {selectedOrder.map((orderData) => (
           <>
-            <div
-              style={{
-                border: "1px solid black",
-                height: "50%",
-              }}
-            >
+           
               <OrderPrint
                 counter={counter.find(
                   (a) => a.counter_uuid === orderData.counter_uuid
@@ -1088,14 +1083,9 @@ const MainAdmin = () => {
                 }
                 footer={!(orderData.item_details > 16)}
               />
-            </div>
+
             {orderData.item_details > 16 ? (
-              <div
-                style={{
-                  border: "1px solid black",
-                  height: "50%",
-                }}
-              >
+           
                 <OrderPrint
                   counter={counter.find(
                     (a) => a.counter_uuid === orderData.counter_uuid
@@ -1114,7 +1104,7 @@ const MainAdmin = () => {
                   )}
                   footer={true}
                 />
-              </div>
+              
             ) : (
               ""
             )}{" "}
