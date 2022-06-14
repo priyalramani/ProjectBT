@@ -23,7 +23,7 @@ const OrderPrint = ({
   });
   return (
     <>
-    <div style={{height:"50%"}}></div>
+    
       <table style={{  width: "100%", border: "1px solid black",
               height: "50%", pageBreakAfter:"always"}}>
         <tr>
@@ -572,7 +572,7 @@ const OrderPrint = ({
           </tr>
          
       )}
-        </table>
+        </table><div style={{height:"50%"}}></div>
     </>
   );
 };
