@@ -18,7 +18,7 @@ const OrderPrint = ({
     let tex_amt =
       (+unit_price || 0) -
       ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0));
-    let dsc_amt = (+unit_price || 0) - +item.price;
+    let dsc_amt =  ( +item.price-(+unit_price || 0))*itemQty;
     return { dsc_amt, tex_amt };
   });
   return (
@@ -196,7 +196,7 @@ const OrderPrint = ({
           let tex_amt =
             (+unit_price || 0) -
             ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0));
-          let dsc_amt = (+unit_price || 0) - +item.price;
+          let dsc_amt =   (+item.price-(+unit_price || 0))*itemQty;
           return (
             <tr
               style={{ borderBottom: "1px solid #000" }}
