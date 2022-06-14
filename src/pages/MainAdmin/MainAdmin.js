@@ -1876,7 +1876,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
                   >
                     Box
                     <input
-                      type="text"
+                      type="number"
                       name="route_title"
                       className="numberInput"
                       value={data?.b}
@@ -1897,7 +1897,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
                   >
                     Pcs
                     <input
-                      type="text"
+                      type="number"
                       name="route_title"
                       className="numberInput"
                       value={data?.p}
