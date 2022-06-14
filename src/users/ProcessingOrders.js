@@ -951,7 +951,7 @@ const ProcessingOrders = () => {
           <>
             <div
               className="flex"
-              style={{ justifyContent: "space-between", margin: "10px 0" }}
+              style={{ justifyContent: "space-between", margin: "10px 0",height:"90vh" }}
             >
               <h2 style={{ width: "20vw", textAlign: "start" }}>
                 {selectedOrder.invoice_number}
