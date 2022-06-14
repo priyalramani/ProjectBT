@@ -24,8 +24,8 @@ const OrderPrint = ({
   return (
     <>
     
-      <table style={{  width: "100%", border: "1px solid black",
-              height: "50%", pageBreakAfter:"always"}}>
+      <table style={{ width:"95%", border: "1px solid black",
+              height: "47%", pageBreakAfter:"always"}}>
         <tr>
           <td
             colSpan={26}
@@ -42,6 +42,7 @@ const OrderPrint = ({
                   style={{
                     fontSize: "larger",
                     fontWeight: "bold",
+                    lineHeight:0.5
                   }}
                 >
                   Bharat Traders
@@ -92,7 +93,7 @@ const OrderPrint = ({
           <th colSpan={26}>
             <hr
               style={{
-                height: "1px",
+                height: "3px",
                 backgroundColor: "#000",
                 width: "100%",
               }}
@@ -123,7 +124,7 @@ const OrderPrint = ({
           <th colSpan={26}>
             <hr
               style={{
-                height: "1px",
+                height: "3px",
                 backgroundColor: "#000",
                 width: "100%",
               }}
@@ -164,7 +165,7 @@ const OrderPrint = ({
             Dsc Amt
           </th>
           <th style={{ fontSize: "x-small" }} colSpan={2}>
-            Tex Amt
+            Tax Amt
           </th>
           <th style={{ fontSize: "x-small" }} colSpan={2}>
             Net Unit Price
@@ -177,7 +178,7 @@ const OrderPrint = ({
           <th colSpan={26}>
             <hr
               style={{
-                height: "1px",
+                height: "3px",
                 backgroundColor: "#000",
                 width: "100%",
               }}
@@ -187,7 +188,7 @@ const OrderPrint = ({
         {item_details.map((item, i) => {
           const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid);
           let itemQty =
-            (+item.q || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0);
+            ((+item.q || 0) * (+itemInfo?.conversion || 1)) + (+item.p || 0);
           let unit_price = (+item.item_total || 0) / (+itemQty || 1);
           let tex_amt =
             (+unit_price || 0) -
@@ -308,7 +309,7 @@ const OrderPrint = ({
             </tr>
           );
         })}
-        <tr style={{height:((16-item_details.length)*10)+"px"}}>
+        <tr style={{height:((17-item_details.length)*10)+"px"}}>
           <td colspan="26"></td>
         </tr>
 
@@ -318,7 +319,7 @@ const OrderPrint = ({
               <th colSpan={26}>
                 <hr
                   style={{
-                    height: "1px",
+                    height: "3px",
                     backgroundColor: "#000",
                     width: "100%",
                   }}
@@ -450,7 +451,7 @@ const OrderPrint = ({
           <th colSpan={26}>
             <hr
               style={{
-                height: "1px",
+                height: "3px",
                 backgroundColor: "#000",
                 width: "100%",
               }}
@@ -548,7 +549,7 @@ const OrderPrint = ({
           <th colSpan={26}>
             <hr
               style={{
-                height: "1px",
+                height: "3px",
                 backgroundColor: "#000",
                 width: "100%",
               }}
@@ -572,7 +573,8 @@ const OrderPrint = ({
           </tr>
          
       )}
-        </table><div style={{height:"50%"}}></div>
+        </table>
+        <div style={{height:"50%"}}></div>
     </>
   );
 };
