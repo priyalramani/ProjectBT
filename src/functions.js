@@ -294,6 +294,7 @@ export const Billing = async ({
         (+edit_price || +item.item_desc_total || +item.item_price || 0) *
         (+item.qty || 0)
       ).toFixed(2),
+      item_desc_total:0,
     };
     newPriceItems.push(item);
   }
