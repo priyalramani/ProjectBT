@@ -99,6 +99,7 @@ const Orders = () => {
                 <tbody style={{ width: "100%" }}>
                   {counters
                     ?.filter((a) => a.counter_title)
+                    .sort((a,b)=>+a.sort_order-b.sort_order)
                     ?.filter(
                       (a) =>
                         (!counterFilter ||
