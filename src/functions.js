@@ -251,7 +251,7 @@ export const Billing = async ({
     console.log("company_discount_percentage", company_discount_percentage);
     item = {
       ...item,
-      qty: (+item.conversion * +item.b) + item.p,
+      qty: +item.conversion * +item.b + item.p,
     };
     if (price) item = { ...item, item_price: price };
 
@@ -266,6 +266,18 @@ export const Billing = async ({
         item_desc_total:
           (item.item_price || 0) *
             ((100 - special_discount_percentage) / 100) || 0,
+      };
+    }
+    if (item.item_discount) {
+      charges_discount.push({
+        title: "Item Discount",
+        value: special_discount_percentage,
+      });
+      item = {
+        ...item,
+        item_desc_total: item.item_desc_total
+          ? item.item_desc_total * ((100 - item.item_discount) / 100) || 0
+          : (item.item_price || 0) * ((100 - item.item_discount) / 100) || 0,
       };
     }
     if (company_discount_percentage) {
@@ -294,18 +306,19 @@ export const Billing = async ({
         (+edit_price || +item.item_desc_total || +item.item_price || 0) *
         (+item.qty || 0)
       ).toFixed(2),
-      item_desc_total:0,
+      item_desc_total: 0,
     };
     newPriceItems.push(item);
   }
   console.log("newItemPrice", newPriceItems);
-  let order_grandtotal =
-    (newPriceItems.length > 1
+  let order_grandtotal = (
+    newPriceItems.length > 1
       ? newPriceItems.map((a) => +a.item_total || 0).reduce((a, b) => a + b) -
         replacement
       : newPriceItems.length
       ? (newPriceItems.map((a) => a.item_total)[0] || 0) - replacement
-      : 0).toFixed(0);
+      : 0
+  ).toFixed(0);
 
   return {
     counter_uuid: counter.counter_uuid,
@@ -367,5 +380,5 @@ export const updateIndexedDb = async () => {
   }
   let time = new Date();
   localStorage.setItem("indexed_time", time.getTime());
-  window.location.reload()
+  window.location.reload();
 };

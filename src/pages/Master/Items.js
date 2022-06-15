@@ -703,21 +703,20 @@ function NewUserForm({
                 </div>
 
                 <div className="row">
-                  <label className="selectLabel">
-                    Barcode
-                    <textarea
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
+                <label className="selectLabel">
+                    Item Discount
+                    <input
+                      type="text"
+                      name="one_pack"
                       className="numberInput"
-                      value={data?.barcode?.toString()?.replace(/,/g, "\n")}
-                      style={{ height: "50px" }}
+                      value={data?.item_discount}
                       onChange={(e) =>
                         setdata({
                           ...data,
-                          barcode: e.target.value.split("\n"),
+                          item_discount: e.target.value,
                         })
                       }
+                      maxLength={5}
                     />
                   </label>
                   <label className="selectLabel">
@@ -754,6 +753,26 @@ function NewUserForm({
                       </div>
                     </div>
                   </label>
+                </div>
+                <div className="row">
+                  <label className="selectLabel">
+                    Barcode
+                    <textarea
+                      type="number"
+                      onWheel={(e) => e.target.blur()}
+                      name="sort_order"
+                      className="numberInput"
+                      value={data?.barcode?.toString()?.replace(/,/g, "\n")}
+                      style={{ height: "50px" }}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          barcode: e.target.value.split("\n"),
+                        })
+                      }
+                    />
+                  </label>
+                 
                 </div>
               </div>
               <i style={{ color: "red" }}>
