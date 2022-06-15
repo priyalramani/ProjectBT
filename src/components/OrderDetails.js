@@ -274,7 +274,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       (a) => a.counter_uuid === orderData?.counter_uuid
                     )?.counter_title || ""}
                   </h2>
-                  
+
                   <button
                     style={{ width: "fit-Content", backgroundColor: "red" }}
                     className="item-sales-search"
@@ -305,20 +305,55 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 className="items_table"
                 style={{ flex: "1", paddingLeft: "10px" }}
               >
-               
-                  <table>
-                    <thead
-                      className="bb b--green"
-                      style={{ position: "sticky", top: 0, zIndex: "100" }}
-                    >
-                      <>
-                        <tr>
-                          <th>Grand Total</th>
-                          <th>{orderData?.order_grandtotal || 0}</th>
-                          <th>Payment Total</th>
-                          <th>{orderData?.payment_total || 0}</th>
-                          <th style={{ width: "12%" }}>UUID</th>
-                          <th
+                <table>
+                  <thead
+                    className="bb b--green"
+                    style={{ position: "sticky", top: 0, zIndex: "100" }}
+                  >
+                    <>
+                      <tr>
+                        <th>Grand Total</th>
+                        <th>{orderData?.order_grandtotal || 0}</th>
+                        <th>Payment Total</th>
+                        <th>{orderData?.payment_total || 0}</th>
+                        <th style={{ width: "12%" }}>UUID</th>
+                        <th
+                          onClick={() => {
+                            setCopymsg(true);
+                            navigator.clipboard.writeText(
+                              orderData?.order_uuid
+                            );
+                            setTimeout(() => setCopymsg(false), 1000);
+                          }}
+                          style={{
+                            cursor: "pointer",
+                            position: "relative",
+                            width: "12%",
+                          }}
+                          onMouseOver={() => setUuid(true)}
+                          onMouseLeave={() => setUuid(false)}
+                        >
+                          {orderData?.order_uuid?.substring(0, 7) + "..."}
+                          {copymsg && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: "100%",
+                              }}
+                            >
+                              <div id="talkbubble">COPIED!</div>
+                            </div>
+                          )}
+                          {"   "}
+                          <ContentCopy
+                            style={
+                              uuids
+                                ? {
+                                    fontSize: "12px",
+                                    transform: "scale(1.5)",
+                                  }
+                                : { fontSize: "12px" }
+                            }
                             onClick={() => {
                               setCopymsg(true);
                               navigator.clipboard.writeText(
@@ -326,105 +361,67 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                               );
                               setTimeout(() => setCopymsg(false), 1000);
                             }}
-                            style={{
-                              cursor: "pointer",
-                              position: "relative",
-                              width: "12%",
-                            }}
-                            onMouseOver={() => setUuid(true)}
-                            onMouseLeave={() => setUuid(false)}
-                          >
-                            {orderData?.order_uuid?.substring(0, 7) + "..."}
-                            {copymsg && (
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  top: "100%",
-                                }}
-                              >
-                                <div id="talkbubble">COPIED!</div>
-                              </div>
-                            )}
-                            {"   "}
-                            <ContentCopy
-                              style={
-                                uuids
-                                  ? {
-                                      fontSize: "12px",
-                                      transform: "scale(1.5)",
-                                    }
-                                  : { fontSize: "12px" }
-                              }
-                              onClick={() => {
-                                setCopymsg(true);
-                                navigator.clipboard.writeText(
-                                  orderData?.order_uuid
-                                );
-                                setTimeout(() => setCopymsg(false), 1000);
+                          />
+                          {uuids && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: "100%",
                               }}
-                            />
-                            {uuids && (
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  top: "100%",
-                                }}
-                              >
-                                <div id="talkbubble">
-                                  {orderData?.order_uuid}
-                                </div>
-                              </div>
-                            )}
-                          </th>
-                        </tr>
-                        <tr>
-                          <th colSpan={2} style={{ textAlign: "center" }}>
-                            <button
-                              style={{ width: "fit-Content" }}
-                              className="item-sales-search"
-                              onClick={() =>
-                                setPopupDetails({
-                                  type: "Status",
-                                  data: orderData?.status,
-                                })
-                              }
                             >
-                              Status
-                            </button>
-                          </th>
-                          <th colSpan={2} style={{ textAlign: "center" }}>
-                            <button
-                              style={{ width: "fit-Content" }}
-                              className="item-sales-search"
-                              onClick={() =>
-                                setPopupDetails({
-                                  type: "Delivery Return",
-                                  data: orderData?.delivery_return,
-                                })
-                              }
-                            >
-                              Delivery Return
-                            </button>
-                          </th>
-                          <th colSpan={2} style={{ textAlign: "center" }}>
-                            <button
-                              style={{ width: "fit-Content" }}
-                              className="item-sales-search"
-                              onClick={() =>
-                                setPopupDetails({
-                                  type: "Auto Added",
-                                  data: orderData?.auto_Added,
-                                })
-                              }
-                            >
-                              Auto Added
-                            </button>
-                          </th>
-                        </tr>
-                      </>
-                    </thead>
-                  </table>
-                
+                              <div id="talkbubble">{orderData?.order_uuid}</div>
+                            </div>
+                          )}
+                        </th>
+                      </tr>
+                      <tr>
+                        <th colSpan={2} style={{ textAlign: "center" }}>
+                          <button
+                            style={{ width: "fit-Content" }}
+                            className="item-sales-search"
+                            onClick={() =>
+                              setPopupDetails({
+                                type: "Status",
+                                data: orderData?.status,
+                              })
+                            }
+                          >
+                            Status
+                          </button>
+                        </th>
+                        <th colSpan={2} style={{ textAlign: "center" }}>
+                          <button
+                            style={{ width: "fit-Content" }}
+                            className="item-sales-search"
+                            onClick={() =>
+                              setPopupDetails({
+                                type: "Delivery Return",
+                                data: orderData?.delivery_return,
+                              })
+                            }
+                          >
+                            Delivery Return
+                          </button>
+                        </th>
+                        <th colSpan={2} style={{ textAlign: "center" }}>
+                          <button
+                            style={{ width: "fit-Content" }}
+                            className="item-sales-search"
+                            onClick={() =>
+                              setPopupDetails({
+                                type: "Auto Added",
+                                data: orderData?.auto_Added,
+                              })
+                            }
+                          >
+                            Auto Added
+                          </button>
+                        </th>
+                      </tr>
+                    </>
+                  </thead>
+                </table>
+
                 <table className="f6 w-100 center" cellSpacing="0">
                   <thead className="lh-copy" style={{ position: "static" }}>
                     <tr className="white">
@@ -443,7 +440,25 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   <tbody className="lh-copy">
                     {orderData?.item_details?.map((item, i) => {
                       return (
-                        <tr key={i} style={{ height: "50px" }}>
+                        <tr
+                          key={i}
+                          style={{
+                            height: "50px",
+                            backgroundColor:
+                              +item.status === 1
+                                ? "green"
+                                : +item.status === 2
+                                ? "yellow"
+                                : +item.status === 3
+                                ? "red"
+                                : "#fff",
+                            color:
+                              +item.status === 1 || +item.status === 3
+                                ? "#fff"
+                                : "#000",
+                                borderBottom:"2px solid #fff"
+                          }}
+                        >
                           <td className="ph2 pv1 tl bb b--black-20 bg-white">
                             <div className="inputGroup">
                               {editOrder && !item.default ? (
@@ -512,7 +527,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             className="ph2 pv1 tc bb b--black-20 bg-white"
                             style={{ textAlign: "center" }}
                           >
-                            {item.mrp||""}
+                            {item.mrp || ""}
                           </td>
                           <td
                             className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -720,7 +735,26 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           // padding: "10px"
         }}
       >
-       
+        <OrderPrint
+          counter={counters.find(
+            (a) => a.counter_uuid === orderData?.counter_uuid
+          )}
+          order={order}
+          date={new Date(order.status[0].time)}
+          user={
+            users.find((a) => a.user_uuid === order.status[0].user_uuid)
+              ?.user_title || ""
+          }
+          itemData={itemsData}
+          item_details={
+            order?.item_details?.length > 16
+              ? order?.item_details?.slice(0, 16)
+              : order?.item_details
+          }
+          footer={!(order?.item_details?.length > 16)}
+        />
+
+        {order.item_details > 16 ? (
           <OrderPrint
             counter={counters.find(
               (a) => a.counter_uuid === orderData?.counter_uuid
@@ -732,31 +766,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 ?.user_title || ""
             }
             itemData={itemsData}
-            item_details={
-              order?.item_details?.length > 16
-                ? order?.item_details?.slice(0, 16)
-                : order?.item_details
-            }
-            footer={!(order?.item_details?.length > 16)}
+            item_details={order.item_details.slice(16, order.item.length)}
+            footer={true}
           />
- 
-        {order.item_details > 16 ? (
-   
-            <OrderPrint
-              counter={counters.find(
-                (a) => a.counter_uuid === orderData?.counter_uuid
-              )}
-              order={order}
-              date={new Date(order.status[0].time)}
-              user={
-                users.find((a) => a.user_uuid === order.status[0].user_uuid)
-                  ?.user_title || ""
-              }
-              itemData={itemsData}
-              item_details={order.item_details.slice(16, order.item.length)}
-              footer={true}
-            />
-         
         ) : (
           ""
         )}
