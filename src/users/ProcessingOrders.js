@@ -2044,10 +2044,11 @@ function HoldPopup({
     console.log(data);
     let result = data.reduce((acc, curr) => {
       let item = acc.find((item) => item.item_uuid === curr.item_uuid);
-
       if (item) {
-        item.p = +item.p + curr.p;
-        item.b = +item.b + curr.b;
+        let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
+        ?.conversion;
+        item.b = +item.b + curr.b + (+item.p + curr.p) / conversion;
+        item.p = (+item.p + curr.p) % conversion;
       } else {
         acc.push(curr);
       }
@@ -2703,10 +2704,10 @@ function DiliveryPopup({
                         className="numberInput"
                         value={outstanding?.amount}
                         placeholder={
-                          !credit_allowed === "Y" ? "Not Allowed" : ""
+                          credit_allowed !== "Y" ? "Not Allowed" : ""
                         }
                         style={
-                          !credit_allowed === "Y"
+                          credit_allowed !== "Y"
                             ? {
                                 width: "90px",
                                 backgroundColor: "light",

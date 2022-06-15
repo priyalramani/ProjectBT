@@ -347,18 +347,16 @@ const MainAdmin = () => {
                 {routesData.length ? (
                   <>
                     {routesData.map((route) => {
-                      
                       if (
                         orders
                           .filter(
                             (a) =>
-                            counter.filter(
-                              (c) =>
-                                c.counter_uuid === a.counter_uuid &&
-                                (route.route_uuid === c.route_uuid ||
-                                  (!c.route_uuid &&
-                                    +route.route_uuid === 0))
-                            ).length
+                              counter.filter(
+                                (c) =>
+                                  c.counter_uuid === a.counter_uuid &&
+                                  (route.route_uuid === c.route_uuid ||
+                                    (!c.route_uuid && +route.route_uuid === 0))
+                              ).length
                           )
                           .filter(
                             (a) =>
@@ -388,39 +386,44 @@ const MainAdmin = () => {
                                   onClick={() =>
                                     orders.filter(
                                       (a) =>
-                                        (counter.filter(
+                                        counter.filter(
                                           (c) =>
                                             c.counter_uuid === a.counter_uuid &&
-                                            (route.route_uuid === c.route_uuid ||
+                                            (route.route_uuid ===
+                                              c.route_uuid ||
                                               (!c.route_uuid &&
                                                 +route.route_uuid === 0))
-                                        ).length) &&
+                                        ).length &&
                                         selectedOrder.filter(
                                           (b) => b.order_uuid === a.order_uuid
                                         ).length
                                     ).length ===
                                     orders.filter(
                                       (a) =>
-                                      counter.filter(
-                                        (c) =>
-                                          c.counter_uuid === a.counter_uuid &&
-                                          (route.route_uuid === c.route_uuid ||
-                                            (!c.route_uuid &&
-                                              +route.route_uuid === 0))
-                                      ).length
+                                        counter.filter(
+                                          (c) =>
+                                            c.counter_uuid === a.counter_uuid &&
+                                            (route.route_uuid ===
+                                              c.route_uuid ||
+                                              (!c.route_uuid &&
+                                                +route.route_uuid === 0))
+                                        ).length
                                     ).length
                                       ? setSelectedOrder(
                                           selectedOrder.filter(
                                             (b) =>
                                               !orders.filter(
                                                 (a) =>
-                                                  (counter.filter(
+                                                  counter.filter(
                                                     (c) =>
-                                                      c.counter_uuid === a.counter_uuid &&
-                                                      (route.route_uuid === c.route_uuid ||
+                                                      c.counter_uuid ===
+                                                        a.counter_uuid &&
+                                                      (route.route_uuid ===
+                                                        c.route_uuid ||
                                                         (!c.route_uuid &&
-                                                          +route.route_uuid === 0))
-                                                  ).length) &&
+                                                          +route.route_uuid ===
+                                                            0))
+                                                  ).length &&
                                                   b.order_uuid === a.order_uuid
                                               ).length
                                           )
@@ -432,63 +435,74 @@ const MainAdmin = () => {
                                                   (b) =>
                                                     !orders.filter(
                                                       (a) =>
-                                                        (counter.filter(
+                                                        counter.filter(
                                                           (c) =>
-                                                            c.counter_uuid === a.counter_uuid &&
-                                                            (route.route_uuid === c.route_uuid ||
+                                                            c.counter_uuid ===
+                                                              a.counter_uuid &&
+                                                            (route.route_uuid ===
+                                                              c.route_uuid ||
                                                               (!c.route_uuid &&
-                                                                +route.route_uuid === 0))
-                                                        ).length) &&
+                                                                +route.route_uuid ===
+                                                                  0))
+                                                        ).length &&
                                                         b.order_uuid ===
                                                           a.order_uuid
                                                     ).length
                                                 ),
                                                 ...orders.filter(
                                                   (a) =>
-                                                  counter.filter(
-                                                    (c) =>
-                                                      c.counter_uuid === a.counter_uuid &&
-                                                      (route.route_uuid === c.route_uuid ||
-                                                        (!c.route_uuid &&
-                                                          +route.route_uuid === 0))
-                                                  ).length
+                                                    counter.filter(
+                                                      (c) =>
+                                                        c.counter_uuid ===
+                                                          a.counter_uuid &&
+                                                        (route.route_uuid ===
+                                                          c.route_uuid ||
+                                                          (!c.route_uuid &&
+                                                            +route.route_uuid ===
+                                                              0))
+                                                    ).length
                                                 ),
                                               ]
                                             : orders.filter(
                                                 (a) =>
-                                                counter.filter(
-                                                  (c) =>
-                                                    c.counter_uuid === a.counter_uuid &&
-                                                    (route.route_uuid === c.route_uuid ||
-                                                      (!c.route_uuid &&
-                                                        +route.route_uuid === 0))
-                                                ).length
+                                                  counter.filter(
+                                                    (c) =>
+                                                      c.counter_uuid ===
+                                                        a.counter_uuid &&
+                                                      (route.route_uuid ===
+                                                        c.route_uuid ||
+                                                        (!c.route_uuid &&
+                                                          +route.route_uuid ===
+                                                            0))
+                                                  ).length
                                               )
                                         )
                                   }
                                   defaultChecked={
                                     orders.filter(
                                       (a) =>
-                                        (counter.filter(
+                                        counter.filter(
                                           (c) =>
                                             c.counter_uuid === a.counter_uuid &&
-                                            (route.route_uuid === c.route_uuid ||
+                                            (route.route_uuid ===
+                                              c.route_uuid ||
                                               (!c.route_uuid &&
                                                 +route.route_uuid === 0))
-                                        ).length) &&
+                                        ).length &&
                                         selectedOrder.filter(
                                           (b) => b.order_uuid === a.order_uuid
                                         ).length
                                     ).length ===
                                     orders.filter(
                                       (a) =>
-                                      counter.filter(
-                                        (c) =>
-                                          c.counter_uuid === a.counter_uuid &&
-                                          (route.route_uuid === c.route_uuid ||
-                                            (!c.route_uuid &&
-                                              +route.route_uuid === 0))
-                                      ).length
+                                        counter.filter(
+                                          (c) =>
+                                            c.counter_uuid === a.counter_uuid &&
+                                            (route.route_uuid ===
+                                              c.route_uuid ||
+                                              (!c.route_uuid &&
+                                                +route.route_uuid === 0))
+                                        ).length
                                     ).length
                                   }
                                 />
@@ -503,7 +517,7 @@ const MainAdmin = () => {
                                 flexWrap: "wrap",
                                 gap: "0px",
                                 marginBottom: "10px",
-                                paddingBottom:"20px"
+                                paddingBottom: "20px",
                               }}
                               id="seats_container"
                             >
@@ -1385,6 +1399,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
     orderStage = orderStage.filter(
       (a) => stage === "all" || +a.stage === stage
     );
+    console.log(orderStage);
     setOrderTotal(
       orderStage.length > 1
         ? orderStage
@@ -1504,6 +1519,8 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                                     backgroundColor:
                                       +item.status === 1
                                         ? "green"
+                                        : +item.status === 2
+                                        ? "yellow"
                                         : +item.status === 3
                                         ? "red"
                                         : "#7990dd",
@@ -1528,6 +1545,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                         >
                           <td>Total</td>
                           <td colSpan={3}></td>
+                          <td colSpan={2}></td>
                           <td colSpan={2}>
                             {(items.length > 1
                               ? items
