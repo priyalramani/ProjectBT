@@ -2700,3 +2700,7 @@ button.counter-save-btn {
     height: inherit;
   }
 }
+@page {
+  size: A4;
+  margin: 0;
+}

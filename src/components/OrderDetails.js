@@ -29,6 +29,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [focusedInputId, setFocusedInputId] = useState(0);
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
+  console.log(componentRef.current);
   const [deletePopup, setDeletePopup] = useState(false);
   const callBilling = async () => {
     if (!editOrder) return;
@@ -746,40 +747,29 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         ""
       )}
       <div
-        ref={componentRef}
-        id="item-container"
         style={{
-          width: "20.5cm",
-          height: "29cm",
-          margin: "45mm 40mm 30mm 60mm",
-          // textAlign: "center",
           position: "fixed",
           top: -100,
           left: -180,
           zIndex: "-1000",
-          // padding: "10px"
         }}
       >
-        <OrderPrint
-          counter={counters.find(
-            (a) => a.counter_uuid === orderData?.counter_uuid
-          )}
-          order={order}
-          date={new Date(order.status[0].time)}
-          user={
-            users.find((a) => a.user_uuid === order.status[0].user_uuid)
-              ?.user_title || ""
-          }
-          itemData={itemsData}
-          item_details={
-            order?.item_details?.length > 16
-              ? order?.item_details?.slice(0, 16)
-              : order?.item_details
-          }
-          footer={!(order?.item_details?.length > 16)}
-        />
-
-        {order.item_details > 16 ? (
+        <div
+          ref={componentRef}
+          id="item-container"
+          style={{
+      
+              marginTop:"20mm",
+              marginLeft:"20mm",
+              marginRight:"20mm"
+               // margin: "45mm 40mm 30mm 60mm",
+               // textAlign: "center",
+              
+             
+               // padding: "10px"
+            
+          }}
+        >
           <OrderPrint
             counter={counters.find(
               (a) => a.counter_uuid === orderData?.counter_uuid
@@ -791,12 +781,34 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 ?.user_title || ""
             }
             itemData={itemsData}
-            item_details={order.item_details.slice(16, order.item.length)}
-            footer={true}
+            item_details={
+              order?.item_details?.length > 14
+                ? order?.item_details?.slice(0, 14)
+                : order?.item_details
+            }
+            footer={!(order?.item_details?.length > 14)}
           />
-        ) : (
-          ""
-        )}
+
+          {order.item_details > 14 ? (
+            <><div style={{height:"20mm"}} ></div>
+            <OrderPrint
+              counter={counters.find(
+                (a) => a.counter_uuid === orderData?.counter_uuid
+              )}
+              order={order}
+              date={new Date(order.status[0].time)}
+              user={
+                users.find((a) => a.user_uuid === order.status[0].user_uuid)
+                  ?.user_title || ""
+              }
+              itemData={itemsData}
+              item_details={order.item_details.slice(14, order.item.length)}
+              footer={true}
+            /></>
+          ) : (
+            ""
+          )}
+        </div>
       </div>
     </>
   );

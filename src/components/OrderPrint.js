@@ -7,9 +7,8 @@ const OrderPrint = ({
   user,
   itemData,
   item_details,
-  footer
+  footer,
 }) => {
-
   let total_desc_amt = order.item_details.map((item) => {
     const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid);
     let itemQty =
@@ -18,14 +17,20 @@ const OrderPrint = ({
     let tex_amt =
       (+unit_price || 0) -
       ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0));
-    let dsc_amt =  ( +item.price-(+unit_price || 0))*itemQty;
+    let dsc_amt = (+item.price - (+unit_price || 0)) * itemQty;
     return { dsc_amt, tex_amt };
   });
   return (
     <>
-    
-      <table style={{ width:"90%", border: "1px solid black",
-              height: "47%", pageBreakAfter:"always"}}>
+      <table
+        style={{
+          width: "170mm",
+          height: "128mm",
+          border: "1px solid black",
+          pageBreakAfter: "always",
+          display: "block",
+        }}
+      >
         <tr>
           <td
             colSpan={28}
@@ -42,7 +47,7 @@ const OrderPrint = ({
                   style={{
                     fontSize: "larger",
                     fontWeight: "bold",
-                    lineHeight:0.5
+                    lineHeight: 0.5,
                   }}
                 >
                   Bharat Traders
@@ -117,8 +122,12 @@ const OrderPrint = ({
               )
               .replace("dd", ("00" + date?.getDate().toString()).slice(-2))}
           </td>
-          <td style={{ fontSize: "x-small" }} colSpan={7}>S.M: {user}</td>
-          <td style={{ fontSize: "x-small" }} colSpan={7}>Memo: Cash</td>
+          <td style={{ fontSize: "x-small" }} colSpan={7}>
+            S.M: {user}
+          </td>
+          <td style={{ fontSize: "x-small" }} colSpan={7}>
+            Memo: Cash
+          </td>
         </tr>
         <tr>
           <th colSpan={28}>
@@ -191,12 +200,12 @@ const OrderPrint = ({
         {item_details.map((item, i) => {
           const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid);
           let itemQty =
-            ((+item.b || 0) * (+itemInfo?.conversion || 1)) + (+item.p || 0);
+            (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0);
           let unit_price = (+item.item_total || 0) / (+itemQty || 1);
           let tex_amt =
             (+unit_price || 0) -
             ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0));
-          let dsc_amt =   (+item.price-(+unit_price || 0))*itemQty;
+          let dsc_amt = (+item.price - (+unit_price || 0)) * itemQty;
           return (
             <tr
               style={{ borderBottom: "1px solid #000" }}
@@ -215,7 +224,7 @@ const OrderPrint = ({
               >
                 {itemInfo?.conversion || ""}
               </td>
-       
+
               <td
                 style={{
                   fontSize: "x-small",
@@ -322,7 +331,7 @@ const OrderPrint = ({
             </tr>
           );
         })}
-        <tr style={{height:((15-item_details.length)*10)+"px"}}>
+        <tr style={{ height: (15 - item_details.length) * 10 + "px" }}>
           <td colspan="28"></td>
         </tr>
 
@@ -460,7 +469,8 @@ const OrderPrint = ({
                   ? order.item_details
                       .map((a) => +a.item_total || 0)
                       .reduce((a, b) => a + b)
-                  : order.item_details[0].item_total || 0 || 0).toFixed(2)}
+                  : order.item_details[0].item_total || 0 || 0
+                ).toFixed(2)}
               </th>
             </tr>
           </>
@@ -479,10 +489,8 @@ const OrderPrint = ({
           </th>
         </tr>
 
-
-      {footer ? (
-        <>
- 
+        {footer ? (
+          <>
             <tr>
               <td colSpan={14}>
                 <table
@@ -554,30 +562,28 @@ const OrderPrint = ({
                         textAlign: "right",
                       }}
                     >
-                      Order Total:{" "}
-                      {order.order_grandtotal||0}
+                      Order Total: {order.order_grandtotal || 0}
                     </th>
                   </tr>
                 </table>
               </td>
             </tr>
             <tr>
-          <th colSpan={28}>
-            <hr
-              style={{
-                height: "3px",
-                backgroundColor: "#000",
-                width: "100%",
-              }}
-            />
-          </th>
-        </tr>
-        </>
-      ) : (
-        
+              <th colSpan={28}>
+                <hr
+                  style={{
+                    height: "3px",
+                    backgroundColor: "#000",
+                    width: "100%",
+                  }}
+                />
+              </th>
+            </tr>
+          </>
+        ) : (
           <tr>
             <td
-            colSpan={28}
+              colSpan={28}
               style={{
                 fontSize: "xx-large",
                 fontWeight: "bolder",
@@ -587,10 +593,9 @@ const OrderPrint = ({
               Continue...
             </td>
           </tr>
-         
-      )}
-        </table>
-        <div style={{height:"50%"}}></div>
+        )}
+      </table>
+      
     </>
   );
 };

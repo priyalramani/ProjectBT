@@ -1106,22 +1106,22 @@ const MainAdmin = () => {
           )}
         </div>
       </div>
-      <div ref={componentRef}>
-        <div
+      <div style={{position:"fixed",top:-1000,right:-1000,  zIndex: "-1000",}}>
+        <div ref={componentRef}
           style={{
-            width: "20.5cm",
-            height: "29cm",
-            margin: "45mm 40mm 30mm 60mm",
+           marginTop:"20mm",
+           marginLeft:"20mm",
+           marginRight:"20mm"
+            // margin: "45mm 40mm 30mm 60mm",
             // textAlign: "center",
-            position: "fixed",
-            top: -100,
-            left: -180,
-            zIndex: "-1000",
+           
+          
             // padding: "10px"
           }}
         >
-          {selectedOrder.map((orderData) => (
+          {selectedOrder.map((orderData,index) => (
             <>
+            {index===0?"":<div style={{height:"20mm"}} ></div>}
               <OrderPrint
                 counter={counter.find(
                   (a) => a.counter_uuid === orderData.counter_uuid
