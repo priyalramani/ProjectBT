@@ -1,8 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-loop-func */
 import axios from "axios";
-import React, { useEffect, useState, useRef } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState, useRef, useContext } from "react";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  UNSAFE_NavigationContext,
+} from "react-router-dom";
 import { AiFillPlayCircle } from "react-icons/ai";
 import { openDB } from "idb";
 import { Billing } from "../functions";
@@ -15,7 +20,8 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import HomeIcon from "@mui/icons-material/Home";
 import { ArrowDropDown, SquareFoot } from "@mui/icons-material";
 let intervalId = 0;
-const ProcessingOrders = () => {
+
+const ProcessingOrders = ({ navigation }) => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
   const [itemChanged, setItemChanged] = useState([]);
   const [popupDelivery, setPopupDelivery] = useState(false);
@@ -51,7 +57,48 @@ const ProcessingOrders = () => {
   const [phonePopup, setPhonePopup] = useState(false);
   const [dropdown, setDropDown] = useState(false);
   const Navigate = useNavigate();
+  useEffect(() => {
+    if(selectedOrder){
+      (function (global) {
+      if (typeof global === "undefined") {
+        throw new Error("window is undefined");
+      }
 
+      var _hash = "!";
+      var noBackPlease = function () {
+        global.location.href += "#";
+
+        // making sure we have the fruit available for juice....
+        // 50 milliseconds for just once do not cost much (^__^)
+        global.setTimeout(function () {
+          global.location.href += "!";
+        }, 50);
+      };
+
+      // Earlier we had setInerval here....
+      global.onhashchange = function () {
+        if (global.location.hash !== _hash) {
+          global.location.hash = _hash;
+        }
+      };
+
+      global.onload = function () {
+        noBackPlease();
+
+        // disables backspace on page except on input fields and textarea..
+        document.body.onkeydown = function (e) {
+          var elm = e.target.nodeName.toLowerCase();
+          if (e.which === 8 && elm !== "input" && elm !== "textarea") {
+            e.preventDefault();
+          }
+          // stopping event bubbling up the DOM tree..
+          e.stopPropagation();
+        };
+      };
+    })(window);
+    }
+    
+  }, [selectedOrder]);
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -2580,7 +2627,8 @@ function DiliveryPopup({
       +(+modeTotal + (+outstanding?.amount || 0))
     );
     if (
-      +Tempdata?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
+      +Tempdata?.order_grandtotal !==
+      +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
       return;
