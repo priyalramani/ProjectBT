@@ -23,6 +23,7 @@ const Orders = () => {
       .objectStore("routes");
     let route = await store.getAll();
     setRoutes(route);
+    db.close();
   };
   useEffect(() => {
     getIndexedDbData();

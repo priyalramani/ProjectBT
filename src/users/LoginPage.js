@@ -92,6 +92,7 @@ const LoginPage = () => {
           }
         }
         setIsLoading(false);
+        db.close();
         let time = new Date();
         localStorage.setItem("indexed_time", time.getTime());
         window.location.assign("/users");

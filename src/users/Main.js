@@ -156,6 +156,7 @@ function Logout({ onSave, popupForm }) {
       }
       let time = new Date();
       localStorage.setItem("indexed_time", time.getTime());
+      db.close();
       onSave();
     } else {
       await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);

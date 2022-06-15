@@ -51,6 +51,7 @@ const SelectedCounterOrder = () => {
     store = await db.transaction("counter", "readwrite").objectStore("counter");
     let countersData = await store.getAll();
     setCounters(countersData);
+    db.close();
   };
   useEffect(() => {
     getIndexedDbData();
@@ -724,6 +725,7 @@ const SelectedCounterOrder = () => {
                 }).then((data) => {
                   setOrder((prev) => ({ ...prev, ...data }));
                   postOrder({ ...order, ...data });
+                  db.close();
                 });
               }, 2000);
             }}

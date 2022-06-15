@@ -96,6 +96,7 @@ const ProcessingOrders = () => {
       .objectStore("payment_modes");
     let PaymentData = await store.getAll();
     setPaymentModes(PaymentData);
+    db.close();
   };
 
   const audioLoopFunction = ({ i, recall, forcePlayCount }) => {
@@ -199,7 +200,7 @@ const ProcessingOrders = () => {
     let tx = db.transaction("items", "readonly").objectStore("items");
     let IDBItems = await tx.getAll();
     setItems(IDBItems);
-
+    db.close();
     const response = await axios({
       method: "post",
       url: `/orders/${

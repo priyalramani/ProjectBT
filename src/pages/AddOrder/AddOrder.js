@@ -10,6 +10,7 @@ import { v4 as uuid } from "uuid";
 import Select from "react-select";
 import { useIdleTimer } from "react-idle-timer";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import FreeItems from "../../components/FreeItems";
 const list = ["item_uuid", "q", "p"];
 
 export default function AddOrder() {
@@ -20,6 +21,7 @@ export default function AddOrder() {
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [counters, setCounters] = useState([]);
   const [counterFilter] = useState("");
+  const [holdPopup, setHoldPopup] = useState(false);
   // const selectRef = useRef();
   const [itemsData, setItemsData] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
@@ -194,7 +196,7 @@ export default function AddOrder() {
     data = {
       ...data,
       order_uuid: uuid(),
-      opened_by:0,
+      opened_by: 0,
       item_details: data.item_details.map((a) => ({
         ...a,
         unit_price: a.price,
@@ -357,7 +359,7 @@ export default function AddOrder() {
   };
 
   let listItemIndexCount = 0;
-
+console.log(order)
   return (
     <>
       <Sidebar />
@@ -406,6 +408,21 @@ export default function AddOrder() {
                   menuPlacement="auto"
                   placeholder="Select"
                 />
+                {order.counter_uuid ? (
+                  <button
+                    className="item-sales-search"
+                    style={{
+                      width: "max-content",
+                      position:"fixed",
+                      right:"100px"
+                    }}
+                    onClick={() => setHoldPopup("Summary")}
+                  >
+                    Free
+                  </button>
+                ) : (
+                  ""
+                )}
               </div>
             </div>
 
@@ -455,7 +472,6 @@ export default function AddOrder() {
                                   label: a.item_title + "______" + a.mrp,
                                   key: a.item_uuid,
                                 }))}
-                              z
                               onChange={(e) => {
                                 setTimeout(
                                   () => setQtyDetails((prev) => !prev),
@@ -777,12 +793,22 @@ export default function AddOrder() {
           </div>
         </div>
       </div>
-
+      {holdPopup ? (
+        <FreeItems
+          onSave={() => setHoldPopup(false)}
+          orders={order}
+          holdPopup={holdPopup}
+          itemsData={itemsData}
+          setOrder={setOrder}
+        />
+      ) : (
+        ""
+      )}
       {popup ? (
         <NewUserForm
           onClose={() => setPopup(false)}
           onSubmit={(e) => {
-            console.log(e)
+            console.log(e);
             setAutoAdd(e.autoAdd);
             if (e.stage === 3) setDeliveryPopup(true);
             else {

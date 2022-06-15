@@ -12,13 +12,14 @@ import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 import OrderPrint from "./OrderPrint";
 import { useIdleTimer } from "react-idle-timer";
+import FreeItems from "./FreeItems";
 export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
 
   const [orderData, setOrderData] = useState();
-  const [popup, setPopup] = useState(false);
+  const [holdPopup, setHoldPopup] = useState(false);
   const [autoBills, setAutoBills] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
   const [users, setUsers] = useState([]);
@@ -291,6 +292,19 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   >
                     Print
                   </button>
+                  {editOrder ? (
+                    <button
+                      className="item-sales-search"
+                      style={{
+                        width: "max-content",
+                      }}
+                      onClick={() => setHoldPopup("Summary")}
+                    >
+                      Free
+                    </button>
+                  ) : (
+                    ""
+                  )}
                   <button
                     style={{ width: "fit-Content" }}
                     className="item-sales-search"
@@ -456,7 +470,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                               +item.status === 1 || +item.status === 3
                                 ? "#fff"
                                 : "#000",
-                                borderBottom:"2px solid #fff"
+                            borderBottom: "2px solid #fff",
                           }}
                         >
                           <td className="ph2 pv1 tl bb b--black-20 bg-white">
@@ -693,6 +707,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           </div>
         </div>
       </div>
+      {holdPopup ? (
+        <FreeItems
+          onSave={() => setHoldPopup(false)}
+          orders={orderData}
+          holdPopup={holdPopup}
+          itemsData={itemsData}
+          setOrder={setOrderData}
+        />
+      ) : (
+        ""
+      )}
       {popupDetails ? (
         <CheckingValues
           onSave={() => setPopupDetails(false)}
