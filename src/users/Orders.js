@@ -75,27 +75,24 @@ const Orders = () => {
             alignItems: "center",
             flexDirection: "column",
             width: "100vw",
-            top: "10px",
+            paddingTop: "5px",
+            backgroundColor: "rgb(242, 242, 242)"
           }}
         >
-          {params.route_uuid ? (
-            ""
-          ) : (
-            <input
-              type="text"
-              onChange={(e) => setCounterFilter(e.target.value)}
-              value={counterFilter}
-              placeholder="Search Counter Title..."
-              className="searchInput counterSearch"
-              style={{ width: "200px" }}
-            />
-          )}
+          <input
+            type="text"
+            onChange={(e) => setCounterFilter(e.target.value)}
+            value={counterFilter}
+            placeholder="Search Counter Title..."
+            className="searchInput counterSearch"
+            style={{ width: "200px" }}
+          />
           {counterFilter.length >= 3 || params.route_uuid ? (
             <div
               style={{
                 overflowY: "scroll",
-                height: params.route_uuid ?"90vh":"70vh",
-                marginTop:params.route_uuid ?"10px": "100px",
+                height: params.route_uuid ? "90vh" : "80vh",
+                marginTop: params.route_uuid ? "10px" : "10px",
               }}
             >
               <table className="table" style={{ width: "100vw" }}>
@@ -104,11 +101,13 @@ const Orders = () => {
                     ?.filter((a) => a.counter_title)
                     ?.filter(
                       (a) =>
-                        window.location.pathname.includes("route")? params.route_uuid === a.route_uuid :
-                        !counterFilter ||
-                        a.counter_title
-                          .toLocaleLowerCase()
-                          .includes(counterFilter.toLocaleLowerCase())
+                        (!counterFilter ||
+                          a.counter_title
+                            .toLocaleLowerCase()
+                            .includes(counterFilter.toLocaleLowerCase())) &&
+                        (window.location.pathname.includes("route")
+                          ? params.route_uuid === a.route_uuid
+                          : true)
                     )
                     ?.map((item, index) => {
                       return (
@@ -178,7 +177,7 @@ const Orders = () => {
                 marginTop: "20px",
                 backgroundColor: "#f2f2f2",
                 overflowY: "scroll",
-                paddingBottom:"100px",
+                paddingBottom: "100px",
               }}
             >
               {routes.length
@@ -193,6 +192,7 @@ const Orders = () => {
                         }
                         className="linkDecoration"
                         onClick={() => {
+                          setCounterFilter("");
                           window.location.assign(
                             `/users/route/` + data.route_uuid
                           );
