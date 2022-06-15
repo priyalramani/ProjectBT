@@ -99,6 +99,9 @@ useEffect(()=>{
                   <Route path="/users/orders/:counter_uuid" element={<SelectedCounterOrder />} />
                   <Route path="/users/checking/:trip_uuid" element={<ProcessingOrders />} />
                   <Route path="/users/delivery/:trip_uuid" element={<ProcessingOrders />} />
+                  <Route path="/users/processing/:trip_uuid/:order_uuid" element={<ProcessingOrders />} />
+                  <Route path="/users/checking/:trip_uuid/:order_uuid" element={<ProcessingOrders />} />
+                  <Route path="/users/delivery/:trip_uuid/:order_uuid" element={<ProcessingOrders />} />
 
                   <Route path="*" element={<Navigate replace to={"/users"} />} />
                 </>
