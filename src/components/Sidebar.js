@@ -101,6 +101,10 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Outstandings",
               link: "/admin/Outstandings",
             },
+            {
+              name: "Pending Entry",
+              link: "/admin/pendingEntry",
+            },
             
           ]}
         />

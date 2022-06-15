@@ -760,6 +760,7 @@ const ProcessingOrders = () => {
       counter: counters.find(
         (a) => a.counter_uuid === selectedOrder.counter_uuid
       ),
+      add_discounts: true,
       items: selectedOrder.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {
@@ -1653,7 +1654,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
     let billingData = await Billing({
       replacement: data.replacement,
       counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
-
+      add_discounts: true,
       items: data.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {
@@ -2047,7 +2048,7 @@ function HoldPopup({
       let item = acc.find((item) => item.item_uuid === curr.item_uuid);
       if (item) {
         let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
-        ?.conversion;
+          ?.conversion;
         item.b = +item.b + curr.b + (+item.p + curr.p) / conversion;
         item.p = (+item.p + curr.p) % conversion;
       } else {
@@ -2552,7 +2553,7 @@ function DiliveryPopup({
     let billingData = await Billing({
       replacement: order.replacement,
       counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
-
+      add_discounts: true,
       items: order.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {
@@ -2562,6 +2563,7 @@ function DiliveryPopup({
         };
       }),
     });
+
     let Tempdata = {
       ...order,
       ...billingData,
@@ -2575,7 +2577,7 @@ function DiliveryPopup({
       +(+modeTotal + (+outstanding?.amount || 0))
     );
     if (
-      Tempdata?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
+      +Tempdata?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
       return;
