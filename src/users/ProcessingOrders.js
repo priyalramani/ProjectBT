@@ -380,6 +380,9 @@ const ProcessingOrders = () => {
       )
         data = {
           ...data,
+          item_details: data.item_details.map((a) =>
+            +a.status === 3 ? { ...a, b: 0, p: 0 } : a
+          ),
           processing_canceled: data?.item_details?.filter(
             (a) => +a.status === 3
           ),
@@ -437,6 +440,8 @@ const ProcessingOrders = () => {
     if (response.data.success) {
       console.log(response);
       sessionStorage.setItem("playCount", playCount);
+      setLoading(false);
+      getTripOrders();
       if (!hold) {
         let dataItem = Location.pathname.includes("processing")
           ? itemChanged
@@ -457,7 +462,7 @@ const ProcessingOrders = () => {
         }`;
         setLoading(false);
         setSelectedOrder(false);
-        getTripOrders();
+
         postActivity({
           activity:
             (Location.pathname.includes("checking")
@@ -1059,7 +1064,7 @@ const ProcessingOrders = () => {
                           <div className="t-head-element">Qty</div>
                         </th>
                         {!Location.pathname.includes("delivery") ? (
-                          <th>
+                          <th colSpan={2}>
                             <div className="t-head-element">Action</div>
                           </th>
                         ) : (
@@ -1280,50 +1285,54 @@ const ProcessingOrders = () => {
                                   ((+item.p || 0) + (+item.free || 0))}
                             </td>
                             {!Location.pathname.includes("delivery") ? (
-                              <td className="flex">
-                                <button
-                                  className="item-sales-search"
-                                  style={{ width: "max-content" }}
-                                  onClick={() => {
-                                    setOneTimeState();
+                              <>
+                                <td className="flex">
+                                  <button
+                                    className="item-sales-search"
+                                    style={{ width: "max-content" }}
+                                    onClick={() => {
+                                      setOneTimeState();
 
-                                    setSelectedOrder((prev) => ({
-                                      ...prev,
-                                      item_details: prev.item_details.map((a) =>
-                                        a.item_uuid === item.item_uuid
-                                          ? {
-                                              ...a,
-                                              status: +a.status === 2 ? 0 : 2,
-                                            }
-                                          : a
-                                      ),
-                                    }));
-                                  }}
-                                >
-                                  Hold
-                                </button>
-                                <button
-                                  className="item-sales-search"
-                                  style={{ width: "max-content" }}
-                                  onClick={() => {
-                                    setOneTimeState();
+                                      setSelectedOrder((prev) => ({
+                                        ...prev,
+                                        item_details: prev.item_details.map(
+                                          (a) =>
+                                            a.item_uuid === item.item_uuid
+                                              ? {
+                                                  ...a,
+                                                  status:
+                                                    +a.status === 2 ? 0 : 2,
+                                                }
+                                              : a
+                                        ),
+                                      }));
+                                    }}
+                                  >
+                                    Hold
+                                  </button>
+                                </td>
+                                <td>
+                                  <DeleteOutlineIcon
+                                    onClick={() => {
+                                      setOneTimeState();
 
-                                    setSelectedOrder((prev) => ({
-                                      ...prev,
-                                      item_details: prev.item_details.map((a) =>
-                                        a.item_uuid === item.item_uuid
-                                          ? {
-                                              ...a,
-                                              status: +a.status === 3 ? 0 : 3,
-                                            }
-                                          : a
-                                      ),
-                                    }));
-                                  }}
-                                >
-                                  Cancel
-                                </button>
-                              </td>
+                                      setSelectedOrder((prev) => ({
+                                        ...prev,
+                                        item_details: prev.item_details.map(
+                                          (a) =>
+                                            a.item_uuid === item.item_uuid
+                                              ? {
+                                                  ...a,
+                                                  status:
+                                                    +a.status === 3 ? 0 : 3,
+                                                }
+                                              : a
+                                        ),
+                                      }));
+                                    }}
+                                  />
+                                </td>
+                              </>
                             ) : (
                               ""
                             )}
@@ -3128,7 +3137,7 @@ function OpenWarningMessage({ onSave, data, users, onClose }) {
               </div>
             </form>
           </div>
-          <button onClick={onSave} className="closeButton">
+          <button onClick={onClose} className="closeButton">
             x
           </button>
         </div>
