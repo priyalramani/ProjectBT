@@ -194,6 +194,7 @@ export default function AddOrder() {
     data = {
       ...data,
       order_uuid: uuid(),
+      opened_by:0,
       item_details: data.item_details.map((a) => ({
         ...a,
         unit_price: a.price,

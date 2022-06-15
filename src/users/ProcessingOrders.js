@@ -790,12 +790,16 @@ const ProcessingOrders = () => {
               } else Navigate(-1);
             }}
           />
-         {!selectedOrder? <HomeIcon
-            className="user_Back_icon"
-            onClick={() => {
-              Navigate("/users");
-            }}
-          />:""}
+          {!selectedOrder ? (
+            <HomeIcon
+              className="user_Back_icon"
+              onClick={() => {
+                Navigate("/users");
+              }}
+            />
+          ) : (
+            ""
+          )}
         </div>
 
         <h1 style={{ width: "100%", textAlign: "left", marginLeft: "30px" }}>
@@ -944,14 +948,13 @@ const ProcessingOrders = () => {
           left: "0",
           top: "50px",
           textAlign: "center",
-          height: "90vh",
         }}
       >
         {selectedOrder ? (
           <>
             <div
               className="flex"
-              style={{ justifyContent: "space-between", margin: "10px 0",height:"90vh" }}
+              style={{ justifyContent: "space-between", margin: "10px 0" }}
             >
               <h2 style={{ width: "20vw", textAlign: "start" }}>
                 {selectedOrder.invoice_number}
@@ -1015,7 +1018,7 @@ const ProcessingOrders = () => {
             left: "0",
             top: "0",
             display: "flex",
-            height: "90vh",
+            minHeight: "95vh",
           }}
         >
           <table
@@ -2021,13 +2024,14 @@ function HoldPopup({
           (holdPopup === "Hold" ? 2 : holdPopup === "Checking Summary" ? 1 : 0)
       )
       .map((a) => {
-        let itemDetails= itemsData?.find((b) => b.item_uuid === a.item_uuid)
-          
+        let itemDetails = itemsData?.find((b) => b.item_uuid === a.item_uuid);
+
         return {
-        ...a,
-        item_title: itemDetails?.item_title,
-        mrp: itemDetails?.mrp,
-      }});
+          ...a,
+          item_title: itemDetails?.item_title,
+          mrp: itemDetails?.mrp,
+        };
+      });
     console.log(data);
     let result = data.reduce((acc, curr) => {
       let item = acc.find((item) => item.item_uuid === curr.item_uuid);
@@ -2184,7 +2188,7 @@ function HoldPopup({
                                   key={item?.item_uuid || Math.random()}
                                   style={{
                                     height: "30px",
-                                    fontSize:"12px",
+                                    fontSize: "12px",
                                     color: "#fff",
                                     backgroundColor:
                                       +item.status === 1
@@ -2195,7 +2199,7 @@ function HoldPopup({
                                   }}
                                 >
                                   <td
-                                  style={{padding:"5px"}}
+                                    style={{ padding: "5px" }}
                                     onClick={() =>
                                       setItems((prev) =>
                                         prev.map((a) =>
@@ -2216,7 +2220,9 @@ function HoldPopup({
                                     }
                                   >
                                     {+item.status !== 1 ? (
-                                      <CheckCircleOutlineIcon style={{width:"15px"}}/>
+                                      <CheckCircleOutlineIcon
+                                        style={{ width: "15px" }}
+                                      />
                                     ) : (
                                       ""
                                     )}
@@ -2232,7 +2238,7 @@ function HoldPopup({
                                         {item?.b || 0} : {item?.p || 0}
                                       </td>
                                       <td
-                                      style={{padding:"5px"}}
+                                        style={{ padding: "5px" }}
                                         onClick={() =>
                                           setItems((prev) =>
                                             prev.map((a) =>
@@ -2253,7 +2259,9 @@ function HoldPopup({
                                         }
                                       >
                                         {+item.status !== 3 ? (
-                                          <DeleteOutlineIcon  style={{width:"15px"}}/>
+                                          <DeleteOutlineIcon
+                                            style={{ width: "15px" }}
+                                          />
                                         ) : (
                                           ""
                                         )}
@@ -3166,12 +3174,14 @@ function NewUserForm({
                     ? {
                         item_uuid: popupInfo.item_uuid,
                         b:
-                          +data.b -
+                          +a.b +
+                          data.b -
                           (+orderData?.item_details?.find(
                             (a) => a.item_uuid === popupInfo.item_uuid
                           )?.b || 0),
                         p:
-                          +data.p -
+                          +a.b +
+                          data.p -
                           (+orderData?.item_details?.find(
                             (a) => a.item_uuid === popupInfo.item_uuid
                           )?.p || 0),
@@ -3232,15 +3242,17 @@ function NewUserForm({
                   ? {
                       item_uuid: popupInfo.item_uuid,
                       b:
-                        +data.b -
+                        +a.b +
                         (+orderData?.item_details?.find(
                           (a) => a.item_uuid === popupInfo.item_uuid
-                        )?.b || 0),
+                        )?.b || 0) -
+                        data.b,
                       p:
-                        +data.p -
+                        +a.p +
                         (+orderData?.item_details?.find(
                           (a) => a.item_uuid === popupInfo.item_uuid
-                        )?.p || 0),
+                        )?.p || 0) -
+                        data.p,
                     }
                   : a
               )
@@ -3249,30 +3261,26 @@ function NewUserForm({
                 {
                   item_uuid: popupInfo.item_uuid,
                   b:
-                    +data.b -
                     (+orderData?.item_details?.find(
                       (a) => a.item_uuid === popupInfo.item_uuid
-                    )?.b || 0),
+                    )?.b || 0) - data.b,
                   p:
-                    +data.p -
                     (+orderData?.item_details?.find(
                       (a) => a.item_uuid === popupInfo.item_uuid
-                    )?.p || 0),
+                    )?.p || 0) - data.p,
                 },
               ]
           : [
               {
                 item_uuid: popupInfo.item_uuid,
                 b:
-                  +data.b -
                   (+orderData?.item_details?.find(
                     (a) => a.item_uuid === popupInfo.item_uuid
-                  )?.b || 0),
+                  )?.b || 0) - data.b,
                 p:
-                  +data.p -
                   (+orderData?.item_details?.find(
                     (a) => a.item_uuid === popupInfo.item_uuid
-                  )?.p || 0),
+                  )?.p || 0) - data.p,
               },
             ],
         item_details: orderData.item_details.map((a) =>
