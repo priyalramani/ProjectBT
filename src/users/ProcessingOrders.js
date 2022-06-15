@@ -1438,6 +1438,9 @@ const ProcessingOrders = () => {
                         )}
                       </tr>
                     ))}
+              <tr>
+                <td style={{ height: "80px" }}></td>
+              </tr>
             </tbody>
           </table>
         </div>
