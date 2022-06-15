@@ -1135,13 +1135,13 @@ const MainAdmin = () => {
                 }
                 itemData={items}
                 item_details={
-                  orderData?.item_details?.length > 16
-                    ? orderData?.item_details?.slice(0, 16)
+                  orderData?.item_details?.length > 14
+                    ? orderData?.item_details?.slice(0, 14)
                     : orderData?.item_details
                 }
-                footer={!(orderData.item_details > 16)}
+                footer={!(orderData.item_details > 14)}
               />
-              {orderData.item_details > 16 ? (
+              {orderData.item_details > 14 ? (
                 <OrderPrint
                   counter={counter.find(
                     (a) => a.counter_uuid === orderData.counter_uuid
@@ -1155,7 +1155,7 @@ const MainAdmin = () => {
                   }
                   itemData={items}
                   item_details={orderData.item_details.slice(
-                    16,
+                    14,
                     orderData.item.length
                   )}
                   footer={true}

@@ -51,7 +51,7 @@ const OrderPrint = ({
               <tr>
                 <td style={{ fontSize: "x-small" }}>
                   Ganesh Nagar, Near Sharda Convent School,
-                  <br /> Ganesh Nagar, Gondia - 441601
+                  <br /> Ganesh Nagar, Gondia - 441401
                 </td>
               </tr>
               <tr>
@@ -322,7 +322,7 @@ const OrderPrint = ({
             </tr>
           );
         })}
-        <tr style={{height:((17-item_details.length)*10)+"px"}}>
+        <tr style={{height:((15-item_details.length)*10)+"px"}}>
           <td colspan="28"></td>
         </tr>
 
