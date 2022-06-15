@@ -381,5 +381,5 @@ export const updateIndexedDb = async () => {
   let time = new Date();
   localStorage.setItem("indexed_time", time.getTime());
   db.close();
-  window.location.reload();
+  window.location.reload(true);
 };

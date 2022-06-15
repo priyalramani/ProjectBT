@@ -55,7 +55,7 @@ const Main = () => {
   }, []);
   console.log(typeof userRole);
   return (
-    <PullToRefresh onRefresh={()=>window.location.reload()}>
+    <PullToRefresh onRefresh={()=>window.location.reload(true)}>
     <div className="servicePage" style={{ maxHeight: "100vh" }}>
       <div className="servicesContainer">
         {userRole?.map((data, i) => (
