@@ -1,25 +1,25 @@
 import React from "react";
 
 const OrderPrint = ({
-  counter,
-  order,
-  date,
-  user,
-  itemData,
-  item_details,
-  footer,
+  counter=[],
+  order={item_details:[]},
+  date="",
+  user={},
+  itemData=[],
+  item_details=[],
+  footer=false,
 }) => {
-  let total_desc_amt = order.item_details.map((item) => {
-    const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid);
+  let total_desc_amt = order?.item_details?.map((item) => {
+    const itemInfo = itemData?.find((a) => a.item_uuid === item.item_uuid);
     let itemQty =
       (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0);
-    let unit_price = (+item.item_total || 0) / (+itemQty || 1);
+    let unit_price = (+item?.item_total || 0) / (+itemQty || 1);
     let tex_amt =
-      (+unit_price || 0) -
-      ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0));
-    let dsc_amt = (+item.price - (+unit_price || 0)) * itemQty;
+   (   (+unit_price || 0) -
+      ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0)))||0;
+    let dsc_amt = (+item.price - (+unit_price || 0)) * itemQty||0;
     return { dsc_amt, tex_amt };
-  });
+  })||[];
   return (
     <>
       <table
@@ -87,7 +87,7 @@ const OrderPrint = ({
 
               <tr>
                 <td style={{ fontSize: "x-small" }}>
-                  {counter?.mobile.map((a, i) => (i === 0 ? a : ", " + a)) ||
+                  {counter?.mobile?.map((a, i) => (i === 0 ? a : ", " + a)) ||
                     ""}
                 </td>
               </tr>
@@ -107,7 +107,7 @@ const OrderPrint = ({
         </tr>
         <tr>
           <td style={{ fontSize: "x-small" }} colSpan={7}>
-            Invoice: {order.invoice_number}
+            Invoice: {order?.invoice_number}
           </td>
           <td style={{ fontSize: "x-small" }} colSpan={7}>
             Date:{" "}
@@ -197,7 +197,7 @@ const OrderPrint = ({
             />
           </th>
         </tr>
-        {item_details.map((item, i) => {
+        {item_details?.map((item, i) => {
           const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid);
           let itemQty =
             (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0);
@@ -211,7 +211,7 @@ const OrderPrint = ({
               style={{ borderBottom: "1px solid #000" }}
               className="order_item"
             >
-              <td style={{ fontSize: "x-small" }}>{i + 1}</td>
+              <td style={{ fontSize: "x-small" }}>{item?.sr||(i + 1)}.</td>
               <td style={{ fontSize: "x-small" }} colSpan={3}>
                 {itemInfo?.item_title || ""}
               </td>
@@ -331,7 +331,7 @@ const OrderPrint = ({
             </tr>
           );
         })}
-        <tr style={{ height: (15 - item_details.length) * 10 + "px" }}>
+        <tr style={{ height: (15 - item_details?.length) * 10 + "px" }}>
           <td colspan="28"></td>
         </tr>
 
@@ -434,9 +434,9 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               >
-                {(total_desc_amt.length > 1
-                  ? total_desc_amt.map((a) => a.dsc_amt).reduce((a, b) => a + b)
-                  : total_desc_amt[0].dsc_amt || 0
+                {(total_desc_amt?.length > 1
+                  ? total_desc_amt?.map((a) => a.dsc_amt).reduce((a, b) => a + b)
+                  : total_desc_amt[0]?.dsc_amt || 0
                 ).toFixed(2)}
               </th>
               <th
@@ -446,9 +446,9 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               >
-                {(total_desc_amt.length > 1
-                  ? total_desc_amt.map((a) => a.tex_amt).reduce((a, b) => a + b)
-                  : total_desc_amt[0].tex_amt || 0
+                {(total_desc_amt?.length > 1
+                  ? total_desc_amt?.map((a) => a.tex_amt).reduce((a, b) => a + b)
+                  : total_desc_amt[0]?.tex_amt || 0
                 ).toFixed(2)}
               </th>
               <td
@@ -465,11 +465,11 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               >
-                {(order.item_details.length > 1
-                  ? order.item_details
-                      .map((a) => +a.item_total || 0)
+                {(order?.item_details?.length > 1
+                  ? order?.item_details
+                      ?.map((a) => +a.item_total || 0)
                       .reduce((a, b) => a + b)
-                  : order.item_details[0].item_total || 0 || 0
+                  : order?.item_details[0]?.item_total || 0 || 0
                 ).toFixed(2)}
               </th>
             </tr>
@@ -562,7 +562,7 @@ const OrderPrint = ({
                         textAlign: "right",
                       }}
                     >
-                      Order Total: {order.order_grandtotal || 0}
+                      Order Total: {order?.order_grandtotal || 0}
                     </th>
                   </tr>
                 </table>
