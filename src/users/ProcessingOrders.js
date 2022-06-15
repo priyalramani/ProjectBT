@@ -60,10 +60,12 @@ const ProcessingOrders = ({ navigation }) => {
   useEffect(() => {
     window.history.pushState(null, document.title, window.location.href);
     window.addEventListener("popstate", function (event) {
+      window.history.pushState(null, document.title, window.location.href);
       if (selectedOrder) {
-        window.history.pushState(null, document.title, window.location.href);
         setConfirmPopup(true);
-      } 
+      }else{
+        Navigate(-1)
+      }
     });
   }, [selectedOrder]);
   const getUsers = async () => {
@@ -1564,7 +1566,9 @@ const ProcessingOrders = ({ navigation }) => {
             audiosRef.current = null;
             console.clear();
           }}
+          selectedOrder={selectedOrder}
           onClose={() => setConfirmPopup(false)}
+          Navigate={Navigate}
         />
       ) : (
         ""
@@ -2982,7 +2986,11 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
     </div>
   );
 }
-function ConfirmPopup({ onSave, onClose }) {
+function ConfirmPopup({ onSave, onClose, selectedOrder, Navigate }) {
+  useEffect(() => {
+    console.log("selectedOrder", selectedOrder);
+    if (!selectedOrder) Navigate(-1);
+  }, []);
   return (
     <div className="overlay">
       <div
