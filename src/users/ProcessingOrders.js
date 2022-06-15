@@ -51,7 +51,6 @@ const ProcessingOrders = ({ navigation }) => {
   const [tempQuantity, setTempQuantity] = useState([]);
   const [users, setUsers] = useState([]);
   const [warningPopup, setWarningPopUp] = useState(false);
-  const [update, setUpdate] = useState(false);
   const [deletePopup, setDeletePopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const [phonePopup, setPhonePopup] = useState(false);
@@ -60,14 +59,14 @@ const ProcessingOrders = ({ navigation }) => {
   useEffect(() => {
     window.history.pushState(null, document.title, window.location.href);
     window.addEventListener("popstate", function (event) {
-      window.history.pushState(null, document.title, window.location.href);
       if (selectedOrder) {
         setConfirmPopup(true);
-      }else{
-        Navigate(-1)
+        window.history.pushState(null, document.title, window.location.href);
+      } else {
+        Navigate(-1);
       }
     });
-  }, [selectedOrder]);
+  }, [selectedOrder,confirmPopup]);
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -796,7 +795,7 @@ const ProcessingOrders = ({ navigation }) => {
     if (Location.pathname.includes("delivery")) {
       updateBillingAmount();
     }
-  }, [update]);
+  }, []);
 
   return (
     <div>
@@ -2987,11 +2986,8 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
   );
 }
 function ConfirmPopup({ onSave, onClose, selectedOrder, Navigate }) {
-  useEffect(() => {
-    console.log("selectedOrder", selectedOrder);
-    if (!selectedOrder) Navigate(-1);
-  }, []);
-  return (
+  if (!selectedOrder) Navigate(-1);
+  return selectedOrder ? (
     <div className="overlay">
       <div
         className="modal"
@@ -3026,6 +3022,8 @@ function ConfirmPopup({ onSave, onClose, selectedOrder, Navigate }) {
         </div>
       </div>
     </div>
+  ) : (
+    ""
   );
 }
 function DeliveryMessagePopup({ onSave, data, credit_allowed }) {
