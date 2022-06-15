@@ -66,7 +66,7 @@ const ProcessingOrders = ({ navigation }) => {
         Navigate(-1);
       }
     });
-  }, [selectedOrder,confirmPopup]);
+  }, [selectedOrder, confirmPopup]);
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -685,7 +685,7 @@ const ProcessingOrders = ({ navigation }) => {
                     {
                       ...ItemData,
                       ...orderItem,
-                      barcodeQty: a.qty,
+                      barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
                       case: 1,
                       qty:
                         (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
@@ -697,7 +697,7 @@ const ProcessingOrders = ({ navigation }) => {
                     {
                       ...ItemData,
                       ...orderItem,
-                      barcodeQty: a.qty,
+                      barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
                       case: 1,
                       qty:
                         (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
@@ -1147,7 +1147,8 @@ const ProcessingOrders = ({ navigation }) => {
                               : "#000"
                             : "#000",
                         }}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation()
                           if (Location.pathname.includes("checking")) {
                             setTempQuantity(
                               tempQuantity?.filter(
@@ -1355,7 +1356,16 @@ const ProcessingOrders = ({ navigation }) => {
                             )}
                           </>
                         ) : (
-                          <td>
+                          <td
+                            onClick={(e) => {
+                              e.stopPropagatio();
+                              setPopupForm(
+                                items.find(
+                                  (a) => a.item_uuid === item.item_uuid
+                                )
+                              );
+                            }}
+                          >
                             {tempQuantity?.find(
                               (a) => a.item_uuid === item.item_uuid
                             )?.b || 0}
@@ -1752,22 +1762,22 @@ function CheckingValues({
             style={{
               height: "fit-content",
               padding: "20px",
-              width: "fit-content",
+              width: "500px",
             }}
           >
             <div style={{ overflowY: "scroll", width: "100%" }}>
-              {BarcodeMessage?.filter((a) => +a.case === 1 && a.barcodeQty)
+              {BarcodeMessage?.filter((a) => +a.case === 1)
                 .length ? (
                 <div
                   className="flex"
-                  style={{ flexDirection: "column", width: "100%" }}
+                  style={{ flexDirection: "column",width:"300px" }}
                 >
                   {" "}
                   <i>Incorrect Quantity</i>
                   <table
                     className="user-table"
                     style={{
-                      width: "max-content",
+                      width: "100%",
                       height: "fit-content",
                     }}
                   >
@@ -1789,7 +1799,7 @@ function CheckingValues({
                     </thead>
                     <tbody className="tbody">
                       {BarcodeMessage?.filter(
-                        (a) => +a.case === 1 && a.barcodeQty
+                        (a) => +a.case === 1
                       )?.map((item, i) => (
                         <tr
                           key={item?.item_uuid || Math.random()}
@@ -1816,13 +1826,13 @@ function CheckingValues({
                 ""
               )}
               {BarcodeMessage?.filter((a) => +a.case === 2).length ? (
-                <div className="flex" style={{ flexDirection: "column" }}>
+                <div className="flex" style={{ flexDirection: "column",width:"300px" }}>
                   {" "}
                   <i>Remove Extra Items</i>
                   <table
                     className="user-table"
                     style={{
-                      width: "max-content",
+                      width: "100%",
                       height: "fit-content",
                       backgroundColor: "yellow",
                       color: "#fff",
@@ -1864,15 +1874,15 @@ function CheckingValues({
               ) : (
                 ""
               )}
-              {BarcodeMessage?.filter((a) => +a.case === 1 && !a.barcodeQty)
+              {/* {BarcodeMessage?.filter((a) => +a.case === 1 && !a.barcodeQty)
                 .length ? (
-                <div className="flex" style={{ flexDirection: "column" }}>
+                <div className="flex" style={{ flexDirection: "column",width:"300px" }}>
                   {" "}
                   <i>Add Items</i>
                   <table
                     className="user-table"
                     style={{
-                      width: "max-content",
+                      width: "100%",
                       height: "fit-content",
                       backgroundColor: "yellow",
                       color: "#000",
@@ -1915,11 +1925,11 @@ function CheckingValues({
                 </div>
               ) : (
                 ""
-              )}
+              )} */}
               {BarcodeMessage?.filter((a) => +a.case === 3).length ? (
                 <div
                   className="flex"
-                  style={{ flexDirection: "column", width: "100%" }}
+                  style={{ flexDirection: "column",width:"300px" }}
                 >
                   {" "}
                   <i>Unknown Barcode</i>
@@ -1961,7 +1971,7 @@ function CheckingValues({
               ) : (
                 ""
               )}
-              <div className="flex" style={{ justifyContent: "space-between" }}>
+              <div className="flex" style={{ justifyContent: "space-between",width:"300px" }}>
                 <button
                   type="button"
                   style={{ backgroundColor: "red" }}
