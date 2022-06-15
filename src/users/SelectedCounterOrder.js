@@ -1016,7 +1016,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
                   >
                     Pcs
                     <input
-                      type="text"
+                      type="number"
                       name="route_title"
                       className="numberInput"
                       value={data?.p}
