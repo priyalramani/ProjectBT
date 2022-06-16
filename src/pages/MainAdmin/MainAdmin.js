@@ -1443,17 +1443,16 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
           : a.status[0].stage,
     }));
     setFilteredOrder(orderStage);
+    console.log("orders",[].concat
+    .apply(
+      [],
+      orderStage.map((a) => a.item_details)
+    ))
     orderStage = orderStage.filter(
       (a) => stage === "all" || +a.stage === stage
     );
     console.log(orderStage);
-    setOrderTotal(
-      orderStage.length > 1
-        ? orderStage
-            .map((a) => +a?.order_grandtotal || 0)
-            .reduce((a, b) => a + b)
-        : orderStage[0]?.order_grandtotal
-    );
+
     let data = [].concat
       .apply(
         [],
@@ -1473,18 +1472,32 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
     console.log(data);
     let result = data.reduce((acc, curr) => {
       let item = acc.find((item) => item.item_uuid === curr.item_uuid);
-
       if (item) {
         let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
           ?.conversion;
-        item.b = +item.b + curr.b + (+item.p + curr.p) / conversion;
-        item.p = (+item.p + curr.p) % conversion;
+        item.b = parseInt(
+          +item.b +
+            curr.b +
+            (+item.p + curr.p + ((+item.free || 0) + (+curr.free || 0))) /
+              conversion
+        );
+        item.p = parseInt(
+          (+item.p + curr.p + ((+item.free || 0) + (+curr.free || 0))) %
+            conversion
+        );
       } else {
         acc.push(curr);
       }
 
       return acc;
     }, []);
+    setOrderTotal(
+      orderStage.length > 1
+        ? orderStage
+            .map((a) => +a?.order_grandtotal || 0)
+            .reduce((a, b) => a + b)
+        : orderStage[0]?.order_grandtotal
+    );
     console.log(result);
     setItems(result);
   }, [stage, itemStatus]);
