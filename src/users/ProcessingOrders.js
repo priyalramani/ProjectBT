@@ -772,9 +772,7 @@ const ProcessingOrders = ({ navigation }) => {
   const updateBillingAmount = async () => {
     let billingData = await Billing({
       replacement: selectedOrder.replacement,
-      counter: counters.find(
-        (a) => a.counter_uuid === selectedOrder.counter_uuid
-      ),
+      counter: counters.find((a) => a.counter_uuid === selectedOrder.counter_uuid),
       add_discounts: true,
       items: selectedOrder.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
@@ -1478,11 +1476,8 @@ const ProcessingOrders = ({ navigation }) => {
             if (data) {
               // setUpdate((prev) => !prev);
               let billingData = await Billing({
-                replacement: data.replacement,
-                counter: counters.find(
-                  (a) => a.counter_uuid === data.counter_uuid
-                ),
-
+                counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
+                add_discounts: true,
                 items: data.item_details.map((a) => {
                   let itemData = items.find((b) => a.item_uuid === b.item_uuid);
                   return {
@@ -1491,7 +1486,7 @@ const ProcessingOrders = ({ navigation }) => {
                     price: itemData?.price || 0,
                   };
                 }),
-                add_discounts: true,
+
               });
               setSelectedOrder((prev) => ({
                 ...prev,
