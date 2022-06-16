@@ -58,8 +58,9 @@ const Card = ({
     return finalHours;
   }
 
-  const cardColor1Height = (hours(new Date(dateTime)) * 100) / +details.map((a) => a.order_time_1)[0];
-  const cardColor2Height = (hours(new Date(dateTime)) * 100) / +details.map((a) => a.order_time_2)[0];
+  const order_time_1 = +details.map((a) => a.order_time_1)[0]
+  const cardColor1Height = (hours(new Date(dateTime)) * 100) / order_time_1;
+  const cardColor2Height = ((hours(new Date(dateTime)) - order_time_1) * 100) / +details.map((a) => +a.order_time_2 - order_time_1)[0];
 
   return (
     <>
