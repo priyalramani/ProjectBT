@@ -157,11 +157,11 @@ function Table({ itemsDetails }) {
 
 
     var hours = time / 3600000;
-    var minutes = (+(hours-(+hours.toString().split(".")[0])) * 60).toFixed(0);
+    var minutes = parseInt(+(hours-(+hours.toString().split(".")[0])) * 60);
 
     minutes = +minutes < 10 ? "0" + minutes : minutes;
 
-    var strTime = hours.toFixed(0) + ":" + minutes;
+    var strTime = parseInt(hours) + ":" + minutes;
     return strTime;
   }
   return (
