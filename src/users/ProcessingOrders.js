@@ -2629,6 +2629,8 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
                           p: e.target.value,
                         })
                       }
+                      autoComplete={true}
+                      autoFocus={true}
                       maxLength={42}
                     />
                   </label>
@@ -3582,6 +3584,8 @@ function NewUserForm({
                           p: e.target.value,
                         })
                       }
+                      autoComplete={true}
+                      autoFocus={true}
                       maxLength={42}
                     />
                   </label>

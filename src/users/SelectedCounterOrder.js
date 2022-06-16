@@ -1029,6 +1029,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
                           p: e.target.value,
                         })
                       }
+                      autoFocus={true}
                       maxLength={42}
                     />
                   </label>
