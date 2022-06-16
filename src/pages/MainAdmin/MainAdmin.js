@@ -1121,85 +1121,97 @@ const MainAdmin = () => {
             // padding: "10px"
           }}
         >
-          {selectedOrder.map((orderData, index) => (
-            <>
-              {index === 0 ? "" : <div style={{ height: "20mm" }}></div>}
-              <OrderPrint
-                counter={counter.find(
-                  (a) => a.counter_uuid === orderData?.counter_uuid
+          {selectedOrder
+            .map((a) => ({
+              ...a,
+              sort_order: +category.find(
+                (b) => b.category_uuid === a.category_uuid
+              )?.sort_order,
+            }))
+            .sort((a, b) => a.sort_order - b.sort_order)
+            .map((a) => ({
+              ...a,
+              item_details: a.item_details.map((b, i) => ({ ...b, sr: i + 1 })),
+            }))
+            .map((orderData, index) => (
+              <>
+                {index === 0 ? "" : <div style={{ height: "20mm" }}></div>}
+                <OrderPrint
+                  counter={counter.find(
+                    (a) => a.counter_uuid === orderData?.counter_uuid
+                  )}
+                  order={orderData}
+                  date={new Date(orderData?.status[0]?.time)}
+                  user={
+                    users.find(
+                      (a) => a.user_uuid === orderData.status[0].user_uuid
+                    )?.user_title || ""
+                  }
+                  itemData={items}
+                  item_details={
+                    orderData?.item_details?.length > 14
+                      ? orderData?.item_details?.slice(0, 14)
+                      : orderData?.item_details
+                  }
+                  footer={!(orderData?.item_details?.length > 14)}
+                />
+                {orderData?.item_details?.length > 14 ? (
+                  <>
+                    <div style={{ height: "20mm" }}></div>
+                    <OrderPrint
+                      counter={counter.find(
+                        (a) => a.counter_uuid === orderData?.counter_uuid
+                      )}
+                      order={orderData}
+                      date={new Date(orderData?.status[0]?.time)}
+                      user={
+                        users.find(
+                          (a) => a.user_uuid === orderData?.status[0]?.user_uuid
+                        )?.user_title || ""
+                      }
+                      itemData={items}
+                      item_details={
+                        orderData?.item_details?.length > 28
+                          ? orderData?.item_details?.slice(14, 28)
+                          : orderData?.item_details?.slice(
+                              14,
+                              orderData?.item_details?.length
+                            )
+                      }
+                      footer={!(orderData?.item_details?.length > 28)}
+                    />
+                  </>
+                ) : (
+                  ""
                 )}
-                order={orderData}
-                date={new Date(orderData?.status[0]?.time)}
-                user={
-                  users.find(
-                    (a) => a.user_uuid === orderData.status[0].user_uuid
-                  )?.user_title || ""
-                }
-                itemData={items}
-                item_details={
-                  orderData?.item_details?.length > 14
-                    ? orderData?.item_details?.slice(0, 14)
-                    : orderData?.item_details
-                }
-                footer={!(orderData?.item_details?.length > 14)}
-              />
-              {orderData?.item_details?.length > 14 ? (
-                <>
-                  <div style={{ height: "20mm" }}></div>
-                  <OrderPrint
-                    counter={counter.find(
-                      (a) => a.counter_uuid === orderData?.counter_uuid
-                    )}
-                    order={orderData}
-                    date={new Date(orderData?.status[0]?.time)}
-                    user={
-                      users.find(
-                        (a) => a.user_uuid === orderData?.status[0]?.user_uuid
-                      )?.user_title || ""
-                    }
-                    itemData={items}
-                    item_details={
-                      orderData?.item_details?.length > 28
-                        ? orderData?.item_details?.slice(14, 28)
-                        : orderData?.item_details?.slice(
-                            14,
-                            orderData?.item_details?.length
-                          )
-                    }
-                    footer={!(orderData?.item_details?.length > 28)}
-                  />
-                </>
-              ) : (
-                ""
-              )}
 
-              {orderData?.item_details?.length > 28 ? (
-                <>
-                  <div style={{ height: "20mm" }}></div>
-                  <OrderPrint
-                    counter={counter.find(
-                      (a) => a.counter_uuid === orderData?.counter_uuid
-                    )}
-                    order={orderData}
-                    date={new Date(orderData?.status[0]?.time)}
-                    user={
-                      users.find(
-                        (a) => a.user_uuid === orderData?.status[0]?.user_uuid
-                      )?.user_title || ""
-                    }
-                    itemData={items}
-                    item_details={orderData?.item_details?.slice(
-                      28,
-                      orderData?.item_details.length
-                    )}
-                    footer={true}
-                  />
-                </>
-              ) : (
-                ""
-              )}
-            </>
-          ))}
+                {orderData?.item_details?.length > 28 ? (
+                  <>
+                    <div style={{ height: "20mm" }}></div>
+                    <OrderPrint
+                      counter={counter.find(
+                        (a) => a.counter_uuid === orderData?.counter_uuid
+                      )}
+                      order={orderData}
+                      date={new Date(orderData?.status[0]?.time)}
+                      user={
+                        users.find(
+                          (a) => a.user_uuid === orderData?.status[0]?.user_uuid
+                        )?.user_title || ""
+                      }
+                      itemData={items}
+                      item_details={orderData?.item_details?.slice(
+                        28,
+                        orderData?.item_details.length
+                      )}
+                      footer={true}
+                    />
+                  </>
+                ) : (
+                  ""
+                )}
+              </>
+            ))}
         </div>
       </div>
       {popupForm ? (

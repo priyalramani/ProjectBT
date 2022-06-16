@@ -331,7 +331,7 @@ const OrderPrint = ({
             </tr>
           );
         })}
-        <tr style={{ height: (15 - item_details?.length) * 10 + "px" }}>
+        <tr style={{ height: (14 - item_details?.length) * 10 + "px" }}>
           <td colspan="28"></td>
         </tr>
 
