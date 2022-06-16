@@ -389,7 +389,7 @@ export const updateIndexedDb = async () => {
 
 export const audioLoopFunction = ({ i, recall, forcePlayCount, src, callback }) => {
   try {
-    clearInterval(sessionStorage.getItem('intervalId'));
+    clearInterval(+sessionStorage.getItem('intervalId'));
 
     if (!src?.[0]) return;
     if (!src?.some(i => i.getAttribute("played") !== "true")) {
@@ -440,7 +440,7 @@ export const audioLoopFunction = ({ i, recall, forcePlayCount, src, callback }) 
               }`
             );
 
-          clearInterval(sessionStorage.getItem('intervalId'));
+          clearInterval(+sessionStorage.getItem('intervalId'));
           src[i].currentTime = src[i].duration;
           src[i].pause();
           src[i].setAttribute("played", "true");

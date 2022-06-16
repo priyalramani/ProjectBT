@@ -1520,7 +1520,7 @@ const ProcessingOrders = () => {
             setConfirmPopup(false);
             postOrderContained(selectedOrder);
             setSelectedOrder(false);
-            clearInterval(sessionStorage.getItem('intervalId'));
+            clearInterval(+sessionStorage.getItem('intervalId'));
             audiosRef.current.forEach((audio) => audio.pause());
             navigator.mediaSession.playbackState = "none";
             audiosRef.current = null;
@@ -2452,6 +2452,7 @@ function HoldPopup({
               audiosRef.current?.[0] && audiosRef.current?.forEach((audio) => audio.pause());
               audiosRef.current = null;
               navigator.mediaSession.playbackState = "none";
+              clearInterval(+sessionStorage.getItem('intervalId'))
               console.clear();
               onSave()
             }} className="closeButton">
