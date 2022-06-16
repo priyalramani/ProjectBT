@@ -2117,8 +2117,8 @@ function HoldPopup({
       if (item) {
         let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
           ?.conversion;
-        item.b = parseInt(+item.b + curr.b + (+item.p + curr.p) / conversion);
-        item.p = parseInt((+item.p + curr.p) % conversion);
+        item.b = parseInt(+item.b + curr.b + (((+item.p + curr.p) +((+item.free||0)+(+curr.free||0)))/ conversion));
+        item.p = parseInt((+item.p + curr.p+((+item.free||0)+(+curr.free||0))) % conversion);
       } else {
         acc.push(curr);
       }
