@@ -772,7 +772,9 @@ const ProcessingOrders = ({ navigation }) => {
   const updateBillingAmount = async () => {
     let billingData = await Billing({
       replacement: selectedOrder.replacement,
-      counter: counters.find((a) => a.counter_uuid === selectedOrder.counter_uuid),
+      counter: counters.find(
+        (a) => a.counter_uuid === selectedOrder.counter_uuid
+      ),
       add_discounts: true,
       items: selectedOrder.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
@@ -1146,7 +1148,7 @@ const ProcessingOrders = ({ navigation }) => {
                             : "#000",
                         }}
                         onClick={(e) => {
-                          e.stopPropagation()
+                          e.stopPropagation();
                           if (Location.pathname.includes("checking")) {
                             setTempQuantity(
                               tempQuantity?.filter(
@@ -1159,8 +1161,7 @@ const ProcessingOrders = ({ navigation }) => {
                                           b:
                                             +(a.b || 0) +
                                             parseInt(
-                                              ((a?.p || 0) +
-                                                (+a?.one_pack || 1)) /
+                                              (+a?.one_pack || 1) /
                                                 +a.conversion
                                             ),
 
@@ -1277,101 +1278,85 @@ const ProcessingOrders = ({ navigation }) => {
                               ?.mrp
                           }
                         </td>
-                        {!Location.pathname.includes("checking") ? (
+
+                        <td
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOneTimeState();
+                            setPopupForm(
+                              items.find((a) => a.item_uuid === item.item_uuid)
+                            );
+                          }}
+                        >
+                          {Location.pathname.includes("delivery")
+                            ? item.b === 0 && item.p === 0 && item.free
+                              ? item.free + "(F)"
+                              : item.b +
+                                ":" +
+                                item.p +
+                                (item.free ? "  " + item.free + "(F)" : "")
+                            : Location.pathname.includes("checking")
+                            ? (tempQuantity?.find(
+                                (a) => a.item_uuid === item.item_uuid
+                              )?.b || 0) +
+                              ":" +
+                              (tempQuantity?.find(
+                                (a) => a.item_uuid === item.item_uuid
+                              )?.p || 0)
+                            : item.b +
+                              ":" +
+                              ((+item.p || 0) + (+item.free || 0))}
+                        </td>
+                        {!(
+                          Location.pathname.includes("delivery") ||
+                          Location.pathname.includes("checking")
+                        ) ? (
                           <>
-                            <td
-                              onClick={() => {
-                                setOneTimeState();
-                                setPopupForm(
-                                  items.find(
-                                    (a) => a.item_uuid === item.item_uuid
-                                  )
-                                );
-                              }}
-                            >
-                              {Location.pathname.includes("delivery")
-                                ? item.b === 0 && item.p === 0 && item.free
-                                  ? item.free + "(F)"
-                                  : item.b +
-                                    ":" +
-                                    item.p +
-                                    (item.free ? "  " + item.free + "(F)" : "")
-                                : item.b +
-                                  ":" +
-                                  ((+item.p || 0) + (+item.free || 0))}
+                            <td className="flex">
+                              <button
+                                className="item-sales-search"
+                                style={{ width: "max-content" }}
+                                onClick={() => {
+                                  setOneTimeState();
+
+                                  setSelectedOrder((prev) => ({
+                                    ...prev,
+                                    item_details: prev.item_details.map((a) =>
+                                      a.item_uuid === item.item_uuid
+                                        ? {
+                                            ...a,
+                                            status: +a.status === 2 ? 0 : 2,
+                                          }
+                                        : a
+                                    ),
+                                  }));
+                                }}
+                              >
+                                Hold
+                              </button>
                             </td>
-                            {!Location.pathname.includes("delivery") ? (
-                              <>
-                                <td className="flex">
-                                  <button
-                                    className="item-sales-search"
-                                    style={{ width: "max-content" }}
-                                    onClick={() => {
-                                      setOneTimeState();
+                            <td>
+                              <DeleteOutlineIcon
+                                onClick={() => {
+                                  setOneTimeState();
 
-                                      setSelectedOrder((prev) => ({
-                                        ...prev,
-                                        item_details: prev.item_details.map(
-                                          (a) =>
-                                            a.item_uuid === item.item_uuid
-                                              ? {
-                                                  ...a,
-                                                  status:
-                                                    +a.status === 2 ? 0 : 2,
-                                                }
-                                              : a
-                                        ),
-                                      }));
-                                    }}
-                                  >
-                                    Hold
-                                  </button>
-                                </td>
-                                <td>
-                                  <DeleteOutlineIcon
-                                    onClick={() => {
-                                      setOneTimeState();
-
-                                      setSelectedOrder((prev) => ({
-                                        ...prev,
-                                        item_details: prev.item_details.map(
-                                          (a) =>
-                                            a.item_uuid === item.item_uuid
-                                              ? {
-                                                  ...a,
-                                                  status:
-                                                    +a.status === 3 ? 0 : 3,
-                                                }
-                                              : a
-                                        ),
-                                      }));
-                                    }}
-                                  />
-                                </td>
-                              </>
-                            ) : (
-                              ""
-                            )}
+                                  setSelectedOrder((prev) => ({
+                                    ...prev,
+                                    item_details: prev.item_details.map((a) =>
+                                      a.item_uuid === item.item_uuid
+                                        ? {
+                                            ...a,
+                                            status: +a.status === 3 ? 0 : 3,
+                                          }
+                                        : a
+                                    ),
+                                  }));
+                                }}
+                              />
+                            </td>
                           </>
                         ) : (
-                          <td
-                            onClick={(e) => {
-                              e.stopPropagatio();
-                              setPopupForm(
-                                items.find(
-                                  (a) => a.item_uuid === item.item_uuid
-                                )
-                              );
-                            }}
-                          >
-                            {tempQuantity?.find(
-                              (a) => a.item_uuid === item.item_uuid
-                            )?.b || 0}
-                            :
-                            {tempQuantity?.find(
-                              (a) => a.item_uuid === item.item_uuid
-                            )?.p || 0}
-                          </td>
+                          ""
                         )}
                       </tr>
                     ))
@@ -1470,13 +1455,18 @@ const ProcessingOrders = ({ navigation }) => {
       </div>
       {popupForm ? (
         <NewUserForm
+          items={items}
+          tempQuantity={tempQuantity}
+          onClose={() => setPopupForm("")}
           onSave={async (data) => {
             setPopupForm(false);
             console.log(data);
             if (data) {
               // setUpdate((prev) => !prev);
               let billingData = await Billing({
-                counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
+                counter: counters.find(
+                  (a) => a.counter_uuid === data.counter_uuid
+                ),
                 add_discounts: true,
                 items: data.item_details.map((a) => {
                   let itemData = items.find((b) => a.item_uuid === b.item_uuid);
@@ -1486,7 +1476,6 @@ const ProcessingOrders = ({ navigation }) => {
                     price: itemData?.price || 0,
                   };
                 }),
-
               });
               setSelectedOrder((prev) => ({
                 ...prev,
@@ -1495,6 +1484,7 @@ const ProcessingOrders = ({ navigation }) => {
               }));
             }
           }}
+          setTempQuantity={setTempQuantity}
           setOrder={setSelectedOrder}
           popupInfo={popupForm}
           order={selectedOrder}
@@ -1761,11 +1751,10 @@ function CheckingValues({
             }}
           >
             <div style={{ overflowY: "scroll", width: "100%" }}>
-              {BarcodeMessage?.filter((a) => +a.case === 1)
-                .length ? (
+              {BarcodeMessage?.filter((a) => +a.case === 1).length ? (
                 <div
                   className="flex"
-                  style={{ flexDirection: "column",width:"300px" }}
+                  style={{ flexDirection: "column", width: "300px" }}
                 >
                   {" "}
                   <i>Incorrect Quantity</i>
@@ -1793,27 +1782,27 @@ function CheckingValues({
                       </tr>
                     </thead>
                     <tbody className="tbody">
-                      {BarcodeMessage?.filter(
-                        (a) => +a.case === 1
-                      )?.map((item, i) => (
-                        <tr
-                          key={item?.item_uuid || Math.random()}
-                          style={{
-                            height: "30px",
-                            color: "#fff",
-                            backgroundColor: "#7990dd",
-                          }}
-                        >
-                          <td colSpan={2}>{item.item_title}</td>
-                          <td>{item?.mrp || 0}</td>
-                          <td style={{ backgroundColor: "green" }}>
-                            {item?.b || 0}:{item?.p || 0}
-                          </td>
-                          <td style={{ backgroundColor: "red" }}>
-                            {item?.barcodeQty || 0}
-                          </td>
-                        </tr>
-                      ))}
+                      {BarcodeMessage?.filter((a) => +a.case === 1)?.map(
+                        (item, i) => (
+                          <tr
+                            key={item?.item_uuid || Math.random()}
+                            style={{
+                              height: "30px",
+                              color: "#fff",
+                              backgroundColor: "#7990dd",
+                            }}
+                          >
+                            <td colSpan={2}>{item.item_title}</td>
+                            <td>{item?.mrp || 0}</td>
+                            <td style={{ backgroundColor: "green" }}>
+                              {item?.b || 0}:{item?.p || 0}
+                            </td>
+                            <td style={{ backgroundColor: "red" }}>
+                              {item?.barcodeQty || 0}
+                            </td>
+                          </tr>
+                        )
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1821,7 +1810,10 @@ function CheckingValues({
                 ""
               )}
               {BarcodeMessage?.filter((a) => +a.case === 2).length ? (
-                <div className="flex" style={{ flexDirection: "column",width:"300px" }}>
+                <div
+                  className="flex"
+                  style={{ flexDirection: "column", width: "300px" }}
+                >
                   {" "}
                   <i>Remove Extra Items</i>
                   <table
@@ -1924,7 +1916,7 @@ function CheckingValues({
               {BarcodeMessage?.filter((a) => +a.case === 3).length ? (
                 <div
                   className="flex"
-                  style={{ flexDirection: "column",width:"300px" }}
+                  style={{ flexDirection: "column", width: "300px" }}
                 >
                   {" "}
                   <i>Unknown Barcode</i>
@@ -1966,7 +1958,10 @@ function CheckingValues({
               ) : (
                 ""
               )}
-              <div className="flex" style={{ justifyContent: "space-between",width:"300px" }}>
+              <div
+                className="flex"
+                style={{ justifyContent: "space-between", width: "300px" }}
+              >
                 <button
                   type="button"
                   style={{ backgroundColor: "red" }}
@@ -2110,7 +2105,7 @@ function HoldPopup({
               ?.filter((a) => a.item_uuid === item.item_uuid)
               .map((a) => ({
                 ...a,
-                b: (+data.b || 0).toFixed(0),
+                b: (+data.b || 0 || 0).toFixed(0),
                 p: +data?.p || 0,
               }))
       )
@@ -2432,7 +2427,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
             ?.filter((a) => a.item_uuid === popupInfo.item_uuid)
             .map((a) => ({
               ...a,
-              b: (+data.b || 0).toFixed(0),
+              b: (+data.b || 0 || 0).toFixed(0),
               p: +data?.p || 0,
             }))
     );
@@ -3183,16 +3178,19 @@ function OpenWarningMessage({ onSave, data, users, onClose }) {
 function NewUserForm({
   onSave,
   popupInfo,
-  setOrder,
+  tempQuantity,
+  setTempQuantity,
   order,
   setUpdateBilling,
   deliveryPage,
+  items,
+  onClose,
 }) {
   const [data, setdata] = useState({});
   useEffect(() => {
-    let data = order?.item_details?.find(
-      (a) => a.item_uuid === popupInfo.item_uuid
-    );
+    let data = window.location.pathname.includes("checking")
+      ? tempQuantity?.find((a) => a.item_uuid === popupInfo.item_uuid)
+      : order?.item_details?.find((a) => a.item_uuid === popupInfo.item_uuid);
     setdata({
       b: data?.b || 0,
       p: data?.p || 0,
@@ -3202,8 +3200,44 @@ function NewUserForm({
   const submitHandler = async (e) => {
     e.preventDefault();
     let orderData = order;
-    console.log(window.location.pathname.includes("delivery"));
-    if (window.location.pathname.includes("delivery")) {
+
+    if (window.location.pathname.includes("checking")) {
+      setTempQuantity(
+        tempQuantity?.filter((a) => a.item_uuid === popupInfo.item_uuid)?.length
+          ? tempQuantity?.map((a) =>
+              a.item_uuid === popupInfo.item_uuid
+                ? {
+                    ...a,
+                    b:
+                      +(+data.b || 0) +
+                      parseInt((+data.p || 1) / +a.conversion),
+                    p: ((+data.p || 1) % +a.conversion).toFixed(0),
+                  }
+                : a
+            )
+          : tempQuantity?.length
+          ? [
+              ...tempQuantity,
+              ...items
+                ?.filter((a) => a.item_uuid === popupInfo.item_uuid)
+                .map((a) => ({
+                  ...a,
+                  b: +(+data.b || 0) + parseInt((+data.p || 1) / +a.conversion),
+                  p: ((+data.p || 1) % +a.conversion).toFixed(0),
+                })),
+            ]
+          : items
+              ?.filter((a) => a.item_uuid === popupInfo.item_uuid)
+              .map((a) => ({
+                ...a,
+                b:
+                  +(+data.b || 0) +
+                  +parseInt((+data.p || 1) / +a.conversion).toFixed(0),
+                p: ((+data.p || 1) % +a.conversion).toFixed(0),
+              }))
+      );
+      onClose();
+    } else if (window.location.pathname.includes("delivery")) {
       orderData = {
         ...orderData,
         delivery_return: deliveryPage
@@ -3235,7 +3269,7 @@ function NewUserForm({
                   {
                     item_uuid: popupInfo.item_uuid,
                     b:
-                      +data.b -
+                      (+data.b || 0) -
                       (+orderData?.item_details?.find(
                         (a) => a.item_uuid === popupInfo.item_uuid
                       )?.b || 0),
@@ -3250,7 +3284,7 @@ function NewUserForm({
                 {
                   item_uuid: popupInfo.item_uuid,
                   b:
-                    +data.b -
+                    (+data.b || 0) -
                     (+orderData?.item_details?.find(
                       (a) => a.item_uuid === popupInfo.item_uuid
                     )?.b || 0),
@@ -3266,12 +3300,16 @@ function NewUserForm({
           a.item_uuid === popupInfo.item_uuid
             ? {
                 ...a,
-                b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
+                b:
+                  (+data.b || 0) +
+                  parseInt(+data.p / (+popupInfo.conversion || 1)),
                 p: +data.p % (+popupInfo.conversion || 1),
               }
             : a
         ),
       };
+      setUpdateBilling(true);
+      onSave(orderData);
     } else {
       orderData = {
         ...orderData,
@@ -3329,15 +3367,17 @@ function NewUserForm({
           a.item_uuid === popupInfo.item_uuid
             ? {
                 ...a,
-                b: +data.b + parseInt(+data.p / (+popupInfo.conversion || 1)),
+                b:
+                  (+data.b || 0) +
+                  parseInt(+data.p / (+popupInfo.conversion || 1)),
                 p: +data.p % (+popupInfo.conversion || 1),
               }
             : a
         ),
       };
+      setUpdateBilling(true);
+      onSave(orderData);
     }
-    setUpdateBilling(true);
-    onSave(orderData);
   };
 
   return (
