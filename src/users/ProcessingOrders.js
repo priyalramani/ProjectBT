@@ -21,7 +21,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import { ArrowDropDown, SquareFoot } from "@mui/icons-material";
 let intervalId = 0;
 
-const ProcessingOrders = ({ navigation }) => {
+const ProcessingOrders = ({}) => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
   const [itemChanged, setItemChanged] = useState([]);
   const [popupDelivery, setPopupDelivery] = useState(false);
@@ -679,7 +679,24 @@ const ProcessingOrders = ({ navigation }) => {
         ) {
           if (orderItem)
             setBarcodeMessage((prev) =>
-              prev.length
+              prev.filter((b) => b.item_uuid === orderItem.item_uuid)?.length
+                ? prev.map((b) =>
+                    b.item_uuid === orderItem.item_uuid
+                      ? {...b,
+                          ...ItemData,
+                          ...orderItem,
+                          barcodeQty:(+b.barcodeQty||0)+
+                            (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+                          case: 1,
+                          qty:
+                            (+orderItem?.b || 0) *
+                              +(+ItemData?.conversion || 1) +
+                            orderItem?.p +
+                            (+orderItem?.free || 0),
+                        }
+                      : b
+                  )
+                : prev.length
                 ? [
                     ...prev,
                     {
@@ -1559,6 +1576,7 @@ const ProcessingOrders = ({ navigation }) => {
             navigator.mediaSession.playbackState = "none";
             audiosRef.current = null;
             console.clear();
+            setTempQuantity([])
           }}
           selectedOrder={selectedOrder}
           onClose={() => setConfirmPopup(false)}
@@ -1741,7 +1759,7 @@ function CheckingValues({
           className="modal"
           style={{ height: "fit-content", width: "max-content" }}
         >
-          <h1>Correction</h1>
+          <h1>{BarcodeMessage.length ? "Correction" : "Perfect"}</h1>
           <div
             className="content"
             style={{
@@ -1766,7 +1784,13 @@ function CheckingValues({
                     }}
                   >
                     <thead>
-                      <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                      <tr
+                        style={{
+                          color: "#fff",
+                          backgroundColor: "#7990dd",
+                          fontSize: "15px",
+                        }}
+                      >
                         <th colSpan={2}>
                           <div className="t-head-element">Item</div>
                         </th>
@@ -1781,7 +1805,7 @@ function CheckingValues({
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="tbody">
+                    <tbody className="tbody" style={{ fontSize: "10px" }}>
                       {BarcodeMessage?.filter((a) => +a.case === 1)?.map(
                         (item, i) => (
                           <tr
@@ -1826,7 +1850,13 @@ function CheckingValues({
                     }}
                   >
                     <thead>
-                      <tr style={{ color: "#fff", backgroundColor: "red" }}>
+                      <tr
+                        style={{
+                          color: "#fff",
+                          backgroundColor: "red",
+                          fontSize: "15px",
+                        }}
+                      >
                         <th colSpan={2}>
                           <div className="t-head-element">Item</div>
                         </th>
@@ -1838,7 +1868,7 @@ function CheckingValues({
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="tbody">
+                    <tbody className="tbody" style={{ fontSize: "10px" }}>
                       {BarcodeMessage?.filter((a) => +a.case === 2)?.map(
                         (item, i) => (
                           <tr
@@ -1931,13 +1961,19 @@ function CheckingValues({
                     }}
                   >
                     <thead>
-                      <tr style={{ color: "#000", backgroundColor: "#fff" }}>
+                      <tr
+                        style={{
+                          color: "#000",
+                          backgroundColor: "#fff",
+                          fontSize: "15px",
+                        }}
+                      >
                         <th colSpan={2}>
                           <div className="t-head-element">Barcode</div>
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="tbody">
+                    <tbody className="tbody" style={{ fontSize: "10px" }}>
                       {BarcodeMessage?.filter((a) => +a.case === 3)?.map(
                         (item, i) => (
                           <tr
@@ -3211,7 +3247,7 @@ function NewUserForm({
                     b:
                       +(+data.b || 0) +
                       parseInt((+data.p || 1) / +a.conversion),
-                    p: ((+data.p || 1) % +a.conversion).toFixed(0),
+                    p: parseInt((+data.p || 1) % +a.conversion),
                   }
                 : a
             )
@@ -3223,7 +3259,7 @@ function NewUserForm({
                 .map((a) => ({
                   ...a,
                   b: +(+data.b || 0) + parseInt((+data.p || 1) / +a.conversion),
-                  p: ((+data.p || 1) % +a.conversion).toFixed(0),
+                  p: parseInt((+data.p || 1) % +a.conversion),
                 })),
             ]
           : items
@@ -3233,7 +3269,7 @@ function NewUserForm({
                 b:
                   +(+data.b || 0) +
                   +parseInt((+data.p || 1) / +a.conversion).toFixed(0),
-                p: ((+data.p || 1) % +a.conversion).toFixed(0),
+                p: parseInt((+data.p || 1) % +a.conversion),
               }))
       );
       onClose();
