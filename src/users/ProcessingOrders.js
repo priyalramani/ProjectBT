@@ -527,6 +527,7 @@ const ProcessingOrders = ({}) => {
     if (response.data.success) {
       console.log(response);
       getTripOrders();
+      setTempQuantity([]);
     }
   };
   const postHoldOrders = async (orders) => {
@@ -631,170 +632,172 @@ const ProcessingOrders = ({}) => {
 
             return acc;
           }, []);
-    console.log(item_details);
-    for (let a of tempQuantity) {
-      let orderItem = item_details.find((b) => b.item_uuid === a.item_uuid);
+    console.log("item_details", item_details,tempQuantity);
+    for (let a of item_details) {
+      let orderItem = tempQuantity.find((b) => b.item_uuid === a.item_uuid);
+      let ItemData = items.find((b) => b.item_uuid === a.item_uuid);
       console.log(
-        (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+        "quantity",
+        (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
           orderItem?.p +
           (+orderItem?.free || 0),
-        (+a?.b || 0) * +(+a?.conversion || 1) + a?.p
+        (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p
       );
       if (
-        (+orderItem?.b || 0) * +(+a?.conversion || 1) +
+        (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
           orderItem?.p +
           (+orderItem?.free || 0) !==
-        (+a?.b || 0) * +(+a?.conversion || 1) + a?.p
+        (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p
       )
         setBarcodeMessage((prev) =>
           prev.length
             ? [
                 ...prev,
                 {
-                  ...a,
-                  ...orderItem,
-                  barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+                  ...ItemData,
+                  ...orderItem,...a,
+                  barcodeQty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
                   case: 1,
                   qty:
-                    (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-                    orderItem?.p +
-                    (+orderItem?.free || 0),
+                    (+a?.b || 0) * +(+ItemData?.conversion || 1) +
+                    a?.p +
+                    (+a?.free || 0),
                 },
               ]
             : [
                 {
-                  ...a,
-                  ...orderItem,
-                  barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+                  
+                  ...orderItem,...a,
+                  barcodeQty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
                   case: 1,
                   qty:
-                    (+orderItem?.b || 0) * +(+a?.conversion || 1) +
-                    orderItem?.p +
-                    (+orderItem?.free || 0),
+                    (+a?.b || 0) * +(+ItemData?.conversion || 1) +
+                    a?.p +
+                    (+a?.free || 0),
                 },
               ]
         );
       else data.push(a);
     }
-    if (selectedOrder) {
-      for (let a of barcodeFilterState.filter(
-        (a) => !data.filter((b) => b.item_uuid === a.item_uuid).length
-      )) {
-        let orderItem = item_details.find((b) => b.item_uuid === a.item_uuid);
-        let ItemData = items.find((b) => b.item_uuid === a.item_uuid);
-        console.log(a.qty, ItemData);
-        if (
-          (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-            orderItem?.p +
-            (+orderItem?.free || 0) !==
-          a?.qty
-        ) {
-          if (orderItem)
-            setBarcodeMessage((prev) =>
-              prev.filter((b) => b.item_uuid === orderItem.item_uuid)?.length
-                ? prev.map((b) =>
-                    b.item_uuid === orderItem.item_uuid
-                      ? {
-                          ...b,
-                          ...ItemData,
-                          ...orderItem,
-                          barcodeQty:
-                            (+b.barcodeQty || 0) +
-                            (+a?.b || 0) * +(+a?.conversion || 1) +
-                            a?.p,
-                          case: 1,
-                          qty:
-                            (+orderItem?.b || 0) *
-                              +(+ItemData?.conversion || 1) +
-                            orderItem?.p +
-                            (+orderItem?.free || 0),
-                        }
-                      : b
-                  )
-                : prev.length
-                ? [
-                    ...prev,
-                    {
-                      ...ItemData,
-                      ...orderItem,
-                      barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
-                      case: 1,
-                      qty:
-                        (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                        orderItem?.p +
-                        (+orderItem?.free || 0),
-                    },
-                  ]
-                : [
-                    {
-                      ...ItemData,
-                      ...orderItem,
-                      barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
-                      case: 1,
-                      qty:
-                        (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                        orderItem?.p +
-                        (+orderItem?.free || 0),
-                    },
-                  ]
-            );
-          else if (ItemData && a?.qty)
-            setBarcodeMessage((prev) =>
-              prev.length
-                ? [
-                    ...prev,
-                    {
-                      ...ItemData,
-                      barcodeQty: a.qty,
-                      case: 2,
-                      qty:
-                        (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                        orderItem?.p +
-                        (+orderItem?.free || 0),
-                    },
-                  ]
-                : [
-                    {
-                      ...ItemData,
-                      barcodeQty: a.qty,
-                      case: 2,
-                      qty:
-                        (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                        orderItem?.p +
-                        (+orderItem?.free || 0),
-                    },
-                  ]
-            );
-          else if (a?.qty)
-            setBarcodeMessage((prev) =>
-              prev.length
-                ? [
-                    ...prev,
-                    {
-                      ...a,
-                      barcodeQty: a.qty,
-                      case: 3,
-                      qty:
-                        (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                        orderItem?.p +
-                        (+orderItem?.free || 0),
-                    },
-                  ]
-                : [
-                    {
-                      ...a,
-                      barcodeQty: a.qty,
-                      case: 3,
-                      qty:
-                        (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-                        orderItem?.p +
-                        (+orderItem?.free || 0),
-                    },
-                  ]
-            );
-        }
-      }
-    }
+    // if (selectedOrder) {
+    //   for (let a of barcodeFilterState.filter(
+    //     (a) => !data.filter((b) => b.item_uuid === a.item_uuid).length
+    //   )) {
+    //     let orderItem = item_details.find((b) => b.item_uuid === a.item_uuid);
+    //     let ItemData = items.find((b) => b.item_uuid === a.item_uuid);
+    //     console.log(a.qty, ItemData);
+    //     if (
+    //       (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+    //         orderItem?.p +
+    //         (+orderItem?.free || 0) !==
+    //       a?.qty
+    //     ) {
+    //       if (orderItem)
+    //         setBarcodeMessage((prev) =>
+    //           prev.filter((b) => b.item_uuid === orderItem.item_uuid)?.length
+    //             ? prev.map((b) =>
+    //                 b.item_uuid === orderItem.item_uuid
+    //                   ? {
+    //                       ...b,
+    //                       ...ItemData,
+    //                       ...orderItem,
+    //                       barcodeQty:
+    //                         (+b.barcodeQty || 0) +
+    //                         (+a?.b || 0) * +(+a?.conversion || 1) +
+    //                         a?.p,
+    //                       case: 1,
+    //                       qty:
+    //                         (+orderItem?.b || 0) *
+    //                           +(+ItemData?.conversion || 1) +
+    //                         orderItem?.p +
+    //                         (+orderItem?.free || 0),
+    //                     }
+    //                   : b
+    //               )
+    //             : prev.length
+    //             ? [
+    //                 ...prev,
+    //                 {
+    //                   ...ItemData,
+    //                   ...orderItem,
+    //                   barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+    //                   case: 1,
+    //                   qty:
+    //                     (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+    //                     orderItem?.p +
+    //                     (+orderItem?.free || 0),
+    //                 },
+    //               ]
+    //             : [
+    //                 {
+    //                   ...ItemData,
+    //                   ...orderItem,
+    //                   barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+    //                   case: 1,
+    //                   qty:
+    //                     (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+    //                     orderItem?.p +
+    //                     (+orderItem?.free || 0),
+    //                 },
+    //               ]
+    //         );
+    //       else if (ItemData && a?.qty)
+    //         setBarcodeMessage((prev) =>
+    //           prev.length
+    //             ? [
+    //                 ...prev,
+    //                 {
+    //                   ...ItemData,
+    //                   barcodeQty: a.qty,
+    //                   case: 2,
+    //                   qty:
+    //                     (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+    //                     orderItem?.p +
+    //                     (+orderItem?.free || 0),
+    //                 },
+    //               ]
+    //             : [
+    //                 {
+    //                   ...ItemData,
+    //                   barcodeQty: a.qty,
+    //                   case: 2,
+    //                   qty:
+    //                     (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+    //                     orderItem?.p +
+    //                     (+orderItem?.free || 0),
+    //                 },
+    //               ]
+    //         );
+    //       else if (a?.qty)
+    //         setBarcodeMessage((prev) =>
+    //           prev.length
+    //             ? [
+    //                 ...prev,
+    //                 {
+    //                   ...a,
+    //                   barcodeQty: a.qty,
+    //                   case: 3,
+    //                   qty:
+    //                     (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+    //                     orderItem?.p +
+    //                     (+orderItem?.free || 0),
+    //                 },
+    //               ]
+    //             : [
+    //                 {
+    //                   ...a,
+    //                   barcodeQty: a.qty,
+    //                   case: 3,
+    //                   qty:
+    //                     (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
+    //                     orderItem?.p +
+    //                     (+orderItem?.free || 0),
+    //                 },
+    //               ]
+    //         );
+    //     }
+    //   }
+    // }
 
     setTimeout(() => {
       setPopupBarcode(true);
@@ -1571,7 +1574,6 @@ const ProcessingOrders = ({}) => {
             setPopupBarcode(false);
             setBarcodeMessage([]);
             setHoldPopup(false);
-            setTempQuantity([]);
           }}
           BarcodeMessage={BarcodeMessage}
           postOrderData={() => postOrderData()}
@@ -2245,7 +2247,7 @@ function HoldPopup({
             height: "fit-content",
             width: "max-content",
             minWidth: "206px",
-            padding:"10px",
+            padding: "10px",
             paddingTop: "40px",
           }}
         >
@@ -2448,7 +2450,10 @@ function HoldPopup({
                                               a.item_uuid === item.item_uuid
                                           )?.p || 0
                                         }`}
-                                        style={{width:"60px",padding:"10px 0"}}
+                                        style={{
+                                          width: "60px",
+                                          padding: "10px 0",
+                                        }}
                                         className="boxPcsInput"
                                         onClick={(e) => {
                                           e.stopPropagation();
