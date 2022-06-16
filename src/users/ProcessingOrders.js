@@ -2,12 +2,8 @@
 /* eslint-disable no-loop-func */
 import axios from "axios";
 import React, { useEffect, useState, useRef, useContext } from "react";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  UNSAFE_NavigationContext,
-} from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { AiOutlineSearch } from "react-icons/ai";
 import { AiFillPlayCircle } from "react-icons/ai";
 import { openDB } from "idb";
 import { Billing } from "../functions";
@@ -55,6 +51,7 @@ const ProcessingOrders = ({}) => {
   const [loading, setLoading] = useState(false);
   const [phonePopup, setPhonePopup] = useState(false);
   const [dropdown, setDropDown] = useState(false);
+  const [filterItemTitle, setFilterItemTile] = useState("");
   const Navigate = useNavigate();
   useEffect(() => {
     window.history.pushState(null, document.title, window.location.href);
@@ -389,26 +386,25 @@ const ProcessingOrders = ({}) => {
               ]
             : data?.item_details?.filter((a) => +a.status === 3),
         };
- 
-        let billingData = await Billing({
-          replacement: data.replacement,
-          counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
-          add_discounts: true,
-          items: data.item_details.map((a) => {
-            let itemData = items.find((b) => a.item_uuid === b.item_uuid);
-            return {
-              ...itemData,
-              ...a,
-              price: itemData?.price || 0,
-            };
-          }),
-        });
-        data = {
-          ...data,
-          ...billingData,
-          item_details: billingData.items,
-        };
-      
+
+      let billingData = await Billing({
+        replacement: data.replacement,
+        counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
+        add_discounts: true,
+        items: data.item_details.map((a) => {
+          let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+          return {
+            ...itemData,
+            ...a,
+            price: itemData?.price || 0,
+          };
+        }),
+      });
+      data = {
+        ...data,
+        ...billingData,
+        item_details: billingData.items,
+      };
 
       let time = new Date();
       if (
@@ -834,7 +830,10 @@ const ProcessingOrders = ({}) => {
 
   return (
     <div>
-      <nav className="user_nav nav_styling" style={{ top: "0",padding:"10px" }}>
+      <nav
+        className="user_nav nav_styling"
+        style={{ top: "0", padding: "10px" }}
+      >
         <div
           className="user_menubar flex"
           style={{
@@ -862,7 +861,14 @@ const ProcessingOrders = ({}) => {
           )}
         </div>
 
-        <h1 style={{ width: "70%", textAlign: "left", marginLeft: "30px",padding:"10px 0" }}>
+        <h1
+          style={{
+            width: "70%",
+            textAlign: "left",
+            marginLeft: "30px",
+            padding: "10px 0",
+          }}
+        >
           {selectedOrder ? selectedOrder.counter_title : "Orders"}
         </h1>
         {!selectedOrder ? (
@@ -1034,16 +1040,31 @@ const ProcessingOrders = ({}) => {
                 ""
               )}
               {Location.pathname.includes("checking") ? (
-                <input
-                  type="text"
-                  onChange={(e) => setBarcodeFilter(e.target.value)}
-                  value={barcodeFilter}
-                  placeholder="Search Barcode..."
-                  className="searchInput"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") barcodeFilterUpdate();
-                  }}
-                />
+                // <input
+                //   type="text"
+                //   onChange={(e) => setBarcodeFilter(e.target.value)}
+                //   value={barcodeFilter}
+                //   placeholder="Search Barcode..."
+                //   className="searchInput"
+                //   onKeyDown={(e) => {
+                //     if (e.key === "Enter") barcodeFilterUpdate();
+                //   }}
+                // />
+                <div className="user_searchbar flex">
+                  <AiOutlineSearch className="user_search_icon" />
+                  <input
+                    style={{ width: "200px" }}
+                    className="searchInput"
+                    type="text"
+                    placeholder="search"
+                    value={filterItemTitle}
+                    onChange={(e) => setFilterItemTile(e.target.value)}
+                  />
+                  <CloseIcon
+                    className="user_cross_icon"
+                    onClick={() => setFilterItemTile("")}
+                  />
+                </div>
               ) : !Location.pathname.includes("delivery") ? (
                 <button
                   className="item-sales-search"
@@ -1167,7 +1188,12 @@ const ProcessingOrders = ({}) => {
                     .filter(
                       (a) =>
                         !Location.pathname.includes("checking") ||
-                        +a.status === 1
+                        (+a.status === 1 &&
+                          (!filterItemTitle ||
+                            items
+                              .find((b) => a.item_uuid === b.item_uuid)
+                              ?.item_title?.toLocaleLowerCase()
+                              ?.includes(filterItemTitle.toLocaleLowerCase())))
                     )
                     ?.sort(itemsSortFunction)
                     ?.map((item, i) => (
@@ -2108,6 +2134,7 @@ function HoldPopup({
 }) {
   const [items, setItems] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
+  const [filterItemTitle, setFilterItemTile] = useState("");
   useEffect(() => {
     let data = [].concat
       .apply(
@@ -2217,17 +2244,33 @@ function HoldPopup({
           style={{
             height: "fit-content",
             width: "max-content",
-            minWidth: "250px",
+            minWidth: "206px",
+            padding:"10px",
             paddingTop: "40px",
           }}
         >
           <h1>{holdPopup}</h1>
+          <div className="user_searchbar flex" style={{ width: "100%" }}>
+            <AiOutlineSearch className="user_search_icon" />
+            <input
+              style={{ width: "100%" }}
+              className="searchInput"
+              type="text"
+              placeholder="search"
+              value={filterItemTitle}
+              onChange={(e) => setFilterItemTile(e.target.value)}
+            />
+            <CloseIcon
+              className="user_cross_icon"
+              onClick={() => setFilterItemTile("")}
+            />
+          </div>
           <div
             className="content"
             style={{
               height: "fit-content",
-              padding: "20px",
-              width: "fit-content",
+              padding: "20px 0",
+              width: "100%",
             }}
           >
             <div style={{ overflowY: "scroll", width: "100%" }}>
@@ -2266,13 +2309,23 @@ function HoldPopup({
                       {categories
                         .filter(
                           (a) =>
-                            items?.filter(
-                              (b) =>
-                                a.category_uuid ===
-                                itemsData?.find(
-                                  (c) => b.item_uuid === c.item_uuid
-                                )?.category_uuid
-                            ).length
+                            items
+                              ?.filter(
+                                (b) =>
+                                  a.category_uuid ===
+                                  itemsData?.find(
+                                    (c) => b.item_uuid === c.item_uuid
+                                  )?.category_uuid
+                              )
+                              ?.filter(
+                                (a) =>
+                                  !filterItemTitle ||
+                                  a.item_title
+                                    .toLocaleLowerCase()
+                                    .includes(
+                                      filterItemTitle.toLocaleLowerCase()
+                                    )
+                              ).length
                         )
                         .map((a) => (
                           <>
@@ -2287,6 +2340,15 @@ function HoldPopup({
                                   itemsData?.find(
                                     (c) => b.item_uuid === c.item_uuid
                                   )?.category_uuid
+                              )
+                              ?.filter(
+                                (a) =>
+                                  !filterItemTitle ||
+                                  a.item_title
+                                    .toLocaleLowerCase()
+                                    .includes(
+                                      filterItemTitle.toLocaleLowerCase()
+                                    )
                               )
                               .map((item, i) => (
                                 <tr
@@ -2386,6 +2448,7 @@ function HoldPopup({
                                               a.item_uuid === item.item_uuid
                                           )?.p || 0
                                         }`}
+                                        style={{width:"60px",padding:"10px 0"}}
                                         className="boxPcsInput"
                                         onClick={(e) => {
                                           e.stopPropagation();

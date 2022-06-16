@@ -1,4 +1,4 @@
-import { AiOutlineArrowLeft, AiOutlineSearch } from "react-icons/ai";
+import { AiOutlineSearch } from "react-icons/ai";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { useState, useEffect } from "react";
 import { openDB } from "idb";
