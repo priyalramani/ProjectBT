@@ -367,6 +367,21 @@ const ProcessingOrders = ({}) => {
     let finalData = [];
     for (let orderObject of dataArray) {
       let data = orderObject;
+      if (
+        data?.item_details?.filter((a) => +a.status === 1 || +a.status === 3)
+          ?.length === data?.item_details.length &&
+        Location.pathname.includes("processing")
+      )
+        data = {
+          ...data,
+          item_details: data.item_details.map((a) =>
+            +a.status === 3 ? { ...a, b: 0, p: 0 } : a
+          ),
+          processing_canceled: data?.item_details?.filter(
+            (a) => +a.status === 3
+          ),
+         
+        };
       if (updateBilling) {
         let billingData = await Billing({
           replacement: data.replacement,
@@ -390,18 +405,11 @@ const ProcessingOrders = ({}) => {
 
       let time = new Date();
       if (
-        data?.item_details?.filter((a) => +a.status === 1 || +a.status === 3)
-          ?.length === data?.item_details.length &&
+        data?.item_details?.filter((a) => +a.status === 3).length&&
         Location.pathname.includes("processing")
       )
         data = {
           ...data,
-          item_details: data.item_details.map((a) =>
-            +a.status === 3 ? { ...a, b: 0, p: 0 } : a
-          ),
-          processing_canceled: data?.item_details?.filter(
-            (a) => +a.status === 3
-          ),
           status: [
             ...data.status,
             {
