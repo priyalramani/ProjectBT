@@ -350,7 +350,7 @@ const OrderPrint = ({
             </tr>
             <tr style={{ borderBottom: "1px solid #000" }}>
               <td style={{ fontSize: "x-small" }}></td>
-              <th style={{ fontSize: "small" }} colSpan={3}>
+              <th style={{ fontSize: "x-small" }} colSpan={3}>
                 Total
               </th>
               <td
@@ -369,7 +369,7 @@ const OrderPrint = ({
               ></td>
               <th
                 style={{
-                  fontSize: "small",
+                  fontSize: "x-small",
                   textAlign: "center",
                 }}
                 colSpan={2}
@@ -388,7 +388,7 @@ const OrderPrint = ({
               </th>
               <th
                 style={{
-                  fontSize: "small",
+                  fontSize: "x-small",
                   textAlign: "center",
                 }}
                 colSpan={2}
@@ -429,7 +429,7 @@ const OrderPrint = ({
               ></td>
               <th
                 style={{
-                  fontSize: "small",
+                  fontSize: "x-small",
                   textAlign: "center",
                 }}
                 colSpan={2}
@@ -441,7 +441,7 @@ const OrderPrint = ({
               </th>
               <th
                 style={{
-                  fontSize: "small",
+                  fontSize: "x-small",
                   textAlign: "center",
                 }}
                 colSpan={2}
@@ -453,14 +453,14 @@ const OrderPrint = ({
               </th>
               <td
                 style={{
-                  fontSize: "small",
+                  fontSize: "x-small",
                   textAlign: "center",
                 }}
                 colSpan={2}
               ></td>
               <th
                 style={{
-                  fontSize: "small",
+                  fontSize: "x-small",
                   textAlign: "center",
                 }}
                 colSpan={2}

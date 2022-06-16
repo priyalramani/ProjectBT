@@ -25,6 +25,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [editOrder, setEditOrder] = useState(false);
 
   const [orderData, setOrderData] = useState();
+  const [printData, setPrintData] = useState({ item_details: [] ,status:[]});
   const [holdPopup, setHoldPopup] = useState(false);
   const [autoBills, setAutoBills] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
@@ -68,7 +69,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   });
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
-  }, [orderData]);
+  }, [printData]);
 
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
@@ -124,6 +125,18 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       })),
     });
   }, [itemsData]);
+  useEffect(() => {
+    setPrintData({
+      ...printData,
+      ...orderData,
+      item_details: orderData?.item_details
+        ?.filter((a) => +a.status !== 3)
+        ?.map((a, i) => ({
+          ...a,
+          sr: i + 1,
+        }))||[],
+    });
+  }, [orderData]);
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
@@ -204,7 +217,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     );
     let data = {
       ...orderData,
-      item_details: orderData?.item_details.filter((a) => a.item_uuid),
+      item_details: orderData?.item_details.filter((a) => a.item_uuid) || [],
     };
 
     let autoBilling = await Billing({
@@ -226,7 +239,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         ...a,
         unit_price: a.price,
         gst_percentage: a.item_gst,
-        status: 0,
+        status: a.status || 0,
         price: a.item_price,
       })),
 
@@ -556,16 +569,14 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           >
                             {item.mrp || ""}
                           </td>
-                          <td
-                            className="ph2 pv1 tc bb b--black-20 bg-white"
-                            style={{ textAlign: "center" }}
-                          >
-                            {editOrder ? (
+                          {editOrder ? (
+                            <td
+                              className="ph2 pv1 tc bb b--black-20 bg-white"
+                              style={{ textAlign: "center" }}
+                            >
                               <Select
                                 id={"item_uuid" + item.uuid}
-                                options={default_status
-                                  }
-                                
+                                options={default_status}
                                 onChange={(e) => {
                                   setOrderData((prev) => ({
                                     ...prev,
@@ -578,21 +589,23 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                         : a
                                     ),
                                   }));
-                                  
                                 }}
-                                value={item.status?default_status.find(a=>+a.value===+item.status):""}
+                                value={
+                                  item.status
+                                    ? default_status.find(
+                                        (a) => +a.value === +item.status
+                                      )
+                                    : ""
+                                }
                                 openMenuOnFocus={true}
-                               
                                 menuPosition="fixed"
                                 menuPlacement="auto"
-                                placeholder="Item"
+                                placeholder="Status"
                               />
-                            ) : (
-                              itemsData.find(
-                                (a) => a.item_uuid === item.item_uuid
-                              )?.item_title || ""
-                            )}
-                          </td>
+                            </td>
+                          ) : (
+                            ""
+                          )}
                           <td
                             className="ph2 pv1 tc bb b--black-20 bg-white"
                             style={{ textAlign: "center" }}
@@ -639,11 +652,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           >
                             {editOrder ? (
                               <input
-                              onWheel={(e) => e.target.blur()}
+                                onWheel={(e) => e.target.blur()}
                                 id={"p" + item.uuid}
                                 type="number"
                                 className="numberInput"
-                                
                                 index={listItemIndexCount++}
                                 value={item.p || 0}
                                 onChange={(e) => {
@@ -819,71 +831,98 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         >
           <OrderPrint
             counter={counters.find(
-              (a) => a.counter_uuid === orderData?.counter_uuid
+              (a) => a.counter_uuid === printData?.counter_uuid
             )}
-            order={orderData}
-            date={new Date(orderData?.status[0]?.time)}
+            order={printData}
+            date={new Date(printData?.status[0]?.time)}
             user={
-              users.find((a) => a.user_uuid === orderData.status[0].user_uuid)
+              users.find((a) => a.user_uuid === printData?.status[0].user_uuid)
                 ?.user_title || ""
             }
             itemData={itemsData}
             item_details={
-              orderData?.item_details?.length > 14
-                ? orderData?.item_details?.slice(0, 14)
-                : orderData?.item_details
+              printData?.item_details
+                ?.length > 14
+                ? printData?.item_details
+                    
+                    ?.slice(0, 14)
+                : printData?.item_details
             }
-            footer={!(orderData?.item_details?.length > 14)}
+            footer={
+              !(
+                printData?.item_details
+                  ?.length > 14
+              )
+            }
           />
-          {orderData?.item_details?.length > 14 ? (
+          {printData?.item_details?.length >
+          14 ? (
             <>
               <div style={{ height: "20mm" }}></div>
               <OrderPrint
                 counter={counters.find(
-                  (a) => a.counter_uuid === orderData?.counter_uuid
+                  (a) => a.counter_uuid === printData?.counter_uuid
                 )}
-                order={orderData}
-                date={new Date(orderData?.status[0]?.time)}
+                order={printData
+               
+                }
+                date={new Date(printData?.status[0]?.time)}
                 user={
                   users.find(
-                    (a) => a.user_uuid === orderData?.status[0]?.user_uuid
+                    (a) => a.user_uuid === printData?.status[0]?.user_uuid
                   )?.user_title || ""
                 }
                 itemData={itemsData}
                 item_details={
-                  orderData?.item_details?.length > 28
-                    ? orderData?.item_details?.slice(14, 28)
-                    : orderData?.item_details?.slice(
-                        14,
-                        orderData?.item_details?.length
-                      )
+                  printData
+                    ?.length > 28
+                    ? printData?.item_details
+                        
+                        ?.slice(14, 28)
+                    : printData?.item_details
+                        
+                        ?.slice(
+                          14,
+                          printData?.item_details?.filter(
+                            (a) => !(+a.status === 3)
+                          )?.length
+                        )
                 }
-                footer={!(orderData?.item_details?.length > 28)}
+                footer={
+                  !(
+                    printData?.item_details
+                      ?.length > 28
+                  )
+                }
               />
             </>
           ) : (
             ""
           )}
 
-          {orderData?.item_details?.length > 28 ? (
+          {printData?.item_details?.length >
+          28 ? (
             <>
               <div style={{ height: "20mm" }}></div>
               <OrderPrint
                 counter={counters.find(
-                  (a) => a.counter_uuid === orderData?.counter_uuid
+                  (a) => a.counter_uuid === printData?.counter_uuid
                 )}
-                order={orderData}
-                date={new Date(orderData?.status[0]?.time)}
+                order={
+                  printData}
+                date={new Date(printData?.status[0]?.time)}
                 user={
                   users.find(
-                    (a) => a.user_uuid === orderData?.status[0]?.user_uuid
+                    (a) => a.user_uuid === printData?.status[0]?.user_uuid
                   )?.user_title || ""
                 }
                 itemData={itemsData}
-                item_details={orderData?.item_details?.slice(
-                  28,
-                  orderData?.item_details.length
-                )}
+                item_details={printData?.item_details
+                  ?.slice(
+                    28,
+                    printData?.item_details
+                      .length
+                  )}
                 footer={true}
               />
             </>
