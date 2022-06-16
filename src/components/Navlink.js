@@ -9,6 +9,7 @@ const NavLink = ({
   href,
   setIsItemAvilableOpen,
 }) => {
+  console.log(title)
   return (
     <Link
       to={{ pathname: href }}
@@ -41,7 +42,7 @@ const NavLink = ({
         </>
         {/* Submenu popup*/}
         {menuList && (
-          <div className="menuItems">
+          <div className="menuItems" style={title==="Report"?{top:"-200px"}:{}}>
             {menuList
               .filter((a) => a)
               .map((menu) => (
