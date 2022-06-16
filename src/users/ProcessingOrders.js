@@ -834,7 +834,7 @@ const ProcessingOrders = ({}) => {
 
   return (
     <div>
-      <nav className="user_nav nav_styling" style={{ top: "0" }}>
+      <nav className="user_nav nav_styling" style={{ top: "0",padding:"10px" }}>
         <div
           className="user_menubar flex"
           style={{
@@ -862,7 +862,7 @@ const ProcessingOrders = ({}) => {
           )}
         </div>
 
-        <h1 style={{ width: "60%", textAlign: "left", marginLeft: "30px" }}>
+        <h1 style={{ width: "70%", textAlign: "left", marginLeft: "30px",padding:"10px 0" }}>
           {selectedOrder ? selectedOrder.counter_title : "Orders"}
         </h1>
         {!selectedOrder ? (
@@ -956,7 +956,7 @@ const ProcessingOrders = ({}) => {
           ""
         )}
         {selectedOrder ? (
-          <h1 style={{ width: "20%", textAlign: "left", marginLeft: "30px" }}>
+          <h1 style={{ width: "30%", textAlign: "left", marginLeft: "10px" }}>
             Rs:{selectedOrder?.order_grandtotal}
           </h1>
         ) : (
