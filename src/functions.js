@@ -226,6 +226,7 @@ export const Billing = async ({
   edit_prices = [],
 }) => {
   let newPriceItems = [];
+
   for (let item of items) {
     //console.log(
     //   item,
@@ -233,6 +234,7 @@ export const Billing = async ({
     //   +item.conversion * +item.b + item.p,
     //   +item.conversion * +item.b + item.p
     // );
+    item = { ...item, item_total: 0 };
     let charges_discount = [];
     let price = add_discounts
       ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
@@ -298,7 +300,7 @@ export const Billing = async ({
     let edit_price = edit_prices.find(
       (a) => a.item_uuid === item.item_uuid
     )?.item_price;
-
+    console.log(item);
     item = {
       ...item,
       charges_discount,

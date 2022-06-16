@@ -368,8 +368,7 @@ const ProcessingOrders = ({}) => {
     for (let orderObject of dataArray) {
       let data = orderObject;
       if (
-        data?.item_details?.filter((a) => +a.status === 3)
-          ?.length  &&
+        data?.item_details?.filter((a) => +a.status === 3)?.length &&
         Location.pathname.includes("processing")
       )
         data = {
@@ -377,12 +376,20 @@ const ProcessingOrders = ({}) => {
           item_details: data.item_details.map((a) =>
             +a.status === 3 ? { ...a, b: 0, p: 0 } : a
           ),
-          processing_canceled: data?.item_details?.filter(
-            (a) => +a.status === 3
-          ),
-         
+          processing_canceled: data.processing_canceled.length
+            ? [
+                ...data.processing_canceled,
+                ...data.item_details.filter(
+                  (a) =>
+                    +a.status === 3 &&
+                    !data.processing_canceled.filter(
+                      (b) => a.item_uuid === b.item_uuid
+                    ).length
+                ),
+              ]
+            : data?.item_details?.filter((a) => +a.status === 3),
         };
-      if (updateBilling) {
+ 
         let billingData = await Billing({
           replacement: data.replacement,
           counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
@@ -401,7 +408,7 @@ const ProcessingOrders = ({}) => {
           ...billingData,
           item_details: billingData.items,
         };
-      }
+      
 
       let time = new Date();
       if (
@@ -830,7 +837,10 @@ const ProcessingOrders = ({}) => {
       <nav className="user_nav nav_styling" style={{ top: "0" }}>
         <div
           className="user_menubar flex"
-          style={{ width: "160px", justifyContent: "space-between" }}
+          style={{
+            width: selectedOrder ? "fit-content" : "160px",
+            justifyContent: "space-between",
+          }}
         >
           <IoArrowBackOutline
             className="user_Back_icon"
@@ -852,7 +862,7 @@ const ProcessingOrders = ({}) => {
           )}
         </div>
 
-        <h1 style={{ width: "100%", textAlign: "left", marginLeft: "30px" }}>
+        <h1 style={{ width: "60%", textAlign: "left", marginLeft: "30px" }}>
           {selectedOrder ? selectedOrder.counter_title : "Orders"}
         </h1>
         {!selectedOrder ? (
@@ -942,6 +952,13 @@ const ProcessingOrders = ({}) => {
               ""
             )}
           </>
+        ) : (
+          ""
+        )}
+        {selectedOrder ? (
+          <h1 style={{ width: "20%", textAlign: "left", marginLeft: "30px" }}>
+            Rs:{selectedOrder?.order_grandtotal}
+          </h1>
         ) : (
           ""
         )}
@@ -2117,8 +2134,16 @@ function HoldPopup({
       if (item) {
         let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
           ?.conversion;
-        item.b = parseInt(+item.b + curr.b + (((+item.p + curr.p) +((+item.free||0)+(+curr.free||0)))/ conversion));
-        item.p = parseInt((+item.p + curr.p+((+item.free||0)+(+curr.free||0))) % conversion);
+        item.b = parseInt(
+          +item.b +
+            curr.b +
+            (+item.p + curr.p + ((+item.free || 0) + (+curr.free || 0))) /
+              conversion
+        );
+        item.p = parseInt(
+          (+item.p + curr.p + ((+item.free || 0) + (+curr.free || 0))) %
+            conversion
+        );
       } else {
         acc.push(curr);
       }
