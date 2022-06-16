@@ -368,8 +368,8 @@ const ProcessingOrders = ({}) => {
     for (let orderObject of dataArray) {
       let data = orderObject;
       if (
-        data?.item_details?.filter((a) => +a.status === 1 || +a.status === 3)
-          ?.length === data?.item_details.length &&
+        data?.item_details?.filter((a) => +a.status === 3)
+          ?.length  &&
         Location.pathname.includes("processing")
       )
         data = {
@@ -405,7 +405,8 @@ const ProcessingOrders = ({}) => {
 
       let time = new Date();
       if (
-        data?.item_details?.filter((a) => +a.status === 3).length&&
+        data?.item_details?.filter((a) => +a.status === 1 || +a.status === 3)
+          ?.length === data?.item_details.length &&
         Location.pathname.includes("processing")
       )
         data = {
