@@ -277,8 +277,8 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               >
-                {item.charges_discount.length
-                  ? item.charges_discount[0].value || 0
+                {item?.charges_discount?.length
+                  ? item?.charges_discount[0]?.value || 0
                   : 0}
               </td>
               <td
@@ -288,8 +288,8 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               >
-                {item.charges_discount.length > 1
-                  ? item.charges_discount[1].value || 0
+                {item?.charges_discount?.length > 1
+                  ? item.charges_discount[1]?.value || 0
                   : 0}
               </td>
               <td

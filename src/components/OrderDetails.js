@@ -13,6 +13,12 @@ import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 import OrderPrint from "./OrderPrint";
 import { useIdleTimer } from "react-idle-timer";
 import FreeItems from "./FreeItems";
+const default_status = [
+  { value: 0, label: "Preparing" },
+  { value: 1, label: "Ready" },
+  { value: 2, label: "Hold" },
+  { value: 3, label: "Canceled" },
+];
 export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
   const [itemsData, setItemsData] = useState([]);
@@ -443,6 +449,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     <tr className="white">
                       <th className="pa2 tl bb b--black-20 w-30">Item Name</th>
                       <th className="pa2 tl bb b--black-20 w-30">MRP</th>
+                      {editOrder ? (
+                        <th className="pa2 tl bb b--black-20 w-30">MRP</th>
+                      ) : (
+                        ""
+                      )}
                       <th className="pa2 tc bb b--black-20">Quantity(b)</th>
                       <th className="pa2 tc bb b--black-20">Quantity(p)</th>
                       <th className="pa2 tc bb b--black-20 ">Price</th>
@@ -550,6 +561,43 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             style={{ textAlign: "center" }}
                           >
                             {editOrder ? (
+                              <Select
+                                id={"item_uuid" + item.uuid}
+                                options={default_status
+                                  }
+                                
+                                onChange={(e) => {
+                                  setOrderData((prev) => ({
+                                    ...prev,
+                                    item_details: prev.item_details.map((a) =>
+                                      a.uuid === item.uuid
+                                        ? {
+                                            ...a,
+                                            status: e.value,
+                                          }
+                                        : a
+                                    ),
+                                  }));
+                                  
+                                }}
+                                value={item.status?default_status.find(a=>+a.value===+item.status):""}
+                                openMenuOnFocus={true}
+                               
+                                menuPosition="fixed"
+                                menuPlacement="auto"
+                                placeholder="Item"
+                              />
+                            ) : (
+                              itemsData.find(
+                                (a) => a.item_uuid === item.item_uuid
+                              )?.item_title || ""
+                            )}
+                          </td>
+                          <td
+                            className="ph2 pv1 tc bb b--black-20 bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            {editOrder ? (
                               <input
                                 id={"q" + item.uuid}
                                 type="number"
@@ -591,10 +639,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           >
                             {editOrder ? (
                               <input
+                              onWheel={(e) => e.target.blur()}
                                 id={"p" + item.uuid}
                                 type="number"
                                 className="numberInput"
-                                onWheel={(e) => e.preventDefault()}
+                                
                                 index={listItemIndexCount++}
                                 value={item.p || 0}
                                 onChange={(e) => {
