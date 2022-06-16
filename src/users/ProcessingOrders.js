@@ -682,11 +682,14 @@ const ProcessingOrders = ({}) => {
               prev.filter((b) => b.item_uuid === orderItem.item_uuid)?.length
                 ? prev.map((b) =>
                     b.item_uuid === orderItem.item_uuid
-                      ? {...b,
+                      ? {
+                          ...b,
                           ...ItemData,
                           ...orderItem,
-                          barcodeQty:(+b.barcodeQty||0)+
-                            (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
+                          barcodeQty:
+                            (+b.barcodeQty || 0) +
+                            (+a?.b || 0) * +(+a?.conversion || 1) +
+                            a?.p,
                           case: 1,
                           qty:
                             (+orderItem?.b || 0) *
@@ -786,14 +789,13 @@ const ProcessingOrders = ({}) => {
       setLoading(false);
     }, 2000);
   };
-  const updateBillingAmount = async () => {
+  const updateBillingAmount = async (order = selectedOrder) => {
+    console.log(order);
     let billingData = await Billing({
-      replacement: selectedOrder.replacement,
-      counter: counters.find(
-        (a) => a.counter_uuid === selectedOrder.counter_uuid
-      ),
+      replacement: order.replacement,
+      counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
       add_discounts: true,
-      items: selectedOrder.item_details.map((a) => {
+      items: order.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {
           ...itemData,
@@ -1541,6 +1543,7 @@ const ProcessingOrders = ({}) => {
           )}
           counters={counters}
           items={items}
+          setOrder={(a) => updateBillingAmount({ ...selectedOrder, ...a })}
         />
       ) : (
         ""
@@ -1576,7 +1579,7 @@ const ProcessingOrders = ({}) => {
             navigator.mediaSession.playbackState = "none";
             audiosRef.current = null;
             console.clear();
-            setTempQuantity([])
+            setTempQuantity([]);
           }}
           selectedOrder={selectedOrder}
           onClose={() => setConfirmPopup(false)}
@@ -2557,6 +2560,7 @@ function DiliveryPopup({
   items,
   order,
   allowed,
+  setOrder,
 }) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
@@ -2565,6 +2569,12 @@ function DiliveryPopup({
   const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
+  useEffect(() => {
+    setOrder({
+      replacement: data?.actual || 0,
+      replacement_mrp: data?.mrp || 0,
+    });
+  }, [data]);
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -2607,7 +2617,7 @@ function DiliveryPopup({
   const submitHandler = async () => {
     setError("");
     let billingData = await Billing({
-      replacement: order.replacement,
+      replacement: data.actual,
       counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
       add_discounts: true,
       items: order.item_details.map((a) => {

@@ -25,7 +25,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [editOrder, setEditOrder] = useState(false);
 
   const [orderData, setOrderData] = useState();
-  const [printData, setPrintData] = useState({ item_details: [] ,status:[]});
+  const [printData, setPrintData] = useState({ item_details: [], status: [] });
   const [holdPopup, setHoldPopup] = useState(false);
   const [autoBills, setAutoBills] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
@@ -129,12 +129,13 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     setPrintData({
       ...printData,
       ...orderData,
-      item_details: orderData?.item_details
-        ?.filter((a) => +a.status !== 3)
-        ?.map((a, i) => ({
-          ...a,
-          sr: i + 1,
-        }))||[],
+      item_details:
+        orderData?.item_details
+          ?.filter((a) => +a.status !== 3)
+          ?.map((a, i) => ({
+            ...a,
+            sr: i + 1,
+          })) || [],
     });
   }, [orderData]);
   const getItemsData = async () => {
@@ -736,6 +737,54 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     ) : (
                       ""
                     )}
+                    <tr
+                      style={{
+                        height: "50px",
+
+                        borderBottom: "2px solid #fff",
+                      }}
+                    >
+                      <td className="ph2 pv1 tl bb b--black-20 bg-white">
+                        <div className="inputGroup">Total</div>
+                      </td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      ></td>
+                      {editOrder ? (
+                        <td
+                          className="ph2 pv1 tc bb b--black-20 bg-white"
+                          style={{ textAlign: "center" }}
+                        ></td>
+                      ) : (
+                        ""
+                      )}
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        {(orderData?.item_details?.length > 1
+                          ? orderData?.item_details
+                              .map((a) => +a.b || 0)
+                              .reduce((a, b) => a + b)
+                          : orderData?.item_details[0].b) || 0}
+                      </td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        {(orderData?.item_details.length > 1
+                          ? orderData?.item_details
+                              .map((a) => +a.p || 0)
+                              .reduce((a, b) => a + b)
+                          : orderData?.item_details[0].p) || 0}
+                      </td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      ></td>
+                      {editOrder ? <td></td> : ""}
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -841,31 +890,20 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             }
             itemData={itemsData}
             item_details={
-              printData?.item_details
-                ?.length > 14
-                ? printData?.item_details
-                    
-                    ?.slice(0, 14)
+              printData?.item_details?.length > 14
+                ? printData?.item_details?.slice(0, 14)
                 : printData?.item_details
             }
-            footer={
-              !(
-                printData?.item_details
-                  ?.length > 14
-              )
-            }
+            footer={!(printData?.item_details?.length > 14)}
           />
-          {printData?.item_details?.length >
-          14 ? (
+          {printData?.item_details?.length > 14 ? (
             <>
               <div style={{ height: "20mm" }}></div>
               <OrderPrint
                 counter={counters.find(
                   (a) => a.counter_uuid === printData?.counter_uuid
                 )}
-                order={printData
-               
-                }
+                order={printData}
                 date={new Date(printData?.status[0]?.time)}
                 user={
                   users.find(
@@ -874,42 +912,30 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 }
                 itemData={itemsData}
                 item_details={
-                  printData
-                    ?.length > 28
-                    ? printData?.item_details
-                        
-                        ?.slice(14, 28)
-                    : printData?.item_details
-                        
-                        ?.slice(
-                          14,
-                          printData?.item_details?.filter(
-                            (a) => !(+a.status === 3)
-                          )?.length
-                        )
+                  printData?.length > 28
+                    ? printData?.item_details?.slice(14, 28)
+                    : printData?.item_details?.slice(
+                        14,
+                        printData?.item_details?.filter(
+                          (a) => !(+a.status === 3)
+                        )?.length
+                      )
                 }
-                footer={
-                  !(
-                    printData?.item_details
-                      ?.length > 28
-                  )
-                }
+                footer={!(printData?.item_details?.length > 28)}
               />
             </>
           ) : (
             ""
           )}
 
-          {printData?.item_details?.length >
-          28 ? (
+          {printData?.item_details?.length > 28 ? (
             <>
               <div style={{ height: "20mm" }}></div>
               <OrderPrint
                 counter={counters.find(
                   (a) => a.counter_uuid === printData?.counter_uuid
                 )}
-                order={
-                  printData}
+                order={printData}
                 date={new Date(printData?.status[0]?.time)}
                 user={
                   users.find(
@@ -917,12 +943,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   )?.user_title || ""
                 }
                 itemData={itemsData}
-                item_details={printData?.item_details
-                  ?.slice(
-                    28,
-                    printData?.item_details
-                      .length
-                  )}
+                item_details={printData?.item_details?.slice(
+                  28,
+                  printData?.item_details.length
+                )}
                 footer={true}
               />
             </>
