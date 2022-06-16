@@ -1149,13 +1149,13 @@ const MainAdmin = () => {
                   }
                   itemData={items}
                   item_details={
-                    orderData?.item_details?.length > 14
-                      ? orderData?.item_details?.slice(0, 14)
+                    orderData?.item_details?.length > 12
+                      ? orderData?.item_details?.slice(0, 12)
                       : orderData?.item_details
                   }
-                  footer={!(orderData?.item_details?.length > 14)}
+                  footer={!(orderData?.item_details?.length > 12)}
                 />
-                {orderData?.item_details?.length > 14 ? (
+                {orderData?.item_details?.length > 12 ? (
                   <>
                     <div style={{ height: "20mm" }}></div>
                     <OrderPrint
@@ -1171,21 +1171,50 @@ const MainAdmin = () => {
                       }
                       itemData={items}
                       item_details={
-                        orderData?.item_details?.length > 28
-                          ? orderData?.item_details?.slice(14, 28)
+                        orderData?.item_details?.length > 24
+                          ? orderData?.item_details?.slice(12, 24)
                           : orderData?.item_details?.slice(
-                            14,
+                            12,
                             orderData?.item_details?.length
                           )
                       }
-                      footer={!(orderData?.item_details?.length > 28)}
+                      footer={!(orderData?.item_details?.length > 24)}
+                    />
+                  </>
+                ) : (
+                  ""
+                )}
+                {orderData?.item_details?.length > 24 ? (
+                  <>
+                    <div style={{ height: "20mm" }}></div>
+                    <OrderPrint
+                      counter={counter.find(
+                        (a) => a.counter_uuid === orderData?.counter_uuid
+                      )}
+                      order={orderData}
+                      date={new Date(orderData?.status[0]?.time)}
+                      user={
+                        users.find(
+                          (a) => a.user_uuid === orderData?.status[0]?.user_uuid
+                        )?.user_title || ""
+                      }
+                      itemData={items}
+                      item_details={
+                        orderData?.item_details?.length > 36
+                          ? orderData?.item_details?.slice(24, 36)
+                          : orderData?.item_details?.slice(
+                            24,
+                            orderData?.item_details?.length
+                          )
+                      }
+                      footer={!(orderData?.item_details?.length > 36)}
                     />
                   </>
                 ) : (
                   ""
                 )}
 
-                {orderData?.item_details?.length > 28 ? (
+                {orderData?.item_details?.length > 36 ? (
                   <>
                     <div style={{ height: "20mm" }}></div>
                     <OrderPrint
@@ -1201,7 +1230,7 @@ const MainAdmin = () => {
                       }
                       itemData={items}
                       item_details={orderData?.item_details?.slice(
-                        28,
+                        36,
                         orderData?.item_details.length
                       )}
                       footer={true}
