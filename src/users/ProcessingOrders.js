@@ -2032,7 +2032,7 @@ function HoldPopup({
   const audiosRef = useRef();
 
   const audioCallback = elem_id => {
-    // setItems(prev => prev.map(i => i.item_uuid === elem_id ? {...i, status: done}));
+    setItems(prev => prev.map(i => i.item_uuid === elem_id ? { ...i, status: 1 } : i))
   }
 
   const [filterItemTitle, setFilterItemTile] = useState("");
@@ -2273,7 +2273,7 @@ function HoldPopup({
                         )
                         .map(a => (
                           <>
-                            <tr onClick={e => audioLoopFunction({ i: 0, src: audiosRef.current?.filter(i => i.category_uuid === a.category_uuid), forcePlayCount: items?.filter(i => i.category_uuid === a.category_uuid)?.length || 1, callback: audioCallback })}>
+                            <tr onClick={e => audioLoopFunction({ i: 0, src: audiosRef.current?.filter(i => i.category_uuid === a.category_uuid), forcePlayCount: 1, callback: audioCallback })}>
                               <td colSpan={8}>{a.category_title} <AiFillPlayCircle /></td>
                             </tr>
                             {console.log(a, items)}
@@ -2335,7 +2335,7 @@ function HoldPopup({
                                         style={{ width: "15px" }}
                                       />
                                     ) : (
-                                      ""
+                                      ''
                                     )}
                                   </td>
 

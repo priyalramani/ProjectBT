@@ -393,8 +393,10 @@ export const audioLoopFunction = ({ i, recall, forcePlayCount, src, callback }) 
 
     if (!src?.[0]) return;
     if (!src?.some(i => i.getAttribute("played") !== "true")) {
-      let utterance = new SpeechSynthesisUtterance("All items played in this category");
-      speechSynthesis.speak(utterance);
+      let utterance = new SpeechSynthesisUtterance("Category completed");
+      var voices = window.speechSynthesis.getVoices();
+      utterance.voice = voices.find(voice => voice.lang === 'hi-IN');
+      window.speechSynthesis.speak(utterance);
       return;
     }
     if (src?.[i]?.getAttribute("played") === "true") {
