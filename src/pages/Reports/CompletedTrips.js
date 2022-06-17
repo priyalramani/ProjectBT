@@ -98,7 +98,7 @@ const CompletedTrips = () => {
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading">
-          <h2>Comapleted Trips </h2>
+          <h2>Completed Trips </h2>
         </div>
         <div id="item-sales-top">
           <div
@@ -220,6 +220,14 @@ const CompletedTrips = () => {
           unpaid_invoice={statementTrip?.unpaid_invoice}
         />
       </div>
+      {detailsPopup ? (
+        <PopupTable
+          trip_uuid={detailsPopup}
+          onSave={() => setDetailsPopup("")}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
@@ -317,5 +325,129 @@ function Table({ itemsDetails, getTripData, handlePrint, setDetailsPopup }) {
           ))}
       </tbody>
     </table>
+  );
+}
+function PopupTable({ trip_uuid, onSave }) {
+  const [itemDetails, setItemDetails] = useState([]);
+  const [counter, setCounter] = useState([]);
+  const getCounter = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/counters/GetCounterList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCounter(response.data.result);
+  };
+  function formatAMPM(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var strTime = hours + ":" + minutes + " " + ampm;
+    return strTime;
+  }
+  const getCompleteOrders = async () => {
+    if (trip_uuid) {
+      const response = await axios({
+        method: "post",
+        url: "/orders/getTripOrderList",
+        data: { trip_uuid },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log("activity", response);
+      if (response.data.success) setItemDetails(response.data.result);
+    }
+  };
+  useEffect(() => {
+    getCompleteOrders();
+    getCounter();
+  }, [trip_uuid]);
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{
+          height: "500px",
+          width: "max-content",
+          minWidth: "206px",
+          padding: "10px",
+          paddingTop: "40px",
+        }}
+      >
+        <div
+          className="content"
+          style={{
+
+            padding: "20px",
+            width: "80vw",
+            overflow:"scroll"
+          }}
+        >
+          <table
+            className="user-table"
+            style={{
+              maxWidth: "100vw",
+
+              overflowX: "scroll",
+            }}
+          >
+            <thead>
+              <tr>
+                <th>S.N</th>
+                <th colSpan={4}>Order Date</th>
+                <th colSpan={4}>Delivery Date</th>
+                <th colSpan={4}>Counter</th>
+                <th colSpan={2}>Invoice</th>
+                <th colSpan={2}>Qty</th>
+                <th colSpan={2}>Amount</th>
+                <th colSpan={2}>Cash</th>
+                <th colSpan={2}>Cheque</th>
+                <th colSpan={2}>UPI</th>
+                <th colSpan={2}>Unpaid</th>
+                
+              </tr>
+            </thead>
+            <tbody className="tbody">
+              {itemDetails
+                ?.sort((a, b) => a.order_date - b.order_date)
+                ?.map((item, i, array) => (
+                  <tr key={Math.random()} style={{ height: "30px" }}>
+                    <td>{i + 1}</td>
+                    <td colSpan={4}>
+                      {new Date(item.order_date).toDateString()} -{" "}
+                      {formatAMPM(new Date(item.order_date))}
+                    </td>
+                    <td colSpan={4}>
+                      {new Date(item.delivery_date).toDateString()} -{" "}
+                      {formatAMPM(new Date(item.delivery_date))}
+                    </td>
+                    <td colSpan={4}>
+                      {counter.find((a) => a.counter_uuid === item.counter_uuid)
+                        ?.counter_title || ""}
+                    </td>
+                    <td colSpan={2}>{item.invoice_number || ""}</td>
+                    <td colSpan={2}>{item.qty || ""}</td>
+                    <td colSpan={2}>{item.amt || ""}</td>
+                    <td colSpan={2}>{item.modes.find(a=>a.mode_uuid==="c67b54ba-d2b6-11ec-9d64-0242ac120002")?.amt || 0}</td>
+                    <td colSpan={2}>{item.modes.find(a=>a.mode_uuid==="c67b5794-d2b6-11ec-9d64-0242ac120002")?.amt || 0}</td>
+                    <td colSpan={2}>{item.modes.find(a=>a.mode_uuid==="c67b5988-d2b6-11ec-9d64-0242ac120002")?.amt || 0}</td>
+                    <td colSpan={2}>{item.unpaid || 0}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
