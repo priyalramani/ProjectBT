@@ -242,7 +242,7 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               >
-                {(item.b || 0) + ":" + ("00" + item?.p.toString()).slice(-2)}
+                {(item.b || 0) + ":" + ("00" + item?.p.toString()).slice(-3)}
               </td>
               <td
                 style={{
