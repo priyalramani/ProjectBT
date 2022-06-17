@@ -232,7 +232,7 @@ const SelectedCounterOrder = () => {
                         (category) =>
                           items
                             .filter(
-                              (a) => a.category_uuid === category.category_uuid
+                              (a) => a.category_uuid === category.category_uuid&&a.status
                             )
                             ?.sort((a, b) => a.sort_order - b.sort_order)
                             ?.filter(
@@ -265,7 +265,7 @@ const SelectedCounterOrder = () => {
                                 ?.sort((a, b) => a - b)
                                 .filter(
                                   (a) =>
-                                    a.category_uuid === category.category_uuid
+                                    a.category_uuid === category.category_uuid&&a.status
                                 )
                                 ?.map((item) => {
                                   return (

@@ -462,7 +462,7 @@ console.log(order)
                                   (a) =>
                                     !order.item_details.filter(
                                       (b) => a.item_uuid === b.item_uuid
-                                    ).length
+                                    ).length&&a.status
                                 )
                                 .sort((a, b) =>
                                   a.item_title.localeCompare(b.item_title)

@@ -728,7 +728,7 @@ function NewUserForm({
                       <div className="flex">
                         <input
                           type="radio"
-                          name="sort_order"
+                          name="statusOnn"
                           className="numberInput"
                           checked={data.free_issue === "Y"}
                           style={{ height: "25px" }}
@@ -741,7 +741,7 @@ function NewUserForm({
                       <div className="flex">
                         <input
                           type="radio"
-                          name="sort_order"
+                          name="statusOff"
                           className="numberInput"
                           checked={data.free_issue === "N"}
                           style={{ height: "25px" }}
@@ -772,7 +772,41 @@ function NewUserForm({
                       }
                     />
                   </label>
-                 
+                  <label className="selectLabel">
+                    Status
+                    <div
+                      className="flex"
+                      style={{ justifyContent: "space-between" }}
+                    >
+                      <div className="flex">
+                        <input
+                          type="radio"
+                          name="sort_order"
+                          className="numberInput"
+                          checked={data.status}
+                          style={{ height: "25px" }}
+                          onClick={() =>
+                            setdata((prev) => ({ ...prev, status: 1 }))
+                          }
+                        />
+                        On
+                      </div>
+                      <div className="flex">
+                        <input
+                          type="radio"
+                          name="sort_order"
+                          className="numberInput"
+                          checked={!data.status }
+                          style={{ height: "25px" }}
+                          onClick={() =>
+                            setdata((prev) => ({ ...prev, status: 0 }))
+                          }
+                        />
+                        Off
+                      </div>
+                      {console.log(data)}
+                    </div>
+                  </label>
                 </div>
               </div>
               <i style={{ color: "red" }}>
