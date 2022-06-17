@@ -1565,6 +1565,7 @@ const ProcessingOrders = () => {
           setTempQuantity={setTempQuantity}
           tempQuantity={tempQuantity}
           categories={itemCategories}
+          getTripOrders={getTripOrders}
         />
       ) : (
         ""
@@ -2086,6 +2087,7 @@ function HoldPopup({
   setTempQuantity,
   tempQuantity,
   categories,
+  getTripOrders
 }) {
   const [items, setItems] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
@@ -2400,13 +2402,14 @@ function HoldPopup({
                                   style={{
                                     height: "30px",
                                     fontSize: "12px",
-                                    color: +item.status === 1
-                                      ? "#fff"
-                                      : +item.status === 2
-                                      ? "#000"
-                                      : +item.status === 3
-                                      ? "#fff"
-                                      : "#000",
+                                    color:
+                                      +item.status === 1
+                                        ? "#fff"
+                                        : +item.status === 2
+                                        ? "#000"
+                                        : +item.status === 3
+                                        ? "#fff"
+                                        : "#000",
                                     backgroundColor:
                                       +item.status === 1
                                         ? "green"
@@ -2534,7 +2537,10 @@ function HoldPopup({
                   <button
                     type="button"
                     className="submit"
-                    onClick={postOrderData}
+                    onClick={async () => {
+                      await getTripOrders();
+                      postOrderData();
+                    }}
                   >
                     Save
                   </button>
