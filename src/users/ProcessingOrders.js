@@ -1373,7 +1373,7 @@ const ProcessingOrders = () => {
                       </tr>
                     ))
                 : orders
-                    ?.sort((a, b) => a.created_at - b.created_at)
+                    ?.sort((a, b) => a.sort_order - b.sort_order)
                     ?.map((item, i) => (
                       <tr
                         key={Math.random()}
