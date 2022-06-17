@@ -38,7 +38,6 @@ const ProcessingOrders = () => {
   const audiosRef = useRef();
   const Location = useLocation();
   const [playerSpeed, setPlayerSpeed] = useState(1);
-  const [updateBilling, setUpdateBilling] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
   const [oneTimeState, setOneTimeState] = useState(false);
   const [barcodeFilter, setBarcodeFilter] = useState("");
@@ -367,7 +366,12 @@ const ProcessingOrders = () => {
           return obj;
         }, {});
 
-      finalData.push({ ...data, opened_by: 0 });
+      finalData.push({
+        ...data,
+        opened_by: 0,
+        replacement: orderObject.replacement,
+        replacement_mrp: orderObject.replacement_mrp,
+      });
     }
     const response = await axios({
       method: "put",
@@ -1506,7 +1510,6 @@ const ProcessingOrders = () => {
           setOrder={setSelectedOrder}
           popupInfo={popupForm}
           order={selectedOrder}
-          setUpdateBilling={setUpdateBilling}
           deliveryPage={Location.pathname.includes("delivery")}
         />
       ) : (
@@ -1541,7 +1544,10 @@ const ProcessingOrders = () => {
           )}
           counters={counters}
           items={items}
-          setOrder={(a) => updateBillingAmount({ ...selectedOrder, ...a })}
+          setOrder={(a) => {
+            updateBillingAmount({ ...selectedOrder, ...a });
+            setSelectedOrder({ ...selectedOrder, ...a });
+          }}
         />
       ) : (
         ""
@@ -2083,9 +2089,11 @@ function HoldPopup({
   const [popupForm, setPopupForm] = useState(false);
   const audiosRef = useRef();
 
-  const audioCallback = elem_id => {
-    setItems(prev => prev.map(i => i.item_uuid === elem_id ? { ...i, status: 1 } : i))
-  }
+  const audioCallback = (elem_id) => {
+    setItems((prev) =>
+      prev.map((i) => (i.item_uuid === elem_id ? { ...i, status: 1 } : i))
+    );
+  };
 
   const [filterItemTitle, setFilterItemTile] = useState("");
   useEffect(() => {
@@ -2350,8 +2358,21 @@ function HoldPopup({
                         )
                         .map((a) => (
                           <>
-                            <tr onClick={e => audioLoopFunction({ i: 0, src: audiosRef.current?.filter(i => i.category_uuid === a.category_uuid), forcePlayCount: 1, callback: audioCallback })}>
-                              <td colSpan={8}>{a.category_title} <AiFillPlayCircle /></td>
+                            <tr
+                              onClick={(e) =>
+                                audioLoopFunction({
+                                  i: 0,
+                                  src: audiosRef.current?.filter(
+                                    (i) => i.category_uuid === a.category_uuid
+                                  ),
+                                  forcePlayCount: 1,
+                                  callback: audioCallback,
+                                })
+                              }
+                            >
+                              <td colSpan={8}>
+                                {a.category_title} <AiFillPlayCircle />
+                              </td>
                             </tr>
                             {console.log(a, items)}
                             {items
@@ -2412,7 +2433,7 @@ function HoldPopup({
                                         style={{ width: "15px" }}
                                       />
                                     ) : (
-                                      ''
+                                      ""
                                     )}
                                   </td>
 
@@ -3362,7 +3383,7 @@ function NewUserForm({
   tempQuantity,
   setTempQuantity,
   order,
-  setUpdateBilling,
+
   deliveryPage,
   items,
   onClose,
@@ -3489,7 +3510,6 @@ function NewUserForm({
             : a
         ),
       };
-      setUpdateBilling(true);
       onSave(orderData);
     } else {
       orderData = {
@@ -3556,7 +3576,6 @@ function NewUserForm({
             : a
         ),
       };
-      setUpdateBilling(true);
       onSave(orderData);
     }
   };
