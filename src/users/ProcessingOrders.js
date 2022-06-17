@@ -272,6 +272,7 @@ const ProcessingOrders = () => {
     setLoading(true);
     console.log(dataArray);
     setPopupBarcode(false);
+    setBarcodeMessage([]);
     let finalData = [];
     for (let orderObject of dataArray) {
       let data = orderObject;
@@ -588,6 +589,7 @@ const ProcessingOrders = () => {
               ]
             : [
                 {
+                  ...ItemData,
                   ...orderItem,
                   ...a,
                   barcodeQty:
