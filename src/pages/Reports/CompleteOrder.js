@@ -1,22 +1,16 @@
 import axios from "axios";
-import React, { useEffect, useState, } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
 import Select from "react-select";
-
-
 const CompleteOrder = () => {
   const [searchData, setSearchData] = useState({
     startDate: "",
     endDate: "",
     counter_uuid: "",
   });
-
   const [popupOrder, setPopupOrder] = useState(null);
-
-  // const [itemFilter, setItemFilter] = useState("");
-
   const [items, setItems] = useState([]);
   const [counter, setCounter] = useState([]);
   const [invoiceNumberFilter, setInvoiceNumberFilter] = useState("");
@@ -61,8 +55,8 @@ const CompleteOrder = () => {
       endDate: curTime,
     }));
     getCounter();
-
   }, []);
+
   return (
     <>
       <Sidebar />
@@ -157,9 +151,7 @@ const CompleteOrder = () => {
             </button>
           </div>
         </div>
-        <div
-          className="table-container-user item-sales-container"
-        >
+        <div className="table-container-user item-sales-container">
           <Table
             itemsDetails={items.filter(
               (a) =>
@@ -171,8 +163,6 @@ const CompleteOrder = () => {
             )}
             setPopupOrder={setPopupOrder}
             counter={counter}
-
-
           />
         </div>
       </div>
@@ -188,20 +178,13 @@ const CompleteOrder = () => {
       ) : (
         ""
       )}
-      
     </>
   );
 };
 
 export default CompleteOrder;
 
-function Table({
-  itemsDetails,
-  setPopupOrder,
-  counter,
-
-
-}) {
+function Table({ itemsDetails, setPopupOrder, counter }) {
   function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -216,7 +199,7 @@ function Table({
   return (
     <table
       className="user-table"
-      style={{ height: "fit-content", overflowX: "scroll", width: "100%" }}
+      style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}
     >
       <thead>
         <tr>
@@ -227,7 +210,6 @@ function Table({
           <th colSpan={2}>Invoice</th>
           <th colSpan={2}>Qty</th>
           <th colSpan={2}>Amount</th>
-          <th colSpan={4}>Actions</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -237,10 +219,7 @@ function Table({
             <tr
               key={Math.random()}
               style={{ height: "30px" }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setPopupOrder(item);
-              }}
+              onClick={() => setPopupOrder(item)}
             >
               <td>{i + 1}</td>
               <td colSpan={2}>
@@ -258,7 +237,6 @@ function Table({
               <td colSpan={2}>{item.invoice_number || ""}</td>
               <td colSpan={2}>{item.qty || ""}</td>
               <td colSpan={2}>{item.amt || ""}</td>
-              
             </tr>
           ))}
       </tbody>
