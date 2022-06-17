@@ -1572,7 +1572,6 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                     >
                       <thead>
                         <tr
-                          style={{ color: "#fff", backgroundColor: "#7990dd" }}
                         >
                           <th>Sr.</th>
                           <th colSpan={3}>
@@ -1609,7 +1608,13 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                                     key={item?.item_uuid || Math.random()}
                                     style={{
                                       height: "30px",
-                                      color: "#fff",
+                                      color: +item.status === 1
+                                      ? "#fff"
+                                      : +item.status === 2
+                                      ? "#000"
+                                      : +item.status === 3
+                                      ? "#fff"
+                                      : "#000",
                                       backgroundColor:
                                         +item.status === 1
                                           ? "green"
@@ -1617,7 +1622,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                                           ? "yellow"
                                           : +item.status === 3
                                           ? "red"
-                                          : "#7990dd",
+                                          : "#fff",
                                     }}
                                     onClick={() => setPopup(item)}
                                   >

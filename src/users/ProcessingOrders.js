@@ -2318,7 +2318,7 @@ function HoldPopup({
                     }}
                   >
                     <thead>
-                      <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                      <tr>
                         <th></th>
                         <th colSpan={3}>
                           <div className="t-head-element">Item</div>
@@ -2400,13 +2400,19 @@ function HoldPopup({
                                   style={{
                                     height: "30px",
                                     fontSize: "12px",
-                                    color: "#fff",
+                                    color: +item.status === 1
+                                      ? "#fff"
+                                      : +item.status === 2
+                                      ? "#000"
+                                      : +item.status === 3
+                                      ? "#fff"
+                                      : "#000",
                                     backgroundColor:
                                       +item.status === 1
                                         ? "green"
                                         : +item.status === 3
                                         ? "red"
-                                        : "#7990dd",
+                                        : "#fff",
                                   }}
                                 >
                                   <td
