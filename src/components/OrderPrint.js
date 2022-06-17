@@ -201,7 +201,8 @@ const OrderPrint = ({
           const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid);
           let itemQty =
             (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0);
-          let unit_price = (+item.item_total || 0) / (+itemQty || 1);
+            let unit_price = (+item.item_total || 0) / (+itemQty || 1);
+            console.log(item)
           let tex_amt =
             (+unit_price || 0) -
             ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0));
@@ -268,7 +269,7 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               >
-                {item?.price || 0}
+                {item?.item_price || 0}
               </td>
               <td
                 style={{
