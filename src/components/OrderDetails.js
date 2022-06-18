@@ -35,22 +35,28 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [deletePopup, setDeletePopup] = useState(false);
 
   const appendNewRow = () => {
-    let item_uuid = uuid()
+    let item_uuid = uuid();
     setFocusedInputId(`REACT_SELECT_COMPONENT_ITEM_TITLE@${item_uuid}`);
-    setTimeout(() => setOrderData((prev) => ({
-      ...prev, item_details: [
-        ...prev.item_details,
-        {
-          uuid: item_uuid,
-          b: 0,
-          p: 0,
-          sr: prev.item_details.length + 1,
-        },
-      ],
-    })), 250);
-  }
+    setTimeout(
+      () =>
+        setOrderData((prev) => ({
+          ...prev,
+          item_details: [
+            ...prev.item_details,
+            {
+              uuid: item_uuid,
+              b: 0,
+              p: 0,
+              sr: prev.item_details.length + 1,
+            },
+          ],
+        })),
+      250
+    );
+  };
 
-  const shiftFocus = id => jumpToNextIndex(id, reactInputsRef, setFocusedInputId, appendNewRow)
+  const shiftFocus = (id) =>
+    jumpToNextIndex(id, reactInputsRef, setFocusedInputId, appendNewRow);
 
   const callBilling = async () => {
     if (!editOrder) return;
@@ -213,7 +219,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         unit_price: a.price,
         gst_percentage: a.item_gst,
         status: a.status || 0,
-        price: a.item_price,
+        price: a?.price || a.item_price || 0,
       })),
 
       orderStatus,
@@ -461,8 +467,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   </thead>
                   <tbody className="lh-copy">
                     {orderData?.item_details?.map((item, i) => {
-                      const item_title_component_id = `REACT_SELECT_COMPONENT_ITEM_TITLE@${item.uuid}`
-                      const item_status_component_id = `REACT_SELECT_COMPONENT_ITEM_STATUS@${item.uuid}`
+                      const item_title_component_id = `REACT_SELECT_COMPONENT_ITEM_TITLE@${item.uuid}`;
+                      const item_status_component_id = `REACT_SELECT_COMPONENT_ITEM_STATUS@${item.uuid}`;
 
                       return (
                         <tr
@@ -487,28 +493,41 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           <td className="ph2 pv1 tl bb b--black-20 bg-white">
                             <div
                               className="inputGroup"
-                              index={!item.default ? listItemIndexCount++ : ''}
-                              id={!item.default ? item_title_component_id : ''}
+                              index={!item.default ? listItemIndexCount++ : ""}
+                              id={!item.default ? item_title_component_id : ""}
                             >
                               {editOrder && !item.default ? (
                                 <Select
-                                  ref={(ref) => (reactInputsRef.current[item_title_component_id] = ref)}
-                                  id={"1_item_uuid" + item.uuid}
-                                  options={
-                                    itemsData.sort((a, b) => a.item_title.localeCompare(b.item_title))
-                                      .map((a, j) => ({
-                                        value: a.item_uuid,
-                                        label: a.item_title + "______" + a.mrp,
-                                        key: a.item_uuid,
-                                      }))
+                                  ref={(ref) =>
+                                    (reactInputsRef.current[
+                                      item_title_component_id
+                                    ] = ref)
                                   }
+                                  id={"1_item_uuid" + item.uuid}
+                                  options={itemsData
+                                    .sort((a, b) =>
+                                      a.item_title.localeCompare(b.item_title)
+                                    )
+                                    .map((a, j) => ({
+                                      value: a.item_uuid,
+                                      label: a.item_title + "______" + a.mrp,
+                                      key: a.item_uuid,
+                                    }))}
                                   onChange={(e) => {
-                                    setTimeout(() => setQtyDetails((prev) => !prev), 2000);
+                                    setTimeout(
+                                      () => setQtyDetails((prev) => !prev),
+                                      2000
+                                    );
                                     setOrderData((prev) => ({
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
                                         a.uuid === item.uuid
-                                          ? { ...a, ...itemsData.find((b) => b.item_uuid === e.value) }
+                                          ? {
+                                              ...a,
+                                              ...itemsData.find(
+                                                (b) => b.item_uuid === e.value
+                                              ),
+                                            }
                                           : a
                                       ),
                                     }));
@@ -522,7 +541,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                     key: item.item_uuid || item.uuid,
                                   }}
                                   openMenuOnFocus={true}
-                                  autoFocus={focusedInputId === item_title_component_id || (i === 0 && focusedInputId === 0)}
+                                  autoFocus={
+                                    focusedInputId ===
+                                      item_title_component_id ||
+                                    (i === 0 && focusedInputId === 0)
+                                  }
                                   menuPosition="fixed"
                                   menuPlacement="auto"
                                   placeholder="Item"
@@ -548,7 +571,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                               id={item_status_component_id}
                             >
                               <Select
-                                ref={ref => (reactInputsRef.current[item_status_component_id] = ref)}
+                                ref={(ref) =>
+                                  (reactInputsRef.current[
+                                    item_status_component_id
+                                  ] = ref)
+                                }
                                 id={"2_item_uuid" + item.uuid}
                                 options={default_status}
                                 onChange={(e) => {
@@ -564,10 +591,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 }}
                                 value={
                                   item.status
-                                    ? default_status.find(a => +a.value === +item.status)
+                                    ? default_status.find(
+                                        (a) => +a.value === +item.status
+                                      )
                                     : ""
                                 }
-                                autoFocus={focusedInputId === item_status_component_id || (i === 0 && item.default && focusedInputId === 0)}
+                                autoFocus={
+                                  focusedInputId === item_status_component_id ||
+                                  (i === 0 &&
+                                    item.default &&
+                                    focusedInputId === 0)
+                                }
                                 openMenuOnFocus={true}
                                 menuPosition="fixed"
                                 menuPlacement="auto"
@@ -590,7 +624,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 value={item.b || 0}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
-                                    setTimeout(() => setQtyDetails((prev) => !prev), 2000);
+                                    setTimeout(
+                                      () => setQtyDetails((prev) => !prev),
+                                      2000
+                                    );
                                     return {
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -601,11 +638,15 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                     };
                                   });
                                 }}
-                                onFocus={e => {
+                                onFocus={(e) => {
                                   e.target.onwheel = () => false;
-                                  e.target.select()
+                                  e.target.select();
                                 }}
-                                onKeyDown={e => e.key === "Enter" ? shiftFocus(e.target.id) : ""}
+                                onKeyDown={(e) =>
+                                  e.key === "Enter"
+                                    ? shiftFocus(e.target.id)
+                                    : ""
+                                }
                                 disabled={!item.item_uuid}
                               />
                             ) : (
@@ -623,9 +664,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 className="numberInput"
                                 index={listItemIndexCount++}
                                 value={item.p || 0}
-                                onChange={e => {
+                                onChange={(e) => {
                                   setOrderData((prev) => {
-                                    setTimeout(() => setQtyDetails((prev) => !prev), 2000);
+                                    setTimeout(
+                                      () => setQtyDetails((prev) => !prev),
+                                      2000
+                                    );
                                     return {
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -636,11 +680,15 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                     };
                                   });
                                 }}
-                                onFocus={e => {
+                                onFocus={(e) => {
                                   e.target.onwheel = () => false;
                                   e.target.select();
                                 }}
-                                onKeyDown={e => e.key === "Enter" ? shiftFocus(e.target.id) : ""}
+                                onKeyDown={(e) =>
+                                  e.key === "Enter"
+                                    ? shiftFocus(e.target.id)
+                                    : ""
+                                }
                                 disabled={!item.item_uuid}
                               />
                             ) : (
@@ -651,7 +699,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             className="ph2 pv1 tc bb b--black-20 bg-white"
                             style={{ textAlign: "center" }}
                           >
-                            Rs {item?.item_price || 0}
+                            Rs {item?.price || item?.item_price || 0}
                           </td>
                           {editOrder ? (
                             <td

@@ -30,22 +30,22 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
         base_qty_arr =
           base_qty_arr.length > 1
             ? base_qty_arr
-              .map((a) => a.base_qty)
-              .reduce((a, b) => (+Math.max(a, b) === a ? a : b))
+                .map((a) => a.base_qty)
+                .reduce((a, b) => (+Math.max(a, b) === a ? a : b))
             : base_qty_arr.length === 1
-              ? base_qty_arr[0]
-              : null;
+            ? base_qty_arr[0]
+            : null;
         let pice_qty_arr = autobill.qty_details.filter(
           (b) => b.unit === "p" && +b.base_qty <= +a.p
         );
         pice_qty_arr =
           pice_qty_arr.length > 1
             ? pice_qty_arr
-              .map((a) => a.base_qty)
-              .reduce((a, b) => (+Math.max(a, b) === a ? a : b))
+                .map((a) => a.base_qty)
+                .reduce((a, b) => (+Math.max(a, b) === a ? a : b))
             : pice_qty_arr.length === 1
-              ? pice_qty_arr[0]
-              : {};
+            ? pice_qty_arr[0]
+            : {};
         pice_qty_arr = base_qty_arr ? {} : pice_qty_arr;
         if (base_qty_arr || pice_qty_arr)
           auto_added.push({
@@ -85,15 +85,15 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
       eligibleAddItems.length > 1
         ? eligibleAddItems.map((a) => a.b).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
-          ? +eligibleAddItems[0].b
-          : 0;
+        ? +eligibleAddItems[0].b
+        : 0;
     //console.log("eligibleBox", eligiblesBox);
     let eligiblesPcs =
       eligibleAddItems.length > 1
         ? eligibleAddItems.map((a) => a.p).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
-          ? +eligibleAddItems[0].p
-          : 0;
+        ? +eligibleAddItems[0].p
+        : 0;
     // console.log("eligiblePcs", eligiblesPcs);
 
     let base_qty_arr = autobill.qty_details.filter(
@@ -104,11 +104,11 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
       eligibleAddItems.length >= autobill.min_range
         ? base_qty_arr.length > 1
           ? base_qty_arr
-            .map((a) => +a.base_qty || 0)
-            .reduce((a, b) => (+Math.max(a, b) === +a ? a : b))
+              .map((a) => +a.base_qty || 0)
+              .reduce((a, b) => (+Math.max(a, b) === +a ? a : b))
           : base_qty_arr.length === 1
-            ? base_qty_arr[0]
-            : null
+          ? base_qty_arr[0]
+          : null
         : null;
     //console.log("baseqtyobj", base_qty_arr);
     let pice_qty_arr = autobill.qty_details.filter(
@@ -119,11 +119,11 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
       eligibleAddItems.length >= autobill.min_range
         ? pice_qty_arr.length > 1
           ? pice_qty_arr
-            .map((a) => +a.base_qty || 0)
-            .reduce((a, b) => (+Math.max(a, b) === a ? a : b))
+              .map((a) => +a.base_qty || 0)
+              .reduce((a, b) => (+Math.max(a, b) === a ? a : b))
           : pice_qty_arr.length === 1
-            ? pice_qty_arr[0]
-            : null
+          ? pice_qty_arr[0]
+          : null
         : null;
     console.log("piceqtyobj", pice_qty_arr);
 
@@ -163,8 +163,8 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
           ? [...nonFiltered, ...dataItems]
           : nonFiltered
         : dataItems.length
-          ? dataItems
-          : [];
+        ? dataItems
+        : [];
     }
     if (pice_qty_arr?.add_items) {
       let dataItems = dbItems.filter(
@@ -206,8 +206,8 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
           ? [...nonFiltered, ...dataItems]
           : nonFiltered
         : dataItems.length
-          ? dataItems
-          : [];
+        ? dataItems
+        : [];
     }
   }
 
@@ -239,17 +239,17 @@ export const Billing = async ({
     let charges_discount = [];
     let price = add_discounts
       ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
-        ?.price || 0
+          ?.price || 0
       : 0;
     let special_discount_percentage = add_discounts
       ? counter?.item_special_discount?.find(
-        (a) => a.item_uuid === item.item_uuid
-      )?.discount || 0
+          (a) => a.item_uuid === item.item_uuid
+        )?.discount || 0
       : 0;
     let company_discount_percentage = add_discounts
       ? counter?.company_discount?.find(
-        (a) => a.company_uuid === item.company_uuid
-      )?.discount || 0
+          (a) => a.company_uuid === item.company_uuid
+        )?.discount || 0
       : 0;
     // console.log("company_discount_percentage", company_discount_percentage);
     item = {
@@ -267,8 +267,8 @@ export const Billing = async ({
         ...item,
         special_discount_percentage,
         item_desc_total:
-          (item.item_price || 0) *
-          ((100 - special_discount_percentage) / 100) || 0,
+          (item?.price || item.item_price || 0) *
+            ((100 - special_discount_percentage) / 100) || 0,
       };
     }
     if (item.item_discount) {
@@ -280,7 +280,8 @@ export const Billing = async ({
         ...item,
         item_desc_total: item.item_desc_total
           ? item.item_desc_total * ((100 - item.item_discount) / 100) || 0
-          : (item.item_price || 0) * ((100 - item.item_discount) / 100) || 0,
+          : (item?.price || item.item_price || 0) *
+              ((100 - item.item_discount) / 100) || 0,
       };
     }
     if (company_discount_percentage) {
@@ -293,9 +294,9 @@ export const Billing = async ({
         company_discount_percentage,
         item_desc_total: item.item_desc_total
           ? item.item_desc_total *
-          ((100 - company_discount_percentage) / 100) || 0
-          : (item.item_price || 0) *
-          ((100 - company_discount_percentage) / 100) || 0,
+              ((100 - company_discount_percentage) / 100) || 0
+          : (item?.price || item.item_price || 0) *
+              ((100 - company_discount_percentage) / 100) || 0,
       };
     }
     let edit_price = edit_prices.find(
@@ -306,8 +307,11 @@ export const Billing = async ({
       ...item,
       charges_discount,
       item_total: (
-        (+edit_price || +item.item_desc_total || +item.item_price || 0) *
-        (+item.qty || 0)
+        (+edit_price ||
+          +item.item_desc_total ||
+          item?.price ||
+          +item.item_price ||
+          0) * (+item.qty || 0)
       ).toFixed(2),
       item_desc_total: 0,
     };
@@ -317,10 +321,10 @@ export const Billing = async ({
   let order_grandtotal = (
     newPriceItems.length > 1
       ? newPriceItems.map((a) => +a.item_total || 0).reduce((a, b) => a + b) -
-      replacement
+        replacement
       : newPriceItems.length
-        ? (newPriceItems.map((a) => a.item_total)[0] || 0) - replacement
-        : 0
+      ? (newPriceItems.map((a) => a.item_total)[0] || 0) - replacement
+      : 0
   ).toFixed(0);
 
   return {
@@ -360,23 +364,23 @@ export const updateIndexedDb = async () => {
     for (let item of data[property]) {
       let IDENTIFIER =
         item[
-        property === "autobill"
-          ? "auto_uuid"
-          : property === "companies"
+          property === "autobill"
+            ? "auto_uuid"
+            : property === "companies"
             ? "company_uuid"
             : property === "counter"
-              ? "counter_uuid"
-              : property === "counter_groups"
-                ? "counter_group_uuid"
-                : property === "item_category"
-                  ? "category_uuid"
-                  : property === "items"
-                    ? "item_uuid"
-                    : property === "routes"
-                      ? "route_uuid"
-                      : property === "payment_modes"
-                        ? "mode_uuid"
-                        : ""
+            ? "counter_uuid"
+            : property === "counter_groups"
+            ? "counter_group_uuid"
+            : property === "item_category"
+            ? "category_uuid"
+            : property === "items"
+            ? "item_uuid"
+            : property === "routes"
+            ? "route_uuid"
+            : property === "payment_modes"
+            ? "mode_uuid"
+            : ""
         ];
       console.log({ ...item, IDENTIFIER });
       await store.put({ ...item, IDENTIFIER });
@@ -388,15 +392,21 @@ export const updateIndexedDb = async () => {
   window.location.reload(true);
 };
 
-export const audioLoopFunction = ({ i, recall, forcePlayCount, src, callback }) => {
+export const audioLoopFunction = ({
+  i,
+  recall,
+  forcePlayCount,
+  src,
+  callback,
+}) => {
   try {
-    clearInterval(+sessionStorage.getItem('intervalId'));
+    clearInterval(+sessionStorage.getItem("intervalId"));
 
     if (!src?.[0]) return;
-    if (!src?.some(i => i.getAttribute("played") !== "true")) {
+    if (!src?.some((i) => i.getAttribute("played") !== "true")) {
       let utterance = new SpeechSynthesisUtterance("Category completed");
       var voices = window.speechSynthesis.getVoices();
-      utterance.voice = voices.find(voice => voice.lang === 'hi-IN');
+      utterance.voice = voices.find((voice) => voice.lang === "hi-IN");
       window.speechSynthesis.speak(utterance);
       return;
     }
@@ -432,26 +442,19 @@ export const audioLoopFunction = ({ i, recall, forcePlayCount, src, callback }) 
         }
 
         let intervalId = setInterval(() => {
-          if (
-            src[i]?.duration -
-            src[i].currentTime >
-            8.8
-          )
+          if (src[i]?.duration - src[i].currentTime > 8.8)
             return console.log(
-              `returning : ${src[i]?.duration -
-              src[i].currentTime
-              }`
+              `returning : ${src[i]?.duration - src[i].currentTime}`
             );
 
-          clearInterval(+sessionStorage.getItem('intervalId'));
+          clearInterval(+sessionStorage.getItem("intervalId"));
           src[i].currentTime = src[i].duration;
           src[i].pause();
           src[i].setAttribute("played", "true");
           navigator.mediaSession.playbackState = "paused";
-          callback(src[i]?.elem_id)
+          callback(src[i]?.elem_id);
 
-          if (!src[i + 1])
-            return console.log(`no next audio : ${i + 1}`);
+          if (!src[i + 1]) return console.log(`no next audio : ${i + 1}`);
 
           setTimeout(() => {
             audioLoopFunction({
@@ -459,11 +462,11 @@ export const audioLoopFunction = ({ i, recall, forcePlayCount, src, callback }) 
               forcePlayCount: forcePlayCount ? forcePlayCount - 1 : 0,
               recall,
               src,
-              callback
+              callback,
             });
           }, 1000);
         }, 100);
-        sessionStorage.setItem('intervalId', intervalId);
+        sessionStorage.setItem("intervalId", intervalId);
       })
       .catch((error) => {
         if (recall)
@@ -481,24 +484,35 @@ export const audioLoopFunction = ({ i, recall, forcePlayCount, src, callback }) 
 };
 
 export const audioAPIFunction = ({ speechString, elem_id, callback }) => {
-
-  let audioElement = new Audio(`${axios.defaults.baseURL}/stream/${speechString.toLowerCase().replaceAll(" ", "_")}`);
-  audioElement.addEventListener("durationchange", function (e) {
-    if (audioElement.duration !== Infinity) {
-      audioElement.remove();
-      console.log(audioElement.duration);
-      audioElement.elem_id = elem_id;
-      callback(audioElement);
-    }
-  }, false);
+  let audioElement = new Audio(
+    `${axios.defaults.baseURL}/stream/${speechString
+      .toLowerCase()
+      .replaceAll(" ", "_")}`
+  );
+  audioElement.addEventListener(
+    "durationchange",
+    function (e) {
+      if (audioElement.duration !== Infinity) {
+        audioElement.remove();
+        console.log(audioElement.duration);
+        audioElement.elem_id = elem_id;
+        callback(audioElement);
+      }
+    },
+    false
+  );
 
   audioElement.load();
   audioElement.currentTime = 24 * 60 * 60;
   audioElement.volume = 0;
-}
+};
 
-export const jumpToNextIndex = (id, reactInputsRef, setFocusedInputId, appendData) => {
-
+export const jumpToNextIndex = (
+  id,
+  reactInputsRef,
+  setFocusedInputId,
+  appendData
+) => {
   console.log(id);
   document.getElementById(id)?.blur();
   const index = +document.getElementById(id).getAttribute("index") + 1;
@@ -512,9 +526,11 @@ export const jumpToNextIndex = (id, reactInputsRef, setFocusedInputId, appendDat
     } else {
       // console.log("next input id: ", nextElem.id);
       setFocusedInputId("");
-      setTimeout(() => document.querySelector(`[index="${index}"]`).focus(), 250);
+      setTimeout(
+        () => document.querySelector(`[index="${index}"]`).focus(),
+        250
+      );
       return;
     }
-  } else
-    appendData()
+  } else appendData();
 };
