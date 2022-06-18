@@ -41,56 +41,56 @@ export default function AddOrder() {
   //   order.item_details,
   //   counting
   // );
-  const escFunction = (event) => {
-    console.log(event.key);
-    if (event.key !== "Enter") return;
-    if (!order.counter_uuid) {
-      document.getElementById("counter_select").focus();
-      setId(list[0] + order.item_details[0]?.uuid);
-      return;
-    }
-    console.log(document.getElementById(id));
+  // const escFunction = (event) => {
+  //   console.log(event.key);
+  //   if (event.key !== "Enter") return;
+  //   if (!order.counter_uuid) {
+  //     document.getElementById("counter_select").focus();
+  //     setId(list[0] + order.item_details[0]?.uuid);
+  //     return;
+  //   }
+  //   console.log(document.getElementById(id));
 
-    let index = list.indexOf(
-      id.replace(
-        selectedItem
-          ? order.item_details.find((a) => +a.sr === +selectedItem + 1)?.uuid
-          : order.item_details.find((a) => +a.sr === 1)?.uuid,
-        ""
-      )
-    );
-    console.log(index);
+  //   let index = list.indexOf(
+  //     id.replace(
+  //       selectedItem
+  //         ? order.item_details.find((a) => +a.sr === +selectedItem + 1)?.uuid
+  //         : order.item_details.find((a) => +a.sr === 1)?.uuid,
+  //       ""
+  //     )
+  //   );
+  //   console.log(index);
 
-    if (counting === 3) {
-      let id = uuid();
-      setOrder((prev) => ({
-        ...prev,
-        item_details: [
-          ...prev.item_details,
-          { uuid: id, b: 0, p: 0, sr: prev.item_details.length + 1 },
-        ],
-      }));
-      setSelectedItem((prev) => +prev + 1);
-      setId(list[0] + id);
-      setCounting(0);
-    } else {
-      setCounting((prev) => prev + 1);
-      setId(
-        index === 0 || index
-          ? list[index + 1] +
-              (selectedItem
-                ? order.item_details.find((a) => +a.sr === +selectedItem + 1)
-                    ?.uuid
-                : order.item_details.find((a) => +a.sr === 1)?.uuid)
-          : list[0] +
-              (selectedItem
-                ? order.item_details.find((a) => +a.sr === +selectedItem + 1)
-                    ?.uuid
-                : order.item_details.find((a) => +a.sr === 1)?.uuid)
-      );
-    }
-    document.getElementById(id).focus();
-  };
+  //   if (counting === 3) {
+  //     let id = uuid();
+  //     setOrder((prev) => ({
+  //       ...prev,
+  //       item_details: [
+  //         ...prev.item_details,
+  //         { uuid: id, b: 0, p: 0, sr: prev.item_details.length + 1 },
+  //       ],
+  //     }));
+  //     setSelectedItem((prev) => +prev + 1);
+  //     setId(list[0] + id);
+  //     setCounting(0);
+  //   } else {
+  //     setCounting((prev) => prev + 1);
+  //     setId(
+  //       index === 0 || index
+  //         ? list[index + 1] +
+  //             (selectedItem
+  //               ? order.item_details.find((a) => +a.sr === +selectedItem + 1)
+  //                   ?.uuid
+  //               : order.item_details.find((a) => +a.sr === 1)?.uuid)
+  //         : list[0] +
+  //             (selectedItem
+  //               ? order.item_details.find((a) => +a.sr === +selectedItem + 1)
+  //                   ?.uuid
+  //               : order.item_details.find((a) => +a.sr === 1)?.uuid)
+  //     );
+  //   }
+  //   document.getElementById(id).focus();
+  // };
 
   const getAutoBill = async () => {
     let data = [];
@@ -359,7 +359,7 @@ export default function AddOrder() {
   };
 
   let listItemIndexCount = 0;
-console.log(order)
+
   return (
     <>
       <Sidebar />
