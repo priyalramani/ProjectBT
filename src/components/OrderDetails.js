@@ -2,12 +2,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { v4 as uuid } from "uuid";
-import { Billing, AutoAdd } from "../functions";
-import {
-  ContentCopy,
-  ReplayCircleFilledOutlined,
-  Cancel,
-} from "@mui/icons-material";
+import { Billing, jumpToNextIndex } from "../functions";
+import { ContentCopy } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 import OrderPrint from "./OrderPrint";
@@ -36,8 +32,26 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [focusedInputId, setFocusedInputId] = useState(0);
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
-
   const [deletePopup, setDeletePopup] = useState(false);
+
+  const appendNewRow = () => {
+    let item_uuid = uuid()
+    setFocusedInputId(`REACT_SELECT_COMPONENT_ITEM_TITLE@${item_uuid}`);
+    setTimeout(() => setOrderData((prev) => ({
+      ...prev, item_details: [
+        ...prev.item_details,
+        {
+          uuid: item_uuid,
+          b: 0,
+          p: 0,
+          sr: prev.item_details.length + 1,
+        },
+      ],
+    })), 250);
+  }
+
+  const shiftFocus = id => jumpToNextIndex(id, reactInputsRef, setFocusedInputId, appendNewRow)
+
   const callBilling = async () => {
     if (!editOrder) return;
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
@@ -113,6 +127,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     setAutoBills(data);
     console.log(data);
   };
+
   useEffect(() => {
     setOrderData({
       ...order,
@@ -125,6 +140,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       })),
     });
   }, [itemsData]);
+
   useEffect(() => {
     setPrintData({
       ...printData,
@@ -168,50 +184,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     getUsers();
   }, []);
 
-  const jumpToNextIndex = (id) => {
-    console.log(id);
-    document.querySelector(`#${id}`).blur();
-    const index = document.querySelector(`#${id}`).getAttribute("index");
-    console.log("this is index", index);
-
-    const nextElem = document.querySelector(`[index="${+index + 1}"]`);
-
-    if (nextElem) {
-      if (nextElem.id.includes("selectContainer-")) {
-        console.log("next select container id: ", nextElem.id);
-        reactInputsRef.current[
-          nextElem.id.replace("selectContainer-", "")
-        ].focus();
-      } else {
-        console.log("next input id: ", nextElem.id);
-        setFocusedInputId("");
-        setTimeout(
-          () => document.querySelector(`[index="${+index + 1}"]`).focus(),
-          250
-        );
-        return;
-      }
-    } else {
-      let nextElemId = uuid();
-      setFocusedInputId(`selectContainer-${nextElemId}`);
-      setTimeout(
-        () =>
-          setOrderData((prev) => ({
-            ...prev,
-            item_details: [
-              ...prev.item_details,
-              {
-                uuid: nextElemId,
-                b: 0,
-                p: 0,
-                sr: prev.item_details.length + 1,
-              },
-            ],
-          })),
-        250
-      );
-    }
-  };
   const onSubmit = async () => {
     let counter = counters.find(
       (a) => orderData?.counter_uuid === a.counter_uuid
@@ -489,6 +461,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   </thead>
                   <tbody className="lh-copy">
                     {orderData?.item_details?.map((item, i) => {
+                      const item_title_component_id = `REACT_SELECT_COMPONENT_ITEM_TITLE@${item.uuid}`
+                      const item_status_component_id = `REACT_SELECT_COMPONENT_ITEM_STATUS@${item.uuid}`
+
                       return (
                         <tr
                           key={i}
@@ -510,42 +485,34 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           }}
                         >
                           <td className="ph2 pv1 tl bb b--black-20 bg-white">
-                            <div className="inputGroup" id={`selectContainer-${item.uuid}`} index={listItemIndexCount++}>
+                            <div
+                              className="inputGroup"
+                              index={!item.default ? listItemIndexCount++ : ''}
+                              id={!item.default ? item_title_component_id : ''}
+                            >
                               {editOrder && !item.default ? (
                                 <Select
-                                  ref={(ref) => (reactInputsRef.current[item.uuid] = ref)}
-                                  id={"item_uuid" + item.uuid}
-                                  options={itemsData
-                                    .sort((a, b) =>
-                                      a.item_title.localeCompare(b.item_title)
-                                    )
-                                    .map((a, j) => ({
-                                      value: a.item_uuid,
-                                      label: a.item_title + "______" + a.mrp,
-                                      key: a.item_uuid,
-                                    }))}
-                                  z
+                                  ref={(ref) => (reactInputsRef.current[item_title_component_id] = ref)}
+                                  id={"1_item_uuid" + item.uuid}
+                                  options={
+                                    itemsData.sort((a, b) => a.item_title.localeCompare(b.item_title))
+                                      .map((a, j) => ({
+                                        value: a.item_uuid,
+                                        label: a.item_title + "______" + a.mrp,
+                                        key: a.item_uuid,
+                                      }))
+                                  }
                                   onChange={(e) => {
-                                    setTimeout(
-                                      () => setQtyDetails((prev) => !prev),
-                                      2000
-                                    );
+                                    setTimeout(() => setQtyDetails((prev) => !prev), 2000);
                                     setOrderData((prev) => ({
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
                                         a.uuid === item.uuid
-                                          ? {
-                                            ...a,
-                                            ...itemsData.find(
-                                              (b) => b.item_uuid === e.value
-                                            ),
-                                          }
+                                          ? { ...a, ...itemsData.find((b) => b.item_uuid === e.value) }
                                           : a
                                       ),
                                     }));
-                                    jumpToNextIndex(
-                                      `selectContainer-${item.uuid}`
-                                    );
+                                    shiftFocus(item_title_component_id);
                                   }}
                                   value={{
                                     value: item.item_uuid || "",
@@ -555,7 +522,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                     key: item.item_uuid || item.uuid,
                                   }}
                                   openMenuOnFocus={true}
-                                  autoFocus={focusedInputId === `selectContainer-${item.uuid}` || (i === 0 && focusedInputId === 0)}
+                                  autoFocus={focusedInputId === item_title_component_id || (i === 0 && focusedInputId === 0)}
                                   menuPosition="fixed"
                                   menuPlacement="auto"
                                   placeholder="Item"
@@ -577,12 +544,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             <td
                               className="ph2 pv1 tc bb b--black-20 bg-white"
                               style={{ textAlign: "center" }}
-                              id={`selectContainer-${item.uuid}`}
                               index={listItemIndexCount++}
+                              id={item_status_component_id}
                             >
                               <Select
-                                ref={(ref) => (reactInputsRef.current[item.uuid] = ref)}
-                                id={"item_uuid" + item.uuid}
+                                ref={ref => (reactInputsRef.current[item_status_component_id] = ref)}
+                                id={"2_item_uuid" + item.uuid}
                                 options={default_status}
                                 onChange={(e) => {
                                   setOrderData((prev) => ({
@@ -593,15 +560,14 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                         : a
                                     ),
                                   }));
+                                  shiftFocus(item_status_component_id);
                                 }}
                                 value={
                                   item.status
-                                    ? default_status.find(
-                                      (a) => +a.value === +item.status
-                                    )
+                                    ? default_status.find(a => +a.value === +item.status)
                                     : ""
                                 }
-                                autoFocus={focusedInputId === `selectContainer-${item.uuid}` || (i === 0 && item.default && focusedInputId === 0)}
+                                autoFocus={focusedInputId === item_status_component_id || (i === 0 && item.default && focusedInputId === 0)}
                                 openMenuOnFocus={true}
                                 menuPosition="fixed"
                                 menuPlacement="auto"
@@ -620,15 +586,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 id={"q" + item.uuid}
                                 type="number"
                                 className="numberInput"
-                                onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
                                 value={item.b || 0}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
-                                    setTimeout(
-                                      () => setQtyDetails((prev) => !prev),
-                                      2000
-                                    );
+                                    setTimeout(() => setQtyDetails((prev) => !prev), 2000);
                                     return {
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -639,12 +601,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                     };
                                   });
                                 }}
-                                onFocus={(e) => e.target.select()}
-                                onKeyDown={(e) =>
-                                  e.key === "Enter"
-                                    ? jumpToNextIndex("q" + item.uuid)
-                                    : ""
-                                }
+                                onFocus={e => {
+                                  e.target.onwheel = () => false;
+                                  e.target.select()
+                                }}
+                                onKeyDown={e => e.key === "Enter" ? shiftFocus(e.target.id) : ""}
                                 disabled={!item.item_uuid}
                               />
                             ) : (
@@ -657,18 +618,14 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           >
                             {editOrder ? (
                               <input
-                                onWheel={(e) => e.target.blur()}
                                 id={"p" + item.uuid}
                                 type="number"
                                 className="numberInput"
                                 index={listItemIndexCount++}
                                 value={item.p || 0}
-                                onChange={(e) => {
+                                onChange={e => {
                                   setOrderData((prev) => {
-                                    setTimeout(
-                                      () => setQtyDetails((prev) => !prev),
-                                      2000
-                                    );
+                                    setTimeout(() => setQtyDetails((prev) => !prev), 2000);
                                     return {
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -679,12 +636,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                     };
                                   });
                                 }}
-                                onFocus={(e) => e.target.select()}
-                                onKeyDown={(e) =>
-                                  e.key === "Enter"
-                                    ? jumpToNextIndex("p" + item.uuid)
-                                    : ""
-                                }
+                                onFocus={e => {
+                                  e.target.onwheel = () => false;
+                                  e.target.select();
+                                }}
+                                onKeyDown={e => e.key === "Enter" ? shiftFocus(e.target.id) : ""}
                                 disabled={!item.item_uuid}
                               />
                             ) : (

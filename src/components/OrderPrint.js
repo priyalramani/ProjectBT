@@ -202,7 +202,7 @@ const OrderPrint = ({
           let itemQty =
             (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0);
             let unit_price = (+item.item_total || 0) / (+itemQty || 1);
-            console.log(item)
+            // console.log(item)
           let tex_amt =
             (+unit_price || 0) -
             ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0));

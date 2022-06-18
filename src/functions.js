@@ -1,5 +1,6 @@
 import axios from "axios";
 import { deleteDB, openDB } from "idb";
+import { v4 as uuid } from "uuid";
 
 export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
   let eligibleItems = items;
@@ -250,7 +251,7 @@ export const Billing = async ({
         (a) => a.company_uuid === item.company_uuid
       )?.discount || 0
       : 0;
-    console.log("company_discount_percentage", company_discount_percentage);
+    // console.log("company_discount_percentage", company_discount_percentage);
     item = {
       ...item,
       qty: +item.conversion * +item.b + item.p,
@@ -300,7 +301,7 @@ export const Billing = async ({
     let edit_price = edit_prices.find(
       (a) => a.item_uuid === item.item_uuid
     )?.item_price;
-    console.log(item);
+    // console.log(item);
     item = {
       ...item,
       charges_discount,
@@ -495,3 +496,25 @@ export const audioAPIFunction = ({ speechString, elem_id, callback }) => {
   audioElement.currentTime = 24 * 60 * 60;
   audioElement.volume = 0;
 }
+
+export const jumpToNextIndex = (id, reactInputsRef, setFocusedInputId, appendData) => {
+
+  console.log(id);
+  document.getElementById(id)?.blur();
+  const index = +document.getElementById(id).getAttribute("index") + 1;
+  // console.log("this is next index", index);
+
+  const nextElem = document.querySelector(`[index="${index}"]`);
+  if (nextElem) {
+    if (nextElem.id.includes(`REACT_SELECT_COMPONENT`)) {
+      // console.log("next select container id: ", nextElem.id);
+      reactInputsRef.current[nextElem.id].focus();
+    } else {
+      // console.log("next input id: ", nextElem.id);
+      setFocusedInputId("");
+      setTimeout(() => document.querySelector(`[index="${index}"]`).focus(), 250);
+      return;
+    }
+  } else
+    appendData()
+};

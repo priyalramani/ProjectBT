@@ -162,7 +162,7 @@ const MainAdmin = () => {
 
     if (response.data.success) setOrders(response.data.result);
   };
-  console.log(selectedOrder);
+  // console.log(selectedOrder);
   useEffect(() => {
     if (
       window.location.pathname.includes("admin") ||
