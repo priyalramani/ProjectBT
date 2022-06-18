@@ -235,7 +235,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   useEffect(() => {
     if (!editOrder) return;
     reactInputsRef.current?.[orderData?.item_details?.[0]?.uuid]?.focus();
-  }, [editOrder])
+  }, [editOrder]);
 
   let listItemIndexCount = 0;
   return (
@@ -307,7 +307,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   <button
                     style={{ width: "fit-Content" }}
                     className="item-sales-search"
-                    onClick={e => {
+                    onClick={(e) => {
                       reactInputsRef.current = {};
                       e.target.blur();
                       setEditOrder((prev) => !prev);
@@ -366,9 +366,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             style={
                               uuids
                                 ? {
-                                  fontSize: "12px",
-                                  transform: "scale(1.5)",
-                                }
+                                    fontSize: "12px",
+                                    transform: "scale(1.5)",
+                                  }
                                 : { fontSize: "12px" }
                             }
                             onClick={() => {
@@ -473,10 +473,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                               +item.status === 1
                                 ? "green"
                                 : +item.status === 2
-                                  ? "yellow"
-                                  : +item.status === 3
-                                    ? "red"
-                                    : "#fff",
+                                ? "yellow"
+                                : +item.status === 3
+                                ? "red"
+                                : "#fff",
                             color:
                               +item.status === 1 || +item.status === 3
                                 ? "#fff"
@@ -725,8 +725,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       >
                         {(orderData?.item_details?.length > 1
                           ? orderData?.item_details
-                            .map((a) => +a.b || 0)
-                            .reduce((a, b) => a + b)
+                              .map((a) => +a.b || 0)
+                              .reduce((a, b) => a + b)
                           : orderData?.item_details[0].b) || 0}
                       </td>
                       <td
@@ -735,8 +735,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       >
                         {(orderData?.item_details.length > 1
                           ? orderData?.item_details
-                            .map((a) => +a.p || 0)
-                            .reduce((a, b) => a + b)
+                              .map((a) => +a.p || 0)
+                              .reduce((a, b) => a + b)
                           : orderData?.item_details[0].p) || 0}
                       </td>
                       <td
@@ -771,7 +771,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             )}
             <button
               type="button"
-              onClick={() => { }}
+              onClick={() => {}}
               style={{ width: "max-content", padding: "10px 20px" }}
             >
               OrderTotal : {orderData?.order_grandtotal || 0}
@@ -875,11 +875,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   printData.item_details?.length > 12
                     ? printData?.item_details?.slice(12, 24)
                     : printData?.item_details?.slice(
-                      12,
-                      printData?.item_details?.filter(
-                        (a) => !(+a.status === 3)
-                      )?.length
-                    )
+                        12,
+                        printData?.item_details?.filter(
+                          (a) => !(+a.status === 3)
+                        )?.length
+                      )
                 }
                 footer={!(printData?.item_details?.length > 24)}
               />
@@ -907,9 +907,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   orderData?.item_details?.length > 24
                     ? orderData?.item_details?.slice(24, 36)
                     : orderData?.item_details?.slice(
-                      24,
-                      orderData?.item_details?.length
-                    )
+                        24,
+                        orderData?.item_details?.length
+                      )
                 }
                 footer={!(orderData?.item_details?.length > 36)}
               />
@@ -958,8 +958,8 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted }) => {
     let time = new Date();
     let stage = order?.status?.length
       ? order?.status
-        ?.map((a) => +a.stage || 0)
-        ?.reduce((a, b) => Math.max(a, b))
+          ?.map((a) => +a.stage || 0)
+          ?.reduce((a, b) => Math.max(a, b))
       : order?.status[0]?.stage || 0;
     let data = {
       ...order,
@@ -1152,16 +1152,18 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
                           {+item.stage === 1
                             ? "Order Placed By"
                             : +item.stage === 2
-                              ? "Order Processed By"
-                              : +item.stage === 3
-                                ? "Order Checked By"
-                                : +item.stage === 4
-                                  ? "Order Delivered By"
-                                  : ""}
+                            ? "Order Processed By"
+                            : +item.stage === 3
+                            ? "Order Checked By"
+                            : +item.stage === 4
+                            ? "Order Delivered By"
+                            : ""}
                         </td>
                         <td>
-                          {users.find((a) => a.user_uuid === item?.user_uuid)
-                            ?.user_title || ""}
+                          {item.user_uuid === "240522"
+                            ? "Admin"
+                            : users.find((a) => a.user_uuid === item?.user_uuid)
+                                ?.user_title || ""}
                         </td>
                       </tr>
                     ))}
