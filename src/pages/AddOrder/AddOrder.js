@@ -810,7 +810,7 @@ export default function AddOrder() {
           onSubmit={(e) => {
             console.log(e);
             setAutoAdd(e.autoAdd);
-            if (e.stage === 3) setDeliveryPopup(true);
+            if (e.stage === 4) setDeliveryPopup(true);
             else {
               onSubmit(e);
             }
