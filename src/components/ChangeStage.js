@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-
+import { Billing } from "../functions";
 
 const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
   const [data, setData] = useState({ stage: stage + 1 });
@@ -55,7 +55,66 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
       ...a,
       status: [...a.status, ...status],
     }));
+
     console.log(selectedData);
+    if (+data.stage === 5) {
+      let orderData = [];
+      for (let obj of selectedData) {
+        obj = {
+          ...obj,
+
+          processing_canceled:
+            +stage === 2
+              ? obj.processing_canceled.length
+                ? [...obj.processing_canceled, ...obj.item_details]
+                : obj.item_details
+              : obj.processing_canceled || [],
+          delivery_return:
+            +stage === 4
+              ? obj.delivery_return.length
+                ? [...obj.delivery_return, ...obj.item_details]
+                : obj.item_details
+              : obj.delivery_return || [],
+          item_details: obj.item_details.map((a) => ({
+            ...a,
+            b: 0,
+            p: 0,
+          })),
+        };
+
+        let billingData = await Billing({
+          replacement: obj.replacement,
+          counter: counters.find((a) => a.counter_uuid === obj.counter_uuid),
+          add_discounts: true,
+          items: obj.item_details.map((a) => {
+            let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+            return {
+              ...itemData,
+              ...a,
+              price: itemData?.price || 0,
+            };
+          }),
+        });
+        orderData.push({
+          ...obj,
+          ...billingData,
+          item_details: billingData.items,
+        });
+      }
+      const response = await axios({
+        method: "put",
+        url: "/orders/putOrders",
+        data: orderData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        onClose();
+      }
+
+      return;
+    }
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
@@ -89,7 +148,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
                 className="form"
                 onSubmit={(e) => {
                   e.preventDefault();
-                   onSubmit(data);
+                  onSubmit(data);
                 }}
               >
                 <div className="formGroup">
@@ -186,10 +245,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
           </div>
         </div>
       </div>
-      
     </>
   );
 };
 
 export default ChangeStage;
-

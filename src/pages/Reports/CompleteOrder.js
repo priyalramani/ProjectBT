@@ -223,12 +223,15 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
             >
               <td>{i + 1}</td>
               <td colSpan={2}>
-                {new Date(item.order_date).toDateString()} -{" "}
-                {formatAMPM(new Date(item.order_date))}
+                {new Date(+item.order_date).toDateString()} -{" "}
+                {formatAMPM(new Date(+item.order_date))}
               </td>
               <td colSpan={2}>
-                {new Date(item.delivery_date).toDateString()} -{" "}
-                {formatAMPM(new Date(item.delivery_date))}
+                {item.delivery_date
+                  ? new Date(item.delivery_date).toDateString() +
+                    " - " +
+                    formatAMPM(new Date(item.delivery_date))
+                  : ""}
               </td>
               <td colSpan={3}>
                 {counter.find((a) => a.counter_uuid === item.counter_uuid)
