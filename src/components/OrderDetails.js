@@ -505,6 +505,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                   }
                                   id={"1_item_uuid" + item.uuid}
                                   options={itemsData
+                                    .filter(
+                                      (a) =>
+                                        !order.item_details.filter(
+                                          (b) => a.item_uuid === b.item_uuid
+                                        ).length && a.status !== 0
+                                    )
                                     .sort((a, b) =>
                                       a.item_title.localeCompare(b.item_title)
                                     )

@@ -202,7 +202,7 @@ export default function AddOrder() {
         unit_price: a.price,
         gst_percentage: a.item_gst,
         status: 0,
-        price:a.price|| a.item_price,
+        price: a.price || a.item_price,
       })),
       status:
         type.stage === 1
@@ -413,8 +413,8 @@ export default function AddOrder() {
                     className="item-sales-search"
                     style={{
                       width: "max-content",
-                      position:"fixed",
-                      right:"100px"
+                      position: "fixed",
+                      right: "100px",
                     }}
                     onClick={() => setHoldPopup("Summary")}
                   >
@@ -462,7 +462,7 @@ export default function AddOrder() {
                                   (a) =>
                                     !order.item_details.filter(
                                       (b) => a.item_uuid === b.item_uuid
-                                    ).length&&a.status
+                                    ).length && a.status !== 0
                                 )
                                 .sort((a, b) =>
                                   a.item_title.localeCompare(b.item_title)

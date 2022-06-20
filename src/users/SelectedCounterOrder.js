@@ -31,11 +31,13 @@ const SelectedCounterOrder = () => {
     let tx = await db.transaction("items", "readwrite").objectStore("items");
     let item = await tx.getAll();
     setItems(
-      item.map((a) => ({
-        ...a,
-        item_price: a.item_price || 0,
-        gst_percentage: a.gst_percentage || 0,
-      }))
+      item
+        .filter((a) => a.status !== 0)
+        .map((a) => ({
+          ...a,
+          item_price: a.item_price || 0,
+          gst_percentage: a.gst_percentage || 0,
+        }))
     );
     let store = await db
       .transaction("companies", "readwrite")
@@ -87,7 +89,7 @@ const SelectedCounterOrder = () => {
         unit_price: a.price,
         gst_percentage: a.item_gst,
         status: 0,
-        price:a.price|| a.item_price,
+        price: a.price || a.item_price,
       })),
       status: [
         {
@@ -232,7 +234,7 @@ const SelectedCounterOrder = () => {
                         (category) =>
                           items
                             .filter(
-                              (a) => a.category_uuid === category.category_uuid&&a.status
+                              (a) => a.category_uuid === category.category_uuid
                             )
                             ?.sort((a, b) => a.sort_order - b.sort_order)
                             ?.filter(
@@ -265,7 +267,7 @@ const SelectedCounterOrder = () => {
                                 ?.sort((a, b) => a - b)
                                 .filter(
                                   (a) =>
-                                    a.category_uuid === category.category_uuid&&a.status
+                                    a.category_uuid === category.category_uuid
                                 )
                                 ?.map((item) => {
                                   return (
