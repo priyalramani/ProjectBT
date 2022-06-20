@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
-import PullToRefresh from 'react-simple-pull-to-refresh';
+import PullToRefresh from "react-simple-pull-to-refresh";
 import "./style.css";
 import { Link, useLocation } from "react-router-dom";
 import { deleteDB, openDB } from "idb";
@@ -55,45 +55,49 @@ const Main = () => {
   }, []);
   console.log(typeof userRole);
   return (
-    <PullToRefresh onRefresh={()=>window.location.reload(true)}>
-    <div className="servicePage" style={{ maxHeight: "100vh" }}>
-      <div className="servicesContainer">
-        {userRole?.map((data, i) => (
-          <Link
-            key={i}
-            to={pathname + rolesArray.find((a) => +a.type === +data)?.link}
-            onClick={() => {}}
-            className="linkDecoration"
-            style={{ textDecoration: "none", height: "fit-content" }}
-          >
-            <div className="service">
-              <span>{rolesArray.find((a) => +a.type === +data)?.name}</span>
-            </div>
-          </Link>
-        ))}
+    <PullToRefresh onRefresh={() => window.location.reload(true)}>
+      <div className="servicePage" style={{ maxHeight: "100vh" }}>
+        <div className="servicesContainer">
+          {userRole?.map((data, i) => (
+            <Link
+              key={i}
+              to={pathname + rolesArray.find((a) => +a.type === +data)?.link}
+              onClick={() => {}}
+              className="linkDecoration"
+              style={{ textDecoration: "none", height: "fit-content" }}
+            >
+              <div className="service">
+                <span>{rolesArray.find((a) => +a.type === +data)?.name}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div style={{ position: "fixed", bottom: "60px",right:"20vw",fontSize:"20px" }}>
+          Version 11
+        </div>
+        <button
+          type="button"
+          className="cartBtn"
+          style={{ width: "50%" }}
+          onClick={() => setPopupForm(true)}
+        >
+          Logout
+        </button>
+        <button
+          type="button"
+          className="cartBtn"
+          style={{ width: "50%", right: "0px", left: "50vw" }}
+          onClick={() => setPopupForm("refresh")}
+        >
+          Refresh
+        </button>
+        {popupForm ? (
+          <Logout onSave={() => setPopupForm(false)} popupForm={popupForm} />
+        ) : (
+          ""
+        )}
       </div>
-      <button
-        type="button"
-        className="cartBtn"
-        style={{ width: "50%" }}
-        onClick={() => setPopupForm(true)}
-      >
-        Logout
-      </button>
-      <button
-        type="button"
-        className="cartBtn"
-        style={{ width: "50%", right: "0px", left: "50vw" }}
-        onClick={() => setPopupForm("refresh")}
-      >
-        Refresh
-      </button>
-      {popupForm ? (
-        <Logout onSave={() => setPopupForm(false)} popupForm={popupForm} />
-      ) : (
-        ""
-      )}
-    </div></PullToRefresh>
+    </PullToRefresh>
   );
 };
 
@@ -102,20 +106,23 @@ export default Main;
 function Logout({ onSave, popupForm }) {
   const submitHandler = async (e) => {
     e.preventDefault();
-    console.log(popupForm)
+    console.log(popupForm);
     if (popupForm === "refresh") {
-      let response = await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
-      console.log(response)
+      let response = await deleteDB(
+        "BT",
+        +localStorage.getItem("IDBVersion") || 1
+      );
+      console.log(response);
       const result = await axios({
         method: "get",
         url: "/users/getDetails",
-    
+
         headers: {
           "Content-Type": "application/json",
         },
       });
       let data = result.data.result;
-      console.log(data)
+      console.log(data);
       const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
         upgrade(db) {
           for (const property in data) {
@@ -125,10 +132,12 @@ function Logout({ onSave, popupForm }) {
           }
         },
       });
-    
+
       let store;
       for (const property in data) {
-        store = await db.transaction(property, "readwrite").objectStore(property);
+        store = await db
+          .transaction(property, "readwrite")
+          .objectStore(property);
         for (let item of data[property]) {
           let IDENTIFIER =
             item[
@@ -180,7 +189,7 @@ function Logout({ onSave, popupForm }) {
           }}
         >
           <div style={{ overflowY: "scroll" }}>
-            <form className="form" >
+            <form className="form">
               <div className="row">
                 <h1>Are you Confirm </h1>
               </div>
