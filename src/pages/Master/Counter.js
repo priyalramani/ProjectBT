@@ -460,7 +460,7 @@ function NewUserForm({
                     Sort Order
                     <input
                       type="number"
-                      onWheel={(e) => e.target.blur()}
+                      onWheel={(e) => e.preventDefault()}
                       name="sort_order"
                       className="numberInput"
                       value={data?.sort_order}

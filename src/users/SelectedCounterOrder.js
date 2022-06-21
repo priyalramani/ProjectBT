@@ -879,6 +879,7 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                                 )
                               )
                             }
+                            onWheel={(e) => e.preventDefault()}
                             maxLength={42}
                           />
                         </td>
@@ -1011,6 +1012,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
                         })
                       }
                       maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
                     />
                     {popupInfo.conversion || 0}
                   </label>
@@ -1033,6 +1035,7 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
                       }
                       autoFocus={true}
                       maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
                     />
                   </label>
                 </div>

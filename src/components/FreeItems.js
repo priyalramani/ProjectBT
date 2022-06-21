@@ -1,9 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { v4 as uuid } from "uuid";
+
 const FreeItems = ({ onSave, orders, itemsData, holdPopup, setOrder }) => {
   const [items, setItems] = useState([]);
   useEffect(() => {
-    setItems(itemsData.filter((a) => a.free_issue === "Y"));
+    setItems(
+      itemsData
+        .filter((a) => a.free_issue === "Y")
+        .map((a) => {
+          let itemData = orders?.item_details?.find(
+            (b) => b.item_uuid === a.item_uuid
+          );
+          if (itemData) {
+            return { ...a, ...itemData };
+          } else {
+            return a;
+          }
+        })
+    );
   }, []);
   const postOrderData = async () => {
     let data = orders;
@@ -20,7 +33,7 @@ const FreeItems = ({ onSave, orders, itemsData, holdPopup, setOrder }) => {
             ...NonFilterItem.find((b) => b.item_uuid === a.item_uuid),
             free: a.free,
           }
-        : { ...a, b: 0, p: 0,uuid:a.item_uuid,default:true }
+        : { ...a, b: 0, p: 0, uuid: a.item_uuid, default: true }
     );
     let item_details = filterItem.length
       ? NonFilterItem.length
@@ -113,6 +126,7 @@ const FreeItems = ({ onSave, orders, itemsData, holdPopup, setOrder }) => {
                               )
                             }
                             maxLength={42}
+                            onWheel={(e) => e.preventDefault()}
                           />
                         </td>
                       </tr>

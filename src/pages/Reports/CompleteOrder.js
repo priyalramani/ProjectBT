@@ -105,6 +105,7 @@ const CompleteOrder = () => {
               value={invoiceNumberFilter}
               placeholder="Search Invoice Number..."
               className="searchInput"
+              onWheel={(e) => e.preventDefault()}
             />
             <div className="inputGroup" style={{ width: "50%" }}>
               <Select
@@ -223,12 +224,12 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
             >
               <td>{i + 1}</td>
               <td colSpan={2}>
-                {new Date(+item.order_date).toDateString()} -{" "}
+                {(new Date(+item.order_date)).toDateString()} -{" "}
                 {formatAMPM(new Date(+item.order_date))}
               </td>
               <td colSpan={2}>
                 {item.delivery_date
-                  ? new Date(item.delivery_date).toDateString() +
+                  ? (new Date(item.delivery_date)).toDateString() +
                     " - " +
                     formatAMPM(new Date(item.delivery_date))
                   : ""}

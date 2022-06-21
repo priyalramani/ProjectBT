@@ -1085,6 +1085,7 @@ function DiliveryPopup({
                             )
                           }
                           maxLength={42}
+                          onWheel={(e) => e.preventDefault()}
                         />
                         {/* {popupInfo.conversion || 0} */}
                       </label>
@@ -1125,6 +1126,7 @@ function DiliveryPopup({
                         }
                         disabled={credit_allowed !== "Y"}
                         maxLength={42}
+                        onWheel={(e) => e.preventDefault()}
                       />
                       {/* {popupInfo.conversion || 0} */}
                     </label>
@@ -1234,6 +1236,7 @@ function DiliveryPopup({
                             )
                           }
                           maxLength={42}
+                          onWheel={(e) => e.preventDefault()}
                         />
                       </label>
                     </div>
@@ -1302,6 +1305,7 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                           actual: +e.target.value * 0.8,
                         }))
                       }
+                      onWheel={(e) => e.preventDefault()}
                       maxLength={42}
                     />
                     {/* {popupInfo.conversion || 0} */}
@@ -1328,6 +1332,7 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                         }))
                       }
                       maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
                     />
                     {/* {popupInfo.conversion || 0} */}
                   </label>

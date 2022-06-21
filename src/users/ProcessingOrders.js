@@ -2680,6 +2680,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
                         })
                       }
                       maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
                     />
                     {popupInfo.conversion || 0}
                   </label>
@@ -2703,6 +2704,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
                       autoComplete={true}
                       autoFocus={true}
                       maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
                     />
                   </label>
                 </div>
@@ -2924,6 +2926,7 @@ function DiliveryPopup({
                           disabled={
                             !allowed.find((a) => a.mode_uuid === item.mode_uuid)
                           }
+                          onWheel={(e) => e.preventDefault()}
                         />
                         {/* {popupInfo.conversion || 0} */}
                       </label>
@@ -2946,6 +2949,7 @@ function DiliveryPopup({
                         placeholder={
                           credit_allowed !== "Y" ? "Not Allowed" : ""
                         }
+                        onWheel={(e) => e.preventDefault()}
                         style={
                           credit_allowed !== "Y"
                             ? {
@@ -3051,6 +3055,7 @@ function DiliveryPopup({
                           name="route_title"
                           className="numberInput"
                           placeholder="Coins"
+                          onWheel={(e) => e.preventDefault()}
                           value={
                             modes.find(
                               (a) =>
@@ -3149,6 +3154,7 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                           actual: +e.target.value * 0.8,
                         }))
                       }
+                      onWheel={(e) => e.preventDefault()}
                       maxLength={42}
                     />
                     {/* {popupInfo.conversion || 0} */}
@@ -3175,6 +3181,7 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                         }))
                       }
                       maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
                     />
                     {/* {popupInfo.conversion || 0} */}
                   </label>
@@ -3633,6 +3640,7 @@ function NewUserForm({
                         })
                       }
                       maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
                     />
                     {popupInfo.conversion || 0}
                   </label>
@@ -3654,6 +3662,7 @@ function NewUserForm({
                         })
                       }
                       autoComplete={true}
+                      onWheel={(e) => e.preventDefault()}
                       autoFocus={true}
                       maxLength={42}
                     />

@@ -1292,8 +1292,6 @@ const MainAdmin = () => {
         <HoldPopup
           onSave={() => {
             setSumaryPopup(false);
-            setSelectOrder("");
-            setSelectedOrder([]);
           }}
           orders={selectedOrder}
           itemsData={items}
@@ -2078,6 +2076,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
                         })
                       }
                       maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
                     />
                     {popupInfo.conversion || 0}
                   </label>
@@ -2099,6 +2098,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
                         })
                       }
                       maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
                     />
                   </label>
                 </div>

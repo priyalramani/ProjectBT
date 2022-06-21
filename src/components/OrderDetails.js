@@ -654,6 +654,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                     : ""
                                 }
                                 disabled={!item.item_uuid}
+                                onWheel={(e) => e.preventDefault()}
                               />
                             ) : (
                               item.b || 0
@@ -668,6 +669,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 id={"p" + item.uuid}
                                 type="number"
                                 className="numberInput"
+                                onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
                                 value={item.p || 0}
                                 onChange={(e) => {
@@ -1156,6 +1158,16 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted }) => {
 //   );
 // }
 function CheckingValues({ onSave, popupDetails, users, items }) {
+  function formatAMPM(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var strTime = hours + ":" + minutes + " " + ampm;
+    return strTime;
+  }
   return (
     <div className="overlay" style={{ zIndex: 999999999 }}>
       <div
@@ -1189,6 +1201,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
                       <th colSpan={2}>
                         <div className="t-head-element">Type</div>
                       </th>
+                      <th colSpan={2}>
+                        <div className="t-head-element">Time</div>
+                      </th>
                       <th>
                         <div className="t-head-element">User</div>
                       </th>
@@ -1212,6 +1227,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
                             : +item.stage === 4
                             ? "Order Delivered By"
                             : ""}
+                        </td>
+                        <td colSpan={2}>
+                          {new Date(+item.time).toDateString()+" "+formatAMPM(new Date(item.time))|| ""}
                         </td>
                         <td>
                           {item.user_uuid === "240522"
