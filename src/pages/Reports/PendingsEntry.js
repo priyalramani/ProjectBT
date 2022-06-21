@@ -104,6 +104,10 @@ function Table({ itemsDetails, setPopupOrder, putOrder }) {
           <th colSpan={2}>Counter</th>
           <th colSpan={2}>Invoice Number</th>
           <th colSpan={2}>Amount</th>
+          <th colSpan={2}>Cash</th>
+          <th colSpan={2}>Cheque</th>
+          <th colSpan={2}>UPI</th>
+          <th colSpan={2}>Unpaid</th>
           <th colSpan={2}>Action</th>
         </tr>
       </thead>
@@ -124,6 +128,22 @@ function Table({ itemsDetails, setPopupOrder, putOrder }) {
               <td colSpan={2}>{item.counter_title || ""}</td>
               <td colSpan={2}>{item.invoice_number || ""}</td>
               <td colSpan={2}>{item.order_grandtotal || ""}</td>
+              <td colSpan={2}>
+                {item.modes.find(
+                  (a) => a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                )?.amt || 0}
+              </td>
+              <td colSpan={2}>
+                {item.modes.find(
+                  (a) => a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002"
+                )?.amt || 0}
+              </td>
+              <td colSpan={2}>
+                {item.modes.find(
+                  (a) => a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+                )?.amt || 0}
+              </td>
+              <td colSpan={2}>{item.unpaid || 0}</td>
               <td colSpan={2}>
                 <button
                   className="item-sales-search"
