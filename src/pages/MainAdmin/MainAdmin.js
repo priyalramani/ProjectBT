@@ -1448,6 +1448,16 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
   const [FilteredOrder, setFilteredOrder] = useState([]);
   const [popup, setPopup] = useState(false);
   const [orderTotal, setOrderTotal] = useState(0);
+  const componentRef = useRef(null);
+  const reactToPrintContent = useCallback(() => {
+    return componentRef.current;
+  }, [items]);
+
+  const handlePrint = useReactToPrint({
+    content: reactToPrintContent,
+    documentTitle: "Statement",
+    removeAfterPrint: true,
+  });
   const stagesData = [
     { value: "all", label: "All" },
     { value: 1, label: "Processing" },
@@ -1543,7 +1553,23 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
         >
           <div className="flex" style={{ justifyContent: "space-between" }}>
             <h1>Summary</h1>
-            {stage && itemStatus ? <h3>Orders Total:Rs. {orderTotal}</h3> : ""}
+            {stage && itemStatus ? (
+              <>
+                {" "}
+                <button
+                  style={{ width: "fit-Content", backgroundColor: "black" }}
+                  className="item-sales-search"
+                  onClick={() => {
+                    handlePrint();
+                  }}
+                >
+                  Print
+                </button>{" "}
+                <h3>Orders Total:Rs. {orderTotal}</h3>
+              </>
+            ) : (
+              ""
+            )}
           </div>
 
           <div
@@ -1569,8 +1595,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                       }}
                     >
                       <thead>
-                        <tr
-                        >
+                        <tr>
                           <th>Sr.</th>
                           <th colSpan={3}>
                             <div className="t-head-element">Item</div>
@@ -1606,13 +1631,14 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                                     key={item?.item_uuid || Math.random()}
                                     style={{
                                       height: "30px",
-                                      color: +item.status === 1
-                                      ? "#fff"
-                                      : +item.status === 2
-                                      ? "#000"
-                                      : +item.status === 3
-                                      ? "#fff"
-                                      : "#000",
+                                      color:
+                                        +item.status === 1
+                                          ? "#fff"
+                                          : +item.status === 2
+                                          ? "#000"
+                                          : +item.status === 3
+                                          ? "#fff"
+                                          : "#000",
                                       backgroundColor:
                                         +item.status === 1
                                           ? "green"
@@ -1737,7 +1763,128 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
         />
       ) : (
         ""
-      )}
+      )}    <div
+      style={{
+        position: "fixed",
+        top: -100,
+        left: -180,
+        zIndex: "-1000",
+      }}
+    >
+      <div
+        ref={componentRef}
+        id="item-container"
+        style={{
+          
+          // margin: "45mm 40mm 30mm 60mm",
+          // textAlign: "center",
+          height: "128mm",
+          // padding: "10px"
+        }}
+      >
+        {items?.length ? (
+          <table
+            className="user-table"
+            style={{
+              width: "170mm",
+              marginTop: "20mm",
+              marginLeft: "20mm",
+              marginRight: "20mm",
+              border: "1px solid black",
+              pageBreakInside: "auto",
+              display: "block",
+            }}
+          >
+            <thead style={{width:"100%"}}>
+              <tr style={{width:"100%"}}>
+                <th>Sr.</th>
+                <th colSpan={5}>
+                  <div className="t-head-element">Item</div>
+                </th>
+                <th colSpan={3}>
+                  <div className="t-head-element">MRP</div>
+                </th>
+                <th colSpan={3}>
+                  <div className="t-head-element">Qty</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="tbody" style={{width:"100%"}}>
+              {category
+                .filter(
+                  (a) =>
+                    items?.filter((b) => a.category_uuid === b.category_uuid)
+                      .length
+                )
+                .map((a) => (
+                  <>
+                    <tr style={{ pageBreakAfter: "always",width:"100%" }}>
+                      <td colSpan={11}>{a.category_title}</td>
+                    </tr>
+
+                    {items
+                      .filter((b) => a.category_uuid === b.category_uuid)
+                      ?.map((item, i) => (
+                        <tr
+                          key={item?.item_uuid || Math.random()}
+                          style={{
+                            height: "30px",
+                            pageBreakAfter: "always",
+                            color:
+                              +item.status === 1
+                                ? "#fff"
+                                : +item.status === 2
+                                ? "#000"
+                                : +item.status === 3
+                                ? "#fff"
+                                : "#000",
+                            backgroundColor:
+                              +item.status === 1
+                                ? "green"
+                                : +item.status === 2
+                                ? "yellow"
+                                : +item.status === 3
+                                ? "red"
+                                : "#fff",
+                          }}
+                          onClick={() => setPopup(item)}
+                        >
+                          <td>{i + 1}</td>
+                          <td colSpan={5}>{item.item_title}</td>
+                          <td colSpan={3}>{item.mrp}</td>
+                          <td colSpan={3}>
+                            {(item?.b || 0).toFixed(0)} : {item?.p || 0}
+                          </td>
+                        </tr>
+                      ))}
+                  </>
+                ))}
+              <tr
+                style={{
+                  height: "30px",
+                  fontWeight: "bold",
+                }}
+              >
+                <td>Total</td>
+                <td colSpan={5}></td>
+                <td colSpan={3}></td>
+                <td colSpan={3}>
+                  {(items.length > 1
+                    ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
+                    : items[0]?.b || 0
+                  ).toFixed(0)}{" "}
+                  :{" "}
+                  {items.length > 1
+                    ? items.map((a) => +a.p || 0).reduce((a, b) => a + b)
+                    : items[0].p || 0}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        ) : (
+          ""
+        )}
+      </div></div>
     </>
   );
 }
