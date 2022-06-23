@@ -421,7 +421,7 @@ function NewUserForm({
   useEffect(
     popupInfo?.type === "edit"
       ? () => {
-          setdata({ one_pack: "1", conversion: "1", ...popupInfo.data });
+          setdata({ one_pack: "1", conversion: "1",status:1, ...popupInfo.data });
         }
       : () => {
           setdata({
@@ -432,6 +432,7 @@ function NewUserForm({
               (a) => a.company_uuid === companies[0].company_uuid
             )[0]?.category_uuid,
             free_issue: "N",
+            status:1
           });
         },
     []
