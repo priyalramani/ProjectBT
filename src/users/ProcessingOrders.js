@@ -1106,6 +1106,9 @@ const ProcessingOrders = () => {
                       <div className="t-head-element">Total</div>
                     </th>
                     <th>
+                      <div className="t-head-element">Qty</div>
+                    </th>
+                    <th>
                       <div className="t-head-element">User</div>
                     </th>
                     <th>
@@ -1424,7 +1427,6 @@ const ProcessingOrders = () => {
                             )?.length || 0}
                         </td>
                         <td
-                          colSpan={2}
                           onClick={(e) => {
                             e.stopPropagation();
                             setChecking(false);
@@ -1432,6 +1434,25 @@ const ProcessingOrders = () => {
                           }}
                         >
                           {item.order_grandtotal}
+                        </td>
+                        <td
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setChecking(false);
+                            setWarningPopUp(item);
+                          }}
+                        >
+                          {(item?.item_details?.length > 1
+                            ? item?.item_details
+                                ?.map((a) => +a.b || 0)
+                                ?.reduce((a, b) => a + b)
+                            : item?.item_details?.b || 0) +
+                            ":" +
+                            (item?.item_details?.length > 1
+                              ? item?.item_details
+                                  ?.map((a) => +a.p || 0)
+                                  ?.reduce((a, b) => a + b)
+                              : item?.item_details[0]?.p || 0)}
                         </td>
                         <td>
                           {users.find((a) => a.user_uuid === item.opened_by)
@@ -2864,7 +2885,7 @@ function DiliveryPopup({
           className="modal"
           style={{ height: "fit-content", width: "max-content" }}
         >
-          <div className="flex" style={{justifyContent:"space-between"}}>
+          <div className="flex" style={{ justifyContent: "space-between" }}>
             <h3>Payments</h3>
             <h3>Rs. {order.order_grandtotal}</h3>
           </div>
