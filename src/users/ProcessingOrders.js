@@ -1572,6 +1572,7 @@ const ProcessingOrders = () => {
             updateBillingAmount({ ...selectedOrder, ...a });
             setSelectedOrder({ ...selectedOrder, ...a });
           }}
+          credit_allowed={selectedOrder.credit_allowed}
         />
       ) : (
         ""
