@@ -224,7 +224,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
 
       orderStatus,
     };
-    console.log(data);
+ 
     const response = await axios({
       method: "put",
       url: "/orders/putOrder",
@@ -234,7 +234,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       },
     });
     if (response.data.success) {
+      setOrderData(prev=>({
+...prev,order_grandtotal:data.order_grandtotal
+      }));
       setEditOrder(false);
+      getRunningOrders()
     }
   };
 
