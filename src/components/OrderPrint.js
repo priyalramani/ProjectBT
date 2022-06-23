@@ -1,25 +1,27 @@
 import React from "react";
 
 const OrderPrint = ({
-  counter=[],
-  order={item_details:[]},
-  date="",
-  user={},
-  itemData=[],
-  item_details=[],
-  footer=false,
+  counter = [],
+  order = { item_details: [] },
+  date = "",
+  user = {},
+  itemData = [],
+  item_details = [],
+  footer = false,
 }) => {
-  let total_desc_amt = order?.item_details?.map((item) => {
-    const itemInfo = itemData?.find((a) => a.item_uuid === item.item_uuid);
-    let itemQty =
-      (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0);
-    let unit_price = (+item?.item_total || 0) / (+itemQty || 1);
-    let tex_amt =
-   (   (+unit_price || 0) -
-      ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0)))||0;
-    let dsc_amt = (+(item?.price|| item.item_price) - (+unit_price || 0)) * itemQty||0;
-    return { dsc_amt, tex_amt };
-  })||[];
+  let total_desc_amt =
+    order?.item_details?.map((item) => {
+      const itemInfo = itemData?.find((a) => a.item_uuid === item.item_uuid);
+      let itemQty =
+        (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0);
+      let unit_price = (+item?.item_total || 0) / (+itemQty || 1);
+      let tex_amt =
+        (+unit_price || 0) -
+          ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0)) || 0;
+      let dsc_amt =
+        (+(item?.price || item.item_price) - (+unit_price || 0)) * itemQty || 0;
+      return { dsc_amt, tex_amt };
+    }) || [];
   return (
     <>
       <table
@@ -201,8 +203,8 @@ const OrderPrint = ({
           const itemInfo = itemData.find((a) => a.item_uuid === item.item_uuid);
           let itemQty =
             (+item.b || 0) * (+itemInfo?.conversion || 1) + (+item.p || 0);
-            let unit_price = (+item.item_total || 0) / (+itemQty || 1);
-            // console.log(item)
+          let unit_price = (+item.item_total || 0) / (+itemQty || 1);
+          // console.log(item)
           let tex_amt =
             (+unit_price || 0) -
             ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0));
@@ -212,7 +214,7 @@ const OrderPrint = ({
               style={{ borderBottom: "1px solid #000" }}
               className="order_item"
             >
-              <td style={{ fontSize: "x-small" }}>{item?.sr||(i + 1)}.</td>
+              <td style={{ fontSize: "x-small" }}>{item?.sr || i + 1}.</td>
               <td style={{ fontSize: "x-small" }} colSpan={3}>
                 {itemInfo?.item_title || ""}
               </td>
@@ -242,7 +244,7 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               >
-                {(item.b || 0) + ":" + ("00" + item?.p.toString()).slice(-3)}
+                {(item.b || 0) + ":" + (item?.p || 0)}
               </td>
               <td
                 style={{
@@ -269,7 +271,7 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               >
-                {item?.price|| item?.item_price || 0}
+                {item?.price || item?.item_price || 0}
               </td>
               <td
                 style={{
@@ -436,7 +438,9 @@ const OrderPrint = ({
                 colSpan={2}
               >
                 {(total_desc_amt?.length > 1
-                  ? total_desc_amt?.map((a) => a.dsc_amt).reduce((a, b) => a + b)
+                  ? total_desc_amt
+                      ?.map((a) => a.dsc_amt)
+                      .reduce((a, b) => a + b)
                   : total_desc_amt[0]?.dsc_amt || 0
                 ).toFixed(2)}
               </th>
@@ -448,7 +452,9 @@ const OrderPrint = ({
                 colSpan={2}
               >
                 {(total_desc_amt?.length > 1
-                  ? total_desc_amt?.map((a) => a.tex_amt).reduce((a, b) => a + b)
+                  ? total_desc_amt
+                      ?.map((a) => a.tex_amt)
+                      .reduce((a, b) => a + b)
                   : total_desc_amt[0]?.tex_amt || 0
                 ).toFixed(2)}
               </th>
@@ -596,7 +602,6 @@ const OrderPrint = ({
           </tr>
         )}
       </table>
-      
     </>
   );
 };
