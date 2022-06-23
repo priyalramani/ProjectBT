@@ -238,7 +238,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
 ...prev,order_grandtotal:data.order_grandtotal
       }));
       setEditOrder(false);
-      getRunningOrders()
     }
   };
 
