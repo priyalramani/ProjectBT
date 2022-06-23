@@ -818,9 +818,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               paddingTop: "20px",
             }}
           >
+            <div style={{width:"20%",color:"#fff"}}>-</div>
             {editOrder ? (
               <button type="button" onClick={onSubmit}>
-                Bill
+                Save
               </button>
             ) : (
               ""
