@@ -2087,7 +2087,7 @@ function HoldPopup({
   setTempQuantity,
   tempQuantity,
   categories,
-  getTripOrders
+  getTripOrders,
 }) {
   const [items, setItems] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
@@ -2864,7 +2864,10 @@ function DiliveryPopup({
           className="modal"
           style={{ height: "fit-content", width: "max-content" }}
         >
-          <h3>Payments</h3>
+          <div className="flex" style={{justifyContent:"space-between"}}>
+            <h3>Payments</h3>
+            <h3>Rs. {order.order_grandtotal}</h3>
+          </div>
           <div
             className="content"
             style={{
