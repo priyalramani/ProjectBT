@@ -533,25 +533,25 @@ const ProcessingOrders = () => {
     setLoading(true);
     let data = [];
     let item_details = selectedOrder
-      ? selectedOrder?.item_details
+      ? selectedOrder?.item_details.filter((a) => a.status === 1)
       : [].concat
           .apply(
             [],
-            orders.map((a) => a.item_details)
+            orders.map((a) => a.item_details.filter((a) => a.status === 1))
           )
-          .filter((a) => a.status === 1)
+          
           .reduce((acc, curr) => {
             let item = acc.find((item) => item.item_uuid === curr.item_uuid);
 
             if (item) {
-              item.p = +item.p + curr.p;
-              item.b = +item.b + curr.b;
+              item.b = (+item.b||0) + (+curr.b||0);
+              item.p = (+item.p||0) + (+curr.p||0);
             } else {
               acc.push(curr);
             }
 
             return acc;
-          }, []);
+          },[]);
     console.log("item_details", item_details, tempQuantity);
     for (let a of item_details) {
       let orderItem = tempQuantity.find((b) => b.item_uuid === a.item_uuid);
@@ -559,13 +559,13 @@ const ProcessingOrders = () => {
       console.log(
         "quantity",
         (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-          orderItem?.p +
+          (+orderItem?.p||0) +
           (+orderItem?.free || 0),
         (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p
       );
       if (
         (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-          orderItem?.p +
+          (+orderItem?.p||0) +
           (+orderItem?.free || 0) !==
         (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p
       )
@@ -605,6 +605,7 @@ const ProcessingOrders = () => {
         );
       else data.push(a);
     }
+    item_details=[]
     // if (selectedOrder) {
     //   for (let a of barcodeFilterState.filter(
     //     (a) => !data.filter((b) => b.item_uuid === a.item_uuid).length
@@ -1543,7 +1544,7 @@ const ProcessingOrders = () => {
           onSave={() => {
             setPopupBarcode(false);
             setBarcodeMessage([]);
-            setHoldPopup(false);
+
           }}
           BarcodeMessage={BarcodeMessage}
           postOrderData={() => postOrderData()}
@@ -2266,6 +2267,7 @@ function HoldPopup({
   }, []);
 
   const postOrderData = async () => {
+    if(holdPopup !== "Checking Summary")
     postHoldOrders(
       orders
         .filter(
