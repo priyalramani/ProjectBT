@@ -1651,7 +1651,6 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                                     onClick={() => setPopup(item)}
                                   >
                                     <td>{i + 1}</td>
-                                    {console.log(item.item_title,item)}
                                     <td colSpan={3}>{item.item_title}</td>
                                     <td colSpan={2}>{item.mrp}</td>
                                     <td colSpan={2}>
