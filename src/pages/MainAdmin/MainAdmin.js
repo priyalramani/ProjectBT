@@ -1131,7 +1131,7 @@ const MainAdmin = () => {
             .sort((a, b) => a.sort_order - b.sort_order)
             .map((a) => ({
               ...a,
-              item_details: a.item_details.map((b, i) => ({ ...b, sr: i + 1 })),
+              item_details: a.item_details.filter(b=>b.status!==3).map((b, i) => ({ ...b, sr: i + 1 })),
             }))
             .map((orderData, index) => (
               <>
