@@ -1651,6 +1651,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                                     onClick={() => setPopup(item)}
                                   >
                                     <td>{i + 1}</td>
+                                    {console.log(item.item_title,item)}
                                     <td colSpan={3}>{item.item_title}</td>
                                     <td colSpan={2}>{item.mrp}</td>
                                     <td colSpan={2}>
@@ -2061,7 +2062,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
                               value={
                                 (item.item_details.find(
                                   (a) => a.item_uuid === items.item_uuid
-                                )?.q || 0) +
+                                )?.b || 0) +
                                 " : " +
                                 (item.item_details.find(
                                   (a) => a.item_uuid === items.item_uuid
