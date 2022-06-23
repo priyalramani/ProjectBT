@@ -4,10 +4,10 @@ import { Billing } from "../functions";
 
 const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
   const [data, setData] = useState({ stage: stage + 1 });
-  const onSubmit = async () => {
+  const [deliveryPopup, setDeliveryPopup] = useState(false);
+  const onSubmit = async (selectedData = orders) => {
     let user_uuid = localStorage.getItem("user_uuid");
     let time = new Date();
-    let selectedData = orders;
     console.log(stage, data);
     let status =
       stage === 1
@@ -148,7 +148,9 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
                 className="form"
                 onSubmit={(e) => {
                   e.preventDefault();
-                  onSubmit(data);
+                  if (data.stage === 4) {
+                    setDeliveryPopup(true);
+                  } else onSubmit(data);
                 }}
               >
                 <div className="formGroup">
@@ -245,8 +247,511 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
           </div>
         </div>
       </div>
+      {deliveryPopup ? (
+        <DiliveryPopup
+          onSave={() => setDeliveryPopup(false)}
+          postOrderData={onSubmit}
+          orders={orders}
+          counters={counters}
+          items={items}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default ChangeStage;
+function DiliveryPopup({
+  onSave,
+  postOrderData,
+
+  counters,
+  items,
+  orders,
+}) {
+  const [PaymentModes, setPaymentModes] = useState([]);
+  const [modes, setModes] = useState([]);
+  const [error, setError] = useState("");
+  const [popup, setPopup] = useState(false);
+  const [coinPopup, setCoinPopup] = useState(false);
+  const [data, setData] = useState({});
+  const [outstanding, setOutstanding] = useState({});
+  const [count, setCount] = useState(0);
+  const [order, setOrder] = useState({});
+  useEffect(() => {
+    setOrder(orders[0]);
+  }, []);
+  const GetPaymentModes = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/paymentModes/GetPaymentModesList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setPaymentModes(response.data.result);
+  };
+  useEffect(() => {
+    let time = new Date();
+    setOutstanding({
+      order_uuid: order[count],
+      amount: "",
+      user_uuid: localStorage.getItem("user_uuid"),
+      time: time.getTime(),
+      invoice_number: order.invoice_number,
+      trip_uuid: order.trip_uuid,
+      counter_uuid: order.counter_uuid,
+    });
+    GetPaymentModes();
+  }, [order]);
+  useEffect(() => {
+    if (PaymentModes.length)
+      setModes(
+        PaymentModes.map((a) => ({
+          ...a,
+          amt: "",
+          coin: "",
+          status:
+            a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
+            a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+              ? "0"
+              : 1,
+        }))
+      );
+  }, [PaymentModes]);
+  const updateBillingAmount = async (selectedOrder) => {
+    console.log(selectedOrder);
+    let billingData = await Billing({
+      replacement: selectedOrder.replacement,
+      counter: counters.find(
+        (a) => a.counter_uuid === selectedOrder.counter_uuid
+      ),
+      add_discounts: true,
+      items: selectedOrder.item_details.map((a) => {
+        let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+        return {
+          ...itemData,
+          ...a,
+          price: itemData?.price || 0,
+        };
+      }),
+    });
+    setOrder((prev) => ({
+      ...prev,
+      ...selectedOrder,
+      ...billingData,
+      item_details: billingData.items,
+    }));
+  };
+
+  const submitHandler = async () => {
+    setError("");
+    let billingData = await Billing({
+      replacement: data.actual,
+      replacement_mrp: data.mrp,
+      counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
+      add_discounts: true,
+      items: order.item_details.map((a) => {
+        let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+        return {
+          ...itemData,
+          ...a,
+          price: itemData?.price || 0,
+        };
+      }),
+    });
+    let Tempdata = {
+      ...order,
+      ...billingData,
+      item_details: billingData.items,
+    };
+    let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
+    console.log(
+      Tempdata?.order_grandtotal,
+      +(+modeTotal + (+outstanding?.amount || 0))
+    );
+    if (
+      +Tempdata?.order_grandtotal !==
+      +(+modeTotal + (+outstanding?.amount || 0))
+    ) {
+      setError("Invoice Amount and Payment mismatch");
+      return;
+    }
+    let obj = modes.find((a) => a.mode_title === "Cash");
+    if (obj?.amt && obj?.coin === "") {
+      setCoinPopup(true);
+      return;
+    }
+    let time = new Date();
+    obj = {
+      user_uuid: localStorage.getItem("user_uuid"),
+      time: time.getTime(),
+      order_uuid: order[count],
+      counter_uuid: order.counter_uuid,
+      trip_uuid: order.trip_uuid,
+      modes,
+    };
+    const response = await axios({
+      method: "post",
+      url: "/receipts/postReceipt",
+      data: obj,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (outstanding?.amount)
+      await axios({
+        method: "post",
+        url: "/Outstanding/postOutstanding",
+        data: outstanding,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    if (response.data.success) {
+      if (count + 1 === orders.length) {
+        postOrderData();
+        onSave();
+      } else {
+        setOrder(orders[count + 1]);
+        setCount((prev) => prev + 1);
+        setData({});
+        setCoinPopup(false);
+      }
+    }
+  };
+  return (
+    <>
+      <div className="overlay">
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "400px" }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h3>Payments</h3>
+            <h3>Rs. {order?.order_grandtotal || 0}</h3>
+          </div>
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h4>{order?.counter_title || ""}</h4>
+            <h4>Invoice No.{order?.invoice_number || 0}</h4>
+          </div>
+
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "100%",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup">
+                  {PaymentModes.map((item) => (
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                      key={item.mode_uuid}
+                    >
+                      <div style={{ width: "50px" }}>{item.mode_title}</div>
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "80px" }}
+                      >
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          value={
+                            modes.find((a) => a.mode_uuid === item.mode_uuid)
+                              ?.amt
+                          }
+                          style={{ width: "80px" }}
+                          onChange={(e) =>
+                            setModes((prev) =>
+                              prev.map((a) =>
+                                a.mode_uuid === item.mode_uuid
+                                  ? {
+                                      ...a,
+                                      amt: e.target.value,
+                                    }
+                                  : a
+                              )
+                            )
+                          }
+                          maxLength={42}
+                          onWheel={(e) => e.preventDefault()}
+                        />
+                        {/* {popupInfo.conversion || 0} */}
+                      </label>
+                    </div>
+                  ))}
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <div style={{ width: "50px" }}>UnPaid</div>
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "80px" }}
+                    >
+                      <input
+                        type="number"
+                        name="route_title"
+                        className="numberInput"
+                        value={outstanding?.amount}
+                        // placeholder={
+                        //   !order.credit_allowed === "Y" ? "Not Allowed" : ""
+                        // }
+                        style={{ width: "80px" }}
+                        onChange={(e) =>
+                          setOutstanding((prev) => ({
+                            ...prev,
+                            amount: e.target.value,
+                          }))
+                        }
+                        // disabled={order.credit_allowed !== "Y"}
+                        maxLength={42}
+                        onWheel={(e) => e.preventDefault()}
+                      />
+                      {/* {popupInfo.conversion || 0} */}
+                    </label>
+                  </div>
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <button
+                      type="button"
+                      className="submit"
+                      style={{ color: "#fff", backgroundColor: "#7990dd" }}
+                      onClick={() => setPopup(true)}
+                    >
+                      Replacement
+                    </button>
+                  </div>
+                  <i style={{ color: "red" }}>{error}</i>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "red" }}
+                    className="submit"
+                    onClick={onSave}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="submit"
+                    onClick={submitHandler}
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {popup ? (
+        <DiliveryReplaceMent
+          onSave={() => {
+            setPopup(false);
+            updateBillingAmount({
+              ...order,
+              replacement: data?.actual || 0,
+              replacement_mrp: data?.mrp || 0,
+            });
+          }}
+          setData={setData}
+          data={data}
+        />
+      ) : (
+        ""
+      )}
+      {coinPopup ? (
+        <div className="overlay">
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "max-content" }}
+          >
+            <h3>Cash Coin</h3>
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "10px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form className="form">
+                  <div className="formGroup">
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <div style={{ width: "50px" }}>Cash</div>
+
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "80px" }}
+                      >
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          placeholder="Coins"
+                          value={
+                            modes.find(
+                              (a) =>
+                                a.mode_uuid ===
+                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                            )?.coin
+                          }
+                          style={{ width: "70px" }}
+                          onChange={(e) =>
+                            setModes((prev) =>
+                              prev.map((a) =>
+                                a.mode_uuid ===
+                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                                  ? {
+                                      ...a,
+                                      coin: e.target.value,
+                                    }
+                                  : a
+                              )
+                            )
+                          }
+                          maxLength={42}
+                          onWheel={(e) => e.preventDefault()}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div
+                    className="flex"
+                    style={{ justifyContent: "space-between" }}
+                  >
+                    <button
+                      type="button"
+                      className="submit"
+                      onClick={() => submitHandler()}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+    </>
+  );
+}
+function DiliveryReplaceMent({ onSave, data, setData }) {
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <h2>Replacements</h2>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form">
+              <div className="formGroup">
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                >
+                  <div style={{ width: "50px" }}>MRP</div>
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data.mrp}
+                      style={{ width: "100px" }}
+                      onChange={(e) =>
+                        setData((prev) => ({
+                          mrp: e.target.value,
+                          actual: +e.target.value * 0.8,
+                        }))
+                      }
+                      onWheel={(e) => e.preventDefault()}
+                      maxLength={42}
+                    />
+                    {/* {popupInfo.conversion || 0} */}
+                  </label>
+                </div>
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                >
+                  <div style={{ width: "50px" }}>Actual</div>
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data.actual}
+                      style={{ width: "100px" }}
+                      onChange={(e) =>
+                        setData((prev) => ({
+                          actual: e.target.value,
+                        }))
+                      }
+                      maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
+                    />
+                    {/* {popupInfo.conversion || 0} */}
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                <button
+                  type="button"
+                  style={{ backgroundColor: "red" }}
+                  className="submit"
+                  onClick={onSave}
+                >
+                  Cancel
+                </button>
+                <button type="button" className="submit" onClick={onSave}>
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
