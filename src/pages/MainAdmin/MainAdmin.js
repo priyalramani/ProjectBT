@@ -3,6 +3,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./style.css";
+import CloseIcon from "@mui/icons-material/Close";
+import { AiOutlineSearch } from "react-icons/ai";
 import Card from "../../components/Card";
 import { AiOutlineReload } from "react-icons/ai";
 import VerticalTabs from "../../components/VerticalTabs";
@@ -1111,15 +1113,16 @@ const MainAdmin = () => {
       >
         <div
           ref={componentRef}
-          style={{
-            // marginTop: "20mm",
-            // marginLeft: "20mm",
-            // marginRight: "20mm",
-            // margin: "45mm 40mm 30mm 60mm",
-            // textAlign: "center",
-
-            // padding: "10px"
-          }}
+          style={
+            {
+              // marginTop: "20mm",
+              // marginLeft: "20mm",
+              // marginRight: "20mm",
+              // margin: "45mm 40mm 30mm 60mm",
+              // textAlign: "center",
+              // padding: "10px"
+            }
+          }
         >
           {selectedOrder
             .map((a) => ({
@@ -1131,7 +1134,9 @@ const MainAdmin = () => {
             .sort((a, b) => a.sort_order - b.sort_order)
             .map((a) => ({
               ...a,
-              item_details: a.item_details.filter(b=>b.status!==3).map((b, i) => ({ ...b, sr: i + 1 })),
+              item_details: a.item_details
+                .filter((b) => b.status !== 3)
+                .map((b, i) => ({ ...b, sr: i + 1 })),
             }))
             .map((orderData, index) => (
               <>
@@ -1292,7 +1297,7 @@ const MainAdmin = () => {
         <HoldPopup
           onSave={() => {
             setSumaryPopup(false);
-            getRunningOrders()
+            getRunningOrders();
           }}
           orders={selectedOrder}
           itemsData={items}
@@ -1450,6 +1455,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
   const [popup, setPopup] = useState(false);
   const [orderTotal, setOrderTotal] = useState(0);
   const componentRef = useRef(null);
+  const [filterItemTitle, setFilterItemTile] = useState("");
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, [items]);
@@ -1546,26 +1552,61 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
         <div
           className="modal"
           style={{
-            height: "500px",
+            height: "600px",
             width: "max-content",
             minWidth: "250px",
             paddingTop: "50px",
           }}
         >
-          <div className="flex" style={{ justifyContent: "space-between" }}>
+          <div
+            className="flex"
+            style={{ justifyContent: "space-between", alignItems: "start" }}
+          >
             <h1>Summary</h1>
             {stage && itemStatus ? (
               <>
-                {" "}
-                <button
-                  style={{ width: "fit-Content", backgroundColor: "black" }}
-                  className="item-sales-search"
-                  onClick={() => {
-                    handlePrint();
+                <div
+                  className="flex"
+                  style={{
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    height: "80px",
                   }}
                 >
-                  Print
-                </button>{" "}
+                  <button
+                    style={{ width: "fit-Content", backgroundColor: "black" }}
+                    className="item-sales-search"
+                    onClick={() => {
+                      handlePrint();
+                    }}
+                  >
+                    Print
+                  </button>
+                  <div
+                    className="user_searchbar flex"
+                    style={{ width: "100%" }}
+                  >
+                    <AiOutlineSearch className="user_search_icon" />
+                    <input
+                      style={{ width: "100%" }}
+                      className="searchInput"
+                      type="text"
+                      placeholder="search"
+                      value={filterItemTitle}
+                      onChange={(e) => setFilterItemTile(e.target.value)}
+                      id="checking_summary_search"
+                    />
+                    <CloseIcon
+                      className="user_cross_icon"
+                      onClick={() => {
+                        setFilterItemTile("");
+                        document
+                          .getElementById("checking_summary_search")
+                          .focus();
+                      }}
+                    />
+                  </div>
+                </div>
                 <h3>Orders Total:Rs. {orderTotal}</h3>
               </>
             ) : (
@@ -1614,7 +1655,14 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                           .filter(
                             (a) =>
                               items?.filter(
-                                (b) => a.category_uuid === b.category_uuid
+                                (b) =>
+                                  (!filterItemTitle ||
+                                    b.item_title
+                                      .toLocaleLowerCase()
+                                      .includes(
+                                        filterItemTitle.toLocaleLowerCase()
+                                      )) &&
+                                  a.category_uuid === b.category_uuid
                               ).length
                           )
                           .map((a) => (
@@ -1624,8 +1672,15 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                               </tr>
 
                               {items
-                                .filter(
-                                  (b) => a.category_uuid === b.category_uuid
+                                ?.filter(
+                                  (b) =>
+                                    (!filterItemTitle ||
+                                      b.item_title
+                                        .toLocaleLowerCase()
+                                        .includes(
+                                          filterItemTitle.toLocaleLowerCase()
+                                        )) &&
+                                    a.category_uuid === b.category_uuid
                                 )
                                 ?.map((item, i) => (
                                   <tr
@@ -1764,128 +1819,129 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
         />
       ) : (
         ""
-      )}    <div
-      style={{
-        position: "fixed",
-        top: -100,
-        left: -180,
-        zIndex: "-1000",
-      }}
-    >
+      )}{" "}
       <div
-        ref={componentRef}
-        id="item-container"
         style={{
-          
-          // margin: "45mm 40mm 30mm 60mm",
-          // textAlign: "center",
-          height: "128mm",
-          // padding: "10px"
+          position: "fixed",
+          top: -100,
+          left: -180,
+          zIndex: "-1000",
         }}
       >
-        {items?.length ? (
-          <table
-            className="user-table"
-            style={{
-              width: "170mm",
-              // marginTop: "20mm",
-              // marginLeft: "20mm",
-              // marginRight: "20mm",
-              border: "1px solid black",
-              pageBreakInside: "auto",
-              display: "block",
-            }}
-          >
-            <thead style={{width:"100%"}}>
-              <tr style={{width:"100%"}}>
-                <th style={{width:"10mm"}}>Sr.</th>
-                <th colSpan={5} style={{width:"100mm"}}>
-                  <div className="t-head-element">Item</div>
-                </th>
-                <th colSpan={3} style={{width:"30mm"}}>
-                  <div className="t-head-element">MRP</div>
-                </th>
-                <th colSpan={3} style={{width:"30mm"}}>
-                  <div className="t-head-element">Qty</div>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="tbody" style={{width:"100%"}}>
-              {category
-                .filter(
-                  (a) =>
-                    items?.filter((b) => a.category_uuid === b.category_uuid)
-                      .length
-                )
-                .map((a) => (
-                  <>
-                    <tr style={{ pageBreakAfter: "always",width:"100%" }}>
-                      <td colSpan={11}>{a.category_title}</td>
-                    </tr>
+        <div
+          ref={componentRef}
+          id="item-container"
+          style={{
+            // margin: "45mm 40mm 30mm 60mm",
+            // textAlign: "center",
+            height: "128mm",
+            // padding: "10px"
+          }}
+        >
+          {items?.length ? (
+            <table
+              className="user-table"
+              style={{
+                width: "170mm",
+                // marginTop: "20mm",
+                // marginLeft: "20mm",
+                // marginRight: "20mm",
+                border: "1px solid black",
+                pageBreakInside: "auto",
+                display: "block",
+              }}
+            >
+              <thead style={{ width: "100%" }}>
+                <tr style={{ width: "100%" }}>
+                  <th style={{ width: "10mm" }}>Sr.</th>
+                  <th colSpan={5} style={{ width: "100mm" }}>
+                    <div className="t-head-element">Item</div>
+                  </th>
+                  <th colSpan={3} style={{ width: "30mm" }}>
+                    <div className="t-head-element">MRP</div>
+                  </th>
+                  <th colSpan={3} style={{ width: "30mm" }}>
+                    <div className="t-head-element">Qty</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="tbody" style={{ width: "100%" }}>
+                {category
+                  .filter(
+                    (a) =>
+                      items?.filter((b) => a.category_uuid === b.category_uuid)
+                        .length
+                  )
+                  .map((a) => (
+                    <>
+                      <tr style={{ pageBreakAfter: "always", width: "100%" }}>
+                        <td colSpan={11}>{a.category_title}</td>
+                      </tr>
 
-                    {items
-                      .filter((b) => a.category_uuid === b.category_uuid)
-                      ?.map((item, i) => (
-                        <tr
-                          key={item?.item_uuid || Math.random()}
-                          style={{
-                            height: "30px",
-                            pageBreakAfter: "always",
-                            color:
-                              +item.status === 1
-                                ? "#fff"
-                                : +item.status === 2
-                                ? "#000"
-                                : +item.status === 3
-                                ? "#fff"
-                                : "#000",
-                            backgroundColor:
-                              +item.status === 1
-                                ? "green"
-                                : +item.status === 2
-                                ? "yellow"
-                                : +item.status === 3
-                                ? "red"
-                                : "#fff",
-                          }}
-                          onClick={() => setPopup(item)}
-                        >
-                          <td>{i + 1}</td>
-                          <td colSpan={5}>{item.item_title}</td>
-                          <td colSpan={3}>{item.mrp}</td>
-                          <td colSpan={3}>
-                            {(item?.b || 0).toFixed(0)} : {item?.p || 0}
-                          </td>
-                        </tr>
-                      ))}
-                  </>
-                ))}
-              <tr
-                style={{
-                  height: "30px",
-                  fontWeight: "bold",
-                }}
-              >
-                <td>Total</td>
-                <td colSpan={5}></td>
-                <td colSpan={3}></td>
-                <td colSpan={3}>
-                  {(items.length > 1
-                    ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
-                    : items[0]?.b || 0
-                  ).toFixed(0)}{" "}
-                  :{" "}
-                  {items.length > 1
-                    ? items.map((a) => +a.p || 0).reduce((a, b) => a + b)
-                    : items[0].p || 0}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        ) : (
-          ""
-        )}
-      </div></div>
+                      {items
+                        .filter((b) => a.category_uuid === b.category_uuid)
+                        ?.map((item, i) => (
+                          <tr
+                            key={item?.item_uuid || Math.random()}
+                            style={{
+                              height: "30px",
+                              pageBreakAfter: "always",
+                              color:
+                                +item.status === 1
+                                  ? "#fff"
+                                  : +item.status === 2
+                                  ? "#000"
+                                  : +item.status === 3
+                                  ? "#fff"
+                                  : "#000",
+                              backgroundColor:
+                                +item.status === 1
+                                  ? "green"
+                                  : +item.status === 2
+                                  ? "yellow"
+                                  : +item.status === 3
+                                  ? "red"
+                                  : "#fff",
+                            }}
+                            onClick={() => setPopup(item)}
+                          >
+                            <td>{i + 1}</td>
+                            <td colSpan={5}>{item.item_title}</td>
+                            <td colSpan={3}>{item.mrp}</td>
+                            <td colSpan={3}>
+                              {(item?.b || 0).toFixed(0)} : {item?.p || 0}
+                            </td>
+                          </tr>
+                        ))}
+                    </>
+                  ))}
+                <tr
+                  style={{
+                    height: "30px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  <td>Total</td>
+                  <td colSpan={5}></td>
+                  <td colSpan={3}></td>
+                  <td colSpan={3}>
+                    {(items.length > 1
+                      ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
+                      : items[0]?.b || 0
+                    ).toFixed(0)}{" "}
+                    :{" "}
+                    {items.length > 1
+                      ? items.map((a) => +a.p || 0).reduce((a, b) => a + b)
+                      : items[0].p || 0}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            ""
+          )}
+        </div>
+      </div>
     </>
   );
 }
@@ -1913,7 +1969,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
     var strTime = hours + ":" + minutes + " " + ampm;
     return strTime;
   }
-  console.log("updatedOrders",updateOrders,deleteItemsOrder)
+  console.log("updatedOrders", updateOrders, deleteItemsOrder);
   const postOrderData = async (deleteItems) => {
     let dataArray = deleteItems
       ? updateOrders.map((a) => ({
@@ -1938,7 +1994,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
                 }
               : a
           );
-    console.log("dataArray",dataArray);
+    console.log("dataArray", dataArray);
     let finalData = [];
     for (let orderObject of dataArray) {
       let data = orderObject;
@@ -1970,7 +2026,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 
       finalData.push({ ...data, opened_by: 0 });
     }
-    console.log("finalData",finalData);
+    console.log("finalData", finalData);
 
     const response = await axios({
       method: "put",
@@ -2128,7 +2184,10 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
           </div>
           {updateOrders.filter((a) => a.edit).length ||
           deleteItemsOrder.length ? (
-            <button className="simple_Logout_button" onClick={()=>postOrderData()}>
+            <button
+              className="simple_Logout_button"
+              onClick={() => postOrderData()}
+            >
               Update
             </button>
           ) : (
@@ -2176,7 +2235,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
                 b.item_uuid === popupInfo.item_uuid
                   ? {
                       ...b,
-                      b: (+data.b + +data.p / +item.conversion||0).toFixed(0),
+                      b: (+data.b + +data.p / +item.conversion || 0).toFixed(0),
                       p: +data.p % +item.conversion,
                     }
                   : b

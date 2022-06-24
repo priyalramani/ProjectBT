@@ -1554,7 +1554,7 @@ const ProcessingOrders = () => {
       )}
       {popupDelivery ? (
         <DiliveryPopup
-        setLoading={setLoading}
+          setLoading={setLoading}
           onSave={() => setPopupDelivery(false)}
           postOrderData={postOrderData}
           order_uuid={selectedOrder?.order_uuid}
@@ -1807,7 +1807,6 @@ function CheckingValues({
                   className="flex"
                   style={{ flexDirection: "column", width: "300px" }}
                 >
-                  {" "}
                   <i>Incorrect Quantity</i>
                   <table
                     className="user-table"
@@ -1849,13 +1848,26 @@ function CheckingValues({
                               backgroundColor: "#7990dd",
                             }}
                           >
+                            {console.log(item)}
                             <td colSpan={2}>{item.item_title}</td>
                             <td>{item?.mrp || 0}</td>
                             <td style={{ backgroundColor: "green" }}>
-                              {item?.b || 0}:{item?.p || 0}
+                              {parseInt(
+                                +item.b +
+                                  (+item.p + (+item.free || 0)) /
+                                    +item.conversion
+                              ) || 0}
+                              :
+                              {parseInt(
+                                (+item.p + (+item.free || 0)) % +item.conversion
+                              ) || 0}
                             </td>
                             <td style={{ backgroundColor: "red" }}>
-                              {item?.barcodeQty || 0}
+                              {parseInt(+item.barcodeQty / +item.conversion) ||
+                                0}
+                              :
+                              {parseInt(+item.barcodeQty % +item.conversion) ||
+                                0}
                             </td>
                           </tr>
                         )
@@ -2413,19 +2425,17 @@ function HoldPopup({
                               ?.filter(
                                 (b) =>
                                   a.category_uuid ===
-                                  itemsData?.find(
-                                    (c) => b.item_uuid === c.item_uuid
-                                  )?.category_uuid
+                                    itemsData?.find(
+                                      (c) => b.item_uuid === c.item_uuid
+                                    )?.category_uuid &&
+                                  (!filterItemTitle ||
+                                    b.item_title
+                                      .toLocaleLowerCase()
+                                      .includes(
+                                        filterItemTitle.toLocaleLowerCase()
+                                      ))
                               )
-                              ?.filter(
-                                (a) =>
-                                  !filterItemTitle ||
-                                  a.item_title
-                                    .toLocaleLowerCase()
-                                    .includes(
-                                      filterItemTitle.toLocaleLowerCase()
-                                    )
-                              )
+
                               .map((item, i) => (
                                 <tr
                                   key={item?.item_uuid || Math.random()}
@@ -2560,33 +2570,35 @@ function HoldPopup({
               )}
 
               <div className="flex" style={{ justifyContent: "space-between" }}>
+                <button
+                  type="button"
+                  className="submit"
+                  style={{ backgroundColor: "red" }}
+                  onClick={() => {
+                    setConfirmPopup(true);
+                    setDisabled(true);
+                    setTimeout(() => {
+                      setDisabled(false);
+                    }, 5000);
+                  }}
+                >
+                  Discard
+                </button>
                 {items.filter((a) => a.edit).length ? (
-                  <button
-                    type="button"
-                    className="submit"
-                    onClick={async () => {
-                      await getTripOrders();
-                      postOrderData();
-                    }}
-                  >
-                    Save
-                  </button>
-                ) : holdPopup === "Checking Summary" ? (
                   <>
                     <button
                       type="button"
                       className="submit"
-                      style={{ backgroundColor: "red" }}
-                      onClick={() => {
-                        setConfirmPopup(true);
-                        setDisabled(true);
-                        setTimeout(() => {
-                          setDisabled(false);
-                        }, 5000);
+                      onClick={async () => {
+                        await getTripOrders();
+                        postOrderData();
                       }}
                     >
-                      Discard
+                      Save
                     </button>
+                  </>
+                ) : holdPopup === "Checking Summary" ? (
+                  <>
                     <button
                       type="button"
                       className="submit"
@@ -2815,7 +2827,7 @@ function DiliveryPopup({
   order,
   allowed,
   setOrder,
-  setLoading
+  setLoading,
 }) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
@@ -2870,7 +2882,6 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
-
     setError("");
     let billingData = await Billing({
       replacement: data.actual,
@@ -2927,8 +2938,8 @@ function DiliveryPopup({
         "Content-Type": "application/json",
       },
     });
-    setLoading(true)
-    setTimeout(()=>setLoading(false),45000)
+    setLoading(true);
+    setTimeout(() => setLoading(false), 45000);
     if (outstanding?.amount)
       await axios({
         method: "post",
@@ -2940,7 +2951,7 @@ function DiliveryPopup({
       });
     if (response.data.success) {
       postOrderData();
-      setLoading(false)
+      setLoading(false);
       onSave();
     }
   };
