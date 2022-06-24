@@ -416,7 +416,7 @@ function PopupTable({ trip_uuid, onSave }) {
             <tbody className="tbody">
               {itemDetails
                 ?.sort((a, b) => a.order_date - b.order_date)
-                ?.map((item, i, array) => (
+                ?.map((item, i) => (
                   <tr key={Math.random()} style={{ height: "30px" }}>
                     <td>{i + 1}</td>
                     <td colSpan={4}>
@@ -455,6 +455,94 @@ function PopupTable({ trip_uuid, onSave }) {
                     <td colSpan={2}>{item.unpaid || 0}</td>
                   </tr>
                 ))}
+              <tr style={{ height: "30px" }}>
+                <td></td>
+                <td colSpan={4}>
+                  <b>Total</b>
+                </td>
+                <td colSpan={4}></td>
+                <td colSpan={4}></td>
+                <td colSpan={2}></td>
+                <td colSpan={2}></td>
+                <td colSpan={2}>
+                  <b>
+                    {itemDetails.length > 1
+                      ? itemDetails
+                          .map((a) => +a?.amt || 0)
+                          .reduce((a, b) => a + b)
+                      : itemDetails[0]?.amt || 0}
+                  </b>
+                </td>
+                <td colSpan={2}>
+                  <b>
+                    {itemDetails.length > 1
+                      ? itemDetails
+                          .map(
+                            (a) =>
+                              +a?.modes.find(
+                                (a) =>
+                                  a.mode_uuid ===
+                                  "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                              )?.amt || 0
+                          )
+                          .reduce((a, b) => a + b)
+                      : itemDetails[0]?.modes.find(
+                          (a) =>
+                            a.mode_uuid ===
+                            "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                        )?.amt || 0}
+                  </b>
+                </td>
+                <td colSpan={2}>
+                  <b>
+                    {itemDetails.length > 1
+                      ? itemDetails
+                          .map(
+                            (a) =>
+                              +a?.modes.find(
+                                (a) =>
+                                  a.mode_uuid ===
+                                  "c67b5794-d2b6-11ec-9d64-0242ac120002"
+                              )?.amt || 0
+                          )
+                          .reduce((a, b) => a + b)
+                      : itemDetails[0]?.modes.find(
+                          (a) =>
+                            a.mode_uuid ===
+                            "c67b5794-d2b6-11ec-9d64-0242ac120002"
+                        )?.amt || 0}
+                  </b>
+                </td>
+                <td colSpan={2}>
+                  <b>
+                    {itemDetails.length > 1
+                      ? itemDetails
+                          .map(
+                            (a) =>
+                              +a?.modes.find(
+                                (a) =>
+                                  a.mode_uuid ===
+                                  "c67b5988-d2b6-11ec-9d64-0242ac120002"
+                              )?.amt || 0
+                          )
+                          .reduce((a, b) => a + b)
+                      : itemDetails[0]?.modes.find(
+                          (a) =>
+                            a?.mode_uuid ===
+                            "c67b5988-d2b6-11ec-9d64-0242ac120002"
+                        )?.amt || 0}
+                  </b>
+                </td>
+                <td colSpan={2}>
+                  <b>
+                    {itemDetails.length > 1
+                      ? itemDetails
+                          .map((a) => +a?.unpaid || 0)
+                          .reduce((a, b) => a + b)
+                      : itemDetails[0]?.unpaid || 0}
+                  </b>
+                </td>
+              </tr>
             </tbody>
           </table>
           <button onClick={onSave} className="closeButton">

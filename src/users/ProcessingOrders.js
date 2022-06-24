@@ -1554,6 +1554,7 @@ const ProcessingOrders = () => {
       )}
       {popupDelivery ? (
         <DiliveryPopup
+        setLoading={setLoading}
           onSave={() => setPopupDelivery(false)}
           postOrderData={postOrderData}
           order_uuid={selectedOrder?.order_uuid}
@@ -2814,6 +2815,7 @@ function DiliveryPopup({
   order,
   allowed,
   setOrder,
+  setLoading
 }) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
@@ -2868,6 +2870,7 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
+
     setError("");
     let billingData = await Billing({
       replacement: data.actual,
@@ -2924,6 +2927,8 @@ function DiliveryPopup({
         "Content-Type": "application/json",
       },
     });
+    setLoading(true)
+    setTimeout(()=>setLoading(false),45000)
     if (outstanding?.amount)
       await axios({
         method: "post",
@@ -2935,6 +2940,7 @@ function DiliveryPopup({
       });
     if (response.data.success) {
       postOrderData();
+      setLoading(false)
       onSave();
     }
   };
