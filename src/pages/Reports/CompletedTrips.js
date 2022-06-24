@@ -188,37 +188,38 @@ const CompletedTrips = () => {
         </div>
       </div>
       <div
-        ref={componentRef}
-        style={{
-          width: "21cm",
-          height: "29.7cm",
-          margin: "30mm 45mm 30mm 45mm",
-          textAlign: "center",
-          position: "fixed",
-          top: -100,
-          left: -180,
-          zIndex: "-1000",
-          padding: "100px",
-        }}
+        style={{ position: "fixed", top: -100, left: -180, zIndex: "-1000" }}
       >
-        <TripPage
+        <div
           ref={componentRef}
-          trip_title={statementTrip?.trip_title || ""}
-          users={
-            statementTrip?.users.map((a) =>
-              users.find((b) => b.user_uuid === a)
-            ) || []
-          }
-          trip_uuid={statementTrip?.trip_uuid || ""}
-          created_at={formatAMPM(new Date(statementTrip?.created_at || ""))}
-          amt={statementTrip?.amt || 0}
-          coin={statementTrip?.coin || 0}
-          formatAMPM={formatAMPM}
-          cheque={statementTrip?.cheque}
-          replacement={statementTrip?.replacement}
-          sales_return={statementTrip?.sales_return}
-          unpaid_invoice={statementTrip?.unpaid_invoice}
-        />
+          style={{
+            width: "21cm",
+            height: "29.7cm",
+            // margin: "30mm 45mm 30mm 45mm",
+            textAlign: "center",
+
+            // padding: "100px",
+          }}
+        >
+          <TripPage
+            ref={componentRef}
+            trip_title={statementTrip?.trip_title || ""}
+            users={
+              statementTrip?.users.map((a) =>
+                users.find((b) => b.user_uuid === a)
+              ) || []
+            }
+            trip_uuid={statementTrip?.trip_uuid || ""}
+            created_at={formatAMPM(new Date(statementTrip?.created_at || ""))}
+            amt={statementTrip?.amt || 0}
+            coin={statementTrip?.coin || 0}
+            formatAMPM={formatAMPM}
+            cheque={statementTrip?.cheque}
+            replacement={statementTrip?.replacement}
+            sales_return={statementTrip?.sales_return}
+            unpaid_invoice={statementTrip?.unpaid_invoice}
+          />
+        </div>
       </div>
       {detailsPopup ? (
         <PopupTable
@@ -384,10 +385,9 @@ function PopupTable({ trip_uuid, onSave }) {
         <div
           className="content"
           style={{
-
             padding: "20px",
             width: "80vw",
-            overflow:"scroll"
+            overflow: "scroll",
           }}
         >
           <table
@@ -411,7 +411,6 @@ function PopupTable({ trip_uuid, onSave }) {
                 <th colSpan={2}>Cheque</th>
                 <th colSpan={2}>UPI</th>
                 <th colSpan={2}>Unpaid</th>
-                
               </tr>
             </thead>
             <tbody className="tbody">
@@ -435,9 +434,24 @@ function PopupTable({ trip_uuid, onSave }) {
                     <td colSpan={2}>{item.invoice_number || ""}</td>
                     <td colSpan={2}>{item.qty || ""}</td>
                     <td colSpan={2}>{item.amt || ""}</td>
-                    <td colSpan={2}>{item.modes.find(a=>a.mode_uuid==="c67b54ba-d2b6-11ec-9d64-0242ac120002")?.amt || 0}</td>
-                    <td colSpan={2}>{item.modes.find(a=>a.mode_uuid==="c67b5794-d2b6-11ec-9d64-0242ac120002")?.amt || 0}</td>
-                    <td colSpan={2}>{item.modes.find(a=>a.mode_uuid==="c67b5988-d2b6-11ec-9d64-0242ac120002")?.amt || 0}</td>
+                    <td colSpan={2}>
+                      {item.modes.find(
+                        (a) =>
+                          a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                      )?.amt || 0}
+                    </td>
+                    <td colSpan={2}>
+                      {item.modes.find(
+                        (a) =>
+                          a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002"
+                      )?.amt || 0}
+                    </td>
+                    <td colSpan={2}>
+                      {item.modes.find(
+                        (a) =>
+                          a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+                      )?.amt || 0}
+                    </td>
                     <td colSpan={2}>{item.unpaid || 0}</td>
                   </tr>
                 ))}

@@ -86,7 +86,10 @@ export default function ItemAvilibility({
   return (
     <>
       <div className="itemavilablelity">
-        <div className="itemavilabelitycontainer" style={{position:"relative"}}>
+        <div
+          className="itemavilabelitycontainer"
+          style={{ position: "relative" }}
+        >
           <div className="itemavilablelity_header">
             <h2>Trips</h2>
           </div>
@@ -236,14 +239,14 @@ export default function ItemAvilibility({
               </div>
             </div>
           </div>
-            <button
-              onClick={() => {
-                setIsItemAvilableOpen(false);
-              }}
-              className="closeButton"
-            >
-              x
-            </button>
+          <button
+            onClick={() => {
+              setIsItemAvilableOpen(false);
+            }}
+            className="closeButton"
+          >
+            x
+          </button>
 
           <div
             onClick={() => {
@@ -265,44 +268,45 @@ export default function ItemAvilibility({
         ""
       )}
       <div
-        ref={componentRef}
-        style={{
-          width: "21cm",
-          height: "29.7cm",
-          margin: "30mm 45mm 30mm 45mm",
-          textAlign: "center",
-          position: "fixed",
-          top: -100,
-          left: -180,
-          zIndex: "-1000",
-          padding: "100px",
-        }}
+        style={{ position: "fixed", top: -100, left: -180, zIndex: "-1000" }}
       >
-        <TripPage
+        <div
           ref={componentRef}
-          trip_title={statementTrip?.trip_title || ""}
-          users={
-            itemsData
-              .filter(
-                (a) =>
-                  (itemFilter !== ""
-                    ? a.trip_title
-                        .toLowerCase()
-                        .includes(itemFilter.toLowerCase())
-                    : true) && a.trip_title
-              )[0]
-              ?.users.map((a) => users.find((b) => b.user_uuid === a)) || []
-          }
-          trip_uuid={statementTrip?.trip_uuid || ""}
-          created_at={formatAMPM(new Date(statementTrip?.created_at || ""))}
-          amt={statementTrip?.amt || 0}
-          coin={statementTrip?.coin || 0}
-          formatAMPM={formatAMPM}
-          cheque={statementTrip?.cheque}
-          replacement={statementTrip?.replacement}
-          sales_return={statementTrip?.sales_return}
-          unpaid_invoice={statementTrip?.unpaid_invoice}
-        />
+          style={{
+            width: "21cm",
+            height: "29.7cm",
+            
+            textAlign: "center",
+
+            // padding: "100px",
+            pageBreakInside: "auto",
+          }}
+        >
+          <TripPage
+            trip_title={statementTrip?.trip_title || ""}
+            users={
+              itemsData
+                .filter(
+                  (a) =>
+                    (itemFilter !== ""
+                      ? a.trip_title
+                          .toLowerCase()
+                          .includes(itemFilter.toLowerCase())
+                      : true) && a.trip_title
+                )[0]
+                ?.users.map((a) => users.find((b) => b.user_uuid === a)) || []
+            }
+            trip_uuid={statementTrip?.trip_uuid || ""}
+            created_at={formatAMPM(new Date(statementTrip?.created_at || ""))}
+            amt={statementTrip?.amt || 0}
+            coin={statementTrip?.coin || 0}
+            formatAMPM={formatAMPM}
+            cheque={statementTrip?.cheque}
+            replacement={statementTrip?.replacement}
+            sales_return={statementTrip?.sales_return}
+            unpaid_invoice={statementTrip?.unpaid_invoice}
+          />
+        </div>
       </div>
     </>
   );
@@ -392,4 +396,3 @@ function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
     </div>
   );
 }
-

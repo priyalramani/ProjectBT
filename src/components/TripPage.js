@@ -85,7 +85,7 @@ const TripPage = ({
           </tr>
           {cheque.map((item) => (
             <tr>
-              <td style={{ border: "1px solid #000" }}>{item.counter}</td>
+              <td style={{ border: "1px solid #000" }}>{item.counter_title}</td>
               <td style={{ border: "1px solid #000" }}>{item.amt}</td>
               <td style={{ border: "1px solid #000" }}>
                 {item.invoice_number}

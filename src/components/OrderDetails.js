@@ -889,9 +889,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           ref={componentRef}
           id="item-container"
           style={{
-            marginTop: "20mm",
-            marginLeft: "20mm",
-            marginRight: "20mm",
+            // marginTop: "20mm",
+            // marginLeft: "20mm",
+            // marginRight: "20mm",
             // margin: "45mm 40mm 30mm 60mm",
             // textAlign: "center",
 

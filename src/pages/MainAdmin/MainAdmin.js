@@ -1112,9 +1112,9 @@ const MainAdmin = () => {
         <div
           ref={componentRef}
           style={{
-            marginTop: "20mm",
-            marginLeft: "20mm",
-            marginRight: "20mm",
+            // marginTop: "20mm",
+            // marginLeft: "20mm",
+            // marginRight: "20mm",
             // margin: "45mm 40mm 30mm 60mm",
             // textAlign: "center",
 
@@ -1135,7 +1135,7 @@ const MainAdmin = () => {
             }))
             .map((orderData, index) => (
               <>
-                {index === 0 ? "" : <div style={{ height: "20mm" }}></div>}
+                {/* {index === 0 ? "" : <div style={{ height: "20mm" }}></div>} */}
                 <OrderPrint
                   counter={counter.find(
                     (a) => a.counter_uuid === orderData?.counter_uuid
@@ -1157,7 +1157,7 @@ const MainAdmin = () => {
                 />
                 {orderData?.item_details?.length > 12 ? (
                   <>
-                    <div style={{ height: "20mm" }}></div>
+                    {/* <div style={{ height: "20mm" }}></div> */}
                     <OrderPrint
                       counter={counter.find(
                         (a) => a.counter_uuid === orderData?.counter_uuid
@@ -1186,7 +1186,7 @@ const MainAdmin = () => {
                 )}
                 {orderData?.item_details?.length > 24 ? (
                   <>
-                    <div style={{ height: "20mm" }}></div>
+                    {/* <div style={{ height: "20mm" }}></div> */}
                     <OrderPrint
                       counter={counter.find(
                         (a) => a.counter_uuid === orderData?.counter_uuid
@@ -1216,7 +1216,7 @@ const MainAdmin = () => {
 
                 {orderData?.item_details?.length > 36 ? (
                   <>
-                    <div style={{ height: "20mm" }}></div>
+                    {/* <div style={{ height: "20mm" }}></div> */}
                     <OrderPrint
                       counter={counter.find(
                         (a) => a.counter_uuid === orderData?.counter_uuid
@@ -1787,9 +1787,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
             className="user-table"
             style={{
               width: "170mm",
-              marginTop: "20mm",
-              marginLeft: "20mm",
-              marginRight: "20mm",
+              // marginTop: "20mm",
+              // marginLeft: "20mm",
+              // marginRight: "20mm",
               border: "1px solid black",
               pageBreakInside: "auto",
               display: "block",
@@ -1797,14 +1797,14 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
           >
             <thead style={{width:"100%"}}>
               <tr style={{width:"100%"}}>
-                <th>Sr.</th>
-                <th colSpan={5}>
+                <th style={{width:"10mm"}}>Sr.</th>
+                <th colSpan={5} style={{width:"100mm"}}>
                   <div className="t-head-element">Item</div>
                 </th>
-                <th colSpan={3}>
+                <th colSpan={3} style={{width:"30mm"}}>
                   <div className="t-head-element">MRP</div>
                 </th>
-                <th colSpan={3}>
+                <th colSpan={3} style={{width:"30mm"}}>
                   <div className="t-head-element">Qty</div>
                 </th>
               </tr>
