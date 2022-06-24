@@ -264,7 +264,7 @@ const ProcessingOrders = () => {
       console.log(response);
     }
   };
-
+console.log(selectedOrder)
   const postOrderData = async (
     dataArray = selectedOrder ? [selectedOrder] : orders,
     hold = false
@@ -1523,7 +1523,7 @@ const ProcessingOrders = () => {
                 }),
               });
               setSelectedOrder((prev) => ({
-                ...prev,
+                ...data,
                 ...billingData,
                 item_details: billingData.items,
               }));
