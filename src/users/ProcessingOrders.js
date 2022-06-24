@@ -532,26 +532,25 @@ const ProcessingOrders = () => {
   const checkingQuantity = () => {
     setLoading(true);
     let data = [];
-    let item_details = selectedOrder
+    let itemsDetails = [];
+    itemsDetails = selectedOrder
       ? selectedOrder?.item_details.filter((a) => a.status === 1)
-      : [].concat
-          .apply(
-            [],
-            orders.map((a) => a.item_details.filter((a) => a.status === 1))
-          )
+      : [].concat.apply(
+          [],
+          orders.map((a) => a.item_details.filter((a) => a.status === 1))
+        );
+    let item_details = itemsDetails.reduce((acc, curr) => {
+      let itemData = acc.find((item) => item.item_uuid === curr.item_uuid);
+      console.log(acc);
+      if (itemData) {
+        itemData.b = (+itemData.b || 0) + (+curr.b || 0);
+        itemData.p = (+itemData.p || 0) + (+curr.p || 0);
+      } else {
+        acc.push(curr);
+      }
 
-          .reduce((acc, curr) => {
-            let item = acc.find((item) => item.item_uuid === curr.item_uuid);
-
-            if (item) {
-              item.b = (+item.b || 0) + (+curr.b || 0);
-              item.p = (+item.p || 0) + (+curr.p || 0);
-            } else {
-              acc.push(curr);
-            }
-
-            return acc;
-          }, []);
+      return acc;
+    }, []);
     console.log("item_details", item_details, tempQuantity);
     for (let a of item_details) {
       let orderItem = tempQuantity.find((b) => b.item_uuid === a.item_uuid);
@@ -605,7 +604,7 @@ const ProcessingOrders = () => {
         );
       else data.push(a);
     }
-    item_details = [];
+    itemsDetails = [];
     // if (selectedOrder) {
     //   for (let a of barcodeFilterState.filter(
     //     (a) => !data.filter((b) => b.item_uuid === a.item_uuid).length
@@ -1544,6 +1543,7 @@ const ProcessingOrders = () => {
           onSave={() => {
             setPopupBarcode(false);
             setBarcodeMessage([]);
+            getTripOrders();
           }}
           BarcodeMessage={BarcodeMessage}
           postOrderData={() => postOrderData()}
@@ -1848,7 +1848,6 @@ function CheckingValues({
                               backgroundColor: "#7990dd",
                             }}
                           >
-                            {console.log(item)}
                             <td colSpan={2}>{item.item_title}</td>
                             <td>{item?.mrp || 0}</td>
                             <td style={{ backgroundColor: "green" }}>
