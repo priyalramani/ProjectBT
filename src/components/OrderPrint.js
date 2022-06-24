@@ -81,18 +81,33 @@ const OrderPrint = ({
                   M/S {counter?.counter_title || ""}
                 </td>
               </tr>
-              <tr>
-                <td style={{ fontSize: "x-small" }}>
-                  {counter?.address || ""}
-                </td>
-              </tr>
+              {counter?.address ? (
+                <tr>
+                  <td style={{ fontSize: "x-small" }}>
+                    {counter?.address || ""}
+                  </td>
+                </tr>
+              ) : (
+                ""
+              )}
 
-              <tr>
-                <td style={{ fontSize: "x-small" }}>
-                  {counter?.mobile?.map((a, i) => (i === 0 ? a : ", " + a)) ||
-                    ""}
-                </td>
-              </tr>
+              {counter?.mobile?.length ? (
+                <tr>
+                  <td style={{ fontSize: "x-small" }}>
+                    {counter?.mobile?.map((a, i) => (i === 0 ? a : ", " + a)) ||
+                      ""}
+                  </td>
+                </tr>
+              ) : (
+                ""
+              )}
+              {counter?.gst ? (
+                <tr>
+                  <td style={{ fontSize: "x-small" }}>GSTIN: {counter?.gst}</td>
+                </tr>
+              ) : (
+                ""
+              )}
             </table>
           </td>
         </tr>

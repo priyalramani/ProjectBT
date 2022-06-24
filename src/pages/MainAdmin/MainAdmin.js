@@ -1292,6 +1292,7 @@ const MainAdmin = () => {
         <HoldPopup
           onSave={() => {
             setSumaryPopup(false);
+            getRunningOrders()
           }}
           orders={selectedOrder}
           itemsData={items}
@@ -1912,6 +1913,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
     var strTime = hours + ":" + minutes + " " + ampm;
     return strTime;
   }
+  console.log("updatedOrders",updateOrders,deleteItemsOrder)
   const postOrderData = async (deleteItems) => {
     let dataArray = deleteItems
       ? updateOrders.map((a) => ({
@@ -1936,7 +1938,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
                 }
               : a
           );
-    console.log(dataArray);
+    console.log("dataArray",dataArray);
     let finalData = [];
     for (let orderObject of dataArray) {
       let data = orderObject;
@@ -1968,6 +1970,8 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 
       finalData.push({ ...data, opened_by: 0 });
     }
+    console.log("finalData",finalData);
+
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
@@ -2124,7 +2128,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
           </div>
           {updateOrders.filter((a) => a.edit).length ||
           deleteItemsOrder.length ? (
-            <button className="simple_Logout_button" onClick={postOrderData}>
+            <button className="simple_Logout_button" onClick={()=>postOrderData()}>
               Update
             </button>
           ) : (
@@ -2172,7 +2176,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
                 b.item_uuid === popupInfo.item_uuid
                   ? {
                       ...b,
-                      b: +data.b + +data.p / +item.conversion,
+                      b: (+data.b + +data.p / +item.conversion||0).toFixed(0),
                       p: +data.p % +item.conversion,
                     }
                   : b
@@ -2246,6 +2250,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
                       }
                       maxLength={42}
                       onWheel={(e) => e.preventDefault()}
+                      autoFocus={true}
                     />
                   </label>
                 </div>

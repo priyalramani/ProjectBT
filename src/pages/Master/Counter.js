@@ -164,7 +164,11 @@ const Counter = () => {
         ""
       )}
       {sequencePopup ? (
-        <CounterSequence onSave={() => setSequencePopup(false)} counters={counter} routesData={routesData} />
+        <CounterSequence
+          onSave={() => setSequencePopup(false)}
+          counters={counter}
+          routesData={routesData}
+        />
       ) : (
         ""
       )}
@@ -253,6 +257,29 @@ function Table({ itemsDetails, setPopupForm, setItemPopup }) {
               </div>
             </div>
           </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>GST</span>
+              <div className="sort-buttons-container">
+                {/* <button
+                  onClick={() => {
+                    setItems("gst");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button> */}
+                {/* <button
+                  onClick={() => {
+                    setItems("gst");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button> */}
+              </div>
+            </div>
+          </th>
           <th colSpan={3}>Actions</th>
         </tr>
       </thead>
@@ -279,7 +306,10 @@ function Table({ itemsDetails, setPopupForm, setItemPopup }) {
               <td>{i + 1}</td>
               <td colSpan={2}>{item.route_title}</td>
               <td colSpan={2}>{item.counter_title}</td>
-              <td colSpan={2}>{item?.mobile?.map((a,i)=>i===0?a:", "+a)}</td>
+              <td colSpan={2}>
+                {item?.mobile?.map((a, i) => (i === 0 ? a : ", " + a))}
+              </td>
+              <td colSpan={2}>{item.gst || ""}</td>
               <td>
                 <button
                   type="button"
@@ -474,7 +504,7 @@ function NewUserForm({
                   </label>
                 </div>
                 <div className="row">
-                <label className="selectLabel">
+                  <label className="selectLabel">
                     Adress
                     <input
                       type="text"
@@ -490,7 +520,7 @@ function NewUserForm({
                       maxLength={42}
                     />
                   </label>
-                  
+
                   <label className="selectLabel">
                     Route
                     <select
@@ -514,7 +544,7 @@ function NewUserForm({
                   </label>
                 </div>
                 <div className="row">
-                <label className="selectLabel" style={{ width: "50%" }}>
+                  <label className="selectLabel" style={{ width: "50%" }}>
                     Mobile
                     <textarea
                       type="number"
@@ -571,6 +601,25 @@ function NewUserForm({
                         Unpaid
                       </option>
                     </select>
+                  </label>{" "}
+                </div>
+
+                <div className="row">
+                  <label className="selectLabel">
+                    GST
+                    <input
+                      type="text"
+                      name="GST"
+                      className="numberInput"
+                      value={data?.gst}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          gst: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                    />
                   </label>
                 </div>
               </div>
