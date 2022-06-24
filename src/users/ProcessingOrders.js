@@ -539,19 +539,19 @@ const ProcessingOrders = () => {
             [],
             orders.map((a) => a.item_details.filter((a) => a.status === 1))
           )
-          
+
           .reduce((acc, curr) => {
             let item = acc.find((item) => item.item_uuid === curr.item_uuid);
 
             if (item) {
-              item.b = (+item.b||0) + (+curr.b||0);
-              item.p = (+item.p||0) + (+curr.p||0);
+              item.b = (+item.b || 0) + (+curr.b || 0);
+              item.p = (+item.p || 0) + (+curr.p || 0);
             } else {
               acc.push(curr);
             }
 
             return acc;
-          },[]);
+          }, []);
     console.log("item_details", item_details, tempQuantity);
     for (let a of item_details) {
       let orderItem = tempQuantity.find((b) => b.item_uuid === a.item_uuid);
@@ -559,13 +559,13 @@ const ProcessingOrders = () => {
       console.log(
         "quantity",
         (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-          (+orderItem?.p||0) +
+          (+orderItem?.p || 0) +
           (+orderItem?.free || 0),
         (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p
       );
       if (
         (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-          (+orderItem?.p||0) +
+          (+orderItem?.p || 0) +
           (+orderItem?.free || 0) !==
         (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p
       )
@@ -605,7 +605,7 @@ const ProcessingOrders = () => {
         );
       else data.push(a);
     }
-    item_details=[]
+    item_details = [];
     // if (selectedOrder) {
     //   for (let a of barcodeFilterState.filter(
     //     (a) => !data.filter((b) => b.item_uuid === a.item_uuid).length
@@ -1544,7 +1544,6 @@ const ProcessingOrders = () => {
           onSave={() => {
             setPopupBarcode(false);
             setBarcodeMessage([]);
-
           }}
           BarcodeMessage={BarcodeMessage}
           postOrderData={() => postOrderData()}
@@ -2114,6 +2113,8 @@ function HoldPopup({
 }) {
   const [items, setItems] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
+  const [confirmPopup, setConfirmPopup] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const audiosRef = useRef();
 
   const audioCallback = (elem_id) => {
@@ -2268,27 +2269,27 @@ function HoldPopup({
   }, []);
 
   const postOrderData = async () => {
-    if(holdPopup !== "Checking Summary")
-    postHoldOrders(
-      orders
-        .filter(
-          (a) =>
-            a.item_details.filter(
-              (b) =>
-                items.filter((c) => c.edit && c.item_uuid === b.item_uuid)
-                  .length
-            ).length
-        )
-        .map((a) => ({
-          ...a,
-          item_details: a.item_details.map((a) => ({
+    if (holdPopup !== "Checking Summary")
+      postHoldOrders(
+        orders
+          .filter(
+            (a) =>
+              a.item_details.filter(
+                (b) =>
+                  items.filter((c) => c.edit && c.item_uuid === b.item_uuid)
+                    .length
+              ).length
+          )
+          .map((a) => ({
             ...a,
-            status:
-              items.find((b) => b.item_uuid === a.item_uuid)?.status ||
-              a.status,
-          })),
-        }))
-    );
+            item_details: a.item_details.map((a) => ({
+              ...a,
+              status:
+                items.find((b) => b.item_uuid === a.item_uuid)?.status ||
+                a.status,
+            })),
+          }))
+      );
     onSave();
   };
 
@@ -2316,10 +2317,14 @@ function HoldPopup({
               placeholder="search"
               value={filterItemTitle}
               onChange={(e) => setFilterItemTile(e.target.value)}
+              id="checking_summary_search"
             />
             <CloseIcon
               className="user_cross_icon"
-              onClick={() => setFilterItemTile("")}
+              onClick={() => {
+                setFilterItemTile("");
+                document.getElementById("checking_summary_search").focus();
+              }}
             />
           </div>
           <div
@@ -2553,11 +2558,8 @@ function HoldPopup({
                 </div>
               )}
 
-              {items.filter((a) => a.edit).length ? (
-                <div
-                  className="flex"
-                  style={{ justifyContent: "space-between" }}
-                >
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                {items.filter((a) => a.edit).length ? (
                   <button
                     type="button"
                     className="submit"
@@ -2568,41 +2570,35 @@ function HoldPopup({
                   >
                     Save
                   </button>
-                </div>
-              ) : (
-                ""
-              )}
-              {holdPopup === "Checking Summary" ? (
-                <div
-                  className="flex"
-                  style={{ justifyContent: "space-between" }}
-                >
-                  <button
-                    type="button"
-                    className="submit"
-                    onClick={checkingQuantity}
-                  >
-                    Save
-                  </button>
-                </div>
-              ) : (
-                ""
-              )}
+                ) : holdPopup === "Checking Summary" ? (
+                  <>
+                    <button
+                      type="button"
+                      className="submit"
+                      style={{ backgroundColor: "red" }}
+                      onClick={() => {
+                        setConfirmPopup(true);
+                        setDisabled(true);
+                        setTimeout(() => {
+                          setDisabled(false);
+                        }, 5000);
+                      }}
+                    >
+                      Discard
+                    </button>
+                    <button
+                      type="button"
+                      className="submit"
+                      onClick={checkingQuantity}
+                    >
+                      Save
+                    </button>
+                  </>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
-            <button
-              onClick={() => {
-                audiosRef.current?.[0] &&
-                  audiosRef.current?.forEach((audio) => audio.pause());
-                audiosRef.current = null;
-                navigator.mediaSession.playbackState = "none";
-                clearInterval(+sessionStorage.getItem("intervalId"));
-                console.clear();
-                onSave();
-              }}
-              className="closeButton"
-            >
-              x
-            </button>
           </div>
         </div>
       </div>
@@ -2614,6 +2610,67 @@ function HoldPopup({
           setTempQuantity={setTempQuantity}
           items={items}
         />
+      ) : (
+        ""
+      )}
+      {confirmPopup ? (
+        <div className="overlay" style={{ zIndex: "9999999999999" }}>
+          <div
+            className="modal"
+            style={{
+              height: "fit-content",
+              width: "max-content",
+              padding: "30px",
+            }}
+          >
+            <h2 style={{ textAlign: "center" }}>Are you sure?</h2>
+            <h2 style={{ textAlign: "center" }}>Changes will be discarded</h2>
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+              }}
+            >
+              <div style={{ overflowY: "scroll", width: "100%" }}>
+                <form className="form">
+                  <div
+                    className="flex"
+                    style={{ justifyContent: "space-between", width: "100%" }}
+                  >
+                    <button
+                      type="submit"
+                      style={{
+                        opacity: disabled ? "0.5" : "1",
+                        backgroundColor: "red",
+                      }}
+                      className="submit"
+                      onClick={() => {
+                        audiosRef.current?.[0] &&
+                          audiosRef.current?.forEach((audio) => audio.pause());
+                        audiosRef.current = null;
+                        navigator.mediaSession.playbackState = "none";
+                        clearInterval(+sessionStorage.getItem("intervalId"));
+                        console.clear();
+                        onSave();
+                      }}
+                      disabled={disabled}
+                    >
+                      Continue
+                    </button>
+                    <button
+                      type="submit"
+                      className="submit"
+                      onClick={() => setConfirmPopup(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
       ) : (
         ""
       )}
