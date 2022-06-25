@@ -259,6 +259,29 @@ function Table({ itemsDetails, setPopupForm, setItemPopup }) {
           </th>
           <th colSpan={2}>
             <div className="t-head-element">
+              <span>Food License</span>
+              <div className="sort-buttons-container">
+                {/* <button
+                  onClick={() => {
+                    setItems("gst");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button> */}
+                {/* <button
+                  onClick={() => {
+                    setItems("gst");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button> */}
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
               <span>GST</span>
               <div className="sort-buttons-container">
                 {/* <button
@@ -309,6 +332,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup }) {
               <td colSpan={2}>
                 {item?.mobile?.map((a, i) => (i === 0 ? a : ", " + a))}
               </td>
+              <td colSpan={2}>{item.food_license || ""}</td>
               <td colSpan={2}>{item.gst || ""}</td>
               <td>
                 <button
@@ -616,6 +640,22 @@ function NewUserForm({
                         setdata({
                           ...data,
                           gst: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                    />
+                  </label>
+                  <label className="selectLabel">
+                  Food License
+                    <input
+                      type="text"
+                      name="food_license"
+                      className="numberInput"
+                      value={data?.food_license}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          food_license: e.target.value,
                         })
                       }
                       maxLength={42}

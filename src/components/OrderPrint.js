@@ -101,6 +101,15 @@ const OrderPrint = ({
               ) : (
                 ""
               )}
+              {counter?.food_license ? (
+                <tr>
+                  <td style={{ fontSize: "x-small" }}>
+                    Food License: {counter?.food_license}
+                  </td>
+                </tr>
+              ) : (
+                ""
+              )}
               {counter?.gst ? (
                 <tr>
                   <td style={{ fontSize: "x-small" }}>GSTIN: {counter?.gst}</td>
