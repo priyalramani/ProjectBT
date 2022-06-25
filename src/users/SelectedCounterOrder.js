@@ -10,6 +10,8 @@ import axios from "axios";
 import CloseIcon from "@mui/icons-material/Close";
 const SelectedCounterOrder = () => {
   const [items, setItems] = useState([]);
+  const [foodLicensePopup, setFoodLicencePopup] = useState(false);
+  const [food_license, setFoodLicence] = useState("");
   const [order, setOrder] = useState([]);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [clickedId, setClickedId] = useState(false);
@@ -26,6 +28,39 @@ const SelectedCounterOrder = () => {
   const [holdPopup, setHoldPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const Navigate = useNavigate();
+  const getCounter = async () => {
+    const response = await axios({
+      method: "post",
+      url: "/counters/GetCounter",
+      data: { counter_uuid: params.counter_uuid },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success)
+      if (!response.data.result.food_license) {
+        setFoodLicencePopup(true);
+      }
+  };
+  const putCounterData = async () => {
+    if (!food_license) return;
+    const response = await axios({
+      method: "put",
+      url: "/counters/putCounter",
+      data: [
+        {
+          counter_uuid: params.counter_uuid,
+          food_license,
+        },
+      ],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setFoodLicencePopup(false);
+    }
+  };
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
     let tx = await db.transaction("items", "readwrite").objectStore("items");
@@ -57,6 +92,7 @@ const SelectedCounterOrder = () => {
   };
   useEffect(() => {
     getIndexedDbData();
+    getCounter();
   }, []);
   useEffect(() => {
     if (counters.length)
@@ -759,6 +795,63 @@ const SelectedCounterOrder = () => {
           itemsData={items}
           setOrder={setOrder}
         />
+      ) : (
+        ""
+      )}
+      {foodLicensePopup ? (
+        <div className="overlay">
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "max-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form className="form" onSubmit={putCounterData}>
+                  <div className="formGroup">
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "flex-start" }}
+                    >
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "200px" }}
+                      >
+                        Food License
+                        <input
+                          type="text"
+                          name="route_title"
+                          className="numberInput"
+                          value={food_license}
+                          style={{ width: "200px" }}
+                          onChange={(e) => setFoodLicence(e.target.value)}
+                          maxLength={42}
+
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <button type="submit" className="submit">
+                    Save changes
+                  </button>
+                </form>
+              </div>
+              <button
+                onClick={() => setFoodLicencePopup(false)}
+                className="closeButton"
+              >
+                x
+              </button>
+            </div>
+          </div>
+        </div>
       ) : (
         ""
       )}
