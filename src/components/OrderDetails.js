@@ -33,6 +33,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
+  const [itemDetails,setItemDetails]=useState([])
 
   const appendNewRow = () => {
     let item_uuid = uuid();
@@ -224,7 +225,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
 
       orderStatus,
     };
- 
+
     const response = await axios({
       method: "put",
       url: "/orders/putOrder",
@@ -234,8 +235,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       },
     });
     if (response.data.success) {
-      setOrderData(prev=>({
-...prev,order_grandtotal:data.order_grandtotal
+      setOrderData((prev) => ({
+        ...prev,
+        order_grandtotal: data.order_grandtotal,
       }));
       setEditOrder(false);
     }
@@ -451,6 +453,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 <table className="f6 w-100 center" cellSpacing="0">
                   <thead className="lh-copy" style={{ position: "static" }}>
                     <tr className="white">
+                      <th className="pa2 tl bb b--black-20 w-30">Sr.</th>
                       <th className="pa2 tl bb b--black-20 w-30">Item Name</th>
                       <th className="pa2 tl bb b--black-20 w-30">MRP</th>
                       {editOrder ? (
@@ -493,6 +496,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             borderBottom: "2px solid #fff",
                           }}
                         >
+                          <td
+                            className="ph2 pv1 tl bb b--black-20 bg-white"
+                            style={{ textAlign: "center", width: "3ch" }}
+                          >
+                            {item.sr}
+                          </td>
                           <td className="ph2 pv1 tl bb b--black-20 bg-white">
                             <div
                               className="inputGroup"
@@ -821,7 +830,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               paddingTop: "20px",
             }}
           >
-            <div style={{width:"20%",color:"#fff"}}>-</div>
+            <div style={{ width: "20%", color: "#fff" }}>-</div>
             {editOrder ? (
               <button type="button" onClick={onSubmit}>
                 Save
@@ -888,15 +897,16 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         <div
           ref={componentRef}
           id="item-container"
-          style={{
-            // marginTop: "20mm",
-            // marginLeft: "20mm",
-            // marginRight: "20mm",
-            // margin: "45mm 40mm 30mm 60mm",
-            // textAlign: "center",
-
-            // padding: "10px"
-          }}
+          style={
+            {
+              // marginTop: "20mm",
+              // marginLeft: "20mm",
+              // marginRight: "20mm",
+              // margin: "45mm 40mm 30mm 60mm",
+              // textAlign: "center",
+              // padding: "10px"
+            }
+          }
         >
           <OrderPrint
             counter={counters.find(
@@ -948,30 +958,30 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             ""
           )}
 
-          {orderData?.item_details?.length > 24 ? (
+          {printData?.item_details?.length > 24 ? (
             <>
               <div style={{ height: "20mm" }}></div>
               <OrderPrint
                 counter={counters.find(
-                  (a) => a.counter_uuid === orderData?.counter_uuid
+                  (a) => a.counter_uuid === printData?.counter_uuid
                 )}
-                order={orderData}
-                date={new Date(orderData?.status[0]?.time)}
+                order={printData}
+                date={new Date(printData?.status[0]?.time)}
                 user={
                   users.find(
-                    (a) => a.user_uuid === orderData?.status[0]?.user_uuid
+                    (a) => a.user_uuid === printData?.status[0]?.user_uuid
                   )?.user_title || ""
                 }
                 itemData={itemsData}
                 item_details={
-                  orderData?.item_details?.length > 24
-                    ? orderData?.item_details?.slice(24, 36)
-                    : orderData?.item_details?.slice(
+                  printData?.item_details?.length > 24
+                    ? printData?.item_details?.slice(24, 36)
+                    : printData?.item_details?.slice(
                         24,
-                        orderData?.item_details?.length
+                        printData?.item_details?.length
                       )
                 }
-                footer={!(orderData?.item_details?.length > 36)}
+                footer={!(printData?.item_details?.length > 36)}
               />
             </>
           ) : (
@@ -983,19 +993,19 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               <div style={{ height: "20mm" }}></div>
               <OrderPrint
                 counter={counters.find(
-                  (a) => a.counter_uuid === orderData?.counter_uuid
+                  (a) => a.counter_uuid === printData?.counter_uuid
                 )}
-                order={orderData}
-                date={new Date(orderData?.status[0]?.time)}
+                order={printData}
+                date={new Date(printData?.status[0]?.time)}
                 user={
                   users.find(
-                    (a) => a.user_uuid === orderData?.status[0]?.user_uuid
+                    (a) => a.user_uuid === printData?.status[0]?.user_uuid
                   )?.user_title || ""
                 }
                 itemData={itemsData}
-                item_details={orderData?.item_details?.slice(
+                item_details={printData?.item_details?.slice(
                   36,
-                  orderData?.item_details.length
+                  printData?.item_details.length
                 )}
                 footer={true}
               />
@@ -1233,7 +1243,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
                             : ""}
                         </td>
                         <td colSpan={2}>
-                          {new Date(+item.time).toDateString()+" "+formatAMPM(new Date(item.time))|| ""}
+                          {new Date(+item.time).toDateString() +
+                            " " +
+                            formatAMPM(new Date(item.time)) || ""}
                         </td>
                         <td>
                           {item.user_uuid === "240522"
