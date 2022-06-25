@@ -11,6 +11,8 @@ import CloseIcon from "@mui/icons-material/Close";
 const SelectedCounterOrder = () => {
   const [items, setItems] = useState([]);
   const [foodLicensePopup, setFoodLicencePopup] = useState(false);
+  const [checkNumberPopup, setCheckNumberPopup] = useState(false);
+  const [number, setNumber] = useState([]);
   const [food_license, setFoodLicence] = useState("");
   const [order, setOrder] = useState([]);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -37,12 +39,19 @@ const SelectedCounterOrder = () => {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success)
+    if (response.data.success) {
+      if (response.data.result.mobile.length)
+        setNumber(response.data.result.mobile);
+      else setNumber([""]);
       if (!response.data.result.food_license) {
         setFoodLicencePopup(true);
+      }else{
+        setCheckNumberPopup(true)
       }
+    }
   };
-  const putCounterData = async () => {
+  const putCounterData = async (e) => {
+    e.preventDefault()
     if (!food_license) return;
     const response = await axios({
       method: "put",
@@ -59,6 +68,28 @@ const SelectedCounterOrder = () => {
     });
     if (response.data.success) {
       setFoodLicencePopup(false);
+      setCheckNumberPopup(true)
+    }
+  };
+  const putCounterNumber = async (e) => {
+    e.preventDefault()
+    if (!number) return;
+    const response = await axios({
+      method: "put",
+      url: "/counters/putCounter",
+      data: [
+        {
+          counter_uuid: params.counter_uuid,
+          mobile:number,
+        },
+      ],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+
+      setCheckNumberPopup(false)
     }
   };
   const getIndexedDbData = async () => {
@@ -832,7 +863,6 @@ const SelectedCounterOrder = () => {
                           style={{ width: "200px" }}
                           onChange={(e) => setFoodLicence(e.target.value)}
                           maxLength={42}
-
                         />
                       </label>
                     </div>
@@ -845,6 +875,63 @@ const SelectedCounterOrder = () => {
               </div>
               <button
                 onClick={() => setFoodLicencePopup(false)}
+                className="closeButton"
+              >
+                x
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+      {checkNumberPopup ? (
+        <div className="overlay">
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "max-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                  <h2>Check Mobile Numbers</h2>
+                <form className="form" onSubmit={putCounterNumber}>
+                  <div className="formGroup">
+                  <div className="row">
+                  <label className="selectLabel" style={{ width: "200px" }}>
+                    Mobile
+                    <textarea
+                      type="number"
+                      onWheel={(e) => e.target.blur()}
+                      name="sort_order"
+                      className="numberInput"
+                      rows={7}
+                      cols={12}
+                      value={number?.toString()?.replace(/,/g, "\n")}
+                      style={{ height: "100px",width:"200px" }}
+                      onChange={(e) =>
+                        setNumber( e.target.value.split("\n"),
+                        )
+                      }
+                    />
+                  </label>
+               
+                </div>
+                  </div>
+
+                  <button type="submit" className="submit">
+                    Save changes
+                  </button>
+                </form>
+              </div>
+              <button
+                onClick={() => setCheckNumberPopup(false)}
                 className="closeButton"
               >
                 x
