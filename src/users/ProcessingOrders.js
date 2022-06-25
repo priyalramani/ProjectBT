@@ -264,7 +264,7 @@ const ProcessingOrders = () => {
       console.log(response);
     }
   };
-console.log(selectedOrder)
+  console.log(selectedOrder);
   const postOrderData = async (
     dataArray = selectedOrder ? [selectedOrder] : orders,
     hold = false
@@ -2401,6 +2401,7 @@ function HoldPopup({
                                     )
                               ).length
                         )
+
                         .map((a) => (
                           <>
                             <tr
@@ -2434,7 +2435,9 @@ function HoldPopup({
                                         filterItemTitle.toLocaleLowerCase()
                                       ))
                               )
-
+                              .sort((a, b) =>
+                                a?.item_title?.localeCompare(b?.item_title)
+                              )
                               .map((item, i) => (
                                 <tr
                                   key={item?.item_uuid || Math.random()}
