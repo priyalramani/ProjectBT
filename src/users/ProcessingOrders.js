@@ -264,7 +264,7 @@ const ProcessingOrders = () => {
       console.log(response);
     }
   };
-  console.log(selectedOrder);
+  console.log("orders", orders);
   const postOrderData = async (
     dataArray = selectedOrder ? [selectedOrder] : orders,
     hold = false
@@ -374,6 +374,7 @@ const ProcessingOrders = () => {
         replacement_mrp: orderObject.replacement_mrp,
       });
     }
+
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
@@ -407,7 +408,7 @@ const ProcessingOrders = () => {
         }`;
         setLoading(false);
         setSelectedOrder(false);
-
+        setHoldPopup(false);
         postActivity({
           activity:
             (Location.pathname.includes("checking")
@@ -530,6 +531,7 @@ const ProcessingOrders = () => {
   };
 
   const checkingQuantity = () => {
+    let orderData = orders;
     setLoading(true);
     let data = [];
     let itemsDetails = [];
@@ -537,7 +539,7 @@ const ProcessingOrders = () => {
       ? selectedOrder?.item_details.filter((a) => a.status === 1)
       : [].concat.apply(
           [],
-          orders.map((a) => a.item_details.filter((a) => a.status === 1))
+          orderData.map((a) => a.item_details.filter((a) => a.status === 1))
         );
     let item_details = itemsDetails.reduce((acc, curr) => {
       let itemData = acc.find((item) => item.item_uuid === curr.item_uuid);
@@ -555,13 +557,6 @@ const ProcessingOrders = () => {
     for (let a of item_details) {
       let orderItem = tempQuantity.find((b) => b.item_uuid === a.item_uuid);
       let ItemData = items.find((b) => b.item_uuid === a.item_uuid);
-      console.log(
-        "quantity",
-        (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-          (+orderItem?.p || 0) +
-          (+orderItem?.free || 0),
-        (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p
-      );
       if (
         (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
           (+orderItem?.p || 0) +
@@ -604,7 +599,6 @@ const ProcessingOrders = () => {
         );
       else data.push(a);
     }
-    itemsDetails = [];
     // if (selectedOrder) {
     //   for (let a of barcodeFilterState.filter(
     //     (a) => !data.filter((b) => b.item_uuid === a.item_uuid).length
@@ -728,11 +722,12 @@ const ProcessingOrders = () => {
     setTimeout(() => {
       setPopupBarcode(true);
       setLoading(false);
+      getTripOrders();
     }, 2000);
   };
 
   const updateBillingAmount = async (order = selectedOrder) => {
-    console.log(order);
+    // console.log(order);
     let billingData = await Billing({
       replacement: order.replacement,
       counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
@@ -1048,11 +1043,7 @@ const ProcessingOrders = () => {
           <table
             className="user-table"
             style={{
-              width:
-                Location.pathname.includes("checking") ||
-                Location.pathname.includes("delivery")
-                  ? "100"
-                  : "max-content",
+              width: "max-content",
               height: "fit-content",
             }}
           >
@@ -1659,7 +1650,7 @@ const ProcessingOrders = () => {
         ""
       )}
       {loading ? (
-        <div className="overlay" style={{zIndex:"99999999"}}>
+        <div className="overlay" style={{ zIndex: "99999999" }}>
           <div className="flex" style={{ width: "40px", height: "40px" }}>
             <svg viewBox="0 0 100 100">
               <path
@@ -1877,167 +1868,7 @@ function CheckingValues({
               ) : (
                 ""
               )}
-              {BarcodeMessage?.filter((a) => +a.case === 2).length ? (
-                <div
-                  className="flex"
-                  style={{ flexDirection: "column", width: "300px" }}
-                >
-                  {" "}
-                  <i>Remove Extra Items</i>
-                  <table
-                    className="user-table"
-                    style={{
-                      width: "100%",
-                      height: "fit-content",
-                      backgroundColor: "yellow",
-                      color: "#fff",
-                    }}
-                  >
-                    <thead>
-                      <tr
-                        style={{
-                          color: "#fff",
-                          backgroundColor: "red",
-                          fontSize: "15px",
-                        }}
-                      >
-                        <th colSpan={2}>
-                          <div className="t-head-element">Item</div>
-                        </th>
-                        <th>
-                          <div className="t-head-element">MRP</div>
-                        </th>
-                        <th>
-                          <div className="t-head-element">Checking</div>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="tbody" style={{ fontSize: "10px" }}>
-                      {BarcodeMessage?.filter((a) => +a.case === 2)?.map(
-                        (item, i) => (
-                          <tr
-                            key={item?.item_uuid || Math.random()}
-                            style={{
-                              height: "30px",
-                              color: "#fff",
-                              backgroundColor: "red",
-                            }}
-                          >
-                            <td colSpan={2}>{item.item_title}</td>
-                            <td>{item?.mrp || 0}</td>
-                            <td>{item?.barcodeQty}</td>
-                          </tr>
-                        )
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                ""
-              )}
-              {/* {BarcodeMessage?.filter((a) => +a.case === 1 && !a.barcodeQty)
-                .length ? (
-                <div className="flex" style={{ flexDirection: "column",width:"300px" }}>
-                  {" "}
-                  <i>Add Items</i>
-                  <table
-                    className="user-table"
-                    style={{
-                      width: "100%",
-                      height: "fit-content",
-                      backgroundColor: "yellow",
-                      color: "#000",
-                    }}
-                  >
-                    <thead>
-                      <tr style={{ color: "#000", backgroundColor: "#ffbf00" }}>
-                        <th colSpan={2}>
-                          <div className="t-head-element">Item</div>
-                        </th>
-                        <th>
-                          <div className="t-head-element">MRP</div>
-                        </th>
-                        <th>
-                          <div className="t-head-element">Order</div>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="tbody">
-                      {BarcodeMessage?.filter(
-                        (a) => +a.case === 1 && !a.barcodeQty
-                      )?.map((item, i) => (
-                        <tr
-                          key={item?.item_uuid || Math.random()}
-                          style={{
-                            height: "30px",
-                            color: "#000",
-                            backgroundColor: "#ffbf00",
-                          }}
-                        >
-                          <td colSpan={2}>{item.item_title}</td>
-                          <td>{item?.mrp || 0}</td>
-                          <td>
-                            {item?.b || 0}:{item?.p || 0}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                ""
-              )} */}
-              {BarcodeMessage?.filter((a) => +a.case === 3).length ? (
-                <div
-                  className="flex"
-                  style={{ flexDirection: "column", width: "300px" }}
-                >
-                  {" "}
-                  <i>Unknown Barcode</i>
-                  <table
-                    className="user-table"
-                    style={{
-                      width: "100%",
-                      height: "fit-content",
-                      backgroundColor: "yellow",
-                      color: "#fff",
-                      border: "2px solid #000",
-                    }}
-                  >
-                    <thead>
-                      <tr
-                        style={{
-                          color: "#000",
-                          backgroundColor: "#fff",
-                          fontSize: "15px",
-                        }}
-                      >
-                        <th colSpan={2}>
-                          <div className="t-head-element">Barcode</div>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="tbody" style={{ fontSize: "10px" }}>
-                      {BarcodeMessage?.filter((a) => +a.case === 3)?.map(
-                        (item, i) => (
-                          <tr
-                            key={item?.item_uuid || Math.random()}
-                            style={{
-                              height: "30px",
-                              color: "#000",
-                              backgroundColor: "#fff",
-                            }}
-                          >
-                            <td colSpan={2}>{item.barcode[0]}</td>
-                          </tr>
-                        )
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                ""
-              )}
+
               <div
                 className="flex"
                 style={{ justifyContent: "space-between", width: "300px" }}
@@ -2941,7 +2772,7 @@ function DiliveryPopup({
         "Content-Type": "application/json",
       },
     });
-    
+
     setTimeout(() => setLoading(false), 45000);
     if (outstanding?.amount)
       await axios({
