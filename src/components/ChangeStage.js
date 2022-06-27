@@ -6,6 +6,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
   const [data, setData] = useState({ stage: stage + 1 });
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const onSubmit = async (selectedData = orders) => {
+    console.log(selectedData)
     let user_uuid = localStorage.getItem("user_uuid");
     let time = new Date();
     console.log(stage, data);
@@ -51,7 +52,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
               { stage: 5, time: time.getTime(), user_uuid },
             ]
         : [{ stage: 5, time: time.getTime(), user_uuid }];
-    selectedData = selectedData.map((a) => ({
+    selectedData = selectedData?.map((a) => ({
       ...a,
       status: [...a.status, ...status],
     }));
@@ -150,7 +151,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
                   e.preventDefault();
                   if (data.stage === 4) {
                     setDeliveryPopup(true);
-                  } else onSubmit(data);
+                  } else onSubmit();
                 }}
               >
                 <div className="formGroup">
