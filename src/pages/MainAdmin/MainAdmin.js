@@ -1682,6 +1682,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                                         )) &&
                                     a.category_uuid === b.category_uuid
                                 )
+                                .sort((a, b) =>
+                                  a?.item_title?.localeCompare(b?.item_title)
+                                )
                                 ?.map((item, i) => (
                                   <tr
                                     key={item?.item_uuid || Math.random()}
