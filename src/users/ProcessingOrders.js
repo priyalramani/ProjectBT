@@ -1659,7 +1659,7 @@ const ProcessingOrders = () => {
         ""
       )}
       {loading ? (
-        <div className="overlay">
+        <div className="overlay" style={{zIndex:"99999999"}}>
           <div className="flex" style={{ width: "40px", height: "40px" }}>
             <svg viewBox="0 0 100 100">
               <path
@@ -2932,6 +2932,7 @@ function DiliveryPopup({
       trip_uuid: order.trip_uuid,
       modes,
     };
+    setLoading(true);
     const response = await axios({
       method: "post",
       url: "/receipts/postReceipt",
@@ -2940,7 +2941,7 @@ function DiliveryPopup({
         "Content-Type": "application/json",
       },
     });
-    setLoading(true);
+    
     setTimeout(() => setLoading(false), 45000);
     if (outstanding?.amount)
       await axios({
