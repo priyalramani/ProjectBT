@@ -4,6 +4,8 @@ import Sidebar from "../../components/Sidebar";
 import axios from "axios";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import CounterSequence from "../../components/CounterSequence";
+import * as XLSX from "xlsx";
+import * as FileSaver from "file-saver";
 const Counter = () => {
   const [counter, setCounter] = useState([]);
   const [paymentModes, setPaymentModes] = useState([]);
@@ -12,9 +14,12 @@ const Counter = () => {
   const [filterRoute, setFilterRoute] = useState("");
   const [popupForm, setPopupForm] = useState(false);
   const [routesData, setRoutesData] = useState([]);
+  const [selectedRoutes, setSelectedRoutes] = useState([]);
+  const [xlSelection, seXlSelection] = useState(false);
   const [itemPopup, setItemPopup] = useState(false);
   const [sequencePopup, setSequencePopup] = useState(false);
-
+  const fileType =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const getRoutesData = async () => {
     const response = await axios({
       method: "get",
@@ -46,6 +51,9 @@ const Counter = () => {
           route_title:
             routesData.find((a) => a.route_uuid === b.route_uuid)
               ?.route_title || "-",
+          route_sort_order:
+            routesData.find((a) => a.route_uuid === b.route_uuid)?.sort_order ||
+            0,
         }))
       );
   };
@@ -90,6 +98,59 @@ const Counter = () => {
       ),
     [counter, filterCounterTitle, filterRoute]
   );
+  const fileExtension = ".xlsx";
+  const downloadHandler = async () => {
+    seXlSelection(false);
+    
+    let sheetData = counter
+      .filter(
+        (a) =>
+          selectedRoutes.filter((b) => b === a.route_uuid)?.length
+      )
+      .sort((a, b) =>
+        a.route_sort_order - b.route_sort_order
+          ? a.route_sort_order - b.route_sort_order
+          : a.sort_order - b.sort_order
+      )
+      ?.map((item, i) => ({
+        ...item,
+        mobile: item?.mobile?.map((a, i) => (i === 0 ? a : ", " + a)),
+      }));
+      console.log(selectedRoutes,sheetData)
+    sheetData = sheetData.map((a) => {
+      // console.log(a)
+      return {
+        "Route Title": a.route_title,
+        "Counter Title": a.counter_title,
+        "Mobile": a.mobile,
+        "Food License": a.food_license,
+        "GST": a.gst || "",
+      };
+    });
+    // console.log(sheetData)
+    const ws = XLSX.utils.json_to_sheet(sheetData);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(data, "counters" + fileExtension);
+    setSelectedRoutes([]);
+  };
+  const onChangeHandler = (e) => {
+    let temp = selectedRoutes || [];
+    let options = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value
+    );
+    for (let i of options) {
+      if (selectedRoutes.filter((a) => a === i).length)
+        temp = temp.filter((a) => a !== i);
+      else temp = [...temp, i];
+    }
+    // temp = data.filter(a => options.filter(b => b === a.user_uuid).length)
+    console.log(options, temp);
+
+    setSelectedRoutes(temp);
+  };
   return (
     <>
       <Sidebar />
@@ -123,6 +184,12 @@ const Counter = () => {
               placeholder="Search Route Title..."
               className="searchInput"
             />
+            <button
+              className="item-sales-search"
+              onClick={() => seXlSelection(true)}
+            >
+              Xls
+            </button>
             <div>Total Items: {filterCounter.length}</div>
             <button
               className="item-sales-search"
@@ -169,6 +236,73 @@ const Counter = () => {
           counters={counter}
           routesData={routesData}
         />
+      ) : (
+        ""
+      )}
+      {xlSelection ? (
+        <div className="overlay">
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "fit-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form className="form" onSubmit={downloadHandler}>
+                  <div className="row">
+                    <h1>Select Routes</h1>
+                  </div>
+
+                  <div className="form">
+                    <div className="row">
+                      <label className="selectLabel" style={{ width: "50%" }}>
+                        <select
+                          className="numberInput"
+                          style={{ width: "200px", height: "100px" }}
+                          value={selectedRoutes}
+                          onChange={onChangeHandler}
+                          multiple
+                        >
+                          {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+                          {routesData?.map((occ) => (
+                            <option
+                              value={occ.route_uuid}
+                              style={{
+                                marginBottom: "5px",
+                                textAlign: "center",
+                              }}
+                            >
+                              {occ.route_title}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+
+                  <button type="submit" className="submit">
+                    Done
+                  </button>
+                </form>
+              </div>
+              <button
+                onClick={() => {
+                  seXlSelection(false);
+                  setSelectedRoutes([]);
+                }}
+                className="closeButton"
+              >
+                x
+              </button>
+            </div>
+          </div>
+        </div>
       ) : (
         ""
       )}
@@ -337,6 +471,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup }) {
               <td>
                 <button
                   type="button"
+                  style={{ fontSize: "10px" }}
                   className="fieldEditButton"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -349,6 +484,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup }) {
               <td>
                 <button
                   type="button"
+                  style={{ fontSize: "10px" }}
                   className="fieldEditButton"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -361,6 +497,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup }) {
               <td>
                 <button
                   type="button"
+                  style={{ fontSize: "10px" }}
                   className="fieldEditButton"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -646,7 +783,7 @@ function NewUserForm({
                     />
                   </label>
                   <label className="selectLabel">
-                  Food License
+                    Food License
                     <input
                       type="text"
                       name="food_license"
