@@ -356,7 +356,7 @@ function PopupTable({ trip_uuid, onSave }) {
     if (trip_uuid) {
       const response = await axios({
         method: "post",
-        url: "/orders/getTripOrderList",
+        url: "/orders/getTripCompletedOrderList",
         data: { trip_uuid },
         headers: {
           "Content-Type": "application/json",

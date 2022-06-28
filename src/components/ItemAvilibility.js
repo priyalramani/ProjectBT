@@ -18,6 +18,7 @@ export default function ItemAvilibility({
   const [btn, setBtn] = useState(false);
   const [itemFilter, setItemFilter] = useState("");
   const [statementTrip, setStatementTrip] = useState();
+  const [detailsPopup, setDetailsPopup] = useState(false);
   const componentRef = useRef(null);
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
@@ -132,7 +133,7 @@ export default function ItemAvilibility({
                       <th
                         className="pa3 bb b--black-20 "
                         style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
-                        colSpan={3}
+                        colSpan={4}
                       >
                         Action
                       </th>
@@ -232,6 +233,20 @@ export default function ItemAvilibility({
                               Users
                             </button>
                           </td>
+                          <td>
+                            <button
+                              className="item-sales-search"
+                              style={{
+                                display: "inline",
+                              }}
+                              type="button"
+                              onClick={() => {
+                                setDetailsPopup(item.trip_uuid);
+                              }}
+                            >
+                              Details
+                            </button>
+                          </td>
                         </tr>
                       ))}
                   </tbody>
@@ -267,6 +282,14 @@ export default function ItemAvilibility({
       ) : (
         ""
       )}
+      {detailsPopup ? (
+        <PopupTable
+          trip_uuid={detailsPopup}
+          onSave={() => setDetailsPopup("")}
+        />
+      ) : (
+        ""
+      )}
       <div
         style={{ position: "fixed", top: -100, left: -180, zIndex: "-1000" }}
       >
@@ -275,7 +298,7 @@ export default function ItemAvilibility({
           style={{
             width: "21cm",
             height: "29.7cm",
-            
+
             textAlign: "center",
 
             // padding: "100px",
@@ -388,6 +411,231 @@ function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
               </button>
             </form>
           </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function PopupTable({ trip_uuid, onSave }) {
+  const [itemDetails, setItemDetails] = useState([]);
+  const [counter, setCounter] = useState([]);
+  const getCounter = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/counters/GetCounterList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCounter(response.data.result);
+  };
+  function formatAMPM(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var strTime = hours + ":" + minutes + " " + ampm;
+    return strTime;
+  }
+  const getCompleteOrders = async () => {
+    if (trip_uuid) {
+      const response = await axios({
+        method: "post",
+        url: "/orders/getTripCompletedOrderList",
+        data: { trip_uuid },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log("activity", response);
+      if (response.data.success) setItemDetails(response.data.result);
+    }
+  };
+  useEffect(() => {
+    getCompleteOrders();
+    getCounter();
+  }, [trip_uuid]);
+  return (
+    <div className="overlay" style={{zIndex:999999999999}}>
+      <div
+        className="modal"
+        style={{
+          height: "500px",
+          width: "max-content",
+          minWidth: "206px",
+          padding: "10px",
+          paddingTop: "40px",
+        }}
+      >
+        <div
+          className="content"
+          style={{
+            padding: "20px",
+            width: "80vw",
+            overflow: "scroll",
+          }}
+        >
+          <table
+            className="user-table"
+            style={{
+              maxWidth: "100vw",
+
+              overflowX: "scroll",
+            }}
+          >
+            <thead>
+              <tr>
+                <th>S.N</th>
+                <th colSpan={4}>Order Date</th>
+                <th colSpan={4}>Delivery Date</th>
+                <th colSpan={4}>Counter</th>
+                <th colSpan={2}>Invoice</th>
+                <th colSpan={2}>Qty</th>
+                <th colSpan={2}>Amount</th>
+                <th colSpan={2}>Cash</th>
+                <th colSpan={2}>Cheque</th>
+                <th colSpan={2}>UPI</th>
+                <th colSpan={2}>Unpaid</th>
+              </tr>
+            </thead>
+            <tbody className="tbody">
+              {itemDetails
+                ?.sort((a, b) => a.order_date - b.order_date)
+                ?.map((item, i) => (
+                  <tr key={Math.random()} style={{ height: "30px" }}>
+                    <td>{i + 1}</td>
+                    <td colSpan={4}>
+                      {new Date(item.order_date).toDateString()} -{" "}
+                      {formatAMPM(new Date(item.order_date))}
+                    </td>
+                    <td colSpan={4}>
+                      {new Date(item.delivery_date).toDateString()} -{" "}
+                      {formatAMPM(new Date(item.delivery_date))}
+                    </td>
+                    <td colSpan={4}>
+                      {counter.find((a) => a.counter_uuid === item.counter_uuid)
+                        ?.counter_title || ""}
+                    </td>
+                    <td colSpan={2}>{item.invoice_number || ""}</td>
+                    <td colSpan={2}>{item.qty || ""}</td>
+                    <td colSpan={2}>{item.amt || ""}</td>
+                    <td colSpan={2}>
+                      {item.modes.find(
+                        (a) =>
+                          a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                      )?.amt || 0}
+                    </td>
+                    <td colSpan={2}>
+                      {item.modes.find(
+                        (a) =>
+                          a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002"
+                      )?.amt || 0}
+                    </td>
+                    <td colSpan={2}>
+                      {item.modes.find(
+                        (a) =>
+                          a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+                      )?.amt || 0}
+                    </td>
+                    <td colSpan={2}>{item.unpaid || 0}</td>
+                  </tr>
+                ))}
+              <tr style={{ height: "30px" }}>
+                <td></td>
+                <td colSpan={4}>
+                  <b>Total</b>
+                </td>
+                <td colSpan={4}></td>
+                <td colSpan={4}></td>
+                <td colSpan={2}></td>
+                <td colSpan={2}></td>
+                <td colSpan={2}>
+                  <b>
+                    {itemDetails.length > 1
+                      ? itemDetails
+                          .map((a) => +a?.amt || 0)
+                          .reduce((a, b) => a + b)
+                      : itemDetails[0]?.amt || 0}
+                  </b>
+                </td>
+                <td colSpan={2}>
+                  <b>
+                    {itemDetails.length > 1
+                      ? itemDetails
+                          .map(
+                            (a) =>
+                              +a?.modes.find(
+                                (a) =>
+                                  a.mode_uuid ===
+                                  "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                              )?.amt || 0
+                          )
+                          .reduce((a, b) => a + b)
+                      : itemDetails[0]?.modes.find(
+                          (a) =>
+                            a.mode_uuid ===
+                            "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                        )?.amt || 0}
+                  </b>
+                </td>
+                <td colSpan={2}>
+                  <b>
+                    {itemDetails.length > 1
+                      ? itemDetails
+                          .map(
+                            (a) =>
+                              +a?.modes.find(
+                                (a) =>
+                                  a.mode_uuid ===
+                                  "c67b5794-d2b6-11ec-9d64-0242ac120002"
+                              )?.amt || 0
+                          )
+                          .reduce((a, b) => a + b)
+                      : itemDetails[0]?.modes.find(
+                          (a) =>
+                            a.mode_uuid ===
+                            "c67b5794-d2b6-11ec-9d64-0242ac120002"
+                        )?.amt || 0}
+                  </b>
+                </td>
+                <td colSpan={2}>
+                  <b>
+                    {itemDetails.length > 1
+                      ? itemDetails
+                          .map(
+                            (a) =>
+                              +a?.modes.find(
+                                (a) =>
+                                  a.mode_uuid ===
+                                  "c67b5988-d2b6-11ec-9d64-0242ac120002"
+                              )?.amt || 0
+                          )
+                          .reduce((a, b) => a + b)
+                      : itemDetails[0]?.modes.find(
+                          (a) =>
+                            a?.mode_uuid ===
+                            "c67b5988-d2b6-11ec-9d64-0242ac120002"
+                        )?.amt || 0}
+                  </b>
+                </td>
+                <td colSpan={2}>
+                  <b>
+                    {itemDetails.length > 1
+                      ? itemDetails
+                          .map((a) => +a?.unpaid || 0)
+                          .reduce((a, b) => a + b)
+                      : itemDetails[0]?.unpaid || 0}
+                  </b>
+                </td>
+              </tr>
+            </tbody>
+          </table>
           <button onClick={onSave} className="closeButton">
             x
           </button>

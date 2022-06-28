@@ -2136,7 +2136,7 @@ function HoldPopup({
     onSave();
   };
 
-  console.log(tempQuantity);
+  // console.log(tempQuantity);
   return (
     <>
       <div className="overlay">
@@ -2182,12 +2182,12 @@ function HoldPopup({
               {items.length ? (
                 <div
                   className="flex"
-                  style={{ flexDirection: "column", width: "100%" }}
+                  style={{ flexDirection: "column", width: "max-content" }}
                 >
                   <table
                     className="user-table"
                     style={{
-                      width: "100%",
+                      width: "max-content",
                       height: "fit-content",
                     }}
                   >
@@ -2203,6 +2203,12 @@ function HoldPopup({
                         <th colSpan={2}>
                           <div className="t-head-element">Qty</div>
                         </th>
+                        {!window.location.pathname.includes("checking") &&
+                        !window.location.pathname.includes("delivery") ? (
+                          <th colSpan={2}></th>
+                        ) : (
+                          ""
+                        )}
                         {!window.location.pathname.includes("checking") ? (
                           <th></th>
                         ) : (
@@ -2251,7 +2257,6 @@ function HoldPopup({
                                 {a.category_title} <AiFillPlayCircle />
                               </td>
                             </tr>
-                            {console.log(a, items)}
                             {items
                               ?.filter(
                                 (b) =>
@@ -2286,6 +2291,8 @@ function HoldPopup({
                                     backgroundColor:
                                       +item.status === 1
                                         ? "green"
+                                      :+item.status === 2
+                                        ? "yellow"
                                         : +item.status === 3
                                         ? "red"
                                         : "#fff",
@@ -2323,6 +2330,7 @@ function HoldPopup({
 
                                   <td colSpan={3}>{item.item_title}</td>
                                   <td colSpan={2}>{item.mrp}</td>
+
                                   {!window.location.pathname.includes(
                                     "checking"
                                   ) ? (
@@ -2330,6 +2338,36 @@ function HoldPopup({
                                       <td colSpan={2}>
                                         {item?.b || 0} : {item?.p || 0}
                                       </td>
+                                      {!window.location.pathname.includes(
+                                        "delivery"
+                                      ) ? (
+                                        <td colSpan={2}>
+                                          <button
+                                            className="item-sales-search"
+                                            style={{ width: "max-content" }}
+                                            onClick={() =>
+                                              setItems((prev) =>
+                                                prev.map((a) =>
+                                                  a.item_uuid === item.item_uuid
+                                                    ? {
+                                                        ...a,
+                                                        status:
+                                                          a.status !== 2
+                                                            ? 2
+                                                            : 0,
+                                                        edit: true,
+                                                      }
+                                                    : a
+                                                )
+                                              )
+                                            }
+                                          >
+                                            Hold
+                                          </button>
+                                        </td>
+                                      ) : (
+                                        ""
+                                      )}
                                       <td
                                         style={{ padding: "5px" }}
                                         onClick={() =>
