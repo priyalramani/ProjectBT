@@ -375,8 +375,10 @@ export default function AddOrder() {
             <div className="topInputs">
               <div className="inputGroup">
                 <label htmlFor="Warehouse">Counter</label>
-                <Select
+                <div className="inputGroup" style={{ width: "500px" }}>
+                  <Select
                   ref={(ref) => (reactInputsRef.current["0"] = ref)}
+                  
                   options={counters
                     ?.filter(
                       (a) =>
@@ -387,7 +389,7 @@ export default function AddOrder() {
                     )
                     .map((a) => ({
                       value: a.counter_uuid,
-                      label: a.counter_title,
+                      label: a.counter_title+" , "+a.route_title,
                     }))}
                   onChange={(doc) =>
                     setOrder((prev) => ({ ...prev, counter_uuid: doc.value }))
@@ -408,6 +410,8 @@ export default function AddOrder() {
                   menuPlacement="auto"
                   placeholder="Select"
                 />
+                </div>
+                
                 {order.counter_uuid ? (
                   <button
                     className="item-sales-search"
