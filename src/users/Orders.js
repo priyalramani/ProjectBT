@@ -9,6 +9,7 @@ const Orders = () => {
   const [counterFilter, setCounterFilter] = useState("");
   const [routes, setRoutes] = useState([]);
   const [phonePopup, setPhonePopup] = useState(false);
+  const [remarks, setRemarks] = useState(false);
   const params = useParams();
   const Navigate = useNavigate();
   const getIndexedDbData = async () => {
@@ -17,7 +18,7 @@ const Orders = () => {
       .transaction("counter", "readwrite")
       .objectStore("counter");
     let counter = await tx.getAll();
-    setCounters(counter);
+    setCounters(counter.filter((a) => +a?.status !== 0));
     let store = await db
       .transaction("routes", "readwrite")
       .objectStore("routes");
@@ -77,7 +78,7 @@ const Orders = () => {
             flexDirection: "column",
             width: "100vw",
             paddingTop: "5px",
-            backgroundColor: "rgb(242, 242, 242)"
+            backgroundColor: "rgb(242, 242, 242)",
           }}
         >
           <input
@@ -100,7 +101,7 @@ const Orders = () => {
                 <tbody style={{ width: "100%" }}>
                   {counters
                     ?.filter((a) => a.counter_title)
-                    .sort((a,b)=>+a.sort_order-b.sort_order)
+                    .sort((a, b) => +a.sort_order - b.sort_order)
                     ?.filter(
                       (a) =>
                         (!counterFilter ||
@@ -116,21 +117,26 @@ const Orders = () => {
                         <tr
                           key={item.counter_uuid}
                           className="counterSearch"
+                          style={{ color: item.status === 2 ? "red" : "#000" }}
                           onClick={(e) => {
-                            e.stopPropagation();
-                            postActivity(
-                              item,
-                              routes.find(
-                                (a) => a?.route_uuid === item?.route_uuid
-                              )
-                            );
-                            sessionStorage.setItem(
-                              "route_title",
-                              routes.find(
-                                (a) => a?.route_uuid === item?.route_uuid
-                              )?.route_title
-                            );
-                            Navigate("/users/orders/" + item.counter_uuid);
+                            if (item.status === 2) {
+                              setRemarks(item.remarks);
+                            } else {
+                              e.stopPropagation();
+                              postActivity(
+                                item,
+                                routes.find(
+                                  (a) => a?.route_uuid === item?.route_uuid
+                                )
+                              );
+                              sessionStorage.setItem(
+                                "route_title",
+                                routes.find(
+                                  (a) => a?.route_uuid === item?.route_uuid
+                                )?.route_title
+                              );
+                              Navigate("/users/orders/" + item.counter_uuid);
+                            }
                           }}
                         >
                           <td style={{ width: "50%" }}>{item.counter_title}</td>
@@ -212,6 +218,26 @@ const Orders = () => {
       </div>
       {phonePopup ? (
         <PhoneList onSave={() => setPhonePopup(false)} mobile={phonePopup} />
+      ) : (
+        ""
+      )}
+      {remarks ? (
+        <div className="overlay">
+          <div
+            className="modal"
+            style={{
+              height: "fit-content",
+              width: "max-content",
+              padding: "50px",
+            }}
+          >
+            <h3>{remarks}</h3>
+
+            <button onClick={() => setRemarks(false)} className="closeButton">
+              x
+            </button>
+          </div>
+        </div>
       ) : (
         ""
       )}

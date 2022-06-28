@@ -766,51 +766,37 @@ function NewUserForm({
                 <div className="row">
                   <label className="selectLabel">
                     Status
-                    <div
-                      className="flex"
-                      style={{ justifyContent: "space-between",width:"100%" }}
+                    <select
+                      className="numberInput"
+                      value={data.status}
+                      onChange={(e) =>
+                        setdata((prev) => ({ ...prev, status: e.target.value }))
+                      }
+                      
                     >
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="sort_order"
-                          className="numberInput"
-                          checked={data.status === 1}
-                          style={{ height: "25px" }}
-                          onClick={() =>
-                            setdata((prev) => ({ ...prev, status: 1 }))
-                          }
-                        />
-                        Active
-                      </div>
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="sort_order"
-                          className="numberInput"
-                          checked={data.status === 0}
-                          style={{ height: "25px" }}
-                          onClick={() =>
-                            setdata((prev) => ({ ...prev, status: 0 }))
-                          }
-                        />
-                        Hide
-                      </div>
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="sort_order"
-                          className="numberInput"
-                          checked={data.status === 2}
-                          style={{ height: "25px" }}
-                          onClick={() =>
-                            setdata((prev) => ({ ...prev, status: 2}))
-                          }
-                        />
-                        Locked
-                      </div>
-                    </div>
+                      {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+
+                      <option value={1}>Active</option>
+                      <option value={0}>Hide</option>
+                      <option value={2}>Locked</option>
+                    </select>
                   </label>
+                  {+data.status===2? <label className="selectLabel">
+                    Remarks
+                    <input
+                      type="text"
+                      name="route_title"
+                      className="numberInput"
+                      value={data?.remarks}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          remarks: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                    />
+                  </label>:""}
                 </div>
                 <div className="row">
                   <label className="selectLabel">
