@@ -116,7 +116,7 @@ const CompleteOrder = () => {
                   },
                   ...counter.map((a) => ({
                     value: a.counter_uuid,
-                    label: a.counter_title,
+                    label: a.counter_title + " , " + a.route_title,
                   })),
                 ]}
                 onChange={(doc) =>
@@ -224,12 +224,12 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
             >
               <td>{i + 1}</td>
               <td colSpan={2}>
-                {(new Date(+item.order_date)).toDateString()} -{" "}
+                {new Date(+item.order_date).toDateString()} -{" "}
                 {formatAMPM(new Date(+item.order_date))}
               </td>
               <td colSpan={2}>
                 {item.delivery_date
-                  ? (new Date(item.delivery_date)).toDateString() +
+                  ? new Date(item.delivery_date).toDateString() +
                     " - " +
                     formatAMPM(new Date(item.delivery_date))
                   : ""}
