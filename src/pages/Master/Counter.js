@@ -101,12 +101,9 @@ const Counter = () => {
   const fileExtension = ".xlsx";
   const downloadHandler = async () => {
     seXlSelection(false);
-    
+
     let sheetData = counter
-      .filter(
-        (a) =>
-          selectedRoutes.filter((b) => b === a.route_uuid)?.length
-      )
+      .filter((a) => selectedRoutes.filter((b) => b === a.route_uuid)?.length)
       .sort((a, b) =>
         a.route_sort_order - b.route_sort_order
           ? a.route_sort_order - b.route_sort_order
@@ -116,15 +113,15 @@ const Counter = () => {
         ...item,
         mobile: item?.mobile?.map((a, i) => (i === 0 ? a : ", " + a)),
       }));
-      console.log(selectedRoutes,sheetData)
+    console.log(selectedRoutes, sheetData);
     sheetData = sheetData.map((a) => {
       // console.log(a)
       return {
         "Route Title": a.route_title,
         "Counter Title": a.counter_title,
-        "Mobile": a.mobile,
+        Mobile: a.mobile,
         "Food License": a.food_license,
-        "GST": a.gst || "",
+        GST: a.gst || "",
       };
     });
     // console.log(sheetData)
@@ -539,6 +536,7 @@ function NewUserForm({
               )
               .map((a) => a.mode_uuid),
             credit_allowed: "N",
+            status: 1,
           });
         },
     []
@@ -765,6 +763,55 @@ function NewUserForm({
                   </label>{" "}
                 </div>
 
+                <div className="row">
+                  <label className="selectLabel">
+                    Status
+                    <div
+                      className="flex"
+                      style={{ justifyContent: "space-between",width:"100%" }}
+                    >
+                      <div className="flex">
+                        <input
+                          type="radio"
+                          name="sort_order"
+                          className="numberInput"
+                          checked={data.status === 1}
+                          style={{ height: "25px" }}
+                          onClick={() =>
+                            setdata((prev) => ({ ...prev, status: 1 }))
+                          }
+                        />
+                        Active
+                      </div>
+                      <div className="flex">
+                        <input
+                          type="radio"
+                          name="sort_order"
+                          className="numberInput"
+                          checked={data.status === 0}
+                          style={{ height: "25px" }}
+                          onClick={() =>
+                            setdata((prev) => ({ ...prev, status: 0 }))
+                          }
+                        />
+                        Hide
+                      </div>
+                      <div className="flex">
+                        <input
+                          type="radio"
+                          name="sort_order"
+                          className="numberInput"
+                          checked={data.status === 2}
+                          style={{ height: "25px" }}
+                          onClick={() =>
+                            setdata((prev) => ({ ...prev, status: 2}))
+                          }
+                        />
+                        Locked
+                      </div>
+                    </div>
+                  </label>
+                </div>
                 <div className="row">
                   <label className="selectLabel">
                     GST
