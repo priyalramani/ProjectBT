@@ -132,15 +132,15 @@ const TripPage = ({
           <tr>
             <th style={{ border: "1px solid #000" }}>Counter</th>
             <th style={{ border: "1px solid #000" }}>Replacement MRP</th>
-            <th style={{ border: "1px solid #000" }}>Replacement</th>
+            <th style={{ border: "1px solid #000" }}>Replacement Actual</th>
             <th style={{ border: "1px solid #000" }}>Invoice Number</th>
           </tr>
           {replacement.map((item) => (
             <tr>
               <td style={{ border: "1px solid #000" }}>{item.counter_title}</td>
-              <td style={{ border: "1px solid #000" }}>{item.replacement}</td>
+              <td style={{ border: "1px solid #000" }}>{item.replacement_mrp}</td>
               <td style={{ border: "1px solid #000" }}>
-                {item.replacement_mrp}
+                {item.replacement}
               </td>
               <td style={{ border: "1px solid #000" }}>
                 {item.invoice_number}

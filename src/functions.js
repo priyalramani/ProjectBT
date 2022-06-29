@@ -2,11 +2,11 @@ import axios from "axios";
 import { deleteDB, openDB } from "idb";
 import { v4 as uuid } from "uuid";
 
-export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
+export const AutoAdd = async ({ counter, items, dbItems, autobills =[]}) => {
   let eligibleItems = items;
   let auto_added = [];
 
-  let data = autobills.filter(
+  let data = autobills?.filter(
     (a) =>
       a.type === "auto-increase-qty" &&
       (a?.counters?.filter((b) => b === counter.counter_uuid)?.length ||
@@ -62,7 +62,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills }) => {
     });
   }
   console.log("eligibleitems", eligibleItems);
-  data = autobills.filter(
+  data = autobills?.filter(
     (a) =>
       a.type === "auto-item-add" &&
       (a.counters.filter((b) => b === counter.counter_uuid).length ||

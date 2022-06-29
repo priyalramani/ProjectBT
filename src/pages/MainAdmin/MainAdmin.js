@@ -34,6 +34,7 @@ const MainAdmin = () => {
   const [popupOrder, setPopupOrder] = useState(null);
   const [users, setUsers] = useState([]);
   const [dropdown, setDropDown] = useState(false);
+  const [joinSummary, setJoinSummary] = useState(false);
   const [selectOrder, setSelectOrder] = useState(false);
   const [summaryPopup, setSumaryPopup] = useState(false);
   const [items, setItems] = useState([]);
@@ -41,6 +42,18 @@ const MainAdmin = () => {
   const [changesStatePopup, setChangeStatePopup] = useState(false);
   const componentRef = useRef(null);
   const [messagePopup, setMessagePopup] = useState("");
+  const [company, setCompanies] = useState([]);
+  const getCompanies = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/companies/getCompanies",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCompanies(response.data.result);
+  };
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, [selectedOrder]);
@@ -155,6 +168,7 @@ const MainAdmin = () => {
     getUsers();
     getItemsData();
     getItemCategories();
+    getCompanies();
   }, []);
   const getRunningOrders = async () => {
     const response = await axios({
@@ -374,8 +388,28 @@ const MainAdmin = () => {
                         return (
                           <div key={Math.random()} className="sectionDiv">
                             <h1>
-                              {route.route_title} ({route.orderLength}) [
-                              processing: {route?.processingLength}, Checking:{" "}
+                              <span
+                                style={{ cursor: "pointer" }}
+                                onClick={() =>
+                                  setJoinSummary(
+                                    orders?.filter(
+                                      (b) =>
+                                        counter.filter(
+                                          (c) =>
+                                            c.counter_uuid === b.counter_uuid &&
+                                            (route.route_uuid ===
+                                              c.route_uuid ||
+                                              (!c.route_uuid &&
+                                                +route.route_uuid === 0))
+                                        ).length
+                                    )
+                                  )
+                                }
+                              >
+                                {route.route_title}
+                              </span>{" "}
+                              ({route.orderLength}) [ processing:{" "}
+                              {route?.processingLength}, Checking:{" "}
                               {route.checkingLength}, Delivery:{" "}
                               {route?.deliveryLength}]
                               {selectOrder ? (
@@ -670,7 +704,15 @@ const MainAdmin = () => {
                   .filter((a) => !a?.trip_uuid).length ? (
                   <div key={Math.random()} className="sectionDiv">
                     <h2>
-                      UnKnown ({orders.filter((a) => !a?.trip_uuid).length}) [
+                      <span
+                        style={{ cursor: "pointer" }}
+                        onClick={() =>
+                          setJoinSummary(orders.filter((a) => !a?.trip_uuid))
+                        }
+                      >
+                        UnKnown
+                      </span>{" "}
+                      ({orders.filter((a) => !a?.trip_uuid).length}) [
                       processing:{" "}
                       {
                         tripData.find((a) => +a.trip_uuid === 0)
@@ -866,7 +908,19 @@ const MainAdmin = () => {
                         return (
                           <div key={Math.random()} className="sectionDiv">
                             <h1>
-                              {trip.trip_title} (
+                              <span
+                                style={{ cursor: "pointer" }}
+                                onClick={() =>
+                                  setJoinSummary(
+                                    orders.filter(
+                                      (a) => a.trip_uuid === trip.trip_uuid
+                                    )
+                                  )
+                                }
+                              >
+                                {trip.trip_title}
+                              </span>{" "}
+                              (
                               {
                                 orders.filter(
                                   (a) => a.trip_uuid === trip.trip_uuid
@@ -1303,6 +1357,21 @@ const MainAdmin = () => {
           itemsData={items}
           counter={counter}
           category={category}
+        />
+      ) : (
+        ""
+      )}
+      {joinSummary ? (
+        <SummaryPopup
+          onSave={() => {
+            setJoinSummary(false);
+            getRunningOrders();
+          }}
+          orders={joinSummary}
+          itemsData={items}
+          counter={counter}
+          category={category}
+          company={company}
         />
       ) : (
         ""
@@ -1800,6 +1869,409 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                 </div>
               ) : (
                 ""
+              )}
+            </div>
+            <button onClick={onSave} className="closeButton">
+              x
+            </button>
+          </div>
+        </div>
+      </div>
+      {popup ? (
+        <OrdersEdit
+          order={FilteredOrder}
+          onSave={() => {
+            setPopup(false);
+            onSave();
+          }}
+          items={popup}
+          counter={counter}
+          itemsData={itemsData}
+          onClose={() => setPopup(false)}
+        />
+      ) : (
+        ""
+      )}{" "}
+      <div
+        style={{
+          position: "fixed",
+          top: -100,
+          left: -180,
+          zIndex: "-1000",
+        }}
+      >
+        <div
+          ref={componentRef}
+          id="item-container"
+          style={{
+            // margin: "45mm 40mm 30mm 60mm",
+            // textAlign: "center",
+            height: "128mm",
+            // padding: "10px"
+          }}
+        >
+          {items?.length ? (
+            <table
+              className="user-table"
+              style={{
+                width: "170mm",
+                // marginTop: "20mm",
+                // marginLeft: "20mm",
+                // marginRight: "20mm",
+                border: "1px solid black",
+                pageBreakInside: "auto",
+                display: "block",
+              }}
+            >
+              <thead style={{ width: "100%" }}>
+                <tr style={{ width: "100%" }}>
+                  <th style={{ width: "10mm" }}>Sr.</th>
+                  <th colSpan={5} style={{ width: "100mm" }}>
+                    <div className="t-head-element">Item</div>
+                  </th>
+                  <th colSpan={3} style={{ width: "30mm" }}>
+                    <div className="t-head-element">MRP</div>
+                  </th>
+                  <th colSpan={3} style={{ width: "30mm" }}>
+                    <div className="t-head-element">Qty</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="tbody" style={{ width: "100%" }}>
+                {category
+                  .filter(
+                    (a) =>
+                      items?.filter((b) => a.category_uuid === b.category_uuid)
+                        .length
+                  )
+                  .map((a) => (
+                    <>
+                      <tr style={{ pageBreakAfter: "always", width: "100%" }}>
+                        <td colSpan={11}>{a.category_title}</td>
+                      </tr>
+
+                      {items
+                        .filter((b) => a.category_uuid === b.category_uuid)
+                        ?.map((item, i) => (
+                          <tr
+                            key={item?.item_uuid || Math.random()}
+                            style={{
+                              height: "30px",
+                              pageBreakAfter: "always",
+                              color:
+                                +item.status === 1
+                                  ? "#fff"
+                                  : +item.status === 2
+                                  ? "#000"
+                                  : +item.status === 3
+                                  ? "#fff"
+                                  : "#000",
+                              backgroundColor:
+                                +item.status === 1
+                                  ? "green"
+                                  : +item.status === 2
+                                  ? "yellow"
+                                  : +item.status === 3
+                                  ? "red"
+                                  : "#fff",
+                            }}
+                            onClick={() => setPopup(item)}
+                          >
+                            <td>{i + 1}</td>
+                            <td colSpan={5}>{item.item_title}</td>
+                            <td colSpan={3}>{item.mrp}</td>
+                            <td colSpan={3}>
+                              {(item?.b || 0).toFixed(0)} : {item?.p || 0}
+                            </td>
+                          </tr>
+                        ))}
+                    </>
+                  ))}
+                <tr
+                  style={{
+                    height: "30px",
+                    fontWeight: "bold",
+                  }}
+                >
+                  <td>Total</td>
+                  <td colSpan={5}></td>
+                  <td colSpan={3}></td>
+                  <td colSpan={3}>
+                    {(items.length > 1
+                      ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
+                      : items[0]?.b || 0
+                    ).toFixed(0)}{" "}
+                    :{" "}
+                    {items.length > 1
+                      ? items.map((a) => +a.p || 0).reduce((a, b) => a + b)
+                      : items[0].p || 0}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            ""
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+function SummaryPopup({
+  onSave,
+  orders,
+  itemsData,
+  counter,
+  category,
+  company,
+}) {
+  const [items, setItems] = useState([]);
+
+  const [FilteredOrder, setFilteredOrder] = useState([]);
+  const [popup, setPopup] = useState(false);
+  const [orderTotal, setOrderTotal] = useState(0);
+  const componentRef = useRef(null);
+  const [filterItemTitle, setFilterItemTile] = useState("");
+  const reactToPrintContent = useCallback(() => {
+    return componentRef.current;
+  }, [items]);
+
+  const handlePrint = useReactToPrint({
+    content: reactToPrintContent,
+    documentTitle: "Statement",
+    removeAfterPrint: true,
+  });
+
+  useEffect(() => {
+    let orderStage = orders.map((a) => ({
+      ...a,
+      stage:
+        a.status.length > 1
+          ? a.status.map((b) => +b.stage || 0).reduce((c, b) => Math.max(c, b))
+          : a.status[0].stage,
+    }));
+    setFilteredOrder(orderStage);
+    console.log(
+      "orders",
+      [].concat.apply(
+        [],
+        orderStage.map((a) => a.item_details)
+      )
+    );
+
+    let data = [].concat
+      .apply(
+        [],
+        orderStage.map((a) => a.item_details)
+      )
+
+      .map((a) => {
+        let itemDetails = itemsData?.find((b) => b.item_uuid === a.item_uuid);
+
+        return {
+          ...a,
+          item_title: itemDetails?.item_title,
+          mrp: itemDetails?.mrp,
+          category_uuid: itemDetails?.category_uuid,
+        };
+      });
+    console.log(data);
+    let result = data.reduce((acc, curr) => {
+      let item = acc.find((item) => item.item_uuid === curr.item_uuid);
+      if (item) {
+        let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
+          ?.conversion;
+        item.b = parseInt(
+          +item.b +
+            curr.b +
+            (+item.p + curr.p + ((+item.free || 0) + (+curr.free || 0))) /
+              conversion
+        );
+        item.p = parseInt(
+          (+item.p + curr.p + ((+item.free || 0) + (+curr.free || 0))) %
+            conversion
+        );
+      } else {
+        acc.push(curr);
+      }
+
+      return acc;
+    }, []);
+    setOrderTotal(
+      orderStage.length > 1
+        ? orderStage
+            .map((a) => +a?.order_grandtotal || 0)
+            .reduce((a, b) => a + b)
+        : orderStage[0]?.order_grandtotal
+    );
+    console.log(result);
+    setItems(result);
+  }, []);
+  const GetItemsQty = (category_uuid) => {
+    let itemsData = items?.filter((b) => category_uuid === b.category_uuid);
+    let box =
+      itemsData.length > 1
+        ? itemsData.map((a) => +a.b || 0).reduce((a, b) => a + b)
+        : itemsData.length
+        ? itemsData[0]?.b
+        : 0;
+    let pcs =
+      itemsData.length > 1
+        ? itemsData.map((a) => +a.p || 0).reduce((a, b) => a + b)
+        : itemsData.length
+        ? itemsData[0]?.p
+        : 0;
+    return box + " : " + pcs;
+  };
+  const getTotalItems = (company_uuid) => {
+    let itemsData = items?.filter(
+      (b) =>
+        category.filter(
+          (a) =>
+            a.company_uuid === company_uuid &&
+            a.category_uuid === b.category_uuid
+        ).length
+    );
+    let box =
+      itemsData.length > 1
+        ? itemsData.map((a) => +a.b || 0).reduce((a, b) => a + b)
+        : itemsData.length
+        ? itemsData[0]?.b
+        : 0;
+    let pcs =
+      itemsData.length > 1
+        ? itemsData.map((a) => +a.p || 0).reduce((a, b) => a + b)
+        : itemsData.length
+        ? itemsData[0]?.p
+        : 0;
+    return box + " : " + pcs;
+  };
+  return (
+    <>
+      <div className="overlay">
+        <div
+          className="modal"
+          style={{
+            height: "600px",
+            width: "max-content",
+            minWidth: "250px",
+            paddingTop: "50px",
+          }}
+        >
+          <div
+            className="flex"
+            style={{ justifyContent: "space-between", alignItems: "center" }}
+          >
+            <h1 style={{ textAlign: "center", width: "100%" }}>
+              Rs. {orderTotal}
+            </h1>
+          </div>
+
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "20px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll", width: "100%" }}>
+              {items.length ? (
+                <div
+                  className="flex"
+                  style={{ flexDirection: "column", width: "100%" }}
+                >
+                  <table
+                    className="user-table"
+                    style={{
+                      width: "500px",
+                      height: "fit-content",
+                    }}
+                  >
+                    <thead>
+                      <tr>
+                        <th>Sr.</th>
+                        <th colSpan={3}>
+                          <div className="t-head-element">Item</div>
+                        </th>
+
+                        <th colSpan={2}>
+                          <div className="t-head-element">Qty</div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="tbody">
+                      {company
+                        .filter(
+                          (c) =>
+                            category.filter(
+                              (a) =>
+                                items?.filter(
+                                  (b) => a.category_uuid === b.category_uuid
+                                ).length && c.company_uuid === a.company_uuid
+                            ).length
+                        )
+                        .map((c) => (
+                          <>
+                            {category
+                              .filter(
+                                (a) =>
+                                  items?.filter(
+                                    (b) => a.category_uuid === b.category_uuid
+                                  ).length && c.company_uuid === a.company_uuid
+                              )
+                              .map((a, i) => (
+                                <>
+                                  <tr
+                                    style={{
+                                      height: "30px",
+                                    }}
+                                  >
+                                    <td>{i + 1}</td>
+                                    <td colSpan={3}>{a.category_title}</td>
+
+                                    <td colSpan={2}>
+                                      {GetItemsQty(a.category_uuid)}
+                                    </td>
+                                  </tr>
+                                </>
+                              ))}
+                            <tr
+                              style={{
+                                height: "30px",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              <td></td>
+                              <td colSpan={3}>{c.company_title}</td>
+
+                              <td colSpan={2}>
+                                {getTotalItems(c.company_uuid)}
+                              </td>
+                            </tr>
+                            <tr
+                              style={{
+                                height: "30px",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              <td></td>
+                              <td colSpan={3}></td>
+
+                              <td colSpan={2}></td>
+                            </tr>
+                          </>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div
+                  className="flex"
+                  style={{ flexDirection: "column", width: "100%" }}
+                >
+                  <i>No Data Present</i>
+                </div>
               )}
             </div>
             <button onClick={onSave} className="closeButton">

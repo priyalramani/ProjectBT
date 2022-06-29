@@ -274,6 +274,7 @@ function Table({ itemsDetails }) {
         <tr>
           <th>S.N</th>
           <th colSpan={3}>Item Name</th>
+          <th colSpan={2}>MRP</th>
           <th colSpan={2}>Sales</th>
           <th colSpan={2}>Amt</th>
           <th colSpan={2}>Delivery Return</th>
@@ -294,6 +295,7 @@ function Table({ itemsDetails }) {
             <tr key={item.item_uuid} style={{ height: "30px" }}>
               <td>{i + 1}</td>
               <td colSpan={3}>{item.item_title}</td>
+              <td colSpan={2}>{item.mrp}</td>
               <td colSpan={2}>{item.sales || ""}</td>
               <td colSpan={2}>{item.sales_amt || ""}</td>
               <td colSpan={2}>{item.deliver_return || ""}</td>

@@ -102,7 +102,7 @@ export default function AddOrder() {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) data = response;
+    if (response.data.success) data = response.data.result;
     const response1 = await axios({
       method: "get",
       url: "/autoBill/autoBillQty",
@@ -185,6 +185,7 @@ export default function AddOrder() {
 
         type: "NEW",
       },
+      replacement:data.replacement,
       add_discounts: true,
       edit_prices,
     });
@@ -284,10 +285,11 @@ export default function AddOrder() {
     }
   };
 
-  const callBilling = async () => {
+  const callBilling = async (type={}) => {
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let time = new Date();
     let autoBilling = await Billing({
+      replacement:order.replacement,
       counter,
       items: order.item_details,
       others: {
@@ -299,14 +301,16 @@ export default function AddOrder() {
       },
       add_discounts: true,
       edit_prices,
+      ...type,
     });
     setOrder((prev) => ({
       ...prev,
       ...autoBilling,
+      ...type,
       item_details: autoBilling.items,
     }));
   };
-
+console.log(order)
   const { getRemainingTime, getLastActiveTime } = useIdleTimer({
     timeout: 1000 * 5,
     onIdle: callBilling,
@@ -377,41 +381,40 @@ export default function AddOrder() {
                 <label htmlFor="Warehouse">Counter</label>
                 <div className="inputGroup" style={{ width: "500px" }}>
                   <Select
-                  ref={(ref) => (reactInputsRef.current["0"] = ref)}
-                  
-                  options={counters
-                    ?.filter(
-                      (a) =>
-                        !counterFilter ||
-                        a.counter_title
-                          .toLocaleLowerCase()
-                          .includes(counterFilter.toLocaleLowerCase())
-                    )
-                    .map((a) => ({
-                      value: a.counter_uuid,
-                      label: a.counter_title+" , "+a.route_title,
-                    }))}
-                  onChange={(doc) =>
-                    setOrder((prev) => ({ ...prev, counter_uuid: doc.value }))
-                  }
-                  value={
-                    order?.counter_uuid
-                      ? {
-                          value: order?.counter_uuid,
-                          label: counters?.find(
-                            (j) => j.counter_uuid === order.counter_uuid
-                          )?.counter_title,
-                        }
-                      : ""
-                  }
-                  autoFocus={!order?.counter_uuid}
-                  openMenuOnFocus={true}
-                  menuPosition="fixed"
-                  menuPlacement="auto"
-                  placeholder="Select"
-                />
+                    ref={(ref) => (reactInputsRef.current["0"] = ref)}
+                    options={counters
+                      ?.filter(
+                        (a) =>
+                          !counterFilter ||
+                          a.counter_title
+                            .toLocaleLowerCase()
+                            .includes(counterFilter.toLocaleLowerCase())
+                      )
+                      .map((a) => ({
+                        value: a.counter_uuid,
+                        label: a.counter_title + " , " + a.route_title,
+                      }))}
+                    onChange={(doc) =>
+                      setOrder((prev) => ({ ...prev, counter_uuid: doc.value }))
+                    }
+                    value={
+                      order?.counter_uuid
+                        ? {
+                            value: order?.counter_uuid,
+                            label: counters?.find(
+                              (j) => j.counter_uuid === order.counter_uuid
+                            )?.counter_title,
+                          }
+                        : ""
+                    }
+                    autoFocus={!order?.counter_uuid}
+                    openMenuOnFocus={true}
+                    menuPosition="fixed"
+                    menuPlacement="auto"
+                    placeholder="Select"
+                  />
                 </div>
-                
+
                 {order.counter_uuid ? (
                   <button
                     className="item-sales-search"
@@ -769,6 +772,7 @@ export default function AddOrder() {
                   if (!order.item_details.filter((a) => a.item_uuid).length)
                     return;
                   setPopup(true);
+                  callBilling()
                 }}
               >
                 Bill
@@ -827,11 +831,11 @@ export default function AddOrder() {
         <DiliveryPopup
           onSave={() => setDeliveryPopup(false)}
           postOrderData={() => onSubmit({ stage: 5, autoAdd })}
-          order_uuid={order?.order_uuid}
           setSelectedOrder={setOrder}
           order={order}
           counters={counters}
           items={itemsData}
+          updateBilling={callBilling}
         />
       ) : (
         ""
@@ -916,11 +920,11 @@ function NewUserForm({ onSubmit, onClose }) {
 function DiliveryPopup({
   onSave,
   postOrderData,
-  order_uuid,
   credit_allowed,
   counters,
   items,
   order,
+  updateBilling,
 }) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
@@ -943,7 +947,7 @@ function DiliveryPopup({
   useEffect(() => {
     let time = new Date();
     setOutstanding({
-      order_uuid,
+      order_uuid:order.order_uuid,
       amount: "",
       user_uuid: localStorage.getItem("user_uuid"),
       time: time.getTime(),
@@ -996,7 +1000,7 @@ function DiliveryPopup({
       +(+modeTotal + (+outstanding?.amount || 0))
     );
     if (
-      Tempdata?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
+      +Tempdata?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
       return;
@@ -1010,7 +1014,7 @@ function DiliveryPopup({
     obj = {
       user_uuid: localStorage.getItem("user_uuid"),
       time: time.getTime(),
-      order_uuid,
+      order_uuid:order.order_uuid,
       counter_uuid: order.counter_uuid,
       trip_uuid: order.trip_uuid,
       modes,
@@ -1044,7 +1048,7 @@ function DiliveryPopup({
           className="modal"
           style={{ height: "fit-content", width: "max-content" }}
         >
-           <div className="flex" style={{justifyContent:"space-between"}}>
+          <div className="flex" style={{ justifyContent: "space-between" }}>
             <h3>Payments</h3>
             <h3>Rs. {order.order_grandtotal}</h3>
           </div>
@@ -1181,7 +1185,13 @@ function DiliveryPopup({
       </div>
       {popup ? (
         <DiliveryReplaceMent
-          onSave={() => setPopup(false)}
+          onSave={() => {
+            setPopup(false);
+            updateBilling({
+              replacement: data.actual,
+              replacement_mrp: data.mrp,
+            });
+          }}
           setData={setData}
           data={data}
         />

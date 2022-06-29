@@ -743,6 +743,7 @@ const ProcessingOrders = () => {
     });
     setSelectedOrder((prev) => ({
       ...prev,
+      ...order,
       ...billingData,
       item_details: billingData.items,
     }));
@@ -1514,6 +1515,7 @@ const ProcessingOrders = () => {
                 }),
               });
               setSelectedOrder((prev) => ({
+                ...prev,
                 ...data,
                 ...billingData,
                 item_details: billingData.items,
