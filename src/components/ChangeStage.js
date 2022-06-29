@@ -298,7 +298,7 @@ function DiliveryPopup({
   useEffect(() => {
     let time = new Date();
     setOutstanding({
-      order_uuid: order[count]?.order_uuid,
+      order_uuid: orders[count]?.order_uuid,
       amount: "",
       user_uuid: localStorage.getItem("user_uuid"),
       time: time.getTime(),
@@ -390,7 +390,7 @@ function DiliveryPopup({
     obj = {
       user_uuid: localStorage.getItem("user_uuid"),
       time: time.getTime(),
-      order_uuid: order[count].order_uuid,
+      order_uuid: orders[count].order_uuid,
       counter_uuid: order.counter_uuid,
       trip_uuid: order.trip_uuid,
       modes,
