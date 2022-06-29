@@ -45,13 +45,13 @@ const SelectedCounterOrder = () => {
       else setNumber([""]);
       if (!response.data.result.food_license) {
         setFoodLicencePopup(true);
-      }else{
-        setCheckNumberPopup(true)
+      } else {
+        setCheckNumberPopup(true);
       }
     }
   };
   const putCounterData = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!food_license) return;
     const response = await axios({
       method: "put",
@@ -68,11 +68,11 @@ const SelectedCounterOrder = () => {
     });
     if (response.data.success) {
       setFoodLicencePopup(false);
-      setCheckNumberPopup(true)
+      setCheckNumberPopup(true);
     }
   };
   const putCounterNumber = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!number) return;
     const response = await axios({
       method: "put",
@@ -80,7 +80,7 @@ const SelectedCounterOrder = () => {
       data: [
         {
           counter_uuid: params.counter_uuid,
-          mobile:number,
+          mobile: number,
         },
       ],
       headers: {
@@ -88,8 +88,7 @@ const SelectedCounterOrder = () => {
       },
     });
     if (response.data.success) {
-
-      setCheckNumberPopup(false)
+      setCheckNumberPopup(false);
     }
   };
   const getIndexedDbData = async () => {
@@ -782,7 +781,7 @@ const SelectedCounterOrder = () => {
                 let time = new Date();
                 Billing({
                   counter,
-                  items: order.items,
+                  items: data.items,
                   others: {
                     stage: 1,
                     user_uuid: localStorage.getItem("user_uuid"),
@@ -900,29 +899,27 @@ const SelectedCounterOrder = () => {
               }}
             >
               <div style={{ overflowY: "scroll" }}>
-                  <h2>Check Mobile Numbers</h2>
+                <h2>Check Mobile Numbers</h2>
                 <form className="form" onSubmit={putCounterNumber}>
                   <div className="formGroup">
-                  <div className="row">
-                  <label className="selectLabel" style={{ width: "200px" }}>
-                    Mobile
-                    <textarea
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
-                      className="numberInput"
-                      rows={7}
-                      cols={12}
-                      value={number?.toString()?.replace(/,/g, "\n")}
-                      style={{ height: "100px",width:"200px" }}
-                      onChange={(e) =>
-                        setNumber( e.target.value.split("\n"),
-                        )
-                      }
-                    />
-                  </label>
-               
-                </div>
+                    <div className="row">
+                      <label className="selectLabel" style={{ width: "200px" }}>
+                        Mobile
+                        <textarea
+                          type="number"
+                          onWheel={(e) => e.target.blur()}
+                          name="sort_order"
+                          className="numberInput"
+                          rows={7}
+                          cols={12}
+                          value={number?.toString()?.replace(/,/g, "\n")}
+                          style={{ height: "100px", width: "200px" }}
+                          onChange={(e) =>
+                            setNumber(e.target.value.split("\n"))
+                          }
+                        />
+                      </label>
+                    </div>
                   </div>
 
                   <button type="submit" className="submit">
