@@ -108,6 +108,7 @@ const FreeItems = ({ onSave, orders, itemsData, holdPopup, setOrder }) => {
                         <td colSpan={2}>
                           <input
                             type="number"
+                            onWheel={(e) => e.target.blur()}
                             name="route_title"
                             className="numberInput"
                             value={item?.free || ""}
