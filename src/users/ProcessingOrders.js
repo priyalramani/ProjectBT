@@ -2338,7 +2338,7 @@ function HoldPopup({
                                   ) ? (
                                     <>
                                       <td colSpan={2}>
-                                        {item?.b || 0} : {item?.p || 0}
+                                        {item?.b || 0} : {(item?.p || 0)+(item?.free||0)}
                                       </td>
                                       {!window.location.pathname.includes(
                                         "delivery"
