@@ -67,7 +67,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
       } else return a;
     });
   }
-  console.log("eligibleitems", eligibleItems);
+  // console.log("eligibleitems", eligibleItems);
   data = autobills?.filter(
     (a) =>
       a.type === "auto-item-add" &&
@@ -108,30 +108,38 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
     //console.log("baseqtyarr", base_qty_arr);
     base_qty_arr =
       eligibleAddItems.length >= autobill.min_range
-        ? base_qty_arr.length > 1
-          ? base_qty_arr
-              .map((a) => +a.base_qty || 0)
-              .reduce((a, b) => (+Math.max(a, b) === +a ? a : b))
-          : base_qty_arr.length === 1
-          ? base_qty_arr[0]
-          : null
+        ? base_qty_arr.find(
+            (item) =>
+              +item.base_qty ===
+              (base_qty_arr.length > 1
+                ? base_qty_arr
+                    .map((a) => a.base_qty)
+                    .reduce((a, b) => +Math.max(a, b))
+                : base_qty_arr.length === 1
+                ? base_qty_arr[0]
+                : null)
+          )
         : null;
     //console.log("baseqtyobj", base_qty_arr);
     let pice_qty_arr = autobill.qty_details.filter(
       (b) => b.unit === "p" && +b.base_qty <= eligiblesPcs
     );
-    console.log("piceqtyarr", pice_qty_arr);
+    // console.log("piceqtyarr", pice_qty_arr);
     pice_qty_arr =
       eligibleAddItems.length >= autobill.min_range
-        ? pice_qty_arr.length > 1
-          ? pice_qty_arr
-              .map((a) => +a.base_qty || 0)
-              .reduce((a, b) => (+Math.max(a, b) === a ? a : b))
-          : pice_qty_arr.length === 1
-          ? pice_qty_arr[0]
-          : null
+        ? pice_qty_arr.find(
+            (item) =>
+              +item.base_qty ===
+              (pice_qty_arr.length > 1
+                ? pice_qty_arr
+                    .map((a) => a.base_qty)
+                    .reduce((a, b) => +Math.max(a, b))
+                : pice_qty_arr.length === 1
+                ? pice_qty_arr[0]
+                : null)
+          )
         : null;
-    console.log("piceqtyobj", pice_qty_arr);
+    // console.log("piceqtyobj", pice_qty_arr);
 
     if (base_qty_arr?.add_items) {
       let dataItems = dbItems.filter(

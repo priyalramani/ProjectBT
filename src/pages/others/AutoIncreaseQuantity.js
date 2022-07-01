@@ -356,7 +356,7 @@ function NewUserForm({ onSave, popupForm }) {
               <table
                 className="user-table"
                 style={{
-                  width: "50vw",
+                  width: "60vw",
 
                   overflow: "scroll",
                 }}
@@ -403,7 +403,7 @@ function NewUserForm({ onSave, popupForm }) {
                             border: "none",
                             borderBottom: "2px solid black",
                             borderRadius: "0px",
-                            width: "50px",
+                            width: "80px",
                             padding: "0 5px",
                           }}
                           value={item?.base_qty}

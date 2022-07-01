@@ -428,7 +428,8 @@ function NewUserForm({ onSave, popupForm }) {
                               border: "none",
                               borderBottom: "2px solid black",
                               borderRadius: "0px",
-                              width: "50px",
+                              width: "100px",
+
                             }}
                             value={item.base_qty}
                             onChange={(e) =>
