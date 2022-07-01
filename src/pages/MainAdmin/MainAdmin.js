@@ -358,6 +358,7 @@ const MainAdmin = () => {
             </div>
           )}
           <div className="content-container" id="content-file-container">
+
             {window.location.pathname.includes("admin") ? (
               <>
                 {routesData.length ? (
@@ -371,7 +372,7 @@ const MainAdmin = () => {
                                 (c) =>
                                   c.counter_uuid === a.counter_uuid &&
                                   (route.route_uuid === c.route_uuid ||
-                                    (!c.route_uuid && +route.route_uuid === 0))
+                                    ((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
                               ).length
                           )
                           .filter(
@@ -399,7 +400,7 @@ const MainAdmin = () => {
                                             c.counter_uuid === b.counter_uuid &&
                                             (route.route_uuid ===
                                               c.route_uuid ||
-                                              (!c.route_uuid &&
+                                              ((!c.route_uuid || +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
                                         ).length
                                     )
@@ -427,7 +428,7 @@ const MainAdmin = () => {
                                             c.counter_uuid === a.counter_uuid &&
                                             (route.route_uuid ===
                                               c.route_uuid ||
-                                              (!c.route_uuid &&
+                                              ((!c.route_uuid || +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
                                         ).length &&
                                         selectedOrder.filter(
@@ -441,7 +442,7 @@ const MainAdmin = () => {
                                             c.counter_uuid === a.counter_uuid &&
                                             (route.route_uuid ===
                                               c.route_uuid ||
-                                              (!c.route_uuid &&
+                                              ((!c.route_uuid || +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
                                         ).length
                                     ).length
@@ -456,7 +457,7 @@ const MainAdmin = () => {
                                                         a.counter_uuid &&
                                                       (route.route_uuid ===
                                                         c.route_uuid ||
-                                                        (!c.route_uuid &&
+                                                        ((!c.route_uuid || +c.route_uuid === 0) &&
                                                           +route.route_uuid ===
                                                             0))
                                                   ).length &&
@@ -477,7 +478,7 @@ const MainAdmin = () => {
                                                               a.counter_uuid &&
                                                             (route.route_uuid ===
                                                               c.route_uuid ||
-                                                              (!c.route_uuid &&
+                                                              ((!c.route_uuid || +c.route_uuid === 0) &&
                                                                 +route.route_uuid ===
                                                                   0))
                                                         ).length &&
@@ -493,7 +494,7 @@ const MainAdmin = () => {
                                                           a.counter_uuid &&
                                                         (route.route_uuid ===
                                                           c.route_uuid ||
-                                                          (!c.route_uuid &&
+                                                          ((!c.route_uuid || +c.route_uuid === 0) &&
                                                             +route.route_uuid ===
                                                               0))
                                                     ).length
@@ -507,7 +508,7 @@ const MainAdmin = () => {
                                                         a.counter_uuid &&
                                                       (route.route_uuid ===
                                                         c.route_uuid ||
-                                                        (!c.route_uuid &&
+                                                        ((!c.route_uuid || +c.route_uuid === 0) &&
                                                           +route.route_uuid ===
                                                             0))
                                                   ).length
@@ -522,7 +523,7 @@ const MainAdmin = () => {
                                             c.counter_uuid === a.counter_uuid &&
                                             (route.route_uuid ===
                                               c.route_uuid ||
-                                              (!c.route_uuid &&
+                                              ((!c.route_uuid || +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
                                         ).length &&
                                         selectedOrder.filter(
@@ -536,7 +537,7 @@ const MainAdmin = () => {
                                             c.counter_uuid === a.counter_uuid &&
                                             (route.route_uuid ===
                                               c.route_uuid ||
-                                              (!c.route_uuid &&
+                                              ((!c.route_uuid || +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
                                         ).length
                                     ).length
@@ -564,7 +565,7 @@ const MainAdmin = () => {
                                       (c) =>
                                         c.counter_uuid === b.counter_uuid &&
                                         (route.route_uuid === c.route_uuid ||
-                                          (!c.route_uuid &&
+                                          ((!c.route_uuid || +c.route_uuid === 0) &&
                                             +route.route_uuid === 0))
                                     ).length
                                 )
