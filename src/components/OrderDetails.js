@@ -457,7 +457,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       <th className="pa2 tl bb b--black-20 w-30">Item Name</th>
                       <th className="pa2 tl bb b--black-20 w-30">MRP</th>
                       {editOrder ? (
-                        <th className="pa2 tl bb b--black-20 w-30">MRP</th>
+                        <th className="pa2 tl bb b--black-20 w-30">Status</th>
                       ) : (
                         ""
                       )}
@@ -584,9 +584,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           {editOrder ? (
                             <td
                               className="ph2 pv1 tc bb b--black-20 bg-white"
-                              style={{ textAlign: "center" }}
+                              style={{ textAlign: "center",color:"#000" }}
                               index={listItemIndexCount++}
                               id={item_status_component_id}
+
                             >
                               <Select
                                 ref={(ref) =>

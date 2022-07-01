@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/solid";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
+import { Delete } from "@mui/icons-material";
 const DEFAULT = {
   base_qty: "",
   add_qty: "",
@@ -127,7 +128,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
           )
           ?.map((item, i) => (
             <tr
-            key={item.item_uuid} 
+              key={item.item_uuid}
               style={{ height: "30px" }}
               onClick={() => setPopupForm({ type: "edit", data: item })}
             >
@@ -163,16 +164,21 @@ function NewUserForm({ onSave, popupForm }) {
     qty_details: [{ ...DEFAULT, uuid: uuid() }],
   });
   console.log(popupForm);
-  useEffect(
-    popupForm?.type === "edit" ? () => setObgData(popupForm.data) : () => {},
-    []
-  );
+  useEffect(() => {
+    if (popupForm?.type === "edit")
+      setObgData({
+        ...popupForm.data,
+        qty_details: popupForm.data.qty_details.map((a) => ({
+          ...a,
+          uuid: uuid(),
+        })),
+      });
+  }, []);
   const [ui, setUi] = useState(1);
   const [items, setItems] = useState([]);
   const [company, setCompany] = useState([]);
   const [Category, setCategory] = useState([]);
   const [counterGroup, setCounterGroup] = useState([]);
-  const [itemGroupings, setItemGroupings] = useState([]);
   const [filterCounterGroupTitle, setFilterCounterGroupTitle] = useState("");
   const [itemGroups, setItemsGroup] = useState([]);
   const [filterTitle, setFilterTitle] = useState("");
@@ -297,12 +303,16 @@ function NewUserForm({ onSave, popupForm }) {
   }, []);
   const submitHandler = async (e) => {
     e.preventDefault();
-    console.log(objData);
+    if (!objData.qty_details.length) return;
+    let data = {
+      ...objData,
+      qty_details: objData.filter((a) => a.add_qty && a.base_qty),
+    };
     if (popupForm?.type === "edit") {
       const response = await axios({
         method: "put",
         url: "/autoBill/UpdateAutoQty",
-        data: objData,
+        data,
         headers: {
           "Content-Type": "application/json",
         },
@@ -315,7 +325,7 @@ function NewUserForm({ onSave, popupForm }) {
       const response = await axios({
         method: "post",
         url: "/autoBill/CreateAutoQty",
-        data: objData,
+        data,
         headers: {
           "Content-Type": "application/json",
         },
@@ -394,7 +404,7 @@ function NewUserForm({ onSave, popupForm }) {
                             borderBottom: "2px solid black",
                             borderRadius: "0px",
                             width: "50px",
-                            padding:"0 5px"
+                            padding: "0 5px",
                           }}
                           value={item?.base_qty}
                           onChange={(e) =>
@@ -416,7 +426,7 @@ function NewUserForm({ onSave, popupForm }) {
                             borderBottom: "2px solid black",
                             borderRadius: "0px",
                             width: "80px",
-                            padding:"0 5px"
+                            padding: "0 5px",
                           }}
                           type="number"
                           onWheel={(e) => e.target.blur()}
@@ -459,6 +469,18 @@ function NewUserForm({ onSave, popupForm }) {
                           <option value="b">Box</option>
                         </select>
                       </td>
+                      <td>
+                        <Delete
+                          onClick={(e) =>
+                            setObgData((prev) => ({
+                              ...prev,
+                              qty_details: prev.qty_details.filter(
+                                (i) => i.uuid !== item.uuid
+                              ),
+                            }))
+                          }
+                        />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -468,7 +490,10 @@ function NewUserForm({ onSave, popupForm }) {
                 onClick={(e) =>
                   setObgData((prev) => ({
                     ...prev,
-                    qty_details: [...prev.qty_details, {...DEFAULT,uuid:uuid()}],
+                    qty_details: [
+                      ...prev.qty_details,
+                      { ...DEFAULT, uuid: uuid() },
+                    ],
                   }))
                 }
               >

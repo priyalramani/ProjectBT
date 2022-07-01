@@ -1011,7 +1011,7 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                   }}
                 >
                   <thead>
-                    <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                    <tr >
                       <th colSpan={3}>
                         <div className="t-head-element">Item</div>
                       </th>
@@ -1026,13 +1026,8 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                         key={item?.item_uuid || Math.random()}
                         style={{
                           height: "30px",
-                          color: "#fff",
-                          backgroundColor:
-                            +item.status === 1
-                              ? "green"
-                              : +item.status === 3
-                              ? "red"
-                              : "#7990dd",
+                  
+                          
                         }}
                       >
                         <td colSpan={3}>{item.item_title}</td>

@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/solid";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
+import { Delete } from "@mui/icons-material";
 const DEFAULT = {
   base_qty: "",
   add_items: [],
@@ -164,19 +165,16 @@ function NewUserForm({ onSave, popupForm }) {
     counter_groups: [],
     qty_details: [{ ...DEFAULT, uuid: uuid() }],
   });
-  useEffect(
-    popupForm?.type === "edit"
-      ? () =>
-          setObgData({
-            ...popupForm.data,
-            qty_details: popupForm.data.qty_details.map((a) => ({
-              ...a,
-              uuid: uuid(),
-            })),
-          })
-      : () => {},
-    []
-  );
+  useEffect(() => {
+    if (popupForm?.type === "edit")
+      setObgData({
+        ...popupForm.data,
+        qty_details: popupForm.data.qty_details.map((a) => ({
+          ...a,
+          uuid: uuid(),
+        })),
+      });
+  }, []);
   const [ui, setUi] = useState(1);
   const [items, setItems] = useState([]);
   const [company, setCompany] = useState([]);
@@ -307,12 +305,15 @@ function NewUserForm({ onSave, popupForm }) {
   }, []);
   const submitHandler = async (e) => {
     e.preventDefault();
+    if (!objData.qty_details.length) return;
     let data = {
       ...objData,
-      qty_details: objData.qty_details.map((a) => ({
-        ...a,
-        add_items: a.add_items.map((b) => ({ ...b, unit: a.unit })),
-      })),
+      qty_details: objData.qty_details
+        .map((a) => ({
+          ...a,
+          add_items: a.add_items.map((b) => ({ ...b, unit: a.unit })),
+        }))
+        .filter((a) => a.add_items.length && a.base_qty),
     };
     if (popupForm?.type === "edit") {
       const response = await axios({
@@ -481,6 +482,18 @@ function NewUserForm({ onSave, popupForm }) {
                             <option value="p">Pcs</option>
                             <option value="b">Box</option>
                           </select>
+                        </td>
+                        <td>
+                          <Delete
+                            onClick={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+                                qty_details: prev.qty_details.filter(
+                                  (i) => i.uuid !== item.uuid
+                                ),
+                              }))
+                            }
+                          />
                         </td>
                       </tr>
                     ))}

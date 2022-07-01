@@ -1892,7 +1892,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
         />
       ) : (
         ""
-      )}{" "}
+      )}
       <div
         style={{
           position: "fixed",

@@ -2,7 +2,7 @@ import axios from "axios";
 import { deleteDB, openDB } from "idb";
 import { v4 as uuid } from "uuid";
 
-export const AutoAdd = async ({ counter, items, dbItems, autobills =[]}) => {
+export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
   let eligibleItems = items;
   let auto_added = [];
 
@@ -27,25 +27,31 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills =[]}) => {
         let base_qty_arr = autobill.qty_details.filter(
           (b) => b.unit === "b" && +b.base_qty <= +a.b
         );
-        base_qty_arr =
-          base_qty_arr.length > 1
-            ? base_qty_arr
-                .map((a) => a.base_qty)
-                .reduce((a, b) => (+Math.max(a, b) === a ? a : b))
-            : base_qty_arr.length === 1
-            ? base_qty_arr[0]
-            : null;
+        base_qty_arr = base_qty_arr.find(
+          (item) =>
+            +item.base_qty ===
+            (base_qty_arr.length > 1
+              ? base_qty_arr
+                  .map((a) => a.base_qty)
+                  .reduce((a, b) => +Math.max(a, b))
+              : base_qty_arr.length === 1
+              ? base_qty_arr[0]
+              : null)
+        );
         let pice_qty_arr = autobill.qty_details.filter(
           (b) => b.unit === "p" && +b.base_qty <= +a.p
         );
-        pice_qty_arr =
-          pice_qty_arr.length > 1
-            ? pice_qty_arr
-                .map((a) => a.base_qty)
-                .reduce((a, b) => (+Math.max(a, b) === a ? a : b))
-            : pice_qty_arr.length === 1
-            ? pice_qty_arr[0]
-            : {};
+        pice_qty_arr = pice_qty_arr.find(
+          (item) =>
+            +item.base_qty ===
+            (pice_qty_arr.length > 1
+              ? pice_qty_arr
+                  .map((a) => a.base_qty)
+                  .reduce((a, b) => +Math.max(a, b))
+              : pice_qty_arr.length === 1
+              ? pice_qty_arr[0]
+              : null)
+        );
         pice_qty_arr = base_qty_arr ? {} : pice_qty_arr;
         if (base_qty_arr || pice_qty_arr)
           auto_added.push({

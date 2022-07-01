@@ -908,6 +908,7 @@ const ProcessingOrders = () => {
               className="simple_Logout_button"
               onClick={() => {
                 setHoldPopup("Checking Summary");
+                getTripOrders()
                 setDropDown(false);
               }}
             >
@@ -919,6 +920,7 @@ const ProcessingOrders = () => {
                 className="simple_Logout_button"
                 onClick={() => {
                   setHoldPopup("Summary");
+                  getTripOrders()
                   setDropDown(false);
                 }}
               >
@@ -928,6 +930,7 @@ const ProcessingOrders = () => {
                 className="simple_Logout_button"
                 onClick={() => {
                   setHoldPopup("Hold");
+                  getTripOrders()
                   setDropDown(false);
                 }}
               >
@@ -1572,7 +1575,10 @@ const ProcessingOrders = () => {
       )}
       {holdPopup ? (
         <HoldPopup
-          onSave={() => setHoldPopup(false)}
+          onSave={() => {
+            setHoldPopup(false);
+            getTripOrders();
+          }}
           orders={orders}
           holdPopup={holdPopup}
           itemsData={items}
@@ -1582,6 +1588,7 @@ const ProcessingOrders = () => {
           tempQuantity={tempQuantity}
           categories={itemCategories}
           getTripOrders={getTripOrders}
+          counter={counters}
         />
       ) : (
         ""
@@ -1955,12 +1962,14 @@ function HoldPopup({
   tempQuantity,
   categories,
   getTripOrders,
+  counter,
 }) {
   const [items, setItems] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
   const [confirmPopup, setConfirmPopup] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const audiosRef = useRef();
+  const [popup, setPopup] = useState(false);
 
   const audioCallback = (elem_id) => {
     setItems((prev) =>
@@ -2293,11 +2302,19 @@ function HoldPopup({
                                     backgroundColor:
                                       +item.status === 1
                                         ? "green"
-                                      :+item.status === 2
+                                        : +item.status === 2
                                         ? "yellow"
                                         : +item.status === 3
                                         ? "red"
                                         : "#fff",
+                                  }}
+                                  onClick={() => {
+                                    if (
+                                      window.location.pathname.includes(
+                                        "processing"
+                                      )
+                                    )
+                                      setPopup(item);
                                   }}
                                 >
                                   <td
@@ -2338,7 +2355,8 @@ function HoldPopup({
                                   ) ? (
                                     <>
                                       <td colSpan={2}>
-                                        {item?.b || 0} : {(item?.p || 0)+(item?.free||0)}
+                                        {item?.b || 0} :{" "}
+                                        {(item?.p || 0) + (item?.free || 0)}
                                       </td>
                                       {!window.location.pathname.includes(
                                         "delivery"
@@ -2557,6 +2575,21 @@ function HoldPopup({
             </div>
           </div>
         </div>
+      ) : (
+        ""
+      )}
+      {popup ? (
+        <OrdersEdit
+          order={orders}
+          onSave={() => {
+            setPopup(false);
+            onSave();
+          }}
+          items={popup}
+          counter={counter}
+          itemsData={itemsData}
+          onClose={() => setPopup(false)}
+        />
       ) : (
         ""
       )}
@@ -3732,3 +3765,385 @@ const PhoneList = ({ onSave, mobile }) => {
     </div>
   );
 };
+const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
+  const [orderEditPopup, setOrderEditPopup] = useState("");
+  const [updateOrders, setUpdateOrders] = useState([]);
+  const [deleteItemsOrder, setDeleteItemOrders] = useState([]);
+  useEffect(() => {
+    setUpdateOrders(
+      order.filter(
+        (item) =>
+          item.item_details.filter((a) => a.item_uuid === items.item_uuid)
+            ?.length
+      )
+    );
+  }, []);
+  function formatAMPM(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var strTime = hours + ":" + minutes + " " + ampm;
+    return strTime;
+  }
+  console.log("updatedOrders", updateOrders, deleteItemsOrder);
+  const postOrderData = async (deleteItems) => {
+    let dataArray = deleteItems
+      ? updateOrders.map((a) => ({
+          ...a,
+          item_details: a.item_details.filter(
+            (b) => !(b.item_uuid === items.item_uuid)
+          ),
+        }))
+      : updateOrders
+          .filter(
+            (a) =>
+              a.edit ||
+              deleteItemsOrder.filter((b) => b === a.order_uuid).length
+          )
+          .map((a) =>
+            deleteItemsOrder.filter((b) => b === a.order_uuid).length
+              ? {
+                  ...a,
+                  item_details: a.item_details.filter(
+                    (b) => !(b.item_uuid === items.item_uuid)
+                  ),
+                }
+              : a
+          );
+    console.log("dataArray", dataArray);
+    let finalData = [];
+    for (let orderObject of dataArray) {
+      let data = orderObject;
+
+      let billingData = await Billing({
+        replacement: data.replacement,
+        counter: counter.find((a) => a.counter_uuid === data.counter_uuid),
+        add_discounts: true,
+        items: data.item_details.map((a) => {
+          let itemData = itemsData.find((b) => a.item_uuid === b.item_uuid);
+          return {
+            ...itemData,
+            ...a,
+            price: itemData?.price || 0,
+          };
+        }),
+      });
+      data = {
+        ...data,
+        ...billingData,
+        item_details: billingData.items,
+      };
+      data = Object.keys(data)
+        .filter((key) => key !== "others" || key !== "items")
+        .reduce((obj, key) => {
+          obj[key] = data[key];
+          return obj;
+        }, {});
+
+      finalData.push({ ...data, opened_by: 0 });
+    }
+    console.log("finalData", finalData);
+
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: finalData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+    }
+  };
+  return (
+    <>
+      <div className="overlay">
+        <div
+          className="modal"
+          style={{
+            height: "500px",
+            width: "max-content",
+            minWidth: "250px",
+          }}
+        >
+          <h1>Orders</h1>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "20px",
+              width: "700px",
+            }}
+          >
+            <div style={{ overflowY: "scroll", width: "100%" }}>
+              {order.length ? (
+                <div
+                  className="flex"
+                  style={{ flexDirection: "column", width: "100%" }}
+                >
+                  <table
+                    className="user-table"
+                    style={{
+                      height: "fit-content",
+                    }}
+                  >
+                    <thead>
+                      <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
+                        <th>Sr.</th>
+                        <th colSpan={3}>
+                          <div className="t-head-element">Date</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Invoice Number</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Counter</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Quantity</div>
+                        </th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody className="tbody">
+                      {updateOrders?.map((item, i) => (
+                        <tr
+                          key={item?.item_uuid || Math.random()}
+                          style={{
+                            height: "30px",
+                            color: "#fff",
+                            backgroundColor: +deleteItemsOrder.filter(
+                              (a) => a === item.order_uuid
+                            ).length
+                              ? "red"
+                              : "#7990dd",
+                          }}
+                        >
+                          <td>{i + 1}</td>
+                          <td colSpan={3}>
+                            {new Date(item?.status[0]?.time).toDateString() +
+                              " - " +
+                              formatAMPM(new Date(item?.status[0]?.time))}
+                          </td>
+                          <td colSpan={2}>{item.invoice_number}</td>
+                          <td colSpan={2}>
+                            {counter?.find(
+                              (a) => a.counter_uuid === item.counter_uuid
+                            )?.counter_title || "-"}
+                          </td>
+                          <td colSpan={2}>
+                            <input
+                              value={
+                                (item.item_details.find(
+                                  (a) => a.item_uuid === items.item_uuid
+                                )?.b || 0) +
+                                " : " +
+                                (item.item_details.find(
+                                  (a) => a.item_uuid === items.item_uuid
+                                )?.p || 0)
+                              }
+                              className="boxPcsInput"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOrderEditPopup(item);
+                              }}
+                            />
+                          </td>
+                          <td
+                            onClick={() => {
+                              setDeleteItemOrders((prev) =>
+                                prev?.filter((a) => a === item.order_uuid)
+                                  .length
+                                  ? prev.filter((a) => !(a === item.order_uuid))
+                                  : [...(prev || []), item.order_uuid]
+                              );
+                            }}
+                          >
+                            {!deleteItemsOrder.filter(
+                              (a) => a === item.order_uuid
+                            ).length ? (
+                              <DeleteOutlineIcon />
+                            ) : (
+                              ""
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div
+                  className="flex"
+                  style={{ flexDirection: "column", width: "100%" }}
+                >
+                  <i>No Data Present</i>
+                </div>
+              )}
+            </div>
+            <button
+              className="simple_Logout_button"
+              style={{
+                position: "absolute",
+                right: "50px",
+                top: "0px",
+                backgroundColor: "red",
+              }}
+              onClick={() => postOrderData(true)}
+            >
+              Delete All
+            </button>
+            <button onClick={onClose} className="closeButton">
+              x
+            </button>
+          </div>
+          {updateOrders.filter((a) => a.edit).length ||
+          deleteItemsOrder.length ? (
+            <button
+              className="simple_Logout_button"
+              onClick={() => postOrderData()}
+            >
+              Update
+            </button>
+          ) : (
+            ""
+          )}
+        </div>
+      </div>
+      {orderEditPopup ? (
+        <QuantityChanged
+          popupInfo={items}
+          order={orderEditPopup}
+          onSave={() => setOrderEditPopup("")}
+          setOrder={setUpdateOrders}
+          itemsData={itemsData}
+        />
+      ) : (
+        ""
+      )}
+    </>
+  );
+};
+function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
+  const [data, setdata] = useState({});
+
+  useEffect(() => {
+    let data = order.item_details?.find(
+      (a) => a.item_uuid === popupInfo.item_uuid
+    );
+    setdata({
+      b: data?.b || 0,
+      p: data?.p || 0,
+    });
+  }, []);
+  console.log(popupInfo);
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    let item = itemsData.find((a) => a.item_uuid === popupInfo.item_uuid);
+    setOrder((prev) =>
+      prev.map((a) =>
+        a.order_uuid === order.order_uuid
+          ? {
+              ...a,
+              edit: true,
+              item_details: a.item_details.map((b) =>
+                b.item_uuid === popupInfo.item_uuid
+                  ? {
+                      ...b,
+                      b: (+data.b + +data.p / +item.conversion || 0).toFixed(0),
+                      p: +data.p % +item.conversion,
+                    }
+                  : b
+              ),
+            }
+          : a
+      )
+    );
+    onSave();
+  };
+
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="formGroup">
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "flex-start" }}
+                >
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    Box
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data?.b}
+                      style={{ width: "100px" }}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          b: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
+                    />
+                    {popupInfo.conversion || 0}
+                  </label>
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    Pcs
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data?.p}
+                      style={{ width: "100px" }}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          p: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
+                      autoFocus={true}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
