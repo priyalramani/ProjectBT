@@ -908,7 +908,7 @@ const ProcessingOrders = () => {
               className="simple_Logout_button"
               onClick={() => {
                 setHoldPopup("Checking Summary");
-                getTripOrders()
+                getTripOrders();
                 setDropDown(false);
               }}
             >
@@ -920,7 +920,7 @@ const ProcessingOrders = () => {
                 className="simple_Logout_button"
                 onClick={() => {
                   setHoldPopup("Summary");
-                  getTripOrders()
+                  getTripOrders();
                   setDropDown(false);
                 }}
               >
@@ -930,7 +930,7 @@ const ProcessingOrders = () => {
                 className="simple_Logout_button"
                 onClick={() => {
                   setHoldPopup("Hold");
-                  getTripOrders()
+                  getTripOrders();
                   setDropDown(false);
                 }}
               >
@@ -2308,18 +2308,11 @@ function HoldPopup({
                                         ? "red"
                                         : "#fff",
                                   }}
-                                  onClick={() => {
-                                    if (
-                                      window.location.pathname.includes(
-                                        "processing"
-                                      )
-                                    )
-                                      setPopup(item);
-                                  }}
                                 >
                                   <td
                                     style={{ padding: "5px" }}
-                                    onClick={() =>
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       setItems((prev) =>
                                         prev.map((a) =>
                                           a.item_uuid === item.item_uuid
@@ -2335,8 +2328,8 @@ function HoldPopup({
                                               }
                                             : a
                                         )
-                                      )
-                                    }
+                                      );
+                                    }}
                                   >
                                     {+item.status !== 1 ? (
                                       <CheckCircleOutlineIcon
@@ -2354,7 +2347,18 @@ function HoldPopup({
                                     "checking"
                                   ) ? (
                                     <>
-                                      <td colSpan={2}>
+                                      <td
+                                        colSpan={2}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (
+                                            window.location.pathname.includes(
+                                              "processing"
+                                            )
+                                          )
+                                            setPopup(item);
+                                        }}
+                                      >
                                         {item?.b || 0} :{" "}
                                         {(item?.p || 0) + (item?.free || 0)}
                                       </td>
@@ -3861,13 +3865,15 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
   };
   return (
     <>
-      <div className="overlay">
+      <div className="overlay" style={{zIndex:"999999999"}}>
         <div
           className="modal"
           style={{
-            height: "500px",
+            height: "fit-content",
             width: "max-content",
-            minWidth: "250px",
+            minWidth: "206px",
+            padding: "10px",
+            paddingTop: "40px",
           }}
         >
           <h1>Orders</h1>
@@ -3875,30 +3881,32 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
             className="content"
             style={{
               height: "fit-content",
-              padding: "20px",
-              width: "700px",
+              padding: "20px 0",
+              width: "80vw",
             }}
           >
-            <div style={{ overflowY: "scroll", width: "100%" }}>
+            <div style={{ overflow: "scroll", width: "100%" }}>
               {order.length ? (
                 <div
                   className="flex"
-                  style={{ flexDirection: "column", width: "100%" }}
+                  style={{ flexDirection: "column"}}
                 >
                   <table
                     className="user-table"
                     style={{
+                   
                       height: "fit-content",
+fontSize:"10px"
                     }}
                   >
                     <thead>
                       <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
-                        <th>Sr.</th>
-                        <th colSpan={3}>
+                        <th></th>
+                        <th colSpan={3} >
                           <div className="t-head-element">Date</div>
                         </th>
                         <th colSpan={2}>
-                          <div className="t-head-element">Invoice Number</div>
+                          <div className="t-head-element" style={{width:"40px"}}>Invoice Number</div>
                         </th>
                         <th colSpan={2}>
                           <div className="t-head-element">Counter</div>
@@ -3923,19 +3931,19 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
                               : "#7990dd",
                           }}
                         >
-                          <td>{i + 1}</td>
-                          <td colSpan={3}>
+                          <td style={{width:"3ch"}}>{i + 1}</td>
+                          <td colSpan={3} style={{width:"70px"}}>
                             {new Date(item?.status[0]?.time).toDateString() +
                               " - " +
                               formatAMPM(new Date(item?.status[0]?.time))}
                           </td>
-                          <td colSpan={2}>{item.invoice_number}</td>
-                          <td colSpan={2}>
+                          <td colSpan={2} style={{width:"40px"}}>{item.invoice_number}</td>
+                          <td colSpan={2} style={{width:"50px"}}>
                             {counter?.find(
                               (a) => a.counter_uuid === item.counter_uuid
                             )?.counter_title || "-"}
                           </td>
-                          <td colSpan={2}>
+                          <td colSpan={2}  style={{width:"50px",padding:"0 2px"}}>
                             <input
                               value={
                                 (item.item_details.find(
@@ -3947,6 +3955,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
                                 )?.p || 0)
                               }
                               className="boxPcsInput"
+                              style={{fontSize:"10px",width:"10ch",overflow:"scroll",padding:"none"}}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setOrderEditPopup(item);
@@ -3954,6 +3963,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
                             />
                           </td>
                           <td
+                          style={{width:"50px",padding:"0 2px"}}
                             onClick={() => {
                               setDeleteItemOrders((prev) =>
                                 prev?.filter((a) => a === item.order_uuid)
@@ -3992,6 +4002,8 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
                 right: "50px",
                 top: "0px",
                 backgroundColor: "red",
+                fontSize:"15px",
+                width:"90px"
               }}
               onClick={() => postOrderData(true)}
             >
