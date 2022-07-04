@@ -70,7 +70,8 @@ const ProcessingOrders = () => {
     window.addEventListener("popstate", function (event) {
       if (selectedOrder) {
         setConfirmPopup(true);
-        window.history.pushState(null, document.title, window.location.href);
+        // window.history.pushState(null, document.title, window.location.href);
+        Navigate(1)
       } else {
         Navigate(-1);
       }
