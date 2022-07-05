@@ -3476,62 +3476,56 @@ function NewUserForm({
     } else if (window.location.pathname.includes("delivery")) {
       orderData = {
         ...orderData,
-        delivery_return: deliveryPage
-          ? orderData.delivery_return.length
-            ? orderData.delivery_return.filter(
-                (a) => a.item_uuid === popupInfo.item_uuid
+        delivery_return: orderData.delivery_return.length
+          ? orderData.delivery_return.filter(
+              (a) => a.item_uuid === popupInfo.item_uuid
+            )
+            ? orderData.delivery_return.map((a) =>
+                a.item_uuid === popupInfo.item_uuid
+                  ? {
+                      item_uuid: popupInfo.item_uuid,
+                      b:
+                        +a.b +
+                        (+orderData?.item_details?.find(
+                          (a) => a.item_uuid === popupInfo.item_uuid
+                        )?.b || 0) -
+                        data.b,
+                      p:
+                        +a.p +
+                        (+orderData?.item_details?.find(
+                          (a) => a.item_uuid === popupInfo.item_uuid
+                        )?.p || 0) -
+                        data.p,
+                    }
+                  : a
               )
-              ? orderData.delivery_return.map((a) =>
-                  a.item_uuid === popupInfo.item_uuid
-                    ? {
-                        item_uuid: popupInfo.item_uuid,
-                        b:
-                          +a.b +
-                          data.b -
-                          (+orderData?.item_details?.find(
-                            (a) => a.item_uuid === popupInfo.item_uuid
-                          )?.b || 0),
-                        p:
-                          +a.b +
-                          data.p -
-                          (+orderData?.item_details?.find(
-                            (a) => a.item_uuid === popupInfo.item_uuid
-                          )?.p || 0),
-                      }
-                    : a
-                )
-              : [
-                  ...orderData.delivery_return,
-                  {
-                    item_uuid: popupInfo.item_uuid,
-                    b:
-                      (+data.b || 0) -
-                      (+orderData?.item_details?.find(
-                        (a) => a.item_uuid === popupInfo.item_uuid
-                      )?.b || 0),
-                    p:
-                      +data.p -
-                      (+orderData?.item_details?.find(
-                        (a) => a.item_uuid === popupInfo.item_uuid
-                      )?.p || 0),
-                  },
-                ]
             : [
+                ...orderData.delivery_return,
                 {
                   item_uuid: popupInfo.item_uuid,
                   b:
-                    (+data.b || 0) -
                     (+orderData?.item_details?.find(
                       (a) => a.item_uuid === popupInfo.item_uuid
-                    )?.b || 0),
+                    )?.b || 0) - data.b,
                   p:
-                    +data.p -
                     (+orderData?.item_details?.find(
                       (a) => a.item_uuid === popupInfo.item_uuid
-                    )?.p || 0),
+                    )?.p || 0) - data.p,
                 },
               ]
-          : [],
+          : [
+              {
+                item_uuid: popupInfo.item_uuid,
+                b:
+                  (+orderData?.item_details?.find(
+                    (a) => a.item_uuid === popupInfo.item_uuid
+                  )?.b || 0) - data.b,
+                p:
+                  (+orderData?.item_details?.find(
+                    (a) => a.item_uuid === popupInfo.item_uuid
+                  )?.p || 0) - data.p,
+              },
+            ],
         item_details: orderData.item_details.map((a) =>
           a.item_uuid === popupInfo.item_uuid
             ? {
