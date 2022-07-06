@@ -306,7 +306,7 @@ function NewUserForm({ onSave, popupForm }) {
     if (!objData.qty_details.length) return;
     let data = {
       ...objData,
-      qty_details: objData.filter((a) => a.add_qty && a.base_qty),
+      qty_details: objData.qty_details.filter((a) => a.add_qty && a.base_qty),
     };
     if (popupForm?.type === "edit") {
       const response = await axios({
