@@ -4021,6 +4021,7 @@ fontSize:"10px"
           )}
         </div>
       </div>
+
       {orderEditPopup ? (
         <QuantityChanged
           popupInfo={items}
@@ -4074,7 +4075,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
   };
 
   return (
-    <div className="overlay">
+    <div className="overlay" style={{zIndex:999999999999}}>
       <div
         className="modal"
         style={{ height: "fit-content", width: "max-content" }}
