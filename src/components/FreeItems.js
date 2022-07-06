@@ -109,7 +109,7 @@ const FreeItems = ({ onSave, orders, itemsData, holdPopup, setOrder }) => {
                             style={{
                               width: "100px",
                               backgroundColor: "transparent",
-                              color: "#fff",
+                              color: "#000",
                             }}
                             onChange={(e) =>
                               setItems((prev) =>
