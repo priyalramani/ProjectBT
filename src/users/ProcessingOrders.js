@@ -1691,7 +1691,7 @@ export default ProcessingOrders;
 const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
   const [disable, setDisabled] = useState(true);
   useEffect(() => {
-    setTimeout(() => setDisabled(false), 5000);
+    setTimeout(() => setDisabled(false), 3000);
   }, []);
   const PutOrder = async () => {
     let time = new Date();
@@ -2475,7 +2475,7 @@ function HoldPopup({
                     setDisabled(true);
                     setTimeout(() => {
                       setDisabled(false);
-                    }, 5000);
+                    }, 3000);
                   }}
                 >
                   Discard
@@ -3265,7 +3265,7 @@ function ConfirmPopup({ onSave, onClose, selectedOrder, Navigate }) {
 function DeliveryMessagePopup({ onSave, data, credit_allowed }) {
   const [disabled, setDisabled] = useState(true);
   useEffect(() => {
-    setTimeout(() => setDisabled(false), 5000);
+    setTimeout(() => setDisabled(false), 3000);
   }, []);
   console.log("counters", data);
   return (
