@@ -173,7 +173,7 @@ const MainAdmin = () => {
   const getRunningOrders = async () => {
     const response = await axios({
       method: "get",
-      url: "/orders/GetOrderRunningList",
+      url: "/orders/GetOrderAllRunningList",
     });
 
     if (response.data.success) setOrders(response.data.result);

@@ -12,6 +12,7 @@ const SelectedCounterOrder = () => {
   const [items, setItems] = useState([]);
   const [foodLicensePopup, setFoodLicencePopup] = useState(false);
   const [checkNumberPopup, setCheckNumberPopup] = useState(false);
+  const [pricePopup, setPricePopup] = useState(false);
   const [number, setNumber] = useState([]);
   const [food_license, setFoodLicence] = useState("");
   const [order, setOrder] = useState([]);
@@ -146,6 +147,7 @@ const SelectedCounterOrder = () => {
     console.log(orderData);
     let data = {
       ...orderData,
+      order_status: orderData?.order_status || "R",
       order_uuid: uuid(),
       opened_by: 0,
       item_details: orderData.items.map((a) => ({
@@ -432,8 +434,12 @@ const SelectedCounterOrder = () => {
                                             justifyContent: "space-between",
                                           }}
                                         >
-                                          <h3 className={`item-price`}>
-                                            Price: {item?.item_price}
+                                          <h3
+                                            className={`item-price`}
+                                            style={{ cursor: "pointer" }}
+                                          >
+                                            Price:
+                                            {item?.item_price}
                                           </h3>
                                           <h3 className={`item-price`}>
                                             MRP: {item?.mrp || ""}
@@ -571,10 +577,21 @@ const SelectedCounterOrder = () => {
                                           className="item-mode flex"
                                           style={{
                                             justifyContent: "space-between",
+                                            cursor: "pointer",
                                           }}
                                         >
-                                          <h3 className={`item-price`}>
-                                            Price: {item?.item_price}
+                                          <h3
+                                            className={`item-price`}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setPricePopup(item);
+                                            }}
+                                          >
+                                            Price:
+                                            {order?.items?.find(
+                                              (a) =>
+                                                a.item_uuid === item.item_uuid
+                                            )?.item_price || item?.item_price}
                                           </h3>
                                           <h3 className={`item-price`}>
                                             MRP: {item?.mrp || ""}
@@ -828,6 +845,17 @@ const SelectedCounterOrder = () => {
       ) : (
         ""
       )}
+      {pricePopup ? (
+        <PricePopup
+          onSave={() => setPricePopup(false)}
+          orders={order}
+          holdPopup={pricePopup}
+          itemsData={items}
+          setOrder={setOrder}
+        />
+      ) : (
+        ""
+      )}
       {foodLicensePopup ? (
         <div className="overlay">
           <div
@@ -1011,7 +1039,7 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                   }}
                 >
                   <thead>
-                    <tr >
+                    <tr>
                       <th colSpan={3}>
                         <div className="t-head-element">Item</div>
                       </th>
@@ -1026,8 +1054,6 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                         key={item?.item_uuid || Math.random()}
                         style={{
                           height: "30px",
-                  
-                          
                         }}
                       >
                         <td colSpan={3}>{item.item_title}</td>
@@ -1090,6 +1116,142 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
             ) : (
               ""
             )}
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
+  const [item, setItem] = useState([]);
+  useEffect(() => {
+    setItem(itemsData.find((a) => a.item_uuid === holdPopup.item_uuid));
+  }, []);
+  const postOrderData = async () => {
+    let data = orders;
+    let item_details = data.items.map((a) =>
+      a.item_uuid === holdPopup.item_uuid
+        ? { ...a, old_price: a.item_price, item_price: item.item_price }
+        : a
+    );
+    setOrder((prev) => ({ ...prev, order_status: "A", items: item_details }));
+    console.log(item_details);
+    onSave();
+  };
+  console.log(orders);
+  return (
+    <div className="overlay" style={{ zIndex: 999999999 }}>
+      <div
+        className="modal"
+        style={{
+          height: "fit-content",
+          width: "max-content",
+          minWidth: "250px",
+        }}
+      >
+        <h1>Free Items</h1>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll", width: "100%" }}>
+            <div
+              className="flex"
+              style={{ flexDirection: "column", width: "100%" }}
+            >
+              <table
+                className="user-table"
+                style={{
+                  width: "100%",
+                  height: "fit-content",
+                }}
+              >
+                <thead>
+                  <tr>
+                    <th colSpan={2}>
+                      <div className="t-head-element">PCS Price</div>
+                    </th>
+                    <th colSpan={2}>
+                      <div className="t-head-element">BOX Price</div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="tbody">
+                  <tr
+                    key={item?.item_uuid || Math.random()}
+                    style={{
+                      height: "30px",
+                    }}
+                  >
+                    <td colSpan={2}>
+                      <input
+                        type="number"
+                        name="route_title"
+                        className="numberInput"
+                        value={item?.item_price || ""}
+                        style={{
+                          width: "100px",
+                          backgroundColor: "transparent",
+                          color: "#000",
+                        }}
+                        onChange={(e) =>
+                          setItem((prev) => ({
+                            ...prev,
+                            item_price: e.target.value,
+                          }))
+                        }
+                        onWheel={(e) => e.preventDefault()}
+                        maxLength={42}
+                      />
+                    </td>
+                    <td colSpan={2}>
+                      <input
+                        type="number"
+                        name="route_title"
+                        className="numberInput"
+                        value={(
+                          item?.item_price * item?.conversion || 0
+                        ).toFixed(0)}
+                        style={{
+                          width: "100px",
+                          backgroundColor: "transparent",
+                          color: "#000",
+                        }}
+                        onChange={(e) =>
+                          setItem((prev) => ({
+                            ...prev,
+                            item_price: e.target.value / item?.conversion,
+                          }))
+                        }
+                        onWheel={(e) => e.preventDefault()}
+                        maxLength={42}
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex" style={{ justifyContent: "space-between" }}>
+              {/* <button
+                type="button"
+                style={{ backgroundColor: "red" }}
+                className="submit"
+                onClick={onSave}
+              >
+                Cancel
+              </button> */}
+              <button type="button" className="submit" onClick={postOrderData}>
+                Save
+              </button>
+            </div>
           </div>
           <button onClick={onSave} className="closeButton">
             x

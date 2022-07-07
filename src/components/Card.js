@@ -61,7 +61,6 @@ const Card = ({
   const order_time_1 = +details.map((a) => a.order_time_1)[0]
   const cardColor1Height = (hours(new Date(dateTime)) * 100) / order_time_1;
   const cardColor2Height = ((hours(new Date(dateTime)) - order_time_1) * 100) / +details.map((a) => +a.order_time_2 - order_time_1)[0];
-
   return (
     <>
       <div onDoubleClick={onDoubleClick}>
@@ -74,7 +73,7 @@ const Card = ({
         >
           <div
             className={`card ${rounded ? "rounded" : ""}`}
-            style={{ padding: "10px 15px", gap: "2px" }}
+            style={{ padding: "10px 15px", gap: "2px",backgroundColor:order.order_status==="A"?"blue":"#fff" }}
           >
             <p
               className="title2"
