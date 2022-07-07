@@ -320,13 +320,16 @@ export const Billing = async ({
     item = {
       ...item,
       charges_discount,
-      item_total: (
-        (+edit_price ||
-          +item.item_desc_total ||
-          item?.price ||
-          +item.item_price ||
-          0) * (+item.qty || 0)
-      ).toFixed(2),
+      item_total:
+        item.status !== 3
+          ? (
+              (+edit_price ||
+                +item.item_desc_total ||
+                item?.price ||
+                +item.item_price ||
+                0) * (+item.qty || 0)
+            ).toFixed(2)
+          : 0,
       item_desc_total: 0,
     };
     newPriceItems.push(item);

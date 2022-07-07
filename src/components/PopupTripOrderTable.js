@@ -193,7 +193,7 @@ const PopupTripOrderTable = ({ trip_uuid, onSave }) => {
             </thead>
             <tbody className="tbody">
               {itemDetails
-                ?.sort((a, b) => a.order_date - b.order_date)
+                ?.sort((a, b) => a.delivery_date - b.delivery_date)
                 ?.map((item, i) => (
                   <tr key={Math.random()} style={{ height: "30px" }}>
                     <td>{i + 1}</td>
