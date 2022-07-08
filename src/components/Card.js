@@ -73,7 +73,7 @@ const Card = ({
         >
           <div
             className={`card ${rounded ? "rounded" : ""}`}
-            style={{ padding: "10px 15px", gap: "2px",backgroundColor:order.order_status==="A"?"blue":"#fff" }}
+            style={{ padding: "10px 15px", gap: "2px",backgroundColor:order.order_status==="A"?"#00edff":"#fff" }}
           >
             <p
               className="title2"

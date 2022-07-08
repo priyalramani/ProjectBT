@@ -233,7 +233,10 @@ const SelectedCounterOrder = () => {
   return (
     <>
       <div>
-        <nav className="user_nav nav_styling">
+        <nav
+          className="user_nav nav_styling"
+          style={cartPage ? { backgroundColor: "#000" } : {}}
+        >
           <div className="user_menubar">
             <IoArrowBackOutline
               className="user_Back_icon"
@@ -247,6 +250,7 @@ const SelectedCounterOrder = () => {
                 className="item-sales-search"
                 style={{
                   width: "max-content",
+                  backgroundColor:"#4ac959"
                 }}
                 onClick={() => setHoldPopup("Summary")}
               >
@@ -1134,7 +1138,12 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
     let data = orders;
     let item_details = data.items.map((a) =>
       a.item_uuid === holdPopup.item_uuid
-        ? { ...a, old_price: a.item_price, item_price: item.item_price }
+        ? {
+            ...a,
+            old_price: a.item_price,
+            price_approval: "N",
+            item_price: item.item_price,
+          }
         : a
     );
     setOrder((prev) => ({ ...prev, order_status: "A", items: item_details }));

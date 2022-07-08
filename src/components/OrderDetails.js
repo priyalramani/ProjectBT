@@ -3,7 +3,7 @@ import axios from "axios";
 import Select from "react-select";
 import { v4 as uuid } from "uuid";
 import { Billing, jumpToNextIndex } from "../functions";
-import { ContentCopy } from "@mui/icons-material";
+import { CheckCircle, ContentCopy } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 import OrderPrint from "./OrderPrint";
@@ -33,8 +33,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
-  const [itemDetails,setItemDetails]=useState([])
-
+  const [itemDetails, setItemDetails] = useState([]);
+  useEffect(() => {
+    if (order.order_status === "A") setEditOrder(true);
+  }, []);
   const appendNewRow = () => {
     let item_uuid = uuid();
     setFocusedInputId(`REACT_SELECT_COMPONENT_ITEM_TITLE@${item_uuid}`);
@@ -197,6 +199,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     );
     let data = {
       ...orderData,
+      order_status: orderData?.item_details.filter(
+        (a) => a.price_approval === "N"
+      ).length
+        ? "A"
+        : "R",
       item_details: orderData?.item_details.filter((a) => a.item_uuid) || [],
     };
 
@@ -254,7 +261,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       <div className="overlay">
         <div
           className="modal"
-          style={{ height: "fit-content", width: "80vw", padding: "50px" }}
+          style={{ height: "fit-content", width: "90vw", padding: "50px",zIndex:"999999999",border:"2px solid #000" }}
         >
           <div className="inventory">
             <div
@@ -463,9 +470,13 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       )}
                       <th className="pa2 tc bb b--black-20">Quantity(b)</th>
                       <th className="pa2 tc bb b--black-20">Quantity(p)</th>
-                      <th className="pa2 tc bb b--black-20 ">Price</th>
+                      <th className="pa2 tc bb b--black-20 ">Price(p)</th>
+                      <th className="pa2 tc bb b--black-20 ">Price(b)</th>
                       {editOrder ? (
-                        <th className="pa2 tc bb b--black-20 "></th>
+                        <>
+                          <th className="pa2 tc bb b--black-20 "></th>
+                          <th className="pa2 tc bb b--black-20 ">Old Price</th>
+                        </>
                       ) : (
                         ""
                       )}
@@ -482,7 +493,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           style={{
                             height: "50px",
                             backgroundColor:
-                              +item.status === 1
+                              item.price_approval === "N"
+                                ? "#00edff"
+                                : +item.status === 1
                                 ? "green"
                                 : +item.status === 2
                                 ? "yellow"
@@ -490,7 +503,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 ? "red"
                                 : "#fff",
                             color:
-                              +item.status === 1 || +item.status === 3
+                              item.price_approval === "N"
+                                ? "#000"
+                                : +item.status === 1 || +item.status === 3
                                 ? "#fff"
                                 : "#000",
                             borderBottom: "2px solid #fff",
@@ -584,10 +599,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           {editOrder ? (
                             <td
                               className="ph2 pv1 tc bb b--black-20 bg-white"
-                              style={{ textAlign: "center",color:"#000" }}
+                              style={{ textAlign: "center", color: "#000" }}
                               index={listItemIndexCount++}
                               id={item_status_component_id}
-
                             >
                               <Select
                                 ref={(ref) =>
@@ -640,6 +654,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 type="number"
                                 className="numberInput"
                                 index={listItemIndexCount++}
+                                style={{ width: "10ch" }}
                                 value={item.b || 0}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
@@ -680,6 +695,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             {editOrder ? (
                               <input
                                 id={"p" + item.uuid}
+                                style={{ width: "10ch" }}
                                 type="number"
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
@@ -720,24 +736,141 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             className="ph2 pv1 tc bb b--black-20 bg-white"
                             style={{ textAlign: "center" }}
                           >
-                            Rs {item?.price || item?.item_price || 0}
+                            {editOrder ? (
+                              <input
+                                type="number"
+                                style={{ width: "15ch" }}
+                                className="numberInput"
+                                onWheel={(e) => e.preventDefault()}
+                                index={listItemIndexCount++}
+                                value={item.price || 0}
+                                onChange={(e) => {
+                                  setOrderData((prev) => {
+                                    setTimeout(
+                                      () => setQtyDetails((prev) => !prev),
+                                      2000
+                                    );
+                                    return {
+                                      ...prev,
+                                      item_details: prev.item_details.map((a) =>
+                                        a.uuid === item.uuid
+                                          ? { ...a, price: e.target.value }
+                                          : a
+                                      ),
+                                    };
+                                  });
+                                }}
+                                onFocus={(e) => {
+                                  e.target.onwheel = () => false;
+                                  e.target.select();
+                                }}
+                                onKeyDown={(e) =>
+                                  e.key === "Enter"
+                                    ? shiftFocus(e.target.id)
+                                    : ""
+                                }
+                                disabled={!item.item_uuid}
+                              />
+                            ) : (
+                              "Rs:" + item?.price
+                            )}
+                          </td>
+                          <td
+                            className="ph2 pv1 tc bb b--black-20 bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            {editOrder ? (
+                              <input
+                                type="number"
+                                style={{ width: "15ch" }}
+                                className="numberInput"
+                                onWheel={(e) => e.preventDefault()}
+                                index={listItemIndexCount++}
+                                value={(
+                                  item.price * item.conversion || 0
+                                ).toFixed(0)}
+                                onChange={(e) => {
+                                  setOrderData((prev) => {
+                                    setTimeout(
+                                      () => setQtyDetails((prev) => !prev),
+                                      2000
+                                    );
+                                    return {
+                                      ...prev,
+                                      item_details: prev.item_details.map((a) =>
+                                        a.uuid === item.uuid
+                                          ? {
+                                              ...a,
+                                              price:
+                                                e.target.value /
+                                                item.conversion,
+                                            }
+                                          : a
+                                      ),
+                                    };
+                                  });
+                                }}
+                                onFocus={(e) => {
+                                  e.target.onwheel = () => false;
+                                  e.target.select();
+                                }}
+                                onKeyDown={(e) =>
+                                  e.key === "Enter"
+                                    ? shiftFocus(e.target.id)
+                                    : ""
+                                }
+                                disabled={!item.item_uuid}
+                              />
+                            ) : (
+                              "Rs:" + item?.price
+                            )}
                           </td>
                           {editOrder ? (
-                            <td
-                              onClick={() =>
-                                setOrderData((prev) => ({
-                                  ...prev,
-                                  item_details: prev.item_details.filter(
-                                    (a) => !(a.uuid === item.uuid)
-                                  ),
-                                }))
-                              }
-                            >
-                              <RemoveCircle
-                                sx={{ fontSize: 40 }}
-                                style={{ cursor: "pointer", color: "red" }}
-                              />
-                            </td>
+                            <>
+                              <td>
+                                {item.price_approval === "N" ? (
+                                  <span
+                                    onClick={() =>
+                                      setOrderData((prev) => ({
+                                        ...prev,
+                                        item_details: prev.item_details.map(
+                                          (a) =>
+                                            a.uuid === item.uuid
+                                              ? { ...a, price_approval: "Y" }
+                                              : a
+                                        ),
+                                      }))
+                                    }
+                                  >
+                                    <CheckCircle
+                                      sx={{ fontSize: 40 }}
+                                      style={{
+                                        cursor: "pointer",
+                                        color: "blue",
+                                      }}
+                                    />
+                                  </span>
+                                ) : (
+                                  ""
+                                )}
+                                <span
+                                  onClick={() =>
+                                    setOrderData((prev) => ({
+                                      ...prev,
+                                      item_details: prev.item_details.filter(
+                                        (a) => !(a.uuid === item.uuid)
+                                      ),
+                                    }))
+                                  }
+                                >
+                                  <RemoveCircle
+                                    sx={{ fontSize: 40 }}
+                                    style={{ cursor: "pointer", color: "red" }}
+                                  />
+                                </span>
+                              </td>
+                              <td>Rs.{item.old_price || item.item_price}</td>
+                            </>
                           ) : (
                             ""
                           )}

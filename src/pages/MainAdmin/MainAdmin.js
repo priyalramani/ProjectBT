@@ -196,7 +196,7 @@ const MainAdmin = () => {
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
-      data: selectedOrder.map((a) => ({
+      data: selectedOrder.filter(a=>a.order_status==="R").map((a) => ({
         ...a,
         trip_uuid: +selectedTrip === 0 ? "" : selectedTrip,
       })),
