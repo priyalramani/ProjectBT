@@ -683,6 +683,7 @@ function NewUserForm({
                         })
                       }
                       maxLength={5}
+                      disabled={popupInfo.type==="edit"}
                     />
                   </label>
                   <label className="selectLabel">
