@@ -1221,7 +1221,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted }) => {
     }
   };
   return (
-    <div className="overlay">
+    <div className="overlay" style={{zIndex:9999999999}}>
       <div
         className="modal"
         style={{
