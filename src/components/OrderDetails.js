@@ -261,7 +261,13 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       <div className="overlay">
         <div
           className="modal"
-          style={{ height: "fit-content", width: "90vw", padding: "50px",zIndex:"999999999",border:"2px solid #000" }}
+          style={{
+            height: "fit-content",
+            width: "90vw",
+            padding: "50px",
+            zIndex: "999999999",
+            border: "2px solid #000",
+          }}
         >
           <div className="inventory">
             <div
@@ -560,6 +566,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                               ...itemsData.find(
                                                 (b) => b.item_uuid === e.value
                                               ),
+                                              price: itemsData.find(
+                                                (b) => b.item_uuid === e.value
+                                              )?.item_price,
                                             }
                                           : a
                                       ),
@@ -1221,7 +1230,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted }) => {
     }
   };
   return (
-    <div className="overlay" style={{zIndex:9999999999}}>
+    <div className="overlay" style={{ zIndex: 9999999999 }}>
       <div
         className="modal"
         style={{
