@@ -772,7 +772,6 @@ function NewUserForm({
                       onChange={(e) =>
                         setdata((prev) => ({ ...prev, status: e.target.value }))
                       }
-                      
                     >
                       {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
 
@@ -781,22 +780,26 @@ function NewUserForm({
                       <option value={2}>Locked</option>
                     </select>
                   </label>
-                  {+data.status===2? <label className="selectLabel">
-                    Remarks
-                    <input
-                      type="text"
-                      name="route_title"
-                      className="numberInput"
-                      value={data?.remarks}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          remarks: e.target.value,
-                        })
-                      }
-                      maxLength={42}
-                    />
-                  </label>:""}
+                  {+data.status === 2 ? (
+                    <label className="selectLabel">
+                      Remarks
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.remarks}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            remarks: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                      />
+                    </label>
+                  ) : (
+                    ""
+                  )}
                 </div>
                 <div className="row">
                   <label className="selectLabel">
@@ -829,6 +832,24 @@ function NewUserForm({
                         })
                       }
                       maxLength={42}
+                    />
+                  </label>
+                </div>
+                <div className="row">
+                  <label className="selectLabel">
+                    Counter Code
+                    <input
+                      type="text"
+                      name="one_pack"
+                      className="numberInput"
+                      value={data?.counter_code}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          counter_code: e.target.value,
+                        })
+                      }
+                      maxLength={5}
                     />
                   </label>
                 </div>

@@ -810,6 +810,25 @@ function NewUserForm({
                     </div>
                   </label>
                 </div>
+                <div className="row">
+                <label className="selectLabel">
+                    Item Code
+                    <input
+                      type="text"
+                      name="one_pack"
+                      className="numberInput"
+                      value={data?.item_code}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          item_code: e.target.value,
+                        })
+                      }
+                      maxLength={5}
+                    />
+                  </label>
+                 
+                </div>
               </div>
               <i style={{ color: "red" }}>
                 {errMassage === "" ? "" : "Error: " + errMassage}
