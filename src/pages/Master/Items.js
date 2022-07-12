@@ -824,7 +824,6 @@ function NewUserForm({
                           item_code: e.target.value,
                         })
                       }
-                      maxLength={5}
                     />
                   </label>
                  

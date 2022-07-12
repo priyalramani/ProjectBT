@@ -849,7 +849,6 @@ function NewUserForm({
                           counter_code: e.target.value,
                         })
                       }
-                      maxLength={5}
                     />
                   </label>
                 </div>
