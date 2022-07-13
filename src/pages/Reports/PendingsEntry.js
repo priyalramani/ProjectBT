@@ -3,12 +3,19 @@ import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
+import * as XLSX from "xlsx";
+import * as FileSaver from "file-saver";
+const fileExtension = ".xlsx";
+const fileType =
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
 const PendingsEntry = () => {
   const [orders, setOrders] = useState([]);
+  const [itemsData, setItemsData] = useState([]);
   const [popupOrder, setPopupOrder] = useState(false);
 
   const [counters, setCounters] = useState([]);
+  const [selectedOrders, setSelectedOrders] = useState([]);
 
   const getOrders = async () => {
     const response = await axios({
@@ -24,8 +31,7 @@ const PendingsEntry = () => {
       setOrders(
         response.data.result.map((a) => ({
           ...a,
-          counter_title: counters.find((b) => b.counter_uuid === a.counter_uuid)
-            ?.counter_title,
+          ...counters.find((b) => b.counter_uuid === a.counter_uuid),
         }))
       );
   };
@@ -40,7 +46,19 @@ const PendingsEntry = () => {
     });
     if (response.data.success) setCounters(response.data.result);
   };
+  const getItemsData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/items/GetItemList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setItemsData(response.data.result);
+  };
   useEffect(() => {
+    getItemsData();
     getCounter();
   }, []);
   useEffect(() => {
@@ -56,8 +74,54 @@ const PendingsEntry = () => {
       },
     });
     if (response.data.success) {
-      getOrders();
+      return;
     }
+  };
+  const downloadHandler = async () => {
+    let sheetData = [];
+    // console.log(sheetData)
+    for (let order of selectedOrders) {
+      for (let item of order.item_details.filter(
+        (a) => !(a.status === 3 && a.b && a.p && a.free)
+      )) {
+        let date = new Date(+order.status[0]?.time);
+        let itemData = itemsData.find((a) => a.item_uuid === item.item_uuid);
+        sheetData.push({
+          "Party Code": order.counter_code || "",
+          "Invoice Number": "N" + order.invoice_number,
+          "Invoice Date": "dd/mm/yy"
+            .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
+            .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))
+            .replace("dd", ("00" + date?.getDate().toString()).slice(-2)),
+          "Item Code": itemData.item_code || "",
+          Box: item.b || 0,
+          Pcs: item.p || 0,
+          "Item Price":
+            +(item.price || itemData?.item_price || 0) *
+            +(itemData?.conversion || 1),
+          "Cash Credit":
+            order.modes.filter(
+              (a) =>
+                a.amt && a.mode_uuid !== "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+            ).length || order.unpaid
+              ? "Credit"
+              : "Cash",
+          "Dicount 1": item.charges_discount?.length
+            ? item.charges_discount[0]?.value
+            : 0,
+          "Dicount 2": item.charges_discount?.length
+            ? item.charges_discount[1]?.value
+            : 0,
+        });
+      }
+    }
+    // console.log(sheetData);
+    const ws = XLSX.utils.json_to_sheet(sheetData);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(data, "Book" + fileExtension);
+    setSelectedOrders([]);
   };
   return (
     <>
@@ -73,8 +137,40 @@ const PendingsEntry = () => {
             itemsDetails={orders}
             setPopupOrder={setPopupOrder}
             putOrder={putOrder}
+            selectedOrders={selectedOrders}
+            setSelectedOrders={setSelectedOrders}
+            getOrders={getOrders}
           />
         </div>
+        {selectedOrders.length ? (
+          <div className="flex" style={{ justifyContent: "start" }}>
+            <button
+              className="item-sales-search"
+              onClick={async (e) => {
+                e.stopPropagation();
+                for (let order of selectedOrders)
+                  await putOrder(order.order_uuid);
+                setSelectedOrders([]);
+                getOrders();
+              }}
+              style={{ margin: "20px" }}
+            >
+              All Done
+            </button>
+            <button
+              className="item-sales-search"
+              onClick={(e) => {
+                e.stopPropagation();
+                downloadHandler();
+              }}
+              style={{ margin: "20px" }}
+            >
+              Excel
+            </button>
+          </div>
+        ) : (
+          ""
+        )}
       </div>
       {popupOrder ? (
         <OrderDetails
@@ -92,7 +188,14 @@ const PendingsEntry = () => {
   );
 };
 
-function Table({ itemsDetails, setPopupOrder, putOrder }) {
+function Table({
+  itemsDetails,
+  setPopupOrder,
+  putOrder,
+  selectedOrders,
+  setSelectedOrders,
+  getOrders,
+}) {
   return (
     <table
       className="user-table"
@@ -123,7 +226,26 @@ function Table({ itemsDetails, setPopupOrder, putOrder }) {
                 setPopupOrder(item);
               }}
             >
-              <td>{i + 1}</td>
+              <td
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedOrders((prev) =>
+                    prev.filter((a) => a.order_uuid === item.order_uuid).length
+                      ? prev.filter((a) => a.order_uuid !== item.order_uuid)
+                      : [...(prev || []), item]
+                  );
+                }}
+                className="flex"
+                style={{ justifyContent: "space-between" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedOrders.find(
+                    (a) => a.order_uuid === item.order_uuid
+                  )}
+                />
+                {i + 1}
+              </td>
 
               <td colSpan={2}>{item.counter_title || ""}</td>
               <td colSpan={2}>{item.invoice_number || ""}</td>
@@ -147,9 +269,10 @@ function Table({ itemsDetails, setPopupOrder, putOrder }) {
               <td colSpan={2}>
                 <button
                   className="item-sales-search"
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.stopPropagation();
-                    putOrder(item.order_uuid);
+                    await putOrder(item.order_uuid);
+                    getOrders();
                   }}
                 >
                   Done
