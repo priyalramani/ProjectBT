@@ -80,7 +80,9 @@ const PendingsEntry = () => {
   const downloadHandler = async () => {
     let sheetData = [];
     // console.log(sheetData)
-    for (let order of selectedOrders?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
+    for (let order of selectedOrders?.sort(
+      (a, b) => +a.invoice_number - +b.invoice_number
+    )) {
       for (let item of order.item_details.filter(
         (a) => !(a.status === 3 && a.b && a.p && a.free)
       )) {
@@ -216,7 +218,7 @@ function Table({
       </thead>
       <tbody className="tbody">
         {itemsDetails
-          ?.sort((a, b) => a.time - b.time)
+          ?.sort((a, b) => +a.invoice_number - +b.invoice_number)
           ?.map((item, i, array) => (
             <tr
               key={Math.random()}
