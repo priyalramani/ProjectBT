@@ -80,7 +80,7 @@ const PendingsEntry = () => {
   const downloadHandler = async () => {
     let sheetData = [];
     // console.log(sheetData)
-    for (let order of selectedOrders) {
+    for (let order of selectedOrders?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
       for (let item of order.item_details.filter(
         (a) => !(a.status === 3 && a.b && a.p && a.free)
       )) {
