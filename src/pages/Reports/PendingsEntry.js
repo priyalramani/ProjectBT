@@ -12,6 +12,7 @@ const fileType =
 const PendingsEntry = () => {
   const [orders, setOrders] = useState([]);
   const [itemsData, setItemsData] = useState([]);
+  const [warningCodes, setWarningCodes] = useState(false);
   const [popupOrder, setPopupOrder] = useState(false);
 
   const [counters, setCounters] = useState([]);
@@ -163,7 +164,33 @@ const PendingsEntry = () => {
               className="item-sales-search"
               onClick={(e) => {
                 e.stopPropagation();
-                downloadHandler();
+                let countersCodes = selectedOrders
+                  .filter((a) => !a.counter_code)
+                  .filter(
+                    (value, index, self) =>
+                      index ===
+                      self.findIndex(
+                        (t) => t.counter_uuid === value.counter_uuid
+                      )
+                  );
+                let itemCodes = [].concat
+                  .apply(
+                    [],
+                    selectedOrders.map((a) => a.item_details)
+                  )
+                  .filter(
+                    (value, index, self) =>
+                      index ===
+                      self.findIndex((t) => t.item_uuid === value.item_uuid)
+                  )
+                  .filter((a) => !a.item_code)
+                  .map((a) =>
+                    itemsData.find((b) => b.item_uuid === a.item_uuid)
+                  );
+
+                if (countersCodes.length || itemCodes.length) {
+                  setWarningCodes({ countersCodes, itemCodes });
+                } else downloadHandler();
               }}
               style={{ margin: "20px" }}
             >
@@ -183,6 +210,78 @@ const PendingsEntry = () => {
           order={popupOrder}
           orderStatus="edit"
         />
+      ) : (
+        ""
+      )}
+      {warningCodes ? (
+        <div className="overlay">
+          <div
+            className="modal"
+            style={{ height: "70vh", width: "fit-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form className="form" onSubmit={downloadHandler}>
+                  <div className="row">
+                    <h1> Code missing</h1>
+                  </div>
+
+                  <div className="formGroup">
+                    {warningCodes.countersCodes.length ? (
+                      <div
+                        className="row"
+                        style={{
+                          flexDirection: "column",
+                          alignItems: "flex-start",
+                        }}
+                      >
+                        <h2>Counters:</h2>
+                        {warningCodes.countersCodes.map((a) => (
+                          <div>{a.counter_title}</div>
+                        ))}
+                      </div>
+                    ) : (
+                      ""
+                    )}
+                    {warningCodes.itemCodes.length ? (
+                      <div
+                        className="row"
+                        style={{
+                          flexDirection: "column",
+                          alignItems: "flex-start",
+                        }}
+                      >
+                        <h2>item:</h2>
+                        {warningCodes.itemCodes.map((a) => (
+                          <div>{a.item_title}</div>
+                        ))}
+                      </div>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+
+                  <button type="submit" className="submit">
+                    Okay
+                  </button>
+                </form>
+              </div>
+              <button
+                onClick={() => setWarningCodes(false)}
+                className="closeButton"
+              >
+                x
+              </button>
+            </div>
+          </div>
+        </div>
       ) : (
         ""
       )}
