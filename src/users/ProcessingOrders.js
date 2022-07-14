@@ -309,7 +309,7 @@ const ProcessingOrders = () => {
           return {
             ...itemData,
             ...a,
-            price: itemData?.price || 0,
+            // price: itemData?.price || 0,
           };
         }),
       });
@@ -738,7 +738,7 @@ const ProcessingOrders = () => {
         return {
           ...itemData,
           ...a,
-          price: itemData?.price || 0,
+          // price: itemData?.price || 0,
         };
       }),
     });
@@ -1514,7 +1514,7 @@ const ProcessingOrders = () => {
                   return {
                     ...itemData,
                     ...a,
-                    price: itemData?.price || 0,
+                    // price: itemData?.price || 0,
                   };
                 }),
               });
@@ -1727,7 +1727,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
         return {
           ...itemData,
           ...a,
-          price: itemData?.price || 0,
+          // price: itemData?.price || 0,
         };
       }),
     });
@@ -2803,7 +2803,7 @@ function DiliveryPopup({
         return {
           ...itemData,
           ...a,
-          price: itemData?.price || 0,
+          // price: itemData?.price || 0,
         };
       }),
     });
@@ -3826,7 +3826,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
           return {
             ...itemData,
             ...a,
-            price: itemData?.price || 0,
+            // price: itemData?.price || 0,
           };
         }),
       });

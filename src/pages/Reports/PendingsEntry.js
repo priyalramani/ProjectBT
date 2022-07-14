@@ -99,6 +99,7 @@ const PendingsEntry = () => {
           "Item Code": itemData.item_code || "",
           Box: item.b || 0,
           Pcs: item.p || 0,
+          Free: item.free || 0,
           "Item Price":
             +(item.price || itemData?.item_price || 0) *
             +(itemData?.conversion || 1),
@@ -109,10 +110,10 @@ const PendingsEntry = () => {
             ).length || order.unpaid
               ? "Credit"
               : "Cash",
-          "Dicount 1": item.charges_discount?.length
+          "Discount 1": item.charges_discount?.length
             ? item.charges_discount[0]?.value
             : 0,
-          "Dicount 2": item.charges_discount?.length
+          "Discount 2": item.charges_discount?.length
             ? item.charges_discount[1]?.value
             : 0,
         });
@@ -124,7 +125,7 @@ const PendingsEntry = () => {
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const data = new Blob([excelBuffer], { type: fileType });
     FileSaver.saveAs(data, "Book" + fileExtension);
-    setSelectedOrders([]);
+    // setSelectedOrders([]);
   };
   return (
     <>
@@ -183,10 +184,11 @@ const PendingsEntry = () => {
                       index ===
                       self.findIndex((t) => t.item_uuid === value.item_uuid)
                   )
-                  .filter((a) => !a.item_code)
+
                   .map((a) =>
                     itemsData.find((b) => b.item_uuid === a.item_uuid)
-                  );
+                  )
+                  .filter((a) => !a.item_code);
 
                 if (countersCodes.length || itemCodes.length) {
                   setWarningCodes({ countersCodes, itemCodes });
