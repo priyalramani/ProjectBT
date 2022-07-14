@@ -211,7 +211,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       counter,
       items: data.item_details,
       others: {},
-
     });
     data = {
       ...data,
@@ -224,7 +223,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
 
       item_details: data.item_details.map((a) => ({
         ...a,
-        unit_price: a.price,
         gst_percentage: a.item_gst,
         status: a.status || 0,
         price: a?.price || a.item_price || 0,

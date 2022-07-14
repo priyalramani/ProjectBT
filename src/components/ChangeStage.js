@@ -86,13 +86,13 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
         let billingData = await Billing({
           replacement: obj.replacement,
           counter: counters.find((a) => a.counter_uuid === obj.counter_uuid),
-          add_discounts: true,
+          ////add_discounts: true,
           items: obj.item_details.map((a) => {
             let itemData = items.find((b) => a.item_uuid === b.item_uuid);
             return {
               ...itemData,
               ...a,
-              price: itemData?.price || 0,
+              
             };
           }),
         });
@@ -330,13 +330,13 @@ function DiliveryPopup({
       counter: counters.find(
         (a) => a.counter_uuid === selectedOrder.counter_uuid
       ),
-      add_discounts: true,
+      ////add_discounts: true,
       items: selectedOrder.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {
           ...itemData,
           ...a,
-          price: itemData?.price || 0,
+          
         };
       }),
     });
@@ -354,13 +354,13 @@ function DiliveryPopup({
       replacement: data.actual,
       replacement_mrp: data.mrp,
       counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
-      add_discounts: true,
+      ////add_discounts: true,
       items: order.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {
           ...itemData,
           ...a,
-          price: itemData?.price || 0,
+          
         };
       }),
     });

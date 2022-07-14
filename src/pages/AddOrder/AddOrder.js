@@ -200,10 +200,13 @@ export default function AddOrder() {
       opened_by: 0,
       item_details: data.item_details.map((a) => ({
         ...a,
-        unit_price: a.price,
+        unit_price:
+          a.item_total / (+(+a.conversion * a.b) + a.p + a.free) ||
+          a.unit_price ||
+          a.price,
         gst_percentage: a.item_gst,
         status: 0,
-        price: a.price || a.item_price,
+        price: a.price || a.item_price||0,
       })),
       status:
         type.stage === 1
