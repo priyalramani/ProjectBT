@@ -6,7 +6,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
   const [data, setData] = useState({ stage: stage + 1 });
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const onSubmit = async (selectedData = orders) => {
-    console.log(selectedData)
+    console.log(selectedData);
     let user_uuid = localStorage.getItem("user_uuid");
     let time = new Date();
     console.log(stage, data);
@@ -92,7 +92,6 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
             return {
               ...itemData,
               ...a,
-              
             };
           }),
         });
@@ -336,7 +335,6 @@ function DiliveryPopup({
         return {
           ...itemData,
           ...a,
-          
         };
       }),
     });
@@ -350,32 +348,30 @@ function DiliveryPopup({
 
   const submitHandler = async () => {
     setError("");
-    let billingData = await Billing({
-      replacement: data.actual,
-      replacement_mrp: data.mrp,
-      counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
-      ////add_discounts: true,
-      items: order.item_details.map((a) => {
-        let itemData = items.find((b) => a.item_uuid === b.item_uuid);
-        return {
-          ...itemData,
-          ...a,
-          
-        };
-      }),
-    });
-    let Tempdata = {
-      ...order,
-      ...billingData,
-      item_details: billingData.items,
-    };
+    // let billingData = await Billing({
+    //   replacement: data.actual,
+    //   replacement_mrp: data.mrp,
+    //   counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
+    //   items: order.item_details.map((a) => {
+    //     let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+    //     return {
+    //       ...itemData,
+    //       ...a,
+    //     };
+    //   }),
+    // });
+    // let Tempdata = {
+    //   ...order,
+    //   ...billingData,
+    //   item_details: billingData.items,
+    // };
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
     console.log(
-      Tempdata?.order_grandtotal,
+      order?.order_grandtotal,
       +(+modeTotal + (+outstanding?.amount || 0))
     );
     if (
-      +Tempdata?.order_grandtotal !==
+      +order?.order_grandtotal !==
       +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
