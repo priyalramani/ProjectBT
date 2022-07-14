@@ -67,7 +67,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
       } else return a;
     });
   }
-  // console.log("eligibleitems", eligibleItems);
+  // //console.log("eligibleitems", eligibleItems);
   data = autobills?.filter(
     (a) =>
       a.type === "auto-item-add" &&
@@ -86,26 +86,26 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           (b) => a.item_group_uuid.filter((c) => c === b).length
         ).length
     );
-    console.log("eligible", eligibleAddItems);
+    //console.log("eligible", eligibleAddItems);
     let eligiblesBox =
       eligibleAddItems.length > 1
         ? eligibleAddItems.map((a) => a.b).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
         ? +eligibleAddItems[0].b
         : 0;
-    //console.log("eligibleBox", eligiblesBox);
+    ////console.log("eligibleBox", eligiblesBox);
     let eligiblesPcs =
       eligibleAddItems.length > 1
         ? eligibleAddItems.map((a) => a.p).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
         ? +eligibleAddItems[0].p
         : 0;
-    // console.log("eligiblePcs", eligiblesPcs);
+    // //console.log("eligiblePcs", eligiblesPcs);
 
     let base_qty_arr = autobill.qty_details.filter(
       (b) => b.unit === "b" && +b.base_qty <= eligiblesBox
     );
-    //console.log("baseqtyarr", base_qty_arr);
+    ////console.log("baseqtyarr", base_qty_arr);
     base_qty_arr =
       eligibleAddItems.length >= autobill.min_range
         ? base_qty_arr.find(
@@ -120,11 +120,11 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
                 : null)
           )
         : null;
-    //console.log("baseqtyobj", base_qty_arr);
+    ////console.log("baseqtyobj", base_qty_arr);
     let pice_qty_arr = autobill.qty_details.filter(
       (b) => b.unit === "p" && +b.base_qty <= eligiblesPcs
     );
-    // console.log("piceqtyarr", pice_qty_arr);
+    // //console.log("piceqtyarr", pice_qty_arr);
     pice_qty_arr =
       eligibleAddItems.length >= autobill.min_range
         ? pice_qty_arr.find(
@@ -139,7 +139,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
                 : null)
           )
         : null;
-    // console.log("piceqtyobj", pice_qty_arr);
+    // //console.log("piceqtyobj", pice_qty_arr);
 
     if (base_qty_arr?.add_items) {
       let dataItems = dbItems.filter(
@@ -186,7 +186,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           pice_qty_arr?.add_items.filter((b) => b.item_uuid === a.item_uuid)
             .length
       );
-      //console.log("datapiceItems", dataItems);
+      ////console.log("datapiceItems", dataItems);
       dataItems = dataItems.map((a) => {
         if (pice_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)) {
           let data = pice_qty_arr?.add_items.find(
@@ -200,7 +200,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
             .add_qty,
         };
       });
-      //console.log("datapiceItems", dataItems);
+      ////console.log("datapiceItems", dataItems);
 
       let nonFiltered = eligibleItems.filter(
         (a) => !dataItems.filter((b) => a.item_uuid === b.item_uuid).length
@@ -214,7 +214,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           b: (data ? +a.b + data.b : a.b) || 0,
         };
       });
-      //console.log(nonFiltered, dataItems);
+      ////console.log(nonFiltered, dataItems);
       eligibleItems = nonFiltered.length
         ? dataItems.length
           ? [...nonFiltered, ...dataItems]
@@ -243,7 +243,7 @@ export const Billing = async ({
   let newPriceItems = [];
 
   for (let item of items) {
-    //console.log(
+    ////console.log(
     //   item,
     //   others,
     //   +item.conversion * +item.b + item.p,
@@ -265,7 +265,7 @@ export const Billing = async ({
           (a) => a.company_uuid === item.company_uuid
         )?.discount || 0
       : 0;
-    // console.log("company_discount_percentage", company_discount_percentage);
+    // //console.log("company_discount_percentage", company_discount_percentage);
     item = {
       ...item,
       qty: +item.conversion * +item.b + item.p,
@@ -285,6 +285,7 @@ export const Billing = async ({
             ((100 - special_discount_percentage) / 100) || 0,
       };
     }
+    //console.log(add_discounts, item.item_discount);
     if (add_discounts && item.item_discount) {
       charges_discount.push({
         title: "Item Discount",
@@ -298,7 +299,7 @@ export const Billing = async ({
               ((100 - item.item_discount) / 100) || 0,
       };
     }
-    if (item.charges_discount.length && !add_discounts) {
+    if (item?.charges_discount?.length && !add_discounts) {
       for (let desc of item.charges_discount) {
         item.item_desc_total = item.item_desc_total
           ? item.item_desc_total * ((100 - desc.value) / 100) || 0
@@ -324,7 +325,7 @@ export const Billing = async ({
     let edit_price = edit_prices.find(
       (a) => a.item_uuid === item.item_uuid
     )?.item_price;
-    // console.log(item);
+    // //console.log(item);
     item = {
       ...item,
       charges_discount,
@@ -340,10 +341,10 @@ export const Billing = async ({
           : 0,
       item_desc_total: 0,
     };
-    console.log("charges_discount", charges_discount);
+    //console.log("charges_discount", charges_discount);
     newPriceItems.push(item);
   }
-  console.log("newItemPrice", newPriceItems);
+  //console.log("newItemPrice", newPriceItems);
   let order_grandtotal = (
     newPriceItems.length > 1
       ? newPriceItems.map((a) => +a.item_total || 0).reduce((a, b) => a + b) -
@@ -363,7 +364,7 @@ export const Billing = async ({
 
 export const updateIndexedDb = async () => {
   let response = await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
-  console.log(response);
+  //console.log(response);
   const result = await axios({
     method: "get",
     url: "/users/getDetails",
@@ -373,7 +374,7 @@ export const updateIndexedDb = async () => {
     },
   });
   let data = result.data.result;
-  console.log(data);
+  //console.log(data);
   const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
     upgrade(db) {
       for (const property in data) {
@@ -408,7 +409,7 @@ export const updateIndexedDb = async () => {
             ? "mode_uuid"
             : ""
         ];
-      console.log({ ...item, IDENTIFIER });
+      //console.log({ ...item, IDENTIFIER });
       await store.put({ ...item, IDENTIFIER });
     }
   }
@@ -437,12 +438,12 @@ export const audioLoopFunction = ({
       return;
     }
     if (src?.[i]?.getAttribute("played") === "true") {
-      console.log(`skipped number : ${i + 1}`);
+      //console.log(`skipped number : ${i + 1}`);
       audioLoopFunction({ i: i + 1, recall, forcePlayCount, src, callback });
       return;
     }
 
-    console.log(`trying to play audio number : ${i + 1}`);
+    //console.log(`trying to play audio number : ${i + 1}`);
 
     navigator.mediaSession.setActionHandler("play", function () {
       src[i].play();
@@ -460,11 +461,11 @@ export const audioLoopFunction = ({
         if (!forcePlayCount) {
           src[i].pause();
           navigator.mediaSession.playbackState = "paused";
-          console.log(`Paused ${i + 1}/${src.length} audios`);
+          //console.log(`Paused ${i + 1}/${src.length} audios`);
         } else {
-          console.log(`Playing ${i + 1}/${src.length} audios`);
+          //console.log(`Playing ${i + 1}/${src.length} audios`);
           navigator.mediaSession.playbackState = "playing";
-          console.log("forcePlayCount:", forcePlayCount);
+          //console.log("forcePlayCount:", forcePlayCount);
         }
 
         let intervalId = setInterval(() => {
@@ -480,7 +481,7 @@ export const audioLoopFunction = ({
           navigator.mediaSession.playbackState = "paused";
           callback(src[i]?.elem_id);
 
-          if (!src[i + 1]) return console.log(`no next audio : ${i + 1}`);
+          if (!src[i + 1]) return //console.log(`no next audio : ${i + 1}`);
 
           setTimeout(() => {
             audioLoopFunction({
@@ -505,7 +506,7 @@ export const audioLoopFunction = ({
         else console.log(`could not play ${i} audio : ${error.message}`);
       });
   } catch (error) {
-    console.log(error.message);
+    //console.log(error.message);
   }
 };
 
@@ -520,7 +521,7 @@ export const audioAPIFunction = ({ speechString, elem_id, callback }) => {
     function (e) {
       if (audioElement.duration !== Infinity) {
         audioElement.remove();
-        console.log(audioElement.duration);
+        //console.log(audioElement.duration);
         audioElement.elem_id = elem_id;
         callback(audioElement);
       }
@@ -539,18 +540,18 @@ export const jumpToNextIndex = (
   setFocusedInputId,
   appendData
 ) => {
-  console.log(id);
+  //console.log(id);
   document.getElementById(id)?.blur();
   const index = +document.getElementById(id).getAttribute("index") + 1;
-  // console.log("this is next index", index);
+  // //console.log("this is next index", index);
 
   const nextElem = document.querySelector(`[index="${index}"]`);
   if (nextElem) {
     if (nextElem.id.includes(`REACT_SELECT_COMPONENT`)) {
-      // console.log("next select container id: ", nextElem.id);
+      // //console.log("next select container id: ", nextElem.id);
       reactInputsRef.current[nextElem.id].focus();
     } else {
-      // console.log("next input id: ", nextElem.id);
+      // //console.log("next input id: ", nextElem.id);
       setFocusedInputId("");
       setTimeout(
         () => document.querySelector(`[index="${index}"]`).focus(),

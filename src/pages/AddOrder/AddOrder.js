@@ -34,7 +34,7 @@ export default function AddOrder() {
   const [focusedInputId, setFocusedInputId] = useState(0);
   const [edit_prices, setEditPrices] = useState([]);
   const [autoAdd, setAutoAdd] = useState(false);
-  // console.log(
+  // //console.log(
   //   document.getElementById(id),
   //   id,
   //   selectedItem,
@@ -42,14 +42,14 @@ export default function AddOrder() {
   //   counting
   // );
   // const escFunction = (event) => {
-  //   console.log(event.key);
+  //   //console.log(event.key);
   //   if (event.key !== "Enter") return;
   //   if (!order.counter_uuid) {
   //     document.getElementById("counter_select").focus();
   //     setId(list[0] + order.item_details[0]?.uuid);
   //     return;
   //   }
-  //   console.log(document.getElementById(id));
+  //   //console.log(document.getElementById(id));
 
   //   let index = list.indexOf(
   //     id.replace(
@@ -59,7 +59,7 @@ export default function AddOrder() {
   //       ""
   //     )
   //   );
-  //   console.log(index);
+  //   //console.log(index);
 
   //   if (counting === 3) {
   //     let id = uuid();
@@ -114,7 +114,7 @@ export default function AddOrder() {
     if (response1.data.success)
       data = data ? response1.data.result : [...data, ...response1.data.result];
     setAutoBills(data);
-    console.log(data);
+    //console.log(data);
   };
 
   const getItemsData = async () => {
@@ -268,7 +268,7 @@ export default function AddOrder() {
               },
             ],
     };
-    console.log(data);
+    //console.log('orderJSon',data);
     const response = await axios({
       method: "post",
       url: "/orders/postOrder",
@@ -310,7 +310,7 @@ export default function AddOrder() {
       item_details: autoBilling.items,
     }));
   };
-console.log(order)
+//console.log(order)
   const { getRemainingTime, getLastActiveTime } = useIdleTimer({
     timeout: 1000 * 5,
     onIdle: callBilling,
@@ -318,21 +318,21 @@ console.log(order)
   });
 
   const jumpToNextIndex = (id) => {
-    console.log(id);
+    //console.log(id);
     document.querySelector(`#${id}`).blur();
     const index = document.querySelector(`#${id}`).getAttribute("index");
-    console.log("this is index", index);
+    //console.log("this is index", index);
 
     const nextElem = document.querySelector(`[index="${+index + 1}"]`);
 
     if (nextElem) {
       if (nextElem.id.includes("selectContainer-")) {
-        console.log("next select container id: ", nextElem.id);
+        //console.log("next select container id: ", nextElem.id);
         reactInputsRef.current[
           nextElem.id.replace("selectContainer-", "")
         ].focus();
       } else {
-        console.log("next input id: ", nextElem.id);
+        //console.log("next input id: ", nextElem.id);
         setFocusedInputId("");
         setTimeout(
           () => document.querySelector(`[index="${+index + 1}"]`).focus(),
@@ -734,7 +734,7 @@ console.log(order)
                                   (a) => a.uuid !== item.uuid
                                 ),
                               });
-                              console.log(item);
+                              //console.log(item);
                             }}
                           />
                         </td>
@@ -816,7 +816,7 @@ console.log(order)
         <NewUserForm
           onClose={() => setPopup(false)}
           onSubmit={(e) => {
-            console.log(e);
+            //console.log(e);
             setAutoAdd(e.autoAdd);
             if (e.stage === 4) setDeliveryPopup(true);
             else {
@@ -995,10 +995,10 @@ function DiliveryPopup({
       replacement_mrp: data.mrp,
     };
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
-    console.log(
-      Tempdata?.order_grandtotal,
-      +(+modeTotal + (+outstanding?.amount || 0))
-    );
+    //console.log(
+     // Tempdata?.order_grandtotal,
+   //   +(+modeTotal + (+outstanding?.amount || 0))
+   // );
     if (
       +Tempdata?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {
