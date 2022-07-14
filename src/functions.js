@@ -249,8 +249,9 @@ export const Billing = async ({
     //   +item.conversion * +item.b + item.p,
     //   +item.conversion * +item.b + item.p
     // );
+    console.log("item", item);
     item = { ...item, item_total: 0 };
-    let charges_discount = [];
+    let charges_discount = add_discounts ? [] : item.charges_discount || [];
     let price = add_discounts
       ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
           ?.price || 0
@@ -341,7 +342,7 @@ export const Billing = async ({
           : 0,
       item_desc_total: 0,
     };
-    //console.log("charges_discount", charges_discount);
+
     newPriceItems.push(item);
   }
   //console.log("newItemPrice", newPriceItems);
@@ -481,7 +482,7 @@ export const audioLoopFunction = ({
           navigator.mediaSession.playbackState = "paused";
           callback(src[i]?.elem_id);
 
-          if (!src[i + 1]) return //console.log(`no next audio : ${i + 1}`);
+          if (!src[i + 1]) return; //console.log(`no next audio : ${i + 1}`);
 
           setTimeout(() => {
             audioLoopFunction({
