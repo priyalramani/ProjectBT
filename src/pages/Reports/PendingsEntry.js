@@ -116,7 +116,7 @@ const PendingsEntry = () => {
           "Discount 2": item.charges_discount?.length
             ? item.charges_discount[1]?.value
             : 0,
-          Replacement: -item.Replacement || 0,
+          Replacement: -order.Replacement || 0,
         });
       }
     }
