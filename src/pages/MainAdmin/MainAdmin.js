@@ -2478,7 +2478,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
       let billingData = await Billing({
         replacement: data.replacement,
         counter: counter.find((a) => a.counter_uuid === data.counter_uuid),
-        add_discounts: true,
+        // add_discounts: true,
         items: data.item_details.map((a) => {
           let itemData = itemsData.find((b) => a.item_uuid === b.item_uuid);
           return {
