@@ -250,7 +250,7 @@ const SelectedCounterOrder = () => {
                 className="item-sales-search"
                 style={{
                   width: "max-content",
-                  backgroundColor:"#4ac959"
+                  backgroundColor: "#4ac959",
                 }}
                 onClick={() => setHoldPopup("Summary")}
               >
@@ -1132,7 +1132,14 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
   const [item, setItem] = useState([]);
   useEffect(() => {
-    setItem(itemsData.find((a) => a.item_uuid === holdPopup.item_uuid));
+    setItem(() => {
+      let data = itemsData.find((a) => a.item_uuid === holdPopup.item_uuid);
+      return {
+        ...data,
+        p_price: data.item_price,
+        b_price: ((data.item_price * data.conversion)||0).toFixed(0),
+      };
+    });
   }, []);
   const postOrderData = async () => {
     let data = orders;
@@ -1142,7 +1149,7 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
             ...a,
             old_price: a.item_price,
             price_approval: "N",
-            item_price: item.item_price,
+            item_price: item.p_price,
           }
         : a
     );
@@ -1204,7 +1211,7 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                         type="number"
                         name="route_title"
                         className="numberInput"
-                        value={item?.item_price || ""}
+                        value={item?.p_price || ""}
                         style={{
                           width: "100px",
                           backgroundColor: "transparent",
@@ -1213,7 +1220,10 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                         onChange={(e) =>
                           setItem((prev) => ({
                             ...prev,
-                            item_price: e.target.value,
+                            p_price: e.target.value,
+                            b_price: (
+                              e.target.value * item.conversion || 0
+                            ).toFixed(2),
                           }))
                         }
                         onWheel={(e) => e.preventDefault()}
@@ -1225,9 +1235,7 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                         type="number"
                         name="route_title"
                         className="numberInput"
-                        value={(
-                          item?.item_price * item?.conversion || 0
-                        ).toFixed(0)}
+                        value={item?.b_price}
                         style={{
                           width: "100px",
                           backgroundColor: "transparent",
@@ -1236,7 +1244,10 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                         onChange={(e) =>
                           setItem((prev) => ({
                             ...prev,
-                            item_price: e.target.value / item?.conversion,
+                            b_price: e.target.value,
+                            p_price: (
+                              e.target.value / item.conversion || 0
+                            ).toFixed(2),
                           }))
                         }
                         onWheel={(e) => e.preventDefault()}
