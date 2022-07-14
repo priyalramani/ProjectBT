@@ -116,11 +116,11 @@ const PendingsEntry = () => {
           "Discount 2": item.charges_discount?.length
             ? item.charges_discount[1]?.value
             : 0,
-          Replacement: -order.Replacement || 0,
+          Replacement: -order.replacement || 0,
         });
       }
     }
-    // console.log(sheetData);
+
     const ws = XLSX.utils.json_to_sheet(sheetData);
     const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
