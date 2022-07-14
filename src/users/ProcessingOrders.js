@@ -303,7 +303,7 @@ const ProcessingOrders = () => {
       let billingData = await Billing({
         replacement: data.replacement,
         counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
-        add_discounts: true,
+
         items: data.item_details.map((a) => {
           let itemData = items.find((b) => a.item_uuid === b.item_uuid);
           return {
@@ -732,7 +732,7 @@ const ProcessingOrders = () => {
     let billingData = await Billing({
       replacement: order.replacement,
       counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
-      add_discounts: true,
+
       items: order.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {
@@ -1508,7 +1508,7 @@ const ProcessingOrders = () => {
                 counter: counters.find(
                   (a) => a.counter_uuid === data.counter_uuid
                 ),
-                add_discounts: true,
+
                 items: data.item_details.map((a) => {
                   let itemData = items.find((b) => a.item_uuid === b.item_uuid);
                   return {
@@ -1721,7 +1721,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
     let billingData = await Billing({
       replacement: data.replacement,
       counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
-      add_discounts: true,
+
       items: data.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {
@@ -2797,7 +2797,7 @@ function DiliveryPopup({
     let billingData = await Billing({
       replacement: data.actual,
       counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
-      add_discounts: true,
+
       items: order.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {
@@ -3820,7 +3820,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
       let billingData = await Billing({
         replacement: data.replacement,
         counter: counter.find((a) => a.counter_uuid === data.counter_uuid),
-        add_discounts: true,
+
         items: data.item_details.map((a) => {
           let itemData = itemsData.find((b) => a.item_uuid === b.item_uuid);
           return {
