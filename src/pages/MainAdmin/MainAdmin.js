@@ -196,10 +196,12 @@ const MainAdmin = () => {
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
-      data: selectedOrder.filter(a=>a.order_status!=="A").map((a) => ({
-        ...a,
-        trip_uuid: +selectedTrip === 0 ? "" : selectedTrip,
-      })),
+      data: selectedOrder
+        .filter((a) => a.order_status !== "A")
+        .map((a) => ({
+          ...a,
+          trip_uuid: +selectedTrip === 0 ? "" : selectedTrip,
+        })),
       headers: {
         "Content-Type": "application/json",
       },
@@ -358,7 +360,6 @@ const MainAdmin = () => {
             </div>
           )}
           <div className="content-container" id="content-file-container">
-
             {window.location.pathname.includes("admin") ? (
               <>
                 {routesData.length ? (
@@ -372,7 +373,8 @@ const MainAdmin = () => {
                                 (c) =>
                                   c.counter_uuid === a.counter_uuid &&
                                   (route.route_uuid === c.route_uuid ||
-                                    ((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
+                                    ((!c.route_uuid || +c.route_uuid === 0) &&
+                                      +route.route_uuid === 0))
                               ).length
                           )
                           .filter(
@@ -400,7 +402,8 @@ const MainAdmin = () => {
                                             c.counter_uuid === b.counter_uuid &&
                                             (route.route_uuid ===
                                               c.route_uuid ||
-                                              ((!c.route_uuid || +c.route_uuid === 0) &&
+                                              ((!c.route_uuid ||
+                                                +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
                                         ).length
                                     )
@@ -428,7 +431,8 @@ const MainAdmin = () => {
                                             c.counter_uuid === a.counter_uuid &&
                                             (route.route_uuid ===
                                               c.route_uuid ||
-                                              ((!c.route_uuid || +c.route_uuid === 0) &&
+                                              ((!c.route_uuid ||
+                                                +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
                                         ).length &&
                                         selectedOrder.filter(
@@ -442,7 +446,8 @@ const MainAdmin = () => {
                                             c.counter_uuid === a.counter_uuid &&
                                             (route.route_uuid ===
                                               c.route_uuid ||
-                                              ((!c.route_uuid || +c.route_uuid === 0) &&
+                                              ((!c.route_uuid ||
+                                                +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
                                         ).length
                                     ).length
@@ -457,7 +462,9 @@ const MainAdmin = () => {
                                                         a.counter_uuid &&
                                                       (route.route_uuid ===
                                                         c.route_uuid ||
-                                                        ((!c.route_uuid || +c.route_uuid === 0) &&
+                                                        ((!c.route_uuid ||
+                                                          +c.route_uuid ===
+                                                            0) &&
                                                           +route.route_uuid ===
                                                             0))
                                                   ).length &&
@@ -478,7 +485,9 @@ const MainAdmin = () => {
                                                               a.counter_uuid &&
                                                             (route.route_uuid ===
                                                               c.route_uuid ||
-                                                              ((!c.route_uuid || +c.route_uuid === 0) &&
+                                                              ((!c.route_uuid ||
+                                                                +c.route_uuid ===
+                                                                  0) &&
                                                                 +route.route_uuid ===
                                                                   0))
                                                         ).length &&
@@ -494,7 +503,9 @@ const MainAdmin = () => {
                                                           a.counter_uuid &&
                                                         (route.route_uuid ===
                                                           c.route_uuid ||
-                                                          ((!c.route_uuid || +c.route_uuid === 0) &&
+                                                          ((!c.route_uuid ||
+                                                            +c.route_uuid ===
+                                                              0) &&
                                                             +route.route_uuid ===
                                                               0))
                                                     ).length
@@ -508,7 +519,9 @@ const MainAdmin = () => {
                                                         a.counter_uuid &&
                                                       (route.route_uuid ===
                                                         c.route_uuid ||
-                                                        ((!c.route_uuid || +c.route_uuid === 0) &&
+                                                        ((!c.route_uuid ||
+                                                          +c.route_uuid ===
+                                                            0) &&
                                                           +route.route_uuid ===
                                                             0))
                                                   ).length
@@ -523,7 +536,8 @@ const MainAdmin = () => {
                                             c.counter_uuid === a.counter_uuid &&
                                             (route.route_uuid ===
                                               c.route_uuid ||
-                                              ((!c.route_uuid || +c.route_uuid === 0) &&
+                                              ((!c.route_uuid ||
+                                                +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
                                         ).length &&
                                         selectedOrder.filter(
@@ -537,7 +551,8 @@ const MainAdmin = () => {
                                             c.counter_uuid === a.counter_uuid &&
                                             (route.route_uuid ===
                                               c.route_uuid ||
-                                              ((!c.route_uuid || +c.route_uuid === 0) &&
+                                              ((!c.route_uuid ||
+                                                +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
                                         ).length
                                     ).length
@@ -565,7 +580,8 @@ const MainAdmin = () => {
                                       (c) =>
                                         c.counter_uuid === b.counter_uuid &&
                                         (route.route_uuid === c.route_uuid ||
-                                          ((!c.route_uuid || +c.route_uuid === 0) &&
+                                          ((!c.route_uuid ||
+                                            +c.route_uuid === 0) &&
                                             +route.route_uuid === 0))
                                     ).length
                                 )
@@ -1924,8 +1940,14 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                 display: "block",
               }}
             >
-              <thead style={{ width: "100%" }}>
-                <tr style={{ width: "100%" }}>
+              <thead
+                style={{
+                  width: "100%",
+                  color: "#000",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <tr style={{ width: "100%", fontSize: "12px" }}>
                   <th style={{ width: "10mm" }}>Sr.</th>
                   <th colSpan={5} style={{ width: "100mm" }}>
                     <div className="t-head-element">Item</div>
@@ -1945,43 +1967,49 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                       items?.filter((b) => a.category_uuid === b.category_uuid)
                         .length
                   )
+                  .sort((a, b) =>
+                    a?.category_title?.localeCompare(b?.category_title)
+                  )
                   .map((a) => (
                     <>
-                      <tr style={{ pageBreakAfter: "always", width: "100%" }}>
-                        <td colSpan={11}>{a.category_title}</td>
+                      <tr
+                        style={{
+                          pageBreakAfter: "always",
+                          width: "100%",
+                          height: "8px",
+                          fontSize: "12px",
+                        }}
+                      >
+                        <td colSpan={11} style={{ padding: "5px" }}>
+                          {a.category_title}
+                        </td>
                       </tr>
 
                       {items
                         .filter((b) => a.category_uuid === b.category_uuid)
+                        .sort((a, b) =>
+                          a?.item_title?.localeCompare(b?.item_title)
+                        )
                         ?.map((item, i) => (
                           <tr
                             key={item?.item_uuid || Math.random()}
                             style={{
-                              height: "30px",
+                              height: "8px",
                               pageBreakAfter: "always",
-                              color:
-                                +item.status === 1
-                                  ? "#fff"
-                                  : +item.status === 2
-                                  ? "#000"
-                                  : +item.status === 3
-                                  ? "#fff"
-                                  : "#000",
-                              backgroundColor:
-                                +item.status === 1
-                                  ? "green"
-                                  : +item.status === 2
-                                  ? "yellow"
-                                  : +item.status === 3
-                                  ? "red"
-                                  : "#fff",
+                              color: "#000",
+                              backgroundColor: "#fff",
+                              fontSize: "12px",
                             }}
                             onClick={() => setPopup(item)}
                           >
-                            <td>{i + 1}</td>
-                            <td colSpan={5}>{item.item_title}</td>
-                            <td colSpan={3}>{item.mrp}</td>
-                            <td colSpan={3}>
+                            <td style={{ padding: "0" }}>{i + 1}</td>
+                            <td colSpan={5} style={{ padding: "0" }}>
+                              {item.item_title}
+                            </td>
+                            <td colSpan={3} style={{ padding: "0" }}>
+                              {item.mrp}
+                            </td>
+                            <td colSpan={3} style={{ padding: "0" }}>
                               {(item?.b || 0).toFixed(0)} : {item?.p || 0}
                             </td>
                           </tr>
@@ -1992,12 +2020,13 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                   style={{
                     height: "30px",
                     fontWeight: "bold",
+                    fontSize: "12px",
                   }}
                 >
-                  <td>Total</td>
-                  <td colSpan={5}></td>
-                  <td colSpan={3}></td>
-                  <td colSpan={3}>
+                  <td style={{ padding: "5px" }}>Total</td>
+                  <td colSpan={5} style={{ padding: "5px" }}></td>
+                  <td colSpan={3} style={{ padding: "5px" }}></td>
+                  <td colSpan={3} style={{ padding: "5px" }}>
                     {(items.length > 1
                       ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
                       : items[0]?.b || 0
@@ -2327,8 +2356,20 @@ function SummaryPopup({
                 display: "block",
               }}
             >
-              <thead style={{ width: "100%" }}>
-                <tr style={{ width: "100%" }}>
+              <thead
+                style={{
+                  width: "100%",
+                  color: "#000",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <tr
+                  style={{
+                    width: "100%",
+                    color: "#000",
+                    backgroundColor: "#fff",
+                  }}
+                >
                   <th style={{ width: "10mm" }}>Sr.</th>
                   <th colSpan={5} style={{ width: "100mm" }}>
                     <div className="t-head-element">Item</div>
@@ -2343,6 +2384,9 @@ function SummaryPopup({
               </thead>
               <tbody className="tbody" style={{ width: "100%" }}>
                 {category
+                  .sort((a, b) =>
+                    a?.category_title?.localeCompare(b?.category_title)
+                  )
                   .filter(
                     (a) =>
                       items?.filter((b) => a.category_uuid === b.category_uuid)
@@ -2362,22 +2406,8 @@ function SummaryPopup({
                             style={{
                               height: "30px",
                               pageBreakAfter: "always",
-                              color:
-                                +item.status === 1
-                                  ? "#fff"
-                                  : +item.status === 2
-                                  ? "#000"
-                                  : +item.status === 3
-                                  ? "#fff"
-                                  : "#000",
-                              backgroundColor:
-                                +item.status === 1
-                                  ? "green"
-                                  : +item.status === 2
-                                  ? "yellow"
-                                  : +item.status === 3
-                                  ? "red"
-                                  : "#fff",
+                              color: "#000",
+                              backgroundColor: "#fff",
                             }}
                             onClick={() => setPopup(item)}
                           >
