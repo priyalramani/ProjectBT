@@ -33,7 +33,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
-  const [itemDetails, setItemDetails] = useState([]);
   useEffect(() => {
     if (order.order_status === "A") setEditOrder(true);
   }, []);
@@ -1056,7 +1055,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             order={printData}
             date={new Date(printData?.status[0]?.time)}
             user={
-              users.find((a) => a.user_uuid === printData?.status[0].user_uuid)
+              users.find((a) => a.user_uuid === printData?.status[0]?.user_uuid)
                 ?.user_title || ""
             }
             itemData={itemsData}
@@ -1365,7 +1364,7 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
                     </tr>
                   </thead>
                   <tbody className="tbody">
-                    {popupDetails.data?.map((item, i) => (
+                    {popupDetails?.data?.length && popupDetails?.data?.map((item, i) => (
                       <tr
                         key={item?.item_uuid || Math.random()}
                         style={{

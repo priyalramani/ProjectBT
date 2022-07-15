@@ -33,6 +33,7 @@ const PendingsEntry = () => {
         response.data.result.map((a) => ({
           ...a,
           ...counters.find((b) => b.counter_uuid === a.counter_uuid),
+          status: a.status,
         }))
       );
   };
@@ -85,7 +86,7 @@ const PendingsEntry = () => {
       (a, b) => +a.invoice_number - +b.invoice_number
     )) {
       for (let item of order.item_details.filter(
-        (a) => !(a.status === 3 && a.b && a.p && a.free)
+        (a) => a.status !== 3 && (a.b || a.p || a.free)
       )) {
         let date = new Date(+order.status[0]?.time);
         let itemData = itemsData.find((a) => a.item_uuid === item.item_uuid);
@@ -133,8 +134,31 @@ const PendingsEntry = () => {
       <Sidebar />
       <Header />
       <div className="item-sales-container orders-report-container">
-        <div id="heading">
-          <h2>Pending Entry</h2>
+        <div id="heading" className="flex">
+          <h2 style={{ width: "70%" }}>Pending Entry</h2>
+          <button
+            type="button"
+            className="submit flex"
+            style={{
+              margin: "0",
+              padding: "1px 10px",
+              fontSize: "15px",
+              height: "30px",
+              
+            }}
+            onClick={() =>
+              setSelectedOrders((prev) =>
+                prev.length === orders.length ? [] : orders
+              )
+            }
+          >
+            <input
+              type="checkbox"
+              checked={orders.length === selectedOrders.length}
+              style={{marginRight:"5px"}}
+            />
+            Select All
+          </button>
         </div>
 
         <div className="table-container-user item-sales-container">
@@ -347,6 +371,7 @@ function Table({
                   checked={selectedOrders.find(
                     (a) => a.order_uuid === item.order_uuid
                   )}
+                  style={{transform:"scale(1.3)"}}
                 />
                 {i + 1}
               </td>
