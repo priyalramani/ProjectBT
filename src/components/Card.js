@@ -104,7 +104,7 @@ const Card = ({
             <div>{status}</div>
             <div style={{ fontSize: "10px" }}>
               {`${days[new Date(dateTime).getDay()] || ""} ${new Date(dateTime).getDate() || ""
-                } ${monthNames[new Date().getMonth()] || ""}`}
+                } ${monthNames[(new Date()).getMonth()] || ""}`}
               {formatAMPM(new Date(dateTime)) || ""}
             </div>
             <div style={{ fontSize: "10px" }}>{getQty()}</div>
