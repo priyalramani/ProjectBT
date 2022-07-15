@@ -241,16 +241,13 @@ export const Billing = async ({
   edit_prices = [],
 }) => {
   let newPriceItems = [];
-
+  
+  // let add_discounts = true;
   for (let item of items) {
-    ////console.log(
-    //   item,
-    //   others,
-    //   +item.conversion * +item.b + item.p,
-    //   +item.conversion * +item.b + item.p
-    // );
-    console.log("item", item);
     item = { ...item, item_total: 0 };
+    let edit_price = edit_prices.find(
+      (a) => a.item_uuid === item.item_uuid
+    )?.item_price;
     let charges_discount = add_discounts ? [] : item.charges_discount || [];
     let price = add_discounts
       ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
@@ -266,7 +263,6 @@ export const Billing = async ({
           (a) => a.company_uuid === item.company_uuid
         )?.discount || 0
       : 0;
-    // //console.log("company_discount_percentage", company_discount_percentage);
     item = {
       ...item,
       qty: +item.conversion * +item.b + item.p,
@@ -282,11 +278,11 @@ export const Billing = async ({
         ...item,
         special_discount_percentage,
         item_desc_total:
-          (item?.price || item.item_price || 0) *
+          (+edit_price||+item?.price || +item?.item_price || 0) *
             ((100 - special_discount_percentage) / 100) || 0,
       };
     }
-    //console.log(add_discounts, item.item_discount);
+
     if (add_discounts && item.item_discount) {
       charges_discount.push({
         title: "Item Discount",
@@ -296,18 +292,11 @@ export const Billing = async ({
         ...item,
         item_desc_total: item.item_desc_total
           ? item.item_desc_total * ((100 - item.item_discount) / 100) || 0
-          : (item?.price || item.item_price || 0) *
+          : (+edit_price||+item?.price || +item?.item_price || 0) *
               ((100 - item.item_discount) / 100) || 0,
       };
     }
-    if (item?.charges_discount?.length && !add_discounts) {
-      for (let desc of item.charges_discount) {
-        item.item_desc_total = item.item_desc_total
-          ? item.item_desc_total * ((100 - desc.value) / 100) || 0
-          : (item?.price || item.item_price || 0) *
-              ((100 - desc.value) / 100) || 0;
-      }
-    }
+
     if (company_discount_percentage) {
       charges_discount.push({
         title: "Company Discount",
@@ -319,21 +308,33 @@ export const Billing = async ({
         item_desc_total: item.item_desc_total
           ? item.item_desc_total *
               ((100 - company_discount_percentage) / 100) || 0
-          : (item?.price || item.item_price || 0) *
+          : (+edit_price||+item?.price || item.item_price || 0) *
               ((100 - company_discount_percentage) / 100) || 0,
       };
     }
-    let edit_price = edit_prices.find(
-      (a) => a.item_uuid === item.item_uuid
-    )?.item_price;
+ 
     // //console.log(item);
+    item = {
+      ...item,
+      item_desc_total: add_discounts
+        ? item.item_desc_total
+        : (+edit_price||+item?.price || +item?.item_price) *
+          (item.charges_discount.length > 1
+            ? item.charges_discount
+                .map((a) => +((100 - +a.value) / 100))
+                .reduce((a, b) => a * b)
+            : item.charges_discount.length
+            ? (100 - +item.charges_discount[0]?.value) / 100
+            : 1),
+    };
+    console.log(item.item_desc_total);
     item = {
       ...item,
       charges_discount,
       item_total:
         item.status !== 3
           ? (
-              (+edit_price ||
+              ( 
                 +item.item_desc_total ||
                 item?.price ||
                 +item.item_price ||
@@ -343,6 +344,7 @@ export const Billing = async ({
       item_desc_total: 0,
     };
 
+    console.log("item", item);
     newPriceItems.push(item);
   }
   //console.log("newItemPrice", newPriceItems);
