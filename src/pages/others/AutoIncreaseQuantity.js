@@ -336,7 +336,21 @@ function NewUserForm({ onSave, popupForm }) {
       }
     }
   };
-
+  const DeleteAutoAdd = async () => {
+    let data = popupForm.data;
+    const response = await axios({
+      method: "delete",
+      url: "/autoBill/DeleteAutoQty",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    if (response.data.success) {
+      onSave();
+    }
+  };
   return (
     <div className="overlay">
       <div
@@ -389,6 +403,11 @@ function NewUserForm({ onSave, popupForm }) {
                           }))
                         }
                       />
+                      {popupForm?.type === "edit" ? (
+                        <Delete onClick={DeleteAutoAdd} />
+                      ) : (
+                        ""
+                      )}
                     </td>
                   </tr>
                   {objData?.qty_details?.map((item, i) => (
@@ -659,6 +678,24 @@ function NewUserForm({ onSave, popupForm }) {
                             .toLocaleLowerCase()
                             .includes(filterCategory.toLocaleLowerCase())
                       )
+
+                      .sort((a, b) => {
+                        let aLength = objData.items.filter(
+                          (c) => c === a.item_uuid
+                        )?.length;
+                        let bLength = objData.items.filter(
+                          (c) => c === b.item_uuid
+                        )?.length;
+                        if (aLength && bLength) {
+                          return a.item_title.localeCompare(b.item_title);
+                        } else if (aLength) {
+                          return -1;
+                        } else if (bLength) {
+                          return 1;
+                        } else {
+                          return a.item_title.localeCompare(b.item_title);
+                        }
+                      })
                       .map((item, index) => {
                         return (
                           <tr key={item.item_uuid}>
@@ -835,7 +872,6 @@ function NewUserForm({ onSave, popupForm }) {
                       <th style={{ width: "25%" }}>Action</th>
                     </tr>
                   </thead>
-                  {console.log(counter)}
                   <tbody>
                     {counter
                       ?.filter((a) => a.counter_uuid)
@@ -853,7 +889,23 @@ function NewUserForm({ onSave, popupForm }) {
                             ?.toLocaleLowerCase()
                             .includes(filterRoute.toLocaleLowerCase())
                       )
-
+                      .sort((a, b) => {
+                        let aLength = objData.counters.filter(
+                          (c) => c === a.counter_uuid
+                        )?.length;
+                        let bLength = objData.counters.filter(
+                          (c) => c === b.counter_uuid
+                        )?.length;
+                        if (aLength && bLength) {
+                          return a.counter_title.localeCompare(b.counter_title);
+                        } else if (aLength) {
+                          return -1;
+                        } else if (bLength) {
+                          return 1;
+                        } else {
+                          return a.counter_title.localeCompare(b.counter_title);
+                        }
+                      })
                       .map((item, index) => {
                         return (
                           <tr key={item.counter_uuid}>
