@@ -1541,14 +1541,23 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
   const [popup, setPopup] = useState(false);
   const [orderTotal, setOrderTotal] = useState(0);
   const componentRef = useRef(null);
+  const componentBoxRef = useRef(null);
   const [filterItemTitle, setFilterItemTile] = useState("");
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
+  }, [items]);
+  const reactToBoxPrintContent = useCallback(() => {
+    return componentBoxRef.current;
   }, [items]);
 
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
     documentTitle: "Statement",
+    removeAfterPrint: true,
+  });
+  const handleBoxPrint = useReactToPrint({
+    content: reactToBoxPrintContent,
+    documentTitle: "BoxStatement",
     removeAfterPrint: true,
   });
   const stagesData = [
@@ -1691,6 +1700,20 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                           .focus();
                       }}
                     />
+                    <button
+                      style={{
+                        width: "fit-Content",
+                        backgroundColor: "black",
+                        position: "absolute",
+                        right: "-100px",
+                      }}
+                      className="item-sales-search"
+                      onClick={() => {
+                        handleBoxPrint();
+                      }}
+                    >
+                      Box
+                    </button>
                   </div>
                 </div>
                 <h3>Orders Total:Rs. {orderTotal}</h3>
@@ -2035,6 +2058,142 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
                     {items.length > 1
                       ? items.map((a) => +a.p || 0).reduce((a, b) => a + b)
                       : items[0].p || 0}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          ) : (
+            ""
+          )}
+        </div>
+      </div>
+      <div
+        style={{
+          position: "fixed",
+          top: -100,
+          left: -180,
+          zIndex: "-1000",
+        }}
+      >
+        <div
+          ref={componentBoxRef}
+          id="item-container"
+          style={{
+            // margin: "45mm 40mm 30mm 60mm",
+            // textAlign: "center",
+            height: "128mm",
+            // padding: "10px"
+          }}
+        >
+          {items?.length ? (
+            <table
+              className="user-table"
+              style={{
+                width: "170mm",
+                // marginTop: "20mm",
+                // marginLeft: "20mm",
+                // marginRight: "20mm",
+                border: "1px solid black",
+                pageBreakInside: "auto",
+                display: "block",
+              }}
+            >
+              <thead
+                style={{
+                  width: "100%",
+                  color: "#000",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <tr style={{ width: "100%", fontSize: "12px" }}>
+                  <th style={{ width: "10mm" }}>Sr.</th>
+                  <th colSpan={5} style={{ width: "100mm" }}>
+                    <div className="t-head-element">Item</div>
+                  </th>
+                  <th colSpan={3} style={{ width: "30mm" }}>
+                    <div className="t-head-element">MRP</div>
+                  </th>
+                  <th colSpan={3} style={{ width: "30mm" }}>
+                    <div className="t-head-element">Qty</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="tbody" style={{ width: "100%" }}>
+                {category
+                  .filter(
+                    (a) =>
+                      items?.filter(
+                        (b) => a.category_uuid === b.category_uuid && b.b
+                      ).length
+                  )
+                  .sort((a, b) =>
+                    a?.category_title?.localeCompare(b?.category_title)
+                  )
+                  .map((a) => (
+                    <>
+                      <tr
+                        style={{
+                          pageBreakAfter: "always",
+                          width: "100%",
+                          height: "8px",
+                          fontSize: "12px",
+                        }}
+                      >
+                        <td colSpan={11} style={{ padding: "5px" }}>
+                          {a.category_title}
+                        </td>
+                      </tr>
+
+                      {items
+                        .filter(
+                          (b) => a.category_uuid === b.category_uuid && b.b
+                        )
+
+                        .sort((a, b) =>
+                          a?.item_title?.localeCompare(b?.item_title)
+                        )
+                        ?.map((item, i) => (
+                          <tr
+                            key={item?.item_uuid || Math.random()}
+                            style={{
+                              height: "8px",
+                              pageBreakAfter: "always",
+                              color: "#000",
+                              backgroundColor: "#fff",
+                              fontSize: "12px",
+                            }}
+                            onClick={() => setPopup(item)}
+                          >
+                            <td style={{ padding: "0" }}>{i + 1}</td>
+                            <td colSpan={5} style={{ padding: "0" }}>
+                              {item.item_title}
+                            </td>
+                            <td colSpan={3} style={{ padding: "0" }}>
+                              {item.mrp}
+                            </td>
+                            <td colSpan={3} style={{ padding: "0" }}>
+                              {(item?.b || 0).toFixed(0)} : {0}
+                            </td>
+                          </tr>
+                        ))}
+                    </>
+                  ))}
+                <tr
+                  style={{
+                    height: "30px",
+                    fontWeight: "bold",
+                    fontSize: "12px",
+                  }}
+                >
+                  <td style={{ padding: "5px" }}>Total</td>
+                  <td colSpan={5} style={{ padding: "5px" }}></td>
+                  <td colSpan={3} style={{ padding: "5px" }}></td>
+                  <td colSpan={3} style={{ padding: "5px" }}>
+                    {(items.length > 1
+                      ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
+                      : items[0]?.b || 0
+                    ).toFixed(0)}{" "}
+                    : {0}
                   </td>
                 </tr>
               </tbody>
