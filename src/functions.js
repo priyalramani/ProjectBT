@@ -319,11 +319,11 @@ export const Billing = async ({
       item_desc_total: add_discounts
         ? item.item_desc_total
         : (+edit_price||+item?.price || +item?.item_price) *
-          (item.charges_discount.length > 1
-            ? item.charges_discount
-                .map((a) => +((100 - +a.value) / 100))
-                .reduce((a, b) => a * b)
-            : item.charges_discount.length
+          (item?.charges_discount?.length > 1
+            ? item?.charges_discount
+                ?.map((a) => +((100 - +a.value) / 100))
+                ?.reduce((a, b) => a * b)
+            : item?.charges_discount?.length
             ? (100 - +item.charges_discount[0]?.value) / 100
             : 1),
     };
