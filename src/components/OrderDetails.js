@@ -629,7 +629,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                   shiftFocus(item_status_component_id);
                                 }}
                                 value={
-                                  item.status
+                                  item.status||+item.status===0
                                     ? default_status.find(
                                         (a) => +a.value === +item.status
                                       )
