@@ -11,7 +11,9 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
     let time = new Date();
     console.log(stage, data);
     let status =
-      stage === 1
+      +data.stage === 0
+        ? []
+        : stage === 1
         ? +data.stage === 2
           ? [{ stage: 2, time: time.getTime(), user_uuid }]
           : +data.stage === 3
@@ -54,7 +56,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
         : [{ stage: 5, time: time.getTime(), user_uuid }];
     selectedData = selectedData?.map((a) => ({
       ...a,
-      status: [...a.status, ...status],
+      status: +data.stage === 0 ? a.status : [...a.status, ...status],
+      hold: +data.stage === 0 ? "Y" : a.hold || "N",
     }));
 
     console.log(selectedData);
@@ -216,6 +219,16 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
                       />
                       Complete
                     </div>
+                    <div>
+                      <input
+                        type="radio"
+                        checked={data.stage === 0}
+                        onClick={() => {
+                          setData({ ...data, stage: 0 });
+                        }}
+                      />
+                      Hold
+                    </div>
                     <div
                       style={{
                         textDecoration: stage >= 5 ? "line-through" : "",
@@ -371,8 +384,7 @@ function DiliveryPopup({
       +(+modeTotal + (+outstanding?.amount || 0))
     );
     if (
-      +order?.order_grandtotal !==
-      +(+modeTotal + (+outstanding?.amount || 0))
+      +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
       return;

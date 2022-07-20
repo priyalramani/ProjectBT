@@ -251,7 +251,39 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     if (!editOrder) return;
     reactInputsRef.current?.[orderData?.item_details?.[0]?.uuid]?.focus();
   }, [editOrder]);
+  const HoldOrder = async () => {
+    let data = orderData;
+    let billingData = await Billing({
+      replacement: data.replacement,
+      counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
 
+      items: data.item_details.map((a) => {
+        let itemData = itemsData.find((b) => a.item_uuid === b.item_uuid);
+        return {
+          ...itemData,
+          ...a,
+          price: itemData?.price || 0,
+        };
+      }),
+    });
+    data = {
+      ...data,
+      ...billingData,
+      item_details: billingData.items,
+      hold: "Y",
+    };
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: [data],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+    }
+  };
   let listItemIndexCount = 0;
   return (
     <>
@@ -303,6 +335,18 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   >
                     Cancel Order
                   </button>
+
+                  {order.hold !== "Y" ? (
+                    <button
+                      style={{ width: "fit-Content", backgroundColor: "red" }}
+                      className="item-sales-search"
+                      onClick={() => HoldOrder()}
+                    >
+                      Hold Order
+                    </button>
+                  ) : (
+                    ""
+                  )}
                   <button
                     style={{ width: "fit-Content", backgroundColor: "black" }}
                     className="item-sales-search"
@@ -629,7 +673,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                   shiftFocus(item_status_component_id);
                                 }}
                                 value={
-                                  item.status||+item.status===0
+                                  item.status || +item.status === 0
                                     ? default_status.find(
                                         (a) => +a.value === +item.status
                                       )
@@ -933,9 +977,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       >
                         {(orderData?.item_details?.length > 1
                           ? orderData?.item_details
-                              .map((a) => +a.b || 0)
+                              .map((a) => +a?.b || 0)
                               .reduce((a, b) => a + b)
-                          : orderData?.item_details[0].b) || 0}
+                          : orderData?.item_details[0]?.b) || 0}
                       </td>
                       <td
                         className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -943,9 +987,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       >
                         {(orderData?.item_details.length > 1
                           ? orderData?.item_details
-                              .map((a) => +a.p || 0)
+                              .map((a) => +a?.p || 0)
                               .reduce((a, b) => a + b)
-                          : orderData?.item_details[0].p) || 0}
+                          : orderData?.item_details[0]?.p) || 0}
                       </td>
                       <td
                         className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -1364,37 +1408,39 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
                     </tr>
                   </thead>
                   <tbody className="tbody">
-                    {popupDetails?.data?.length && popupDetails?.data?.map((item, i) => (
-                      <tr
-                        key={item?.item_uuid || Math.random()}
-                        style={{
-                          height: "30px",
-                        }}
-                      >
-                        <td colSpan={2}>
-                          {+item.stage === 1
-                            ? "Order Placed By"
-                            : +item.stage === 2
-                            ? "Order Processed By"
-                            : +item.stage === 3
-                            ? "Order Checked By"
-                            : +item.stage === 4
-                            ? "Order Delivered By"
-                            : ""}
-                        </td>
-                        <td colSpan={2}>
-                          {new Date(+item.time).toDateString() +
-                            " " +
-                            formatAMPM(new Date(item.time)) || ""}
-                        </td>
-                        <td>
-                          {item.user_uuid === "240522"
-                            ? "Admin"
-                            : users.find((a) => a.user_uuid === item?.user_uuid)
-                                ?.user_title || ""}
-                        </td>
-                      </tr>
-                    ))}
+                    {popupDetails?.data?.length &&
+                      popupDetails?.data?.map((item, i) => (
+                        <tr
+                          key={item?.item_uuid || Math.random()}
+                          style={{
+                            height: "30px",
+                          }}
+                        >
+                          <td colSpan={2}>
+                            {+item.stage === 1
+                              ? "Order Placed By"
+                              : +item.stage === 2
+                              ? "Order Processed By"
+                              : +item.stage === 3
+                              ? "Order Checked By"
+                              : +item.stage === 4
+                              ? "Order Delivered By"
+                              : ""}
+                          </td>
+                          <td colSpan={2}>
+                            {new Date(+item.time).toDateString() +
+                              " " +
+                              formatAMPM(new Date(item.time)) || ""}
+                          </td>
+                          <td>
+                            {item.user_uuid === "240522"
+                              ? "Admin"
+                              : users.find(
+                                  (a) => a.user_uuid === item?.user_uuid
+                                )?.user_title || ""}
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>

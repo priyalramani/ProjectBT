@@ -40,6 +40,7 @@ const MainAdmin = () => {
   const [items, setItems] = useState([]);
   const [category, setCategory] = useState([]);
   const [changesStatePopup, setChangeStatePopup] = useState(false);
+  const [holdOrders, setHoldOrders] = useState(false);
   const componentRef = useRef(null);
   const [messagePopup, setMessagePopup] = useState("");
   const [company, setCompanies] = useState([]);
@@ -139,6 +140,7 @@ const MainAdmin = () => {
     });
     if (response.data.success) setRoutesData(response.data.result);
   };
+
   const getTripData = async () => {
     const response = await axios({
       method: "get",
@@ -154,10 +156,14 @@ const MainAdmin = () => {
     getTripData();
   }, [popupForm]);
   useEffect(() => {
-    getRoutesData();
+    if (holdOrders) getRunningHoldOrders();
+    else getRunningOrders();
+  }, [holdOrders]);
+  useEffect(() => {
     getCounter();
     setInterval(() => {
-      getRunningOrders();
+      if (holdOrders) getRunningHoldOrders();
+      else getRunningOrders();
       if (window.location.pathname.includes("admin")) {
         getRoutesData();
       } else if (window.location.pathname.includes("trip")) {
@@ -178,13 +184,22 @@ const MainAdmin = () => {
 
     if (response.data.success) setOrders(response.data.result);
   };
+  const getRunningHoldOrders = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/orders/GetOrderHoldRunningList",
+    });
+
+    if (response.data.success) setOrders(response.data.result);
+  };
   // console.log(selectedOrder);
   useEffect(() => {
     if (
       window.location.pathname.includes("admin") ||
       window.location.pathname.includes("trip")
     ) {
-      getRunningOrders();
+      if (holdOrders) getRunningHoldOrders();
+      else getRunningOrders();
     }
     if (window.location.pathname.includes("admin")) {
       getRoutesData();
@@ -215,7 +230,10 @@ const MainAdmin = () => {
   return (
     <>
       <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} />
-      <div className="right-side">
+      <div
+        className="right-side"
+        style={holdOrders ? { backgroundColor: "#f2e017" } : {}}
+      >
         <Header />
         <AiOutlineReload
           style={{
@@ -281,6 +299,29 @@ const MainAdmin = () => {
                   >
                     Select
                   </button>
+                  {holdOrders ? (
+                    <button
+                      // style={{ padding: "10px" }}
+                      className="simple_Logout_button"
+                      type="button"
+                      onClick={() => {
+                        setHoldOrders(false);
+                      }}
+                    >
+                      Show Running Orders
+                    </button>
+                  ) : (
+                    <button
+                      // style={{ padding: "10px" }}
+                      className="simple_Logout_button"
+                      type="button"
+                      onClick={() => {
+                        setHoldOrders(true);
+                      }}
+                    >
+                      Show hold Orders
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
@@ -1346,7 +1387,8 @@ const MainAdmin = () => {
         <OrderDetails
           onSave={() => {
             setPopupOrder(null);
-            getRunningOrders();
+            if (holdOrders) getRunningHoldOrders();
+            else getRunningOrders();
           }}
           order={popupOrder}
         />
@@ -1368,7 +1410,8 @@ const MainAdmin = () => {
         <HoldPopup
           onSave={() => {
             setSumaryPopup(false);
-            getRunningOrders();
+            if (holdOrders) getRunningHoldOrders();
+            else getRunningOrders();
           }}
           orders={selectedOrder}
           itemsData={items}
@@ -1382,7 +1425,8 @@ const MainAdmin = () => {
         <SummaryPopup
           onSave={() => {
             setJoinSummary(false);
-            getRunningOrders();
+            if (holdOrders) getRunningHoldOrders();
+            else getRunningOrders();
           }}
           orders={joinSummary}
           itemsData={items}
@@ -1399,7 +1443,8 @@ const MainAdmin = () => {
             setChangeStatePopup(false);
             setSelectOrder("");
             setSelectedOrder([]);
-            getRunningOrders();
+            if (holdOrders) getRunningHoldOrders();
+            else getRunningOrders();
           }}
           orders={selectedOrder}
           stage={changesStatePopup}
