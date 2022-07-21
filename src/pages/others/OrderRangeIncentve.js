@@ -1081,11 +1081,11 @@ function NewUserForm({ onSave, popupForm }) {
                       ?.filter((a) => a.user_title)
                       .filter(
                         (a) =>
-                          !filterCounterGroupTitle ||
+                          !filterUserTitle ||
                           a.user_title
                             .toLocaleLowerCase()
                             .includes(
-                              filterCounterGroupTitle.toLocaleLowerCase()
+                                filterUserTitle.toLocaleLowerCase()
                             )
                       )
                       .sort((a, b) => {
