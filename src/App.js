@@ -33,25 +33,25 @@ import { updateIndexedDb } from "./functions";
 import CounterLeger from "./pages/Reports/CounterLeger";
 import Outstanding from "./pages/Reports/Outstanding";
 import PendingsEntry from "./pages/Reports/PendingsEntry";
+import OrderRangeIncentive from "./pages/others/OrderRangeIncentve";
 
 const id = "240522";
 function App() {
-
   axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
   // axios.defaults.baseURL = "http://localhost:9000";
 
   useEffect(() => {
-    let user = localStorage.getItem("user_uuid")
+    let user = localStorage.getItem("user_uuid");
     if (user && user !== "240522") {
-      let time = +localStorage.getItem("indexed_time") || ""
-      let currTime = new Date()
-      currTime = currTime.getTime()
+      let time = +localStorage.getItem("indexed_time") || "";
+      let currTime = new Date();
+      currTime = currTime.getTime();
       if (64800000 < currTime - time) {
         updateIndexedDb();
       }
     }
-  }, [])
+  }, []);
 
   return (
     <div className="App">
@@ -67,24 +67,64 @@ function App() {
                   <Route path="/admin" element={<MainAdmin />} />
                   <Route path="/trip" element={<MainAdmin />} />
                   <Route path="/admin/routes" element={<RoutesPage />} />
-                  <Route path="/admin/itemCategories" element={<ItemCategories />} />
-                  <Route path="/admin/counterGroup" element={<CounterGroup />} />
+                  <Route
+                    path="/admin/itemCategories"
+                    element={<ItemCategories />}
+                  />
+                  <Route
+                    path="/admin/counterGroup"
+                    element={<CounterGroup />}
+                  />
                   <Route path="/admin/itemGroup" element={<ItemGroup />} />
                   <Route path="/admin/counter" element={<Counter />} />
                   <Route path="/admin/adminUsers" element={<Users />} />
                   <Route path="/admin/items" element={<ItemsPage />} />
-                  <Route path="/admin/autoIncreaseQty" element={<AutoIncreaseQuantity />} />
-                  <Route path="/admin/autoIncreaseItem" element={<AutoIncreaseItem />} />
+                  <Route
+                    path="/admin/autoIncreaseQty"
+                    element={<AutoIncreaseQuantity />}
+                  />
+                  <Route
+                    path="/admin/autoIncreaseItem"
+                    element={<AutoIncreaseItem />}
+                  />
+                  <Route
+                    path="/admin/OrderRangeIncentive"
+                    element={<OrderRangeIncentive />}
+                  />
                   <Route path="/admin/addOrder" element={<AddOrder />} />
-                  <Route path="/admin/userActivity" element={<UserActivity />} />
-                  <Route path="/admin/upiTransactionReport" element={<UPITransection />} />
-                  <Route path="/admin/completeOrderReport" element={<CompleteOrder />} />
-                  <Route path="/admin/OrderItemReport" element={<ItemDetails />} />
-                  <Route path="/admin/CompletedTripsReport" element={<CompletedTrips />} />
-                  <Route path="/admin/CounterLeger" element={<CounterLeger />} />
+                  <Route
+                    path="/admin/userActivity"
+                    element={<UserActivity />}
+                  />
+                  <Route
+                    path="/admin/upiTransactionReport"
+                    element={<UPITransection />}
+                  />
+                  <Route
+                    path="/admin/completeOrderReport"
+                    element={<CompleteOrder />}
+                  />
+                  <Route
+                    path="/admin/OrderItemReport"
+                    element={<ItemDetails />}
+                  />
+                  <Route
+                    path="/admin/CompletedTripsReport"
+                    element={<CompletedTrips />}
+                  />
+                  <Route
+                    path="/admin/CounterLeger"
+                    element={<CounterLeger />}
+                  />
                   <Route path="/admin/Outstandings" element={<Outstanding />} />
-                  <Route path="/admin/pendingEntry" element={<PendingsEntry />} />
-                  <Route path="*" element={<Navigate replace to={"/admin"} />} />
+                  <Route
+                    path="/admin/pendingEntry"
+                    element={<PendingsEntry />}
+                  />
+                  <Route
+                    path="*"
+                    element={<Navigate replace to={"/admin"} />}
+                  />
                 </>
               ) : (
                 <>
@@ -95,28 +135,53 @@ function App() {
                   <Route path="/users/processing" element={<Processing />} />
                   <Route path="/users/checking" element={<Processing />} />
                   <Route path="/users/delivery" element={<Processing />} />
-                  <Route path="/users/processing/:trip_uuid" element={<ProcessingOrders />} />
-                  <Route path="/users/orders/:counter_uuid" element={<SelectedCounterOrder />} />
-                  <Route path="/users/checking/:trip_uuid" element={<ProcessingOrders />} />
-                  <Route path="/users/delivery/:trip_uuid" element={<ProcessingOrders />} />
-                  <Route path="/users/processing/:trip_uuid/:order_uuid" element={<ProcessingOrders />} />
-                  <Route path="/users/checking/:trip_uuid/:order_uuid" element={<ProcessingOrders />} />
-                  <Route path="/users/delivery/:trip_uuid/:order_uuid" element={<ProcessingOrders />} />
+                  <Route
+                    path="/users/processing/:trip_uuid"
+                    element={<ProcessingOrders />}
+                  />
+                  <Route
+                    path="/users/orders/:counter_uuid"
+                    element={<SelectedCounterOrder />}
+                  />
+                  <Route
+                    path="/users/checking/:trip_uuid"
+                    element={<ProcessingOrders />}
+                  />
+                  <Route
+                    path="/users/delivery/:trip_uuid"
+                    element={<ProcessingOrders />}
+                  />
+                  <Route
+                    path="/users/processing/:trip_uuid/:order_uuid"
+                    element={<ProcessingOrders />}
+                  />
+                  <Route
+                    path="/users/checking/:trip_uuid/:order_uuid"
+                    element={<ProcessingOrders />}
+                  />
+                  <Route
+                    path="/users/delivery/:trip_uuid/:order_uuid"
+                    element={<ProcessingOrders />}
+                  />
 
-                  <Route path="*" element={<Navigate replace to={"/users"} />} />
+                  <Route
+                    path="*"
+                    element={<Navigate replace to={"/users"} />}
+                  />
                 </>
               )}
             </>
-          ) : !window.location.pathname.includes('/login') ? (
+          ) : !window.location.pathname.includes("/login") ? (
             <Route path="*" element={<Navigate replace to={"/login"} />} />
-          ) : ''}
+          ) : (
+            ""
+          )}
         </Routes>
       </Router>
 
       {/* {window.location.pathname.split('/').at(-2) === 'processing' && <div id="console">
         <h3>CONSOLE <button onClick={e => window.location.reload()}>Reload</button></h3>
       </div>} */}
-
     </div>
   );
 }
