@@ -73,7 +73,7 @@ const Main = () => {
           ))}
         </div>
         <div style={{ position: "fixed", bottom: "60px",right:"20vw",fontSize:"20px" }}>
-          Version 32
+          Version 33
         </div>
         <button
           type="button"
