@@ -786,7 +786,7 @@ const SelectedCounterOrder = () => {
                 counter,
                 items: order.items,
                 dbItems,
-                autobills: autobills.filter((a) => a.filter),
+                autobills: autobills.filter((a) => a.status),
               });
 
               setOrder((prev) => ({

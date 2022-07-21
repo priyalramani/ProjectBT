@@ -822,7 +822,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 disabled={!item.item_uuid}
                               />
                             ) : (
-                              "Rs:" + item?.price
+                              "Rs:" + (item?.price||0)
                             )}
                           </td>
                           <td
@@ -872,7 +872,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 disabled={!item.item_uuid}
                               />
                             ) : (
-                              "Rs:" + item?.price
+                              "Rs:" + (item?.price||0)
                             )}
                           </td>
                           {editOrder ? (
