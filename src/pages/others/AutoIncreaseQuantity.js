@@ -10,14 +10,29 @@ import {
 import { v4 as uuid } from "uuid";
 import axios from "axios";
 import { Delete } from "@mui/icons-material";
+import { Switch } from "@mui/material";
+import { green } from "@mui/material/colors";
+import { alpha, styled } from "@mui/material/styles";
 const DEFAULT = {
   base_qty: "",
   add_qty: "",
   unit: "p",
 };
+const GreenSwitch = styled(Switch)(({ theme }) => ({
+  "& .MuiSwitch-switchBase.Mui-checked": {
+    color: green[500],
+    "&:hover": {
+      backgroundColor: alpha(green[500], theme.palette.action.hoverOpacity),
+    },
+  },
+  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+    backgroundColor: green[500],
+  },
+}));
 const AutoIncreaseQuantity = () => {
   const [popupForm, setPopupForm] = useState(false);
   const [itemsData, setItemsData] = useState([]);
+  const [deletePopup, setDeletePopup] = useState(false);
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
@@ -32,6 +47,21 @@ const AutoIncreaseQuantity = () => {
   useEffect(() => {
     getItemsData();
   }, [popupForm]);
+  const DeleteAutoAdd = async (data) => {
+    const response = await axios({
+      method: "delete",
+      url: "/autoBill/DeleteAutoQty",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    if (response.data.success) {
+      setDeletePopup(false);
+      getItemsData();
+    }
+  };
   return (
     <>
       <Sidebar />
@@ -63,7 +93,8 @@ const AutoIncreaseQuantity = () => {
           <Table
             itemsDetails={itemsData}
             setPopupForm={setPopupForm}
-            // setAddItems={setAddItems}
+            setDeletePopup={setDeletePopup}
+            getItemsData={getItemsData}
           />
         </div>
       </div>
@@ -72,14 +103,77 @@ const AutoIncreaseQuantity = () => {
       ) : (
         ""
       )}
+      {deletePopup ? (
+        <div className="overlay">
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "fit-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                paddingTop: "40px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>Sure You Want to Delete</div>
+
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <button
+                  className="fieldEditButton"
+                  onClick={() => DeleteAutoAdd(deletePopup)}
+                >
+                  Confirm
+                </button>
+              </div>
+
+              <button
+                onClick={() => setDeletePopup(false)}
+                className="closeButton"
+              >
+                x
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default AutoIncreaseQuantity;
-function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
+function Table({
+  itemsDetails = [],
+  setPopupForm,
+  setDeletePopup,
+  getItemsData,
+}) {
   const [items, setItems] = useState("auto_title");
   const [order, setOrder] = useState("asc");
+  const updateStatus = async (data) => {
+    const response = await axios({
+      method: "put",
+      url: "/autoBill/UpdateAutoQty",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    if (response.data.success) {
+      getItemsData();
+    }
+  };
   return (
     <table
       className="user-table"
@@ -111,7 +205,7 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
               </div>
             </div>
           </th>
-          <th></th>
+          <th colSpan={2}></th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -127,24 +221,33 @@ function Table({ itemsDetails = [], setPopupForm, setAddItems }) {
               : b[items] - a[items]
           )
           ?.map((item, i) => (
-            <tr
-              key={item.item_uuid}
-              style={{ height: "30px" }}
-              onClick={() => setPopupForm({ type: "edit", data: item })}
-            >
+            <tr key={item.item_uuid} style={{ height: "30px" }}>
               <td>{i + 1}</td>
-              <td colSpan={2}>{item.auto_title}</td>
+              <td
+                colSpan={2}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPopupForm({ type: "edit", data: item });
+                }}
+              >
+                {item.auto_title}
+              </td>
               <td>
-                <button
-                  type="button"
+                <Delete
                   onClick={(e) => {
                     e.stopPropagation();
-                    setAddItems(item);
+                    setDeletePopup(item);
                   }}
-                  className="fieldEditButton"
-                >
-                  Action
-                </button>
+                />
+              </td>
+              <td>
+                <GreenSwitch
+                  checked={item?.status}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    updateStatus({ ...item, status: item.status ? 0 : 1 });
+                  }}
+                />
               </td>
             </tr>
           ))}
@@ -336,21 +439,7 @@ function NewUserForm({ onSave, popupForm }) {
       }
     }
   };
-  const DeleteAutoAdd = async () => {
-    let data = popupForm.data;
-    const response = await axios({
-      method: "delete",
-      url: "/autoBill/DeleteAutoQty",
-      data,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-    if (response.data.success) {
-      onSave();
-    }
-  };
+
   return (
     <div className="overlay">
       <div
@@ -403,11 +492,6 @@ function NewUserForm({ onSave, popupForm }) {
                           }))
                         }
                       />
-                      {popupForm?.type === "edit" ? (
-                        <Delete onClick={DeleteAutoAdd} />
-                      ) : (
-                        ""
-                      )}
                     </td>
                   </tr>
                   {objData?.qty_details?.map((item, i) => (
@@ -560,6 +644,27 @@ function NewUserForm({ onSave, popupForm }) {
                             .toLocaleLowerCase()
                             .includes(itemGroupTitle.toLocaleLowerCase())
                       )
+                      .sort((a, b) => {
+                        let aLength = objData.item_groups?.filter(
+                          (c) => c === a?.item_group_uuid
+                        )?.length;
+                        let bLength = objData.item_groups?.filter(
+                          (c) => c === b?.item_group_uuid
+                        )?.length;
+                        if (aLength && bLength) {
+                          return a.item_group_title.localeCompare(
+                            b.item_group_title
+                          );
+                        } else if (aLength) {
+                          return -1;
+                        } else if (bLength) {
+                          return 1;
+                        } else {
+                          return a.item_group_title.localeCompare(
+                            b.item_group_title
+                          );
+                        }
+                      })
                       .map((item, index) => {
                         return (
                           <tr key={item.item_uuid}>
@@ -788,6 +893,28 @@ function NewUserForm({ onSave, popupForm }) {
                               filterCounterGroupTitle.toLocaleLowerCase()
                             )
                       )
+                      .sort((a, b) => {
+                        let aLength = objData.counter_groups.filter(
+                          (c) => c === a.counter_group_uuid
+                        )?.length;
+
+                        let bLength = objData.counter_groups.filter(
+                          (c) => c === b.counter_group_uuid
+                        )?.length;
+                        if (aLength && bLength) {
+                          return a.counter_group_title.localeCompare(
+                            b.counter_group_title
+                          );
+                        } else if (aLength) {
+                          return -1;
+                        } else if (bLength) {
+                          return 1;
+                        } else {
+                          return a.counter_group_title.localeCompare(
+                            b.counter_group_title
+                          );
+                        }
+                      })
                       .map((item, index) => {
                         return (
                           <tr key={item.item_uuid}>

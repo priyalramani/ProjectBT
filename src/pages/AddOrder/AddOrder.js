@@ -170,7 +170,7 @@ export default function AddOrder() {
         counter,
         items: data.item_details,
         dbItems: data.item_details,
-        autobills: autoBills,
+        autobills: autoBills.filter((a) => a.filter),
       });
       data = { ...data, ...autoAdd, item_details: autoAdd.items };
     }

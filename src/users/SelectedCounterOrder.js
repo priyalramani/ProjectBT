@@ -786,7 +786,7 @@ const SelectedCounterOrder = () => {
                 counter,
                 items: order.items,
                 dbItems,
-                autobills,
+                autobills: autobills.filter((a) => a.filter),
               });
 
               setOrder((prev) => ({
@@ -1137,7 +1137,7 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
       return {
         ...data,
         p_price: data.item_price,
-        b_price: ((data.item_price * data.conversion)||0).toFixed(0),
+        b_price: (data.item_price * data.conversion || 0).toFixed(0),
       };
     });
   }, []);
