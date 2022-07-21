@@ -121,6 +121,10 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Auto Add Item",
               link: "/admin/autoIncreaseItem",
             },
+            {
+              name: "Order Range Incentive",
+              link: "/admin/OrderRangeIncentive",
+            },
           ]}
         />
         {/* <NavLink
