@@ -163,7 +163,12 @@ export default function AddOrder() {
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let data = {
       ...order,
-      item_details: order.item_details.filter((a) => a.item_uuid),
+      item_details: order.item_details
+        .filter((a) => a.item_uuid)
+        .map((a) => ({
+          ...a,
+          item_price: a.p_price || a.item_price,
+        })),
     };
     if (type.autoAdd) {
       let autoAdd = await AutoAdd({
@@ -185,9 +190,12 @@ export default function AddOrder() {
 
         type: "NEW",
       },
-      replacement:data.replacement,
+      replacement: data.replacement,
       add_discounts: true,
-      edit_prices,
+      edit_prices: edit_prices.map((a) => ({
+        ...a,
+        item_price: a.p_price || a.item_price,
+      })),
     });
     data = {
       ...data,
@@ -206,7 +214,7 @@ export default function AddOrder() {
           a.price,
         gst_percentage: a.item_gst,
         status: 0,
-        price: a.price || a.item_price||0,
+        price: a.price || a.item_price || 0,
       })),
       status:
         type.stage === 1
@@ -288,13 +296,13 @@ export default function AddOrder() {
     }
   };
 
-  const callBilling = async (type={}) => {
+  const callBilling = async (type = {}) => {
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let time = new Date();
     let autoBilling = await Billing({
-      replacement:order.replacement,
+      replacement: order.replacement,
       counter,
-      items: order.item_details,
+      items: order.item_details.map((a) => ({ ...a, item_price: a.p_price })),
       others: {
         stage: 1,
         user_uuid: "240522",
@@ -303,7 +311,10 @@ export default function AddOrder() {
         type: "NEW",
       },
       add_discounts: true,
-      edit_prices,
+      edit_prices: edit_prices.map((a) => ({
+        ...a,
+        item_price: a.p_price,
+      })),
       ...type,
     });
     setOrder((prev) => ({
@@ -313,7 +324,7 @@ export default function AddOrder() {
       item_details: autoBilling.items,
     }));
   };
-//console.log(order)
+  //console.log(order)
   const { getRemainingTime, getLastActiveTime } = useIdleTimer({
     timeout: 1000 * 5,
     onIdle: callBilling,
@@ -489,16 +500,21 @@ export default function AddOrder() {
                                 );
                                 setOrder((prev) => ({
                                   ...prev,
-                                  item_details: prev.item_details.map((a) =>
-                                    a.uuid === item.uuid
-                                      ? {
-                                          ...a,
-                                          ...itemsData.find(
-                                            (b) => b.item_uuid === e.value
-                                          ),
-                                        }
-                                      : a
-                                  ),
+                                  item_details: prev.item_details.map((a) => {
+                                    if (a.uuid === item.uuid) {
+                                      let item = itemsData.find(
+                                        (b) => b.item_uuid === e.value
+                                      );
+                                      return {
+                                        ...a,
+                                        ...item,
+                                        p_price: item.item_price,
+                                        b_price: (
+                                          item.item_price * item.conversion || 0
+                                        ).toFixed(0),
+                                      };
+                                    } else return a;
+                                  }),
                                 }));
                                 jumpToNextIndex(`selectContainer-${item.uuid}`);
                               }}
@@ -612,7 +628,7 @@ export default function AddOrder() {
                             className="numberInput"
                             min={1}
                             onWheel={(e) => e.preventDefault()}
-                            value={item?.item_price || 0}
+                            value={item?.p_price || 0}
                             onChange={(e) => {
                               setOrder((prev) => {
                                 return {
@@ -621,7 +637,11 @@ export default function AddOrder() {
                                     a.uuid === item.uuid
                                       ? {
                                           ...a,
-                                          item_price: e.target.value.toFixed(2),
+                                          p_price: e.target.value,
+                                          b_price: (
+                                            e.target.value * item.conversion ||
+                                            0
+                                          ).toFixed(2),
                                         }
                                       : a
                                   ),
@@ -635,8 +655,11 @@ export default function AddOrder() {
                                       a.item_uuid === item.item_uuid
                                         ? {
                                             ...a,
-                                            item_price:
-                                              e.target.value.toFixed(2),
+                                            p_price: e.target.value,
+                                            b_price: (
+                                              e.target.value *
+                                                item.conversion || 0
+                                            ).toFixed(2),
                                           }
                                         : a
                                     )
@@ -645,13 +668,19 @@ export default function AddOrder() {
                                       ...prev,
                                       {
                                         ...item,
-                                        item_price: e.target.value.toFixed(2),
+                                        p_price: e.target.value,
+                                        b_price: (
+                                          e.target.value * item.conversion || 0
+                                        ).toFixed(2),
                                       },
                                     ]
                                   : [
                                       {
                                         ...item,
-                                        item_price: e.target.value.toFixed(2),
+                                        p_price: e.target.value,
+                                        b_price: (
+                                          e.target.value * item.conversion || 0
+                                        ).toFixed(2),
                                       },
                                     ]
                               );
@@ -669,9 +698,7 @@ export default function AddOrder() {
                             className="numberInput"
                             min={1}
                             onWheel={(e) => e.preventDefault()}
-                            value={
-                              (item?.item_price || 0) * (+item?.conversion || 1)
-                            }
+                            value={item?.b_price}
                             onChange={(e) => {
                               setOrder((prev) => {
                                 return {
@@ -680,9 +707,11 @@ export default function AddOrder() {
                                     a.uuid === item.uuid
                                       ? {
                                           ...a,
-                                          item_price:
-                                            e.target.value /
-                                            (+item.conversion || 1),
+                                          b_price: e.target.value,
+                                          p_price: (
+                                            e.target.value / item.conversion ||
+                                            0
+                                          ).toFixed(2),
                                         }
                                       : a
                                   ),
@@ -696,9 +725,11 @@ export default function AddOrder() {
                                       a.item_uuid === item.item_uuid
                                         ? {
                                             ...a,
-                                            item_price:
+                                            b_price: e.target.value,
+                                            p_price: (
                                               e.target.value /
-                                              (+item.conversion || 1),
+                                                item.conversion || 0
+                                            ).toFixed(2),
                                           }
                                         : a
                                     )
@@ -707,17 +738,20 @@ export default function AddOrder() {
                                       ...prev,
                                       {
                                         ...item,
-                                        item_price:
-                                          e.target.value /
-                                          (+item.conversion || 1),
+                                        b_price: e.target.value,
+                                        p_price: (
+                                          e.target.value / item.conversion || 0
+                                        ).toFixed(2),
                                       },
                                     ]
                                   : [
                                       {
                                         ...item,
-                                        item_price:
-                                          e.target.value /
-                                          (+item.conversion || 1),
+
+                                        b_price: e.target.value,
+                                        p_price: (
+                                          e.target.value / item.conversion || 0
+                                        ).toFixed(2),
                                       },
                                     ]
                               );
@@ -775,7 +809,7 @@ export default function AddOrder() {
                   if (!order.item_details.filter((a) => a.item_uuid).length)
                     return;
                   setPopup(true);
-                  callBilling()
+                  callBilling();
                 }}
               >
                 Bill
@@ -950,7 +984,7 @@ function DiliveryPopup({
   useEffect(() => {
     let time = new Date();
     setOutstanding({
-      order_uuid:order.order_uuid,
+      order_uuid: order.order_uuid,
       amount: "",
       user_uuid: localStorage.getItem("user_uuid"),
       time: time.getTime(),
@@ -999,11 +1033,12 @@ function DiliveryPopup({
     };
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
     //console.log(
-     // Tempdata?.order_grandtotal,
-   //   +(+modeTotal + (+outstanding?.amount || 0))
-   // );
+    // Tempdata?.order_grandtotal,
+    //   +(+modeTotal + (+outstanding?.amount || 0))
+    // );
     if (
-      +Tempdata?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
+      +Tempdata?.order_grandtotal !==
+      +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
       return;
@@ -1017,7 +1052,7 @@ function DiliveryPopup({
     obj = {
       user_uuid: localStorage.getItem("user_uuid"),
       time: time.getTime(),
-      order_uuid:order.order_uuid,
+      order_uuid: order.order_uuid,
       counter_uuid: order.counter_uuid,
       trip_uuid: order.trip_uuid,
       modes,
