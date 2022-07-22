@@ -4,11 +4,14 @@ import PullToRefresh from "react-simple-pull-to-refresh";
 import "./style.css";
 import { Link, useLocation } from "react-router-dom";
 import { deleteDB, openDB } from "idb";
-import { updateIndexedDb } from "../functions";
+import CloseIcon from "@mui/icons-material/Close";
+import MenuIcon from "@mui/icons-material/Menu";
 import axios from "axios";
 const Main = () => {
   const [userRole, setUserRole] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
+  const [isSideMenuOpen, setSideMenuOpen] = useState(false);
+  const [user_bal, setUserBal] = useState(0);
   const { pathname } = useLocation();
   const Navigate = useNavigate();
   const rolesArray = [
@@ -53,51 +56,99 @@ const Main = () => {
     setUserRole(user_roles || []);
     return () => setUserRole([]);
   }, []);
+  useEffect(() => {
+    if (isSideMenuOpen) {
+      axios({
+        method: "get",
+        url: "/users/GetUser/" + localStorage.getItem("user_uuid"),
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then((response) => {
+        if (response.data.success)
+          setUserBal(response.data.result.incentive_balance);
+      });
+    }
+  }, [isSideMenuOpen]);
   console.log(typeof userRole);
   return (
-    <PullToRefresh onRefresh={() => window.location.reload(true)}>
-      <div className="servicePage" style={{ maxHeight: "100vh" }}>
-        <div className="servicesContainer">
-          {userRole?.map((data, i) => (
-            <Link
-              key={i}
-              to={pathname + rolesArray.find((a) => +a.type === +data)?.link}
-              onClick={() => {}}
-              className="linkDecoration"
-              style={{ textDecoration: "none", height: "fit-content" }}
+    <>
+      <PullToRefresh onRefresh={() => window.location.reload(true)}>
+        <div className="servicePage" style={{ maxHeight: "100vh" }}>
+          <button
+            className="time-icon"
+            type="button"
+            onClick={() => setSideMenuOpen(true)}
+            style={{ color: "#000", left: "2rem" }}
+          >
+            <MenuIcon />
+          </button>
+          <div className="servicesContainer">
+            {userRole?.map((data, i) => (
+              <Link
+                key={i}
+                to={pathname + rolesArray.find((a) => +a.type === +data)?.link}
+                onClick={() => {}}
+                className="linkDecoration"
+                style={{ textDecoration: "none", height: "fit-content" }}
+              >
+                <div className="service">
+                  <span>{rolesArray.find((a) => +a.type === +data)?.name}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div
+            style={{
+              position: "fixed",
+              bottom: "60px",
+              right: "20vw",
+              fontSize: "20px",
+            }}
+          >
+            Version 33
+          </div>
+
+          <button
+            type="button"
+            className="cartBtn"
+            onClick={() => setPopupForm("refresh")}
+          >
+            Refresh
+          </button>
+        </div>
+      </PullToRefresh>
+          {popupForm ? (
+            <Logout onSave={() => setPopupForm(false)} popupForm={popupForm} />
+          ) : (
+            ""
+          )}
+      <div className={`sidebar ${isSideMenuOpen ? "sideopen" : ""}`}>
+        <div className="sidebarContainer">
+          <button
+            className="time-icon"
+            type="button"
+            onClick={() => setSideMenuOpen(false)}
+            style={{ right: "1rem" }}
+          >
+            <CloseIcon />
+          </button>
+          <div className="links">
+            <h1 style={{ color: "#fff" }}>Bharat Traders</h1>
+            <h2>Balance Incentive: Rs {user_bal}</h2>
+
+            <button
+              className="sidebar-btn"
+              type="button"
+              onClick={() => setPopupForm(true)}
             >
-              <div className="service">
-                <span>{rolesArray.find((a) => +a.type === +data)?.name}</span>
-              </div>
-            </Link>
-          ))}
+              Logout
+            </button>
+          </div>
         </div>
-        <div style={{ position: "fixed", bottom: "60px",right:"20vw",fontSize:"20px" }}>
-          Version 33
-        </div>
-        <button
-          type="button"
-          className="cartBtn"
-          style={{ width: "50%" }}
-          onClick={() => setPopupForm(true)}
-        >
-          Logout
-        </button>
-        <button
-          type="button"
-          className="cartBtn"
-          style={{ width: "50%", right: "0px", left: "50vw" }}
-          onClick={() => setPopupForm("refresh")}
-        >
-          Refresh
-        </button>
-        {popupForm ? (
-          <Logout onSave={() => setPopupForm(false)} popupForm={popupForm} />
-        ) : (
-          ""
-        )}
       </div>
-    </PullToRefresh>
+    </>
   );
 };
 
@@ -175,7 +226,7 @@ function Logout({ onSave, popupForm }) {
   };
 
   return (
-    <div className="overlay">
+    <div className="overlay" style={{zIndex:9999999999}}>
       <div
         className="modal"
         style={{ height: "fit-content", width: "fit-content" }}

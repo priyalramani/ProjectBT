@@ -133,7 +133,7 @@ const OrderPrint = ({
         </tr>
         <tr>
           <td style={{ fontSize: "x-small" }} colSpan={7}>
-            Invoice: {order?.invoice_number}
+            Invoice: N{order?.invoice_number}
           </td>
           <td style={{ fontSize: "x-small" }} colSpan={7}>
             Date:{" "}
