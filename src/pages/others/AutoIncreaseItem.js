@@ -1292,7 +1292,27 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, setObgData }) => {
                         a?.category_title
                           .toLocaleLowerCase()
                           .includes(filterCategory.toLocaleLowerCase())
-                    )
+                    ).sort((a, b) => {
+                      let aLength = value.filter(
+                        (c) => c.item_uuid === a.item_uuid
+                      )?.length
+                      let bLength = value.filter(
+                        (c) => c.item_uuid === b.item_uuid
+                      )?.length
+                      if (aLength && bLength) {
+                        return a.item_title.localeCompare(
+                          b.item_title
+                        );
+                      } else if (aLength) {
+                        return -1;
+                      } else if (bLength) {
+                        return 1;
+                      } else {
+                        return a.item_title.localeCompare(
+                          b.item_title
+                        );
+                      }
+                    })
                     .map((item, index) => {
                       return (
                         <tr key={item.item_uuid}>

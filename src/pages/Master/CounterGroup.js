@@ -45,7 +45,6 @@ const CounterGroup = () => {
               width: "100%",
             }}
           >
-
             <input
               type="text"
               onChange={(e) => setFilterCounterGroupTitle(e.target.value)}
@@ -305,6 +304,7 @@ function NewUserForm({ onSave, popupInfo, setRoutesData }) {
 
 function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
   const [pattern, setPattern] = useState("");
+  const [filterRoute, setFilterRoute] = useState("");
   const [Counters, setCounters] = useState([]);
   const [Routes, setRoutes] = useState([]);
 
@@ -351,10 +351,15 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
   );
   const searchedItems = useMemo(
     () =>
-      Counters?.filter((item) =>
-        item?.counter_title?.toLowerCase()?.includes(pattern?.toLowerCase())
+      Counters.map((a) => ({
+        ...a,
+        route_title: Routes?.find((b) => b?.route_uuid === a?.route_uuid)
+          ?.route_title||"",
+      }))?.filter((item) =>
+        item?.counter_title?.toLowerCase()?.includes(pattern?.toLowerCase())&&
+        item?.route_title?.toLowerCase()?.includes(filterRoute?.toLowerCase())
       ),
-    [pattern, Counters, itemGroupings]
+    [pattern, Counters, Routes, filterRoute]
   );
   const includesArray = useMemo(
     () =>
@@ -444,14 +449,23 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
     >
       <h1>Counters</h1>
 
-      <input
-        type="text"
-        onChange={(e) => setPattern(e.target.value)}
-        value={pattern}
-        placeholder="Search..."
-        className="searchInput"
-      />
-
+      <div className="flex" style={{ justifyContent: "space-between" }}>
+        <input
+          type="text"
+          onChange={(e) => setPattern(e.target.value)}
+          value={pattern}
+          placeholder="Search Category..."
+          className="searchInput"
+        />{" "}
+     
+        <input
+          type="text"
+          onChange={(e) => setFilterRoute(e.target.value)}
+          value={filterRoute}
+          placeholder="Search Routes..."
+          className="searchInput"
+        />
+      </div>
       <ItemsTable
         items={searchedItems}
         onItemIncludeToggle={handleItemIncludeToggle}
@@ -493,7 +507,7 @@ function ItemsTable({
               Counter
             </th>
             <th className="description" style={{ width: "25%" }}>
-              Company
+              Route
             </th>
 
             <th style={{ width: "25%" }}>Action</th>
@@ -503,16 +517,37 @@ function ItemsTable({
         <tbody>
           {items
             ?.filter((a) => a.counter_uuid)
+            .sort((a, b) => {
+              let aLength = includesArray?.filter(
+                (c) =>
+                  c?.counter_uuid === a?.counter_uuid &&
+                  c.counter_group_uuid.filter(
+                    (d) => d === itemGroup.counter_group_uuid
+                  ).length
+              )?.length;
+
+              let bLength = includesArray?.filter(
+                (c) =>
+                  c?.counter_uuid === b?.counter_uuid &&
+                  c.counter_group_uuid.filter(
+                    (d) => d === itemGroup.counter_group_uuid
+                  ).length
+              )?.length;
+              if (aLength && bLength) {
+                return a.counter_title.localeCompare(b.counter_title);
+              } else if (aLength) {
+                return -1;
+              } else if (bLength) {
+                return 1;
+              } else {
+                return a.counter_title.localeCompare(b.counter_title);
+              }
+            })
             .map((item, index) => {
               return (
                 <tr key={item.counter_uuid}>
                   <td>{item.counter_title}</td>
-                  <td>
-                    {
-                      route.find((a) => a?.route_uuid === item?.route_uuid)
-                        ?.route_title
-                    }
-                  </td>
+                  <td>{item?.route_title}</td>
                   <td>
                     <button
                       type="button"

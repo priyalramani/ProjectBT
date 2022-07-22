@@ -163,85 +163,68 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
                       style={{
                         textDecoration: stage >= 1 ? "line-through" : "",
                       }}
+                      onClick={() => {
+                        if (stage >= 1) return;
+                        setData({ ...data, stage: 1 });
+                      }}
                     >
-                      <input
-                        type="radio"
-                        checked={data.stage === 1}
-                        onClick={() => {
-                          if (stage >= 1) return;
-                          setData({ ...data, stage: 1 });
-                        }}
-                      />
+                      <input type="radio" checked={data.stage === 1} />
                       Processing
                     </div>
                     <div
                       style={{
                         textDecoration: stage >= 2 ? "line-through" : "",
                       }}
+                      onClick={() => {
+                        if (stage >= 2) return;
+                        setData({ ...data, stage: 2 });
+                      }}
                     >
-                      <input
-                        type="radio"
-                        checked={data.stage === 2}
-                        onClick={() => {
-                          if (stage >= 2) return;
-                          setData({ ...data, stage: 2 });
-                        }}
-                      />
+                      <input type="radio" checked={data.stage === 2} />
                       Checking
                     </div>
                     <div
                       style={{
                         textDecoration: stage >= 3 ? "line-through" : "",
                       }}
+                      onClick={() => {
+                        if (stage >= 3) return;
+                        setData({ ...data, stage: 3 });
+                      }}
                     >
-                      <input
-                        type="radio"
-                        checked={data.stage === 3}
-                        onClick={() => {
-                          if (stage >= 3) return;
-                          setData({ ...data, stage: 3 });
-                        }}
-                      />
+                      <input type="radio" checked={data.stage === 3} />
                       Delivery
                     </div>
                     <div
                       style={{
                         textDecoration: stage >= 4 ? "line-through" : "",
                       }}
+                      onClick={() => {
+                        if (stage >= 4) return;
+                        setData({ ...data, stage: 4 });
+                      }}
                     >
-                      <input
-                        type="radio"
-                        checked={data.stage === 4}
-                        onClick={() => {
-                          if (stage >= 4) return;
-                          setData({ ...data, stage: 4 });
-                        }}
-                      />
+                      <input type="radio" checked={data.stage === 4} />
                       Complete
                     </div>
-                    <div>
-                      <input
-                        type="radio"
-                        checked={data.stage === 0}
-                        onClick={() => {
-                          setData({ ...data, stage: 0 });
-                        }}
-                      />
+                    <div
+                      onClick={() => {
+                        setData({ ...data, stage: 0 });
+                      }}
+                    >
+                      <input type="radio" checked={data.stage === 0} />
                       Hold
                     </div>
                     <div
                       style={{
                         textDecoration: stage >= 5 ? "line-through" : "",
                       }}
+                      onClick={() => {
+                        if (stage >= 5) return;
+                        setData({ ...data, stage: 5 });
+                      }}
                     >
-                      <input
-                        type="radio"
-                        checked={data.stage === 5}
-                        onClick={() => {
-                          if (stage >= 5) return;
-                          setData({ ...data, stage: 5 });
-                        }}
-                      />
+                      <input type="radio" checked={data.stage === 5} />
                       Cancel
                     </div>
                   </div>

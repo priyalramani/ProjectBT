@@ -307,6 +307,8 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
   const [company, setCompany] = useState([]);
   const [Category, setCategory] = useState([]);
   const [itemGroupings, setItemGroupings] = useState([]);
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterCompany, setFilterCompany] = useState("");
   const getItemCategories = async () => {
     const response = await axios({
       method: "get",
@@ -360,10 +362,27 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
   );
   const searchedItems = useMemo(
     () =>
-      items?.filter((item) =>
-        item.item_title.toLowerCase().includes(pattern.toLowerCase())
-      ),
-    [pattern, items, itemGroupings]
+      items
+        ?.map((b) => ({
+          ...b,
+          company_title:
+            company.find((a) => a.company_uuid === b.company_uuid)
+              ?.company_title || "-",
+          category_title:
+            Category.find((a) => a.category_uuid === b.category_uuid)
+              ?.category_title || "-",
+        }))
+        .filter(
+          (item) =>
+            item.item_title.toLowerCase().includes(pattern.toLowerCase()) &&
+            item.category_title
+              .toLowerCase()
+              .includes(filterCategory.toLowerCase()) &&
+            item.company_title
+              .toLowerCase()
+              .includes(filterCompany.toLowerCase())
+        ),
+    [pattern, items, filterCategory, filterCompany, company, Category]
   );
 
   const handleItemIncludeToggle = (item_uuid, type) => {
@@ -445,14 +464,29 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
       }}
     >
       <h1>Items</h1>
-
-      <input
-        type="text"
-        onChange={(e) => setPattern(e.target.value)}
-        value={pattern}
-        placeholder="Search..."
-        className="searchInput"
-      />
+      <div className="flex" style={{ justifyContent: "space-between" }}>
+        <input
+          type="text"
+          onChange={(e) => setPattern(e.target.value)}
+          value={pattern}
+          placeholder="Search Item..."
+          className="searchInput"
+        />{" "}
+        <input
+          type="text"
+          onChange={(e) => setFilterCompany(e.target.value)}
+          value={filterCompany}
+          placeholder="Search Company..."
+          className="searchInput"
+        />{" "}
+        <input
+          type="text"
+          onChange={(e) => setFilterCategory(e.target.value)}
+          value={filterCategory}
+          placeholder="Search Category..."
+          className="searchInput"
+        />
+      </div>
 
       <ItemsTable
         items={searchedItems}
@@ -513,15 +547,33 @@ function ItemsTable({
         <tbody>
           {items
             ?.filter((a) => a.item_uuid)
-            .map((b) => ({
-              ...b,
-              company_title:
-                company.find((a) => a.company_uuid === b.company_uuid)
-                  ?.company_title || "-",
-              category_title:
-                Category.find((a) => a.category_uuid === b.category_uuid)
-                  ?.category_title || "-",
-            }))
+
+            .sort((a, b) => {
+              let aLength = includesArray?.filter(
+                (c) =>
+                  c?.item_uuid === a?.item_uuid &&
+                  c.item_group_uuid.filter(
+                    (d) => d === itemGroup.item_group_uuid
+                  ).length
+              )?.length;
+
+              let bLength = includesArray?.filter(
+                (c) =>
+                  c?.item_uuid === b?.item_uuid &&
+                  c.item_group_uuid.filter(
+                    (d) => d === itemGroup.item_group_uuid
+                  ).length
+              )?.length;
+              if (aLength && bLength) {
+                return a.item_title.localeCompare(b.item_title);
+              } else if (aLength) {
+                return -1;
+              } else if (bLength) {
+                return 1;
+              } else {
+                return a.item_title.localeCompare(b.item_title);
+              }
+            })
             .map((item, index) => {
               return (
                 <tr key={item.item_uuid}>

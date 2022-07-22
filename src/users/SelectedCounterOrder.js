@@ -47,7 +47,7 @@ const SelectedCounterOrder = () => {
       if (!response.data.result.food_license) {
         setFoodLicencePopup(true);
       } else {
-        setCheckNumberPopup(true);
+        // setCheckNumberPopup(true);
       }
     }
   };
@@ -69,28 +69,12 @@ const SelectedCounterOrder = () => {
     });
     if (response.data.success) {
       setFoodLicencePopup(false);
-      setCheckNumberPopup(true);
+      // setCheckNumberPopup(true);
     }
   };
   const putCounterNumber = async (e) => {
     e.preventDefault();
-    if (!number) return;
-    const response = await axios({
-      method: "put",
-      url: "/counters/putCounter",
-      data: [
-        {
-          counter_uuid: params.counter_uuid,
-          mobile: number,
-        },
-      ],
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) {
-      setCheckNumberPopup(false);
-    }
+    Navigate(-1);
   };
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
@@ -196,7 +180,12 @@ const SelectedCounterOrder = () => {
         qty,
         amt: data.order_grandtotal || 0,
       });
-      Navigate(-1);
+      console.log(response.data.incentives);
+      if (response.data.incentives) {
+        setCheckNumberPopup(response.data.incentives);
+        setLoading(false)
+        return;
+      } else Navigate(-1);
     }
   };
   const postActivity = async (others = {}) => {
@@ -931,40 +920,13 @@ const SelectedCounterOrder = () => {
               }}
             >
               <div style={{ overflowY: "scroll" }}>
-                <h2>Check Mobile Numbers</h2>
+                <h2>Incentive Estimate Rs {checkNumberPopup}</h2>
                 <form className="form" onSubmit={putCounterNumber}>
-                  <div className="formGroup">
-                    <div className="row">
-                      <label className="selectLabel" style={{ width: "200px" }}>
-                        Mobile
-                        <textarea
-                          type="number"
-                          onWheel={(e) => e.target.blur()}
-                          name="sort_order"
-                          className="numberInput"
-                          rows={7}
-                          cols={12}
-                          value={number?.toString()?.replace(/,/g, "\n")}
-                          style={{ height: "100px", width: "200px" }}
-                          onChange={(e) =>
-                            setNumber(e.target.value.split("\n"))
-                          }
-                        />
-                      </label>
-                    </div>
-                  </div>
-
                   <button type="submit" className="submit">
-                    Save changes
+                    Great
                   </button>
                 </form>
               </div>
-              <button
-                onClick={() => setCheckNumberPopup(false)}
-                className="closeButton"
-              >
-                x
-              </button>
             </div>
           </div>
         </div>

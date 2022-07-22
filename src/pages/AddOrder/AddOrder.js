@@ -27,9 +27,6 @@ export default function AddOrder() {
   const [qty_details, setQtyDetails] = useState(false);
   const [popup, setPopup] = useState(false);
   const [autoBills, setAutoBills] = useState([]);
-  const [id, setId] = useState("");
-  const [selectedItem, setSelectedItem] = useState("");
-  const [counting, setCounting] = useState(0);
   const reactInputsRef = useRef({});
   const [focusedInputId, setFocusedInputId] = useState(0);
   const [edit_prices, setEditPrices] = useState([]);
@@ -112,9 +109,14 @@ export default function AddOrder() {
       },
     });
     if (response1.data.success)
-      data = data ? response1.data.result : [...data, ...response1.data.result];
-    setAutoBills(data);
-    //console.log(data);
+      data = data.length
+        ? response1.data.result.length
+          ? [...data, ...response1.data.result]
+          : data
+        : response1.data.result.length
+        ? response1.data.result
+        : [];
+    setAutoBills(data.filter(a=>a.status));
   };
 
   const getItemsData = async () => {
@@ -174,8 +176,8 @@ export default function AddOrder() {
       let autoAdd = await AutoAdd({
         counter,
         items: data.item_details,
-        dbItems: data.item_details,
-        autobills: autoBills.filter((a) => a.filter),
+        dbItems: itemsData,
+        autobills: autoBills.filter((a) => a.status),
       });
       data = { ...data, ...autoAdd, item_details: autoAdd.items };
     }
@@ -279,7 +281,7 @@ export default function AddOrder() {
               },
             ],
     };
-    //console.log('orderJSon',data);
+    console.log("orderJSon", data);
     const response = await axios({
       method: "post",
       url: "/orders/postOrder",
@@ -967,7 +969,7 @@ function DiliveryPopup({
   const [modes, setModes] = useState([]);
   const [error, setError] = useState("");
   const [popup, setPopup] = useState(false);
-  const [coinPopup, setCoinPopup] = useState(false);
+  // const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
   const GetPaymentModes = async () => {
@@ -1043,19 +1045,21 @@ function DiliveryPopup({
       setError("Invoice Amount and Payment mismatch");
       return;
     }
-    let obj = modes.find((a) => a.mode_title === "Cash");
-    if (obj?.amt && obj?.coin === "") {
-      setCoinPopup(true);
-      return;
-    }
+    // let obj = modes.find((a) => a.mode_title === "Cash");
+    // if (obj?.amt && obj?.coin === "") {
+    //   setCoinPopup(true);
+    //   return;
+    // }
     let time = new Date();
-    obj = {
+    let obj = {
       user_uuid: localStorage.getItem("user_uuid"),
       time: time.getTime(),
       order_uuid: order.order_uuid,
       counter_uuid: order.counter_uuid,
       trip_uuid: order.trip_uuid,
-      modes,
+      modes: modes.map((a) =>
+        a.mode_title === "Cash" ? { ...a, coin: 0 } : a
+      ),
     };
     const response = await axios({
       method: "post",
@@ -1236,7 +1240,7 @@ function DiliveryPopup({
       ) : (
         ""
       )}
-      {coinPopup ? (
+      {/* {coinPopup ? (
         <div className="overlay">
           <div
             className="modal"
@@ -1316,7 +1320,7 @@ function DiliveryPopup({
         </div>
       ) : (
         ""
-      )}
+      )} */}
     </>
   );
 }
