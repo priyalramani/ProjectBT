@@ -19,7 +19,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
-
+  const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [orderData, setOrderData] = useState();
   const [printData, setPrintData] = useState({ item_details: [], status: [] });
   const [holdPopup, setHoldPopup] = useState(false);
@@ -192,10 +192,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     getUsers();
   }, []);
 
-  const onSubmit = async () => {
+  const onSubmit = async (type = { stage: 0 }) => {
     let counter = counters.find(
       (a) => orderData?.counter_uuid === a.counter_uuid
     );
+
     let data = {
       ...orderData,
       order_status: orderData?.item_details.filter(
@@ -216,6 +217,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       ...autoBilling,
       item_details: autoBilling.items,
     };
+    let time = new Date();
+    let user_uuid = localStorage.getItem("user_uuid");
     data = {
       ...order,
       ...data,
@@ -228,12 +231,48 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       })),
 
       orderStatus,
+      status:
+        type.stage === 5
+          ? [
+              {
+                stage: 1,
+                time:
+                  data.status.find((a) => +a.stage === 1)?.time ||
+                  time.getTime(),
+                user_uuid:
+                  data.status.find((a) => +a.stage === 1)?.time || user_uuid,
+              },
+              {
+                stage: 2,
+                time:
+                  data.status.find((a) => +a.stage === 1)?.time ||
+                  time.getTime(),
+                user_uuid:
+                  data.status.find((a) => +a.stage === 1)?.user_uuid ||
+                  user_uuid,
+              },
+              {
+                stage: 3,
+                time:
+                  data.status.find((a) => +a.stage === 1)?.time ||
+                  time.getTime(),
+                user_uuid:
+                  data.status.find((a) => +a.stage === 1)?.user_uuid ||
+                  user_uuid,
+              },
+              {
+                stage: 4,
+                time: time.getTime(),
+                user_uuid,
+              },
+            ]
+          : data.status,
     };
 
     const response = await axios({
       method: "put",
-      url: "/orders/putOrder",
-      data,
+      url: "/orders/putOrders",
+      data:[data],
       headers: {
         "Content-Type": "application/json",
       },
@@ -241,7 +280,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     if (response.data.success) {
       setOrderData((prev) => ({
         ...prev,
-        order_grandtotal: data.order_grandtotal,
+        ...data,
       }));
       setEditOrder(false);
     }
@@ -331,22 +370,29 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   <button
                     style={{ width: "fit-Content", backgroundColor: "red" }}
                     className="item-sales-search"
-                    onClick={() => setDeletePopup((prev) => true)}
+                    onClick={() => setDeletePopup("Delete")}
                   >
                     Cancel Order
                   </button>
 
                   {order.hold !== "Y" ? (
                     <button
-                      style={{ width: "fit-Content", backgroundColor: "red" }}
+                      style={{ width: "fit-Content", backgroundColor: "blue" }}
                       className="item-sales-search"
-                      onClick={() => HoldOrder()}
+                      onClick={() => setDeletePopup("hold")}
                     >
                       Hold Order
                     </button>
                   ) : (
                     ""
                   )}
+                  <button
+                    style={{ width: "fit-Content", backgroundColor: "#44cd4a" }}
+                    className="item-sales-search"
+                    onClick={() => setDeliveryPopup(true)}
+                  >
+                    Complete Order
+                  </button>
                   <button
                     style={{ width: "fit-Content", backgroundColor: "black" }}
                     className="item-sales-search"
@@ -822,7 +868,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 disabled={!item.item_uuid}
                               />
                             ) : (
-                              "Rs:" + (item?.price||0)
+                              "Rs:" + (item?.price || 0)
                             )}
                           </td>
                           <td
@@ -872,7 +918,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 disabled={!item.item_uuid}
                               />
                             ) : (
-                              "Rs:" + (item?.price||0)
+                              "Rs:" + (item?.price || 0)
                             )}
                           </td>
                           {editOrder ? (
@@ -1062,10 +1108,25 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             setDeletePopup(false);
             onSave();
           }}
+          deletePopup={deletePopup}
           order={order}
           counters={counters}
           items={itemsData}
           item_details={order.item_details}
+          HoldOrder={HoldOrder}
+        />
+      ) : (
+        ""
+      )}
+      {deliveryPopup ? (
+        <DiliveryPopup
+          onSave={() => setDeliveryPopup(false)}
+          postOrderData={() => onSubmit({ stage: 5 })}
+          setSelectedOrder={setOrderData}
+          order={order}
+          counters={counters}
+          items={itemsData}
+          updateBilling={callBilling}
         />
       ) : (
         ""
@@ -1203,12 +1264,24 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   );
 }
 
-const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted }) => {
+const DeleteOrderPopup = ({
+  onSave,
+  order,
+  counters,
+  items,
+  onDeleted,
+  deletePopup,
+  HoldOrder,
+}) => {
   const [disable, setDisabled] = useState(true);
   useEffect(() => {
     setTimeout(() => setDisabled(false), 5000);
   }, []);
   const PutOrder = async () => {
+    if (deletePopup === "hold") {
+      HoldOrder();
+      return;
+    }
     let time = new Date();
     let stage = order?.status?.length
       ? order?.status
@@ -1280,7 +1353,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted }) => {
           paddingTop: "50px",
         }}
       >
-        <h3>Complete Order will be CANCELED</h3>
+        <h3>Order will be {deletePopup}</h3>
 
         <div className="flex">
           <button
@@ -1537,6 +1610,468 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+function DiliveryPopup({
+  onSave,
+  postOrderData,
+  credit_allowed,
+  counters,
+  items,
+  order,
+  updateBilling,
+}) {
+  const [PaymentModes, setPaymentModes] = useState([]);
+  const [modes, setModes] = useState([]);
+  const [error, setError] = useState("");
+  const [popup, setPopup] = useState(false);
+  // const [coinPopup, setCoinPopup] = useState(false);
+  const [data, setData] = useState({});
+  const [outstanding, setOutstanding] = useState({});
+  const GetPaymentModes = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/paymentModes/GetPaymentModesList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setPaymentModes(response.data.result);
+  };
+  useEffect(() => {
+    let time = new Date();
+    setOutstanding({
+      order_uuid: order.order_uuid,
+      amount: "",
+      user_uuid: localStorage.getItem("user_uuid"),
+      time: time.getTime(),
+      invoice_number: order.invoice_number,
+      trip_uuid: order.trip_uuid,
+      counter_uuid: order.counter_uuid,
+    });
+    GetPaymentModes();
+  }, []);
+  useEffect(() => {
+    if (PaymentModes.length)
+      setModes(
+        PaymentModes.map((a) => ({
+          ...a,
+          amt: "",
+          coin: "",
+          status:
+            a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
+            a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+              ? "0"
+              : 1,
+        }))
+      );
+  }, [PaymentModes]);
+  const submitHandler = async () => {
+    setError("");
+    let billingData = await Billing({
+      replacement: order.replacement,
+      counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
+
+      items: order.item_details.map((a) => {
+        let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+        return {
+          ...itemData,
+          ...a,
+          price: itemData?.price || 0,
+        };
+      }),
+    });
+    let Tempdata = {
+      ...order,
+      ...billingData,
+      item_details: billingData.items,
+      replacement: data.actual,
+      replacement_mrp: data.mrp,
+    };
+    let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
+    //console.log(
+    // Tempdata?.order_grandtotal,
+    //   +(+modeTotal + (+outstanding?.amount || 0))
+    // );
+    if (
+      +Tempdata?.order_grandtotal !==
+      +(+modeTotal + (+outstanding?.amount || 0))
+    ) {
+      setError("Invoice Amount and Payment mismatch");
+      return;
+    }
+    // let obj = modes.find((a) => a.mode_title === "Cash");
+    // if (obj?.amt && obj?.coin === "") {
+    //   setCoinPopup(true);
+    //   return;
+    // }
+    let time = new Date();
+    let obj = {
+      user_uuid: localStorage.getItem("user_uuid"),
+      time: time.getTime(),
+      order_uuid: order.order_uuid,
+      counter_uuid: order.counter_uuid,
+      trip_uuid: order.trip_uuid,
+      modes: modes.map((a) =>
+        a.mode_title === "Cash" ? { ...a, coin: 0 } : a
+      ),
+    };
+    const response = await axios({
+      method: "post",
+      url: "/receipts/postReceipt",
+      data: obj,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (outstanding?.amount)
+      await axios({
+        method: "post",
+        url: "/Outstanding/postOutstanding",
+        data: outstanding,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    if (response.data.success) {
+      postOrderData();
+      onSave();
+    }
+  };
+  return (
+    <>
+      <div className="overlay" style={{zIndex:9999999999}}>
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "max-content" }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h3>Payments</h3>
+            <h3>Rs. {order.order_grandtotal}</h3>
+          </div>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup">
+                  {PaymentModes.map((item) => (
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                      key={item.mode_uuid}
+                    >
+                      <div style={{ width: "50px" }}>{item.mode_title}</div>
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "80px" }}
+                      >
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          value={
+                            modes.find((a) => a.mode_uuid === item.mode_uuid)
+                              ?.amt
+                          }
+                          style={{ width: "80px" }}
+                          onChange={(e) =>
+                            setModes((prev) =>
+                              prev.map((a) =>
+                                a.mode_uuid === item.mode_uuid
+                                  ? {
+                                      ...a,
+                                      amt: e.target.value,
+                                    }
+                                  : a
+                              )
+                            )
+                          }
+                          maxLength={42}
+                          onWheel={(e) => e.preventDefault()}
+                        />
+                        {/* {popupInfo.conversion || 0} */}
+                      </label>
+                    </div>
+                  ))}
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <div style={{ width: "50px" }}>UnPaid</div>
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "80px" }}
+                    >
+                      <input
+                        type="number"
+                        name="route_title"
+                        className="numberInput"
+                        value={outstanding?.amount}
+                        placeholder={
+                          !credit_allowed === "Y" ? "Not Allowed" : ""
+                        }
+                        style={
+                          !credit_allowed === "Y"
+                            ? {
+                                width: "90px",
+                                backgroundColor: "light",
+                                fontSize: "12px",
+                                color: "#fff",
+                              }
+                            : { width: "80px" }
+                        }
+                        onChange={(e) =>
+                          setOutstanding((prev) => ({
+                            ...prev,
+                            amount: e.target.value,
+                          }))
+                        }
+                        disabled={credit_allowed !== "Y"}
+                        maxLength={42}
+                        onWheel={(e) => e.preventDefault()}
+                      />
+                      {/* {popupInfo.conversion || 0} */}
+                    </label>
+                  </div>
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <button
+                      type="button"
+                      className="submit"
+                      style={{ color: "#fff", backgroundColor: "#7990dd" }}
+                      onClick={() => setPopup(true)}
+                    >
+                      Replacement
+                    </button>
+                  </div>
+                  <i style={{ color: "red" }}>{error}</i>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "red" }}
+                    className="submit"
+                    onClick={onSave}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="submit"
+                    onClick={submitHandler}
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {popup ? (
+        <DiliveryReplaceMent
+          onSave={() => {
+            setPopup(false);
+            updateBilling({
+              replacement: data.actual,
+              replacement_mrp: data.mrp,
+            });
+          }}
+          setData={setData}
+          data={data}
+        />
+      ) : (
+        ""
+      )}
+      {/* {coinPopup ? (
+        <div className="overlay">
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "max-content" }}
+          >
+            <h3>Cash Coin</h3>
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "10px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form className="form">
+                  <div className="formGroup">
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <div style={{ width: "50px" }}>Cash</div>
+
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "80px" }}
+                      >
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          placeholder="Coins"
+                          value={
+                            modes.find(
+                              (a) =>
+                                a.mode_uuid ===
+                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                            )?.coin
+                          }
+                          style={{ width: "70px" }}
+                          onChange={(e) =>
+                            setModes((prev) =>
+                              prev.map((a) =>
+                                a.mode_uuid ===
+                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                                  ? {
+                                      ...a,
+                                      coin: e.target.value,
+                                    }
+                                  : a
+                              )
+                            )
+                          }
+                          maxLength={42}
+                          onWheel={(e) => e.preventDefault()}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div
+                    className="flex"
+                    style={{ justifyContent: "space-between" }}
+                  >
+                    <button
+                      type="button"
+                      className="submit"
+                      onClick={() => submitHandler()}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        ""
+      )} */}
+    </>
+  );
+}
+function DiliveryReplaceMent({ onSave, data, setData }) {
+  return (
+    <div className="overlay" style={{zIndex:99999999999}}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <h2>Replacements</h2>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form">
+              <div className="formGroup">
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                >
+                  <div style={{ width: "50px" }}>MRP</div>
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data.mrp}
+                      style={{ width: "100px" }}
+                      onChange={(e) =>
+                        setData((prev) => ({
+                          mrp: e.target.value,
+                          actual: +e.target.value * 0.8,
+                        }))
+                      }
+                      onWheel={(e) => e.preventDefault()}
+                      maxLength={42}
+                    />
+                    {/* {popupInfo.conversion || 0} */}
+                  </label>
+                </div>
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                >
+                  <div style={{ width: "50px" }}>Actual</div>
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data.actual}
+                      style={{ width: "100px" }}
+                      onChange={(e) =>
+                        setData((prev) => ({
+                          actual: e.target.value,
+                        }))
+                      }
+                      maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
+                    />
+                    {/* {popupInfo.conversion || 0} */}
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                <button
+                  type="button"
+                  style={{ backgroundColor: "red" }}
+                  className="submit"
+                  onClick={onSave}
+                >
+                  Cancel
+                </button>
+                <button type="button" className="submit" onClick={onSave}>
+                  Save
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
