@@ -884,7 +884,7 @@ export default function AddOrder() {
 }
 
 function NewUserForm({ onSubmit, onClose }) {
-  const [data, setData] = useState({ autoAdd: true, stage: 1 });
+  const [data, setData] = useState({ autoAdd: false, stage: 1 });
   return (
     <div className="overlay">
       <div
