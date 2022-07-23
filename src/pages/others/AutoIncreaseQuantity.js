@@ -292,6 +292,85 @@ function NewUserForm({ onSave, popupForm }) {
   const [counter, setCounter] = useState([]);
   const [filterCounterTitle, setFilterCounterTitle] = useState("");
   const [filterRoute, setFilterRoute] = useState("");
+  const [filterItemData, setFilterItemData] = useState([]);
+  const [filterItemGroupData, setFilterItemGroupData] = useState([]);
+  const [filterCounterata, setFilterCounterData] = useState([]);
+  const [filterCounterGroupData, setFilterCounterGroupData] = useState([]);
+  useEffect(() => {
+    setFilterItemGroupData(
+      itemGroups.sort((a, b) => {
+        let aLength = objData.item_groups?.filter(
+          (c) => c === a?.item_group_uuid
+        )?.length;
+        let bLength = objData.item_groups?.filter(
+          (c) => c === b?.item_group_uuid
+        )?.length;
+        if (aLength && bLength) {
+          return a.item_group_title?.localeCompare(b.item_group_title);
+        } else if (aLength) {
+          return -1;
+        } else if (bLength) {
+          return 1;
+        } else {
+          return a.item_group_title?.localeCompare(b.item_group_title);
+        }
+      })
+    );
+    setFilterItemData(
+      items.sort((a, b) => {
+        let aLength = objData.items.filter((c) => c === a.item_uuid)?.length;
+        let bLength = objData.items.filter((c) => c === b.item_uuid)?.length;
+        if (aLength && bLength) {
+          return a.item_title?.localeCompare(b.item_title);
+        } else if (aLength) {
+          return -1;
+        } else if (bLength) {
+          return 1;
+        } else {
+          return a.item_title?.localeCompare(b.item_title);
+        }
+      })
+    );
+    setFilterCounterGroupData(
+      counterGroup.sort((a, b) => {
+        let aLength = objData.counter_groups.filter(
+          (c) => c === a.counter_group_uuid
+        )?.length;
+
+        let bLength = objData.counter_groups.filter(
+          (c) => c === b.counter_group_uuid
+        )?.length;
+        if (aLength && bLength) {
+          return a.counter_group_title?.localeCompare(b.counter_group_title);
+        } else if (aLength) {
+          return -1;
+        } else if (bLength) {
+          return 1;
+        } else {
+          return a.counter_group_title?.localeCompare(b.counter_group_title);
+        }
+      })
+    );
+    setFilterCounterData(
+      counter.sort((a, b) => {
+        let aLength = objData.counters.filter(
+          (c) => c === a.counter_uuid
+        )?.length;
+        let bLength = objData.counters.filter(
+          (c) => c === b.counter_uuid
+        )?.length;
+        if (aLength && bLength) {
+          return a.counter_title?.localeCompare(b.counter_title);
+        } else if (aLength) {
+          return -1;
+        } else if (bLength) {
+          return 1;
+        } else {
+          return a.counter_title?.localeCompare(b.counter_title);
+        }
+      })
+    );
+  }, [ui, items, counter, itemGroups, counterGroup]);
   const getRoutesData = async () => {
     const response = await axios({
       method: "get",
@@ -635,7 +714,7 @@ function NewUserForm({ onSave, popupForm }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {itemGroups
+                    {filterItemData
                       ?.filter((a) => a.item_group_title)
                       .filter(
                         (a) =>
@@ -644,27 +723,7 @@ function NewUserForm({ onSave, popupForm }) {
                             .toLocaleLowerCase()
                             .includes(itemGroupTitle.toLocaleLowerCase())
                       )
-                      .sort((a, b) => {
-                        let aLength = objData.item_groups?.filter(
-                          (c) => c === a?.item_group_uuid
-                        )?.length;
-                        let bLength = objData.item_groups?.filter(
-                          (c) => c === b?.item_group_uuid
-                        )?.length;
-                        if (aLength && bLength) {
-                          return a.item_group_title.localeCompare(
-                            b.item_group_title
-                          );
-                        } else if (aLength) {
-                          return -1;
-                        } else if (bLength) {
-                          return 1;
-                        } else {
-                          return a.item_group_title.localeCompare(
-                            b.item_group_title
-                          );
-                        }
-                      })
+
                       .map((item, index) => {
                         return (
                           <tr key={item.item_uuid}>
@@ -760,7 +819,7 @@ function NewUserForm({ onSave, popupForm }) {
                   </thead>
 
                   <tbody>
-                    {items
+                    {filterItemData
                       ?.filter((a) => a.item_uuid)
                       .filter(
                         (a) =>
@@ -784,23 +843,6 @@ function NewUserForm({ onSave, popupForm }) {
                             .includes(filterCategory.toLocaleLowerCase())
                       )
 
-                      .sort((a, b) => {
-                        let aLength = objData.items.filter(
-                          (c) => c === a.item_uuid
-                        )?.length;
-                        let bLength = objData.items.filter(
-                          (c) => c === b.item_uuid
-                        )?.length;
-                        if (aLength && bLength) {
-                          return a.item_title.localeCompare(b.item_title);
-                        } else if (aLength) {
-                          return -1;
-                        } else if (bLength) {
-                          return 1;
-                        } else {
-                          return a.item_title.localeCompare(b.item_title);
-                        }
-                      })
                       .map((item, index) => {
                         return (
                           <tr key={item.item_uuid}>
@@ -882,7 +924,7 @@ function NewUserForm({ onSave, popupForm }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {counterGroup
+                    {filterCounterGroupData
                       ?.filter((a) => a.counter_group_title)
                       .filter(
                         (a) =>
@@ -893,28 +935,7 @@ function NewUserForm({ onSave, popupForm }) {
                               filterCounterGroupTitle.toLocaleLowerCase()
                             )
                       )
-                      .sort((a, b) => {
-                        let aLength = objData.counter_groups.filter(
-                          (c) => c === a.counter_group_uuid
-                        )?.length;
 
-                        let bLength = objData.counter_groups.filter(
-                          (c) => c === b.counter_group_uuid
-                        )?.length;
-                        if (aLength && bLength) {
-                          return a.counter_group_title.localeCompare(
-                            b.counter_group_title
-                          );
-                        } else if (aLength) {
-                          return -1;
-                        } else if (bLength) {
-                          return 1;
-                        } else {
-                          return a.counter_group_title.localeCompare(
-                            b.counter_group_title
-                          );
-                        }
-                      })
                       .map((item, index) => {
                         return (
                           <tr key={item.item_uuid}>
@@ -1000,7 +1021,7 @@ function NewUserForm({ onSave, popupForm }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {counter
+                    {filterCounterata
                       ?.filter((a) => a.counter_uuid)
                       .filter(
                         (a) =>
@@ -1016,23 +1037,7 @@ function NewUserForm({ onSave, popupForm }) {
                             ?.toLocaleLowerCase()
                             .includes(filterRoute.toLocaleLowerCase())
                       )
-                      .sort((a, b) => {
-                        let aLength = objData.counters.filter(
-                          (c) => c === a.counter_uuid
-                        )?.length;
-                        let bLength = objData.counters.filter(
-                          (c) => c === b.counter_uuid
-                        )?.length;
-                        if (aLength && bLength) {
-                          return a.counter_title.localeCompare(b.counter_title);
-                        } else if (aLength) {
-                          return -1;
-                        } else if (bLength) {
-                          return 1;
-                        } else {
-                          return a.counter_title.localeCompare(b.counter_title);
-                        }
-                      })
+
                       .map((item, index) => {
                         return (
                           <tr key={item.counter_uuid}>

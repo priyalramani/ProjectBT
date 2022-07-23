@@ -516,7 +516,35 @@ function ItemsTable({
   company,
   Category,
 }) {
-  console.log(items, company, Category);
+  const [filterItemData, setFilterItemData] = useState([]);
+  useEffect(() => {
+    setFilterItemData(
+      items.sort((a, b) => {
+        let aLength = includesArray?.filter(
+          (c) =>
+            c?.item_uuid === a?.item_uuid &&
+            c.item_group_uuid.filter((d) => d === itemGroup.item_group_uuid)
+              .length
+        )?.length;
+
+        let bLength = includesArray?.filter(
+          (c) =>
+            c?.item_uuid === b?.item_uuid &&
+            c.item_group_uuid.filter((d) => d === itemGroup.item_group_uuid)
+              .length
+        )?.length;
+        if (aLength && bLength) {
+          return a.item_title.localeCompare(b.item_title);
+        } else if (aLength) {
+          return -1;
+        } else if (bLength) {
+          return 1;
+        } else {
+          return a.item_title.localeCompare(b.item_title);
+        }
+      })
+    );
+  }, []);
   return (
     <div
       style={{
@@ -545,35 +573,8 @@ function ItemsTable({
         </thead>
 
         <tbody>
-          {items
+          {filterItemData
             ?.filter((a) => a.item_uuid)
-
-            .sort((a, b) => {
-              let aLength = includesArray?.filter(
-                (c) =>
-                  c?.item_uuid === a?.item_uuid &&
-                  c.item_group_uuid.filter(
-                    (d) => d === itemGroup.item_group_uuid
-                  ).length
-              )?.length;
-
-              let bLength = includesArray?.filter(
-                (c) =>
-                  c?.item_uuid === b?.item_uuid &&
-                  c.item_group_uuid.filter(
-                    (d) => d === itemGroup.item_group_uuid
-                  ).length
-              )?.length;
-              if (aLength && bLength) {
-                return a.item_title.localeCompare(b.item_title);
-              } else if (aLength) {
-                return -1;
-              } else if (bLength) {
-                return 1;
-              } else {
-                return a.item_title.localeCompare(b.item_title);
-              }
-            })
             .map((item, index) => {
               return (
                 <tr key={item.item_uuid}>

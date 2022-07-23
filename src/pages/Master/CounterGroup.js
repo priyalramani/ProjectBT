@@ -353,11 +353,15 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
     () =>
       Counters.map((a) => ({
         ...a,
-        route_title: Routes?.find((b) => b?.route_uuid === a?.route_uuid)
-          ?.route_title||"",
-      }))?.filter((item) =>
-        item?.counter_title?.toLowerCase()?.includes(pattern?.toLowerCase())&&
-        item?.route_title?.toLowerCase()?.includes(filterRoute?.toLowerCase())
+        route_title:
+          Routes?.find((b) => b?.route_uuid === a?.route_uuid)?.route_title ||
+          "",
+      }))?.filter(
+        (item) =>
+          item?.counter_title
+            ?.toLowerCase()
+            ?.includes(pattern?.toLowerCase()) &&
+          item?.route_title?.toLowerCase()?.includes(filterRoute?.toLowerCase())
       ),
     [pattern, Counters, Routes, filterRoute]
   );
@@ -457,7 +461,6 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
           placeholder="Search Category..."
           className="searchInput"
         />{" "}
-     
         <input
           type="text"
           onChange={(e) => setFilterRoute(e.target.value)}
@@ -492,7 +495,37 @@ function ItemsTable({
   onItemIncludeToggle,
   route,
 }) {
-  console.log(items, route);
+  const [filterItemData, setFilterItemData] = useState([]);
+  useEffect(() => {
+    setFilterItemData(
+      items.sort((a, b) => {
+        let aLength = includesArray?.filter(
+          (c) =>
+            c?.counter_uuid === a?.counter_uuid &&
+            c.counter_group_uuid.filter(
+              (d) => d === itemGroup.counter_group_uuid
+            ).length
+        )?.length;
+
+        let bLength = includesArray?.filter(
+          (c) =>
+            c?.counter_uuid === b?.counter_uuid &&
+            c.counter_group_uuid.filter(
+              (d) => d === itemGroup.counter_group_uuid
+            ).length
+        )?.length;
+        if (aLength && bLength) {
+          return a.counter_title.localeCompare(b.counter_title);
+        } else if (aLength) {
+          return -1;
+        } else if (bLength) {
+          return 1;
+        } else {
+          return a.counter_title.localeCompare(b.counter_title);
+        }
+      })
+    );
+  }, []);
   return (
     <div
       style={{
@@ -515,34 +548,9 @@ function ItemsTable({
         </thead>
 
         <tbody>
-          {items
+          {filterItemData
             ?.filter((a) => a.counter_uuid)
-            .sort((a, b) => {
-              let aLength = includesArray?.filter(
-                (c) =>
-                  c?.counter_uuid === a?.counter_uuid &&
-                  c.counter_group_uuid.filter(
-                    (d) => d === itemGroup.counter_group_uuid
-                  ).length
-              )?.length;
 
-              let bLength = includesArray?.filter(
-                (c) =>
-                  c?.counter_uuid === b?.counter_uuid &&
-                  c.counter_group_uuid.filter(
-                    (d) => d === itemGroup.counter_group_uuid
-                  ).length
-              )?.length;
-              if (aLength && bLength) {
-                return a.counter_title.localeCompare(b.counter_title);
-              } else if (aLength) {
-                return -1;
-              } else if (bLength) {
-                return 1;
-              } else {
-                return a.counter_title.localeCompare(b.counter_title);
-              }
-            })
             .map((item, index) => {
               return (
                 <tr key={item.counter_uuid}>
