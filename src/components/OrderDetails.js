@@ -23,8 +23,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [orderData, setOrderData] = useState();
   const [printData, setPrintData] = useState({ item_details: [], status: [] });
   const [holdPopup, setHoldPopup] = useState(false);
-  const [autoBills, setAutoBills] = useState([]);
-  const [qty_details, setQtyDetails] = useState(false);
   const [users, setUsers] = useState([]);
   const [uuids, setUuid] = useState();
   const [popupDetails, setPopupDetails] = useState();
@@ -132,7 +130,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     });
     if (response1.data.success)
       data = data ? response1.data.result : [...data, ...response1.data.result];
-    setAutoBills(data);
     console.log(data);
   };
 
@@ -240,7 +237,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   data.status.find((a) => +a.stage === 1)?.time ||
                   time.getTime(),
                 user_uuid:
-                  data.status.find((a) => +a.stage === 1)?.time || user_uuid,
+                  data.status.find((a) => +a.stage === 1)?.user_uuid || user_uuid,
               },
               {
                 stage: 2,
@@ -272,7 +269,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
-      data:[data],
+      data: [data],
       headers: {
         "Content-Type": "application/json",
       },
@@ -640,10 +637,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                       key: a.item_uuid,
                                     }))}
                                   onChange={(e) => {
-                                    setTimeout(
-                                      () => setQtyDetails((prev) => !prev),
-                                      2000
-                                    );
                                     setOrderData((prev) => ({
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -754,10 +747,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 value={item.b || 0}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
-                                    setTimeout(
-                                      () => setQtyDetails((prev) => !prev),
-                                      2000
-                                    );
                                     return {
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -799,10 +788,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 value={item.p || 0}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
-                                    setTimeout(
-                                      () => setQtyDetails((prev) => !prev),
-                                      2000
-                                    );
                                     return {
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -842,10 +827,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 value={item.price || 0}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
-                                    setTimeout(
-                                      () => setQtyDetails((prev) => !prev),
-                                      2000
-                                    );
                                     return {
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -887,10 +868,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 ).toFixed(0)}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
-                                    setTimeout(
-                                      () => setQtyDetails((prev) => !prev),
-                                      2000
-                                    );
                                     return {
                                       ...prev,
                                       item_details: prev.item_details.map((a) =>
@@ -1745,7 +1722,7 @@ function DiliveryPopup({
   };
   return (
     <>
-      <div className="overlay" style={{zIndex:9999999999}}>
+      <div className="overlay" style={{ zIndex: 9999999999 }}>
         <div
           className="modal"
           style={{ height: "fit-content", width: "max-content" }}
@@ -1818,9 +1795,7 @@ function DiliveryPopup({
                         name="route_title"
                         className="numberInput"
                         value={outstanding?.amount}
-                        placeholder={
-                          !credit_allowed === "Y" ? "Not Allowed" : ""
-                        }
+                        placeholder={""}
                         style={
                           !credit_allowed === "Y"
                             ? {
@@ -1837,7 +1812,6 @@ function DiliveryPopup({
                             amount: e.target.value,
                           }))
                         }
-                        disabled={credit_allowed !== "Y"}
                         maxLength={42}
                         onWheel={(e) => e.preventDefault()}
                       />
@@ -1986,7 +1960,7 @@ function DiliveryPopup({
 }
 function DiliveryReplaceMent({ onSave, data, setData }) {
   return (
-    <div className="overlay" style={{zIndex:99999999999}}>
+    <div className="overlay" style={{ zIndex: 99999999999 }}>
       <div
         className="modal"
         style={{ height: "fit-content", width: "max-content" }}
