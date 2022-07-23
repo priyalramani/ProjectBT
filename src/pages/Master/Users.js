@@ -159,6 +159,29 @@ function Table({ itemsDetails, setPopupForm }) {
               </div>
             </div>
           </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Balance Incentive</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("incentive_balance");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("incentive_balance");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
           <th colSpan={2}>Permission</th>
           <th colSpan={2}>
             {" "}
@@ -231,6 +254,7 @@ function Table({ itemsDetails, setPopupForm }) {
               <td>{i + 1}</td>
               <td colSpan={2}>{item.user_title}</td>
               <td colSpan={2}>{item.login_username}</td>
+              <td colSpan={2}>{item.incentive_balance||0}</td>
               <td colSpan={2}>
                 {item?.user_role?.map((a, i) => (i === 0 ? a : "," + a)) || "-"}
               </td>

@@ -52,7 +52,12 @@ export default function ItemAvilibility({
       },
     });
     console.log("users", response);
-    if (response.data.success) setUsers(response.data.result);
+    if (response.data.success)
+      setUsers(
+        response.data.result
+          .filter((a) => a.status)
+          .sort((a, b) => a.user_title?.localeCompare(b.user_title))
+      );
   };
   const getTripData = async () => {
     const response = await axios({
@@ -85,7 +90,7 @@ export default function ItemAvilibility({
       setBtn((prev) => !prev);
     }
   };
-  console.log(statementTrip)
+  console.log(statementTrip);
   return (
     <>
       <div className="itemavilablelity">
@@ -310,8 +315,9 @@ export default function ItemAvilibility({
           <TripPage
             trip_title={statementTrip?.trip_title || ""}
             users={
-              statementTrip
-                ?.users.map((a) => users.find((b) => b.user_uuid === a)) || []
+              statementTrip?.users.map((a) =>
+                users.find((b) => b.user_uuid === a)
+              ) || []
             }
             trip_uuid={statementTrip?.trip_uuid || ""}
             created_at={formatAMPM(new Date(statementTrip?.created_at || ""))}

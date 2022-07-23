@@ -513,8 +513,6 @@ function ItemsTable({
   itemGroup,
   includesArray,
   onItemIncludeToggle,
-  company,
-  Category,
 }) {
   const [filterItemData, setFilterItemData] = useState([]);
   useEffect(() => {
@@ -544,7 +542,7 @@ function ItemsTable({
         }
       })
     );
-  }, []);
+  }, [items]);
   return (
     <div
       style={{

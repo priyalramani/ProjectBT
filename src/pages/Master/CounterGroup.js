@@ -525,7 +525,7 @@ function ItemsTable({
         }
       })
     );
-  }, []);
+  }, [ items]);
   return (
     <div
       style={{
