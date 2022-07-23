@@ -271,7 +271,7 @@ function DiliveryPopup({
   const [modes, setModes] = useState([]);
   const [error, setError] = useState("");
   const [popup, setPopup] = useState(false);
-  const [coinPopup, setCoinPopup] = useState(false);
+  // const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
   const [count, setCount] = useState(0);
@@ -372,19 +372,19 @@ function DiliveryPopup({
       setError("Invoice Amount and Payment mismatch");
       return;
     }
-    let obj = modes.find((a) => a.mode_title === "Cash");
-    if (obj?.amt && obj?.coin === "") {
-      setCoinPopup(true);
-      return;
-    }
+    // let obj = modes.find((a) => a.mode_title === "Cash");
+    // if (obj?.amt && obj?.coin === "") {
+    //   // setCoinPopup(true);
+    //   return;
+    // }
     let time = new Date();
-    obj = {
+    let obj = {
       user_uuid: localStorage.getItem("user_uuid"),
       time: time.getTime(),
       order_uuid: orders[count].order_uuid,
       counter_uuid: order.counter_uuid,
       trip_uuid: order.trip_uuid,
-      modes,
+      modes:modes.map((a) => a.mode_title === "Cash"?({cash:0}):a),
     };
     const response = await axios({
       method: "post",
@@ -411,7 +411,7 @@ function DiliveryPopup({
         setOrder(orders[count + 1]);
         setCount((prev) => prev + 1);
         setData({});
-        setCoinPopup(false);
+        // setCoinPopup(false);
       }
     }
   };
@@ -569,7 +569,7 @@ function DiliveryPopup({
       ) : (
         ""
       )}
-      {coinPopup ? (
+      {/* {coinPopup ? (
         <div className="overlay">
           <div
             className="modal"
@@ -649,7 +649,7 @@ function DiliveryPopup({
         </div>
       ) : (
         ""
-      )}
+      )} */}
     </>
   );
 }
