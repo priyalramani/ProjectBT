@@ -495,6 +495,8 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
         itemGroup={ItemGroup}
         company={company}
         Category={Category}
+        filterCategory={filterCategory}
+        filterCompany={filterCompany}
       />
       <div>
         <button
@@ -513,6 +515,10 @@ function ItemsTable({
   itemGroup,
   includesArray,
   onItemIncludeToggle,
+  filterCategory,
+  filterCompany,
+  company,
+  Category,
 }) {
   const [filterItemData, setFilterItemData] = useState([]);
   useEffect(() => {
@@ -542,7 +548,7 @@ function ItemsTable({
         }
       })
     );
-  }, [items]);
+  }, [items, filterCategory, filterCompany, company, Category]);
   return (
     <div
       style={{

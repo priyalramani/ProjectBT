@@ -475,6 +475,8 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
         includesArray={itemGroupings}
         itemGroup={ItemGroup}
         route={Routes}
+        pattern={pattern}
+        filterRoute={filterRoute}
       />
       <div>
         <button
@@ -494,6 +496,7 @@ function ItemsTable({
   includesArray,
   onItemIncludeToggle,
   route,
+  pattern,filterRoute
 }) {
   const [filterItemData, setFilterItemData] = useState([]);
   useEffect(() => {
@@ -525,7 +528,7 @@ function ItemsTable({
         }
       })
     );
-  }, [ items]);
+  }, [items,pattern,filterRoute]);
   return (
     <div
       style={{
