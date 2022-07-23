@@ -4,7 +4,6 @@ import Sidebar from "../../components/Sidebar";
 import {
   ChevronUpIcon,
   ChevronDownIcon,
-  MenuAlt2Icon,
 } from "@heroicons/react/solid";
 import axios from "axios";
 const ItemsPage = () => {
@@ -278,6 +277,29 @@ function Table({ itemsDetails, setPopupForm }) {
           </th>
           <th colSpan={2}>
             <div className="t-head-element">
+              <span>Discount</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("item_discount");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("item_discount");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
               <span>Selling Price</span>
               <div className="sort-buttons-container">
                 <button
@@ -394,6 +416,7 @@ function Table({ itemsDetails, setPopupForm }) {
               <td colSpan={3}>{item.category_title}</td>
               <td colSpan={3}>{item.item_title}</td>
               <td colSpan={2}>{item.mrp}</td>
+              <td colSpan={2}>{item.item_discount||0}</td>
               <td colSpan={2}>{item.item_price}</td>
               <td colSpan={2}>{item.conversion}</td>
               <td colSpan={2}>{item.item_gst}</td>

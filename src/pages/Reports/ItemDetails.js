@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import Select from "react-select";
+import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 const ItemDetails = () => {
   const [counterGroup, setCounterGroup] = useState([]);
   const [itemGroupFilter, setItemGroupFilter] = useState("");
@@ -265,32 +266,333 @@ const ItemDetails = () => {
 
 export default ItemDetails;
 function Table({ itemsDetails }) {
+  const [items, setItems] = useState("sort_order");
+  const [order, setOrder] = useState("");
   return (
     <table
       className="user-table"
-      style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}
+      style={{
+        maxWidth: "100vw",
+        height: "fit-content",
+        overflowX: "scroll",
+        fontSize: "12px",
+      }}
     >
       <thead>
         <tr>
           <th>S.N</th>
-          <th colSpan={3}>Item Name</th>
-          <th colSpan={2}>MRP</th>
-          <th colSpan={2}>Sales</th>
-          <th colSpan={2}>Amt</th>
-          <th colSpan={2}>Delivery Return</th>
-          <th colSpan={2}> %</th>
-          <th colSpan={2}>Amt</th>
-          <th colSpan={2}>Processing Canceled</th>
-          <th colSpan={2}> %</th>
-          <th colSpan={2}> Amt</th>
-          <th colSpan={2}>Auto Add</th>
-          <th colSpan={2}> %</th>
-          <th colSpan={2}> Amt</th>
+          <th colSpan={3}>
+            <div className="t-head-element">
+              <span>Item<br/> Name</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("item_title");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("item_title");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>MRP</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("mrp");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("mrp");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Sales</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("sales");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("sales");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Amt</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("sales_amt");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("sales_amt");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Delivery <br/>Return</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("deliver_return");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("deliver_return");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span> %</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("deliver_return_percentage");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("deliver_return_percentage");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Amt</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("deliver_return_amt");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("deliver_return_amt");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span >Processing<br/> Canceled</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("processing_canceled");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("processing_canceled");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>%</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("auto_added");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("auto_added");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Amt</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("processing_canceled_amt");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("processing_canceled_amt");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Auto<br/> Add</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("auto_added");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("auto_added");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>%</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("processing_canceled_percentage");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("processing_canceled_percentage");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Amt</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("auto_added_amt");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("auto_added_amt");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
         </tr>
       </thead>
       <tbody className="tbody">
         {itemsDetails
-          ?.sort((a, b) => a.item_title.localeCompare(b.item_title))
+          .sort((a, b) =>
+            order === "asc"
+              ? typeof a[items] === "string"
+                ? a[items].localeCompare(b[items])
+                : a[items] - b[items]
+              : typeof a[items] === "string"
+              ? b[items].localeCompare(a[items])
+              : b[items] - a[items]
+          )
           ?.map((item, i, array) => (
             <tr key={item.item_uuid} style={{ height: "30px" }}>
               <td>{i + 1}</td>
