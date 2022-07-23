@@ -33,6 +33,7 @@ import { updateIndexedDb } from "./functions";
 import CounterLeger from "./pages/Reports/CounterLeger";
 import Outstanding from "./pages/Reports/Outstanding";
 import PendingsEntry from "./pages/Reports/PendingsEntry";
+import SignedBills from "./pages/Reports/SignedBills";
 import OrderRangeIncentive from "./pages/others/OrderRangeIncentve";
 
 const id = "240522";
@@ -120,6 +121,10 @@ function App() {
                   <Route
                     path="/admin/pendingEntry"
                     element={<PendingsEntry />}
+                  />
+                  <Route
+                    path="/admin/signedBills"
+                    element={<SignedBills />}
                   />
                   <Route
                     path="*"

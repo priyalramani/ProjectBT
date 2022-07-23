@@ -1177,7 +1177,7 @@ function DiliveryPopup({
                             amount: e.target.value,
                           }))
                         }
-                        disabled={credit_allowed !== "Y"}
+
                         maxLength={42}
                         onWheel={(e) => e.preventDefault()}
                       />

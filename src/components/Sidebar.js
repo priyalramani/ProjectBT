@@ -66,6 +66,10 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Trips",
               link: "#",
             },
+            {
+              name: "Signed Bills",
+              link: "/admin/signedBills",
+            },
           ]}
         />
          <NavLink
