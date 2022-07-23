@@ -1121,7 +1121,7 @@ const ProcessingOrders = () => {
                     .filter(
                       (a) =>
                         !Location.pathname.includes("delivery") ||
-                        +a.status === 1
+                        +a.status !== 3
                     )
                     .filter(
                       (a) =>
