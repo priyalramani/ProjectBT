@@ -11,7 +11,7 @@ const Main = () => {
   const [userRole, setUserRole] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
   const [isSideMenuOpen, setSideMenuOpen] = useState(false);
-  const [user_bal, setUserBal] = useState(0);
+  const [user_bal, setUserBal] = useState({});
   const { pathname } = useLocation();
   const Navigate = useNavigate();
   const rolesArray = [
@@ -67,7 +67,7 @@ const Main = () => {
         },
       }).then((response) => {
         if (response.data.success)
-          setUserBal(response.data.result.incentive_balance);
+          setUserBal(response.data.result);
       });
     }
   }, [isSideMenuOpen]);
@@ -107,7 +107,7 @@ const Main = () => {
               fontSize: "20px",
             }}
           >
-            Version 35
+            Version 36
           </div>
 
           <button
@@ -135,8 +135,8 @@ const Main = () => {
             <CloseIcon />
           </button>
           <div className="links">
-            <h1 style={{ color: "#fff" }}>Bharat Traders</h1>
-            <h2>Balance Incentive: Rs {user_bal}</h2>
+            <h1 style={{ color: "#fff" }}>{user_bal.user_title||"Bharat Traders"}</h1>
+            <h2>Balance Incentive: Rs {user_bal.incentive_balance}</h2>
 
             <button
               className="sidebar-btn"

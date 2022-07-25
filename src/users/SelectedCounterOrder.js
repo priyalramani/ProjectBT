@@ -183,7 +183,7 @@ const SelectedCounterOrder = () => {
       console.log(response.data.incentives);
       if (response.data.incentives) {
         setCheckNumberPopup(response.data.incentives);
-        setLoading(false)
+        setLoading(false);
         return;
       } else Navigate(-1);
     }
@@ -431,8 +431,19 @@ const SelectedCounterOrder = () => {
                                             className={`item-price`}
                                             style={{ cursor: "pointer" }}
                                           >
-                                            Price:
-                                            {item?.item_price}
+                                            {+item?.item_discount ? (
+                                              <>
+                                                <span style={{color:"red",textDecoration: "line-through"}}>
+                                                  Price: {item?.item_price}
+                                                </span>
+                                                <br />
+                                                <span style={{color:"red",paddingLeft:"10px",marginLeft:"10px",fontWeight:"500",borderLeft:"2px solid red"}}>
+                                                  {item?.item_discount} % OFF
+                                                </span>
+                                              </>
+                                            ) : (
+                                              <>Price: {item?.item_price}</>
+                                            )}
                                           </h3>
                                           <h3 className={`item-price`}>
                                             MRP: {item?.mrp || ""}
