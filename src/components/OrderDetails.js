@@ -1252,7 +1252,7 @@ const DeleteOrderPopup = ({
 }) => {
   const [disable, setDisabled] = useState(true);
   useEffect(() => {
-    setTimeout(() => setDisabled(false), 5000);
+    setTimeout(() => setDisabled(false), deletePopup==="hold"?100:5000);
   }, []);
   const PutOrder = async () => {
     if (deletePopup === "hold") {
@@ -1650,33 +1650,33 @@ function DiliveryPopup({
   }, [PaymentModes]);
   const submitHandler = async () => {
     setError("");
-    let billingData = await Billing({
-      replacement: order.replacement,
-      counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
+    // let billingData = await Billing({
+    //   replacement: order.replacement,
+    //   counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
 
-      items: order.item_details.map((a) => {
-        let itemData = items.find((b) => a.item_uuid === b.item_uuid);
-        return {
-          ...itemData,
-          ...a,
-          price: itemData?.price || 0,
-        };
-      }),
-    });
-    let Tempdata = {
-      ...order,
-      ...billingData,
-      item_details: billingData.items,
-      replacement: data.actual,
-      replacement_mrp: data.mrp,
-    };
+    //   items: order.item_details.map((a) => {
+    //     let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+    //     return {
+    //       ...itemData,
+    //       ...a,
+    //       price: itemData?.price || 0,
+    //     };
+    //   }),
+    // });
+    // let Tempdata = {
+    //   ...order,
+    //   ...billingData,
+    //   item_details: billingData.items,
+    //   replacement: data.actual,
+    //   replacement_mrp: data.mrp,
+    // };
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
     //console.log(
     // Tempdata?.order_grandtotal,
     //   +(+modeTotal + (+outstanding?.amount || 0))
     // );
     if (
-      +Tempdata?.order_grandtotal !==
+      +order?.order_grandtotal !==
       +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");

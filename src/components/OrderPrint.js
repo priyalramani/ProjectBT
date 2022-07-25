@@ -497,11 +497,11 @@ const OrderPrint = ({
                 colSpan={2}
               >
                 {(
-                  Number((order?.item_details?.length > 1
+                  (order?.item_details?.length > 1
                     ? order?.item_details
                         ?.map((a) => +a.item_total || 0)
                         .reduce((a, b) => a + b)
-                    : order?.item_details[0]?.item_total) || 0)
+                    : +order?.item_details[0]?.item_total) || 0
                 ).toFixed(2)}
               </th>
             </tr>
