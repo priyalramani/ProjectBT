@@ -196,11 +196,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
 
     let data = {
       ...orderData,
-      order_status: orderData?.item_details.filter(
-        (a) => a.price_approval === "N"
-      ).length
-        ? "A"
-        : "R",
+
       item_details: orderData?.item_details.filter((a) => a.item_uuid) || [],
     };
 
@@ -228,7 +224,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         status: a.status || 0,
         price: a?.price || a.item_price || 0,
       })),
-
+      order_status: orderData?.item_details.filter(
+        (a) => a.price_approval === "N"
+      ).length
+        ? "A"
+        : "R",
       orderStatus,
     };
     data =
