@@ -71,7 +71,7 @@ const ProcessingOrders = () => {
       if (selectedOrder) {
         setConfirmPopup(true);
         // window.history.pushState(null, document.title, window.location.href);
-        Navigate(1)
+        Navigate(1);
       } else {
         Navigate(-1);
       }
@@ -2003,28 +2003,60 @@ function HoldPopup({
         };
       });
 
-    console.log(data);
-    let result = data.reduce((acc, curr) => {
-      let item = acc.find((item) => item.item_uuid === curr.item_uuid);
-      if (item) {
-        let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
-          ?.conversion;
-        item.b = parseInt(
-          +item.b +
-            curr.b +
-            (+item.p + curr.p + ((+item.free || 0) + (+curr.free || 0))) /
-              conversion
-        );
-        item.p = parseInt(
-          (+item.p + curr.p + ((+item.free || 0) + (+curr.free || 0))) %
-            conversion
-        );
-      } else {
-        acc.push(curr);
-      }
+    let result = [];
+    for (let item of data) {
+      var existing = result.filter(function (v, i) {
+        return v.item_uuid === item.item_uuid;
+      });
 
-      return acc;
-    }, []);
+      if (existing.length === 0) {
+        let itemsFilteredData = data.filter(
+          (a) => a.item_uuid === item.item_uuid
+        );
+        let b =
+          itemsFilteredData.length > 1
+            ? itemsFilteredData?.map((c) => +c.b || 0).reduce((c, d) => c + d)
+            : +itemsFilteredData[0]?.b || 0;
+        let p =
+          itemsFilteredData.length > 1
+            ? itemsFilteredData?.map((c) => +c.p || 0).reduce((c, d) => c + d)
+            : +itemsFilteredData[0]?.p || 0;
+        let free =
+          itemsFilteredData.length > 1
+            ? itemsFilteredData
+                ?.map((c) => +c.free || 0)
+                .reduce((c, d) => c + d)
+            : +itemsFilteredData[0]?.free || 0;
+        console.log({
+          b,
+          p,
+          free,
+          item_title: item.item_title,
+        });
+        b = parseInt(
+          +b +
+            (+p + free) /
+              +itemsData?.find((b) => b.item_uuid === item.item_uuid)
+                ?.conversion
+        );
+        p = parseInt(
+          (+p + free) %
+            +itemsData?.find((b) => b.item_uuid === item.item_uuid)?.conversion
+        );
+        console.log({
+          b,
+          p,
+          free,
+          item_title: item.item_title,
+        });
+        let obj = {
+          ...item,
+          b,
+          p,
+        };
+        result.push(obj);
+      }
+    }
 
     console.log(result);
     result.map((item) =>
@@ -3860,7 +3892,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
   };
   return (
     <>
-      <div className="overlay" style={{zIndex:"999999999"}}>
+      <div className="overlay" style={{ zIndex: "999999999" }}>
         <div
           className="modal"
           style={{
@@ -3882,32 +3914,38 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
           >
             <div style={{ overflow: "scroll", width: "100%" }}>
               {order.length ? (
-                <div
-                  className="flex"
-                  style={{ flexDirection: "column"}}
-                >
+                <div className="flex" style={{ flexDirection: "column" }}>
                   <table
                     className="user-table"
                     style={{
-                   
                       height: "fit-content",
-fontSize:"10px"
+                      fontSize: "10px",
+                      width: "max-content",
+                      overflow: "scroll",
                     }}
                   >
                     <thead>
                       <tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
                         <th></th>
-                        <th colSpan={3} >
+                        <th colSpan={3}>
                           <div className="t-head-element">Date</div>
                         </th>
                         <th colSpan={2}>
-                          <div className="t-head-element" style={{width:"40px"}}>Invoice Number</div>
+                          <div
+                            className="t-head-element"
+                            style={{ width: "40px" }}
+                          >
+                            Invoice Number
+                          </div>
                         </th>
                         <th colSpan={2}>
                           <div className="t-head-element">Counter</div>
                         </th>
                         <th colSpan={2}>
                           <div className="t-head-element">Quantity</div>
+                        </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">free</div>
                         </th>
                         <th></th>
                       </tr>
@@ -3926,19 +3964,24 @@ fontSize:"10px"
                               : "#7990dd",
                           }}
                         >
-                          <td style={{width:"3ch"}}>{i + 1}</td>
-                          <td colSpan={3} style={{width:"70px"}}>
+                          <td style={{ width: "3ch" }}>{i + 1}</td>
+                          <td colSpan={3} style={{ width: "70px" }}>
                             {new Date(item?.status[0]?.time).toDateString() +
                               " - " +
                               formatAMPM(new Date(item?.status[0]?.time))}
                           </td>
-                          <td colSpan={2} style={{width:"40px"}}>{item.invoice_number}</td>
-                          <td colSpan={2} style={{width:"50px"}}>
+                          <td colSpan={2} style={{ width: "40px" }}>
+                            {item.invoice_number}
+                          </td>
+                          <td colSpan={2} style={{ width: "50px" }}>
                             {counter?.find(
                               (a) => a.counter_uuid === item.counter_uuid
                             )?.counter_title || "-"}
                           </td>
-                          <td colSpan={2}  style={{width:"50px",padding:"0 2px"}}>
+                          <td
+                            colSpan={2}
+                            style={{ width: "50px", padding: "0 2px" }}
+                          >
                             <input
                               value={
                                 (item.item_details.find(
@@ -3950,7 +3993,12 @@ fontSize:"10px"
                                 )?.p || 0)
                               }
                               className="boxPcsInput"
-                              style={{fontSize:"10px",width:"10ch",overflow:"scroll",padding:"none"}}
+                              style={{
+                                fontSize: "10px",
+                                width: "10ch",
+                                overflow: "scroll",
+                                padding: "none",
+                              }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setOrderEditPopup(item);
@@ -3958,7 +4006,15 @@ fontSize:"10px"
                             />
                           </td>
                           <td
-                          style={{width:"50px",padding:"0 2px"}}
+                            colSpan={2}
+                            style={{ width: "50px", padding: "0 2px" }}
+                          >
+                            {item.item_details.find(
+                              (a) => a.item_uuid === items.item_uuid
+                            )?.free || 0}
+                          </td>
+                          <td
+                            style={{ width: "50px", padding: "0 2px" }}
                             onClick={() => {
                               setDeleteItemOrders((prev) =>
                                 prev?.filter((a) => a === item.order_uuid)
@@ -3997,8 +4053,8 @@ fontSize:"10px"
                 right: "50px",
                 top: "0px",
                 backgroundColor: "red",
-                fontSize:"15px",
-                width:"90px"
+                fontSize: "15px",
+                width: "90px",
               }}
               onClick={() => postOrderData(true)}
             >
@@ -4075,7 +4131,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
   };
 
   return (
-    <div className="overlay" style={{zIndex:999999999999}}>
+    <div className="overlay" style={{ zIndex: 999999999999 }}>
       <div
         className="modal"
         style={{ height: "fit-content", width: "max-content" }}

@@ -1637,7 +1637,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
     orderStage = orderStage.filter(
       (a) => stage === "all" || +a.stage === stage
     );
-    console.log(orderStage);
+
     let data = [].concat
       .apply(
         [],
@@ -1654,28 +1654,60 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
           category_uuid: itemDetails?.category_uuid,
         };
       });
-    console.log(data);
-    let result = data.reduce((acc, curr) => {
-      let item = acc.find((item) => item.item_uuid === curr.item_uuid);
-      if (item) {
-        let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
-          ?.conversion;
-        item.b = parseInt(
-          +item.b +
-            curr.b +
-            (+item.p + curr.p + ((+item.free || 0) + (+curr.free || 0))) /
-              conversion
+    let result = [];
+    for (let item of data) {
+      var existing = result.filter(function (v, i) {
+        return v.item_uuid === item.item_uuid;
+      });
+   
+      if (existing.length === 0) {
+        let itemsFilteredData = data.filter(
+          (a) => a.item_uuid === item.item_uuid
         );
-        item.p = parseInt(
-          (+item.p + curr.p + ((+item.free || 0) + (+curr.free || 0))) %
-            conversion
-        );
-      } else {
-        acc.push(curr);
+        let b =
+          itemsFilteredData.length > 1
+            ? itemsFilteredData?.map((c) => +c.b || 0).reduce((c, d) => c + d)
+            : +itemsFilteredData[0]?.b || 0;
+        let p =
+          itemsFilteredData.length > 1
+            ? itemsFilteredData?.map((c) => +c.p || 0).reduce((c, d) => c + d)
+            : +itemsFilteredData[0]?.p || 0;
+        let free =
+          itemsFilteredData.length > 1
+            ? itemsFilteredData
+                ?.map((c) => +c.free || 0)
+                .reduce((c, d) => c + d)
+            : +itemsFilteredData[0]?.free || 0;
+        let obj = {
+          ...item,
+          b:
+            parseInt(+b +
+            (+p + free) /
+              +itemsData?.find((b) => b.item_uuid === item.item_uuid)
+                ?.conversion),
+          p:
+            parseInt((+p + free) %
+            +itemsData?.find((b) => b.item_uuid === item.item_uuid)?.conversion),
+        };
+        result.push(obj);
       }
+    }
 
-      return acc;
-    }, []);
+    // let result = data.reduce((acc, curr) => {
+    //   let item = acc.find((item) => item.item_uuid === curr.item_uuid);
+    //   if (item) {
+    //     let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
+    //       ?.conversion;
+    //     item.b = +(
+    //       +item.b + curr.b + (+item.p + curr.p + (+curr.free || 0)) / conversion
+    //     );
+    //     item.p = +((+item.p + curr.p + (+curr.free || 0)) % conversion);
+    //   } else {
+    //     acc.push(curr);
+    //   }
+
+    //   return acc;
+    // }, []);
     setOrderTotal(
       orderStage.length > 1
         ? orderStage
@@ -2797,6 +2829,9 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
                         <th colSpan={2}>
                           <div className="t-head-element">Quantity</div>
                         </th>
+                        <th colSpan={2}>
+                          <div className="t-head-element">Free</div>
+                        </th>
                         <th></th>
                       </tr>
                     </thead>
@@ -2843,6 +2878,11 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
                                 setOrderEditPopup(item);
                               }}
                             />
+                          </td>
+                          <td colSpan={2}>
+                            {item.item_details.find(
+                              (a) => a.item_uuid === items.item_uuid
+                            )?.free || 0}
                           </td>
                           <td
                             onClick={() => {
