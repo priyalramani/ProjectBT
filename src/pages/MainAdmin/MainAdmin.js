@@ -214,7 +214,7 @@ const MainAdmin = () => {
       data: selectedOrder
         .filter((a) => a.order_status !== "A")
         .map((a) => ({
-          ...a,
+          order_uuid: a.order_uuid,
           trip_uuid: +selectedTrip === 0 ? "" : selectedTrip,
         })),
       headers: {

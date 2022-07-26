@@ -217,8 +217,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     let time = new Date();
     let user_uuid = localStorage.getItem("user_uuid");
     data = {
-      ...order,
-      ...data,
+      order_uuid: data.order_uuid,
+      order_grandtotal: data.order_grandtotal,
+      replacement: data.replacement,
+      replacement_mrp: data.replacement_mrp,
 
       item_details: data.item_details.map((a) => ({
         ...a,
@@ -228,16 +230,20 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       })),
 
       orderStatus,
-      status:
-        type.stage === 5
-          ? [
+    };
+    data =
+      type.stage === 5
+        ? {
+            ...data,
+            status: [
               {
                 stage: 1,
                 time:
                   data.status.find((a) => +a.stage === 1)?.time ||
                   time.getTime(),
                 user_uuid:
-                  data.status.find((a) => +a.stage === 1)?.user_uuid || user_uuid,
+                  data.status.find((a) => +a.stage === 1)?.user_uuid ||
+                  user_uuid,
               },
               {
                 stage: 2,
@@ -262,9 +268,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 time: time.getTime(),
                 user_uuid,
               },
-            ]
-          : data.status,
-    };
+            ],
+          }
+        : data;
 
     const response = await axios({
       method: "put",
@@ -1252,7 +1258,7 @@ const DeleteOrderPopup = ({
 }) => {
   const [disable, setDisabled] = useState(true);
   useEffect(() => {
-    setTimeout(() => setDisabled(false), deletePopup==="hold"?100:5000);
+    setTimeout(() => setDisabled(false), deletePopup === "hold" ? 100 : 5000);
   }, []);
   const PutOrder = async () => {
     if (deletePopup === "hold") {
@@ -1676,8 +1682,7 @@ function DiliveryPopup({
     //   +(+modeTotal + (+outstanding?.amount || 0))
     // );
     if (
-      +order?.order_grandtotal !==
-      +(+modeTotal + (+outstanding?.amount || 0))
+      +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
       return;
