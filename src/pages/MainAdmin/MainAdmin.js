@@ -1417,6 +1417,7 @@ const MainAdmin = () => {
           itemsData={items}
           counter={counter}
           category={category}
+          setPopupOrder={setPopupOrder}
         />
       ) : (
         ""
@@ -1433,6 +1434,7 @@ const MainAdmin = () => {
           counter={counter}
           category={category}
           company={company}
+          setPopupOrder={setPopupOrder}
         />
       ) : (
         ""
@@ -1578,7 +1580,7 @@ function NewUserForm({
     </div>
   );
 }
-function HoldPopup({ onSave, orders, itemsData, counter, category }) {
+function HoldPopup({ onSave, orders, itemsData, counter, category,setPopupOrder }) {
   const [items, setItems] = useState([]);
   const [stage, setStage] = useState("");
   const [itemStatus, setItemStatus] = useState("");
@@ -1659,7 +1661,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
       var existing = result.filter(function (v, i) {
         return v.item_uuid === item.item_uuid;
       });
-   
+
       if (existing.length === 0) {
         let itemsFilteredData = data.filter(
           (a) => a.item_uuid === item.item_uuid
@@ -1680,14 +1682,17 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
             : +itemsFilteredData[0]?.free || 0;
         let obj = {
           ...item,
-          b:
-            parseInt(+b +
-            (+p + free) /
+          b: parseInt(
+            +b +
+              (+p + free) /
+                +itemsData?.find((b) => b.item_uuid === item.item_uuid)
+                  ?.conversion
+          ),
+          p: parseInt(
+            (+p + free) %
               +itemsData?.find((b) => b.item_uuid === item.item_uuid)
-                ?.conversion),
-          p:
-            parseInt((+p + free) %
-            +itemsData?.find((b) => b.item_uuid === item.item_uuid)?.conversion),
+                ?.conversion
+          ),
         };
         result.push(obj);
       }
@@ -2005,6 +2010,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category }) {
           counter={counter}
           itemsData={itemsData}
           onClose={() => setPopup(false)}
+          setPopupOrder={setPopupOrder}
         />
       ) : (
         ""
@@ -2290,6 +2296,7 @@ function SummaryPopup({
   counter,
   category,
   company,
+  setPopupOrder
 }) {
   const [items, setItems] = useState([]);
 
@@ -2297,7 +2304,6 @@ function SummaryPopup({
   const [popup, setPopup] = useState(false);
   const [orderTotal, setOrderTotal] = useState(0);
   const componentRef = useRef(null);
-  const [filterItemTitle, setFilterItemTile] = useState("");
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, [items]);
@@ -2557,6 +2563,7 @@ function SummaryPopup({
           counter={counter}
           itemsData={itemsData}
           onClose={() => setPopup(false)}
+          setPopupOrder={setPopupOrder}
         />
       ) : (
         ""
@@ -2688,7 +2695,7 @@ function SummaryPopup({
   );
 }
 
-const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
+const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose ,setPopupOrder}) => {
   const [orderEditPopup, setOrderEditPopup] = useState("");
   const [updateOrders, setUpdateOrders] = useState([]);
   const [deleteItemsOrder, setDeleteItemOrders] = useState([]);
@@ -2848,6 +2855,10 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
                               ? "red"
                               : "#7990dd",
                           }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPopupOrder(item);
+                          }}
                         >
                           <td>{i + 1}</td>
                           <td colSpan={3}>
@@ -2885,7 +2896,8 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
                             )?.free || 0}
                           </td>
                           <td
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setDeleteItemOrders((prev) =>
                                 prev?.filter((a) => a === item.order_uuid)
                                   .length
