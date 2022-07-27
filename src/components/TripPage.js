@@ -71,7 +71,7 @@ const TripPage = ({
           </td>
         </tr>
       </table>
-      {cheque.length ? (
+      {cheque?.length ? (
         <table style={{ margin: "10px", width: "100%" }}>
           <tr>
             <td style={{ fontSize: "small", textAlign: "left" }}>
@@ -97,7 +97,7 @@ const TripPage = ({
         ""
       )}
 
-      {unpaid_invoice.length ? (
+      {unpaid_invoice?.length ? (
         <table style={{ margin: "10px", width: "100%" }}>
           <tr>
             <td style={{ fontSize: "small", textAlign: "left" }}>
@@ -122,7 +122,7 @@ const TripPage = ({
       ) : (
         ""
       )}
-      {replacement.length ? (
+      {replacement?.length ? (
         <table style={{ margin: "10px", width: "100%" }}>
           <tr>
             <td style={{ fontSize: "small", textAlign: "left" }}>
@@ -150,14 +150,14 @@ const TripPage = ({
           <tr style={{ fontWeight: "bold" }}>
             <td style={{ border: "1px solid #000" }}>Total</td>
             <td style={{ border: "1px solid #000" }}>
-              {replacement.length > 1
+              {replacement?.length > 1
                 ? replacement
                     .map((a) => +a.replacement || 0)
                     .reduce((a, b) => a + b)
                 : replacement[0].replacement}
             </td>
             <td style={{ border: "1px solid #000" }}>
-              {replacement.length > 1
+              {replacement?.length > 1
                 ? replacement
                     .map((a) => +a.replacement_mrp || 0)
                     .reduce((a, b) => a + b)
@@ -169,7 +169,7 @@ const TripPage = ({
       ) : (
         ""
       )}
-      {sales_return.length ? (
+      {sales_return?.length ? (
         <table style={{ margin: "10px", width: "100%" }}>
           <tr>
             <td style={{ fontSize: "small", textAlign: "left" }}>

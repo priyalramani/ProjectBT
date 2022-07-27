@@ -1,18 +1,9 @@
 import axios from "axios";
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import PopupTripOrderTable from "./PopupTripOrderTable";
 import TripPage from "./TripPage";
-export default function ItemAvilibility({
-  isItemAvilableOpen,
-  setIsItemAvilableOpen,
-}) {
+export default function ItemAvilibility({ setIsItemAvilableOpen }) {
   const [itemsData, setItemsData] = useState([]);
   const [popup, setPopup] = useState(null);
   const [users, setUsers] = useState([]);
@@ -23,7 +14,7 @@ export default function ItemAvilibility({
   const componentRef = useRef(null);
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
-  }, [statementTrip]);
+  }, []);
 
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
@@ -71,6 +62,26 @@ export default function ItemAvilibility({
     if (response.data.success)
       setItemsData(response.data.result.filter((a) => a.status));
   };
+  const getTripDetails = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/trips/GetTripSummaryDetails/" + statementTrip.trip_uuid,
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      console.log(response)
+      setStatementTrip(response.data.result);
+      setTimeout(handlePrint, 2000);
+    }
+  };
+  useEffect(() => {
+    if (statementTrip?.trip_uuid) {
+      getTripDetails();
+    }
+  }, [statementTrip]);
   useEffect(() => {
     getTripData();
   }, [btn]);
@@ -217,7 +228,6 @@ export default function ItemAvilibility({
                               type="button"
                               onClick={() => {
                                 setStatementTrip(item);
-                                setTimeout(handlePrint, 2000);
                               }}
                             >
                               Statement
@@ -297,40 +307,44 @@ export default function ItemAvilibility({
       ) : (
         ""
       )}
-      <div
-        style={{ position: "fixed", top: -100, left: -180, zIndex: "-1000" }}
-      >
+      {statementTrip?.trip_uuid ? (
         <div
-          ref={componentRef}
-          style={{
-            width: "21cm",
-            height: "29.7cm",
-
-            textAlign: "center",
-
-            // padding: "100px",
-            pageBreakInside: "auto",
-          }}
+          style={{ position: "fixed", top: -100, left: -180, zIndex: "-1000" }}
         >
-          <TripPage
-            trip_title={statementTrip?.trip_title || ""}
-            users={
-              statementTrip?.users.map((a) =>
-                users.find((b) => b.user_uuid === a)
-              ) || []
-            }
-            trip_uuid={statementTrip?.trip_uuid || ""}
-            created_at={formatAMPM(new Date(statementTrip?.created_at || ""))}
-            amt={statementTrip?.amt || 0}
-            coin={statementTrip?.coin || 0}
-            formatAMPM={formatAMPM}
-            cheque={statementTrip?.cheque}
-            replacement={statementTrip?.replacement}
-            sales_return={statementTrip?.sales_return}
-            unpaid_invoice={statementTrip?.unpaid_invoice}
-          />
+          <div
+            ref={componentRef}
+            style={{
+              width: "21cm",
+              height: "29.7cm",
+
+              textAlign: "center",
+
+              // padding: "100px",
+              pageBreakInside: "auto",
+            }}
+          >
+            <TripPage
+              trip_title={statementTrip?.trip_title || ""}
+              users={
+                statementTrip?.users.map((a) =>
+                  users.find((b) => b.user_uuid === a)
+                ) || []
+              }
+              trip_uuid={statementTrip?.trip_uuid || ""}
+              created_at={formatAMPM(new Date(statementTrip?.created_at || ""))}
+              amt={statementTrip?.amt || 0}
+              coin={statementTrip?.coin || 0}
+              formatAMPM={formatAMPM}
+              cheque={statementTrip?.cheque}
+              replacement={statementTrip?.replacement}
+              sales_return={statementTrip?.sales_return}
+              unpaid_invoice={statementTrip?.unpaid_invoice}
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        ""
+      )}
     </>
   );
 }
@@ -338,7 +352,7 @@ function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
   const [data, setdata] = useState([]);
   useEffect(() => {
     setdata(popupInfo?.users || []);
-  }, []);
+  }, [popupInfo?.users]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
