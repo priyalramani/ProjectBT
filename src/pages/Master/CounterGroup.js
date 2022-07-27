@@ -508,7 +508,7 @@ function ItemsTable({
             c.counter_group_uuid.filter(
               (d) => d === itemGroup.counter_group_uuid
             ).length
-        )?.length;
+        )?.length
 
         let bLength = includesArray?.filter(
           (c) =>
@@ -516,7 +516,15 @@ function ItemsTable({
             c.counter_group_uuid.filter(
               (d) => d === itemGroup.counter_group_uuid
             ).length
-        )?.length;
+        )?.length
+        console.log(includesArray?.filter(
+          (c) =>
+            c?.counter_uuid === a?.counter_uuid &&
+            c.counter_group_uuid.filter(
+              (d) => d === itemGroup.counter_group_uuid
+            ).length
+        )?.length,a
+)
         if (aLength && bLength) {
           return a.counter_title.localeCompare(b.counter_title);
         } else if (aLength) {
@@ -528,7 +536,7 @@ function ItemsTable({
         }
       })
     );
-  }, [items,pattern,filterRoute]);
+  }, [items, pattern, filterRoute, includesArray, itemGroup.counter_group_uuid]);
   return (
     <div
       style={{

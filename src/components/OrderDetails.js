@@ -224,7 +224,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         status: a.status || 0,
         price: a?.price || a.item_price || 0,
       })),
-      order_status: orderData?.item_details.filter(
+      order_status: data?.item_details.filter(
         (a) => a.price_approval === "N"
       ).length
         ? "A"

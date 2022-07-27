@@ -1195,8 +1195,9 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, setObgData }) => {
     );
     setFilterItemData(
       items.sort((a, b) => {
-        let aLength = value.filter((c) => c.item_uuid === a.item_uuid)?.length;
-        let bLength = value.filter((c) => c.item_uuid === b.item_uuid)?.length;
+        let aLength = objData?.qty_details?.find((a) => a.uuid === itemPopupId)?.add_items?.filter((c) => c.item_uuid === a.item_uuid)?.length;
+        let bLength = objData?.qty_details?.find((a) => a.uuid === itemPopupId)?.add_items?.filter((c) => c.item_uuid === b.item_uuid)?.length;
+        console.log(objData?.qty_details?.find((a) => a.uuid === itemPopupId)?.add_items)
         if (aLength && bLength) {
           return a.item_title?.localeCompare(b.item_title);
         } else if (aLength) {
@@ -1208,7 +1209,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, setObgData }) => {
         }
       })
     );
-  }, []);
+  }, [itemPopupId, items, objData?.qty_details]);
   const submitHandler = () => {
     setObgData((prev) => ({
       ...prev,
