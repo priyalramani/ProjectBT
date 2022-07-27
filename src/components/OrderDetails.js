@@ -224,9 +224,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         status: a.status || 0,
         price: a?.price || a.item_price || 0,
       })),
-      order_status: data?.item_details.filter(
-        (a) => a.price_approval === "N"
-      ).length
+      order_status: data?.item_details.filter((a) => a.price_approval === "N")
+        .length
         ? "A"
         : "R",
       orderStatus,
@@ -964,7 +963,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                               ...prev,
                               item_details: [
                                 ...prev.item_details,
-                                { uuid: uuid(), b: 0, p: 0 },
+                                { uuid: uuid(), b: 0, p: 0, edit: true },
                               ],
                             }))
                           }
