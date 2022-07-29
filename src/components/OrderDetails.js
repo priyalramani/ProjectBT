@@ -238,28 +238,28 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               {
                 stage: 1,
                 time:
-                  data.status.find((a) => +a.stage === 1)?.time ||
+                  data?.status?.find((a) => +a.stage === 1)?.time ||
                   time.getTime(),
                 user_uuid:
-                  data.status.find((a) => +a.stage === 1)?.user_uuid ||
+                  data?.status?.find((a) => +a.stage === 1)?.user_uuid ||
                   user_uuid,
               },
               {
                 stage: 2,
                 time:
-                  data.status.find((a) => +a.stage === 1)?.time ||
+                  data?.status?.find((a) => +a.stage === 1)?.time ||
                   time.getTime(),
                 user_uuid:
-                  data.status.find((a) => +a.stage === 1)?.user_uuid ||
+                  data?.status?.find((a) => +a.stage === 1)?.user_uuid ||
                   user_uuid,
               },
               {
                 stage: 3,
                 time:
-                  data.status.find((a) => +a.stage === 1)?.time ||
+                  data?.status?.find((a) => +a.stage === 1)?.time ||
                   time.getTime(),
                 user_uuid:
-                  data.status.find((a) => +a.stage === 1)?.user_uuid ||
+                  data?.status?.find((a) => +a.stage === 1)?.user_uuid ||
                   user_uuid,
               },
               {
@@ -270,7 +270,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             ],
           }
         : data;
-
+    console.log(data);
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
