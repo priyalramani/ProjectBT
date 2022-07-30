@@ -36,6 +36,7 @@ import PendingsEntry from "./pages/Reports/PendingsEntry";
 import SignedBills from "./pages/Reports/SignedBills";
 import OrderRangeIncentive from "./pages/others/OrderRangeIncentve";
 import DeliveryIncentive from "./pages/others/DeliveryIncentive";
+import ItemIncentive from "./pages/others/ItemIncentive";
 
 const id = "240522";
 function App() {
@@ -96,6 +97,10 @@ function App() {
                   <Route
                     path="/admin/DeliveryIncentive"
                     element={<DeliveryIncentive />}
+                  />
+                  <Route
+                    path="/admin/ItemIncentive"
+                    element={<ItemIncentive />}
                   />
                   <Route path="/admin/addOrder" element={<AddOrder />} />
                   <Route
