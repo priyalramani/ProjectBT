@@ -30,7 +30,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
         base_qty_arr = base_qty_arr.find(
           (item) =>
             +item.base_qty ===
-            (base_qty_arr.length > 1
+            +(base_qty_arr.length > 1
               ? base_qty_arr
                   .map((a) => a.base_qty)
                   .reduce((a, b) => +Math.max(a, b))
@@ -44,7 +44,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
         pice_qty_arr = pice_qty_arr.find(
           (item) =>
             +item.base_qty ===
-            (pice_qty_arr.length > 1
+            +(pice_qty_arr.length > 1
               ? pice_qty_arr
                   .map((a) => a.base_qty)
                   .reduce((a, b) => +Math.max(a, b))
@@ -53,12 +53,14 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
               : null)
         );
         pice_qty_arr = base_qty_arr ? {} : pice_qty_arr;
-        if (base_qty_arr || pice_qty_arr)
+        if (base_qty_arr || pice_qty_arr) {
           auto_added.push({
             item_uuid: a.item_uuid,
             b: base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0,
             p: pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0,
           });
+        }
+
         return {
           ...a,
           b: +a.b + (base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0),

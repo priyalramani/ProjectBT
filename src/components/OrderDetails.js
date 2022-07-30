@@ -326,6 +326,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     }
   };
   let listItemIndexCount = 0;
+  console.log(orderData)
   return (
     <>
       <div className="overlay">

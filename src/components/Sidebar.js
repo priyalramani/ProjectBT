@@ -129,6 +129,10 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Order Range Incentive",
               link: "/admin/OrderRangeIncentive",
             },
+            {
+              name: "Delivery Incentive",
+              link: "/admin/DeliveryIncentive",
+            },
           ]}
         />
         {/* <NavLink

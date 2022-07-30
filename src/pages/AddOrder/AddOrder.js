@@ -116,7 +116,7 @@ export default function AddOrder() {
         : response1.data.result.length
         ? response1.data.result
         : [];
-    setAutoBills(data.filter(a=>a.status));
+    setAutoBills(data.filter((a) => a.status));
   };
 
   const getItemsData = async () => {
@@ -1177,7 +1177,6 @@ function DiliveryPopup({
                             amount: e.target.value,
                           }))
                         }
-
                         maxLength={42}
                         onWheel={(e) => e.preventDefault()}
                       />

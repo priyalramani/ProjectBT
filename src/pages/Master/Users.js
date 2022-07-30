@@ -12,6 +12,7 @@ const Users = () => {
   const [filterUsers, setFilterUsers] = useState([]);
   const [usersTitle, setUsersTitle] = useState("");
   const [popupForm, setPopupForm] = useState(false);
+  const [payoutPopup, setPayoutPopup] = useState(false);
 
   const getUsers = async () => {
     const response = await axios({
@@ -64,7 +65,6 @@ const Users = () => {
               width: "100%",
             }}
           >
-
             <input
               type="text"
               onChange={(e) => setUsersTitle(e.target.value)}
@@ -83,7 +83,11 @@ const Users = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={filterUsers} setPopupForm={setPopupForm} />
+          <Table
+            itemsDetails={filterUsers}
+            setPopupForm={setPopupForm}
+            setPayoutPopup={setPayoutPopup}
+          />
         </div>
       </div>
       {popupForm ? (
@@ -95,12 +99,21 @@ const Users = () => {
       ) : (
         ""
       )}
+      {payoutPopup ? (
+        <UserPayouts
+          onSave={() => setPayoutPopup(false)}
+          popupInfo={payoutPopup}
+          getUsers={getUsers}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default Users;
-function Table({ itemsDetails, setPopupForm }) {
+function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
   const [items, setItems] = useState("user_title");
   const [order, setOrder] = useState("asc");
   return (
@@ -159,7 +172,7 @@ function Table({ itemsDetails, setPopupForm }) {
               </div>
             </div>
           </th>
-          <th colSpan={2}>
+          <th style={{ width: "170px" }}>
             <div className="t-head-element">
               <span>Balance Incentive</span>
               <div className="sort-buttons-container">
@@ -249,12 +262,31 @@ function Table({ itemsDetails, setPopupForm }) {
             <tr
               key={Math.random()}
               style={{ height: "30px" }}
-              onClick={() => setPopupForm({ type: "edit", data: item })}
+              onClick={(e) => {
+                e.stopPropagation();
+                setPopupForm({ type: "edit", data: item });
+              }}
             >
               <td>{i + 1}</td>
               <td colSpan={2}>{item.user_title}</td>
               <td colSpan={2}>{item.login_username}</td>
-              <td colSpan={2}>{item.incentive_balance||0}</td>
+              <td
+                colSpan={2}
+                className="flex"
+                style={{ justifyContent: "space-between" }}
+              >
+                {item.incentive_balance || 0}
+                <button
+                  type="button"
+                  className="item-sales-search"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPayoutPopup(item);
+                  }}
+                >
+                  Payout
+                </button>
+              </td>
               <td colSpan={2}>
                 {item?.user_role?.map((a, i) => (i === 0 ? a : "," + a)) || "-"}
               </td>
@@ -444,19 +476,127 @@ function NewUserForm({ onSave, popupInfo, setUsers }) {
                       <option value="4">Delivery</option>
                     </select>
                   </label>
-                  <label className="selectLabel" style={{ height: "100px",flexDirection:"row",alignItems:"center" }}>
+                  <label
+                    className="selectLabel"
+                    style={{
+                      height: "100px",
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
                     Status
                     <input
                       type="radio"
                       name="sort_order"
                       className="numberInput"
-                      checked={+data?.status===1}
+                      checked={+data?.status === 1}
                       onClick={(e) =>
-                        setdata(prev=>({
+                        setdata((prev) => ({
                           ...data,
-                          status: +prev.status===1?0:1,
+                          status: +prev.status === 1 ? 0 : 1,
                         }))
                       }
+                    />
+                  </label>
+                </div>
+              </div>
+              <i style={{ color: "red" }}>
+                {errMassage === "" ? "" : "Error: " + errMassage}
+              </i>
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function UserPayouts({ onSave, popupInfo, getUsers }) {
+  const [data, setdata] = useState({
+    amount: 0,
+    remarks: "",
+  });
+  const [errMassage, setErrorMassage] = useState("");
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+
+    console.log(data);
+    let obj = { user_uuid: popupInfo.user_uuid, ...data };
+    const response = await axios({
+      method: "post",
+      url: "/incentiveStatment/postIncentiveStatment",
+      data: obj,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      getUsers();
+      onSave();
+    }
+  };
+
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="row">
+                <h1>{popupInfo?.user_title || "User"}- Payout</h1>
+              </div>
+
+              <div className="form">
+                <div className="row">
+                  <label className="selectLabel">
+                    Payout Amount
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data?.amount}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          amount: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                    />
+                  </label>
+                </div>
+                <div className="row">
+                  <label className="selectLabel">
+                    Remarks
+                    <textarea
+                      type="text"
+                      name="sort_order"
+                      className="numberInput"
+                      value={data?.login_username}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          login_username: e.target.value,
+                        })
+                      }
+                      style={{ height: "150px" }}
                     />
                   </label>
                 </div>
