@@ -213,10 +213,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     let time = new Date();
     let user_uuid = localStorage.getItem("user_uuid");
     data = {
-      order_uuid: data.order_uuid,
-      order_grandtotal: data.order_grandtotal,
-      replacement: data.replacement,
-      replacement_mrp: data.replacement_mrp,
+      ...data,
+
 
       item_details: data.item_details.map((a) => ({
         ...a,
