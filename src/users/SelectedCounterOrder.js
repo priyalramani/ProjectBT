@@ -186,6 +186,8 @@ const SelectedCounterOrder = () => {
         setLoading(false);
         return;
       } else Navigate(-1);
+    } else {
+      setLoading(false);
     }
   };
   const postActivity = async (others = {}) => {
@@ -433,11 +435,25 @@ const SelectedCounterOrder = () => {
                                           >
                                             {+item?.item_discount ? (
                                               <>
-                                                <span style={{color:"red",textDecoration: "line-through"}}>
+                                                <span
+                                                  style={{
+                                                    color: "red",
+                                                    textDecoration:
+                                                      "line-through",
+                                                  }}
+                                                >
                                                   Price: {item?.item_price}
                                                 </span>
                                                 <br />
-                                                <span style={{color:"red",paddingLeft:"10px",marginLeft:"10px",fontWeight:"500",borderLeft:"2px solid red"}}>
+                                                <span
+                                                  style={{
+                                                    color: "red",
+                                                    paddingLeft: "10px",
+                                                    marginLeft: "10px",
+                                                    fontWeight: "500",
+                                                    borderLeft: "2px solid red",
+                                                  }}
+                                                >
                                                   {item?.item_discount} % OFF
                                                 </span>
                                               </>
