@@ -251,7 +251,7 @@ export const Billing = async ({
       (a) => a.item_uuid === item.item_uuid
     )?.item_price;
     let charges_discount =
-      add_discounts || item.edit ? [] : item.charges_discount || [];
+      add_discounts || item.edit ? [] : item.charges_discount.filter(a=>a.value) || [];
     let price =
       add_discounts || item.edit
         ? counter?.item_special_price?.find(
@@ -290,7 +290,7 @@ export const Billing = async ({
       };
     }
 
-    if (add_discounts || (item.edit && item.item_discount)) {
+    if (item.edit || (add_discounts && item.item_discount)) {
       charges_discount.push({
         title: "Item Discount",
         value: item.item_discount,
@@ -320,22 +320,22 @@ export const Billing = async ({
       };
     }
 
-    //console.log(item);
+    console.log(item);
     item = {
       ...item,
       item_desc_total:
         add_discounts || item.edit
           ? item.item_desc_total
           : (+edit_price || +item?.price || +item?.item_price) *
-            (item?.charges_discount?.length > 1
-              ? item?.charges_discount
+            (charges_discount?.length > 1
+              ? charges_discount
                   ?.map((a) => +((100 - +a.value) / 100))
                   ?.reduce((a, b) => a * b)
               : item?.charges_discount?.length
-              ? (100 - +item.charges_discount[0]?.value) / 100
+              ? (100 - +charges_discount[0]?.value) / 100
               : 1),
     };
-    //console.log(item.item_desc_total);
+    console.log(item.item_desc_total);
     item = {
       ...item,
       charges_discount,

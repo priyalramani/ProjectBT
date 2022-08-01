@@ -984,6 +984,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       }}
                     >
                       <td className="ph2 pv1 tl bb b--black-20 bg-white">
+                        <div className="inputGroup"></div>
+                      </td>
+                      <td className="ph2 pv1 tl bb b--black-20 bg-white">
                         <div className="inputGroup">Total</div>
                       </td>
                       <td
