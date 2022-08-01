@@ -714,7 +714,7 @@ function NewUserForm({ onSave, popupForm }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {filterItemData
+                    {filterItemGroupData
                       ?.filter((a) => a.item_group_title)
                       .filter(
                         (a) =>

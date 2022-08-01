@@ -5,7 +5,6 @@ import "./style.css";
 import {
   ChevronUpIcon,
   ChevronDownIcon,
-  MenuAlt2Icon,
 } from "@heroicons/react/solid";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
@@ -277,7 +276,7 @@ function NewUserForm({ onSave, popupForm }) {
           uuid: uuid(),
         })),
       });
-  }, []);
+  }, [popupForm.data, popupForm?.type]);
   const [ui, setUi] = useState(1);
   const [items, setItems] = useState([]);
   const [company, setCompany] = useState([]);
@@ -407,7 +406,7 @@ function NewUserForm({ onSave, popupForm }) {
 
   useEffect(() => {
     getCounter();
-  }, [routesData]);
+  }, [ routesData]);
   const getCounterGroup = async () => {
     const response = await axios({
       method: "get",
@@ -1218,6 +1217,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, setObgData }) => {
     }));
     onSave();
   };
+  console.log(filterItemData)
   return (
     <div className="overlay">
       <div
