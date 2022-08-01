@@ -155,7 +155,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           let data = base_qty_arr?.add_items.find(
             (b) => b.item_uuid === a.item_uuid
           );
-          auto_added.push({ ...data, b: data.add_qty || 0 });
+          auto_added.push({ ...data, p: data.add_qty || 0 });
         }
         return {
           ...a,
