@@ -88,26 +88,26 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           (b) => a.item_group_uuid.filter((c) => c === b).length
         ).length
     );
-    // console.log("eligible", eligibleAddItems);
+    console.log("eligible", eligibleAddItems);
     let eligiblesBox =
       eligibleAddItems.length > 1
         ? eligibleAddItems.map((a) => +a.b || 0).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
         ? +eligibleAddItems[0].b
         : 0;
-    // console.log("eligibleBox", eligiblesBox);
+    console.log("eligibleBox", eligiblesBox);
     let eligiblesPcs =
       eligibleAddItems.length > 1
         ? eligibleAddItems.map((a) => a.p).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
         ? +eligibleAddItems[0].p
         : 0;
-    // console.log("eligiblePcs", eligiblesPcs);
+    console.log("eligiblePcs", eligiblesPcs);
 
     let base_qty_arr = autobill.qty_details.filter(
       (b) => b.unit === "b" && +b.base_qty <= eligiblesBox
     );
-    // console.log("baseqtyarr", base_qty_arr);
+    console.log("baseqtyarr", base_qty_arr);
     base_qty_arr =
       eligibleAddItems.length >= autobill.min_range
         ? base_qty_arr.find(
@@ -118,11 +118,11 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
                     .map((a) => a.base_qty)
                     .reduce((a, b) => +Math.max(a, b))
                 : base_qty_arr.length === 1
-                ? +base_qty_arr[0].base_qty
+                ? +base_qty_arr[0]?.base_qty
                 : null)
           )
         : null;
-    // console.log("baseqtyobj", base_qty_arr);
+    console.log("baseqtyobj", base_qty_arr);
     let pice_qty_arr = autobill.qty_details.filter(
       (b) => b.unit === "p" && +b.base_qty <= eligiblesPcs
     );
@@ -143,6 +143,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
         : null;
     // console.log("piceqtyobj", pice_qty_arr);
 
+ 
     if (base_qty_arr?.add_items) {
       let dataItems = dbItems.filter(
         (a) =>
@@ -158,14 +159,16 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
         }
         return {
           ...a,
-          box: base_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)
+          p: base_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)
             .add_qty,
         };
       });
+      console.log("datapiceItems", dataItems);
+
       let nonFiltered = eligibleItems.filter(
         (a) => !dataItems.filter((b) => a.item_uuid === b.item_uuid).length
       );
-      // eslint-disable-next-line no-loop-func
+
       dataItems = dataItems.map((a) => {
         let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
         return {
@@ -174,7 +177,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           b: (data ? +a.b + data.b : a.b) || 0,
         };
       });
-
+      console.log(nonFiltered, dataItems);
       eligibleItems = nonFiltered.length
         ? dataItems.length
           ? [...nonFiltered, ...dataItems]
@@ -251,7 +254,9 @@ export const Billing = async ({
       (a) => a.item_uuid === item.item_uuid
     )?.item_price;
     let charges_discount =
-      add_discounts || item.edit ? [] : item.charges_discount.filter(a=>a.value) || [];
+      add_discounts || item.edit
+        ? []
+        : item.charges_discount.filter((a) => a.value) || [];
     let price =
       add_discounts || item.edit
         ? counter?.item_special_price?.find(
@@ -320,7 +325,7 @@ export const Billing = async ({
       };
     }
 
-    console.log(item);
+    // console.log(item);
     item = {
       ...item,
       item_desc_total:
@@ -335,7 +340,7 @@ export const Billing = async ({
               ? (100 - +charges_discount[0]?.value) / 100
               : 1),
     };
-    console.log(item.item_desc_total);
+    // console.log(item.item_desc_total);
     item = {
       ...item,
       charges_discount,
