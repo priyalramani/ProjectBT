@@ -256,7 +256,7 @@ export const Billing = async ({
     let charges_discount =
       add_discounts || item.edit
         ? []
-        : item.charges_discount.filter((a) => a.value) || [];
+        : item.charges_discount?.filter((a) => a.value) || [];
     let price =
       add_discounts || item.edit
         ? counter?.item_special_price?.find(
@@ -282,7 +282,7 @@ export const Billing = async ({
     if (price) item = { ...item, item_price: price };
 
     if (special_discount_percentage) {
-      charges_discount.push({
+      charges_discount?.push({
         title: "Special Discount",
         value: special_discount_percentage,
       });
@@ -296,7 +296,7 @@ export const Billing = async ({
     }
 
     if (item.edit || (add_discounts && item.item_discount)) {
-      charges_discount.push({
+      charges_discount?.push({
         title: "Item Discount",
         value: item.item_discount,
       });
@@ -310,7 +310,7 @@ export const Billing = async ({
     }
 
     if (company_discount_percentage) {
-      charges_discount.push({
+      charges_discount?.push({
         title: "Company Discount",
         value: company_discount_percentage,
       });
