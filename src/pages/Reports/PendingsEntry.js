@@ -14,10 +14,17 @@ const PendingsEntry = () => {
   const [itemsData, setItemsData] = useState([]);
   const [warningCodes, setWarningCodes] = useState(false);
   const [popupOrder, setPopupOrder] = useState(false);
+  const [allDoneConfimation, setAllDoneConfimation] = useState(false);
+  const [doneDisabled, setDoneDisabled] = useState(false);
 
   const [counters, setCounters] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
-
+  useEffect(() => {
+    if (allDoneConfimation) {
+      setDoneDisabled(true);
+      setTimeout(() => setDoneDisabled(false), 5000);
+    }
+  }, [allDoneConfimation]);
   const getOrders = async () => {
     const response = await axios({
       method: "get",
@@ -66,11 +73,11 @@ const PendingsEntry = () => {
   useEffect(() => {
     getOrders();
   }, [counters]);
-  const putOrder = async (order_uuid) => {
+  const putOrder = async (invoice_number) => {
     const response = await axios({
       method: "put",
       url: "/orders/putCompleteOrder",
-      data: { entry: 1, order_uuid },
+      data: { entry: 1, invoice_number },
       headers: {
         "Content-Type": "application/json",
       },
@@ -144,7 +151,6 @@ const PendingsEntry = () => {
               padding: "1px 10px",
               fontSize: "15px",
               height: "30px",
-              
             }}
             onClick={() =>
               setSelectedOrders((prev) =>
@@ -155,7 +161,7 @@ const PendingsEntry = () => {
             <input
               type="checkbox"
               checked={orders.length === selectedOrders.length}
-              style={{marginRight:"5px"}}
+              style={{ marginRight: "5px" }}
             />
             Select All
           </button>
@@ -175,12 +181,15 @@ const PendingsEntry = () => {
           <div className="flex" style={{ justifyContent: "start" }}>
             <button
               className="item-sales-search"
-              onClick={async (e) => {
-                e.stopPropagation();
-                for (let order of selectedOrders)
-                  await putOrder(order.order_uuid);
-                setSelectedOrders([]);
-                getOrders();
+              // onClick={async (e) => {
+              //   e.stopPropagation();
+              //   for (let order of selectedOrders)
+              //     await putOrder(order.invoice_number);
+              //   setSelectedOrders([]);
+              //   getOrders();
+              // }}
+              onClick={() => {
+                setAllDoneConfimation(true);
               }}
               style={{ margin: "20px" }}
             >
@@ -312,6 +321,57 @@ const PendingsEntry = () => {
       ) : (
         ""
       )}
+      {allDoneConfimation ? (
+        <div className="overlay">
+          <div
+            className="modal"
+            style={{ height: "max-content", width: "350px" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "100%",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form className="form" onSubmit={downloadHandler}>
+                  <div className="row">
+                    <h1>Confirm Done</h1>
+                  </div>
+                  <div
+                    className="flex"
+                    style={{ justifyContent: "space-between", width: "100%" }}
+                  >
+                    <button
+                      type="submit"
+                      disabled={doneDisabled}
+                      className="submit"
+                      style={
+                        doneDisabled
+                          ? { opacity: 0.5, cursor: "not-allowed" }
+                          : {}
+                      }
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      onClick={() => setAllDoneConfimation(false)}
+                      type="button"
+                      className="submit"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
     </>
   );
 };
@@ -324,6 +384,7 @@ function Table({
   setSelectedOrders,
   getOrders,
 }) {
+  console.log(selectedOrders);
   return (
     <table
       className="user-table"
@@ -358,8 +419,11 @@ function Table({
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedOrders((prev) =>
-                    prev.filter((a) => a.order_uuid === item.order_uuid).length
-                      ? prev.filter((a) => a.order_uuid !== item.order_uuid)
+                    prev.filter((a) => a.invoice_number === item.invoice_number)
+                      .length
+                      ? prev.filter(
+                          (a) => a.invoice_number !== item.invoice_number
+                        )
                       : [...(prev || []), item]
                   );
                 }}
@@ -369,9 +433,9 @@ function Table({
                 <input
                   type="checkbox"
                   checked={selectedOrders.find(
-                    (a) => a.order_uuid === item.order_uuid
+                    (a) => a.invoice_number === item.invoice_number
                   )}
-                  style={{transform:"scale(1.3)"}}
+                  style={{ transform: "scale(1.3)" }}
                 />
                 {i + 1}
               </td>
@@ -400,7 +464,7 @@ function Table({
                   className="item-sales-search"
                   onClick={async (e) => {
                     e.stopPropagation();
-                    await putOrder(item.order_uuid);
+                    await putOrder(item.invoice_number);
                     getOrders();
                   }}
                 >
