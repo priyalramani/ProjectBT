@@ -9,6 +9,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
   const [users, setUsers] = useState([]);
   const [btn, setBtn] = useState(false);
   const [itemFilter, setItemFilter] = useState("");
+  const [statementTrip_uuid, setStatementTrip_uuid] = useState();
   const [statementTrip, setStatementTrip] = useState();
   const [detailsPopup, setDetailsPopup] = useState(false);
   const componentRef = useRef(null);
@@ -65,7 +66,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
   const getTripDetails = async () => {
     const response = await axios({
       method: "get",
-      url: "/trips/GetTripSummaryDetails/" + statementTrip.trip_uuid,
+      url: "/trips/GetTripSummaryDetails/" + statementTrip_uuid,
 
       headers: {
         "Content-Type": "application/json",
@@ -74,14 +75,15 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
     if (response.data.success) {
       console.log(response)
       setStatementTrip(response.data.result);
+      setStatementTrip_uuid(false)
       setTimeout(handlePrint, 2000);
     }
   };
   useEffect(() => {
-    if (statementTrip?.trip_uuid) {
+    if (statementTrip_uuid) {
       getTripDetails();
     }
-  }, [statementTrip]);
+  }, [statementTrip_uuid]);
   useEffect(() => {
     getTripData();
   }, [btn]);
@@ -227,7 +229,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
                               }}
                               type="button"
                               onClick={() => {
-                                setStatementTrip(item);
+                                setStatementTrip_uuid(item.trip_uuid);
                               }}
                             >
                               Statement

@@ -8,6 +8,7 @@ import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 import OrderPrint from "./OrderPrint";
 import { useIdleTimer } from "react-idle-timer";
+import EditIcon from "@mui/icons-material/Edit";
 import FreeItems from "./FreeItems";
 const default_status = [
   { value: 0, label: "Preparing" },
@@ -27,6 +28,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [uuids, setUuid] = useState();
   const [popupDetails, setPopupDetails] = useState();
   const [copymsg, setCopymsg] = useState();
+  const [notesPopup, setNotesPoup] = useState();
   const [focusedInputId, setFocusedInputId] = useState(0);
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
@@ -215,7 +217,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     data = {
       ...data,
 
-
       item_details: data.item_details.map((a) => ({
         ...a,
         gst_percentage: a.item_gst,
@@ -324,7 +325,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     }
   };
   let listItemIndexCount = 0;
-  console.log(orderData)
+  console.log(orderData);
   return (
     <>
       <div className="overlay">
@@ -426,6 +427,16 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     }}
                   >
                     Edit
+                  </button>
+                  <button
+                    style={{ width: "fit-Content" }}
+                    className="item-sales-search"
+                    onClick={(e) => {
+                      e.target.blur();
+                      setNotesPoup((prev) => !prev);
+                    }}
+                  >
+                    <EditIcon />
                   </button>
                 </div>
               </div>
@@ -1111,6 +1122,16 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           counters={counters}
           items={itemsData}
           updateBilling={callBilling}
+        />
+      ) : (
+        ""
+      )}
+      {notesPopup ? (
+        <NotesPopup
+          onSave={() => setNotesPoup(false)}
+          // postOrderData={() => onSubmit({ stage: 5 })}
+          setSelectedOrder={setOrderData}
+          order={orderData}
         />
       ) : (
         ""
@@ -1961,6 +1982,103 @@ function DiliveryPopup({
       ) : (
         ""
       )} */}
+    </>
+  );
+}
+function NotesPopup({
+  onSave,
+
+  order,
+  setSelectedOrder,
+}) {
+  const [notes, setNotes] = useState([]);
+  useEffect(() => {
+    console.log(order?.notes);
+    setNotes(order?.notes || []);
+  }, [order]);
+  const submitHandler = async () => {
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrderNotes",
+      data: { notes, invoice_number: order.invoice_number },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setSelectedOrder((prev) => ({
+        ...prev,
+        notes,
+      }));
+      onSave();
+    }
+  };
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: 9999999999 }}>
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "max-content" }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h3>Order Notes</h3>
+          </div>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup">
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "start" }}
+                  >
+                    <div style={{ width: "50px" }}>Notes</div>
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "200px" }}
+                    >
+                      <textarea
+                        name="route_title"
+                        className="numberInput"
+                        style={{ width: "200px", height: "200px" }}
+                        value={notes?.toString()?.replace(/,/g, "\n")}
+                        onChange={(e) => setNotes(e.target.value.split("\n"))}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "red" }}
+                    className="submit"
+                    onClick={onSave}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="submit"
+                    onClick={submitHandler}
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

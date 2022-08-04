@@ -40,9 +40,9 @@ import ItemIncentive from "./pages/others/ItemIncentive";
 
 const id = "240522";
 function App() {
-  axios.defaults.baseURL = "https://api.btgondia.com";
+  // axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
-  // axios.defaults.baseURL = "http://localhost:9000";
+  axios.defaults.baseURL = "http://localhost:9000";
 
   useEffect(() => {
     let user = localStorage.getItem("user_uuid");
