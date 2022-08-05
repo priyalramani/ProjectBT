@@ -138,10 +138,10 @@ const TripPage = ({
           {replacement.map((item) => (
             <tr>
               <td style={{ border: "1px solid #000" }}>{item.counter_title}</td>
-              <td style={{ border: "1px solid #000" }}>{item.replacement_mrp}</td>
               <td style={{ border: "1px solid #000" }}>
-                {item.replacement}
+                {item.replacement_mrp}
               </td>
+              <td style={{ border: "1px solid #000" }}>{item.replacement}</td>
               <td style={{ border: "1px solid #000" }}>
                 {item.invoice_number}
               </td>
@@ -180,14 +180,16 @@ const TripPage = ({
             <th style={{ border: "1px solid #000" }}>Item</th>
             <th style={{ border: "1px solid #000" }}>Quantity</th>
           </tr>
-          {sales_return.map((item) => (
-            <tr>
-              <td style={{ border: "1px solid #000" }}>{item.item_title}</td>
-              <td style={{ border: "1px solid #000" }}>
-                {item.b}:{item.p}
-              </td>
-            </tr>
-          ))}
+          {sales_return
+            .sort((a, b) => a.item_title.localeCompare(b.item_title))
+            .map((item) => (
+              <tr>
+                <td style={{ border: "1px solid #000" }}>{item.item_title}</td>
+                <td style={{ border: "1px solid #000" }}>
+                  {item.b}:{item.p}
+                </td>
+              </tr>
+            ))}
         </table>
       ) : (
         ""
