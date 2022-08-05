@@ -1048,7 +1048,8 @@ const ProcessingOrders = () => {
           <table
             className="user-table"
             style={{
-              width: Location.pathname.includes("checking")
+              width: Location.pathname.includes("checking")||
+              Location.pathname.includes("delivery")
                 ? "100%"
                 : "max-content",
               height: "fit-content",
@@ -3513,7 +3514,7 @@ function NewUserForm({
         delivery_return: orderData.delivery_return.length
           ? orderData.delivery_return.filter(
               (a) => a.item_uuid === popupInfo.item_uuid
-            )
+            ).length
             ? orderData.delivery_return.map((a) =>
                 a.item_uuid === popupInfo.item_uuid
                   ? {
@@ -3579,7 +3580,7 @@ function NewUserForm({
         processing_canceled: orderData.processing_canceled.length
           ? orderData.processing_canceled.filter(
               (a) => a.item_uuid === popupInfo.item_uuid
-            )
+            ).length
             ? orderData.processing_canceled.map((a) =>
                 a.item_uuid === popupInfo.item_uuid
                   ? {
