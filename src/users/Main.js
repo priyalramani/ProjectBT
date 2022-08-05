@@ -66,8 +66,7 @@ const Main = () => {
           "Content-Type": "application/json",
         },
       }).then((response) => {
-        if (response.data.success)
-          setUserBal(response.data.result);
+        if (response.data.success) setUserBal(response.data.result);
       });
     }
   }, [isSideMenuOpen]);
@@ -119,11 +118,11 @@ const Main = () => {
           </button>
         </div>
       </PullToRefresh>
-          {popupForm ? (
-            <Logout onSave={() => setPopupForm(false)} popupForm={popupForm} />
-          ) : (
-            ""
-          )}
+      {popupForm ? (
+        <Logout onSave={() => setPopupForm(false)} popupForm={popupForm} />
+      ) : (
+        ""
+      )}
       <div className={`sidebar ${isSideMenuOpen ? "sideopen" : ""}`}>
         <div className="sidebarContainer">
           <button
@@ -135,7 +134,9 @@ const Main = () => {
             <CloseIcon />
           </button>
           <div className="links">
-            <h1 style={{ color: "#fff" }}>{user_bal.user_title||"Bharat Traders"}</h1>
+            <h1 style={{ color: "#fff" }}>
+              {user_bal.user_title || "Bharat Traders"}
+            </h1>
             <h2>Balance Incentive: Rs {user_bal.incentive_balance}</h2>
 
             <button
@@ -155,8 +156,11 @@ const Main = () => {
 export default Main;
 
 function Logout({ onSave, popupForm }) {
+  const [isLoading, setIsLoading] = useState(false);
+
   const submitHandler = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     console.log(popupForm);
     if (popupForm === "refresh") {
       let response = await deleteDB(
@@ -223,10 +227,11 @@ function Logout({ onSave, popupForm }) {
       localStorage.clear();
       window.location.assign("/login");
     }
+    setIsLoading(false);
   };
 
   return (
-    <div className="overlay" style={{zIndex:9999999999}}>
+    <div className="overlay" style={{ zIndex: 9999999999 }}>
       <div
         className="modal"
         style={{ height: "fit-content", width: "fit-content" }}
@@ -244,10 +249,34 @@ function Logout({ onSave, popupForm }) {
               <div className="row">
                 <h1>Are you Confirm </h1>
               </div>
-
-              <button type="submit" onClick={submitHandler} className="submit">
-                {popupForm === "refresh" ? "Refresh" : "Logout"}
-              </button>
+              {!isLoading ? (
+                <button
+                  type="submit"
+                  onClick={submitHandler}
+                  className="submit"
+                >
+                  {popupForm === "refresh" ? "Refresh" : "Logout"}
+                </button>
+              ) : (
+                <button className="submit" id="loading-screen">
+                  <svg viewBox="0 0 100 100">
+                    <path
+                      d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                      fill="#ffffff"
+                      stroke="none"
+                    >
+                      <animateTransform
+                        attributeName="transform"
+                        type="rotate"
+                        dur="1s"
+                        repeatCount="indefinite"
+                        keyTimes="0;1"
+                        values="0 50 51;360 50 51"
+                      ></animateTransform>
+                    </path>
+                  </svg>
+                </button>
+              )}
             </form>
           </div>
           <button onClick={onSave} className="closeButton">

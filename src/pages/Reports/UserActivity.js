@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
-let date=new Date()
+let date = new Date();
 const UserActivity = () => {
   const [searchData, setSearchData] = useState({
     startDate: "",
@@ -24,9 +24,9 @@ const UserActivity = () => {
     if (response.data.success) setUsers(response.data.result);
   };
   const getActivityData = async () => {
-    let startDate = new Date(searchData.startDate+" 00:00:00 AM");
+    let startDate = new Date(searchData.startDate + " 00:00:00 AM");
     startDate = startDate.getTime();
-    let endDate = new Date(searchData.endDate +" 00:00:00 AM");
+    let endDate = new Date(searchData.endDate + " 00:00:00 AM");
     endDate = endDate.getTime();
     const response = await axios({
       method: "post",
@@ -85,9 +85,15 @@ const UserActivity = () => {
                 }))
               }
               max={"yy-mm-dd"
-              .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
-              .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))
-              .replace("dd", ("00" + date?.getDate().toString()).slice(-2))}
+                .replace(
+                  "mm",
+                  ("00" + (date?.getMonth() + 1).toString()).slice(-2)
+                )
+                .replace(
+                  "yy",
+                  ("0000" + date?.getFullYear().toString()).slice(-4)
+                )
+                .replace("dd", ("00" + date?.getDate().toString()).slice(-2))}
               value={searchData.startDate}
               placeholder="Search Counter Title..."
               className="searchInput"
@@ -98,9 +104,15 @@ const UserActivity = () => {
                 setSearchData((prev) => ({ ...prev, endDate: e.target.value }))
               }
               max={"yy-mm-dd"
-              .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
-              .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))
-              .replace("dd", ("00" + date?.getDate().toString()).slice(-2))}
+                .replace(
+                  "mm",
+                  ("00" + (date?.getMonth() + 1).toString()).slice(-2)
+                )
+                .replace(
+                  "yy",
+                  ("0000" + date?.getFullYear().toString()).slice(-4)
+                )
+                .replace("dd", ("00" + date?.getDate().toString()).slice(-2))}
               value={searchData.endDate}
               placeholder="Search Route Title..."
               className="searchInput"
@@ -116,7 +128,8 @@ const UserActivity = () => {
               value={searchData.user_uuid}
             >
               {users
-                .filter((a) => a.user_uuid)
+                .filter((a) => a.user_uuid && a.status)
+                .sort((a, b) => a.user_title.localeCompare(b.user_title))
                 .map((a) => (
                   <option value={a.user_uuid}>{a.user_title}</option>
                 ))}
@@ -131,10 +144,7 @@ const UserActivity = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table
-           itemsDetails={items}
-          
-          />
+          <Table itemsDetails={items} />
         </div>
       </div>
     </>
@@ -146,18 +156,16 @@ function Table({ itemsDetails }) {
   function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
-    var ampm = hours >= 12 ? 'pm' : 'am';
+    var ampm = hours >= 12 ? "pm" : "am";
     hours = hours % 12;
     hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? '0'+minutes : minutes;
-    var strTime = hours + ':' + minutes + ' ' + ampm;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var strTime = hours + ":" + minutes + " " + ampm;
     return strTime;
   }
   function format(time) {
-
-
     var hours = time / 3600000;
-    var minutes = parseInt(+(hours-(+hours.toString().split(".")[0])) * 60);
+    var minutes = parseInt(+(hours - +hours.toString().split(".")[0]) * 60);
 
     minutes = +minutes < 10 ? "0" + minutes : minutes;
 
@@ -185,17 +193,21 @@ function Table({ itemsDetails }) {
       <tbody className="tbody">
         {itemsDetails
           ?.sort((a, b) => a.timestamp - b.timestamp)
-          ?.map((item, i,array) => (
-            <tr
-              key={Math.random()}
-              style={{ height: "30px" }}
-            >
+          ?.map((item, i, array) => (
+            <tr key={Math.random()} style={{ height: "30px" }}>
               <td>{i + 1}</td>
-              <td colSpan={3}>{(new Date(item.timestamp)).toDateString() } - {formatAMPM(new Date(item.timestamp))}</td>
+              <td colSpan={3}>
+                {new Date(item.timestamp).toDateString()} -{" "}
+                {formatAMPM(new Date(item.timestamp))}
+              </td>
               <td colSpan={2}>{item.activity || ""}</td>
               <td colSpan={2}>{item.role || ""}</td>
               <td colSpan={2}>{item.narration || ""}</td>
-              <td colSpan={2}>{i!==0?format(+item.timestamp-array[i-1].timestamp) : ""}</td>
+              <td colSpan={2}>
+                {i !== 0
+                  ? format(+item.timestamp - array[i - 1].timestamp)
+                  : ""}
+              </td>
               <td colSpan={2}>{item.range || ""}</td>
               <td colSpan={2}>{item.qty || ""}</td>
               <td colSpan={2}>{item.amt || ""}</td>
