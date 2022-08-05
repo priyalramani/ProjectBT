@@ -146,6 +146,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         sr: i + 1,
       })),
     });
+    if (order.notes.length) {
+      setNotesPoup(true);
+    }
   }, [itemsData]);
 
   useEffect(() => {
@@ -381,7 +384,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     <button
                       style={{ width: "fit-Content", backgroundColor: "blue" }}
                       className="item-sales-search"
-                      onClick={() => setDeletePopup("hold")}
+                      onClick={() => {
+                        if (order.notes.length) {
+                          setDeletePopup("hold");
+                        } else setNotesPoup(true);
+                      }}
                     >
                       Hold Order
                     </button>
