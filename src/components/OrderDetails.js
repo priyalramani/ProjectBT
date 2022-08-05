@@ -387,7 +387,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       onClick={() => {
                         if (order.notes.length) {
                           setDeletePopup("hold");
-                        } else setNotesPoup(true);
+                        } else setNotesPoup("hold");
                       }}
                     >
                       Hold Order
@@ -1136,6 +1136,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       {notesPopup ? (
         <NotesPopup
           onSave={() => setNotesPoup(false)}
+          notesPopup={notesPopup}
+          HoldOrder={HoldOrder}
           // postOrderData={() => onSubmit({ stage: 5 })}
           setSelectedOrder={setOrderData}
           order={orderData}
@@ -1997,6 +1999,8 @@ function NotesPopup({
 
   order,
   setSelectedOrder,
+  notesPopup,
+  HoldOrder,
 }) {
   const [notes, setNotes] = useState([]);
   useEffect(() => {
@@ -2017,6 +2021,7 @@ function NotesPopup({
         ...prev,
         notes,
       }));
+      if (notesPopup === "hold") setTimeout(HoldOrder, 2000);
       onSave();
     }
   };
@@ -2029,6 +2034,7 @@ function NotesPopup({
         >
           <div className="flex" style={{ justifyContent: "space-between" }}>
             <h3>Order Notes</h3>
+            {notesPopup === "hold" ? <h3>Please Enter Notes</h3> : ""}
           </div>
           <div
             className="content"
