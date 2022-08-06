@@ -259,7 +259,7 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               >
-                {itemInfo?.mrp || ""}
+                Rs. {itemInfo?.mrp || ""}
               </td>
               <td
                 style={{
@@ -286,7 +286,7 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               >
-                {item?.gst_percentage || 0}
+                {item?.gst_percentage || 0} %
               </td>
               <td
                 style={{

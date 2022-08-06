@@ -158,24 +158,31 @@ const MainAdmin = () => {
   useEffect(() => {
     if (holdOrders) getRunningHoldOrders();
     else getRunningOrders();
+    if (window.location.pathname.includes("admin")) {
+      getRoutesData();
+    } else if (window.location.pathname.includes("trip")) {
+      getTripData();
+    }
   }, [holdOrders]);
+  setInterval(() => {
+    if (holdOrders) getRunningHoldOrders();
+    else getRunningOrders();
+    if (window.location.pathname.includes("admin")) {
+      getRoutesData();
+    } else if (window.location.pathname.includes("trip")) {
+      getTripData();
+    }
+  }, 180000);
   useEffect(() => {
     getCounter();
-    setInterval(() => {
-      if (holdOrders) getRunningHoldOrders();
-      else getRunningOrders();
-      if (window.location.pathname.includes("admin")) {
-        getRoutesData();
-      } else if (window.location.pathname.includes("trip")) {
-        getTripData();
-      }
-    }, 180000);
+    
     getDetails();
     getUsers();
     getItemsData();
     getItemCategories();
     getCompanies();
   }, []);
+
   const getRunningOrders = async () => {
     const response = await axios({
       method: "get",
