@@ -1580,7 +1580,14 @@ function NewUserForm({
     </div>
   );
 }
-function HoldPopup({ onSave, orders, itemsData, counter, category,setPopupOrder }) {
+function HoldPopup({
+  onSave,
+  orders,
+  itemsData,
+  counter,
+  category,
+  setPopupOrder,
+}) {
   const [items, setItems] = useState([]);
   const [stage, setStage] = useState("");
   const [itemStatus, setItemStatus] = useState("");
@@ -2296,7 +2303,7 @@ function SummaryPopup({
   counter,
   category,
   company,
-  setPopupOrder
+  setPopupOrder,
 }) {
   const [items, setItems] = useState([]);
 
@@ -2348,27 +2355,47 @@ function SummaryPopup({
         };
       });
     console.log(data);
-    let result = data.reduce((acc, curr) => {
-      let item = acc.find((item) => item.item_uuid === curr.item_uuid);
-      if (item) {
-        let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
-          ?.conversion;
-        item.b = parseInt(
-          +item.b +
-            curr.b +
-            (+item.p + curr.p + ((+item.free || 0) + (+curr.free || 0))) /
-              conversion
-        );
-        item.p = parseInt(
-          (+item.p + curr.p + ((+item.free || 0) + (+curr.free || 0))) %
-            conversion
-        );
-      } else {
-        acc.push(curr);
-      }
+    let result = [];
+    for (let item of data) {
+      var existing = result.filter(function (v, i) {
+        return v.item_uuid === item.item_uuid;
+      });
 
-      return acc;
-    }, []);
+      if (existing.length === 0) {
+        let itemsFilteredData = data.filter(
+          (a) => a.item_uuid === item.item_uuid
+        );
+        let b =
+          itemsFilteredData.length > 1
+            ? itemsFilteredData?.map((c) => +c.b || 0).reduce((c, d) => c + d)
+            : +itemsFilteredData[0]?.b || 0;
+        let p =
+          itemsFilteredData.length > 1
+            ? itemsFilteredData?.map((c) => +c.p || 0).reduce((c, d) => c + d)
+            : +itemsFilteredData[0]?.p || 0;
+        let free =
+          itemsFilteredData.length > 1
+            ? itemsFilteredData
+                ?.map((c) => +c.free || 0)
+                .reduce((c, d) => c + d)
+            : +itemsFilteredData[0]?.free || 0;
+        let obj = {
+          ...item,
+          b: parseInt(
+            +b +
+              (+p + free) /
+                +itemsData?.find((b) => b.item_uuid === item.item_uuid)
+                  ?.conversion
+          ),
+          p: parseInt(
+            (+p + free) %
+              +itemsData?.find((b) => b.item_uuid === item.item_uuid)
+                ?.conversion
+          ),
+        };
+        result.push(obj);
+      }
+    }
     setOrderTotal(
       orderStage.length > 1
         ? orderStage
@@ -2377,6 +2404,7 @@ function SummaryPopup({
         : orderStage[0]?.order_grandtotal
     );
     console.log(result);
+
     setItems(result);
   }, []);
   const GetItemsQty = (category_uuid) => {
@@ -2393,6 +2421,10 @@ function SummaryPopup({
         : itemsData.length
         ? itemsData[0]?.p
         : 0;
+    console.log(
+      category.find((a) => a.category_uuid === category_uuid)?.category_title,
+      itemsData
+    );
     return box + " : " + pcs;
   };
   const getTotalItems = (company_uuid) => {
@@ -2695,7 +2727,15 @@ function SummaryPopup({
   );
 }
 
-const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose ,setPopupOrder}) => {
+const OrdersEdit = ({
+  order,
+  onSave,
+  items,
+  counter,
+  itemsData,
+  onClose,
+  setPopupOrder,
+}) => {
   const [orderEditPopup, setOrderEditPopup] = useState("");
   const [updateOrders, setUpdateOrders] = useState([]);
   const [deleteItemsOrder, setDeleteItemOrders] = useState([]);
