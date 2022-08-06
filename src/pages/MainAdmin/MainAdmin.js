@@ -190,7 +190,13 @@ const MainAdmin = () => {
       url: "/orders/GetOrderAllRunningList",
     });
 
-    if (response.data.success) setOrders(response.data.result);
+    if (response.data.success) {
+      let data = response.data.result;
+      setSelectedOrder((prev) =>
+        prev.map((a) => data.find((b) => b.order_uuid === a.order_uuid) || a)
+      );
+      setOrders(response.data.result);
+    }
   };
   const getRunningHoldOrders = async () => {
     const response = await axios({
@@ -198,7 +204,13 @@ const MainAdmin = () => {
       url: "/orders/GetOrderHoldRunningList",
     });
 
-    if (response.data.success) setOrders(response.data.result);
+    if (response.data.success) {
+      let data = response.data.result;
+      setSelectedOrder((prev) =>
+        prev.map((a) => data.find((b) => b.order_uuid === a.order_uuid) || a)
+      );
+      setOrders(response.data.result);
+    }
   };
   // console.log(selectedOrder);
   useEffect(() => {
