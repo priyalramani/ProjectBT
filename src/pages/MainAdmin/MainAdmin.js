@@ -163,19 +163,20 @@ const MainAdmin = () => {
     } else if (window.location.pathname.includes("trip")) {
       getTripData();
     }
+    setInterval(() => {
+      if (holdOrders) getRunningHoldOrders();
+      else getRunningOrders();
+      if (window.location.pathname.includes("admin")) {
+        getRoutesData();
+      } else if (window.location.pathname.includes("trip")) {
+        getTripData();
+      }
+    }, 180000);
   }, [holdOrders]);
-  setInterval(() => {
-    if (holdOrders) getRunningHoldOrders();
-    else getRunningOrders();
-    if (window.location.pathname.includes("admin")) {
-      getRoutesData();
-    } else if (window.location.pathname.includes("trip")) {
-      getTripData();
-    }
-  }, 180000);
+
   useEffect(() => {
     getCounter();
-    
+
     getDetails();
     getUsers();
     getItemsData();
