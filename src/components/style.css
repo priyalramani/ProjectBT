@@ -2750,7 +2750,7 @@ button.counter-save-btn {
   position: absolute;
   border: none;
   cursor: pointer;
-  
+
   padding: 0.5rem;
   top: 1rem;
   background-color: transparent;
@@ -2769,7 +2769,7 @@ button.counter-save-btn {
   padding: 10px;
   border-radius: 5px;
   text-align: center;
-  transition: all .3s ease-in;
+  transition: all 0.3s ease-in;
   margin-bottom: 6px;
 }
 
@@ -2782,17 +2782,23 @@ button.counter-save-btn {
   flex-direction: column;
 }
 
-.links>h1,.links>h2 {
+.links > h1,
+.links > h2 {
   font-size: 2.5rem;
   margin: 1rem 0 2.5rem;
 }
-.links>h2 {
+.links > h2 {
   font-size: 1.3rem;
   margin: 1rem 0 2.5rem;
 }
 
-.links>a {
+.links > a {
   color: #fff;
   margin-bottom: 0.5rem;
   text-decoration: none;
+}
+.hover_class:hover {
+  background: #000;
+  cursor: pointer;
+  color: #fff;
 }

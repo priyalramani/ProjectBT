@@ -8,7 +8,7 @@ import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 import OrderPrint from "./OrderPrint";
 import { useIdleTimer } from "react-idle-timer";
-import EditIcon from "@mui/icons-material/Edit";
+
 import FreeItems from "./FreeItems";
 const default_status = [
   { value: 0, label: "Preparing" },
@@ -353,6 +353,16 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 overflow: "scroll",
               }}
             >
+              <div
+                className="inventory_header"
+                style={{ backgroundColor: "#fff", color: "#000" }}
+              >
+                <h2>
+                  {counters.find(
+                    (a) => a.counter_uuid === orderData?.counter_uuid
+                  )?.counter_title || ""}
+                </h2>
+              </div>
               <div className="inventory_header">
                 <h2>Order Details</h2>
               </div>
@@ -366,12 +376,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     justifyContent: "space-between",
                   }}
                 >
-                  <h2>
-                    {counters.find(
-                      (a) => a.counter_uuid === orderData?.counter_uuid
-                    )?.counter_title || ""}
-                  </h2>
-
                   <button
                     style={{ width: "fit-Content", backgroundColor: "red" }}
                     className="item-sales-search"
@@ -443,7 +447,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       setNotesPoup((prev) => !prev);
                     }}
                   >
-                    <EditIcon />
+                    Notes
                   </button>
                 </div>
               </div>
@@ -461,7 +465,24 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       <tr>
                         <th>Grand Total</th>
                         <th>{orderData?.order_grandtotal || 0}</th>
-                        <th>Payment Total</th>
+                        <th
+                          className={
+                            window.location.pathname.includes(
+                              "completeOrderReport"
+                            )
+                              ? "hover_class"
+                              : ""
+                          }
+                          onClick={() =>
+                            window.location.pathname.includes(
+                              "completeOrderReport"
+                            )
+                              ? setDeliveryPopup("put")
+                              : {}
+                          }
+                        >
+                          Payment Total
+                        </th>
                         <th>{orderData?.payment_total || 0}</th>
                         <th style={{ width: "12%" }}>UUID</th>
                         <th
@@ -1123,6 +1144,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       {deliveryPopup ? (
         <DiliveryPopup
           onSave={() => setDeliveryPopup(false)}
+          deliveryPopup={deliveryPopup}
           postOrderData={() => onSubmit({ stage: 5 })}
           setSelectedOrder={setOrderData}
           order={order}
@@ -1638,6 +1660,7 @@ function DiliveryPopup({
   items,
   order,
   updateBilling,
+  deliveryPopup,
 }) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
@@ -1655,21 +1678,64 @@ function DiliveryPopup({
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setPaymentModes(response.data.result);
+    if (response.data.success) {
+      setPaymentModes(response.data.result);
+      GetReciptsModes();
+    }
+  };
+  const GetReciptsModes = async () => {
+    const response = await axios({
+      method: "post",
+      url: "/receipts/getRecipt",
+      data: { order_uuid: order.order_uuid, counter_uuid: order.counter_uuid },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setModes(response.data.result.modes);
+  };
+  const GetOutstanding = async () => {
+    const response = await axios({
+      method: "post",
+      url: "/Outstanding/getOutstanding",
+      data: { order_uuid: order.order_uuid, counter_uuid: order.counter_uuid },
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setOutstanding(response.data.result);
+    else {
+      let time = new Date();
+      setOutstanding({
+        order_uuid: order.order_uuid,
+        amount: "",
+        user_uuid: localStorage.getItem("user_uuid"),
+        time: time.getTime(),
+        invoice_number: order.invoice_number,
+        trip_uuid: order.trip_uuid,
+        counter_uuid: order.counter_uuid,
+      });
+    }
   };
   useEffect(() => {
-    let time = new Date();
-    setOutstanding({
-      order_uuid: order.order_uuid,
-      amount: "",
-      user_uuid: localStorage.getItem("user_uuid"),
-      time: time.getTime(),
-      invoice_number: order.invoice_number,
-      trip_uuid: order.trip_uuid,
-      counter_uuid: order.counter_uuid,
-    });
+    console.log(deliveryPopup);
+    if (deliveryPopup === "put") {
+      GetOutstanding();
+    } else {
+      let time = new Date();
+      setOutstanding({
+        order_uuid: order.order_uuid,
+        amount: "",
+        user_uuid: localStorage.getItem("user_uuid"),
+        time: time.getTime(),
+        invoice_number: order.invoice_number,
+        trip_uuid: order.trip_uuid,
+        counter_uuid: order.counter_uuid,
+      });
+    }
     GetPaymentModes();
-  }, []);
+  }, [deliveryPopup]);
   useEffect(() => {
     if (PaymentModes.length)
       setModes(
@@ -1687,73 +1753,84 @@ function DiliveryPopup({
   }, [PaymentModes]);
   const submitHandler = async () => {
     setError("");
-    // let billingData = await Billing({
-    //   replacement: order.replacement,
-    //   counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
-
-    //   items: order.item_details.map((a) => {
-    //     let itemData = items.find((b) => a.item_uuid === b.item_uuid);
-    //     return {
-    //       ...itemData,
-    //       ...a,
-    //       price: itemData?.price || 0,
-    //     };
-    //   }),
-    // });
-    // let Tempdata = {
-    //   ...order,
-    //   ...billingData,
-    //   item_details: billingData.items,
-    //   replacement: data.actual,
-    //   replacement_mrp: data.mrp,
-    // };
-    let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
-    //console.log(
-    // Tempdata?.order_grandtotal,
-    //   +(+modeTotal + (+outstanding?.amount || 0))
-    // );
-    if (
-      +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
-    ) {
-      setError("Invoice Amount and Payment mismatch");
-      return;
-    }
-    // let obj = modes.find((a) => a.mode_title === "Cash");
-    // if (obj?.amt && obj?.coin === "") {
-    //   setCoinPopup(true);
-    //   return;
-    // }
-    let time = new Date();
-    let obj = {
-      user_uuid: localStorage.getItem("user_uuid"),
-      time: time.getTime(),
-      order_uuid: order.order_uuid,
-      counter_uuid: order.counter_uuid,
-      trip_uuid: order.trip_uuid,
-      modes: modes.map((a) =>
-        a.mode_title === "Cash" ? { ...a, coin: 0 } : a
-      ),
-    };
-    const response = await axios({
-      method: "post",
-      url: "/receipts/postReceipt",
-      data: obj,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (outstanding?.amount)
-      await axios({
-        method: "post",
-        url: "/Outstanding/postOutstanding",
-        data: outstanding,
+    if (window.location.pathname.includes("completeOrderReport")) {
+      const response = await axios({
+        method: "put",
+        url: "/receipts/putReceipt",
+        data: {
+          modes,
+          order_uuid: order.order_uuid,
+          counter_uuid: order.counter_uuid,
+        },
         headers: {
           "Content-Type": "application/json",
         },
       });
-    if (response.data.success) {
-      postOrderData();
-      onSave();
+      if (outstanding?.amount)
+        await axios({
+          method: "put",
+          url: "/Outstanding/putOutstanding",
+          data: {
+            ...outstanding,
+            order_uuid: order.order_uuid,
+            counter_uuid: order.counter_uuid,
+          },
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      if (response.data.success) {
+        onSave();
+      }
+    } else {
+      let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
+      //console.log(
+      // Tempdata?.order_grandtotal,
+      //   +(+modeTotal + (+outstanding?.amount || 0))
+      // );
+      if (
+        +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
+      ) {
+        setError("Invoice Amount and Payment mismatch");
+        return;
+      }
+      // let obj = modes.find((a) => a.mode_title === "Cash");
+      // if (obj?.amt && obj?.coin === "") {
+      //   setCoinPopup(true);
+      //   return;
+      // }
+      let time = new Date();
+      let obj = {
+        user_uuid: localStorage.getItem("user_uuid"),
+        time: time.getTime(),
+        order_uuid: order.order_uuid,
+        counter_uuid: order.counter_uuid,
+        trip_uuid: order.trip_uuid,
+        modes: modes.map((a) =>
+          a.mode_title === "Cash" ? { ...a, coin: 0 } : a
+        ),
+      };
+      const response = await axios({
+        method: "post",
+        url: "/receipts/postReceipt",
+        data: obj,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (outstanding?.amount)
+        await axios({
+          method: "post",
+          url: "/Outstanding/postOutstanding",
+          data: outstanding,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      if (response.data.success) {
+        postOrderData();
+        onSave();
+      }
     }
   };
   return (
@@ -1858,14 +1935,18 @@ function DiliveryPopup({
                     className="row"
                     style={{ flexDirection: "row", alignItems: "center" }}
                   >
-                    <button
-                      type="button"
-                      className="submit"
-                      style={{ color: "#fff", backgroundColor: "#7990dd" }}
-                      onClick={() => setPopup(true)}
-                    >
-                      Replacement
-                    </button>
+                    {deliveryPopup === "put" ? (
+                      ""
+                    ) : (
+                      <button
+                        type="button"
+                        className="submit"
+                        style={{ color: "#fff", backgroundColor: "#7990dd" }}
+                        onClick={() => setPopup(true)}
+                      >
+                        Replacement
+                      </button>
+                    )}
                   </div>
                   <i style={{ color: "red" }}>{error}</i>
                 </div>
