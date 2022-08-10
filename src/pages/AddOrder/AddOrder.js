@@ -820,7 +820,7 @@ export default function AddOrder() {
                 <button
                   style={{
                     position: "fixed",
-                    bottom: "100px",
+                    bottom: "10px",
                     right: "0",
                     cursor: "default",
                   }}
