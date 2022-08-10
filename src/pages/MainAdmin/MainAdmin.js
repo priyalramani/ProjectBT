@@ -2810,6 +2810,8 @@ const OrdersEdit = ({
 
       let billingData = await Billing({
         replacement: data.replacement,
+        adjustment: data.adjustment,
+        shortage: data.shortage,
         counter: counter.find((a) => a.counter_uuid === data.counter_uuid),
         // add_discounts: true,
         items: data.item_details.map((a) => {

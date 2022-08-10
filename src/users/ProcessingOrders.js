@@ -15,6 +15,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import HomeIcon from "@mui/icons-material/Home";
 import { ArrowDropDown } from "@mui/icons-material";
+import DiliveryReplaceMent from "../components/DiliveryReplaceMent";
 
 const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
@@ -302,6 +303,8 @@ const ProcessingOrders = () => {
 
       let billingData = await Billing({
         replacement: data.replacement,
+        adjustment: data.adjustment,
+        shortage: data.shortage,
         counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
 
         items: data.item_details.map((a) => {
@@ -731,6 +734,8 @@ const ProcessingOrders = () => {
     // console.log(order);
     let billingData = await Billing({
       replacement: order.replacement,
+      adjustment: order.adjustment,
+      shortage: order.shortage,
       counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
 
       items: order.item_details.map((a) => {
@@ -1048,10 +1053,11 @@ const ProcessingOrders = () => {
           <table
             className="user-table"
             style={{
-              width: Location.pathname.includes("checking")||
-              Location.pathname.includes("delivery")
-                ? "100%"
-                : "max-content",
+              width:
+                Location.pathname.includes("checking") ||
+                Location.pathname.includes("delivery")
+                  ? "100%"
+                  : "max-content",
               height: "fit-content",
             }}
           >
@@ -1723,6 +1729,8 @@ const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
 
     let billingData = await Billing({
       replacement: data.replacement,
+      adjustment: data.adjustment,
+      shortage: data.shortage,
       counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
 
       items: data.item_details.map((a) => {
@@ -2785,9 +2793,11 @@ function DiliveryPopup({
   useEffect(() => {
     setOrder({
       replacement: data?.actual || 0,
-      replacement_mrp: data?.mrp || 0,
+      shortage: data?.shortage || 0,
+      adjustment: data?.adjustment || 0,
+      adjustment_remarks: data?.adjustment_remarks || "",
     });
-  }, [data]);
+  }, [popup]);
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -2831,6 +2841,8 @@ function DiliveryPopup({
     setError("");
     let billingData = await Billing({
       replacement: data.actual,
+      adjustment: data.adjustment,
+      shortage: data.shortage,
       counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
 
       items: order.item_details.map((a) => {
@@ -3162,100 +3174,7 @@ function DiliveryPopup({
     </>
   );
 }
-function DiliveryReplaceMent({ onSave, data, setData }) {
-  return (
-    <div className="overlay">
-      <div
-        className="modal"
-        style={{ height: "fit-content", width: "max-content" }}
-      >
-        <h2>Replacements</h2>
-        <div
-          className="content"
-          style={{
-            height: "fit-content",
-            padding: "20px",
-            width: "fit-content",
-          }}
-        >
-          <div style={{ overflowY: "scroll" }}>
-            <form className="form">
-              <div className="formGroup">
-                <div
-                  className="row"
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <div style={{ width: "50px" }}>MRP</div>
-                  <label
-                    className="selectLabel flex"
-                    style={{ width: "100px" }}
-                  >
-                    <input
-                      type="number"
-                      name="route_title"
-                      className="numberInput"
-                      value={data.mrp}
-                      style={{ width: "100px" }}
-                      onChange={(e) =>
-                        setData((prev) => ({
-                          mrp: e.target.value,
-                          actual: +e.target.value * 0.8,
-                        }))
-                      }
-                      onWheel={(e) => e.preventDefault()}
-                      maxLength={42}
-                    />
-                    {/* {popupInfo.conversion || 0} */}
-                  </label>
-                </div>
-                <div
-                  className="row"
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <div style={{ width: "50px" }}>Actual</div>
-                  <label
-                    className="selectLabel flex"
-                    style={{ width: "100px" }}
-                  >
-                    <input
-                      type="number"
-                      name="route_title"
-                      className="numberInput"
-                      value={data.actual}
-                      style={{ width: "100px" }}
-                      onChange={(e) =>
-                        setData((prev) => ({
-                          actual: e.target.value,
-                        }))
-                      }
-                      maxLength={42}
-                      onWheel={(e) => e.preventDefault()}
-                    />
-                    {/* {popupInfo.conversion || 0} */}
-                  </label>
-                </div>
-              </div>
 
-              <div className="flex" style={{ justifyContent: "space-between" }}>
-                <button
-                  type="button"
-                  style={{ backgroundColor: "red" }}
-                  className="submit"
-                  onClick={onSave}
-                >
-                  Cancel
-                </button>
-                <button type="button" className="submit" onClick={onSave}>
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 function ConfirmPopup({ onSave, onClose, selectedOrder, Navigate }) {
   if (!selectedOrder) Navigate(-1);
   return selectedOrder ? (
@@ -3854,6 +3773,8 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 
       let billingData = await Billing({
         replacement: data.replacement,
+        adjustment: data.adjustment,
+        shortage: data.shortage,
         counter: counter.find((a) => a.counter_uuid === data.counter_uuid),
 
         items: data.item_details.map((a) => {

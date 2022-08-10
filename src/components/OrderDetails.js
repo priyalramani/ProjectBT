@@ -10,6 +10,7 @@ import OrderPrint from "./OrderPrint";
 import { useIdleTimer } from "react-idle-timer";
 
 import FreeItems from "./FreeItems";
+import DiliveryReplaceMent from "./DiliveryReplaceMent";
 const default_status = [
   { value: 0, label: "Preparing" },
   { value: 1, label: "Ready" },
@@ -60,11 +61,16 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const shiftFocus = (id) =>
     jumpToNextIndex(id, reactInputsRef, setFocusedInputId, appendNewRow);
 
-  const callBilling = async () => {
-    if (!editOrder) return;
+  const callBilling = async (data) => {
+    console.log(!data && !editOrder)
+    if (!data && !editOrder) return;
+    console.log(data);
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let time = new Date();
     let autoBilling = await Billing({
+      shortage: data.shortage,
+      adjustment: data.adjustment,
+      replacement: data.replacement,
       counter,
       items: orderData?.item_details,
       others: {
@@ -78,6 +84,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     setOrderData((prev) => ({
       ...prev,
       ...autoBilling,
+      ...(data||{}),
       item_details: autoBilling.items.map((a) => ({
         ...(prev.item_details.find((b) => b.item_uuid === a.item_uuid) || {}),
         ...a,
@@ -298,6 +305,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     let data = orderData;
     let billingData = await Billing({
       replacement: data.replacement,
+      adjustment: data.adjustment,
+      shortage: data.shortage,
       counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
 
       items: data.item_details.map((a) => {
@@ -1147,7 +1156,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           deliveryPopup={deliveryPopup}
           postOrderData={() => onSubmit({ stage: 5 })}
           setSelectedOrder={setOrderData}
-          order={order}
+          order={orderData}
           counters={counters}
           items={itemsData}
           updateBilling={callBilling}
@@ -1351,6 +1360,8 @@ const DeleteOrderPopup = ({
 
     let billingData = await Billing({
       replacement: data.replacement,
+      adjustment: data.adjustment,
+      shortage: data.shortage,
       counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
 
       items: data.item_details.map((a) => {
@@ -1981,8 +1992,10 @@ function DiliveryPopup({
           onSave={() => {
             setPopup(false);
             updateBilling({
-              replacement: data.actual,
-              replacement_mrp: data.mrp,
+              replacement: data?.actual || 0,
+              shortage: data?.shortage || 0,
+              adjustment: data?.adjustment || 0,
+              adjustment_remarks: data?.adjustment_remarks || "",
             });
           }}
           setData={setData}
@@ -2174,99 +2187,5 @@ function NotesPopup({
         </div>
       </div>
     </>
-  );
-}
-function DiliveryReplaceMent({ onSave, data, setData }) {
-  return (
-    <div className="overlay" style={{ zIndex: 99999999999 }}>
-      <div
-        className="modal"
-        style={{ height: "fit-content", width: "max-content" }}
-      >
-        <h2>Replacements</h2>
-        <div
-          className="content"
-          style={{
-            height: "fit-content",
-            padding: "20px",
-            width: "fit-content",
-          }}
-        >
-          <div style={{ overflowY: "scroll" }}>
-            <form className="form">
-              <div className="formGroup">
-                <div
-                  className="row"
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <div style={{ width: "50px" }}>MRP</div>
-                  <label
-                    className="selectLabel flex"
-                    style={{ width: "100px" }}
-                  >
-                    <input
-                      type="number"
-                      name="route_title"
-                      className="numberInput"
-                      value={data.mrp}
-                      style={{ width: "100px" }}
-                      onChange={(e) =>
-                        setData((prev) => ({
-                          mrp: e.target.value,
-                          actual: +e.target.value * 0.8,
-                        }))
-                      }
-                      onWheel={(e) => e.preventDefault()}
-                      maxLength={42}
-                    />
-                    {/* {popupInfo.conversion || 0} */}
-                  </label>
-                </div>
-                <div
-                  className="row"
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <div style={{ width: "50px" }}>Actual</div>
-                  <label
-                    className="selectLabel flex"
-                    style={{ width: "100px" }}
-                  >
-                    <input
-                      type="number"
-                      name="route_title"
-                      className="numberInput"
-                      value={data.actual}
-                      style={{ width: "100px" }}
-                      onChange={(e) =>
-                        setData((prev) => ({
-                          actual: e.target.value,
-                        }))
-                      }
-                      maxLength={42}
-                      onWheel={(e) => e.preventDefault()}
-                    />
-                    {/* {popupInfo.conversion || 0} */}
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex" style={{ justifyContent: "space-between" }}>
-                <button
-                  type="button"
-                  style={{ backgroundColor: "red" }}
-                  className="submit"
-                  onClick={onSave}
-                >
-                  Cancel
-                </button>
-                <button type="button" className="submit" onClick={onSave}>
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }

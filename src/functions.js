@@ -143,7 +143,6 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
         : null;
     // console.log("piceqtyobj", pice_qty_arr);
 
- 
     if (base_qty_arr?.add_items) {
       let dataItems = dbItems.filter(
         (a) =>
@@ -242,6 +241,9 @@ export const Billing = async ({
   items = [],
   others = null,
   replacement = 0,
+  shortage = 0,
+  adjustment = 0,
+
   add_discounts,
   edit_prices = [],
 }) => {
@@ -361,9 +363,9 @@ export const Billing = async ({
   let order_grandtotal = (
     newPriceItems.length > 1
       ? newPriceItems.map((a) => +a.item_total || 0).reduce((a, b) => a + b) -
-        replacement
+        replacement-shortage-adjustment
       : newPriceItems.length
-      ? (newPriceItems.map((a) => a.item_total)[0] || 0) - replacement
+      ? (newPriceItems.map((a) => a.item_total)[0] || 0) - replacement-shortage-adjustment
       : 0
   ).toFixed(0);
 

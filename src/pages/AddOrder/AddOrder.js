@@ -11,6 +11,7 @@ import Select from "react-select";
 import { useIdleTimer } from "react-idle-timer";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import FreeItems from "../../components/FreeItems";
+import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 const list = ["item_uuid", "q", "p"];
 
 export default function AddOrder() {
@@ -303,6 +304,8 @@ export default function AddOrder() {
     let time = new Date();
     let autoBilling = await Billing({
       replacement: order.replacement,
+      adjustment: order.adjustment,
+      shortage: order.shortage,
       counter,
       items: order.item_details.map((a) => ({ ...a, item_price: a.p_price })),
       others: {
@@ -1015,6 +1018,8 @@ function DiliveryPopup({
     setError("");
     let billingData = await Billing({
       replacement: order.replacement,
+      shortage: order.shortage,
+      adjustment: order.adjustment,
       counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
 
       items: order.item_details.map((a) => {
@@ -1030,8 +1035,10 @@ function DiliveryPopup({
       ...order,
       ...billingData,
       item_details: billingData.items,
-      replacement: data.actual,
-      replacement_mrp: data.mrp,
+      replacement: data?.actual || 0,
+      shortage: data?.shortage || 0,
+      adjustment: data?.adjustment || 0,
+      adjustment_remarks: data?.adjustment_remarks || "",
     };
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
     //console.log(
@@ -1193,7 +1200,7 @@ function DiliveryPopup({
                       style={{ color: "#fff", backgroundColor: "#7990dd" }}
                       onClick={() => setPopup(true)}
                     >
-                      Replacement
+                      Abc
                     </button>
                   </div>
                   <i style={{ color: "red" }}>{error}</i>
@@ -1229,8 +1236,10 @@ function DiliveryPopup({
           onSave={() => {
             setPopup(false);
             updateBilling({
-              replacement: data.actual,
-              replacement_mrp: data.mrp,
+              replacement: data?.actual || 0,
+              shortage: data?.shortage || 0,
+              adjustment: data?.adjustment || 0,
+              adjustment_remarks: data?.adjustment_remarks || "",
             });
           }}
           setData={setData}
@@ -1323,97 +1332,4 @@ function DiliveryPopup({
     </>
   );
 }
-function DiliveryReplaceMent({ onSave, data, setData }) {
-  return (
-    <div className="overlay">
-      <div
-        className="modal"
-        style={{ height: "fit-content", width: "max-content" }}
-      >
-        <h2>Replacements</h2>
-        <div
-          className="content"
-          style={{
-            height: "fit-content",
-            padding: "20px",
-            width: "fit-content",
-          }}
-        >
-          <div style={{ overflowY: "scroll" }}>
-            <form className="form">
-              <div className="formGroup">
-                <div
-                  className="row"
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <div style={{ width: "50px" }}>MRP</div>
-                  <label
-                    className="selectLabel flex"
-                    style={{ width: "100px" }}
-                  >
-                    <input
-                      type="number"
-                      name="route_title"
-                      className="numberInput"
-                      value={data.mrp}
-                      style={{ width: "100px" }}
-                      onChange={(e) =>
-                        setData((prev) => ({
-                          mrp: e.target.value,
-                          actual: +e.target.value * 0.8,
-                        }))
-                      }
-                      onWheel={(e) => e.preventDefault()}
-                      maxLength={42}
-                    />
-                    {/* {popupInfo.conversion || 0} */}
-                  </label>
-                </div>
-                <div
-                  className="row"
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <div style={{ width: "50px" }}>Actual</div>
-                  <label
-                    className="selectLabel flex"
-                    style={{ width: "100px" }}
-                  >
-                    <input
-                      type="number"
-                      name="route_title"
-                      className="numberInput"
-                      value={data.actual}
-                      style={{ width: "100px" }}
-                      onChange={(e) =>
-                        setData((prev) => ({
-                          actual: e.target.value,
-                        }))
-                      }
-                      maxLength={42}
-                      onWheel={(e) => e.preventDefault()}
-                    />
-                    {/* {popupInfo.conversion || 0} */}
-                  </label>
-                </div>
-              </div>
 
-              <div className="flex" style={{ justifyContent: "space-between" }}>
-                <button
-                  type="button"
-                  style={{ backgroundColor: "red" }}
-                  className="submit"
-                  onClick={onSave}
-                >
-                  Cancel
-                </button>
-                <button type="button" className="submit" onClick={onSave}>
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
