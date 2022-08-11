@@ -281,6 +281,7 @@ export default function AddOrder() {
                 user_uuid: data.others.user_uuid,
               },
             ],
+      ...(type.obj || {}),
     };
     console.log("orderJSon", data);
     const response = await axios({
@@ -291,6 +292,7 @@ export default function AddOrder() {
         "Content-Type": "application/json",
       },
     });
+    console.log(response)
     if (response.data.success) {
       setOrder({
         counter_uuid: "",
@@ -872,7 +874,7 @@ export default function AddOrder() {
       {deliveryPopup ? (
         <DiliveryPopup
           onSave={() => setDeliveryPopup(false)}
-          postOrderData={() => onSubmit({ stage: 5, autoAdd })}
+          postOrderData={(obj) => onSubmit({ stage: 5, autoAdd, obj })}
           setSelectedOrder={setOrder}
           order={order}
           counters={counters}
@@ -1065,38 +1067,16 @@ function DiliveryPopup({
     //   setCoinPopup(true);
     //   return;
     // }
-    let time = new Date();
+
     let obj = {
       user_uuid: localStorage.getItem("user_uuid"),
-      time: time.getTime(),
-      order_uuid: order.order_uuid,
-      counter_uuid: order.counter_uuid,
-      trip_uuid: order.trip_uuid,
       modes: modes.map((a) =>
         a.mode_title === "Cash" ? { ...a, coin: 0 } : a
       ),
     };
-    const response = await axios({
-      method: "post",
-      url: "/receipts/postReceipt",
-      data: obj,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (outstanding?.amount)
-      await axios({
-        method: "post",
-        url: "/Outstanding/postOutstanding",
-        data: outstanding,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    if (response.data.success) {
-      postOrderData();
-      onSave();
-    }
+
+    postOrderData({ ...obj, OutStanding: outstanding.amount });
+    onSave();
   };
   return (
     <>

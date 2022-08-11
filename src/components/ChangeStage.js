@@ -297,7 +297,7 @@ function DiliveryPopup({
   useEffect(() => {
     let time = new Date();
     setOutstanding({
-      order_uuid: orders[count]?.order_uuid,
+      order_uuid: order?.order_uuid,
       amount: "",
       user_uuid: localStorage.getItem("user_uuid"),
       time: time.getTime(),
@@ -387,10 +387,11 @@ function DiliveryPopup({
     let obj = {
       user_uuid: localStorage.getItem("user_uuid"),
       time: time.getTime(),
-      order_uuid: orders[count].order_uuid,
+      order_uuid: order.order_uuid,
       counter_uuid: order.counter_uuid,
+      invoice_number: order.invoice_number,
       trip_uuid: order.trip_uuid,
-      modes: modes.map((a) => (a.mode_title === "Cash" ? { cash: 0 } : a)),
+      modes: modes.map((a) => a.mode_title === "Cash" ? {...a, cash: 0 } : a),
     };
     const response = await axios({
       method: "post",

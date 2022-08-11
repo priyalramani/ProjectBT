@@ -2886,6 +2886,7 @@ function DiliveryPopup({
       order_uuid,
       counter_uuid: order.counter_uuid,
       trip_uuid: order.trip_uuid,
+      invoice_number: order.invoice_number,
       modes,
     };
     setLoading(true);

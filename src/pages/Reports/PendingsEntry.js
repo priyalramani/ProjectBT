@@ -83,6 +83,7 @@ const PendingsEntry = () => {
       },
     });
     if (response.data.success) {
+      setOrders(prev=>prev.filter(a=>a.invoice_number!==invoice_number))
       return;
     }
   };
@@ -344,7 +345,7 @@ const PendingsEntry = () => {
                       await putOrder(a.invoice_number);
                     }
                     setAllDoneConfimation(false);
-                    getOrders()
+            
                   }}
                 >
                   <div className="row">
@@ -475,7 +476,7 @@ function Table({
                   onClick={async (e) => {
                     e.stopPropagation();
                     await putOrder(item.invoice_number);
-                    getOrders();
+                
                   }}
                 >
                   Done

@@ -6,7 +6,6 @@ import Sidebar from "../../components/Sidebar";
 const PendingsEntry = () => {
   const [orders, setOrders] = useState([]);
 
-
   const getOrders = async () => {
     const response = await axios({
       method: "get",
@@ -65,6 +64,16 @@ function Table({
 
   getOrders,
 }) {
+  function formatAMPM(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var strTime = hours + ":" + minutes + " " + ampm;
+    return strTime;
+  }
   return (
     <table
       className="user-table"
@@ -93,7 +102,10 @@ function Table({
 
               <td colSpan={2}>{item.counter_title || ""}</td>
               <td colSpan={2}>{item.invoice_number || ""}</td>
-              <td colSpan={2}>{item.time_stamp || ""}</td>
+              <td colSpan={2}>
+                {new Date(item.time_stamp).toDateString()} -{" "}
+                {formatAMPM(new Date(item.time_stamp))}
+              </td>
               <td colSpan={2}>{item.user_title || ""}</td>
               <td colSpan={2}>{item.order_grandtotal || ""}</td>
 
