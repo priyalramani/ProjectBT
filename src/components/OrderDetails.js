@@ -1955,7 +1955,7 @@ function DiliveryPopup({
                         style={{ color: "#fff", backgroundColor: "#7990dd" }}
                         onClick={() => setPopup(true)}
                       >
-                        Replacement
+                        Deductions
                       </button>
                     )}
                   </div>

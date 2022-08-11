@@ -529,7 +529,7 @@ function DiliveryPopup({
                       style={{ color: "#fff", backgroundColor: "#7990dd" }}
                       onClick={() => setPopup(true)}
                     >
-                      ABC
+                      Deductions
                     </button>
                   </div>
                   <i style={{ color: "red" }}>{error}</i>

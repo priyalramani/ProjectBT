@@ -336,7 +336,17 @@ const PendingsEntry = () => {
               }}
             >
               <div style={{ overflowY: "scroll" }}>
-                <form className="form" onSubmit={downloadHandler}>
+                <form
+                  className="form"
+                  onSubmit={async(e) => {
+                    e.preventDefault();
+                    for (let a of selectedOrders) {
+                      await putOrder(a.invoice_number);
+                    }
+                    setAllDoneConfimation(false);
+                    getOrders()
+                  }}
+                >
                   <div className="row">
                     <h1>Confirm Done</h1>
                   </div>
