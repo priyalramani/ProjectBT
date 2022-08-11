@@ -9,6 +9,7 @@ const TripPage = ({
   replacement,
   sales_return,
   coin,
+  cash,
   amt,
   formatAMPM,
   unpaid_invoice,
@@ -62,12 +63,17 @@ const TripPage = ({
       <table style={{ margin: "10px" }}>
         <tr>
           <td style={{ fontSize: "small", textAlign: "left" }}>
-            Total Cash : {amt}
+            Total Cash : {cash}
           </td>
         </tr>
         <tr>
           <td style={{ fontSize: "small", textAlign: "left" }}>
             Coin : {coin}
+          </td>
+        </tr>
+        <tr>
+          <td style={{ fontSize: "small", textAlign: "left" }}>
+            Total amount : {amt}
           </td>
         </tr>
       </table>

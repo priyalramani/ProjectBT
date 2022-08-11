@@ -336,6 +336,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
               created_at={formatAMPM(new Date(statementTrip?.created_at || ""))}
               amt={statementTrip?.amt || 0}
               coin={statementTrip?.coin || 0}
+              cash={statementTrip?.cash || 0}
               formatAMPM={formatAMPM}
               cheque={statementTrip?.cheque}
               replacement={statementTrip?.replacement}

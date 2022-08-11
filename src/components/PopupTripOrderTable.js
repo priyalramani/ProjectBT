@@ -5,6 +5,7 @@ import * as FileSaver from "file-saver";
 const PopupTripOrderTable = ({ trip_uuid, onSave }) => {
   const [itemDetails, setItemDetails] = useState([]);
   const [counter, setCounter] = useState([]);
+  const [total, setTotal] = useState({});
   const fileExtension = ".xlsx";
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -41,7 +42,10 @@ const PopupTripOrderTable = ({ trip_uuid, onSave }) => {
         },
       });
       console.log("activity", response);
-      if (response.data.success) setItemDetails(response.data.result);
+      if (response.data.success) {
+        setItemDetails(response.data.result);
+        setTotal(response.data.total);
+      }
     }
   };
   useEffect(() => {
@@ -210,26 +214,11 @@ const PopupTripOrderTable = ({ trip_uuid, onSave }) => {
                         ?.counter_title || ""}
                     </td>
                     <td colSpan={2}>{item.invoice_number || ""}</td>
-                    <td colSpan={2}>{item.qty || ""}</td>
-                    <td colSpan={2}>{item.amt || ""}</td>
-                    <td colSpan={2}>
-                      {item.modes.find(
-                        (a) =>
-                          a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-                      )?.amt || 0}
-                    </td>
-                    <td colSpan={2}>
-                      {item.modes.find(
-                        (a) =>
-                          a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002"
-                      )?.amt || 0}
-                    </td>
-                    <td colSpan={2}>
-                      {item.modes.find(
-                        (a) =>
-                          a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
-                      )?.amt || 0}
-                    </td>
+                    <td colSpan={2}>{item.qty || 0}</td>
+                    <td colSpan={2}>{item.amt || 0}</td>
+                    <td colSpan={2}>{item.cash || 0}</td>
+                    <td colSpan={2}>{item.cheque || 0}</td>
+                    <td colSpan={2}>{item.upi || 0}</td>
                     <td colSpan={2}>{item.unpaid || 0}</td>
                   </tr>
                 ))}
@@ -243,82 +232,19 @@ const PopupTripOrderTable = ({ trip_uuid, onSave }) => {
                 <td colSpan={2}></td>
                 <td colSpan={2}></td>
                 <td colSpan={2}>
-                  <b>
-                    {itemDetails.length > 1
-                      ? itemDetails
-                          .map((a) => +a?.amt || 0)
-                          .reduce((a, b) => a + b)
-                      : itemDetails[0]?.amt || 0}
-                  </b>
+                  <b>{total.total_amt || 0}</b>
                 </td>
                 <td colSpan={2}>
-                  <b>
-                    {itemDetails.length > 1
-                      ? itemDetails
-                          .map(
-                            (a) =>
-                              +a?.modes.find(
-                                (a) =>
-                                  a.mode_uuid ===
-                                  "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-                              )?.amt || 0
-                          )
-                          .reduce((a, b) => a + b)
-                      : itemDetails[0]?.modes.find(
-                          (a) =>
-                            a.mode_uuid ===
-                            "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-                        )?.amt || 0}
-                  </b>
+                  <b>{total.total_cash || 0}</b>
                 </td>
                 <td colSpan={2}>
-                  <b>
-                    {itemDetails.length > 1
-                      ? itemDetails
-                          .map(
-                            (a) =>
-                              +a?.modes.find(
-                                (a) =>
-                                  a.mode_uuid ===
-                                  "c67b5794-d2b6-11ec-9d64-0242ac120002"
-                              )?.amt || 0
-                          )
-                          .reduce((a, b) => a + b)
-                      : itemDetails[0]?.modes.find(
-                          (a) =>
-                            a.mode_uuid ===
-                            "c67b5794-d2b6-11ec-9d64-0242ac120002"
-                        )?.amt || 0}
-                  </b>
+                  <b>{total.total_cheque || 0}</b>
                 </td>
                 <td colSpan={2}>
-                  <b>
-                    {itemDetails.length > 1
-                      ? itemDetails
-                          .map(
-                            (a) =>
-                              +a?.modes.find(
-                                (a) =>
-                                  a.mode_uuid ===
-                                  "c67b5988-d2b6-11ec-9d64-0242ac120002"
-                              )?.amt || 0
-                          )
-                          .reduce((a, b) => a + b)
-                      : itemDetails[0]?.modes.find(
-                          (a) =>
-                            a?.mode_uuid ===
-                            "c67b5988-d2b6-11ec-9d64-0242ac120002"
-                        )?.amt || 0}
-                  </b>
+                  <b>{total.total_upi || 0}</b>
                 </td>
                 <td colSpan={2}>
-                  <b>
-                    {itemDetails.length > 1
-                      ? itemDetails
-                          .map((a) => +a?.unpaid || 0)
-                          .reduce((a, b) => a + b)
-                      : itemDetails[0]?.unpaid || 0}
-                  </b>
+                  <b>{total.total_unpaid || 0}</b>
                 </td>
               </tr>
             </tbody>
