@@ -62,7 +62,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     jumpToNextIndex(id, reactInputsRef, setFocusedInputId, appendNewRow);
 
   const callBilling = async (data) => {
-    console.log(!data && !editOrder)
+    console.log(!data && !editOrder);
     if (!data && !editOrder) return;
     console.log(data);
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
@@ -84,7 +84,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     setOrderData((prev) => ({
       ...prev,
       ...autoBilling,
-      ...(data||{}),
+      ...(data || {}),
       item_details: autoBilling.items.map((a) => ({
         ...(prev.item_details.find((b) => b.item_uuid === a.item_uuid) || {}),
         ...a,
@@ -1844,6 +1844,14 @@ function DiliveryPopup({
       }
     }
   };
+  useEffect(() => {
+    updateBilling({
+      replacement: data?.actual || 0,
+      shortage: data?.shortage || 0,
+      adjustment: data?.adjustment || 0,
+      adjustment_remarks: data?.adjustment_remarks || "",
+    });
+  }, [data]);
   return (
     <>
       <div className="overlay" style={{ zIndex: 9999999999 }}>
@@ -1991,12 +1999,6 @@ function DiliveryPopup({
         <DiliveryReplaceMent
           onSave={() => {
             setPopup(false);
-            updateBilling({
-              replacement: data?.actual || 0,
-              shortage: data?.shortage || 0,
-              adjustment: data?.adjustment || 0,
-              adjustment_remarks: data?.adjustment_remarks || "",
-            });
           }}
           setData={setData}
           data={data}

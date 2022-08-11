@@ -1,8 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 function DiliveryReplaceMent({ onSave, data, setData }) {
+  const [error, setError] = useState(false);
+  const [values, setValues] = useState(false);
+  useEffect(() => {
+    setValues(data);
+  }, []);
   return (
-    <div className="overlay" style={{zIndex:"9999999999999"}}>
+    <div className="overlay" style={{ zIndex: "9999999999999" }}>
       <div
         className="modal"
         style={{ height: "fit-content", width: "max-content" }}
@@ -31,10 +36,10 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                       type="number"
                       name="route_title"
                       className="numberInput"
-                      value={data.actual}
+                      value={values.actual}
                       style={{ width: "100px" }}
                       onChange={(e) =>
-                        setData((prev) => ({
+                        setValues((prev) => ({
                           ...prev,
                           actual: e.target.value,
                         }))
@@ -58,10 +63,10 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                       type="number"
                       name="route_title"
                       className="numberInput"
-                      value={data.shortage}
+                      value={values.shortage}
                       style={{ width: "100px" }}
                       onChange={(e) =>
-                        setData((prev) => ({
+                        setValues((prev) => ({
                           ...prev,
                           shortage: e.target.value,
                         }))
@@ -85,10 +90,10 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                       type="number"
                       name="route_title"
                       className="numberInput"
-                      value={data.adjustment}
+                      value={values.adjustment}
                       style={{ width: "100px" }}
                       onChange={(e) =>
-                        setData((prev) => ({
+                        setValues((prev) => ({
                           ...prev,
                           adjustment: e.target.value,
                         }))
@@ -99,7 +104,7 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                     {/* {popupInfo.conversion || 0} */}
                   </label>
                 </div>
-                {data.adjustment ? (
+                {values.adjustment ? (
                   <div
                     className="row"
                     style={{ flexDirection: "row", alignItems: "center" }}
@@ -113,10 +118,14 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                         type="number"
                         name="route_title"
                         className="numberInput"
-                        value={data.adjustment_remarks}
-                        style={{ width: "100px", height: "100px" }}
+                        value={values.adjustment_remarks}
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          border: error ? "2px solid red" : "1px solid #000",
+                        }}
                         onChange={(e) =>
-                          setData((prev) => ({
+                          setValues((prev) => ({
                             ...prev,
                             adjustment_remarks: e.target.value,
                           }))
@@ -129,6 +138,7 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                 ) : (
                   ""
                 )}
+                {error ? <h5>Please Enter Adjustment Remarks</h5> : ""}
               </div>
 
               <div className="flex" style={{ justifyContent: "space-between" }}>
@@ -140,7 +150,19 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                 >
                   Cancel
                 </button>
-                <button type="button" className="submit" onClick={onSave}>
+                <button
+                  type="button"
+                  className="submit"
+                  onClick={() => {
+                    if (!values.adjustment || values.adjustment_remarks) {
+                      setData((prev) => ({ ...prev, ...values }));
+                      onSave()
+                    } else {
+                      setError(true);
+                      setTimeout(()=>setError(false),3000)
+                    }
+                  }}
+                >
                   Save
                 </button>
               </div>

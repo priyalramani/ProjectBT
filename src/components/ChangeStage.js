@@ -422,6 +422,15 @@ function DiliveryPopup({
       }
     }
   };
+  useEffect(() => {
+    updateBillingAmount({
+      ...order,
+      replacement: data?.actual || 0,
+      shortage: data?.shortage || 0,
+      adjustment: data?.adjustment || 0,
+      adjustment_remarks: data?.adjustment_remarks || "",
+    });
+  }, [data]);
   return (
     <>
       <div className="overlay">
@@ -564,13 +573,6 @@ function DiliveryPopup({
         <DiliveryReplaceMent
           onSave={() => {
             setPopup(false);
-            updateBillingAmount({
-              ...order,
-              replacement: data?.actual || 0,
-              shortage: data?.shortage || 0,
-              adjustment: data?.adjustment || 0,
-              adjustment_remarks: data?.adjustment_remarks || "",
-            });
           }}
           setData={setData}
           data={data}

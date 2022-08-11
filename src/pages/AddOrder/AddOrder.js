@@ -975,6 +975,14 @@ function DiliveryPopup({
   // const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
+  useEffect(() => {
+    updateBilling({
+      replacement: data?.actual || 0,
+      shortage: data?.shortage || 0,
+      adjustment: data?.adjustment || 0,
+      adjustment_remarks: data?.adjustment_remarks || "",
+    });
+  }, [data]);
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -1235,12 +1243,6 @@ function DiliveryPopup({
         <DiliveryReplaceMent
           onSave={() => {
             setPopup(false);
-            updateBilling({
-              replacement: data?.actual || 0,
-              shortage: data?.shortage || 0,
-              adjustment: data?.adjustment || 0,
-              adjustment_remarks: data?.adjustment_remarks || "",
-            });
           }}
           setData={setData}
           data={data}
@@ -1332,4 +1334,3 @@ function DiliveryPopup({
     </>
   );
 }
-
