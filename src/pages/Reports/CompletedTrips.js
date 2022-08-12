@@ -28,9 +28,8 @@ const CompletedTrips = () => {
   });
   const getTripData = async (trip_uuid) => {
     const response = await axios({
-      method: "post",
-      url: "/trips/GetTripItemSummary",
-      data: { trip_uuid },
+      method: "get",
+      url: "/trips/GetTripSummaryDetails/"+trip_uuid,
       headers: {
         "Content-Type": "application/json",
       },
@@ -214,6 +213,7 @@ const CompletedTrips = () => {
             created_at={formatAMPM(new Date(statementTrip?.created_at || ""))}
             amt={statementTrip?.amt || 0}
             coin={statementTrip?.coin || 0}
+            cash={statementTrip?.cash || 0}
             formatAMPM={formatAMPM}
             cheque={statementTrip?.cheque}
             replacement={statementTrip?.replacement}
