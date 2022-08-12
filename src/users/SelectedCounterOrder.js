@@ -299,7 +299,6 @@ const SelectedCounterOrder = () => {
                             .filter(
                               (a) => a.category_uuid === category.category_uuid
                             )
-                            ?.sort((a, b) => a.sort_order - b.sort_order)
                             ?.filter(
                               (a) =>
                                 !filterItemTitle ||
@@ -327,7 +326,8 @@ const SelectedCounterOrder = () => {
                                         filterItemTitle.toLocaleLowerCase()
                                       )
                                 )
-                                ?.sort((a, b) => a - b)
+                                ?.sort((a, b) => a.sort_order - b.sort_order)
+
                                 .filter(
                                   (a) =>
                                     a.category_uuid === category.category_uuid
