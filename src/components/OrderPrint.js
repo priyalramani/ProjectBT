@@ -232,7 +232,7 @@ const OrderPrint = ({
           let tex_amt =
             (+unit_price || 0) -
             ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0));
-          let dsc_amt = (+item.price - (+unit_price || 0)) * itemQty;
+          let dsc_amt = (+(item.price||item.item_price||0) - (+unit_price || 0)) * itemQty;
           return (
             <tr
               style={{ borderBottom: "1px solid #000" }}
@@ -295,7 +295,7 @@ const OrderPrint = ({
                 }}
                 colSpan={2}
               >
-                {item?.price || unit_price || 0}
+                {(item?.price || unit_price || 0).toFixed(2)}
               </td>
               <td
                 style={{
