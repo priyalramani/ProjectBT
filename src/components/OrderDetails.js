@@ -324,6 +324,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       item_details: billingData.items,
       hold: "Y",
     };
+    data = Object.keys(data)
+    .filter((key) => key !== "notes")
+    .reduce((obj, key) => {
+      obj[key] = data[key];
+      return obj;
+    }, {});
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
