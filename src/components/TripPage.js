@@ -31,30 +31,44 @@ const TripPage = ({
           </td>
         </tr>
         <tr>
-          <td colSpan={2} style={{ fontSize: "larger", fontWeight: "bold" }}>
+          <td
+            colSpan={2}
+            style={{
+              fontWeight: "600",
+              fontSize: "larger",
+            }}
+          >
             {users.map((a, i) =>
               i === 0 ? a?.user_title : ", " + a?.user_title
             )}
           </td>{" "}
         </tr>
         <tr>
-          <td style={{ fontSize: "small", textAlign: "left" }}></td>
+          <td
+            style={{ fontWeight: "600", fontSize: "small", textAlign: "left" }}
+          ></td>
           <td></td>
         </tr>
         <tr>
-          <td style={{ fontSize: "small", textAlign: "left" }}>
+          <td
+            style={{ fontWeight: "600", fontSize: "small", textAlign: "left" }}
+          >
             Trip UUID : {trip_uuid}
           </td>
           <td></td>
         </tr>
         <tr>
-          <td style={{ fontSize: "small", textAlign: "left" }}>
+          <td
+            style={{ fontWeight: "600", fontSize: "small", textAlign: "left" }}
+          >
             Trip Created At : {created_at}
           </td>
           <td></td>
         </tr>
         <tr>
-          <td style={{ fontSize: "small", textAlign: "left" }}>
+          <td
+            style={{ fontWeight: "600", fontSize: "small", textAlign: "left" }}
+          >
             Statement Printed At : {formatAMPM(new Date())}
           </td>
           <td></td>
@@ -62,17 +76,23 @@ const TripPage = ({
       </table>
       <table style={{ margin: "10px" }}>
         <tr>
-          <td style={{ fontSize: "small", textAlign: "left" }}>
+          <td
+            style={{ fontWeight: "600", fontSize: "small", textAlign: "left" }}
+          >
             Total Cash : {cash}
           </td>
         </tr>
         <tr>
-          <td style={{ fontSize: "small", textAlign: "left" }}>
+          <td
+            style={{ fontWeight: "600", fontSize: "small", textAlign: "left" }}
+          >
             Coin : {coin}
           </td>
         </tr>
         <tr>
-          <td style={{ fontSize: "small", textAlign: "left" }}>
+          <td
+            style={{ fontWeight: "600", fontSize: "small", textAlign: "left" }}
+          >
             Total amount : {amt}
           </td>
         </tr>
@@ -80,7 +100,13 @@ const TripPage = ({
       {cheque?.length ? (
         <table style={{ margin: "10px", width: "100%" }}>
           <tr>
-            <td style={{ fontSize: "small", textAlign: "left" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                fontSize: "small",
+                textAlign: "left",
+              }}
+            >
               Cheque Details
             </td>
           </tr>
@@ -106,7 +132,13 @@ const TripPage = ({
       {unpaid_invoice?.length ? (
         <table style={{ margin: "10px", width: "100%" }}>
           <tr>
-            <td style={{ fontSize: "small", textAlign: "left" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                fontSize: "small",
+                textAlign: "left",
+              }}
+            >
               Unpaid Invoice:
             </td>
           </tr>
@@ -131,7 +163,13 @@ const TripPage = ({
       {replacement?.length ? (
         <table style={{ margin: "10px", width: "100%" }}>
           <tr>
-            <td style={{ fontSize: "small", textAlign: "left" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                fontSize: "small",
+                textAlign: "left",
+              }}
+            >
               Counter Wise Replacements:
             </td>
           </tr>
@@ -145,9 +183,7 @@ const TripPage = ({
           {replacement.map((item) => (
             <tr>
               <td style={{ border: "1px solid #000" }}>{item.counter_title}</td>
-              <td style={{ border: "1px solid #000" }}>
-                {item.replacement}
-              </td>
+              <td style={{ border: "1px solid #000" }}>{item.replacement}</td>
               <td style={{ border: "1px solid #000" }}>{item.shortage}</td>
               <td style={{ border: "1px solid #000" }}>{item.adjustment}</td>
               <td style={{ border: "1px solid #000" }}>
@@ -187,7 +223,13 @@ const TripPage = ({
       {sales_return?.length ? (
         <table style={{ margin: "10px", width: "100%" }}>
           <tr>
-            <td style={{ fontSize: "small", textAlign: "left" }}>
+            <td
+              style={{
+                fontWeight: "600",
+                fontSize: "small",
+                textAlign: "left",
+              }}
+            >
               Sales Return Items:
             </td>
           </tr>

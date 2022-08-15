@@ -36,7 +36,12 @@ const OrderPrint = ({
         <tr>
           <td
             colSpan={28}
-            style={{ textAlign: "center", fontSize: "small", width: "100%" }}
+            style={{
+              textAlign: "center",
+              fontWeight: "600",
+              fontSize: "small",
+              width: "100%",
+            }}
           >
             <b>GST INVOICE</b>
           </td>
@@ -47,8 +52,9 @@ const OrderPrint = ({
               <tr>
                 <td
                   style={{
+                    fontWeight: "600",
                     fontSize: "larger",
-                    fontWeight: "bold",
+                    fontWeight: "600",
                     lineHeight: 0.5,
                   }}
                 >
@@ -56,34 +62,38 @@ const OrderPrint = ({
                 </td>
               </tr>
               <tr>
-                <td style={{ fontSize: "x-small" }}>
+                <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                   Ganesh Nagar, Near Sharda Convent School,
                   <br /> Ganesh Nagar, Gondia - 441401
                 </td>
               </tr>
               <tr>
-                <td style={{ fontSize: "x-small" }}>Phone: 9422551074</td>
+                <td style={{ fontWeight: "600", fontSize: "x-small" }}>
+                  Phone: 9422551074
+                </td>
               </tr>
               <tr>
-                <td style={{ fontSize: "x-small" }}>
+                <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                   Email: bharattradersgondia96@gmail.com
                 </td>
               </tr>
               <tr>
-                <td style={{ fontSize: "x-small" }}>GSTIN: 27ABIPR1186M1Z2</td>
+                <td style={{ fontWeight: "600", fontSize: "x-small" }}>
+                  GSTIN: 27ABIPR1186M1Z2
+                </td>
               </tr>
             </table>
           </td>
           <td colSpan={14}>
             <table>
               <tr>
-                <td style={{ fontSize: "x-small" }}>
+                <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                   M/S {counter?.counter_title || ""}
                 </td>
               </tr>
               {counter?.address ? (
                 <tr>
-                  <td style={{ fontSize: "x-small" }}>
+                  <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                     {counter?.address || ""}
                   </td>
                 </tr>
@@ -93,7 +103,7 @@ const OrderPrint = ({
 
               {counter?.mobile?.length ? (
                 <tr>
-                  <td style={{ fontSize: "x-small" }}>
+                  <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                     {counter?.mobile?.map((a, i) => (i === 0 ? a : ", " + a)) ||
                       ""}
                   </td>
@@ -103,7 +113,7 @@ const OrderPrint = ({
               )}
               {counter?.food_license ? (
                 <tr>
-                  <td style={{ fontSize: "x-small" }}>
+                  <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                     Food License: {counter?.food_license}
                   </td>
                 </tr>
@@ -112,7 +122,9 @@ const OrderPrint = ({
               )}
               {counter?.gst ? (
                 <tr>
-                  <td style={{ fontSize: "x-small" }}>GSTIN: {counter?.gst}</td>
+                  <td style={{ fontWeight: "600", fontSize: "x-small" }}>
+                    GSTIN: {counter?.gst}
+                  </td>
                 </tr>
               ) : (
                 ""
@@ -132,10 +144,10 @@ const OrderPrint = ({
           </th>
         </tr>
         <tr>
-          <td style={{ fontSize: "x-small" }} colSpan={7}>
+          <td style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={7}>
             Invoice: N{order?.invoice_number}
           </td>
-          <td style={{ fontSize: "x-small" }} colSpan={7}>
+          <td style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={7}>
             Date:{" "}
             {"dd/mm/yy"
               .replace(
@@ -148,10 +160,10 @@ const OrderPrint = ({
               )
               .replace("dd", ("00" + date?.getDate().toString()).slice(-2))}
           </td>
-          <td style={{ fontSize: "x-small" }} colSpan={7}>
+          <td style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={7}>
             S.M: {user}
           </td>
-          <td style={{ fontSize: "x-small" }} colSpan={7}>
+          <td style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={7}>
             Memo: Cash
           </td>
         </tr>
@@ -171,44 +183,44 @@ const OrderPrint = ({
             backgroundColor: "#EDEDED",
           }}
         >
-          <th style={{ fontSize: "x-small" }}>S.</th>
-          <th style={{ fontSize: "x-small" }} colSpan={3}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }}>S.</th>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={3}>
             Product
           </th>
-          <th style={{ fontSize: "x-small" }} colSpan={2}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Pack
           </th>
-          <th style={{ fontSize: "x-small" }} colSpan={2}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             MRP
           </th>
-          <th style={{ fontSize: "x-small" }} colSpan={2}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Qty
           </th>
-          <th style={{ fontSize: "x-small" }} colSpan={2}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Free
           </th>
-          <th style={{ fontSize: "x-small" }} colSpan={2}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Tax (%)
           </th>
-          <th style={{ fontSize: "x-small" }} colSpan={2}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Unit Price
           </th>
-          <th style={{ fontSize: "x-small" }} colSpan={2}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Dsc A (%)
           </th>
-          <th style={{ fontSize: "x-small" }} colSpan={2}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Dsc B (%)
           </th>
-          <th style={{ fontSize: "x-small" }} colSpan={2}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Dsc Amt
           </th>
-          <th style={{ fontSize: "x-small" }} colSpan={2}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Tax Amt
           </th>
-          <th style={{ fontSize: "x-small" }} colSpan={2}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Net Unit Price
           </th>
-          <th style={{ fontSize: "x-small" }} colSpan={2}>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Amount
           </th>
         </tr>
@@ -241,12 +253,18 @@ const OrderPrint = ({
               style={{ borderBottom: "1px solid #000" }}
               className="order_item"
             >
-              <td style={{ fontSize: "x-small" }}>{item?.sr || i + 1}.</td>
-              <td style={{ fontSize: "x-small" }} colSpan={3}>
+              <td style={{ fontWeight: "600", fontSize: "x-small" }}>
+                {item?.sr || i + 1}.
+              </td>
+              <td
+                style={{ fontWeight: "600", fontSize: "x-small" }}
+                colSpan={3}
+              >
                 {itemInfo?.item_title || ""}
               </td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -257,6 +275,7 @@ const OrderPrint = ({
 
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -266,6 +285,7 @@ const OrderPrint = ({
               </td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -275,6 +295,7 @@ const OrderPrint = ({
               </td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -284,6 +305,7 @@ const OrderPrint = ({
               </td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -293,6 +315,7 @@ const OrderPrint = ({
               </td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -302,6 +325,7 @@ const OrderPrint = ({
               </td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -313,6 +337,7 @@ const OrderPrint = ({
               </td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -324,6 +349,7 @@ const OrderPrint = ({
               </td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -333,6 +359,7 @@ const OrderPrint = ({
               </td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -342,6 +369,7 @@ const OrderPrint = ({
               </td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -351,6 +379,7 @@ const OrderPrint = ({
               </td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -379,12 +408,16 @@ const OrderPrint = ({
               </th>
             </tr>
             <tr style={{ borderBottom: "1px solid #000" }}>
-              <td style={{ fontSize: "x-small" }}></td>
-              <th style={{ fontSize: "x-small" }} colSpan={3}>
+              <td style={{ fontWeight: "600", fontSize: "x-small" }}></td>
+              <th
+                style={{ fontWeight: "600", fontSize: "x-small" }}
+                colSpan={3}
+              >
                 Total
               </th>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -392,6 +425,7 @@ const OrderPrint = ({
               ></td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -399,6 +433,7 @@ const OrderPrint = ({
               ></td>
               <th
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -418,6 +453,7 @@ const OrderPrint = ({
               </th>
               <th
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -431,6 +467,7 @@ const OrderPrint = ({
               </th>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -438,6 +475,7 @@ const OrderPrint = ({
               ></td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -445,6 +483,7 @@ const OrderPrint = ({
               ></td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -452,6 +491,7 @@ const OrderPrint = ({
               ></td>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -459,6 +499,7 @@ const OrderPrint = ({
               ></td>
               <th
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -473,6 +514,7 @@ const OrderPrint = ({
               </th>
               <th
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -487,6 +529,7 @@ const OrderPrint = ({
               </th>
               <td
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -494,6 +537,7 @@ const OrderPrint = ({
               ></td>
               <th
                 style={{
+                  fontWeight: "600",
                   fontSize: "x-small",
                   textAlign: "center",
                 }}
@@ -532,17 +576,17 @@ const OrderPrint = ({
                   style={{ borderRight: "1px solid black", width: "100%" }}
                 >
                   <tr>
-                    <td style={{ fontSize: "x-small" }}>
+                    <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                       <b> Bank:</b> Punjab National Bank, Gondia
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ fontSize: "x-small" }}>
+                    <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                       <b>Ac. No:</b> 0182008700014607
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ fontSize: "x-small" }}>
+                    <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                       <b>IFSC:</b> PUNB0018200
                     </td>
                   </tr>
@@ -551,6 +595,7 @@ const OrderPrint = ({
                     <td
                       style={{
                         textAlign: "center",
+                        fontWeight: "600",
                         fontSize: "small",
                         width: "100%",
                       }}
@@ -560,12 +605,12 @@ const OrderPrint = ({
                   </tr>
 
                   <tr>
-                    <td style={{ fontSize: "x-small" }}>
+                    <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                       <b>Gpay / PhonePe:</b> 9422551074
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ fontSize: "x-small" }}>
+                    <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                       <b>UPI / VPA:</b> 9422551074@upi / 9422551074@ybl
                     </td>
                   </tr>
@@ -574,17 +619,35 @@ const OrderPrint = ({
               <td colSpan={14}>
                 <table style={{ width: "100%" }}>
                   <tr>
-                    <td style={{ fontSize: "x-small", textAlign: "right" }}>
+                    <td
+                      style={{
+                        fontWeight: "600",
+                        fontSize: "x-small",
+                        textAlign: "right",
+                      }}
+                    >
                       0
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ fontSize: "x-small", textAlign: "right" }}>
+                    <td
+                      style={{
+                        fontWeight: "600",
+                        fontSize: "x-small",
+                        textAlign: "right",
+                      }}
+                    >
                       0
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ fontSize: "x-small", textAlign: "right" }}>
+                    <td
+                      style={{
+                        fontWeight: "600",
+                        fontSize: "x-small",
+                        textAlign: "right",
+                      }}
+                    >
                       0
                     </td>
                   </tr>
@@ -593,7 +656,7 @@ const OrderPrint = ({
                     <th
                       style={{
                         fontSize: "x-large",
-                        fontWeight: "bolder",
+                        fontWeight: "600er",
                         textAlign: "right",
                       }}
                     >
@@ -621,7 +684,7 @@ const OrderPrint = ({
               colSpan={28}
               style={{
                 fontSize: "xx-large",
-                fontWeight: "bolder",
+                fontWeight: "600er",
                 textAlign: "center",
               }}
             >
