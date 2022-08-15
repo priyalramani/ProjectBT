@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const OrderPrint = ({
   counter = [],
@@ -9,6 +9,33 @@ const OrderPrint = ({
   item_details = [],
   footer = false,
 }) => {
+  const [gstValues, setGstVAlues] = useState([]);
+  useEffect(() => {
+    let arr = [];
+    let gst_value = order.item_details.map((a) => a.gst_percentage);
+    gst_value = gst_value.filter((item, pos) => {
+      return gst_value.indexOf(item) === pos;
+    });
+    console.log(gst_value)
+    for (let a of gst_value) {
+      let data = order.item_details.filter((b) => +b.gst_percentage === a);
+      let amt =
+        data.length > 1
+          ? data.map((b) => +b?.item_total).reduce((a, b) => +a + b)
+          : data.length
+          ? +data[0].item_total
+          : 0;
+      let value = +amt - (+amt * 100) / (100 + a);
+
+      if (value)
+        arr.push({
+          value: a,
+          tex_amt: (amt - value).toFixed(2),
+          amount: value.toFixed(2),
+        });
+    }
+    setGstVAlues(arr);
+  }, [order.item_details]);
   let total_desc_amt =
     order?.item_details?.map((item) => {
       const itemInfo = itemData?.find((a) => a.item_uuid === item.item_uuid);
@@ -622,35 +649,28 @@ const OrderPrint = ({
                     <td
                       style={{
                         fontWeight: "600",
-                        fontSize: "x-small",
-                        textAlign: "right",
+                        fontSize: "xx-small",
+                        textAlign: "left",
                       }}
                     >
-                      0
+                      GST:
                     </td>
                   </tr>
-                  <tr>
-                    <td
-                      style={{
-                        fontWeight: "600",
-                        fontSize: "x-small",
-                        textAlign: "right",
-                      }}
-                    >
-                      0
-                    </td>
-                  </tr>
-                  <tr>
-                    <td
-                      style={{
-                        fontWeight: "600",
-                        fontSize: "x-small",
-                        textAlign: "right",
-                      }}
-                    >
-                      0
-                    </td>
-                  </tr>
+                  {gstValues.length
+                    ? gstValues.map((a) => (
+                        <tr>
+                          <td
+                            style={{
+                              fontWeight: "600",
+                              fontSize: "xx-small",
+                              textAlign: "left",
+                            }}
+                          >
+                            {a.tex_amt}*{a.value}%={a.amount}
+                          </td>
+                        </tr>
+                      ))
+                    : ""}
 
                   <tr>
                     <th

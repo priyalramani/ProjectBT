@@ -34,9 +34,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
+
   useEffect(() => {
     if (order.order_status === "A") setEditOrder(true);
-  }, []);
+  }, [order.order_status]);
+
+
   const appendNewRow = () => {
     let item_uuid = uuid();
     setFocusedInputId(`REACT_SELECT_COMPONENT_ITEM_TITLE@${item_uuid}`);
