@@ -325,11 +325,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       hold: "Y",
     };
     data = Object.keys(data)
-    .filter((key) => key !== "notes")
-    .reduce((obj, key) => {
-      obj[key] = data[key];
-      return obj;
-    }, {});
+      .filter((key) => key !== "notes")
+      .reduce((obj, key) => {
+        obj[key] = data[key];
+        return obj;
+      }, {});
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
@@ -2106,6 +2106,7 @@ function NotesPopup({
   HoldOrder,
 }) {
   const [notes, setNotes] = useState([]);
+  const [edit, setEdit] = useState(false);
   useEffect(() => {
     console.log(order?.notes);
     setNotes(order?.notes || []);
@@ -2164,7 +2165,10 @@ function NotesPopup({
                         className="numberInput"
                         style={{ width: "200px", height: "200px" }}
                         value={notes?.toString()?.replace(/,/g, "\n")}
-                        onChange={(e) => setNotes(e.target.value.split("\n"))}
+                        onChange={(e) => {
+                          setNotes(e.target.value.split("\n"));
+                          setEdit(true);
+                        }}
                       />
                     </label>
                   </div>
@@ -2174,21 +2178,20 @@ function NotesPopup({
                   className="flex"
                   style={{ justifyContent: "space-between" }}
                 >
-                  <button
-                    type="button"
-                    style={{ backgroundColor: "red" }}
-                    className="submit"
-                    onClick={onSave}
-                  >
-                    Cancel
+                  <button onClick={onSave} className="closeButton">
+                    x
                   </button>
-                  <button
-                    type="button"
-                    className="submit"
-                    onClick={submitHandler}
-                  >
-                    Save
-                  </button>
+                  {edit ? (
+                    <button
+                      type="button"
+                      className="submit"
+                      onClick={submitHandler}
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    ""
+                  )}
                 </div>
               </form>
             </div>
