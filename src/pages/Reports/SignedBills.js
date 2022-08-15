@@ -1,10 +1,12 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
+import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
 
 const PendingsEntry = () => {
   const [orders, setOrders] = useState([]);
+  const [popupOrder, setPopupOrder] = useState(null);
 
   const getOrders = async () => {
     const response = await axios({
@@ -17,6 +19,7 @@ const PendingsEntry = () => {
     });
     console.log("users", response);
     if (response.data.success) setOrders(response.data.result);
+    else setOrders([]);
   };
 
   useEffect(() => {
@@ -50,16 +53,29 @@ const PendingsEntry = () => {
             itemsDetails={orders}
             putOrder={putOrder}
             getOrders={getOrders}
+            setPopupOrder={setPopupOrder}
           />
         </div>
       </div>
+      {popupOrder ? (
+        <OrderDetails
+          onSave={() => {
+            setPopupOrder(null);
+            getOrders();
+          }}
+          order={popupOrder}
+          orderStatus="edit"
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 function Table({
   itemsDetails,
-
+  setPopupOrder,
   putOrder,
 
   getOrders,
@@ -86,6 +102,7 @@ function Table({
           <th colSpan={2}>Invoice Number</th>
           <th colSpan={2}>Time</th>
           <th colSpan={2}>User</th>
+          <th colSpan={2}>Quantity</th>
           <th colSpan={2}>Amount</th>
           <th colSpan={2}>Unpaid</th>
           <th colSpan={2}>Action</th>
@@ -95,7 +112,11 @@ function Table({
         {itemsDetails
           ?.sort((a, b) => +a.invoice_number - +b.invoice_number)
           ?.map((item, i, array) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
+            <tr
+              key={Math.random()}
+              onClick={() => setPopupOrder(item)}
+              style={{ height: "30px" }}
+            >
               <td className="flex" style={{ justifyContent: "space-between" }}>
                 {i + 1}
               </td>
@@ -107,7 +128,8 @@ function Table({
                 {formatAMPM(new Date(item.time_stamp))}
               </td>
               <td colSpan={2}>{item.user_title || ""}</td>
-              <td colSpan={2}>{item.order_grandtotal || ""}</td>
+              <td colSpan={2}>{item.qty || 0}</td>
+              <td colSpan={2}>{item.order_grandtotal || 0}</td>
 
               <td colSpan={2}>{item.amount || 0}</td>
               <td colSpan={2}>
