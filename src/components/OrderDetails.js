@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { v4 as uuid } from "uuid";
-import { Billing, jumpToNextIndex } from "../functions";
+import { Billing, jumpToNextIndex } from "../Apis/functions";
 import { CheckCircle, ContentCopy } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";

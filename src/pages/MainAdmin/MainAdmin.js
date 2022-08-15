@@ -13,7 +13,7 @@ import { OrderDetails } from "../../components/OrderDetails";
 import { ArrowDropDown, SquareFoot } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import Select from "react-select";
-import { Billing } from "../../functions";
+import { Billing } from "../../Apis/functions";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import OrderPrint from "../../components/OrderPrint";
 import ChangeStage from "../../components/ChangeStage";
@@ -163,7 +163,7 @@ const MainAdmin = () => {
     } else if (window.location.pathname.includes("trip")) {
       getTripData();
     }
-    setInterval(() => {
+    let intervalOrder = setInterval(() => {
       if (holdOrders) getRunningHoldOrders();
       else getRunningOrders();
       if (window.location.pathname.includes("admin")) {
@@ -172,6 +172,9 @@ const MainAdmin = () => {
         getTripData();
       }
     }, 180000);
+    return () => {
+      clearInterval(intervalOrder);
+    };
   }, [holdOrders]);
 
   useEffect(() => {
@@ -326,6 +329,7 @@ const MainAdmin = () => {
                       type="button"
                       onClick={() => {
                         setHoldOrders(false);
+                        setOrders([])
                       }}
                     >
                       Show Running Orders
@@ -337,6 +341,7 @@ const MainAdmin = () => {
                       type="button"
                       onClick={() => {
                         setHoldOrders(true);
+                        setOrders([])
                       }}
                     >
                       Show hold Orders

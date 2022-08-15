@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Billing } from "../functions";
+import { Billing } from "../Apis/functions";
 import DiliveryReplaceMent from "./DiliveryReplaceMent";
 
 const ChangeStage = ({ onClose, orders, stage, counters, items }) => {

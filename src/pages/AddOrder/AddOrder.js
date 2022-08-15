@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
-import { Billing, AutoAdd } from "../../functions";
+import { Billing, AutoAdd } from "../../Apis/functions";
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import Select from "react-select";

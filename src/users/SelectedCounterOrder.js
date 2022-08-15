@@ -3,7 +3,7 @@ import { IoArrowBackOutline } from "react-icons/io5";
 import { useState, useEffect } from "react";
 import { openDB } from "idb";
 import { useNavigate, useParams } from "react-router-dom";
-import { AutoAdd, Billing } from "../functions";
+import { AutoAdd, Billing } from "../Apis/functions";
 import { Link as ScrollLink } from "react-scroll";
 import { v4 as uuid } from "uuid";
 import axios from "axios";

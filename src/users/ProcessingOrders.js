@@ -6,7 +6,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { AiFillPlayCircle } from "react-icons/ai";
 import { openDB } from "idb";
-import { Billing, audioLoopFunction, audioAPIFunction } from "../functions";
+import { Billing, audioLoopFunction, audioAPIFunction } from "../Apis/functions";
 import { AiOutlineReload } from "react-icons/ai";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { Phone } from "@mui/icons-material";

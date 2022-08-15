@@ -29,7 +29,7 @@ import CompleteOrder from "./pages/Reports/CompleteOrder";
 import ItemDetails from "./pages/Reports/ItemDetails";
 import CompletedTrips from "./pages/Reports/CompletedTrips";
 import { useEffect } from "react";
-import { updateIndexedDb } from "./functions";
+import { updateIndexedDb } from "./Apis/functions";
 import CounterLeger from "./pages/Reports/CounterLeger";
 import Outstanding from "./pages/Reports/Outstanding";
 import PendingsEntry from "./pages/Reports/PendingsEntry";
