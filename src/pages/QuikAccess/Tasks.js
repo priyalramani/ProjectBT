@@ -13,7 +13,7 @@ const ItemsPage = () => {
   const [filterTitle, setFilterTitle] = useState("");
   const [users, setUsers] = useState([]);
   const [FilterCounter, setFilterCounter] = useState("");
-  const [completed, setCompleted] = useState(false);
+  const [completed, setCompleted] = useState(0);
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -40,7 +40,7 @@ const ItemsPage = () => {
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
-      url: "/tasks/GetTasksList/" + (completed ? "1" : "0"),
+      url: "/tasks/GetTasksList/" +completed,
 
       headers: {
         "Content-Type": "application/json",
@@ -67,6 +67,7 @@ const ItemsPage = () => {
                 "-",
         }))
       );
+    else setItemsData([]);
   };
   useEffect(() => {
     getItemsData();
@@ -144,13 +145,16 @@ const ItemsPage = () => {
             />
             <select
               type="text"
-              onChange={(e) => setCompleted(e.target.value)}
+              onChange={(e) => {
+                setCompleted(e.target.value);
+                console.log(e.target.value)
+              }}
               value={completed}
               placeholder="Search User..."
               className="searchInput"
             >
-              <option value={false}>Uncomplete Tast</option>
-              <option value={true}>Complete Task</option>
+              <option value={0}>Uncomplete Tast</option>
+              <option value={1}>Complete Task</option>
             </select>
 
             <div>Total Tasks: {filterItemsData.length}</div>
