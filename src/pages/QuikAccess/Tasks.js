@@ -13,6 +13,7 @@ const ItemsPage = () => {
   const [filterTitle, setFilterTitle] = useState("");
   const [users, setUsers] = useState([]);
   const [FilterCounter, setFilterCounter] = useState("");
+  const [completed, setCompleted] = useState(false);
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -39,7 +40,7 @@ const ItemsPage = () => {
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
-      url: "/tasks/GetTasksList",
+      url: "/tasks/GetTasksList/" + (completed ? "1" : "0"),
 
       headers: {
         "Content-Type": "application/json",
@@ -59,12 +60,17 @@ const ItemsPage = () => {
               ? "Admin"
               : users.find((a) => a.created_by === b.user_uuid)?.user_title ||
                 "-",
+          completed_by_user:
+            +b.completed_by === 240522
+              ? "Admin"
+              : users.find((a) => a.completed_by === b.user_uuid)?.user_title ||
+                "-",
         }))
       );
   };
   useEffect(() => {
     getItemsData();
-  }, [popupForm, counters, users]);
+  }, [popupForm, counters, users, completed]);
   useEffect(() => {
     setFilterItemsData(
       itemsData
@@ -95,6 +101,7 @@ const ItemsPage = () => {
     getCounter();
     getUsers();
   }, []);
+  console.log(itemsData);
   return (
     <>
       <Sidebar />
@@ -135,6 +142,16 @@ const ItemsPage = () => {
               placeholder="Search User..."
               className="searchInput"
             />
+            <select
+              type="text"
+              onChange={(e) => setCompleted(e.target.value)}
+              value={completed}
+              placeholder="Search User..."
+              className="searchInput"
+            >
+              <option value={false}>Uncomplete Tast</option>
+              <option value={true}>Complete Task</option>
+            </select>
 
             <div>Total Tasks: {filterItemsData.length}</div>
             <button
@@ -150,6 +167,7 @@ const ItemsPage = () => {
             itemsDetails={filterItemsData}
             counters={counters}
             setPopupForm={setPopupForm}
+            completed={completed}
           />
         </div>
       </div>
@@ -168,7 +186,7 @@ const ItemsPage = () => {
 };
 
 export default ItemsPage;
-function Table({ itemsDetails, setPopupForm }) {
+function Table({ itemsDetails, setPopupForm, completed }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
 
@@ -259,7 +277,58 @@ function Table({ itemsDetails, setPopupForm }) {
               </div>
             </div>
           </th>
-
+          {completed ? (
+            <>
+              <th colSpan={3}>
+                <div className="t-head-element">
+                  <span>Completed by</span>
+                  <div className="sort-buttons-container">
+                    <button
+                      onClick={() => {
+                        setItems("completed_by_user");
+                        setOrder("asc");
+                      }}
+                    >
+                      <ChevronUpIcon className="sort-up sort-button" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setItems("completed_by_user");
+                        setOrder("desc");
+                      }}
+                    >
+                      <ChevronDownIcon className="sort-down sort-button" />
+                    </button>
+                  </div>
+                </div>
+              </th>
+              <th colSpan={3}>
+                <div className="t-head-element">
+                  <span>Completed At</span>
+                  <div className="sort-buttons-container">
+                    <button
+                      onClick={() => {
+                        setItems("completed_at");
+                        setOrder("asc");
+                      }}
+                    >
+                      <ChevronUpIcon className="sort-up sort-button" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setItems("completed_at");
+                        setOrder("desc");
+                      }}
+                    >
+                      <ChevronDownIcon className="sort-down sort-button" />
+                    </button>
+                  </div>
+                </div>
+              </th>
+            </>
+          ) : (
+            ""
+          )}
           <th colSpan={3}>
             <div className="t-head-element">
               <span>Task</span>
@@ -283,7 +352,7 @@ function Table({ itemsDetails, setPopupForm }) {
               </div>
             </div>
           </th>
-          <th></th>
+          {completed ? "" : <th></th>}
         </tr>
       </thead>
       <tbody className="tbody">
@@ -306,14 +375,28 @@ function Table({ itemsDetails, setPopupForm }) {
                 {new Date(+item.created_at).toDateString()} -{" "}
                 {formatAMPM(new Date(+item.created_at))}
               </td>
-
+              {completed ? (
+                <>
+                  <td colSpan={3}>{item.completed_by_user}</td>
+                  <td colSpan={3}>
+                    {new Date(+item.completed_at).toDateString()} -{" "}
+                    {formatAMPM(new Date(+item.completed_at))}
+                  </td>
+                </>
+              ) : (
+                ""
+              )}
               <td colSpan={3}>{item.task}</td>
-              <button
-                className="item-sales-search"
-                onClick={() => setPopupForm({ type: "edit", data: item })}
-              >
-                Done
-              </button>
+              {completed ? (
+                ""
+              ) : (
+                <button
+                  className="item-sales-search"
+                  onClick={() => setPopupForm({ type: "edit", data: item })}
+                >
+                  Done
+                </button>
+              )}
             </tr>
           ))}
       </tbody>
@@ -358,7 +441,6 @@ function NewUserForm({ onSave, popupInfo, counter }) {
         },
       });
       if (response.data.result[0].success) {
-  
         onSave();
       }
     } else {
@@ -371,7 +453,6 @@ function NewUserForm({ onSave, popupInfo, counter }) {
         },
       });
       if (response.data.success) {
-     
         onSave();
       }
     }
@@ -391,11 +472,13 @@ function NewUserForm({ onSave, popupInfo, counter }) {
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
-                <h1>{popupInfo.type === "edit" ? "Confirm Complete " : "Add"} Task</h1>
+                <h1>
+                  {popupInfo.type === "edit" ? "Confirm Complete " : "Add"} Task
+                </h1>
               </div>
 
               {popupInfo?.type === "edit" ? (
-               ""
+                ""
               ) : (
                 <div className="formGroup">
                   <div className="row">
