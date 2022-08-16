@@ -102,7 +102,6 @@ const ItemsPage = () => {
     getCounter();
     getUsers();
   }, []);
-  console.log(itemsData);
   return (
     <>
       <Sidebar />
