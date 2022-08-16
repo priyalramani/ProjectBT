@@ -1,8 +1,8 @@
 import axios from "axios";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useReactToPrint } from "react-to-print";
-import PopupTripOrderTable from "./PopupTripOrderTable";
-import TripPage from "./TripPage";
+import PopupTripOrderTable from "../../components/PopupTripOrderTable";
+import TripPage from "../../components/TripPage";
 export default function ItemAvilibility({ setIsItemAvilableOpen }) {
   const [itemsData, setItemsData] = useState([]);
   const [popup, setPopup] = useState(null);

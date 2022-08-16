@@ -8,7 +8,7 @@ import { AiOutlineSearch } from "react-icons/ai";
 import Card from "../../components/Card";
 import { AiOutlineReload } from "react-icons/ai";
 import VerticalTabs from "../../components/VerticalTabs";
-import ItemAvilibility from "../../components/ItemAvilibility";
+import ItemAvilibility from "../QuikAccess/ItemAvilibility";
 import { OrderDetails } from "../../components/OrderDetails";
 import { ArrowDropDown, SquareFoot } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";

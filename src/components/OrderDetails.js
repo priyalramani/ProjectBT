@@ -34,11 +34,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
-
+  console.log("ORDERDATA",orderData);
   useEffect(() => {
     if (order.order_status === "A") setEditOrder(true);
   }, [order.order_status]);
-
 
   const appendNewRow = () => {
     let item_uuid = uuid();
@@ -218,6 +217,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     let autoBilling = await Billing({
       counter,
       items: data.item_details,
+      replacement: data.replacement,
+      adjustment: data.adjustment,
+      shortage: data.shortage,
       others: {},
     });
     data = {

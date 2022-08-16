@@ -33,10 +33,11 @@ import { updateIndexedDb } from "./Apis/functions";
 import CounterLeger from "./pages/Reports/CounterLeger";
 import Outstanding from "./pages/Reports/Outstanding";
 import PendingsEntry from "./pages/Reports/PendingsEntry";
-import SignedBills from "./pages/Reports/SignedBills";
+import SignedBills from "./pages/QuikAccess/SignedBills";
 import OrderRangeIncentive from "./pages/others/OrderRangeIncentve";
 import DeliveryIncentive from "./pages/others/DeliveryIncentive";
 import ItemIncentive from "./pages/others/ItemIncentive";
+import TasksPage from "./pages/QuikAccess/Tasks";
 
 const id = "240522";
 function App() {
@@ -135,6 +136,10 @@ function App() {
                   <Route
                     path="/admin/signedBills"
                     element={<SignedBills />}
+                  />
+                  <Route
+                    path="/admin/tasks"
+                    element={<TasksPage />}
                   />
                   <Route
                     path="*"
