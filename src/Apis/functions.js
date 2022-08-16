@@ -1,6 +1,6 @@
 import axios from "axios";
 import { deleteDB, openDB } from "idb";
-import { v4 as uuid } from "uuid";
+
 
 export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
   let eligibleItems = items;
@@ -168,6 +168,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
         (a) => !dataItems.filter((b) => a.item_uuid === b.item_uuid).length
       );
 
+      // eslint-disable-next-line no-loop-func
       dataItems = dataItems.map((a) => {
         let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
         return {
@@ -210,6 +211,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
         (a) => !dataItems.filter((b) => a.item_uuid === b.item_uuid).length
       );
 
+      // eslint-disable-next-line no-loop-func
       dataItems = dataItems.map((a) => {
         let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
         return {
@@ -378,7 +380,7 @@ export const Billing = async ({
 };
 
 export const updateIndexedDb = async () => {
-  let response = await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+   await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
   //console.log(response);
   const result = await axios({
     method: "get",
