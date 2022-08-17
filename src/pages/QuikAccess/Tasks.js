@@ -92,13 +92,13 @@ const ItemsPage = () => {
               .toLocaleLowerCase()
               .includes(FilterCounter.toLocaleLowerCase())
         )
-        // .filter(
-        //   (a) =>
-        //     !filterUsers ||
-        //     a.created_by_user
-        //       .toLocaleLowerCase()
-        //       .includes(FilterCounter.toLocaleLowerCase())
-        // )
+      // .filter(
+      //   (a) =>
+      //     !filterUsers ||
+      //     a.created_by_user
+      //       .toLocaleLowerCase()
+      //       .includes(FilterCounter.toLocaleLowerCase())
+      // )
     );
   }, [FilterCounter, filterTitle, filterUsers, itemsData]);
 
@@ -603,7 +603,6 @@ function NewUserForm({ onSave, popupInfo, counter, users }) {
                             task: e.target.value,
                           })
                         }
-                        maxLength={60}
                       />
                     </label>
                   </div>

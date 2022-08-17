@@ -11,6 +11,7 @@ import { useIdleTimer } from "react-idle-timer";
 
 import FreeItems from "./FreeItems";
 import DiliveryReplaceMent from "./DiliveryReplaceMent";
+import TaskPopupMenu from "./TaskPopupMenu";
 const default_status = [
   { value: 0, label: "Preparing" },
   { value: 1, label: "Ready" },
@@ -25,6 +26,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [orderData, setOrderData] = useState();
   const [printData, setPrintData] = useState({ item_details: [], status: [] });
   const [holdPopup, setHoldPopup] = useState(false);
+  const [taskPopup, setTaskPopup] = useState(false);
   const [users, setUsers] = useState([]);
   const [uuids, setUuid] = useState();
   const [popupDetails, setPopupDetails] = useState();
@@ -34,7 +36,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
-  console.log("ORDERDATA",orderData);
+  console.log("ORDERDATA", orderData);
   useEffect(() => {
     if (order.order_status === "A") setEditOrder(true);
   }, [order.order_status]);
@@ -307,26 +309,24 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     reactInputsRef.current?.[orderData?.item_details?.[0]?.uuid]?.focus();
   }, [editOrder]);
   const HoldOrder = async () => {
-    let data = orderData;
-    let billingData = await Billing({
-      replacement: data.replacement,
-      adjustment: data.adjustment,
-      shortage: data.shortage,
-      counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
+    // let data = orderData;
+    // let billingData = await Billing({
+    //   replacement: data.replacement,
+    //   adjustment: data.adjustment,
+    //   shortage: data.shortage,
+    //   counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
 
-      items: data.item_details.map((a) => {
-        let itemData = itemsData.find((b) => a.item_uuid === b.item_uuid);
-        return {
-          ...itemData,
-          ...a,
-          price: itemData?.price || 0,
-        };
-      }),
-    });
-    data = {
-      ...data,
-      ...billingData,
-      item_details: billingData.items,
+    //   items: data.item_details.map((a) => {
+    //     let itemData = itemsData.find((b) => a.item_uuid === b.item_uuid);
+    //     return {
+    //       ...itemData,
+    //       ...a,
+    //       price: itemData?.price || 0,
+    //     };
+    //   }),
+    // });
+    let data = {
+      ...orderData,
       hold: "Y",
     };
     data = Object.keys(data)
@@ -348,7 +348,19 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     }
   };
   let listItemIndexCount = 0;
-  console.log(orderData);
+  const handleTaskChecking = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/tasks/getCounterTask/" + orderData.counter_uuid,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    if (response.data.success) {
+      setTaskPopup(response.data.result);
+    } else handlePrint();
+  };
   return (
     <>
       <div className="overlay">
@@ -409,7 +421,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       style={{ width: "fit-Content", backgroundColor: "blue" }}
                       className="item-sales-search"
                       onClick={() => {
-                        if (order.notes.length) {
+                        if (orderData.notes.length) {
                           setDeletePopup("hold");
                         } else setNotesPoup("hold");
                       }}
@@ -430,7 +442,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     style={{ width: "fit-Content", backgroundColor: "black" }}
                     className="item-sales-search"
                     onClick={() => {
-                      handlePrint();
+                      handleTaskChecking();
                     }}
                   >
                     Print
@@ -1138,6 +1150,19 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           popupDetails={popupDetails}
           users={users}
           items={itemsData}
+        />
+      ) : (
+        ""
+      )}
+      {taskPopup ? (
+        <TaskPopupMenu
+          onSave={() => handlePrint()}
+          onClose={() => setTaskPopup(false)}
+          taskData={taskPopup}
+          users={users}
+          counter={counters.find(
+            (a) => a.counter_uuid === orderData.counter_uuid
+          )}
         />
       ) : (
         ""
