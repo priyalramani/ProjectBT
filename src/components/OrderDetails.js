@@ -692,7 +692,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                         ).length && a.status !== 0
                                     )
                                     .sort((a, b) =>
-                                      a.item_title.localeCompare(b.item_title)
+                                      a?.item_title?.localeCompare(b.item_title)
                                     )
                                     .map((a, j) => ({
                                       value: a.item_uuid,

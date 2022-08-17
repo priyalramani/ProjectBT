@@ -238,7 +238,7 @@ const TripPage = ({
             <th style={{ border: "1px solid #000" }}>Quantity</th>
           </tr>
           {sales_return
-            .sort((a, b) => a.item_title.localeCompare(b.item_title))
+            .sort((a, b) => a.item_title?.localeCompare(b.item_title))
             .map((item) => (
               <tr>
                 <td style={{ border: "1px solid #000" }}>{item.item_title}</td>
