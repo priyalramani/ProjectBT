@@ -8,7 +8,6 @@ const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
   const [filterItemsData, setFilterItemsData] = useState([]);
   const [filterUsers, setFilterUsers] = useState([]);
-
   const [counters, setCounter] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
   const [filterTitle, setFilterTitle] = useState("");
@@ -66,6 +65,10 @@ const ItemsPage = () => {
               ? "Admin"
               : users.find((a) => a.completed_by === b.user_uuid)?.user_title ||
                 "-",
+          users_name:
+            b?.assigned_to?.map(
+              (a) => users.find((c) => a === c.user_uuid)?.user_title
+            ) || [],
         }))
       );
     else setItemsData([]);
@@ -89,13 +92,13 @@ const ItemsPage = () => {
               .toLocaleLowerCase()
               .includes(FilterCounter.toLocaleLowerCase())
         )
-        .filter(
-          (a) =>
-            !filterUsers ||
-            a.created_by_user
-              .toLocaleLowerCase()
-              .includes(FilterCounter.toLocaleLowerCase())
-        )
+        // .filter(
+        //   (a) =>
+        //     !filterUsers ||
+        //     a.created_by_user
+        //       .toLocaleLowerCase()
+        //       .includes(FilterCounter.toLocaleLowerCase())
+        // )
     );
   }, [FilterCounter, filterTitle, filterUsers, itemsData]);
 
@@ -136,13 +139,13 @@ const ItemsPage = () => {
               placeholder="Search Counter..."
               className="searchInput"
             />
-            <input
+            {/* <input
               type="text"
               onChange={(e) => setFilterUsers(e.target.value)}
               value={filterUsers}
               placeholder="Search User..."
               className="searchInput"
-            />
+            /> */}
             <select
               type="text"
               onChange={(e) => {
@@ -181,6 +184,7 @@ const ItemsPage = () => {
           setItemsData={setItemsData}
           counter={counters}
           popupInfo={popupForm}
+          users={users}
         />
       ) : (
         ""
@@ -356,7 +360,8 @@ function Table({ itemsDetails, setPopupForm, completed }) {
               </div>
             </div>
           </th>
-          {completed ? "" : <th></th>}
+          <th colSpan={2}>Users</th>
+          {completed ? "" : <th colSpan={6}></th>}
         </tr>
       </thead>
       <tbody className="tbody">
@@ -371,15 +376,7 @@ function Table({ itemsDetails, setPopupForm, completed }) {
               : b[items] - a[items]
           )
           ?.map((item, i) => (
-            <tr
-              key={Math.random()}
-              style={{ height: "30px" }}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (+item.status === 0)
-                  setPopupForm({ type: "edit", data: item });
-              }}
-            >
+            <tr key={Math.random()} style={{ height: "30px" }}>
               <td>{i + 1}</td>
               <td colSpan={3}>{item.counter_title}</td>
               <td colSpan={3}>{item.created_by_user}</td>
@@ -399,18 +396,51 @@ function Table({ itemsDetails, setPopupForm, completed }) {
                 ""
               )}
               <td colSpan={3}>{item.task}</td>
+              <td colSpan={2}>
+                {item?.users_name?.length
+                  ? item.users_name.map((a, i) => (i === 0 ? a : ", " + a))
+                  : ""}
+              </td>
               {completed ? (
                 ""
               ) : (
-                <button
-                  className="item-sales-search"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setPopupForm({ type: "done", data: item });
-                  }}
-                >
-                  Done
-                </button>
+                <>
+                  <td colSpan={2}>
+                    <button
+                      className="item-sales-search"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (+item.status === 0)
+                          setPopupForm({ type: "user", data: item });
+                      }}
+                    >
+                      Assign
+                    </button>
+                  </td>
+                  <td colSpan={2}>
+                    <button
+                      className="item-sales-search"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (+item.status === 0)
+                          setPopupForm({ type: "edit", data: item });
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </td>
+                  <td colSpan={2}>
+                    <button
+                      className="item-sales-search"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPopupForm({ type: "done", data: item });
+                      }}
+                    >
+                      Done
+                    </button>
+                  </td>
+                </>
               )}
             </tr>
           ))}
@@ -418,13 +448,18 @@ function Table({ itemsDetails, setPopupForm, completed }) {
     </table>
   );
 }
-function NewUserForm({ onSave, popupInfo, counter }) {
+function NewUserForm({ onSave, popupInfo, counter, users }) {
   const [data, setdata] = useState({});
 
   const [errMassage, setErrorMassage] = useState("");
 
   useEffect(() => {
     if (popupInfo?.type === "edit") setdata(popupInfo.data);
+    else if (popupInfo?.type === "user")
+      setdata({
+        task_uuid: popupInfo.data.task_uuid,
+        assigned_to: popupInfo.data.assigned_to || [],
+      });
     else if (popupInfo?.type === "done")
       setdata({
         ...popupInfo.data,
@@ -443,12 +478,16 @@ function NewUserForm({ onSave, popupInfo, counter }) {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    if (!data.task) {
+    if (!data.task && popupInfo.type !== "user") {
       setErrorMassage("Please insert Route Title");
       return;
     }
 
-    if (popupInfo?.type === "edit" || popupInfo?.type === "done") {
+    if (
+      popupInfo?.type === "edit" ||
+      popupInfo?.type === "done" ||
+      popupInfo?.type === "user"
+    ) {
       const response = await axios({
         method: "put",
         url: "/tasks/putTask",
@@ -475,6 +514,7 @@ function NewUserForm({ onSave, popupInfo, counter }) {
     }
   };
 
+  console.log(data);
   return (
     <div className="overlay">
       <div className="modal" style={{ width: "fit-content" }}>
@@ -492,6 +532,8 @@ function NewUserForm({ onSave, popupInfo, counter }) {
                 <h1>
                   {popupInfo.type === "edit"
                     ? "Edit"
+                    : popupInfo.type === "user"
+                    ? "Assign User"
                     : popupInfo.type === "done"
                     ? "Confirm Complete "
                     : "Add"}{" "}
@@ -501,6 +543,49 @@ function NewUserForm({ onSave, popupInfo, counter }) {
 
               {popupInfo?.type === "done" ? (
                 ""
+              ) : popupInfo?.type === "user" ? (
+                <div className="formGroup">
+                  <div className="row">
+                    <label className="selectLabel">
+                      Users
+                      <div
+                        className="formGroup"
+                        style={{ height: "200px", overflow: "scroll" }}
+                      >
+                        {users.map((occ) => (
+                          <div
+                            style={{
+                              marginBottom: "5px",
+                              textAlign: "center",
+                              backgroundColor: data?.assigned_to?.filter(
+                                (a) => a === occ.user_uuid
+                              ).length
+                                ? "#caf0f8"
+                                : "#fff",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setdata((prev) => ({
+                                ...prev,
+                                assigned_to: prev?.assigned_to?.find(
+                                  (a) => a === occ.user_uuid
+                                )
+                                  ? prev?.assigned_to.filter(
+                                      (a) => a !== occ.user_uuid
+                                    )
+                                  : prev?.assigned_to.length
+                                  ? [...prev?.assigned_to, occ?.user_uuid]
+                                  : [occ?.user_uuid],
+                              }));
+                            }}
+                          >
+                            {occ.user_title}
+                          </div>
+                        ))}
+                      </div>
+                    </label>
+                  </div>
+                </div>
               ) : (
                 <div className="formGroup">
                   <div className="row">

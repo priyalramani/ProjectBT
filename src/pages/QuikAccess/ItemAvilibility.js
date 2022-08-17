@@ -73,9 +73,9 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
       },
     });
     if (response.data.success) {
-      console.log(response)
+      console.log(response);
       setStatementTrip(response.data.result);
-      setStatementTrip_uuid(false)
+      setStatementTrip_uuid(false);
       setTimeout(handlePrint, 2000);
     }
   };
@@ -362,22 +362,7 @@ function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
     completeFunction({ ...popupInfo, users: data });
     onSave();
   };
-  const onChangeHandler = (e) => {
-    let temp = data || [];
-    let options = Array.from(
-      e.target.selectedOptions,
-      (option) => option.value
-    );
-    for (let i of options) {
-      if (data.filter((a) => a === i).length)
-        temp = temp.filter((a) => a !== i);
-      else temp = [...temp, i];
-    }
-    // temp = data.filter(a => options.filter(b => b === a.user_uuid).length)
-    console.log(options, temp);
 
-    setdata(temp);
-  };
   return (
     <div className="overlay" style={{ zIndex: "999999" }}>
       <div
@@ -401,24 +386,35 @@ function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
               <div className="form">
                 <div className="row">
                   <label className="selectLabel">
-                    Counter Title
-                    <select
-                      className="numberInput"
-                      style={{ width: "200px", height: "200px" }}
-                      value={data.map((a) => a)}
-                      onChange={onChangeHandler}
-                      multiple
+                    Users
+                    <div
+                      className="formGroup"
+                      style={{ height: "200px", overflow: "scroll" }}
                     >
-                      {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
                       {users.map((occ) => (
-                        <option
-                          value={occ.user_uuid}
-                          style={{ marginBottom: "5px", textAlign: "center" }}
+                        <div
+                          style={{
+                            marginBottom: "5px",
+                            textAlign: "center",
+                            backgroundColor: data?.filter(
+                              (a) => a === occ.user_uuid
+                            ).length
+                              ? "#caf0f8"
+                              : "#fff",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setdata((prev) =>
+                              prev?.find((a) => a === occ.user_uuid)
+                                ? prev.filter((a) => a !== occ.user_uuid)
+                                : [...prev, occ?.user_uuid]
+                            );
+                          }}
                         >
                           {occ.user_title}
-                        </option>
+                        </div>
                       ))}
-                    </select>
+                    </div>
                   </label>
                 </div>
               </div>
