@@ -303,7 +303,7 @@ const SelectedCounterOrder = () => {
                               (a) =>
                                 !filterItemTitle ||
                                 a.item_title
-                                  .toLocaleLowerCase()
+                                  ?.toLocaleLowerCase()
                                   .includes(filterItemTitle.toLocaleLowerCase())
                             )?.length > 0 && (
                             <div
@@ -321,7 +321,7 @@ const SelectedCounterOrder = () => {
                                   (a) =>
                                     !filterItemTitle ||
                                     a.item_title
-                                      .toLocaleLowerCase()
+                                      ?.toLocaleLowerCase()
                                       .includes(
                                         filterItemTitle.toLocaleLowerCase()
                                       )
@@ -524,7 +524,7 @@ const SelectedCounterOrder = () => {
                                   (a) =>
                                     !filterItemTitle ||
                                     a.item_title
-                                      .toLocaleLowerCase()
+                                      ?.toLocaleLowerCase()
                                       .includes(
                                         filterItemTitle.toLocaleLowerCase()
                                       )
@@ -715,7 +715,7 @@ const SelectedCounterOrder = () => {
                                   (a) =>
                                     !filterItemTitle ||
                                     a.item_title
-                                      .toLocaleLowerCase()
+                                      ?.toLocaleLowerCase()
                                       .includes(
                                         filterItemTitle.toLocaleLowerCase()
                                       )
