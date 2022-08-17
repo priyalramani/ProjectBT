@@ -3,6 +3,7 @@ import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import axios from "axios";
+import Select from "react-select";
 const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
   const [filterItemsData, setFilterItemsData] = useState([]);
@@ -40,7 +41,7 @@ const ItemsPage = () => {
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
-      url: "/tasks/GetTasksList/" +completed,
+      url: "/tasks/GetTasksList/" + completed,
 
       headers: {
         "Content-Type": "application/json",
@@ -146,14 +147,14 @@ const ItemsPage = () => {
               type="text"
               onChange={(e) => {
                 setCompleted(e.target.value);
-                console.log(e.target.value)
+                console.log(e.target.value);
               }}
               value={completed}
               placeholder="Search User..."
               className="searchInput"
             >
-              <option value={0}>Uncomplete Tast</option>
-              <option value={1}>Complete Task</option>
+              <option value={0}>Incomplete Tast</option>
+              <option value={1}>Completed Task</option>
             </select>
 
             <div>Total Tasks: {filterItemsData.length}</div>
@@ -370,7 +371,15 @@ function Table({ itemsDetails, setPopupForm, completed }) {
               : b[items] - a[items]
           )
           ?.map((item, i) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
+            <tr
+              key={Math.random()}
+              style={{ height: "30px" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (+item.status === 0)
+                  setPopupForm({ type: "edit", data: item });
+              }}
+            >
               <td>{i + 1}</td>
               <td colSpan={3}>{item.counter_title}</td>
               <td colSpan={3}>{item.created_by_user}</td>
@@ -395,7 +404,10 @@ function Table({ itemsDetails, setPopupForm, completed }) {
               ) : (
                 <button
                   className="item-sales-search"
-                  onClick={() => setPopupForm({ type: "edit", data: item })}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPopupForm({ type: "done", data: item });
+                  }}
                 >
                   Done
                 </button>
@@ -412,11 +424,13 @@ function NewUserForm({ onSave, popupInfo, counter }) {
   const [errMassage, setErrorMassage] = useState("");
 
   useEffect(() => {
-    if (popupInfo?.type === "edit")
+    if (popupInfo?.type === "edit") setdata(popupInfo.data);
+    else if (popupInfo?.type === "done")
       setdata({
         ...popupInfo.data,
         completed_by: localStorage.getItem("user_uuid"),
         status: 1,
+        completed: true,
       });
     else
       setdata({
@@ -434,7 +448,7 @@ function NewUserForm({ onSave, popupInfo, counter }) {
       return;
     }
 
-    if (popupInfo?.type === "edit") {
+    if (popupInfo?.type === "edit" || popupInfo?.type === "done") {
       const response = await axios({
         method: "put",
         url: "/tasks/putTask",
@@ -476,21 +490,27 @@ function NewUserForm({ onSave, popupInfo, counter }) {
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
                 <h1>
-                  {popupInfo.type === "edit" ? "Confirm Complete " : "Add"} Task
+                  {popupInfo.type === "edit"
+                    ? "Edit"
+                    : popupInfo.type === "done"
+                    ? "Confirm Complete "
+                    : "Add"}{" "}
+                  Task
                 </h1>
               </div>
 
-              {popupInfo?.type === "edit" ? (
+              {popupInfo?.type === "done" ? (
                 ""
               ) : (
                 <div className="formGroup">
                   <div className="row">
                     <label className="selectLabel">
                       Task
-                      <input
+                      <textarea
                         type="text"
                         name="route_title"
                         className="numberInput"
+                        style={{ height: "150px" }}
                         value={data?.task}
                         onChange={(e) =>
                           setdata({
@@ -501,29 +521,44 @@ function NewUserForm({ onSave, popupInfo, counter }) {
                         maxLength={60}
                       />
                     </label>
-
-                    <label className="selectLabel">
-                      Company
-                      <select
-                        name="user_type"
-                        className="select"
-                        value={data?.counter_uuid}
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel" style={{ width: "400px" }}>
+                      Counter
+                      <Select
+                        value={
+                          data?.counter_uuid
+                            ? {
+                                value: data?.counter_uuid,
+                                label: counter?.find(
+                                  (j) => j.counter_uuid === data.counter_uuid
+                                )?.counter_title,
+                              }
+                            : { value: 0, label: "None" }
+                        }
                         onChange={(e) =>
                           setdata({
                             ...data,
-                            counter_uuid: e.target.value,
+                            counter_uuid: e.value,
                           })
                         }
-                      >
-                        <option value={0}>None</option>
-                        {counter
-                          .sort((a, b) => a.sort_order - b.sort_order)
-                          .map((a) => (
-                            <option value={a.counter_uuid}>
-                              {a.counter_title}
-                            </option>
-                          ))}
-                      </select>
+                        options={[
+                          { value: 0, label: "None" },
+                          ...counter.map((a) => ({
+                            value: a.counter_uuid,
+                            label:
+                              a.counter_title +
+                              " , " +
+                              a.route_title +
+                              ", " +
+                              a.address,
+                          })),
+                        ]}
+                        openMenuOnFocus={true}
+                        menuPosition="fixed"
+                        menuPlacement="auto"
+                        placeholder="Select"
+                      />
                     </label>
                   </div>
                 </div>
