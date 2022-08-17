@@ -2,8 +2,8 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { openDB } from "idb";
-const id = "240522";
-const LoginPage = () => {
+
+const LoginPage = ({ setUserType }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState({
     login_username: "",
@@ -15,11 +15,6 @@ const LoginPage = () => {
     try {
       setIsLoading(true);
 
-      if (userData.login_username === id) {
-        localStorage.setItem("user_uuid", id);
-        window.location.assign("/admin");
-        return;
-      }
       const response = await axios({
         method: "post",
         url: "/users/login",
@@ -37,6 +32,11 @@ const LoginPage = () => {
         localStorage.setItem("user_title", data.user_title);
         localStorage.setItem("user_role", JSON.stringify(data.user_role || []));
         localStorage.setItem("user_mobile", data.user_mobile);
+        setUserType(response.data.result.user_type || false);
+        if (+data.user_type===0) {
+          window.location.assign("/admin");
+          return;
+        }
         const result = await axios({
           method: "get",
           url: "/users/getDetails",

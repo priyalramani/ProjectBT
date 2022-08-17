@@ -2,11 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import axios from "axios";
-import {
-  ChevronUpIcon,
-  ChevronDownIcon,
-  MenuAlt2Icon,
-} from "@heroicons/react/solid";
+import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [filterUsers, setFilterUsers] = useState([]);
@@ -445,6 +441,53 @@ function NewUserForm({ onSave, popupInfo, setUsers }) {
                   </label>
                 </div>
                 <div className="row">
+                  <label className="selectLabel"  style={{
+                      width: "50%",
+                    
+                   
+                    }}>
+                    User Type
+                    <select
+                      type="text"
+                      name="sort_order"
+                      className="numberInput"
+                      value={data?.user_type}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          user_type: e.target.value,
+                        })
+                      }
+                      // style={{ height: "150px" }}
+                    >
+                      <option value={0}>Admin</option>
+                      <option value={1}>Others</option>
+                    </select>
+                  </label>
+                  <label
+                    className="selectLabel"
+                    style={{
+                   
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    Status
+                    <input
+                      type="radio"
+                      name="sort_order"
+                      className="numberInput"
+                      checked={+data?.status === 1}
+                      onClick={(e) =>
+                        setdata((prev) => ({
+                          ...data,
+                          status: +prev.status === 1 ? 0 : 1,
+                        }))
+                      }
+                    />
+                  </label>
+                </div>
+                <div className="row">
                   <label className="selectLabel" style={{ height: "100px" }}>
                     Roles
                     <select
@@ -475,28 +518,6 @@ function NewUserForm({ onSave, popupInfo, setUsers }) {
                       <option value="3">Checking</option>
                       <option value="4">Delivery</option>
                     </select>
-                  </label>
-                  <label
-                    className="selectLabel"
-                    style={{
-                      height: "100px",
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}
-                  >
-                    Status
-                    <input
-                      type="radio"
-                      name="sort_order"
-                      className="numberInput"
-                      checked={+data?.status === 1}
-                      onClick={(e) =>
-                        setdata((prev) => ({
-                          ...data,
-                          status: +prev.status === 1 ? 0 : 1,
-                        }))
-                      }
-                    />
                   </label>
                 </div>
               </div>
