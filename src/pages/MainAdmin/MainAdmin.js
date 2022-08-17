@@ -18,6 +18,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import OrderPrint from "../../components/OrderPrint";
 import ChangeStage from "../../components/ChangeStage";
 import MessagePopup from "../../components/MessagePopup";
+import TaskPopupMenu from "../../components/TaskPopupMenu";
 const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
@@ -44,6 +45,8 @@ const MainAdmin = () => {
   const componentRef = useRef(null);
   const [messagePopup, setMessagePopup] = useState("");
   const [company, setCompanies] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [selectedtasks, setSelectedTasks] = useState(false);
   const getCompanies = async () => {
     const response = await axios({
       method: "get",
@@ -128,7 +131,9 @@ const MainAdmin = () => {
     });
     if (response.data.success) setDetails(response.data.result);
   };
-
+  useEffect(() => {
+    if (tasks.length) setSelectedTasks(tasks[0]);
+  }, [tasks]);
   const getRoutesData = async () => {
     const response = await axios({
       method: "get",
@@ -139,6 +144,19 @@ const MainAdmin = () => {
       },
     });
     if (response.data.success) setRoutesData(response.data.result);
+  };
+  const getTasksData = async () => {
+    const response = await axios({
+      method: "post",
+      url: "/tasks/getCounterList",
+      data: { counter_uuid: selectedOrder.map((a) => a.counter_uuid) },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    if (response.data.success) setTasks(response.data.result);
+    else handlePrint();
   };
 
   const getTripData = async () => {
@@ -329,7 +347,7 @@ const MainAdmin = () => {
                       type="button"
                       onClick={() => {
                         setHoldOrders(false);
-                        setOrders([])
+                        setOrders([]);
                       }}
                     >
                       Show Running Orders
@@ -341,7 +359,7 @@ const MainAdmin = () => {
                       type="button"
                       onClick={() => {
                         setHoldOrders(true);
-                        setOrders([])
+                        setOrders([]);
                       }}
                     >
                       Show hold Orders
@@ -380,7 +398,7 @@ const MainAdmin = () => {
                         className="simple_Logout_button"
                         type="button"
                         onClick={() => {
-                          handlePrint();
+                          getTasksData();
                         }}
                       >
                         Print Invoice
@@ -1408,6 +1426,32 @@ const MainAdmin = () => {
       ) : (
         ""
       )}
+      {selectedtasks ? (
+        <TaskPopupMenu
+          onSave={() => {
+            if (tasks.length === 1) {
+              handlePrint();
+              setTasks([]);
+              setSelectedTasks(false);
+            } else {
+              setTasks((prev) =>
+                prev.filter((a) => a.task_uuid !== selectedtasks.task_uuid)
+              );
+            }
+          }}
+          onClose={() => {
+            setSelectedTasks(false);
+            setTasks([]);
+          }}
+          taskData={selectedtasks}
+          users={users}
+          counter={counter.find(
+            (a) => a.counter_uuid === selectedtasks.counter_uuid
+          )}
+        />
+      ) : (
+        ""
+      )}
       {popupOrder ? (
         <OrderDetails
           onSave={() => {
@@ -1624,10 +1668,10 @@ function HoldPopup({
   const [filterItemTitle, setFilterItemTile] = useState("");
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
-  }, [items]);
+  }, []);
   const reactToBoxPrintContent = useCallback(() => {
     return componentBoxRef.current;
-  }, [items]);
+  }, []);
 
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
