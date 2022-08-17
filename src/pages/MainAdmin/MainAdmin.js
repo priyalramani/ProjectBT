@@ -1540,9 +1540,22 @@ function NewUserForm({
 }) {
   const [data, setdata] = useState("");
   const [errMassage, setErrorMassage] = useState("");
+  const [warehouse, setWarehouse] = useState([]);
+  const getItemsData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/warehouse/GetWarehouseList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setWarehouse(response.data.result);
+  };
   useEffect(() => {
     if (popupInfo?.type === "edit") setSelectedTrip("0");
-  }, []);
+    getItemsData();
+  }, [popupInfo?.type, setSelectedTrip]);
   const submitHandler = async (e) => {
     e.preventDefault();
     if (popupInfo?.type === "edit") {
@@ -1627,6 +1640,45 @@ function NewUserForm({
                     )}
                   </label>
                 </div>
+                {popupInfo.type !== "edit" ? (
+                  <div className="row">
+                    <label className="selectLabel">
+                      Warehouse
+                      <div className="inputGroup" style={{ width: "200px" }}>
+                        <Select
+                          options={warehouse.map((a) => ({
+                            value: a.warehouse_uuid,
+                            label: a.warehouse_title,
+                          }))}
+                          onChange={(doc) =>
+                            setdata((prev) => ({
+                              ...prev,
+                              warehouse_uuid: doc.value,
+                            }))
+                          }
+                          value={
+                            data?.warehouse_uuid
+                              ? {
+                                  value: data?.counter_uuid,
+                                  label: warehouse?.find(
+                                    (j) =>
+                                      j.warehouse_uuid === data.warehouse_uuid
+                                  )?.warehouse_title,
+                                }
+                              : ""
+                          }
+                          autoFocus={!data?.counter_uuid}
+                          openMenuOnFocus={true}
+                          menuPosition="fixed"
+                          menuPlacement="auto"
+                          placeholder="Select"
+                        />
+                      </div>
+                    </label>
+                  </div>
+                ) : (
+                  ""
+                )}
               </div>
               <i style={{ color: "red" }}>
                 {errMassage === "" ? "" : "Error: " + errMassage}

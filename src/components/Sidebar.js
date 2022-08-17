@@ -53,6 +53,10 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Users",
               link: "/admin/adminUsers",
             },
+            {
+              name: "Warehouse",
+              link: "/admin/warehouse",
+            },
           ]}
         />
        
