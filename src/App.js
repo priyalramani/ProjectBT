@@ -28,7 +28,7 @@ import UPITransection from "./pages/Reports/UPITransection";
 import CompleteOrder from "./pages/Reports/CompleteOrder";
 import ItemDetails from "./pages/Reports/ItemDetails";
 import CompletedTrips from "./pages/Reports/CompletedTrips";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { updateIndexedDb } from "./Apis/functions";
 import CounterLeger from "./pages/Reports/CounterLeger";
 import Outstanding from "./pages/Reports/Outstanding";
@@ -38,16 +38,37 @@ import OrderRangeIncentive from "./pages/others/OrderRangeIncentve";
 import DeliveryIncentive from "./pages/others/DeliveryIncentive";
 import ItemIncentive from "./pages/others/ItemIncentive";
 import TasksPage from "./pages/QuikAccess/Tasks";
+import Warehouse from "./pages/Master/Warehouse";
+import CurrentStock from "./pages/Reports/CurrentStock";
 
-const id = "240522";
+
 function App() {
+  const [userType, setUserType] = useState(false);
   axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
   // axios.defaults.baseURL = "http://localhost:9000";
 
+  const getUserType = async () => {
+    let user_uuid = localStorage.getItem("user_uuid");
+    if (user_uuid) {
+      const response = await axios({
+        method: "get",
+        url: "users/GetUser/" + user_uuid,
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response.data.result.user_type);
+      if (response.data.success)
+        setUserType(response.data.result.user_type || false);
+    }
+  };
   useEffect(() => {
-    let user = localStorage.getItem("user_uuid");
-    if (user && user !== "240522") {
+    getUserType();
+  }, []);
+  useEffect(() => {
+    if (userType) {
       let time = +localStorage.getItem("indexed_time") || "";
       let currTime = new Date();
       currTime = currTime.getTime();
@@ -55,17 +76,20 @@ function App() {
         updateIndexedDb();
       }
     }
-  }, []);
+  }, [userType]);
 
   return (
     <div className="App">
       <Router>
         <Routes>
           <Route path="/" element={<Navigate replace to={"/users"} />} />
-          <Route path="/login" element={<LoginPage />} />
-          {localStorage.getItem("user_uuid") ? (
+          <Route
+            path="/login"
+            element={<LoginPage setUserType={setUserType} />}
+          />
+          {+userType === 0 || userType ? (
             <>
-              {localStorage.getItem("user_uuid") === id ? (
+              {+userType === 0 ? (
                 <>
                   {/* admin Routes */}
                   <Route path="/admin" element={<MainAdmin />} />
@@ -83,6 +107,7 @@ function App() {
                   <Route path="/admin/counter" element={<Counter />} />
                   <Route path="/admin/adminUsers" element={<Users />} />
                   <Route path="/admin/items" element={<ItemsPage />} />
+                  <Route path="/admin/warehouse" element={<Warehouse />} />
                   <Route
                     path="/admin/autoIncreaseQty"
                     element={<AutoIncreaseQuantity />}
@@ -134,13 +159,11 @@ function App() {
                     element={<PendingsEntry />}
                   />
                   <Route
-                    path="/admin/signedBills"
-                    element={<SignedBills />}
+                    path="/admin/currentStock"
+                    element={<CurrentStock />}
                   />
-                  <Route
-                    path="/admin/tasks"
-                    element={<TasksPage />}
-                  />
+                  <Route path="/admin/signedBills" element={<SignedBills />} />
+                  <Route path="/admin/tasks" element={<TasksPage />} />
                   <Route
                     path="*"
                     element={<Navigate replace to={"/admin"} />}
