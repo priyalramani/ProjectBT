@@ -106,7 +106,7 @@ const Main = () => {
               fontSize: "20px",
             }}
           >
-            Version 40
+            Version 41
           </div>
 
           <button
