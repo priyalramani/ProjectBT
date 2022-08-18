@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ViewGridIcon } from "@heroicons/react/solid";
 const NavLink = ({
@@ -10,6 +10,8 @@ const NavLink = ({
   setIsItemAvilableOpen,
 }) => {
   // console.log(title)
+  const [menuVisible, setMenuVisible] = useState(false);
+
   return (
     <Link
       to={{ pathname: href }}
@@ -19,6 +21,8 @@ const NavLink = ({
       <div
         className={`nav-link`}
         draggable={draggable}
+        onClick={() => menuList && setMenuVisible(!menuVisible)}
+        onMouseLeave={(e) => setMenuVisible(false)}
         id={`item-category-${title?.toLowerCase()}`}
       >
         <>
@@ -42,7 +46,10 @@ const NavLink = ({
         </>
         {/* Submenu popup*/}
         {menuList && (
-          <div className="menuItems" style={title==="Report"?{top:"-200px"}:{}}>
+          <div
+            className="menu"
+            style={{ display: menuVisible ? "block" : "none" }}
+          >
             {menuList
               .filter((a) => a)
               .map((menu) => (

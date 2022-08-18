@@ -117,6 +117,10 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Pending Entry",
               link: "/admin/pendingEntry",
             },
+            {
+              name: "Current Stock",
+              link: "/admin/currentStock",
+            },
             
           ]}
         />
