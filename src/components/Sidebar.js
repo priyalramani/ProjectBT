@@ -11,14 +11,24 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import AddIcon from '@mui/icons-material/Add';
 const Sidebar = ({setIsItemAvilableOpen}) => {
   return (
-    <div className="left-panel" style={{ position: "relative" }}>
+    <div className="left-panel" style={{ position: "relative",zIndex:"9000000" }}>
       <div className="nav" style={{ height: "100vh" }}>
       <NavLink
-          title="New Order"
+          title="New"
           icon={<AddIcon sx={{ fontSize: 50 }} />}
-          href="/admin/addOrder"
+          // href="/admin/addOrder"
           isActive={false}
-          menuList={[]}
+          menuList={[
+            {
+              name: "Add Order",
+              link: "/admin/addOrder",
+            },
+            {
+              name: "Add Stock",
+              link: "/admin/addStock",
+            },
+    
+          ]}
         />
         <NavLink
           title={"Master"}

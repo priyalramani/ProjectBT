@@ -60,9 +60,9 @@ export default CurrentStock;
 
 function Table({ itemsDetails, warehouseData }) {
   const CovertedQty = (qty, conversion) => {
-    let b = qty / +conversion;
+    let b = (qty / +conversion).toFixed(0);
 
-    let p = qty % +conversion;
+    let p = (qty % +conversion).toFixed(0);
     return b + ":" + p;
   };
   return (

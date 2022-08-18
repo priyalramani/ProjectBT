@@ -40,6 +40,7 @@ import ItemIncentive from "./pages/others/ItemIncentive";
 import TasksPage from "./pages/QuikAccess/Tasks";
 import Warehouse from "./pages/Master/Warehouse";
 import CurrentStock from "./pages/Reports/CurrentStock";
+import AddStock from "./pages/AddOrder/AddStock";
 
 
 function App() {
@@ -129,6 +130,7 @@ function App() {
                     element={<ItemIncentive />}
                   />
                   <Route path="/admin/addOrder" element={<AddOrder />} />
+                  <Route path="/admin/addStock" element={<AddStock />} />
                   <Route
                     path="/admin/userActivity"
                     element={<UserActivity />}
