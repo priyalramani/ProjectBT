@@ -7,7 +7,8 @@ import Select from "react-select";
 const StockTransferVouchers = () => {
   const [itemsData, setItemsData] = useState([]);
   const [filterItemsData, setFilterItemsData] = useState([]);
-  const [filterUsers, setFilterUsers] = useState([]);
+  const [filterToWarehouse, setFilterToWarehouse] = useState();
+  const [filterFromWarehouse, setFilterFromWarehouse] = useState();
   const [warehouse, setWarehouse] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
   const [filterTitle, setFilterTitle] = useState("");
@@ -75,21 +76,23 @@ const StockTransferVouchers = () => {
   }, [popupForm, warehouse, users, completed]);
   useEffect(() => {
     setFilterItemsData(
-      itemsData.filter(
-        (a) =>
-          !filterTitle ||
-          a.task.toLocaleLowerCase().includes(filterTitle.toLocaleLowerCase())
-      )
-
-      // .filter(
-      //   (a) =>
-      //     !filterUsers ||
-      //     a.created_by_user
-      //       .toLocaleLowerCase()
-      //       .includes(FilterCounter.toLocaleLowerCase())
-      // )
+      itemsData
+        .filter(
+          (a) =>
+            !filterFromWarehouse ||
+            a.from_warehouse_title
+              .toLocaleLowerCase()
+              .includes(filterFromWarehouse.toLocaleLowerCase())
+        )
+        .filter(
+          (a) =>
+            !filterToWarehouse ||
+            a.to_warehouse_title
+              .toLocaleLowerCase()
+              .includes(filterToWarehouse.toLocaleLowerCase())
+        )
     );
-  }, [FilterCounter, filterTitle, filterUsers, itemsData]);
+  }, [filterFromWarehouse, filterToWarehouse, itemsData]);
 
   useEffect(() => {
     GetWarehouseList();
@@ -114,6 +117,20 @@ const StockTransferVouchers = () => {
               width: "100%",
             }}
           >
+            <input
+              type="text"
+              onChange={(e) => setFilterFromWarehouse(e.target.value)}
+              value={filterFromWarehouse}
+              placeholder="Search From Warehouse..."
+              className="searchInput"
+            />
+            <input
+              type="text"
+              onChange={(e) => setFilterToWarehouse(e.target.value)}
+              value={filterToWarehouse}
+              placeholder="Search To Warehouse..."
+              className="searchInput"
+            />
             <select
               type="text"
               onChange={(e) => {
