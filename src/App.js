@@ -43,7 +43,6 @@ import CurrentStock from "./pages/Reports/CurrentStock";
 import AddStock from "./pages/AddOrder/AddStock";
 import StockTransferVouchers from "./pages/Reports/StockTransferVouchers";
 
-
 function App() {
   const [userType, setUserType] = useState(false);
   axios.defaults.baseURL = "https://api.btgondia.com";
@@ -79,152 +78,123 @@ function App() {
       }
     }
   }, [userType]);
+  console.log(userType === "0", userType === "1");
 
   return (
     <div className="App">
       <Router>
         <Routes>
           <Route path="/" element={<Navigate replace to={"/users"} />} />
-          <Route
-            path="/login"
-            element={<LoginPage setUserType={setUserType} />}
-          />
-          {+userType === 0 || userType ? (
-            <>
-              {+userType === 0 ? (
-                <>
-                  {/* admin Routes */}
-                  <Route path="/admin" element={<MainAdmin />} />
-                  <Route path="/trip" element={<MainAdmin />} />
-                  <Route path="/admin/routes" element={<RoutesPage />} />
-                  <Route
-                    path="/admin/itemCategories"
-                    element={<ItemCategories />}
-                  />
-                  <Route
-                    path="/admin/counterGroup"
-                    element={<CounterGroup />}
-                  />
-                  <Route path="/admin/itemGroup" element={<ItemGroup />} />
-                  <Route path="/admin/counter" element={<Counter />} />
-                  <Route path="/admin/adminUsers" element={<Users />} />
-                  <Route path="/admin/items" element={<ItemsPage />} />
-                  <Route path="/admin/warehouse" element={<Warehouse />} />
-                  <Route
-                    path="/admin/autoIncreaseQty"
-                    element={<AutoIncreaseQuantity />}
-                  />
-                  <Route
-                    path="/admin/autoIncreaseItem"
-                    element={<AutoIncreaseItem />}
-                  />
-                  <Route
-                    path="/admin/OrderRangeIncentive"
-                    element={<OrderRangeIncentive />}
-                  />
-                  <Route
-                    path="/admin/DeliveryIncentive"
-                    element={<DeliveryIncentive />}
-                  />
-                  <Route
-                    path="/admin/ItemIncentive"
-                    element={<ItemIncentive />}
-                  />
-                  <Route path="/admin/addOrder" element={<AddOrder />} />
-                  <Route path="/admin/addStock" element={<AddStock />} />
-                  <Route
-                    path="/admin/userActivity"
-                    element={<UserActivity />}
-                  />
-                  <Route
-                    path="/admin/upiTransactionReport"
-                    element={<UPITransection />}
-                  />
-                  <Route
-                    path="/admin/completeOrderReport"
-                    element={<CompleteOrder />}
-                  />
-                  <Route
-                    path="/admin/OrderItemReport"
-                    element={<ItemDetails />}
-                  />
-                  <Route
-                    path="/admin/CompletedTripsReport"
-                    element={<CompletedTrips />}
-                  />
-                  <Route
-                    path="/admin/CounterLeger"
-                    element={<CounterLeger />}
-                  />
-                  <Route path="/admin/Outstandings" element={<Outstanding />} />
-                  <Route
-                    path="/admin/pendingEntry"
-                    element={<PendingsEntry />}
-                  />
-                  <Route
-                    path="/admin/stockTransferVochers"
-                    element={<StockTransferVouchers />}
-                  />
-                  <Route
-                    path="/admin/currentStock"
-                    element={<CurrentStock />}
-                  />
-                  <Route path="/admin/signedBills" element={<SignedBills />} />
-                  <Route path="/admin/tasks" element={<TasksPage />} />
-                  <Route
-                    path="*"
-                    element={<Navigate replace to={"/admin"} />}
-                  />
-                </>
-              ) : (
-                <>
-                  {/* users routes */}
-                  <Route path="/users" element={<Main />} />
-                  <Route path="/users/orders" element={<Orders />} />
-                  <Route path="/users/route/:route_uuid" element={<Orders />} />
-                  <Route path="/users/processing" element={<Processing />} />
-                  <Route path="/users/checking" element={<Processing />} />
-                  <Route path="/users/delivery" element={<Processing />} />
-                  <Route
-                    path="/users/processing/:trip_uuid"
-                    element={<ProcessingOrders />}
-                  />
-                  <Route
-                    path="/users/orders/:counter_uuid"
-                    element={<SelectedCounterOrder />}
-                  />
-                  <Route
-                    path="/users/checking/:trip_uuid"
-                    element={<ProcessingOrders />}
-                  />
-                  <Route
-                    path="/users/delivery/:trip_uuid"
-                    element={<ProcessingOrders />}
-                  />
-                  <Route
-                    path="/users/processing/:trip_uuid/:order_uuid"
-                    element={<ProcessingOrders />}
-                  />
-                  <Route
-                    path="/users/checking/:trip_uuid/:order_uuid"
-                    element={<ProcessingOrders />}
-                  />
-                  <Route
-                    path="/users/delivery/:trip_uuid/:order_uuid"
-                    element={<ProcessingOrders />}
-                  />
 
-                  <Route
-                    path="*"
-                    element={<Navigate replace to={"/users"} />}
-                  />
-                </>
-              )}
+          {userType === "1" ? (
+            <>
+              {/* users routes */}
+              <Route path="/users" element={<Main />} />
+              <Route path="/users/orders" element={<Orders />} />
+              <Route path="/users/route/:route_uuid" element={<Orders />} />
+              <Route path="/users/processing" element={<Processing />} />
+              <Route path="/users/checking" element={<Processing />} />
+              <Route path="/users/delivery" element={<Processing />} />
+              <Route
+                path="/users/processing/:trip_uuid"
+                element={<ProcessingOrders />}
+              />
+              <Route
+                path="/users/orders/:counter_uuid"
+                element={<SelectedCounterOrder />}
+              />
+              <Route
+                path="/users/checking/:trip_uuid"
+                element={<ProcessingOrders />}
+              />
+              <Route
+                path="/users/delivery/:trip_uuid"
+                element={<ProcessingOrders />}
+              />
+              <Route
+                path="/users/processing/:trip_uuid/:order_uuid"
+                element={<ProcessingOrders />}
+              />
+              <Route
+                path="/users/checking/:trip_uuid/:order_uuid"
+                element={<ProcessingOrders />}
+              />
+              <Route
+                path="/users/delivery/:trip_uuid/:order_uuid"
+                element={<ProcessingOrders />}
+              />
+
+              <Route path="*" element={<Navigate replace to={"/users"} />} />
             </>
-          ) : !window.location.pathname.includes("/login") ? (
-            <Route path="*" element={<Navigate replace to={"/login"} />} />
+          ) : userType === "0" ? (
+            <>
+              {/* admin Routes */}
+              <Route path="/admin" element={<MainAdmin />} />
+              <Route path="/trip" element={<MainAdmin />} />
+              <Route path="/admin/routes" element={<RoutesPage />} />
+              <Route
+                path="/admin/itemCategories"
+                element={<ItemCategories />}
+              />
+              <Route path="/admin/counterGroup" element={<CounterGroup />} />
+              <Route path="/admin/itemGroup" element={<ItemGroup />} />
+              <Route path="/admin/counter" element={<Counter />} />
+              <Route path="/admin/adminUsers" element={<Users />} />
+              <Route path="/admin/items" element={<ItemsPage />} />
+              <Route path="/admin/warehouse" element={<Warehouse />} />
+              <Route
+                path="/admin/autoIncreaseQty"
+                element={<AutoIncreaseQuantity />}
+              />
+              <Route
+                path="/admin/autoIncreaseItem"
+                element={<AutoIncreaseItem />}
+              />
+              <Route
+                path="/admin/OrderRangeIncentive"
+                element={<OrderRangeIncentive />}
+              />
+              <Route
+                path="/admin/DeliveryIncentive"
+                element={<DeliveryIncentive />}
+              />
+              <Route path="/admin/ItemIncentive" element={<ItemIncentive />} />
+              <Route path="/admin/addOrder" element={<AddOrder />} />
+              <Route path="/admin/addStock" element={<AddStock />} />
+              <Route path="/admin/userActivity" element={<UserActivity />} />
+              <Route
+                path="/admin/upiTransactionReport"
+                element={<UPITransection />}
+              />
+              <Route
+                path="/admin/completeOrderReport"
+                element={<CompleteOrder />}
+              />
+              <Route path="/admin/OrderItemReport" element={<ItemDetails />} />
+              <Route
+                path="/admin/CompletedTripsReport"
+                element={<CompletedTrips />}
+              />
+              <Route path="/admin/CounterLeger" element={<CounterLeger />} />
+              <Route path="/admin/Outstandings" element={<Outstanding />} />
+              <Route path="/admin/pendingEntry" element={<PendingsEntry />} />
+              <Route
+                path="/admin/stockTransferVochers"
+                element={<StockTransferVouchers />}
+              />
+              <Route path="/admin/currentStock" element={<CurrentStock />} />
+              <Route path="/admin/signedBills" element={<SignedBills />} />
+              <Route path="/admin/tasks" element={<TasksPage />} />
+              <Route path="*" element={<Navigate replace to={"/admin"} />} />
+            </>
           ) : (
-            ""
+            <>
+              <Route path="*" element={<Navigate replace to={"/login"} />} />
+              <Route
+                path="/login"
+                element={<LoginPage setUserType={setUserType} />}
+              />
+            </>
           )}
         </Routes>
       </Router>
