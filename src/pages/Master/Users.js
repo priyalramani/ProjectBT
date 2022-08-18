@@ -5,6 +5,7 @@ import axios from "axios";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 const Users = () => {
   const [users, setUsers] = useState([]);
+  const [routes, setRoutes] = useState([]);
   const [filterUsers, setFilterUsers] = useState([]);
   const [usersTitle, setUsersTitle] = useState("");
   const [popupForm, setPopupForm] = useState(false);
@@ -41,7 +42,20 @@ const Users = () => {
       ),
     [users, usersTitle]
   );
+  const getRoutesData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/routes/GetRouteList",
 
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setRoutes(response.data.result);
+  };
+  useEffect(() => {
+    getRoutesData();
+  }, [popupForm]);
   return (
     <>
       <Sidebar />
@@ -91,6 +105,7 @@ const Users = () => {
           onSave={() => setPopupForm(false)}
           popupInfo={popupForm}
           setUsers={setUsers}
+          routes={routes}
         />
       ) : (
         ""
@@ -296,7 +311,7 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
     </table>
   );
 }
-function NewUserForm({ onSave, popupInfo, setUsers }) {
+function NewUserForm({ onSave, popupInfo, setUsers, routes }) {
   const [data, setdata] = useState({
     user_mobile: "",
     user_type: "1",
@@ -441,11 +456,12 @@ function NewUserForm({ onSave, popupInfo, setUsers }) {
                   </label>
                 </div>
                 <div className="row">
-                  <label className="selectLabel"  style={{
+                  <label
+                    className="selectLabel"
+                    style={{
                       width: "50%",
-                    
-                   
-                    }}>
+                    }}
+                  >
                     User Type
                     <select
                       type="text"
@@ -467,7 +483,6 @@ function NewUserForm({ onSave, popupInfo, setUsers }) {
                   <label
                     className="selectLabel"
                     style={{
-                   
                       flexDirection: "row",
                       alignItems: "center",
                     }}
@@ -488,37 +503,78 @@ function NewUserForm({ onSave, popupInfo, setUsers }) {
                   </label>
                 </div>
                 <div className="row">
-                  <label className="selectLabel" style={{ height: "100px" }}>
-                    Roles
-                    <select
-                      name="user_type"
-                      className="select"
-                      value={data?.user_role}
-                      style={{ height: "100px" }}
-                      onChange={(e) => {
-                        let catData = data?.user_role || [];
-                        let options = Array.from(
-                          e.target.selectedOptions,
-                          (option) => option.value
-                        );
-                        for (let i of options) {
-                          if (catData.filter((a) => a === i).length)
-                            catData = catData.filter((a) => a !== i);
-                          else catData = [...catData, i];
-                        }
-                        // data = occasionsData.filter(a => options.filter(b => b === a.occ_uuid).length)
-                        console.log(options, catData);
+                  {+data.user_type ? (
+                    <label className="selectLabel" style={{ height: "100px" }}>
+                      Roles
+                      <select
+                        name="user_type"
+                        className="select"
+                        value={data?.user_role}
+                        style={{ height: "100px" }}
+                        onChange={(e) => {
+                          let catData = data?.user_role || [];
+                          let options = Array.from(
+                            e.target.selectedOptions,
+                            (option) => option.value
+                          );
+                          for (let i of options) {
+                            if (catData.filter((a) => a === i).length)
+                              catData = catData.filter((a) => a !== i);
+                            else catData = [...catData, i];
+                          }
+                          // data = occasionsData.filter(a => options.filter(b => b === a.occ_uuid).length)
+                          console.log(options, catData);
 
-                        setdata({ ...data, user_role: catData });
-                      }}
-                      multiple
-                    >
-                      <option value="1">Order</option>
-                      <option value="2">Processing</option>
-                      <option value="3">Checking</option>
-                      <option value="4">Delivery</option>
-                    </select>
-                  </label>
+                          setdata({ ...data, user_role: catData });
+                        }}
+                        multiple
+                      >
+                        <option value="1">Order</option>
+                        <option value="2">Processing</option>
+                        <option value="3">Checking</option>
+                        <option value="4">Delivery</option>
+                      </select>
+                    </label>
+                  ) : (
+                    <label className="selectLabel">
+                      Routes
+                      <div
+                        className="formGroup"
+                        style={{ height: "200px", overflow: "scroll" }}
+                      >
+                        {routes.map((occ) => (
+                          <div
+                            style={{
+                              marginBottom: "5px",
+                              textAlign: "center",
+                              backgroundColor: data.routes?.filter(
+                                (a) => a === occ.route_uuid
+                              ).length
+                                ? "#caf0f8"
+                                : "#fff",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setdata((prev) => ({
+                                ...prev,
+                                routes: prev?.routes?.find(
+                                  (a) => a === occ.route_uuid
+                                )
+                                  ? prev?.routes?.filter(
+                                      (a) => a !== occ.route_uuid
+                                    )
+                                  : prev?.routes?.length
+                                  ? [...prev?.routes, occ?.route_uuid]
+                                  : [occ?.route_uuid],
+                              }));
+                            }}
+                          >
+                            {occ.route_title}
+                          </div>
+                        ))}
+                      </div>
+                    </label>
+                  )}
                 </div>
               </div>
               <i style={{ color: "red" }}>
