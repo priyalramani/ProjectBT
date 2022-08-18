@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
@@ -10,11 +10,14 @@ import { v4 as uuid } from "uuid";
 import Select from "react-select";
 
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { useReactToPrint } from "react-to-print";
+let time = new Date();
 const initials = {
   type: "ST",
   created_by: localStorage.getItem("user_uuid"),
   from_warehouse: 0,
   to_warehouse: "",
+  created_at: time.getTime(),
   item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
 };
 export default function AddStock() {
@@ -29,7 +32,15 @@ export default function AddStock() {
 
   const reactInputsRef = useRef({});
   const [focusedInputId, setFocusedInputId] = useState(0);
-
+  const componentRef = useRef(null);
+  const reactToPrintContent = useCallback(() => {
+    return componentRef.current;
+  }, []);
+  const handlePrint = useReactToPrint({
+    content: reactToPrintContent,
+    documentTitle: "Statement",
+    removeAfterPrint: true,
+  });
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
@@ -41,6 +52,16 @@ export default function AddStock() {
     });
     if (response.data.success) setItemsData(response.data.result);
   };
+  function formatAMPM(date) {
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var strTime = hours + ":" + minutes + " " + ampm;
+    return strTime;
+  }
   const GetWarehouseList = async () => {
     const response = await axios({
       method: "get",
@@ -82,6 +103,7 @@ export default function AddStock() {
     });
     console.log(response);
     if (response.data.success) {
+      handlePrint();
       setOrder(initials);
     }
   };
@@ -448,6 +470,90 @@ export default function AddStock() {
               </button>
             </div>
           </div>
+        </div>
+      </div>
+      <div
+        style={{
+          position: "fixed",
+          top: -100,
+          left: -180,
+          zIndex: "-1000",
+        }}
+      >
+        <div
+          ref={componentRef}
+          id="item-container"
+          style={{
+            // margin: "45mm 40mm 30mm 60mm",
+            // textAlign: "center",
+            height: "128mm",
+            // padding: "10px"
+          }}
+        >
+          <table
+            className="user-table"
+            style={{
+              width: "170mm",
+              // marginTop: "20mm",
+              // marginLeft: "20mm",
+              // marginRight: "20mm",
+              border: "1px solid black",
+              pageBreakInside: "auto",
+              display: "block",
+              fontSize: "small",
+            }}
+          >
+            <thead>
+              <tr>
+                <th
+                  colSpan={2}
+                  style={{
+                    width: "85mm",
+                  }}
+                >
+                  From: {order?.from_warehouse_title}
+                </th>
+                <th
+                  colSpan={2}
+                  style={{
+                    width: "85mm",
+                  }}
+                >
+                  To: {order?.to_warehouse_title}
+                </th>
+              </tr>
+              <tr>
+                <th colSpan={2}>
+                  Created At: {new Date(order?.created_at).toDateString()} -{" "}
+                  {formatAMPM(new Date(order?.created_at))}
+                </th>
+                <th colSpan={2}>Created By: {order?.created_by_user}</th>
+              </tr>
+              <tr>
+                <th style={{ width: "10mm" }}>S.N</th>
+                <th>Item Name</th>
+                <th>Box</th>
+                <th>Pcs</th>
+              </tr>
+            </thead>
+            <tbody className="tbody">
+              {order?.item_details?.map((item, i, array) => (
+                <tr key={Math.random()}>
+                  <td
+                    className="flex"
+                    style={{ justifyContent: "space-between" }}
+                  >
+                    {i + 1}
+                  </td>
+
+                  <td>{item.item_title || ""}</td>
+                  <td>{item.b || 0}</td>
+
+                  <td>{item.p || 0}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </>

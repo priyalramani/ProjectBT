@@ -3,7 +3,8 @@ import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import axios from "axios";
-import Select from "react-select";
+import VoucherDetails from "../../components/VoucherDetails";
+
 const StockTransferVouchers = () => {
   const [itemsData, setItemsData] = useState([]);
   const [filterItemsData, setFilterItemsData] = useState([]);
@@ -11,10 +12,10 @@ const StockTransferVouchers = () => {
   const [filterFromWarehouse, setFilterFromWarehouse] = useState();
   const [warehouse, setWarehouse] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
-  const [filterTitle, setFilterTitle] = useState("");
+  const [popupOrder, setPopupOrder] = useState(null);
   const [users, setUsers] = useState([]);
-  const [FilterCounter, setFilterCounter] = useState("");
   const [completed, setCompleted] = useState(0);
+
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -153,6 +154,7 @@ const StockTransferVouchers = () => {
             itemsDetails={filterItemsData}
             setPopupForm={setPopupForm}
             completed={completed}
+            setPopupOrder={setPopupOrder}
           />
         </div>
       </div>
@@ -166,12 +168,24 @@ const StockTransferVouchers = () => {
       ) : (
         ""
       )}
+      {popupOrder ? (
+        <VoucherDetails
+          onSave={() => {
+            setPopupOrder(null);
+            getItemsData();
+          }}
+          order={popupOrder}
+          orderStatus="edit"
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default StockTransferVouchers;
-function Table({ itemsDetails, setPopupForm, completed }) {
+function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
 
@@ -302,7 +316,16 @@ function Table({ itemsDetails, setPopupForm, completed }) {
               : b[items] - a[items]
           )
           ?.map((item, i) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
+            <tr
+              key={Math.random()}
+              style={{ height: "30px" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (+item.delivered) return;
+
+                setPopupOrder(item);
+              }}
+            >
               <td>{i + 1}</td>
 
               <td colSpan={3}>{item.created_by_user}</td>
