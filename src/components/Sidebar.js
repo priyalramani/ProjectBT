@@ -131,6 +131,10 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Current Stock",
               link: "/admin/currentStock",
             },
+            {
+              name: "Stock Transfer Vochers",
+              link: "/admin/stockTransferVochers",
+            },
             
           ]}
         />

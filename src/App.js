@@ -41,6 +41,7 @@ import TasksPage from "./pages/QuikAccess/Tasks";
 import Warehouse from "./pages/Master/Warehouse";
 import CurrentStock from "./pages/Reports/CurrentStock";
 import AddStock from "./pages/AddOrder/AddStock";
+import StockTransferVouchers from "./pages/Reports/StockTransferVouchers";
 
 
 function App() {
@@ -159,6 +160,10 @@ function App() {
                   <Route
                     path="/admin/pendingEntry"
                     element={<PendingsEntry />}
+                  />
+                  <Route
+                    path="/admin/stockTransferVochers"
+                    element={<StockTransferVouchers />}
                   />
                   <Route
                     path="/admin/currentStock"
