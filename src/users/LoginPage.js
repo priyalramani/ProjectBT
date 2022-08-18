@@ -33,6 +33,7 @@ const LoginPage = ({ setUserType }) => {
         localStorage.setItem("user_role", JSON.stringify(data.user_role || []));
         localStorage.setItem("user_mobile", data.user_mobile);
         setUserType(response.data.result.user_type || false);
+        sessionStorage.setItem("userType", response.data.result.user_type);
         if (+data.user_type===0) {
           window.location.assign("/admin");
           return;

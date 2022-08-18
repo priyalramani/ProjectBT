@@ -27,6 +27,8 @@ const Header = () => {
         <MessagePopup
           onClose={() => {
             localStorage.clear();
+            sessionStorage.clear()
+            window.location.reload()
             Navigate("/login");
           }}
           onSave={()=>setLogoutPopup(false)}

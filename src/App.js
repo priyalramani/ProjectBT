@@ -44,7 +44,7 @@ import AddStock from "./pages/AddOrder/AddStock";
 import StockTransferVouchers from "./pages/Reports/StockTransferVouchers";
 
 function App() {
-  const [userType, setUserType] = useState(false);
+  const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
   axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
   // axios.defaults.baseURL = "http://localhost:9000";
@@ -63,9 +63,11 @@ function App() {
       console.log(response.data.result.user_type);
       if (response.data.success)
         setUserType(response.data.result.user_type || false);
+      sessionStorage.setItem("userType", response.data.result.user_type);
     }
   };
   useEffect(() => {
+    if (userType === "1" || userType === "1") return;
     getUserType();
   }, []);
   useEffect(() => {
