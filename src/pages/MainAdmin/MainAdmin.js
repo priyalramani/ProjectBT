@@ -57,7 +57,7 @@ const MainAdmin = () => {
       setSelectedWarehouseOrder(false);
     }
   }, [selectedWarehouseOrders]);
-  console.log(selectedWarehouseOrders);
+
   const getCompanies = async () => {
     const response = await axios({
       method: "get",
@@ -260,7 +260,7 @@ const MainAdmin = () => {
   const getRunningOrders = async () => {
     const response = await axios({
       method: "get",
-      url: "/orders/GetOrderAllRunningList/"+user_uuid,
+      url: "/orders/GetOrderAllRunningList/" + user_uuid,
     });
 
     if (response.data.success) {
@@ -274,7 +274,7 @@ const MainAdmin = () => {
   const getRunningHoldOrders = async () => {
     const response = await axios({
       method: "get",
-      url: "/orders/GetOrderHoldRunningList/"+user_uuid,
+      url: "/orders/GetOrderHoldRunningList/" + user_uuid,
     });
 
     if (response.data.success) {
@@ -1615,6 +1615,7 @@ function NewUserForm({
   const [data, setdata] = useState("");
   const [errMassage, setErrorMassage] = useState("");
   const [warehouse, setWarehouse] = useState([]);
+  const [edit, setEdit] = useState(true);
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
@@ -1628,10 +1629,15 @@ function NewUserForm({
   };
   useEffect(() => {
     if (popupInfo?.type === "edit") setSelectedTrip("0");
-    else
+    else {
+      let warehouse_uuid = localStorage.getItem("warehouse") || 0;
+       warehouse_uuid =warehouse_uuid? JSON.parse(warehouse_uuid)[0] : 0;
+      console.log(warehouse_uuid);
       setdata({
-        warehouse: JSON.parse(localStorage.getItem("warehouse"))[0] || 0,
+        warehouse_uuid,
       });
+      setEdit(warehouse_uuid ? false : true);
+    }
     getItemsData();
   }, [popupInfo?.type, setSelectedTrip]);
   const submitHandler = async (e) => {
@@ -1753,6 +1759,7 @@ function NewUserForm({
                           menuPosition="fixed"
                           menuPlacement="auto"
                           placeholder="Select"
+                          isDisabled={!edit}
                         />
                       </div>
                     </label>

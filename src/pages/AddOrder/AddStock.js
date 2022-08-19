@@ -657,7 +657,7 @@ export function SuggestionsPopup({
                   selectedOrders={selectedItems}
                 />
               </div>
-              <div className="flex" style={{ justifyContent: "space-between" }}>
+              <div className="flex" style={{ justifyContent: "space-between", }}>
                 <button
                   type="button"
                   className="submit"
@@ -666,13 +666,13 @@ export function SuggestionsPopup({
                       ...prev,
                       item_details: selectedItems,
                     }));
-                    onSave()
-                  }
-              }
-
+                    onSave();
+                  }}
                 >
                   Load All
                 </button>
+                <h3 style={{margin:0,padding:0}}>Quantity: {items.length}</h3>
+
                 <button type="button" className="submit" onClick={onSave}>
                   Cancel
                 </button>

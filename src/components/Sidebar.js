@@ -44,7 +44,7 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
               link: "/admin/addOrder",
             },
             {
-              name: "Add Stock",
+              name: "Stock Transfer",
               link: "/admin/addStock",
             },
           ]}

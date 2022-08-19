@@ -194,3 +194,8 @@
     border: 2px solid #4ac959;
 
   }
+.flex{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
