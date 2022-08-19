@@ -94,11 +94,11 @@ function Table({ itemsDetails }) {
     time = time.getTime() - date;
 
     var hours = time / 3600000;
-    var minutes = (+(hours-(+hours.toString().split(".")[0])) * 60).toFixed(0);
+    var minutes = Math.floor(+(hours-(+hours.toString().split(".")[0])) * 60);
 
     minutes = +minutes < 10 ? "0" + minutes : minutes;
 
-    var strTime = hours.toFixed(0) + ":" + minutes;
+    var strTime = Math.floor(hours) + ":" + minutes;
     return strTime;
   }
   return (

@@ -160,6 +160,12 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
             </div>
           </th>
           <th colSpan={2}>
+            <div className="t-head-element">
+              <span>User Type</span>
+              <div className="sort-buttons-container"></div>
+            </div>
+          </th>
+          <th colSpan={2}>
             {" "}
             <div className="t-head-element">
               <span>Login Id</span>
@@ -207,30 +213,7 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
             </div>
           </th>
           <th colSpan={2}>Permission</th>
-          <th colSpan={2}>
-            {" "}
-            <div className="t-head-element">
-              <span>Mobile</span>
-              <div className="sort-buttons-container">
-                <button
-                  onClick={() => {
-                    setItems("user_mobile");
-                    setOrder("asc");
-                  }}
-                >
-                  <ChevronUpIcon className="sort-up sort-button" />
-                </button>
-                <button
-                  onClick={() => {
-                    setItems("user_mobile");
-                    setOrder("desc");
-                  }}
-                >
-                  <ChevronDownIcon className="sort-down sort-button" />
-                </button>
-              </div>
-            </div>
-          </th>
+
           <th colSpan={2}>
             {" "}
             <div className="t-head-element">
@@ -280,6 +263,7 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
             >
               <td>{i + 1}</td>
               <td colSpan={2}>{item.user_title}</td>
+              <td colSpan={2}>{+item.user_type === 0 ? "Admin" : "Other"}</td>
               <td colSpan={2}>{item.login_username}</td>
               <td
                 colSpan={2}
@@ -301,8 +285,6 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
               <td colSpan={2}>
                 {item?.user_role?.map((a, i) => (i === 0 ? a : "," + a)) || "-"}
               </td>
-
-              <td colSpan={2}>{item.user_mobile || "-"}</td>
 
               <td colSpan={2}>{item.status}</td>
             </tr>

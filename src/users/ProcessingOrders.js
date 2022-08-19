@@ -1218,11 +1218,11 @@ const ProcessingOrders = () => {
                                     )
                                     .map((a) => ({
                                       ...a,
-                                      b: (
+                                      b: Math.floor(
                                         (+a.b || 0) +
                                         +((+a?.p || 0) + (+a?.one_pack || 1)) /
                                           +a.conversion
-                                      ).toFixed(0),
+                                      ),
                                       p:
                                         ((+a?.p || 0) + (+a?.one_pack || 1)) %
                                         +a.conversion,
@@ -2097,7 +2097,7 @@ function HoldPopup({
               ?.filter((a) => a.item_uuid === item.item_uuid)
               .map((a) => ({
                 ...a,
-                b: (+data.b || 0 || 0).toFixed(0),
+                b: Math.floor(+data.b || 0 || 0),
                 p: +data?.p || 0,
               }))
       )
@@ -2682,7 +2682,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
             ?.filter((a) => a.item_uuid === popupInfo.item_uuid)
             .map((a) => ({
               ...a,
-              b: (+data.b || 0 || 0).toFixed(0),
+              b:Math.floor(+data.b || 0 || 0),
               p: +data?.p || 0,
             }))
     );
@@ -3423,7 +3423,7 @@ function NewUserForm({
                 ...a,
                 b:
                   +(+data.b || 0) +
-                  +parseInt((+data.p || 1) / +a.conversion).toFixed(0),
+                  +Math.floor(parseInt((+data.p || 1) / +a.conversion)),
                 p: parseInt((+data.p || 1) % +a.conversion),
               }))
       );
@@ -4043,7 +4043,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
                 b.item_uuid === popupInfo.item_uuid
                   ? {
                       ...b,
-                      b: (+data.b + +data.p / +item.conversion || 0).toFixed(0),
+                      b: Math.floor(+data.b + +data.p / +item.conversion || 0),
                       p: +data.p % +item.conversion,
                     }
                   : b

@@ -118,9 +118,9 @@ export default CurrentStock;
 
 function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
   const CovertedQty = (qty, conversion) => {
-    let b = (qty / +conversion).toFixed(0);
+    let b = Math.floor(qty / +conversion);
 
-    let p = (qty % +conversion).toFixed(0);
+    let p = Math.floor(qty % +conversion);
     return b + ":" + p;
   };
   return (
@@ -136,7 +136,6 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
             <th>{a.warehouse_title}</th>
           ))}
           <th>Total</th>
-          <th>Unit</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -193,7 +192,7 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
                   item.conversion
                 )}
               </td>
-              <td>-</td>
+
             </tr>
           ))}
       </tbody>
@@ -211,8 +210,8 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
     if (warehouseData)
       setdata({
         ...warehouseData,
-        b: (+warehouseData.qty / +item.conversion).toFixed(0),
-        p: (+warehouseData.qty % +item.conversion).toFixed(0),
+        b: Math.floor(+warehouseData.qty / +item.conversion),
+        p: Math.floor(+warehouseData.qty % +item.conversion),
       });
     else
       setdata({

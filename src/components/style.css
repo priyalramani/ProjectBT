@@ -2806,7 +2806,7 @@ button.counter-save-btn {
   overflow: hidden;
   position: absolute;
   left: 85%;
-  top: -10px;
+
   z-index: 1;
   width: 200px;
   background-color: white;

@@ -2032,7 +2032,7 @@ function HoldPopup({
                                     <td colSpan={3}>{item.item_title}</td>
                                     <td colSpan={2}>{item.mrp}</td>
                                     <td colSpan={2}>
-                                      {(item?.b || 0).toFixed(0)} :{" "}
+                                      {Math.floor(item?.b || 0)} :{" "}
                                       {item?.p || 0}
                                     </td>
                                   </tr>
@@ -2049,12 +2049,13 @@ function HoldPopup({
                           <td colSpan={3}></td>
                           <td colSpan={2}></td>
                           <td colSpan={2}>
-                            {(items.length > 1
-                              ? items
-                                  .map((a) => +a.b || 0)
-                                  .reduce((a, b) => a + b)
-                              : items[0].b || 0
-                            ).toFixed(0)}{" "}
+                            {Math.floor(
+                              items.length > 1
+                                ? items
+                                    .map((a) => +a.b || 0)
+                                    .reduce((a, b) => a + b)
+                                : items[0].b || 0
+                            )}{" "}
                             :{" "}
                             {items.length > 1
                               ? items
@@ -2244,7 +2245,7 @@ function HoldPopup({
                               {item.mrp}
                             </td>
                             <td colSpan={3} style={{ padding: "0" }}>
-                              {(item?.b || 0).toFixed(0)} : {item?.p || 0}
+                              {Math.floor(item?.b || 0)} : {item?.p || 0}
                             </td>
                           </tr>
                         ))}
@@ -2261,10 +2262,11 @@ function HoldPopup({
                   <td colSpan={5} style={{ padding: "5px" }}></td>
                   <td colSpan={3} style={{ padding: "5px" }}></td>
                   <td colSpan={3} style={{ padding: "5px" }}>
-                    {(items.length > 1
-                      ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
-                      : items[0]?.b || 0
-                    ).toFixed(0)}{" "}
+                    {Math.floor(
+                      items.length > 1
+                        ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
+                        : items[0]?.b || 0
+                    )}{" "}
                     :{" "}
                     {items.length > 1
                       ? items.map((a) => +a.p || 0).reduce((a, b) => a + b)
@@ -2383,7 +2385,7 @@ function HoldPopup({
                               {item.mrp}
                             </td>
                             <td colSpan={3} style={{ padding: "0" }}>
-                              {(item?.b || 0).toFixed(0)} : {0}
+                              {Math.floor(item?.b || 0)} : {0}
                             </td>
                           </tr>
                         ))}
@@ -2400,10 +2402,11 @@ function HoldPopup({
                   <td colSpan={5} style={{ padding: "5px" }}></td>
                   <td colSpan={3} style={{ padding: "5px" }}></td>
                   <td colSpan={3} style={{ padding: "5px" }}>
-                    {(items.length > 1
-                      ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
-                      : items[0]?.b || 0
-                    ).toFixed(0)}{" "}
+                    {Math.floor(
+                      items.length > 1
+                        ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
+                        : items[0]?.b || 0
+                    )}{" "}
                     : {0}
                   </td>
                 </tr>
@@ -2811,7 +2814,7 @@ function SummaryPopup({
                             <td colSpan={5}>{item.item_title}</td>
                             <td colSpan={3}>{item.mrp}</td>
                             <td colSpan={3}>
-                              {(item?.b || 0).toFixed(0)} : {item?.p || 0}
+                              {Math.floor(item?.b || 0)} : {item?.p || 0}
                             </td>
                           </tr>
                         ))}
@@ -2827,10 +2830,11 @@ function SummaryPopup({
                   <td colSpan={5}></td>
                   <td colSpan={3}></td>
                   <td colSpan={3}>
-                    {(items.length > 1
-                      ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
-                      : items[0]?.b || 0
-                    ).toFixed(0)}{" "}
+                    {Math.floor(
+                      items.length > 1
+                        ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
+                        : items[0]?.b || 0
+                    )}{" "}
                     :{" "}
                     {items.length > 1
                       ? items.map((a) => +a.p || 0).reduce((a, b) => a + b)
@@ -3160,7 +3164,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
                 b.item_uuid === popupInfo.item_uuid
                   ? {
                       ...b,
-                      b: (+data.b + +data.p / +item.conversion || 0).toFixed(0),
+                      b: Math.floor(+data.b + +data.p / +item.conversion || 0),
                       p: +data.p % +item.conversion,
                     }
                   : b

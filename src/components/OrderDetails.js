@@ -938,9 +938,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
-                                value={(
+                                value={Math.floor(
                                   item.price * item.conversion || 0
-                                ).toFixed(0)}
+                                )}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
                                     return {

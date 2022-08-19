@@ -516,9 +516,9 @@ export default function AddOrder() {
                                         ...a,
                                         ...item,
                                         p_price: item.item_price,
-                                        b_price: (
+                                        b_price: Math.floor(
                                           item.item_price * item.conversion || 0
-                                        ).toFixed(0),
+                                        ),
                                       };
                                     } else return a;
                                   }),

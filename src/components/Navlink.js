@@ -48,7 +48,10 @@ const NavLink = ({
         {menuList && (
           <div
             className="menu"
-            style={{ display: menuVisible ? "block" : "none" }}
+            style={{
+              display: menuVisible ? "block" : "none",
+              top: title === "Report" || title === "Setup" ? "-150px" : "-10px",
+            }}
           >
             {menuList
               .filter((a) => a)

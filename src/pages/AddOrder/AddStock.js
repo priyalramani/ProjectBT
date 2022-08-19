@@ -321,9 +321,9 @@ export default function AddStock() {
                                         ...a,
                                         ...item,
                                         p_price: item.item_price,
-                                        b_price: (
+                                        b_price: Math.floor(
                                           item.item_price * item.conversion || 0
-                                        ).toFixed(0),
+                                        ),
                                       };
                                     } else return a;
                                   }),
@@ -614,8 +614,8 @@ export function SuggestionsPopup({
           b =
             +warehouseData.min_level % +item.conversion ||
             +warehouseData.min_level === 0
-              ? (b + 1).toFixed(0)
-              : b.toFixed(0);
+              ? Math.floor(b + 1)
+              : Math.floor(b);
           data.push({ ...item, b, p: 0, uuid: item.item_uuid });
         }
       }

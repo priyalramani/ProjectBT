@@ -1126,7 +1126,7 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
       return {
         ...data,
         p_price: data.item_price,
-        b_price: (data.item_price * data.conversion || 0).toFixed(0),
+        b_price: Math.floor(data.item_price * data.conversion || 0),
       };
     });
   }, []);

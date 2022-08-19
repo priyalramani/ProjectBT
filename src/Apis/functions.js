@@ -362,14 +362,14 @@ export const Billing = async ({
     newPriceItems.push(item);
   }
   //console.log("newItemPrice", newPriceItems);
-  let order_grandtotal = (
+  let order_grandtotal = Math.floor(
     newPriceItems.length > 1
       ? newPriceItems.map((a) => +a.item_total || 0).reduce((a, b) => a + b) -
         replacement-shortage-adjustment
       : newPriceItems.length
       ? (newPriceItems.map((a) => a.item_total)[0] || 0) - replacement-shortage-adjustment
       : 0
-  ).toFixed(0);
+  );
 
   return {
     counter_uuid: counter.counter_uuid,
