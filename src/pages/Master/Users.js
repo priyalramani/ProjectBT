@@ -6,6 +6,7 @@ import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [routes, setRoutes] = useState([]);
+  const [warehouseData, setWarehouseData] = useState([]);
   const [filterUsers, setFilterUsers] = useState([]);
   const [usersTitle, setUsersTitle] = useState("");
   const [popupForm, setPopupForm] = useState(false);
@@ -53,9 +54,21 @@ const Users = () => {
     });
     if (response.data.success) setRoutes(response.data.result);
   };
+  const getWarehouseData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/warehouse/GetWarehouseList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setWarehouseData(response.data.result);
+  };
   useEffect(() => {
     getRoutesData();
-  }, [popupForm]);
+    getWarehouseData();
+  }, []);
   return (
     <>
       <Sidebar />
@@ -106,6 +119,7 @@ const Users = () => {
           popupInfo={popupForm}
           setUsers={setUsers}
           routes={routes}
+          warehouseData={warehouseData}
         />
       ) : (
         ""
@@ -293,21 +307,16 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
     </table>
   );
 }
-function NewUserForm({ onSave, popupInfo, setUsers, routes }) {
+function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
   const [data, setdata] = useState({
     user_mobile: "",
     user_type: "1",
     status: "1",
   });
   const [errMassage, setErrorMassage] = useState("");
-  useEffect(
-    popupInfo?.type === "edit"
-      ? () => {
-          setdata(popupInfo.data);
-        }
-      : () => {},
-    []
-  );
+  useEffect(() => {
+    if (popupInfo?.type === "edit") setdata(popupInfo.data);
+  }, [popupInfo.data, popupInfo?.type]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -518,19 +527,57 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes }) {
                       </select>
                     </label>
                   ) : (
-                    <label className="selectLabel">
-                      Routes
-                      <div
-                        className="formGroup"
-                        style={{ height: "200px", overflow: "scroll" }}
-                      >
-                        {routes.map((occ) => (
+                    <>
+                      <label className="selectLabel" style={{ width: "50%" }}>
+                        Routes
+                        <div
+                          className="formGroup"
+                          style={{ height: "200px", overflow: "scroll" }}
+                        >
+                          {routes.map((occ) => (
+                            <div
+                              style={{
+                                marginBottom: "5px",
+                                textAlign: "center",
+                                backgroundColor: data.routes?.filter(
+                                  (a) => a === occ.route_uuid
+                                ).length
+                                  ? "#caf0f8"
+                                  : "#fff",
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setdata((prev) => ({
+                                  ...prev,
+                                  routes: prev?.routes?.find(
+                                    (a) => a === occ.route_uuid
+                                  )
+                                    ? prev?.routes?.filter(
+                                        (a) => a !== occ.route_uuid
+                                      )
+                                    : prev?.routes?.length
+                                    ? [...prev?.routes, occ?.route_uuid]
+                                    : [occ?.route_uuid],
+                                }));
+                              }}
+                            >
+                              {occ.route_title}
+                            </div>
+                          ))}
+                        </div>
+                      </label>
+                      <label className="selectLabel" style={{ width: "50%" }}>
+                        Warehouse
+                        <div
+                          className="formGroup"
+                          style={{ height: "200px", overflow: "scroll" }}
+                        >
                           <div
                             style={{
                               marginBottom: "5px",
                               textAlign: "center",
-                              backgroundColor: data.routes?.filter(
-                                (a) => a === occ.route_uuid
+                              backgroundColor: data.warehouse?.filter(
+                                (a) => +a === 0
                               ).length
                                 ? "#caf0f8"
                                 : "#fff",
@@ -539,23 +586,46 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes }) {
                               e.stopPropagation();
                               setdata((prev) => ({
                                 ...prev,
-                                routes: prev?.routes?.find(
-                                  (a) => a === occ.route_uuid
-                                )
-                                  ? prev?.routes?.filter(
-                                      (a) => a !== occ.route_uuid
-                                    )
-                                  : prev?.routes?.length
-                                  ? [...prev?.routes, occ?.route_uuid]
-                                  : [occ?.route_uuid],
+                                warehouse: [0],
                               }));
                             }}
                           >
-                            {occ.route_title}
+                            None
                           </div>
-                        ))}
-                      </div>
-                    </label>
+                          {warehouseData.map((occ) => (
+                            <div
+                              style={{
+                                marginBottom: "5px",
+                                textAlign: "center",
+                                backgroundColor: data.warehouse?.filter(
+                                  (a) => a === occ.warehouse_uuid
+                                ).length
+                                  ? "#caf0f8"
+                                  : "#fff",
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setdata((prev) => ({
+                                  ...prev,
+                                  warehouse: prev?.warehouse?.find(
+                                    (a) => a === occ.warehouse_uuid
+                                  )
+                                    ? [0]
+                                    : // ? prev?.routes?.filter(
+                                      //     (a) => a !== occ.route_uuid
+                                      //   )
+                                      // : prev?.routes?.length
+                                      // ? [...prev?.routes, occ?.route_uuid]
+                                      [occ?.warehouse_uuid],
+                                }));
+                              }}
+                            >
+                              {occ.warehouse_title}
+                            </div>
+                          ))}
+                        </div>
+                      </label>
+                    </>
                   )}
                 </div>
               </div>

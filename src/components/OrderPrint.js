@@ -16,7 +16,7 @@ const OrderPrint = ({
     gst_value = gst_value.filter((item, pos) => {
       return gst_value.indexOf(item) === pos;
     });
-    console.log(gst_value)
+   
     for (let a of gst_value) {
       let data = order.item_details.filter((b) => +b.gst_percentage === a);
       let amt =

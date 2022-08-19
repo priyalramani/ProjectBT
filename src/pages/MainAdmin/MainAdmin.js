@@ -10,7 +10,7 @@ import { AiOutlineReload } from "react-icons/ai";
 import VerticalTabs from "../../components/VerticalTabs";
 import ItemAvilibility from "../QuikAccess/ItemAvilibility";
 import { OrderDetails } from "../../components/OrderDetails";
-import { ArrowDropDown, SquareFoot } from "@mui/icons-material";
+import { ArrowDropDown } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import Select from "react-select";
 import { Billing } from "../../Apis/functions";
@@ -28,6 +28,8 @@ const MainAdmin = () => {
   const [tripData, setTripData] = useState([]);
   const [counter, setCounter] = useState([]);
   const [btn, setBtn] = useState(false);
+  const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
+  const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState([]);
   const [selectedRouteOrder, setSelectedRouteOrder] = useState({});
   const [selectedTrip, setSelectedTrip] = useState("");
@@ -47,6 +49,14 @@ const MainAdmin = () => {
   const [company, setCompanies] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [selectedtasks, setSelectedTasks] = useState(false);
+  useEffect(() => {
+    if (selectedWarehouseOrders.length) {
+      setSelectedWarehouseOrder(selectedWarehouseOrders[0]);
+    }else{
+      setSelectedWarehouseOrder(false)
+    }
+  }, [selectedWarehouseOrders]);
+  console.log(selectedWarehouseOrders)
   const getCompanies = async () => {
     const response = await axios({
       method: "get",
@@ -144,6 +154,51 @@ const MainAdmin = () => {
       },
     });
     if (response.data.success) setRoutesData(response.data.result);
+  };
+  const handleWarehouseChacking = async () => {
+    let data = [];
+ 
+    for (let orderData of selectedOrder) {
+      
+      let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
+
+      if (
+        warehouse_uuid &&
+        +warehouse_uuid !== 0 &&
+        warehouse_uuid !== orderData.warehouse_uuid
+      ) {
+        console.log(orderData.warehouse_uuid);
+        if (!orderData.warehouse_uuid) {
+          updateWarehouse(warehouse_uuid, orderData);
+        } else {
+          console.log(warehouse_uuid, orderData)
+          data.push({ warehouse_uuid, orderData });
+        }
+      }
+
+    }
+
+      console.log(data)
+      if (data?.length) {
+        setSelectedWarehouseOrders(data);
+      } else {
+        getTasksData();
+      }
+    
+  
+  };
+  const updateWarehouse = async (warehouse_uuid, orderData) => {
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: [{ ...orderData, warehouse_uuid }],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      return true;
+    }
   };
   const getTasksData = async () => {
     const response = await axios({
@@ -398,7 +453,7 @@ const MainAdmin = () => {
                         className="simple_Logout_button"
                         type="button"
                         onClick={() => {
-                          getTasksData();
+                          handleWarehouseChacking();
                         }}
                       >
                         Print Invoice
@@ -1403,6 +1458,28 @@ const MainAdmin = () => {
             ))}
         </div>
       </div>
+      {selectedWarehouseOrder ? (
+        <WarehouseUpdatePopup
+          onClose={() =>
+            setSelectedWarehouseOrders((prev) => {
+              if (prev.length === 1) {
+                getTasksData();
+                return [];
+              } else {
+                prev.filter(
+                  (a) =>
+                    a.orderData.order_uuid !==
+                    selectedWarehouseOrder.orderData.order_uuid
+                );
+              }
+            })
+          }
+          updateChanges={updateWarehouse}
+          popupInfo={selectedWarehouseOrder}
+        />
+      ) : (
+        ""
+      )}
       {popupForm ? (
         <NewUserForm
           onSave={() => {
@@ -1554,6 +1631,10 @@ function NewUserForm({
   };
   useEffect(() => {
     if (popupInfo?.type === "edit") setSelectedTrip("0");
+    else
+      setdata({
+        warehouse: JSON.parse(localStorage.getItem("warehouse"))[0] || 0,
+      });
     getItemsData();
   }, [popupInfo?.type, setSelectedTrip]);
   const submitHandler = async (e) => {
@@ -1646,10 +1727,13 @@ function NewUserForm({
                       Warehouse
                       <div className="inputGroup" style={{ width: "200px" }}>
                         <Select
-                          options={warehouse.map((a) => ({
-                            value: a.warehouse_uuid,
-                            label: a.warehouse_title,
-                          }))}
+                          options={[
+                            { value: 0, label: "None" },
+                            ...warehouse.map((a) => ({
+                              value: a.warehouse_uuid,
+                              label: a.warehouse_title,
+                            })),
+                          ]}
                           onChange={(doc) =>
                             setdata((prev) => ({
                               ...prev,
@@ -1659,15 +1743,15 @@ function NewUserForm({
                           value={
                             data?.warehouse_uuid
                               ? {
-                                  value: data?.counter_uuid,
+                                  value: data?.warehouse_uuid,
                                   label: warehouse?.find(
                                     (j) =>
                                       j.warehouse_uuid === data.warehouse_uuid
                                   )?.warehouse_title,
                                 }
-                              : ""
+                              : { value: 0, label: "None" }
                           }
-                          autoFocus={!data?.counter_uuid}
+                          autoFocus={!data?.warehouse_uuid}
                           openMenuOnFocus={true}
                           menuPosition="fixed"
                           menuPlacement="auto"
@@ -3250,6 +3334,110 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
             </form>
           </div>
           <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
+  const [data, setdata] = useState("");
+
+  const [warehouse, setWarehouse] = useState([]);
+  const getItemsData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/warehouse/GetWarehouseList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setWarehouse(response.data.result);
+  };
+  useEffect(() => {
+    setdata(popupInfo.warehouse_uuid);
+    getItemsData();
+  }, [popupInfo]);
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    updateChanges(data, popupInfo.orderData);
+    onClose();
+  };
+
+  return (
+    <div className="overlay" style={{ zIndex: 99999999999 }}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content", padding: 50 }}
+      >
+        <div
+          className="content"
+          // style={{ flexDirection: "row", flexWrap: "wrap", gap: "5" }}
+          style={{
+            height: "fit-content",
+            padding: "20p0",
+            marginBottom: "10px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="row">
+                <h1>Update Warehouse</h1>
+
+              </div>
+              <div className="row">
+            
+                <h2>Order:{popupInfo.orderData.invoice_number}</h2>
+              </div>
+
+              <div className="formGroup">
+                <div className="row">
+                  <label className="selectLabel">
+                    Warehouse
+                    <div className="inputGroup" style={{ width: "200px" }}>
+                      <Select
+                        options={[
+                          { value: 0, label: "None" },
+                          ...warehouse.map((a) => ({
+                            value: a.warehouse_uuid,
+                            label: a.warehouse_title,
+                          })),
+                        ]}
+                        onChange={(doc) => setdata(doc.value)}
+                        value={
+                          data
+                            ? {
+                                value: data,
+                                label: warehouse?.find(
+                                  (j) => j.warehouse_uuid === data
+                                )?.warehouse_title,
+                              }
+                            : { value: 0, label: "None" }
+                        }
+                        autoFocus={!data}
+                        openMenuOnFocus={true}
+                        menuPosition="fixed"
+                        menuPlacement="auto"
+                        placeholder="Select"
+                      />
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+          <button
+            type="button"
+            onClick={() => onClose()}
+            className="closeButton"
+          >
             x
           </button>
         </div>

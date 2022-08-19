@@ -27,6 +27,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [printData, setPrintData] = useState({ item_details: [], status: [] });
   const [holdPopup, setHoldPopup] = useState(false);
   const [taskPopup, setTaskPopup] = useState(false);
+  const [warehousePopup, setWarhousePopup] = useState(false);
   const [users, setUsers] = useState([]);
   const [uuids, setUuid] = useState();
   const [popupDetails, setPopupDetails] = useState();
@@ -303,7 +304,39 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       setEditOrder(false);
     }
   };
+  const handleWarehouseChacking = async () => {
+    let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
 
+    if (
+      warehouse_uuid &&
+      +warehouse_uuid !== 0 &&
+      warehouse_uuid !== orderData.warehouse_uuid
+    ) {
+      console.log(orderData.warehouse_uuid)
+      if (!orderData.warehouse_uuid) {
+        updateWarehouse(warehouse_uuid);
+      } else {
+        setWarhousePopup(warehouse_uuid);
+      }
+    } else handleTaskChecking();
+  };
+  const updateWarehouse = async (warehouse_uuid) => {
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: [{ ...orderData, warehouse_uuid }],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setOrderData((prev) => ({
+        ...prev,
+        warehouse_uuid,
+      }));
+      handleTaskChecking();
+    }
+  };
   useEffect(() => {
     if (!editOrder) return;
     reactInputsRef.current?.[orderData?.item_details?.[0]?.uuid]?.focus();
@@ -442,7 +475,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     style={{ width: "fit-Content", backgroundColor: "black" }}
                     className="item-sales-search"
                     onClick={() => {
-                      handleTaskChecking();
+                      if (
+                        window.location.pathname.includes("admin") ||
+                        window.location.pathname.includes("trips")
+                      )
+                        handleWarehouseChacking();
+                      else handlePrint();
                     }}
                   >
                     Print
@@ -1140,6 +1178,15 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           holdPopup={holdPopup}
           itemsData={itemsData}
           setOrder={setOrderData}
+        />
+      ) : (
+        ""
+      )}
+      {warehousePopup ? (
+        <NewUserForm
+          onClose={()=>setWarhousePopup(false)}
+          updateChanges={updateWarehouse}
+          popupInfo={warehousePopup}
         />
       ) : (
         ""
@@ -2229,5 +2276,104 @@ function NotesPopup({
         </div>
       </div>
     </>
+  );
+}
+function NewUserForm({ popupInfo, updateChanges, onClose }) {
+  const [data, setdata] = useState("");
+
+  const [warehouse, setWarehouse] = useState([]);
+  const getItemsData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/warehouse/GetWarehouseList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setWarehouse(response.data.result);
+  };
+  useEffect(() => {
+    setdata(popupInfo);
+    getItemsData();
+  }, [popupInfo]);
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    updateChanges(data);
+    onClose();
+  };
+
+  return (
+    <div className="overlay" style={{zIndex:99999999999}}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content",padding:50 }}
+      >
+        <div
+          className="content"
+          // style={{ flexDirection: "row", flexWrap: "wrap", gap: "5" }}
+          style={{
+            height: "fit-content",
+            padding: "20p0",
+            marginBottom: "10px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="row">
+                <h1>Update Warehouse</h1>
+              </div>
+
+              <div className="formGroup">
+                <div className="row">
+                  <label className="selectLabel">
+                    Warehouse
+                    <div className="inputGroup" style={{ width: "200px" }}>
+                      <Select
+                        options={[
+                          { value: 0, label: "None" },
+                          ...warehouse.map((a) => ({
+                            value: a.warehouse_uuid,
+                            label: a.warehouse_title,
+                          })),
+                        ]}
+                        onChange={(doc) => setdata(doc.value)}
+                        value={
+                          data
+                            ? {
+                                value: data,
+                                label: warehouse?.find(
+                                  (j) => j.warehouse_uuid === data
+                                )?.warehouse_title,
+                              }
+                            : { value: 0, label: "None" }
+                        }
+                        autoFocus={!data}
+                        openMenuOnFocus={true}
+                        menuPosition="fixed"
+                        menuPlacement="auto"
+                        placeholder="Select"
+                      />
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+          <button
+            type="button"
+            onClick={() => onClose()}
+            className="closeButton"
+          >
+            x
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
