@@ -18,7 +18,7 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
     setLoading(true);
     const response = await axios({
       method: "get",
-      url: "users/MinLevelUpdate",
+      url: "MinLevelUpdate",
 
       headers: {
         "Content-Type": "application/json",
