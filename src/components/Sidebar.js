@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./style.css";
 import NavLink from "./Navlink";
 import {
@@ -6,14 +6,34 @@ import {
   AssessmentOutlined as ReportsIcon,
   FlashOn as QuickAccessIcon,
   SettingsOutlined as SettingsIcon,
+  UpgradeOutlined,
 } from "@mui/icons-material";
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import AddIcon from '@mui/icons-material/Add';
-const Sidebar = ({setIsItemAvilableOpen}) => {
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import AddIcon from "@mui/icons-material/Add";
+import axios from "axios";
+const Sidebar = ({ setIsItemAvilableOpen }) => {
+  const [loading, setLoading] = useState(false);
+  const updateMinLevel = async () => {
+    if (!loading) return;
+    setLoading(true);
+    const response = await axios({
+      method: "get",
+      url: "users/MinLevelUpdate",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response.data.result.user_type);
+    if (response.data.success) setLoading(false);
+  };
   return (
-    <div className="left-panel" style={{ position: "relative",zIndex:"9000000" }}>
+    <div
+      className="left-panel"
+      style={{ position: "relative", zIndex: "9000000" }}
+    >
       <div className="nav" style={{ height: "100vh" }}>
-      <NavLink
+        <NavLink
           title="New"
           icon={<AddIcon sx={{ fontSize: 50 }} />}
           // href="/admin/addOrder"
@@ -27,7 +47,6 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Add Stock",
               link: "/admin/addStock",
             },
-    
           ]}
         />
         <NavLink
@@ -69,9 +88,9 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
             },
           ]}
         />
-       
+
         <NavLink
-        setIsItemAvilableOpen={setIsItemAvilableOpen}
+          setIsItemAvilableOpen={setIsItemAvilableOpen}
           title={"Quick Access"}
           icon={<QuickAccessIcon sx={{ fontSize: 50 }} />}
           isActive={false}
@@ -90,7 +109,7 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
             },
           ]}
         />
-         <NavLink
+        <NavLink
           title={"Report"}
           icon={<AssessmentIcon sx={{ fontSize: 50 }} />}
           isActive={false}
@@ -135,10 +154,9 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
               name: "Stock Transfer Vochers",
               link: "/admin/stockTransferVochers",
             },
-            
           ]}
         />
-         <NavLink
+        <NavLink
           title={"Setup"}
           icon={<SettingsIcon sx={{ fontSize: 50 }} />}
           isActive={false}
@@ -165,14 +183,17 @@ const Sidebar = ({setIsItemAvilableOpen}) => {
             },
           ]}
         />
-        {/* <NavLink
-          menuList={[]}
-          title={"Users"}
-          icon={<QuickAccessIcon sx={{ fontSize: 50 }} />}
-          isActive={false}
-          href="/users"
-        /> */}
-        
+        <div className="nav_link_container" onClick={updateMinLevel} style={{width:"100%"}}>
+          <div className={`nav-link`}>
+            <>
+              <UpgradeOutlined sx={{ fontSize: 50 }} />
+              <p>
+                <span className={`nav_title`}>Update MinLevel</span>
+              </p>
+            </>
+            {/* Submenu popup*/}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -67,9 +67,9 @@ function App() {
     }
   };
   useEffect(() => {
-    if (userType === "1" || userType === "1") return;
+    if (userType === "0" || userType === "1") return;
     getUserType();
-  }, []);
+  }, [userType]);
   useEffect(() => {
     if (userType) {
       let time = +localStorage.getItem("indexed_time") || "";
