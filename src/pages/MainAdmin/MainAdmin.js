@@ -735,6 +735,10 @@ const MainAdmin = () => {
                                         searchItems.toLocaleLowerCase()
                                       )
                                 )
+                                .sort(
+                                  (a, b) => a.invoice_number - b.invoice_number
+                                )
+
                                 .map((item) => {
                                   return (
                                     <div
@@ -945,6 +949,7 @@ const MainAdmin = () => {
                     >
                       {orders
                         .filter((a) => !a?.trip_uuid)
+                        .sort((a, b) => a.invoice_number - b.invoice_number)
                         .filter(
                           (a) =>
                             !searchItems ||
@@ -1188,6 +1193,10 @@ const MainAdmin = () => {
                                         searchItems.toLocaleLowerCase()
                                       )
                                 )
+                                .sort(
+                                  (a, b) => a.invoice_number - b.invoice_number
+                                )
+
                                 .map((item) => {
                                   return (
                                     <div
@@ -1631,7 +1640,7 @@ function NewUserForm({
     if (popupInfo?.type === "edit") setSelectedTrip("0");
     else {
       let warehouse_uuid = localStorage.getItem("warehouse") || 0;
-       warehouse_uuid =warehouse_uuid? JSON.parse(warehouse_uuid)[0] : 0;
+      warehouse_uuid = warehouse_uuid ? JSON.parse(warehouse_uuid)[0] : 0;
       console.log(warehouse_uuid);
       setdata({
         warehouse_uuid,

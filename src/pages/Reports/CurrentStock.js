@@ -133,7 +133,7 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
           <th>S.N</th>
           <th colSpan={2}>Item Name</th>
           {warehouseData.map((a) => (
-            <th>{a.warehouse_title}</th>
+            <th colSpan={2}>{a.warehouse_title}</th>
           ))}
           <th>Total</th>
         </tr>
@@ -153,12 +153,12 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
                   (b) => b.warehouse_uuid === a.warehouse_uuid
                 );
                 return (
-                  <td
-                    className="flex"
-                    style={{ justifyContent: "space-between" }}
-                  >
-                    <span
-                      style={{ cursor: "pointer" }}
+                  <>
+                    <td
+                      style={{
+                        textAlign: "left",
+                        cursor: "pointer",
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setItemEditPopup({ type: "qty", ...a });
@@ -166,9 +166,12 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
                       }}
                     >
                       {CovertedQty(data?.qty || 0, item.conversion)}
-                    </span>
-                    <span
-                      style={{ cursor: "pointer" }}
+                    </td>
+                    <td
+                      style={{
+                        textAlign: "right",
+                        cursor: "pointer",
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         setItemEditPopup({ type: "min_level", ...a });
@@ -176,8 +179,8 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
                       }}
                     >
                       ({data?.min_level || 0})
-                    </span>
-                  </td>
+                    </td>
+                  </>
                 );
               })}
               <td>
@@ -192,7 +195,6 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
                   item.conversion
                 )}
               </td>
-
             </tr>
           ))}
       </tbody>
