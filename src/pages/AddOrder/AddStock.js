@@ -32,6 +32,7 @@ export default function AddStock() {
 
   const reactInputsRef = useRef({});
   const [focusedInputId, setFocusedInputId] = useState(0);
+  const [suggestionPopup, setSuggestionPopup] = useState(false);
   const componentRef = useRef(null);
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
@@ -242,6 +243,21 @@ export default function AddStock() {
                   />
                 </div>
               </div>
+              {order.to_warehouse ? (
+                <button
+                  className="item-sales-search"
+                  style={{
+                    width: "max-content",
+                    position: "fixed",
+                    right: "100px",
+                  }}
+                  onClick={() => setSuggestionPopup(order.to_warehouse)}
+                >
+                  Suggestions
+                </button>
+              ) : (
+                ""
+              )}
             </div>
 
             <div className="items_table" style={{ flex: "1", height: "auto" }}>
@@ -556,6 +572,169 @@ export default function AddStock() {
           </table>
         </div>
       </div>
+      {suggestionPopup ? (
+        <SuggestionsPopup
+          onSave={() => {
+            setSuggestionPopup(null);
+          }}
+          warehouse={warehouse.find(
+            (a) => a.warehouse_uuid === suggestionPopup
+          )}
+          itemsData={itemsData}
+          order={order}
+          setOrder={setOrder}
+        />
+      ) : (
+        ""
+      )}
     </>
+  );
+}
+
+export function SuggestionsPopup({
+  onSave,
+  warehouse,
+  itemsData,
+  order,
+  setOrder,
+}) {
+  const [items, setItems] = useState([]);
+  const [selectedItems, setSeletedItems] = useState([]);
+  useEffect(() => {
+    let data = [];
+    for (let item of itemsData) {
+      let warehouseData = item?.stock?.find(
+        (a) => a.warehouse_uuid === warehouse.warehouse_uuid
+      );
+      if (warehouseData) {
+        if (+warehouseData.qty < +warehouseData.min_level) {
+          let b =
+            (+warehouseData.min_level - +warehouseData.qty) / +item.conversion;
+
+          b =
+            +warehouseData.min_level % +item.conversion ||
+            +warehouseData.min_level === 0
+              ? (b + 1).toFixed(0)
+              : b.toFixed(0);
+          data.push({ ...item, b, p: 0, uuid: item.item_uuid });
+        }
+      }
+    }
+    setItems(data);
+    setSeletedItems(data);
+  }, []);
+  return (
+    <>
+      <div className="overlay">
+        <div
+          className="modal"
+          style={{
+            height: "fit-content",
+            width: "90vw",
+            padding: "50px",
+            zIndex: "999999999",
+            border: "2px solid #000",
+          }}
+        >
+          <div className="inventory">
+            <div
+              className="accountGroup"
+              id="voucherForm"
+              action=""
+              style={{
+                height: "400px",
+                maxHeight: "500px",
+                overflow: "scroll",
+              }}
+            >
+              <div className="inventory_header">
+                <h2>{warehouse?.warehouse_title || ""} Suggestions</h2>
+              </div>
+              <div className="table-container-user item-sales-container">
+                <Table
+                  itemsDetails={items}
+                  setSelectedOrders={setSeletedItems}
+                  selectedOrders={selectedItems}
+                />
+              </div>
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                <button
+                  type="button"
+                  className="submit"
+                  onClick={() => {
+                    setOrder((prev) => ({
+                      ...prev,
+                      item_details: selectedItems,
+                    }));
+                    onSave()
+                  }
+              }
+
+                >
+                  Load All
+                </button>
+                <button type="button" className="submit" onClick={onSave}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+function Table({
+  itemsDetails,
+
+  selectedOrders,
+  setSelectedOrders,
+}) {
+  console.log(selectedOrders);
+  return (
+    <table
+      className="user-table"
+      style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}
+    >
+      <thead>
+        <tr>
+          <th>S.N</th>
+          <th colSpan={2}>Item Title</th>
+          <th colSpan={2}>Suggestion Box</th>
+        </tr>
+      </thead>
+      <tbody className="tbody">
+        {itemsDetails
+          ?.sort((a, b) => +a.item_uuid - +b.item_uuid)
+          ?.map((item, i, array) => (
+            <tr key={Math.random()} style={{ height: "30px" }}>
+              <td
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedOrders((prev) =>
+                    prev.filter((a) => a.item_uuid === item.item_uuid).length
+                      ? prev.filter((a) => a.item_uuid !== item.item_uuid)
+                      : [...(prev || []), item]
+                  );
+                }}
+                className="flex"
+                style={{ justifyContent: "space-between" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedOrders.find(
+                    (a) => a.item_uuid === item.item_uuid
+                  )}
+                  style={{ transform: "scale(1.3)" }}
+                />
+                {i + 1}
+              </td>
+
+              <td colSpan={2}>{item.item_title || ""}</td>
+              <td colSpan={2}>{item.b || ""}</td>
+            </tr>
+          ))}
+      </tbody>
+    </table>
   );
 }
