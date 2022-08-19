@@ -49,14 +49,15 @@ const MainAdmin = () => {
   const [company, setCompanies] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [selectedtasks, setSelectedTasks] = useState(false);
+  let user_uuid = localStorage.getItem("user_uuid");
   useEffect(() => {
     if (selectedWarehouseOrders.length) {
       setSelectedWarehouseOrder(selectedWarehouseOrders[0]);
-    }else{
-      setSelectedWarehouseOrder(false)
+    } else {
+      setSelectedWarehouseOrder(false);
     }
   }, [selectedWarehouseOrders]);
-  console.log(selectedWarehouseOrders)
+  console.log(selectedWarehouseOrders);
   const getCompanies = async () => {
     const response = await axios({
       method: "get",
@@ -157,9 +158,8 @@ const MainAdmin = () => {
   };
   const handleWarehouseChacking = async () => {
     let data = [];
- 
+
     for (let orderData of selectedOrder) {
-      
       let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
 
       if (
@@ -171,21 +171,18 @@ const MainAdmin = () => {
         if (!orderData.warehouse_uuid) {
           updateWarehouse(warehouse_uuid, orderData);
         } else {
-          console.log(warehouse_uuid, orderData)
+          console.log(warehouse_uuid, orderData);
           data.push({ warehouse_uuid, orderData });
         }
       }
-
     }
 
-      console.log(data)
-      if (data?.length) {
-        setSelectedWarehouseOrders(data);
-      } else {
-        getTasksData();
-      }
-    
-  
+    console.log(data);
+    if (data?.length) {
+      setSelectedWarehouseOrders(data);
+    } else {
+      getTasksData();
+    }
   };
   const updateWarehouse = async (warehouse_uuid, orderData) => {
     const response = await axios({
@@ -263,7 +260,7 @@ const MainAdmin = () => {
   const getRunningOrders = async () => {
     const response = await axios({
       method: "get",
-      url: "/orders/GetOrderAllRunningList",
+      url: "/orders/GetOrderAllRunningList/"+user_uuid,
     });
 
     if (response.data.success) {
@@ -277,7 +274,7 @@ const MainAdmin = () => {
   const getRunningHoldOrders = async () => {
     const response = await axios({
       method: "get",
-      url: "/orders/GetOrderHoldRunningList",
+      url: "/orders/GetOrderHoldRunningList/"+user_uuid,
     });
 
     if (response.data.success) {
@@ -3386,10 +3383,8 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
                 <h1>Update Warehouse</h1>
-
               </div>
               <div className="row">
-            
                 <h2>Order:{popupInfo.orderData.invoice_number}</h2>
               </div>
 
