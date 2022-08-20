@@ -190,7 +190,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
                   </thead>
                   <tbody className="lh-copy">
                     {itemsData
-                      .sort((a, b) => a.trip_title.localeCompare(b.trip_title))
+                      .sort((a, b) => a.created_at-b.created_at)
                       .filter(
                         (a) =>
                           (itemFilter !== ""
