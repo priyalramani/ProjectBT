@@ -22,7 +22,6 @@ const initials = {
 };
 export default function AddStock() {
   const [order, setOrder] = useState(initials);
-
   const [warehouse, setWarehouse] = useState([]);
   const [counterFilter] = useState("");
 
@@ -600,28 +599,44 @@ export function SuggestionsPopup({
 }) {
   const [items, setItems] = useState([]);
   const [selectedItems, setSeletedItems] = useState([]);
-  useEffect(() => {
-    let data = [];
-    for (let item of itemsData) {
-      let warehouseData = item?.stock?.find(
-        (a) => a.warehouse_uuid === warehouse.warehouse_uuid
-      );
-      if (warehouseData) {
-        if (+warehouseData.qty < +warehouseData.min_level) {
-          let b =
-            (+warehouseData.min_level - +warehouseData.qty) / +item.conversion;
+  const getItemSuggestionsData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/warehouse/GetSuggestionItemsList/" + warehouse.warehouse_uuid,
 
-          b =
-            +warehouseData.min_level % +item.conversion ||
-            +warehouseData.min_level === 0
-              ? Math.floor(b + 1)
-              : Math.floor(b);
-          data.push({ ...item, b, p: 0, uuid: item.item_uuid });
-        }
-      }
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      console.log(response.data.result);
+      setItems(response.data.result);
+      setSeletedItems(response.data.result);
     }
-    setItems(data);
-    setSeletedItems(data);
+  };
+  useEffect(() => {
+    // let data = [];
+    // for (let item of itemsData) {
+    //   let warehouseData = item?.stock?.find(
+    //     (a) => a.warehouse_uuid === warehouse.warehouse_uuid
+    //   );
+    //   if (warehouseData) {
+    //     if (+warehouseData.qty < +warehouseData.min_level) {
+    //       let b =
+    //         (+warehouseData.min_level - +warehouseData.qty) / +item.conversion;
+
+    //       b =
+    //         +warehouseData.min_level % +item.conversion ||
+    //         +warehouseData.min_level === 0
+    //           ? Math.floor(b + 1)
+    //           : Math.floor(b);
+    //       data.push({ ...item, b, p: 0, uuid: item.item_uuid });
+    //     }
+    //   }
+    // }
+    // setItems(data);
+    // setSeletedItems(data);
+    getItemSuggestionsData();
   }, []);
   return (
     <>
@@ -657,7 +672,7 @@ export function SuggestionsPopup({
                   selectedOrders={selectedItems}
                 />
               </div>
-              <div className="flex" style={{ justifyContent: "space-between", }}>
+              <div className="flex" style={{ justifyContent: "space-between" }}>
                 <button
                   type="button"
                   className="submit"
@@ -671,7 +686,9 @@ export function SuggestionsPopup({
                 >
                   Load All
                 </button>
-                <h3 style={{margin:0,padding:0}}>Quantity: {items.length}</h3>
+                <h3 style={{ margin: 0, padding: 0 }}>
+                  Quantity: {items.length}
+                </h3>
 
                 <button type="button" className="submit" onClick={onSave}>
                   Cancel

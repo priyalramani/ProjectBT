@@ -22,6 +22,7 @@ import TaskPopupMenu from "../../components/TaskPopupMenu";
 const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
+  const [noOrder, setNoOrder] = useState(false);
   const [orders, setOrders] = useState([]);
   const [details, setDetails] = useState([]);
   const [routesData, setRoutesData] = useState([]);
@@ -270,6 +271,10 @@ const MainAdmin = () => {
         prev.map((a) => data.find((b) => b.order_uuid === a.order_uuid) || a)
       );
       setOrders(response.data.result);
+      if (response.data.result.length === 0) setNoOrder(true);
+      else setNoOrder(false);
+    } else {
+      setNoOrder(true);
     }
   };
   const getRunningHoldOrders = async () => {
@@ -499,7 +504,9 @@ const MainAdmin = () => {
             </div>
           )}
           <div className="content-container" id="content-file-container">
-            {window.location.pathname.includes("admin") ? (
+            {noOrder ? (
+              <div className="noOrder">No Order</div>
+            ) : window.location.pathname.includes("admin") ? (
               <>
                 {routesData.length ? (
                   <>

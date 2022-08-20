@@ -1,0 +1,10 @@
+.noOrder{
+    width: 100%;
+    height: 100%;
+    border: 2px solid #bbbbbb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #bbbbbb;
+}
