@@ -18,7 +18,7 @@ const TaskPopupMenu = ({ onSave, taskData, counter, users, onClose }) => {
     e.preventDefault();
     if (assign) {
       setAssign(false);
-      return;
+      // return;
     }
 
     const response = await axios({
