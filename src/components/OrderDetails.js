@@ -20,6 +20,7 @@ const default_status = [
 ];
 export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
+  const [method, setMethod] = useState("");
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
   const [deliveryPopup, setDeliveryPopup] = useState(false);
@@ -304,7 +305,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       setEditOrder(false);
     }
   };
-  const handleWarehouseChacking = async () => {
+  const handleWarehouseChacking = async (complete) => {
     let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
 
     if (
@@ -312,13 +313,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       +warehouse_uuid !== 0 &&
       warehouse_uuid !== orderData.warehouse_uuid
     ) {
-      console.log(orderData.warehouse_uuid)
+      console.log(orderData.warehouse_uuid);
       if (!orderData.warehouse_uuid) {
         updateWarehouse(warehouse_uuid);
       } else {
         setWarhousePopup(warehouse_uuid);
       }
-    } else handleTaskChecking();
+    } else {
+      if (method === "complete"||complete) {
+        setDeliveryPopup(true);
+      } else handleTaskChecking();
+    }
   };
   const updateWarehouse = async (warehouse_uuid) => {
     const response = await axios({
@@ -334,7 +339,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         ...prev,
         warehouse_uuid,
       }));
-      handleTaskChecking();
+      if (method === "complete") {
+        setDeliveryPopup(true);
+      } else handleTaskChecking();
     }
   };
   useEffect(() => {
@@ -467,7 +474,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   <button
                     style={{ width: "fit-Content", backgroundColor: "#44cd4a" }}
                     className="item-sales-search"
-                    onClick={() => setDeliveryPopup(true)}
+                    onClick={() => {
+                      handleWarehouseChacking(true);
+                      setMethod("complete");
+                    }}
                   >
                     Complete Order
                   </button>
@@ -1184,7 +1194,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       )}
       {warehousePopup ? (
         <NewUserForm
-          onClose={()=>setWarhousePopup(false)}
+          onClose={() => setWarhousePopup(false)}
           updateChanges={updateWarehouse}
           popupInfo={warehousePopup}
         />
@@ -2304,10 +2314,10 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
   };
 
   return (
-    <div className="overlay" style={{zIndex:99999999999}}>
+    <div className="overlay" style={{ zIndex: 99999999999 }}>
       <div
         className="modal"
-        style={{ height: "fit-content", width: "fit-content",padding:50 }}
+        style={{ height: "fit-content", width: "fit-content", padding: 50 }}
       >
         <div
           className="content"

@@ -2,10 +2,20 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Billing } from "../Apis/functions";
 import DiliveryReplaceMent from "./DiliveryReplaceMent";
+import Select from "react-select";
 
 const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
   const [data, setData] = useState({ stage: stage + 1 });
   const [deliveryPopup, setDeliveryPopup] = useState(false);
+  const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
+  const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
+  useEffect(() => {
+    if (selectedWarehouseOrders.length) {
+      setSelectedWarehouseOrder(selectedWarehouseOrders[0]);
+    } else {
+      setSelectedWarehouseOrder(false);
+    }
+  }, [selectedWarehouseOrders]);
   const onSubmit = async (selectedData = orders) => {
     console.log(selectedData);
     let user_uuid = localStorage.getItem("user_uuid");
@@ -133,7 +143,47 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
       onClose();
     }
   };
-  console.log(stage);
+  const handleWarehouseChacking = async () => {
+    let data = [];
+
+    for (let orderData of orders) {
+      let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
+
+      if (
+        warehouse_uuid &&
+        +warehouse_uuid !== 0 &&
+        warehouse_uuid !== orderData.warehouse_uuid
+      ) {
+        console.log(orderData.warehouse_uuid);
+        if (!orderData.warehouse_uuid) {
+          updateWarehouse(warehouse_uuid, orderData);
+        } else {
+          console.log(warehouse_uuid, orderData);
+          data.push({ warehouse_uuid, orderData });
+        }
+      }
+    }
+
+    console.log(data);
+    if (data?.length) {
+      setSelectedWarehouseOrders(data);
+    } else {
+      setDeliveryPopup(true);
+    }
+  };
+  const updateWarehouse = async (warehouse_uuid, orderData) => {
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: [{ ...orderData, warehouse_uuid }],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      return true;
+    }
+  };
   return (
     <>
       <div className="overlay">
@@ -155,7 +205,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
                 onSubmit={(e) => {
                   e.preventDefault();
                   if (data.stage === 4) {
-                    setDeliveryPopup(true);
+                    handleWarehouseChacking(true);
                   } else onSubmit();
                 }}
               >
@@ -253,6 +303,28 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
           orders={orders}
           counters={counters}
           items={items}
+        />
+      ) : (
+        ""
+      )}
+            {selectedWarehouseOrder ? (
+        <WarehouseUpdatePopup
+          onClose={() =>
+            setSelectedWarehouseOrders((prev) => {
+              if (prev.length === 1) {
+                setDeliveryPopup(true);
+                return [];
+              } else {
+                prev.filter(
+                  (a) =>
+                    a.orderData.order_uuid !==
+                    selectedWarehouseOrder.orderData.order_uuid
+                );
+              }
+            })
+          }
+          updateChanges={updateWarehouse}
+          popupInfo={selectedWarehouseOrder}
         />
       ) : (
         ""
@@ -391,7 +463,9 @@ function DiliveryPopup({
       counter_uuid: order.counter_uuid,
       invoice_number: order.invoice_number,
       trip_uuid: order.trip_uuid,
-      modes: modes.map((a) => a.mode_title === "Cash" ? {...a, cash: 0 } : a),
+      modes: modes.map((a) =>
+        a.mode_title === "Cash" ? { ...a, cash: 0 } : a
+      ),
     };
     const response = await axios({
       method: "post",
@@ -663,5 +737,107 @@ function DiliveryPopup({
         ""
       )} */}
     </>
+  );
+}
+function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
+  const [data, setdata] = useState("");
+
+  const [warehouse, setWarehouse] = useState([]);
+  const getItemsData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/warehouse/GetWarehouseList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setWarehouse(response.data.result);
+  };
+  useEffect(() => {
+    setdata(popupInfo.warehouse_uuid);
+    getItemsData();
+  }, [popupInfo]);
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    updateChanges(data, popupInfo.orderData);
+    onClose();
+  };
+
+  return (
+    <div className="overlay" style={{ zIndex: 99999999999 }}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content", padding: 50 }}
+      >
+        <div
+          className="content"
+          // style={{ flexDirection: "row", flexWrap: "wrap", gap: "5" }}
+          style={{
+            height: "fit-content",
+            padding: "20p0",
+            marginBottom: "10px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="row">
+                <h1>Update Warehouse</h1>
+              </div>
+              <div className="row">
+                <h2>Order:{popupInfo.orderData.invoice_number}</h2>
+              </div>
+
+              <div className="formGroup">
+                <div className="row">
+                  <label className="selectLabel">
+                    Warehouse
+                    <div className="inputGroup" style={{ width: "200px" }}>
+                      <Select
+                        options={[
+                          { value: 0, label: "None" },
+                          ...warehouse.map((a) => ({
+                            value: a.warehouse_uuid,
+                            label: a.warehouse_title,
+                          })),
+                        ]}
+                        onChange={(doc) => setdata(doc.value)}
+                        value={
+                          data
+                            ? {
+                                value: data,
+                                label: warehouse?.find(
+                                  (j) => j.warehouse_uuid === data
+                                )?.warehouse_title,
+                              }
+                            : { value: 0, label: "None" }
+                        }
+                        autoFocus={!data}
+                        openMenuOnFocus={true}
+                        menuPosition="fixed"
+                        menuPlacement="auto"
+                        placeholder="Select"
+                      />
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+          <button
+            type="button"
+            onClick={() => onClose()}
+            className="closeButton"
+          >
+            x
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

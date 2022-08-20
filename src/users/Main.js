@@ -225,6 +225,7 @@ function Logout({ onSave, popupForm }) {
     } else {
       await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
       localStorage.clear();
+      sessionStorage.clear()
       window.location.assign("/login");
     }
     setIsLoading(false);
