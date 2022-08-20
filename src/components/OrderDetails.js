@@ -320,7 +320,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         setWarhousePopup(warehouse_uuid);
       }
     } else {
-      if (method === "complete"||complete) {
+      if (method === "complete" || complete) {
         setDeliveryPopup(true);
       } else handleTaskChecking();
     }
@@ -1165,7 +1165,14 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           >
             <div style={{ width: "20%", color: "#fff" }}>-</div>
             {editOrder ? (
-              <button type="button" onClick={onSubmit}>
+              <button
+                type="button"
+                onClick={
+                  window.location.pathname.includes("completeOrderReport")
+                    ? () => setDeliveryPopup("edit")
+                    : onSubmit
+                }
+              >
                 Save
               </button>
             ) : (
@@ -1213,8 +1220,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       )}
       {taskPopup ? (
         <TaskPopupMenu
-          onSave={() => handlePrint()}
-          onClose={() => setTaskPopup(false)}
+          onSave={() => {
+            handlePrint();
+            setTaskPopup(false);
+          }}
           taskData={taskPopup}
           users={users}
           counter={counters.find(
@@ -1245,7 +1254,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       )}
       {deliveryPopup ? (
         <DiliveryPopup
-          onSave={() => setDeliveryPopup(false)}
+          onSave={() => {
+            if (deliveryPopup === "edit") onSubmit();
+            setDeliveryPopup(false);
+          }}
           deliveryPopup={deliveryPopup}
           postOrderData={() => onSubmit({ stage: 5 })}
           setSelectedOrder={setOrderData}
@@ -1823,8 +1835,7 @@ function DiliveryPopup({
     }
   };
   useEffect(() => {
-    console.log(deliveryPopup);
-    if (deliveryPopup === "put") {
+    if (deliveryPopup === "put" || deliveryPopup === "edit") {
       GetOutstanding();
     } else {
       let time = new Date();
@@ -1839,7 +1850,13 @@ function DiliveryPopup({
       });
     }
     GetPaymentModes();
-  }, [deliveryPopup]);
+  }, [
+    deliveryPopup,
+    order.counter_uuid,
+    order.invoice_number,
+    order.order_uuid,
+    order.trip_uuid,
+  ]);
   useEffect(() => {
     if (PaymentModes.length)
       setModes(

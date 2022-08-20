@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-const TaskPopupMenu = ({ onSave, taskData, counter, users, onClose }) => {
+const TaskPopupMenu = ({ onSave, taskData, counter, users }) => {
   const [data, setdata] = useState({});
   const [assign, setAssign] = useState(false);
 
@@ -18,7 +18,8 @@ const TaskPopupMenu = ({ onSave, taskData, counter, users, onClose }) => {
     e.preventDefault();
     if (assign) {
       setAssign(false);
-      // return;
+      onSave()
+      return;
     }
 
     const response = await axios({
@@ -35,7 +36,7 @@ const TaskPopupMenu = ({ onSave, taskData, counter, users, onClose }) => {
 
     if (response.data.success) {
       onSave();
-      onClose();
+
     }
   };
 
@@ -137,7 +138,7 @@ const TaskPopupMenu = ({ onSave, taskData, counter, users, onClose }) => {
                   >
                     Assign
                   </button>
-                  <button type="button" className="submit" onClick={onClose}>
+                  <button type="button" className="submit" onClick={onSave}>
                     Later
                   </button>
                 </div>

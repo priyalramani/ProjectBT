@@ -1532,10 +1532,6 @@ const MainAdmin = () => {
               );
             }
           }}
-          onClose={() => {
-            setSelectedTasks(false);
-            setTasks([]);
-          }}
           taskData={selectedtasks}
           users={users}
           counter={counter.find(
@@ -1580,6 +1576,20 @@ const MainAdmin = () => {
           counter={counter}
           category={category}
           setPopupOrder={setPopupOrder}
+          updateOrders={() => {
+            if (
+              window.location.pathname.includes("admin") ||
+              window.location.pathname.includes("trip")
+            ) {
+              if (holdOrders) getRunningHoldOrders();
+              else getRunningOrders();
+            }
+            if (window.location.pathname.includes("admin")) {
+              getRoutesData();
+            } else if (window.location.pathname.includes("trip")) {
+              getTripData();
+            }
+          }}
         />
       ) : (
         ""
@@ -1591,12 +1601,28 @@ const MainAdmin = () => {
             if (holdOrders) getRunningHoldOrders();
             else getRunningOrders();
           }}
+          setOrders={setOrders}
           orders={joinSummary}
           itemsData={items}
           counter={counter}
           category={category}
           company={company}
           setPopupOrder={setPopupOrder}
+
+          updateOrders={() => {
+            if (
+              window.location.pathname.includes("admin") ||
+              window.location.pathname.includes("trip")
+            ) {
+              if (holdOrders) getRunningHoldOrders();
+              else getRunningOrders();
+            }
+            if (window.location.pathname.includes("admin")) {
+              getRoutesData();
+            } else if (window.location.pathname.includes("trip")) {
+              getTripData();
+            }
+          }}
         />
       ) : (
         ""
@@ -1823,6 +1849,7 @@ function HoldPopup({
   counter,
   category,
   setPopupOrder,
+  updateOrders,
 }) {
   const [items, setItems] = useState([]);
   const [stage, setStage] = useState("");
@@ -1965,7 +1992,7 @@ function HoldPopup({
     );
     console.log(result);
     setItems(result);
-  }, [stage, itemStatus]);
+  }, [stage, itemStatus, orders, itemsData]);
   return (
     <>
       <div className="overlay">
@@ -2248,7 +2275,7 @@ function HoldPopup({
           order={FilteredOrder}
           onSave={() => {
             setPopup(false);
-            onSave();
+            updateOrders();
           }}
           items={popup}
           counter={counter}
@@ -2543,6 +2570,8 @@ function SummaryPopup({
   category,
   company,
   setPopupOrder,
+  updateOrders,
+  setOrders
 }) {
   const [items, setItems] = useState([]);
 
@@ -2552,7 +2581,7 @@ function SummaryPopup({
   const componentRef = useRef(null);
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
-  }, [items]);
+  }, []);
 
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
@@ -2569,13 +2598,7 @@ function SummaryPopup({
           : a.status[0].stage,
     }));
     setFilteredOrder(orderStage);
-    console.log(
-      "orders",
-      [].concat.apply(
-        [],
-        orderStage.map((a) => a.item_details)
-      )
-    );
+
 
     let data = [].concat
       .apply(
@@ -2645,7 +2668,7 @@ function SummaryPopup({
     console.log(result);
 
     setItems(result);
-  }, []);
+  }, [itemsData, orders,setOrders,popup]);
   const GetItemsQty = (category_uuid) => {
     let itemsData = items?.filter((b) => category_uuid === b.category_uuid);
     let box =
@@ -2828,7 +2851,7 @@ function SummaryPopup({
           order={FilteredOrder}
           onSave={() => {
             setPopup(false);
-            onSave();
+            updateOrders();
           }}
           items={popup}
           counter={counter}
@@ -2998,7 +3021,7 @@ const OrdersEdit = ({
     var strTime = hours + ":" + minutes + " " + ampm;
     return strTime;
   }
-  console.log("updatedOrders", updateOrders, deleteItemsOrder);
+
   const postOrderData = async (deleteItems) => {
     let dataArray = deleteItems
       ? updateOrders.map((a) => ({

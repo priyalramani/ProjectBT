@@ -534,6 +534,55 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
                           className="formGroup"
                           style={{ height: "200px", overflow: "scroll" }}
                         >
+                          <div
+                            style={{
+                              marginBottom: "5px",
+                              textAlign: "center",
+                              backgroundColor: data.routes?.filter(
+                                (a) => +a === 1
+                              ).length
+                                ? "#caf0f8"
+                                : "#fff",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setdata((prev) => ({
+                                ...prev,
+                                routes: [1],
+                              }));
+                            }}
+                          >
+                            All
+                          </div>
+                          <div
+                            style={{
+                              marginBottom: "5px",
+                              textAlign: "center",
+                              backgroundColor: data.routes?.filter(
+                                (a) => a === 0 || +a === 0
+                              ).length
+                                ? "#caf0f8"
+                                : "#fff",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setdata((prev) => ({
+                                ...prev,
+                                routes: prev?.routes?.find(
+                                  (a) => a === 0 || +a === 0
+                                )
+                                  ? prev?.routes?.filter(
+                                      (a) => a !== 0 && +a !== 0
+                                    )
+                                  : prev?.routes?.length &&
+                                    !prev.routes.filter((a) => +a === 1).length
+                                  ? [...prev?.routes, 0]
+                                  : [0],
+                              }));
+                            }}
+                          >
+                            UnKnown
+                          </div>
                           {routes.map((occ) => (
                             <div
                               style={{
@@ -555,7 +604,9 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
                                     ? prev?.routes?.filter(
                                         (a) => a !== occ.route_uuid
                                       )
-                                    : prev?.routes?.length
+                                    : prev?.routes?.length &&
+                                      !prev.routes.filter((a) => +a === 1)
+                                        .length
                                     ? [...prev?.routes, occ?.route_uuid]
                                     : [occ?.route_uuid],
                                 }));

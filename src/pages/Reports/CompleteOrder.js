@@ -14,6 +14,7 @@ const CompleteOrder = () => {
   const [items, setItems] = useState([]);
   const [counter, setCounter] = useState([]);
   const [invoiceNumberFilter, setInvoiceNumberFilter] = useState("");
+  const [initial, setInitial] = useState(false);
 
   const getCounter = async () => {
     const response = await axios({
@@ -41,7 +42,7 @@ const CompleteOrder = () => {
     });
     console.log("activity", response);
     if (response.data.success) setItems(response.data.result);
-    else setItems([])
+    else setItems([]);
   };
 
   useEffect(() => {
@@ -57,6 +58,10 @@ const CompleteOrder = () => {
     }));
     getCounter();
   }, []);
+  useEffect(() => {
+    if (initial) getCompleteOrders();
+    else setInitial(true);
+  }, [popupOrder]);
 
   return (
     <>
