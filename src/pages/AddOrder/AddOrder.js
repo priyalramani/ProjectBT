@@ -18,6 +18,7 @@ export default function AddOrder() {
   const [order, setOrder] = useState({
     counter_uuid: "",
     item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
+    
   });
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [counters, setCounters] = useState([]);
@@ -163,6 +164,9 @@ export default function AddOrder() {
   }, [qty_details]);
 
   const onSubmit = async (type) => {
+    let warehouse_uuid = localStorage.getItem("warehouse");
+    warehouse_uuid= warehouse_uuid?JSON.parse(warehouse_uuid)[0]:""
+
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let data = {
       ...order,
@@ -219,6 +223,7 @@ export default function AddOrder() {
         status: 0,
         price: a.price || a.item_price || 0,
       })),
+      warehouse_uuid,
       status:
         type.stage === 1
           ? [

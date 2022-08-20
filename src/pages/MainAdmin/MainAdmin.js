@@ -308,7 +308,8 @@ const MainAdmin = () => {
         .filter((a) => a.order_status !== "A")
         .map((a) => ({
           order_uuid: a.order_uuid,
-          trip_uuid: +selectedTrip === 0 ? "" : selectedTrip,
+          trip_uuid: +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.trip_uuid,
+          warehouse_uuid: +selectedTrip.warehouse_uuid,
         })),
       headers: {
         "Content-Type": "application/json",
@@ -1637,7 +1638,7 @@ function NewUserForm({
     if (response.data.success) setWarehouse(response.data.result);
   };
   useEffect(() => {
-    if (popupInfo?.type === "edit") setSelectedTrip("0");
+    if (popupInfo?.type === "edit") setSelectedTrip({trip_uuid:"0",warehouse_uuid:""});
     else {
       let warehouse_uuid = localStorage.getItem("warehouse") || 0;
       warehouse_uuid = warehouse_uuid ? JSON.parse(warehouse_uuid)[0] : 0;
@@ -1704,8 +1705,15 @@ function NewUserForm({
                       <select
                         name="route_title"
                         className="numberInput"
-                        value={selectedTrip}
-                        onChange={(e) => setSelectedTrip(e.target.value)}
+                        value={selectedTrip.trip_uuid}
+                        onChange={(e) =>
+                          setSelectedTrip({
+                            trip_uuid: e.target.value,
+                            warehouse_uuid:
+                              trips?.find((a) => a.trip_uuid === e.target.value)
+                                ?.warehouse_uuid || "",
+                          })
+                        }
                         maxLength={42}
                         style={{ width: "200px" }}
                       >

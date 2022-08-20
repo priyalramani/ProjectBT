@@ -6,13 +6,17 @@ import axios from "axios";
 import {
   ChevronUpIcon,
   ChevronDownIcon,
-  MenuAlt2Icon,
+
 } from "@heroicons/react/solid";
+import Select from "react-select";
+
 const RoutesPage = () => {
   const [routesData, setRoutesData] = useState([]);
   const [filterRoutesData, setFilterRoutesData] = useState([]);
   const [filterRoutesTitle, setFilterRouteTitle] = useState("");
   const [popupForm, setPopupForm] = useState(false);
+  const [warehouseData, setWarehouseData] = useState([]);
+
   const getRoutesData = async () => {
     const response = await axios({
       method: "get",
@@ -42,6 +46,20 @@ const RoutesPage = () => {
       ),
     [routesData, filterRoutesTitle]
   );
+  const getWarehouseData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/warehouse/GetWarehouseList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setWarehouseData(response.data.result);
+  };
+  useEffect(() => {
+    getWarehouseData();
+  }, []);
   return (
     <>
       <Sidebar />
@@ -51,7 +69,7 @@ const RoutesPage = () => {
           <h2>Routes</h2>
         </div>
         <div id="item-sales-top">
-        <div
+          <div
             id="date-input-container"
             style={{
               overflow: "visible",
@@ -61,7 +79,6 @@ const RoutesPage = () => {
               width: "100%",
             }}
           >
-
             <input
               type="text"
               onChange={(e) => setFilterRouteTitle(e.target.value)}
@@ -80,7 +97,7 @@ const RoutesPage = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={filterRoutesData} setPopupForm={setPopupForm}/>
+          <Table itemsDetails={filterRoutesData} setPopupForm={setPopupForm} warehouseData={warehouseData}/>
         </div>
       </div>
       {popupForm ? (
@@ -88,6 +105,7 @@ const RoutesPage = () => {
           onSave={() => setPopupForm(false)}
           setRoutesData={setRoutesData}
           popupInfo={popupForm}
+          warehouseData={warehouseData}
         />
       ) : (
         ""
@@ -97,7 +115,7 @@ const RoutesPage = () => {
 };
 
 export default RoutesPage;
-function Table({ itemsDetails ,setPopupForm}) {
+function Table({ itemsDetails, setPopupForm }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("asc");
   return (
@@ -147,7 +165,11 @@ function Table({ itemsDetails ,setPopupForm}) {
               : b[items] - a[items]
           )
           ?.map((item, i) => (
-            <tr key={Math.random()} style={{ height: "30px" }} onClick={()=>setPopupForm({type:"edit",data:item})}>
+            <tr
+              key={Math.random()}
+              style={{ height: "30px" }}
+              onClick={() => setPopupForm({ type: "edit", data: item })}
+            >
               <td>{i + 1}</td>
               <td colSpan={2}>{item.route_title}</td>
             </tr>
@@ -156,11 +178,18 @@ function Table({ itemsDetails ,setPopupForm}) {
     </table>
   );
 }
-function NewUserForm({ onSave, popupInfo, setRoutesData }) {
+function NewUserForm({ onSave, popupInfo, setRoutesData,warehouseData }) {
   const [data, setdata] = useState({});
 
   const [errMassage, setErrorMassage] = useState("");
-useEffect(popupInfo?.type==="edit"?()=>{setdata(popupInfo.data)}:()=>{},[])
+  useEffect(
+    popupInfo?.type === "edit"
+      ? () => {
+          setdata(popupInfo.data);
+        }
+      : () => {},
+    []
+  );
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -216,7 +245,7 @@ useEffect(popupInfo?.type==="edit"?()=>{setdata(popupInfo.data)}:()=>{},[])
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
-                <h1>{popupInfo.type==="edit"?"Edit":"Add"} Route</h1>
+                <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Route</h1>
               </div>
 
               <div className="formGroup">
@@ -253,6 +282,38 @@ useEffect(popupInfo?.type==="edit"?()=>{setdata(popupInfo.data)}:()=>{},[])
                       }
                     />
                   </label>
+                </div>
+                <div className="row">
+                  <label className="selectLabel" style={{width:"400px"}}>
+                    Warehouse
+                    <Select
+
+                    options={warehouseData
+                      
+                      .map((a) => ({
+                        value: a.warehouse_uuid,
+                        label: a.warehouse_title ,
+                      }))}
+                    onChange={(doc) =>
+                      setdata((prev) => ({ ...prev, warehouse_uuid: doc.value }))
+                    }
+                    value={
+                      data?.warehouse_uuid
+                        ? {
+                            value: data?.warehouse_uuid,
+                            label: warehouseData?.find(
+                              (j) => j.warehouse_uuid === data.warehouse_uuid
+                            )?.warehouse_title,
+                          }
+                        : ""
+                    }
+                    openMenuOnFocus={true}
+                    menuPosition="fixed"
+                    menuPlacement="auto"
+                    placeholder="Select"
+                  />
+                  </label>
+                
                 </div>
               </div>
               <i style={{ color: "red" }}>
