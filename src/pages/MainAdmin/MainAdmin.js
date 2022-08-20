@@ -160,7 +160,8 @@ const MainAdmin = () => {
     let data = [];
 
     for (let orderData of selectedOrder) {
-      let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
+      let warehouse_uuid = localStorage.getItem("warehouse");
+      warehouse_uuid = warehouse_uuid ? JSON.parse(warehouse_uuid)[0] : 0;
 
       if (
         warehouse_uuid &&
@@ -308,7 +309,8 @@ const MainAdmin = () => {
         .filter((a) => a.order_status !== "A")
         .map((a) => ({
           order_uuid: a.order_uuid,
-          trip_uuid: +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.trip_uuid,
+          trip_uuid:
+            +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.trip_uuid,
           warehouse_uuid: +selectedTrip.warehouse_uuid,
         })),
       headers: {
@@ -1638,7 +1640,8 @@ function NewUserForm({
     if (response.data.success) setWarehouse(response.data.result);
   };
   useEffect(() => {
-    if (popupInfo?.type === "edit") setSelectedTrip({trip_uuid:"0",warehouse_uuid:""});
+    if (popupInfo?.type === "edit")
+      setSelectedTrip({ trip_uuid: "0", warehouse_uuid: "" });
     else {
       let warehouse_uuid = localStorage.getItem("warehouse") || 0;
       warehouse_uuid = warehouse_uuid ? JSON.parse(warehouse_uuid)[0] : 0;
