@@ -154,6 +154,10 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
               name: "Stock Transfer Vochers",
               link: "/admin/stockTransferVochers",
             },
+            {
+              name: "Cancel Order",
+              link: "/admin/cancelOrders",
+            },
           ]}
         />
         <NavLink

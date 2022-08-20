@@ -42,6 +42,7 @@ import Warehouse from "./pages/Master/Warehouse";
 import CurrentStock from "./pages/Reports/CurrentStock";
 import AddStock from "./pages/AddOrder/AddStock";
 import StockTransferVouchers from "./pages/Reports/StockTransferVouchers";
+import CancelOrders from "./pages/Reports/CancelOrder";
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
@@ -171,6 +172,10 @@ function App() {
               <Route
                 path="/admin/completeOrderReport"
                 element={<CompleteOrder />}
+              />
+              <Route
+                path="/admin/cancelOrders"
+                element={<CancelOrders />}
               />
               <Route path="/admin/OrderItemReport" element={<ItemDetails />} />
               <Route
