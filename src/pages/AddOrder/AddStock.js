@@ -264,6 +264,7 @@ export default function AddStock() {
                 <thead className="lh-copy" style={{ position: "static" }}>
                   <tr className="white">
                     <th className="pa2 tl bb b--black-20 w-30">Item Name</th>
+                    <th className="pa2 tl bb b--black-20 w-30">MRP</th>
                     <th className="pa2 tc bb b--black-20">Boxes</th>
                     <th className="pa2 tc bb b--black-20">Pcs</th>
 
@@ -352,6 +353,14 @@ export default function AddStock() {
                               placeholder="Item"
                             />
                           </div>
+                        </td>
+                        <td
+                          className="ph2 pv1 tl bb b--black-20 bg-white"
+                          style={{ textAlign: "center" }}
+                        >
+                         
+                            {item.mrp}
+                    
                         </td>
                         <td
                           className="ph2 pv1 tc bb b--black-20 bg-white"

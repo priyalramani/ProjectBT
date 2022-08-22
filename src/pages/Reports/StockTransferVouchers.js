@@ -348,7 +348,7 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
                       setPopupForm({ type: "comfirm", data: item });
                     }}
                   >
-                    Confirm Dilivered
+                    Confirm Delivery
                   </button>
                 </td>
               )}
