@@ -661,7 +661,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                   From: {orderData?.from_warehouse_title}
                 </th>
                 <th
-                  colSpan={2}
+                  colSpan={3}
                   style={{
                     width: "85mm",
                   }}
@@ -674,11 +674,12 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                   Created At: {new Date(orderData?.created_at).toDateString()} -{" "}
                   {formatAMPM(new Date(orderData?.created_at))}
                 </th>
-                <th colSpan={2}>Created By: {orderData?.created_by_user}</th>
+                <th colSpan={3}>Created By: {orderData?.created_by_user}</th>
               </tr>
               <tr>
                 <th style={{ width: "10mm" }}>S.N</th>
                 <th>Item Name</th>
+                <th>MRP</th>
                 <th>Box</th>
                 <th>Pcs</th>
               </tr>
@@ -694,11 +695,34 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                   </td>
 
                   <td>{item.item_title || ""}</td>
+                  <td>{item.mrp || 0}</td>
                   <td>{item.b || 0}</td>
 
                   <td>{item.p || 0}</td>
                 </tr>
               ))}
+              <tr key={Math.random()}>
+                <td
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                ></td>
+
+                <td>Total</td>
+                <td></td>
+                <td>
+                  {orderData?.item_details?.length > 1
+                    ? orderData?.item_details
+                        ?.map((a) => +a.b || 0)
+                        ?.reduce((a, b) => +a + b)
+                    : orderData?.item_details[0]?.b || 0}
+                </td>
+
+                <td>{orderData?.item_details?.length > 1
+                    ? orderData?.item_details
+                        ?.map((a) => +a.p || 0)
+                        ?.reduce((a, b) => +a + b)
+                    : orderData?.item_details[0]?.p || 0}</td>
+              </tr>
             </tbody>
           </table>
         </div>
