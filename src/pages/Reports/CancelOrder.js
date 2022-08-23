@@ -111,7 +111,7 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
         <tr>
           <th>S.N</th>
           <th colSpan={2}>Order Date</th>
-          <th colSpan={2}>Delivery Date</th>
+          <th colSpan={2}>Cancel Date</th>
           <th colSpan={3}>Counter</th>
           <th colSpan={2}>Invoice</th>
          
@@ -128,14 +128,15 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
             >
               <td>{i + 1}</td>
               <td colSpan={2}>
-                {new Date(+item.order_date).toDateString()} -{" "}
-                {formatAMPM(new Date(+item.order_date))}
+                {new Date(+item?.status[0]?.time).toDateString()} -{" "}
+                {formatAMPM(new Date(+item?.status[0]?.time))}
               </td>
+              {console.log(item.status)}
               <td colSpan={2}>
-                {item.delivery_date
-                  ? new Date(item.delivery_date).toDateString() +
+                {+item?.status.filter(a=>+a.stage===5).length
+                  ? new Date(+item?.status.find(a=>+a.stage===5)?.time).toDateString() +
                     " - " +
-                    formatAMPM(new Date(item.delivery_date))
+                    formatAMPM(new Date(+item?.status.find(a=>+a.stage===5)?.time))
                   : ""}
               </td>
               <td colSpan={3}>

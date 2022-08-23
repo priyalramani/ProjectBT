@@ -40,6 +40,7 @@ export default function AddStock() {
     content: reactToPrintContent,
     documentTitle: "Statement",
     removeAfterPrint: true,
+    onAfterPrint: () => setOrder(initials),
   });
   const getItemsData = async () => {
     const response = await axios({
@@ -104,7 +105,6 @@ export default function AddStock() {
     console.log(response);
     if (response.data.success) {
       handlePrint();
-      setOrder(initials);
     }
   };
 
@@ -358,9 +358,7 @@ export default function AddStock() {
                           className="ph2 pv1 tl bb b--black-20 bg-white"
                           style={{ textAlign: "center" }}
                         >
-                         
-                            {item.mrp}
-                    
+                          {item.mrp}
                         </td>
                         <td
                           className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -535,7 +533,10 @@ export default function AddStock() {
                     width: "85mm",
                   }}
                 >
-                  From: {order?.from_warehouse_title}
+                  From:{" "}
+                  {warehouse.find(
+                    (a) => a.warehouse_uuid === order.from_warehouse
+                  )?.warehouse_title || "None"}
                 </th>
                 <th
                   colSpan={2}
@@ -543,7 +544,12 @@ export default function AddStock() {
                     width: "85mm",
                   }}
                 >
-                  To: {order?.to_warehouse_title}
+                  To:{" "}
+                  {
+                    warehouse.find(
+                      (a) => a.warehouse_uuid === order.to_warehouse
+                    )?.warehouse_title
+                  }
                 </th>
               </tr>
               <tr>
@@ -551,7 +557,9 @@ export default function AddStock() {
                   Created At: {new Date(order?.created_at).toDateString()} -{" "}
                   {formatAMPM(new Date(order?.created_at))}
                 </th>
-                <th colSpan={2}>Created By: {order?.created_by_user}</th>
+                <th colSpan={2}>
+                  Created By: {localStorage.getItem("user_title")}
+                </th>
               </tr>
               <tr>
                 <th style={{ width: "10mm" }}>S.N</th>
@@ -576,6 +584,31 @@ export default function AddStock() {
                   <td>{item.p || 0}</td>
                 </tr>
               ))}
+              <tr key={Math.random()}>
+                <td
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                ></td>
+
+                <td>Total</td>
+                <td>
+                  {" "}
+                  {itemsData.length > 1
+                    ? itemsData.map((a) => +a.b || 0).reduce((a, b) => a + b)
+                    : itemsData.length
+                    ? itemsData[0].b
+                    : 0}
+                </td>
+
+                <td>
+                  {" "}
+                  {itemsData.length > 1
+                    ? itemsData.map((a) => +a.p || 0).reduce((a, b) => a + b)
+                    : itemsData.length
+                    ? itemsData[0].p
+                    : 0}
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -685,6 +718,7 @@ export function SuggestionsPopup({
                 <button
                   type="button"
                   className="submit"
+                  style={{opacity:items.length?1:"0.5"}}
                   onClick={() => {
                     setOrder((prev) => ({
                       ...prev,
@@ -692,11 +726,17 @@ export function SuggestionsPopup({
                     }));
                     onSave();
                   }}
+                  disabled={!items.length}
                 >
                   Load All
                 </button>
                 <h3 style={{ margin: 0, padding: 0 }}>
-                  Quantity: {items.length}
+                  Quantity:{" "}
+                  {items.length > 1
+                    ? items.map((a) => +a.b || 0).reduce((a, b) => a + b)
+                    : items.length
+                    ? items[0].b
+                    : 0}
                 </h3>
 
                 <button type="button" className="submit" onClick={onSave}>

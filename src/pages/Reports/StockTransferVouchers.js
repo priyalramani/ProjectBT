@@ -4,6 +4,7 @@ import Sidebar from "../../components/Sidebar";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import axios from "axios";
 import VoucherDetails from "../../components/VoucherDetails";
+import { DeleteOutline } from "@mui/icons-material";
 
 const StockTransferVouchers = () => {
   const [itemsData, setItemsData] = useState([]);
@@ -301,7 +302,7 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
             </div>
           </th>
 
-          {+completed ? "" : <th colSpan={2}></th>}
+          {+completed ? "" : <th colSpan={3}></th>}
         </tr>
       </thead>
       <tbody className="tbody">
@@ -339,18 +340,29 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
               {+completed ? (
                 ""
               ) : (
-                <td colSpan={2}>
-                  <button
-                    className="item-sales-search"
+                <>
+                  <td colSpan={2}>
+                    <button
+                      className="item-sales-search"
+                      onClick={(e) => {
+                        e.stopPropagation();
+
+                        setPopupForm({ type: "Delivery", data: item });
+                      }}
+                    >
+                      Confirm Delivery
+                    </button>
+                  </td>
+                  <td
                     onClick={(e) => {
                       e.stopPropagation();
 
-                      setPopupForm({ type: "comfirm", data: item });
+                      setPopupForm({ type: "Delete", data: item });
                     }}
                   >
-                    Confirm Delivery
-                  </button>
-                </td>
+                    <DeleteOutline />
+                  </td>
+                </>
               )}
             </tr>
           ))}
@@ -360,24 +372,40 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 }
 function NewUserForm({ onSave, popupInfo }) {
   const [data, setdata] = useState({});
-
+  const [disabled, setDisabled] = useState(true);
   useEffect(() => {
     setdata(popupInfo.data);
+    setTimeout(() => {
+      setDisabled(false);
+    }, 5000);
   }, [popupInfo.data]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
-
-    const response = await axios({
-      method: "put",
-      url: "/vouchers/ConfirmVoucher",
-      data,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) {
-      onSave();
+    if (popupInfo?.type === "Delete") {
+      const response = await axios({
+        method: "delete",
+        url: "/vouchers/DeleteVoucher",
+        data,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        onSave();
+      }
+    } else {
+      const response = await axios({
+        method: "put",
+        url: "/vouchers/ConfirmVoucher",
+        data,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        onSave();
+      }
     }
   };
 
@@ -396,10 +424,15 @@ function NewUserForm({ onSave, popupInfo }) {
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
-                <h1>Confirm Dilivered</h1>
+                <h1>Confirm {popupInfo.type}</h1>
               </div>
 
-              <button type="submit" className="submit">
+              <button
+                style={{ opacity: disabled ? 0.5 : 1 }}
+                type="submit"
+                className="submit"
+                disabled={disabled}
+              >
                 Confirm
               </button>
             </form>
