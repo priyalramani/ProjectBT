@@ -14,7 +14,7 @@ import axios from "axios";
 const Sidebar = ({ setIsItemAvilableOpen }) => {
   const [loading, setLoading] = useState(false);
   const updateMinLevel = async () => {
-    if (!loading) return;
+    if (loading) return;
     setLoading(true);
     const response = await axios({
       method: "get",
@@ -25,7 +25,7 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
       },
     });
     console.log(response.data.result.user_type);
-    if (response.data.success) setLoading(false);
+    setLoading(false);
   };
   return (
     <div
@@ -187,7 +187,11 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
             },
           ]}
         />
-        <div className="nav_link_container" onClick={updateMinLevel} style={{width:"100%"}}>
+        <div
+          className="nav_link_container"
+          onClick={updateMinLevel}
+          style={{ width: "100%" }}
+        >
           <div className={`nav-link`}>
             <>
               <UpgradeOutlined sx={{ fontSize: 50 }} />
