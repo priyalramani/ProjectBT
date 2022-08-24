@@ -177,6 +177,7 @@ const StockTransferVouchers = () => {
           }}
           order={popupOrder}
           orderStatus="edit"
+          completed={completed}
         />
       ) : (
         ""
@@ -322,7 +323,7 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
               style={{ height: "30px" }}
               onClick={(e) => {
                 e.stopPropagation();
-                if (+item.delivered) return;
+                // if (+item.delivered) return;
 
                 setPopupOrder(item);
               }}

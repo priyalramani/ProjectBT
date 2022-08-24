@@ -235,7 +235,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                     Print
                   </button>
 
-                  <button
+                  {+orderData?.delivered===0?<button
                     style={{ width: "fit-Content" }}
                     className="item-sales-search"
                     onClick={(e) => {
@@ -245,7 +245,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                     }}
                   >
                     Edit
-                  </button>
+                  </button>:""}
                 </div>
               </div>
 

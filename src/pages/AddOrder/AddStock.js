@@ -539,7 +539,7 @@ export default function AddStock() {
                   )?.warehouse_title || "None"}
                 </th>
                 <th
-                  colSpan={2}
+                  colSpan={3}
                   style={{
                     width: "85mm",
                   }}
@@ -557,13 +557,14 @@ export default function AddStock() {
                   Created At: {new Date(order?.created_at).toDateString()} -{" "}
                   {formatAMPM(new Date(order?.created_at))}
                 </th>
-                <th colSpan={2}>
+                <th colSpan={3}>
                   Created By: {localStorage.getItem("user_title")}
                 </th>
               </tr>
               <tr>
                 <th style={{ width: "10mm" }}>S.N</th>
                 <th>Item Name</th>
+                <th>MRP</th>
                 <th>Box</th>
                 <th>Pcs</th>
               </tr>
@@ -579,6 +580,7 @@ export default function AddStock() {
                   </td>
 
                   <td>{item.item_title || ""}</td>
+                  <td>{item.mrp || ""}</td>
                   <td>{item.b || 0}</td>
 
                   <td>{item.p || 0}</td>
@@ -591,21 +593,22 @@ export default function AddStock() {
                 ></td>
 
                 <td>Total</td>
+                <td></td>
                 <td>
                   {" "}
-                  {itemsData.length > 1
-                    ? itemsData.map((a) => +a.b || 0).reduce((a, b) => a + b)
-                    : itemsData.length
-                    ? itemsData[0].b
+                  {order?.item_details.length > 1
+                    ? order?.item_details.map((a) => +a.b || 0).reduce((a, b) => a + b)
+                    : order?.item_details.length
+                    ? order?.item_details[0].b
                     : 0}
                 </td>
 
                 <td>
                   {" "}
-                  {itemsData.length > 1
-                    ? itemsData.map((a) => +a.p || 0).reduce((a, b) => a + b)
-                    : itemsData.length
-                    ? itemsData[0].p
+                  {order?.item_details.length > 1
+                    ? order?.item_details.map((a) => +a.p || 0).reduce((a, b) => a + b)
+                    : order?.item_details.length
+                    ? order?.item_details[0].p
                     : 0}
                 </td>
               </tr>
