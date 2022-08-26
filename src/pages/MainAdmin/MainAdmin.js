@@ -321,8 +321,8 @@ const MainAdmin = () => {
         .map((a) => ({
           order_uuid: a.order_uuid,
           trip_uuid:
-            +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.trip_uuid,
-          warehouse_uuid: +selectedTrip.warehouse_uuid,
+            +selectedTrip?.trip_uuid === 0 ? "" : selectedTrip?.trip_uuid,
+          warehouse_uuid: +selectedTrip?.warehouse_uuid,
         })),
       headers: {
         "Content-Type": "application/json",
@@ -1857,7 +1857,7 @@ function NewUserForm({
                       <select
                         name="route_title"
                         className="numberInput"
-                        value={selectedTrip.trip_uuid}
+                        value={selectedTrip?.trip_uuid}
                         onChange={(e) =>
                           setSelectedTrip({
                             trip_uuid: e.target.value,
