@@ -1,5 +1,11 @@
 import axios from "axios";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./style.css";
@@ -328,6 +334,117 @@ const MainAdmin = () => {
       setBtn((prev) => !prev);
     }
   };
+  const routeOrderLength = useMemo(() => {
+    let data = [
+      {
+        route_uuid: 0,
+        route_title: "Unknown",
+        orderLength: orders.filter(
+          (a) =>
+            counter.filter(
+              (c) =>
+                c.counter_uuid === a.counter_uuid &&
+                (!c.route_uuid || +c.route_uuid === 0)
+            ).length
+        ).length,
+        checkingLength: orders.filter(
+          (b) =>
+            counter.filter(
+              (c) =>
+                c.counter_uuid === b.counter_uuid &&
+                (!c.route_uuid || +c.route_uuid === 0)
+            ).length &&
+            (b.status.length > 1
+              ? +b.status
+                  .map((x) => +x.stage || 0)
+                  .reduce((c, d) => Math.max(c, d)) === 2
+              : +b?.status[0]?.stage === 2)
+        ).length,
+        processingLength: orders.filter(
+          (b) =>
+            counter.filter(
+              (c) =>
+                c.counter_uuid === b.counter_uuid &&
+                (!c.route_uuid || +c.route_uuid === 0)
+            ).length &&
+            (b.status.length > 1
+              ? +b.status
+                  .map((x) => +x.stage || 0)
+                  .reduce((c, d) => Math.max(c, d)) === 1
+              : +b?.status[0]?.stage === 1)
+        ).length,
+        deliveryLength: orders.filter(
+          (b) =>
+            counter.filter(
+              (c) =>
+                c.counter_uuid === b.counter_uuid &&
+                (!c.route_uuid || +c.route_uuid === 0)
+            ).length &&
+            (b.status.length > 1
+              ? +b.status
+                  .map((x) => +x.stage || 0)
+                  .reduce((c, d) => Math.max(c, d)) === 3
+              : +b?.status[0]?.stage === 3)
+        ).length,
+      },
+    ];
+
+    for (let route of routesData) {
+      data.push({
+        ...route,
+        orderLength: orders.filter(
+          (b) =>
+            counter.filter(
+              (c) =>
+                c.counter_uuid === b.counter_uuid &&
+                route.route_uuid === c.route_uuid
+            ).length
+        ).length,
+
+        processingLength: orders.filter(
+          (b) =>
+            counter.filter(
+              (c) =>
+                c.counter_uuid === b.counter_uuid &&
+                route.route_uuid === c.route_uuid
+            ).length &&
+            (b.status.length > 1
+              ? +b.status
+                  .map((x) => +x.stage || 0)
+                  .reduce((c, d) => Math.max(c, d)) === 1
+              : +b?.status[0]?.stage === 1)
+        ).length,
+        checkingLength: orders.filter(
+          (b) =>
+            counter.filter(
+              (c) =>
+                c.counter_uuid === b.counter_uuid &&
+                route.route_uuid === c.route_uuid
+            ).length &&
+            (b.status.length > 1
+              ? +b.status
+                  .map((x) => +x.stage || 0)
+                  .reduce((c, d) => Math.max(c, d)) === 2
+              : +b?.status[0]?.stage === 2)
+        ).length,
+        deliveryLength: orders.filter(
+          (b) =>
+            counter.filter(
+              (c) =>
+                c.counter_uuid === b.counter_uuid &&
+                route.route_uuid === c.route_uuid
+            ).length &&
+            (b.status.length > 1
+              ? +b.status
+                  .map((x) => +x.stage || 0)
+                  .reduce((c, d) => Math.max(c, d)) === 3
+              : +b?.status[0]?.stage === 3)
+        ).length,
+      });
+    }
+    return data;
+  }, [counter, orders, routesData]);
+
   return (
     <>
       <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} />
@@ -510,7 +627,7 @@ const MainAdmin = () => {
               <>
                 {routesData.length ? (
                   <>
-                    {routesData.map((route) => {
+                    {routeOrderLength.map((route) => {
                       if (
                         orders
                           .filter(
@@ -1608,7 +1725,6 @@ const MainAdmin = () => {
           category={category}
           company={company}
           setPopupOrder={setPopupOrder}
-
           updateOrders={() => {
             if (
               window.location.pathname.includes("admin") ||
@@ -2571,7 +2687,7 @@ function SummaryPopup({
   company,
   setPopupOrder,
   updateOrders,
-  setOrders
+  setOrders,
 }) {
   const [items, setItems] = useState([]);
 
@@ -2598,7 +2714,6 @@ function SummaryPopup({
           : a.status[0].stage,
     }));
     setFilteredOrder(orderStage);
-
 
     let data = [].concat
       .apply(
@@ -2668,7 +2783,7 @@ function SummaryPopup({
     console.log(result);
 
     setItems(result);
-  }, [itemsData, orders,setOrders,popup]);
+  }, [itemsData, orders, setOrders, popup]);
   const GetItemsQty = (category_uuid) => {
     let itemsData = items?.filter((b) => category_uuid === b.category_uuid);
     let box =
