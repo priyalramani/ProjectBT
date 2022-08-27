@@ -20,7 +20,7 @@ const default_status = [
 ];
 export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
-  const [method, setMethod] = useState("");
+
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
   const [deliveryPopup, setDeliveryPopup] = useState(false);
@@ -305,7 +305,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       setEditOrder(false);
     }
   };
-  const handleWarehouseChacking = async (complete) => {
+  const handleWarehouseChacking = async (complete, methodType) => {
     let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
 
     if (
@@ -315,17 +315,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     ) {
       console.log(orderData.warehouse_uuid);
       if (!orderData.warehouse_uuid) {
-        updateWarehouse(warehouse_uuid);
+        updateWarehouse(warehouse_uuid,methodType);
       } else {
         setWarhousePopup(warehouse_uuid);
       }
     } else {
-      if (method === "complete" || complete) {
+      if (methodType === "complete" || complete) {
         setDeliveryPopup(true);
       } else handleTaskChecking();
     }
   };
-  const updateWarehouse = async (warehouse_uuid) => {
+  const updateWarehouse = async (warehouse_uuid,method) => {
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
@@ -475,8 +475,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     style={{ width: "fit-Content", backgroundColor: "#44cd4a" }}
                     className="item-sales-search"
                     onClick={() => {
-                      handleWarehouseChacking(true);
-                      setMethod("complete");
+                      handleWarehouseChacking(true, "complete");
+        
                     }}
                   >
                     Complete Order
