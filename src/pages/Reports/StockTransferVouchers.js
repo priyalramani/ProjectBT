@@ -374,6 +374,7 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 function NewUserForm({ onSave, popupInfo }) {
   const [data, setdata] = useState({});
   const [disabled, setDisabled] = useState(true);
+
   useEffect(() => {
     setdata(popupInfo.data);
     setTimeout(() => {
@@ -382,6 +383,7 @@ function NewUserForm({ onSave, popupInfo }) {
   }, [popupInfo.data]);
 
   const submitHandler = async (e) => {
+    setDisabled(true);
     e.preventDefault();
     if (popupInfo?.type === "Delete") {
       const response = await axios({
@@ -408,6 +410,7 @@ function NewUserForm({ onSave, popupInfo }) {
         onSave();
       }
     }
+    setDisabled(false);
   };
 
   console.log(data);
@@ -434,7 +437,7 @@ function NewUserForm({ onSave, popupInfo }) {
                 className="submit"
                 disabled={disabled}
               >
-                Confirm
+                {disabled?"Please Wait...":"Confirm"}
               </button>
             </form>
           </div>
