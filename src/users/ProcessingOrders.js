@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-loop-func */
 import axios from "axios";
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { AiFillPlayCircle } from "react-icons/ai";
@@ -178,62 +178,62 @@ const ProcessingOrders = () => {
   useEffect(() => {
     if (!selectedOrder || audiosRef.current?.[0]) return;
 
-    const audioElements = [];
-    const unprocessedItems =
-      selectedOrder?.item_details?.filter((a) => !a.status) || [];
-    let progressCount = 0;
+    // const audioElements = [];
+    // const unprocessedItems =
+    //   selectedOrder?.item_details?.filter((a) => !a.status) || [];
+    // let progressCount = 0;
 
-    unprocessedItems.forEach((order_item) => {
-      const item = items.find((j) => j.item_uuid === order_item.item_uuid);
+    // unprocessedItems.forEach((order_item) => {
+    //   const item = items.find((j) => j.item_uuid === order_item.item_uuid);
 
-      if (item) {
-        console.log(item.item_title);
-        const handleQty = (value, label, sufix) =>
-          value ? `${value} ${label}${value > 1 ? sufix : ""}` : "";
-        const speechString = `${item.pronounce} ${item.mrp} MRP ${handleQty(
-          order_item.b,
-          "Box",
-          "es"
-        )} ${handleQty(
-          (+order_item.p || 0) + (+order_item.free || 0),
-          "Piece",
-          "s"
-        )}`;
+    //   if (item) {
+    //     console.log(item.item_title);
+    //     const handleQty = (value, label, sufix) =>
+    //       value ? `${value} ${label}${value > 1 ? sufix : ""}` : "";
+    //     const speechString = `${item.pronounce} ${item.mrp} MRP ${handleQty(
+    //       order_item.b,
+    //       "Box",
+    //       "es"
+    //     )} ${handleQty(
+    //       (+order_item.p || 0) + (+order_item.free || 0),
+    //       "Piece",
+    //       "s"
+    //     )}`;
 
-        const loopEndFunctioin = (audio) => {
-          audioElements.push(audio);
-          console.log(`${++progressCount}/${unprocessedItems?.length}`);
+    //     const loopEndFunctioin = (audio) => {
+    //       audioElements.push(audio);
+    //       console.log(`${++progressCount}/${unprocessedItems?.length}`);
 
-          if (progressCount === unprocessedItems?.length) {
-            console.log(audioElements);
-            audiosRef.current = audioElements
-              .sort((a, b) =>
-                itemsSortFunction(
-                  { ...a, item_uuid: a.elem_id },
-                  { ...b, item_uuid: b.elem_id }
-                )
-              )
-              .map((i) => {
-                i.volume = 1;
-                i.currentTime = 0;
-                return i;
-              });
-            audioLoopFunction({
-              i: 0,
-              recall: true,
-              src: audiosRef.current,
-              callback: audioCallback,
-            });
-          }
-        };
+    //       if (progressCount === unprocessedItems?.length) {
+    //         console.log(audioElements);
+    //         audiosRef.current = audioElements
+    //           .sort((a, b) =>
+    //             itemsSortFunction(
+    //               { ...a, item_uuid: a.elem_id },
+    //               { ...b, item_uuid: b.elem_id }
+    //             )
+    //           )
+    //           .map((i) => {
+    //             i.volume = 1;
+    //             i.currentTime = 0;
+    //             return i;
+    //           });
+    //         audioLoopFunction({
+    //           i: 0,
+    //           recall: true,
+    //           src: audiosRef.current,
+    //           callback: audioCallback,
+    //         });
+    //       }
+    //     };
 
-        audioAPIFunction({
-          speechString,
-          elem_id: item.item_uuid,
-          callback: loopEndFunctioin,
-        });
-      } else progressCount++;
-    });
+    //     audioAPIFunction({
+    //       speechString,
+    //       elem_id: item.item_uuid,
+    //       callback: loopEndFunctioin,
+    //     });
+    //   } else progressCount++;
+    // });
   }, [selectedOrder]);
 
   const postActivity = async (others = {}) => {
@@ -1001,21 +1001,21 @@ const ProcessingOrders = () => {
                     onClick={() => setFilterItemTile("")}
                   />
                 </div>
-              ) : !Location.pathname.includes("delivery") ? (
-                <button
-                  className="item-sales-search"
-                  style={{ width: "max-content" }}
-                  onClick={() =>
-                    audioLoopFunction({
-                      i: 0,
-                      forcePlayCount: +playCount,
-                      src: audiosRef.current,
-                      callback: audioCallback,
-                    })
-                  }
-                >
-                  Play
-                </button>
+              // ) : !Location.pathname.includes("delivery") ? (
+                // <button
+                //   className="item-sales-search"
+                //   style={{ width: "max-content" }}
+                //   onClick={() =>
+                //     audioLoopFunction({
+                //       i: 0,
+                //       forcePlayCount: +playCount,
+                //       src: audiosRef.current,
+                //       callback: audioCallback,
+                //     })
+                //   }
+                // >
+                //   Play
+                // </button>
               ) : (
                 ""
               )}
