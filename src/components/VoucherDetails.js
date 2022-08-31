@@ -235,17 +235,21 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                     Print
                   </button>
 
-                  {+orderData?.delivered===0?<button
-                    style={{ width: "fit-Content" }}
-                    className="item-sales-search"
-                    onClick={(e) => {
-                      reactInputsRef.current = {};
-                      e.target.blur();
-                      setEditOrder((prev) => !prev);
-                    }}
-                  >
-                    Edit
-                  </button>:""}
+                  {+orderData?.delivered === 0 ? (
+                    <button
+                      style={{ width: "fit-Content" }}
+                      className="item-sales-search"
+                      onClick={(e) => {
+                        reactInputsRef.current = {};
+                        e.target.blur();
+                        setEditOrder((prev) => !prev);
+                      }}
+                    >
+                      Edit
+                    </button>
+                  ) : (
+                    ""
+                  )}
                 </div>
               </div>
 
@@ -635,6 +639,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
             // textAlign: "center",
             height: "128mm",
             // padding: "10px"
+           
           }}
         >
           <table
@@ -648,6 +653,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
               pageBreakInside: "auto",
               display: "block",
               fontSize: "small",
+              fontWeight: "bold",
             }}
           >
             <thead>
@@ -655,7 +661,8 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                 <th
                   colSpan={2}
                   style={{
-                    width: "85mm",
+                    width: "84mm",
+                    backgroundColor: "#fff",
                   }}
                 >
                   From: {orderData?.from_warehouse_title}
@@ -664,24 +671,27 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                   colSpan={3}
                   style={{
                     width: "85mm",
+                    backgroundColor: "#fff",
                   }}
                 >
                   To: {orderData?.to_warehouse_title}
                 </th>
               </tr>
               <tr>
-                <th colSpan={2}>
+                <th colSpan={2} style={{ backgroundColor: "#fff" }}>
                   Created At: {new Date(orderData?.created_at).toDateString()} -{" "}
                   {formatAMPM(new Date(orderData?.created_at))}
                 </th>
-                <th colSpan={3}>Created By: {orderData?.created_by_user}</th>
+                <th colSpan={3} style={{ backgroundColor: "#fff" }}>
+                  Created By: {orderData?.created_by_user}
+                </th>
               </tr>
               <tr>
-                <th style={{ width: "10mm" }}>S.N</th>
-                <th>Item Name</th>
-                <th>MRP</th>
-                <th>Box</th>
-                <th>Pcs</th>
+                <th style={{ width: "10mm", backgroundColor: "#fff" }}>S.N</th>
+                <th style={{ backgroundColor: "#fff" }}>Item Name</th>
+                <th style={{ backgroundColor: "#fff" }}>MRP</th>
+                <th style={{ backgroundColor: "#fff" }}>Box</th>
+                <th style={{ backgroundColor: "#fff" }}>Pcs</th>
               </tr>
             </thead>
             <tbody className="tbody">
@@ -717,11 +727,13 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                     : orderData?.item_details[0]?.b || 0}
                 </td>
 
-                <td>{orderData?.item_details?.length > 1
+                <td>
+                  {orderData?.item_details?.length > 1
                     ? orderData?.item_details
                         ?.map((a) => +a.p || 0)
                         ?.reduce((a, b) => +a + b)
-                    : orderData?.item_details[0]?.p || 0}</td>
+                    : orderData?.item_details[0]?.p || 0}
+                </td>
               </tr>
             </tbody>
           </table>
