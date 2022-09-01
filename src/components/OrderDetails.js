@@ -1891,6 +1891,17 @@ function DiliveryPopup({
   }, [PaymentModes]);
   const submitHandler = async () => {
     setError("");
+    let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
+      //console.log(
+      // Tempdata?.order_grandtotal,
+      //   +(+modeTotal + (+outstanding?.amount || 0))
+      // );
+      if (
+        +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
+      ) {
+        setError("Invoice Amount and Payment mismatch");
+        return;
+      }
     if (
       window.location.pathname.includes("completeOrderReport") ||
       window.location.pathname.includes("signedBills") ||
@@ -1926,17 +1937,7 @@ function DiliveryPopup({
         onSave();
       }
     } else {
-      let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
-      //console.log(
-      // Tempdata?.order_grandtotal,
-      //   +(+modeTotal + (+outstanding?.amount || 0))
-      // );
-      if (
-        +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
-      ) {
-        setError("Invoice Amount and Payment mismatch");
-        return;
-      }
+      
       // let obj = modes.find((a) => a.mode_title === "Cash");
       // if (obj?.amt && obj?.coin === "") {
       //   setCoinPopup(true);
