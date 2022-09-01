@@ -15,23 +15,31 @@ const UPITransection = () => {
     console.log("transactions", response);
     if (response.data.success) setItems(response.data.result);
   };
-  const putActivityData = async (order_uuid,mode_uuid) => {
+  const putActivityData = async (order_uuid, mode_uuid, invoice_number) => {
     const response = await axios({
       method: "put",
       url: "/receipts/putReceiptUPIStatus",
-      data:{order_uuid,status:1,mode_uuid},
+      data: { order_uuid, status: 1, mode_uuid, invoice_number },
       headers: {
         "Content-Type": "application/json",
       },
     });
     console.log("transactions", response);
-    if (response.data.success) getActivityData();
+    if (response.data.success) {
+      setItems((prev) =>
+        prev.filter(
+          (a) =>
+            a.invoice_number !== invoice_number && a.mode_uuid !== mode_uuid
+        )
+      );
+      getActivityData();
+    }
   };
   useEffect(() => {
-      getActivityData();
-    }, []);
-    return (
-        <>
+    getActivityData();
+  }, []);
+  return (
+    <>
       <Sidebar />
       <Header />
       <div className="item-sales-container orders-report-container">
@@ -40,7 +48,7 @@ const UPITransection = () => {
         </div>
 
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={items} putActivityData={putActivityData}/>
+          <Table itemsDetails={items} putActivityData={putActivityData} />
         </div>
       </div>
     </>
@@ -48,7 +56,7 @@ const UPITransection = () => {
 };
 
 export default UPITransection;
-function Table({ itemsDetails,putActivityData }) {
+function Table({ itemsDetails, putActivityData }) {
   function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -89,18 +97,30 @@ function Table({ itemsDetails,putActivityData }) {
               <td colSpan={2}>{item.amt || ""}</td>
               <td colSpan={2}>{item.invoice_number || ""}</td>
 
-              <td colSpan={2}>{(new Date(item.order_date)).toDateString() } -{formatAMPM(new Date(item.order_date)) || ""}</td>
               <td colSpan={2}>
-              {(new Date(item.payment_date)).toDateString() } -{formatAMPM(new Date(item.payment_date)) || ""}
-              </td>
-              <td colSpan={3}>
-              {item.user_title || ""}
-              </td>
-              <td colSpan={3}>
-              {item.mode_title || ""}
+                {new Date(item.order_date).toDateString()} -
+                {formatAMPM(new Date(item.order_date)) || ""}
               </td>
               <td colSpan={2}>
-                  <button type="button" className="item-sales-search"  onClick={()=>putActivityData(item.order_uuid,item.mode_uuid)}>Complete</button>
+                {new Date(item.payment_date).toDateString()} -
+                {formatAMPM(new Date(item.payment_date)) || ""}
+              </td>
+              <td colSpan={3}>{item.user_title || ""}</td>
+              <td colSpan={3}>{item.mode_title || ""}</td>
+              <td colSpan={2}>
+                <button
+                  type="button"
+                  className="item-sales-search"
+                  onClick={() =>
+                    putActivityData(
+                      item.order_uuid,
+                      item.mode_uuid,
+                      item.invoice_number
+                    )
+                  }
+                >
+                  Complete
+                </button>
               </td>
             </tr>
           ))}
