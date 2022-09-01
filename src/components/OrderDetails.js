@@ -315,7 +315,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     ) {
       console.log(orderData.warehouse_uuid);
       if (!orderData.warehouse_uuid) {
-        updateWarehouse(warehouse_uuid,methodType);
+        updateWarehouse(warehouse_uuid, methodType);
       } else {
         setWarhousePopup(warehouse_uuid);
       }
@@ -325,7 +325,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       } else handleTaskChecking();
     }
   };
-  const updateWarehouse = async (warehouse_uuid,method) => {
+  const updateWarehouse = async (warehouse_uuid, method) => {
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
@@ -348,7 +348,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     if (!editOrder) return;
     reactInputsRef.current?.[orderData?.item_details?.[0]?.uuid]?.focus();
   }, [editOrder]);
-  const HoldOrder = async () => {
+  const HoldOrder = async (hold = "Y") => {
     // let data = orderData;
     // let billingData = await Billing({
     //   replacement: data.replacement,
@@ -367,7 +367,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     // });
     let data = {
       ...orderData,
-      hold: "Y",
+      hold,
     };
     data = Object.keys(data)
       .filter((key) => key !== "notes")
@@ -469,14 +469,21 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       Hold Order
                     </button>
                   ) : (
-                    ""
+                    <button
+                      style={{ width: "fit-Content", backgroundColor: "blue" }}
+                      className="item-sales-search"
+                      onClick={() => {
+                        HoldOrder("N");
+                      }}
+                    >
+                      Cancel Hold
+                    </button>
                   )}
                   <button
                     style={{ width: "fit-Content", backgroundColor: "#44cd4a" }}
                     className="item-sales-search"
                     onClick={() => {
                       handleWarehouseChacking(true, "complete");
-        
                     }}
                   >
                     Complete Order
@@ -549,6 +556,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           className={
                             window.location.pathname.includes(
                               "completeOrderReport"
+                            ) ||
+                            window.location.pathname.includes("signedBills") ||
+                            window.location.pathname.includes("pendingEntry") ||
+                            window.location.pathname.includes(
+                              "upiTransactionReport"
                             )
                               ? "hover_class"
                               : ""
@@ -556,6 +568,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           onClick={() =>
                             window.location.pathname.includes(
                               "completeOrderReport"
+                            ) ||
+                            window.location.pathname.includes("signedBills") ||
+                            window.location.pathname.includes("pendingEntry") ||
+                            window.location.pathname.includes(
+                              "upiTransactionReport"
                             )
                               ? setDeliveryPopup("put")
                               : {}
@@ -1874,7 +1891,12 @@ function DiliveryPopup({
   }, [PaymentModes]);
   const submitHandler = async () => {
     setError("");
-    if (window.location.pathname.includes("completeOrderReport")) {
+    if (
+      window.location.pathname.includes("completeOrderReport") ||
+      window.location.pathname.includes("signedBills") ||
+      window.location.pathname.includes("pendingEntry") ||
+      window.location.pathname.includes("upiTransactionReport")
+    ) {
       const response = await axios({
         method: "put",
         url: "/receipts/putReceipt",

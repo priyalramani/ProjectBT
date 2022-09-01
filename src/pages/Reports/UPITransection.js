@@ -2,7 +2,25 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
+import { OrderDetails } from "../../components/OrderDetails";
+import * as XLSX from "xlsx";
+import * as FileSaver from "file-saver";
+const fileExtension = ".xlsx";
+const fileType =
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+function formatAMPM(date) {
+  var hours = date.getHours();
+  var minutes = date.getMinutes();
+  var ampm = hours >= 12 ? "pm" : "am";
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? "0" + minutes : minutes;
+  var strTime = hours + ":" + minutes + " " + ampm;
+  return strTime;
+}
 const UPITransection = () => {
+  const [popupOrder, setPopupOrder] = useState(null);
+
   const [items, setItems] = useState([]);
   const getActivityData = async () => {
     const response = await axios({
@@ -14,6 +32,17 @@ const UPITransection = () => {
     });
     console.log("transactions", response);
     if (response.data.success) setItems(response.data.result);
+  };
+  const getOrderData = async (order_uuid) => {
+    const response = await axios({
+      method: "get",
+      url: "/orders/GetOrder/" + order_uuid,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("transactions", response);
+    if (response.data.success) setPopupOrder(response.data.result);
   };
   const putActivityData = async (order_uuid, mode_uuid, invoice_number) => {
     const response = await axios({
@@ -32,12 +61,40 @@ const UPITransection = () => {
             a.invoice_number !== invoice_number && a.mode_uuid !== mode_uuid
         )
       );
-      getActivityData();
+      // getActivityData();
     }
   };
   useEffect(() => {
     getActivityData();
   }, []);
+  const downloadHandler = async () => {
+    let sheetData = items.map((a) => {
+      // console.log(a)
+      return {
+        "Counter Title": a.counter_title,
+        Amount: a.amt,
+        "Invoice Number": a.invoice_number,
+        "Order Date":
+          new Date(a.order_date).toDateString() +
+          " - " +
+          formatAMPM(new Date(a.order_date)),
+        "Payment Date":
+          new Date(a.payment_date).toDateString() +
+          " - " +
+          formatAMPM(new Date(a.payment_date)),
+
+        User: a.user_title,
+        type: a.mode_title,
+      };
+    });
+    // console.log(sheetData)
+
+    const ws = XLSX.utils.json_to_sheet(sheetData);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(data, "TripOrders" + fileExtension);
+  };
   return (
     <>
       <Sidebar />
@@ -45,29 +102,37 @@ const UPITransection = () => {
       <div className="item-sales-container orders-report-container">
         <div id="heading">
           <h2>UPI and Cheque Transaction </h2>
+          {/* <button type="button" onClick={downloadHandler}>
+            Exels
+          </button> */}
         </div>
 
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={items} putActivityData={putActivityData} />
+          <Table
+            itemsDetails={items}
+            putActivityData={putActivityData}
+            getOrderData={getOrderData}
+          />
         </div>
       </div>
+      {popupOrder ? (
+        <OrderDetails
+          onSave={() => {
+            setPopupOrder(null);
+            getActivityData();
+          }}
+          order={popupOrder}
+          orderStatus="edit"
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default UPITransection;
-function Table({ itemsDetails, putActivityData }) {
-  function formatAMPM(date) {
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var ampm = hours >= 12 ? "pm" : "am";
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    var strTime = hours + ":" + minutes + " " + ampm;
-    return strTime;
-  }
-
+function Table({ itemsDetails, putActivityData, getOrderData }) {
   return (
     <table
       className="user-table"
@@ -90,7 +155,14 @@ function Table({ itemsDetails, putActivityData }) {
         {itemsDetails
           // ?.sort((a, b) => a.timestamp - b.timestamp)
           ?.map((item, i, array) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
+            <tr
+              key={Math.random()}
+              style={{ height: "30px" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                getOrderData(item.order_uuid);
+              }}
+            >
               <td>{i + 1}</td>
 
               <td colSpan={3}>{item.counter_title || ""}</td>
@@ -111,13 +183,14 @@ function Table({ itemsDetails, putActivityData }) {
                 <button
                   type="button"
                   className="item-sales-search"
-                  onClick={() =>
+                  onClick={(e) => {
+                    e.stopPropagation();
                     putActivityData(
                       item.order_uuid,
                       item.mode_uuid,
                       item.invoice_number
-                    )
-                  }
+                    );
+                  }}
                 >
                   Complete
                 </button>
