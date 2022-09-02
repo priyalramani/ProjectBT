@@ -38,6 +38,18 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
+  const [warehouse, setWarehouse] = useState([]);
+  const getWarehouseData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/warehouse/GetWarehouseList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setWarehouse(response.data.result);
+  };
   console.log("ORDERDATA", orderData);
   useEffect(() => {
     if (order.order_status === "A") setEditOrder(true);
@@ -206,6 +218,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     getItemsData();
     getAutoBill();
     getUsers();
+    getWarehouseData();
   }, []);
 
   const onSubmit = async (type = { stage: 0 }) => {
@@ -584,6 +597,44 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   >
                     <>
                       <tr>
+                        <th>Warehouse</th>
+                        <th>
+                          {editOrder ? (
+                            <Select
+                              options={[
+                                { value: "", label: "None" },
+                                ...warehouse.map((a, j) => ({
+                                  value: a.warehouse_uuid,
+                                  label: a.warehouse_title,
+                                })),
+                              ]}
+                              onChange={(e) => {
+                                setOrderData((prev) => ({
+                                  ...prev,
+                                  warehouse_uuid: e.value,
+                                }));
+                              }}
+                              value={{
+                                value: orderData.warehouse_uuid || "",
+                                label:
+                                  warehouse.find(
+                                    (a) =>
+                                      orderData?.warehouse_uuid ===
+                                      a.warehouse_uuid
+                                  )?.warehouse_title || "None",
+                              }}
+                              openMenuOnFocus={true}
+                              menuPosition="fixed"
+                              menuPlacement="auto"
+                              placeholder="Item"
+                            />
+                          ) : (
+                            warehouse.find(
+                              (a) =>
+                                orderData?.warehouse_uuid === a.warehouse_uuid
+                            )?.warehouse_title || "None"
+                          )}
+                        </th>
                         <th>Grand Total</th>
                         <th>{orderData?.order_grandtotal || 0}</th>
                         <th
@@ -631,7 +682,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           }}
                           onMouseOver={() => setUuid(true)}
                           onMouseLeave={() => setUuid(false)}
-                          colSpan={2}
                         >
                           {orderData?.order_uuid?.substring(0, 7) + "..."}
                           {copymsg && (
