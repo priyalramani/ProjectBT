@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
+import * as XLSX from "xlsx";
 
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
@@ -33,6 +34,44 @@ export default function AddStock() {
   const [focusedInputId, setFocusedInputId] = useState(0);
   const [suggestionPopup, setSuggestionPopup] = useState(false);
   const componentRef = useRef(null);
+  const readUploadFile = (e) => {
+    e.preventDefault();
+    if (e.target.files) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = e.target.result;
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet);
+        let dataJson = [];
+        for (let item in json) {
+          let itemData = itemsData.find(
+            (a) =>
+              a.item_code === json[item]["Item Code"] ||
+              +a.item_code === json[item]["Item Code"] ||
+              a.item_code === +json[item]["Item Code"]
+          );
+          let qty = json[item]["Qty"];
+          if (itemData) {
+            let b = Math.floor(+(qty || 0) / (+itemData.conversion || 1));
+            let p = Math.floor(+(qty || 0) % (+itemData.conversion || 1));
+            dataJson.push({ ...itemData, b, p, uuid: itemData.item_uuid });
+          }
+        }
+        if (dataJson.length)
+          setOrder((prev) => ({
+            ...prev,
+            item_details: [
+              ...(prev.item_details.filter((a) => a.item_uuid) || []),
+              ...dataJson,
+            ],
+          }));
+      };
+      reader.readAsArrayBuffer(e.target.files[0]);
+    }
+  };
+console.log(order)
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, []);
@@ -242,6 +281,23 @@ export default function AddStock() {
                   />
                 </div>
               </div>
+              {order.to_warehouse ? (
+                <label htmlFor="upload" className="item-sales-search">
+                  Upload Bulk
+                  <input
+                    style={{ display: "none" }}
+                    className="numberInput"
+                    onWheel={(e) => e.preventDefault()}
+                    index={listItemIndexCount++}
+                    type="file"
+                    name="upload"
+                    id="upload"
+                    onChange={readUploadFile}
+                  />
+                </label>
+              ) : (
+                ""
+              )}
               {order.to_warehouse ? (
                 <button
                   className="item-sales-search"
@@ -597,7 +653,9 @@ export default function AddStock() {
                 <td>
                   {" "}
                   {order?.item_details.length > 1
-                    ? order?.item_details.map((a) => +a.b || 0).reduce((a, b) => a + b)
+                    ? order?.item_details
+                        .map((a) => +a.b || 0)
+                        .reduce((a, b) => a + b)
                     : order?.item_details.length
                     ? order?.item_details[0].b
                     : 0}
@@ -606,7 +664,9 @@ export default function AddStock() {
                 <td>
                   {" "}
                   {order?.item_details.length > 1
-                    ? order?.item_details.map((a) => +a.p || 0).reduce((a, b) => a + b)
+                    ? order?.item_details
+                        .map((a) => +a.p || 0)
+                        .reduce((a, b) => a + b)
                     : order?.item_details.length
                     ? order?.item_details[0].p
                     : 0}
@@ -721,7 +781,7 @@ export function SuggestionsPopup({
                 <button
                   type="button"
                   className="submit"
-                  style={{opacity:items.length?1:"0.5"}}
+                  style={{ opacity: items.length ? 1 : "0.5" }}
                   onClick={() => {
                     setOrder((prev) => ({
                       ...prev,

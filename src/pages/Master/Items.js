@@ -439,30 +439,26 @@ function NewUserForm({
   const [errMassage, setErrorMassage] = useState("");
   let findDuplicates = (arr) =>
     arr?.filter((item, index) => arr?.indexOf(item) != index);
-  useEffect(
-    popupInfo?.type === "edit"
-      ? () => {
-          setdata({
-            one_pack: "1",
-            conversion: "1",
-            status: 1,
-            ...popupInfo.data,
-          });
-        }
-      : () => {
-          setdata({
-            one_pack: "1",
-            conversion: "1",
-            company_uuid: companies[0].company_uuid,
-            category_uuid: itemCategories.filter(
-              (a) => a.company_uuid === companies[0].company_uuid
-            )[0]?.category_uuid,
-            free_issue: "N",
-            status: 1,
-          });
-        },
-    []
-  );
+  useEffect(() => {
+    if (popupInfo?.type === "edit")
+      setdata({
+        one_pack: "1",
+        conversion: "1",
+        status: 1,
+        ...popupInfo.data,
+      });
+    else
+      setdata({
+        one_pack: "1",
+        conversion: "1",
+        company_uuid: companies[0].company_uuid,
+        category_uuid: itemCategories.filter(
+          (a) => a.company_uuid === companies[0].company_uuid
+        )[0]?.category_uuid,
+        free_issue: "N",
+        status: 1,
+      });
+  }, [companies, itemCategories, popupInfo.data, popupInfo?.type]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -477,7 +473,11 @@ function NewUserForm({
       );
     barcodeChecking = [].concat.apply([], barcodeChecking);
     if (!data.item_title) {
-      setErrorMassage("Please insert Route Title");
+      setErrorMassage("Please insert Item Title");
+      return;
+    }
+    if (items.find((a) => a.item_code === data.item_code)) {
+      setErrorMassage("Please insert Different Item Code");
       return;
     }
     if (findDuplicates(data.barcode)?.length || barcodeChecking?.length) {

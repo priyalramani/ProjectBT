@@ -218,6 +218,7 @@ const Counter = () => {
           setCounters={setCounter}
           popupInfo={popupForm}
           paymentModes={paymentModes}
+          counters={counter}
         />
       ) : (
         ""
@@ -516,6 +517,7 @@ function NewUserForm({
   setCounters,
   routesData,
   paymentModes,
+  counters,
 }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
@@ -552,6 +554,10 @@ function NewUserForm({
     //   setErrorMassage("Please enter 10 Numbers in Mobile");
     //   return;
     // }
+    if (counters.find((a) => a.counter_code === data.counter_code)) {
+      setErrorMassage("Please insert Different Counter Code");
+      return;
+    }
     if (!data.route_uuid) {
       setdata({ ...data, route_uuid: "0" });
     }

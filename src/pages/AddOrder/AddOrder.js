@@ -34,8 +34,7 @@ export default function AddOrder() {
   const [edit_prices, setEditPrices] = useState([]);
   const [autoAdd, setAutoAdd] = useState(false);
 
-
-
+  
   const getAutoBill = async () => {
     let data = [];
     const response = await axios({
@@ -399,6 +398,7 @@ export default function AddOrder() {
                 ) : (
                   ""
                 )}
+                
               </div>
             </div>
 
