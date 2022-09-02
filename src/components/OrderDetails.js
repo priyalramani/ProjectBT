@@ -3,7 +3,7 @@ import axios from "axios";
 import Select from "react-select";
 import { v4 as uuid } from "uuid";
 import { Billing, jumpToNextIndex } from "../Apis/functions";
-import { CheckCircle, ContentCopy } from "@mui/icons-material";
+import { CheckCircle, ContentCopy, Fullscreen } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 import OrderPrint from "./OrderPrint";
@@ -158,6 +158,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         default: true,
         sr: i + 1,
       })),
+      fulfillment: [],
     });
     if (order.notes.length) {
       setNotesPoup(true);
@@ -211,7 +212,31 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     let counter = counters.find(
       (a) => orderData?.counter_uuid === a.counter_uuid
     );
+    let fulfillment = orderData.fulfillment;
+    for (let item of orderData.item_details) {
+      let itemData = order.item_details.find(
+        (a) => a.item_uuid === item.item_uuid
+      );
+      let aQty = +(item?.b || 0) * (+item?.conversion || 0) + (+item?.p || 0);
+      let bQty =
+        +(itemData?.b || 0) * (+item?.conversion || 0) + (+itemData?.p || 0);
+      let difference = bQty - aQty;
+      if (bQty > aQty) {
+        let exicting = fulfillment?.find((a) => a.item_uuid === item.item_uuid);
+        if (exicting) {
+          difference =
+            difference +
+            (+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0));
+        }
 
+        fulfillment.push({
+          item_uuid: item.item_uuid,
+          b: Math.floor(difference / (+item.conversion || 1)),
+          p: Math.floor(difference % (+item.conversion || 1)),
+        });
+      }
+    }
+    console.log(fulfillment);
     let data = {
       ...orderData,
 
@@ -248,6 +273,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         : "R",
       orderStatus,
     };
+
     data =
       type.stage === 5
         ? {
@@ -287,7 +313,15 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               },
             ],
           }
-        : data;
+        : {
+            ...data,
+            fulfillment: [
+              ...(fulfillment || []),
+              ...(order.fulfillment.filter(
+                (a) => !fulfillment.find((b) => b.item_uuid === a.item_uuid)
+              ) || []),
+            ],
+          };
     console.log(data);
     const response = await axios({
       method: "put",
@@ -597,6 +631,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           }}
                           onMouseOver={() => setUuid(true)}
                           onMouseLeave={() => setUuid(false)}
+                          colSpan={2}
                         >
                           {orderData?.order_uuid?.substring(0, 7) + "..."}
                           {copymsg && (
@@ -666,6 +701,20 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             }
                           >
                             Delivery Return
+                          </button>
+                        </th>
+                        <th colSpan={2} style={{ textAlign: "center" }}>
+                          <button
+                            style={{ width: "fit-Content" }}
+                            className="item-sales-search"
+                            onClick={() =>
+                              setPopupDetails({
+                                type: "Fulfillment",
+                                data: orderData?.fulfillment,
+                              })
+                            }
+                          >
+                            Fulfillment
                           </button>
                         </th>
                         <th colSpan={2} style={{ textAlign: "center" }}>
@@ -1068,12 +1117,53 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 )}
                                 <span
                                   onClick={() =>
-                                    setOrderData((prev) => ({
-                                      ...prev,
-                                      item_details: prev.item_details.filter(
-                                        (a) => !(a.uuid === item.uuid)
-                                      ),
-                                    }))
+                                    setOrderData((prev) => {
+                                      let exicting = order?.fulfillment?.find(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      );
+                                      let difference = 0;
+                                      if (exicting) {
+                                        difference =
+                                          +(item.b || 0) *
+                                            (+item.conversion || 0) +
+                                          (+item.p || 0) +
+                                          (+(exicting.b || 0) *
+                                            (+item.conversion || 0) +
+                                            (+exicting.p || 0));
+                                      }
+                                      let fulfillment = exicting
+                                        ? [
+                                            ...(prev.fulfillment || []),
+
+                                            {
+                                              item_uuid: item.item_uuid,
+                                              b: Math.floor(
+                                                difference /
+                                                  (+item.conversion || 1)
+                                              ),
+                                              p: Math.floor(
+                                                difference %
+                                                  (+item.conversion || 1)
+                                              ),
+                                            },
+                                          ]
+                                        : [
+                                            ...(prev.fulfillment || []),
+                                            {
+                                              item_uuid: item.item_uuid,
+                                              b: item.b,
+                                              p: item.p,
+                                            },
+                                          ];
+                                      console.log(fulfillment);
+                                      return {
+                                        ...prev,
+                                        item_details: prev.item_details.filter(
+                                          (a) => !(a.uuid === item.uuid)
+                                        ),
+                                        fulfillment,
+                                      };
+                                    })
                                   }
                                 >
                                   <RemoveCircle
@@ -1465,18 +1555,9 @@ const DeleteOrderPopup = ({
           time: time.getTime(),
         },
       ],
-      processing_canceled:
-        +stage === 2
-          ? order.processing_canceled.length
-            ? [...order.processing_canceled, ...order.item_details]
-            : order.item_details
-          : order.processing_canceled || [],
-      delivery_return:
-        +stage === 4
-          ? order.delivery_return.length
-            ? [...order.delivery_return, ...order.item_details]
-            : order.item_details
-          : order.delivery_return || [],
+      fulfillment: order.fulfillment.length
+        ? [...order.fulfillment, ...order.item_details]
+        : order.item_details,
       item_details: order.item_details.map((a) => ({ ...a, b: 0, p: 0 })),
     };
 
@@ -1892,16 +1973,16 @@ function DiliveryPopup({
   const submitHandler = async () => {
     setError("");
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
-      //console.log(
-      // Tempdata?.order_grandtotal,
-      //   +(+modeTotal + (+outstanding?.amount || 0))
-      // );
-      if (
-        +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
-      ) {
-        setError("Invoice Amount and Payment mismatch");
-        return;
-      }
+    //console.log(
+    // Tempdata?.order_grandtotal,
+    //   +(+modeTotal + (+outstanding?.amount || 0))
+    // );
+    if (
+      +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
+    ) {
+      setError("Invoice Amount and Payment mismatch");
+      return;
+    }
     if (
       window.location.pathname.includes("completeOrderReport") ||
       window.location.pathname.includes("signedBills") ||
@@ -1937,7 +2018,6 @@ function DiliveryPopup({
         onSave();
       }
     } else {
-      
       // let obj = modes.find((a) => a.mode_title === "Cash");
       // if (obj?.amt && obj?.coin === "") {
       //   setCoinPopup(true);
