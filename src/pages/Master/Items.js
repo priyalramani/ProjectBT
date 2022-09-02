@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
-import {
-  ChevronUpIcon,
-  ChevronDownIcon,
-} from "@heroicons/react/solid";
+import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import axios from "axios";
 const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
@@ -396,13 +393,14 @@ function Table({ itemsDetails, setPopupForm }) {
       </thead>
       <tbody className="tbody">
         {itemsDetails
+          .map((a) => ({ ...a, item_discount: +a.item_discount || 0 }))
           .sort((a, b) =>
             order === "asc"
               ? typeof a[items] === "string"
-                ? a[items].localeCompare(b[items])
+                ? a[items]?.localeCompare(b[items])
                 : a[items] - b[items]
               : typeof a[items] === "string"
-              ? b[items].localeCompare(a[items])
+              ? b[items]?.localeCompare(a[items])
               : b[items] - a[items]
           )
           ?.map((item, i) => (
@@ -416,7 +414,7 @@ function Table({ itemsDetails, setPopupForm }) {
               <td colSpan={3}>{item.category_title}</td>
               <td colSpan={3}>{item.item_title}</td>
               <td colSpan={2}>{item.mrp}</td>
-              <td colSpan={2}>{item.item_discount||0}</td>
+              <td colSpan={2}>{item.item_discount || 0}</td>
               <td colSpan={2}>{item.item_price}</td>
               <td colSpan={2}>{item.conversion}</td>
               <td colSpan={2}>{item.item_gst}</td>
@@ -444,7 +442,12 @@ function NewUserForm({
   useEffect(
     popupInfo?.type === "edit"
       ? () => {
-          setdata({ one_pack: "1", conversion: "1",status:1, ...popupInfo.data });
+          setdata({
+            one_pack: "1",
+            conversion: "1",
+            status: 1,
+            ...popupInfo.data,
+          });
         }
       : () => {
           setdata({
@@ -455,7 +458,7 @@ function NewUserForm({
               (a) => a.company_uuid === companies[0].company_uuid
             )[0]?.category_uuid,
             free_issue: "N",
-            status:1
+            status: 1,
           });
         },
     []
@@ -706,7 +709,7 @@ function NewUserForm({
                         })
                       }
                       maxLength={5}
-                      disabled={popupInfo.type==="edit"}
+                      disabled={popupInfo.type === "edit"}
                     />
                   </label>
                   <label className="selectLabel">
@@ -728,7 +731,7 @@ function NewUserForm({
                 </div>
 
                 <div className="row">
-                <label className="selectLabel">
+                  <label className="selectLabel">
                     Item Discount
                     <input
                       type="text"
@@ -821,7 +824,7 @@ function NewUserForm({
                           type="radio"
                           name="sort_order"
                           className="numberInput"
-                          checked={!data.status }
+                          checked={!data.status}
                           style={{ height: "25px" }}
                           onClick={() =>
                             setdata((prev) => ({ ...prev, status: 0 }))
@@ -834,7 +837,7 @@ function NewUserForm({
                   </label>
                 </div>
                 <div className="row">
-                <label className="selectLabel">
+                  <label className="selectLabel">
                     Item Code
                     <input
                       type="text"
@@ -849,7 +852,6 @@ function NewUserForm({
                       }
                     />
                   </label>
-                 
                 </div>
               </div>
               <i style={{ color: "red" }}>
