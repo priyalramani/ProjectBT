@@ -653,7 +653,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
               pageBreakInside: "auto",
               display: "block",
               fontSize: "small",
-              fontWeight: "bold",
+              fontWeight: "bolder",
             }}
           >
             <thead>
