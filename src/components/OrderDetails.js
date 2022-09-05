@@ -1901,6 +1901,48 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
                   </tbody>
                 </table>
               </div>
+            ) : popupDetails.type === "Fulfillment" ? (
+              <div
+                className="flex"
+                style={{ flexDirection: "column", width: "100%" }}
+              >
+                <table
+                  className="user-table"
+                  style={{
+                    width: "max-content",
+                    height: "fit-content",
+                  }}
+                >
+                  <thead>
+                    <tr>
+                      <th colSpan={2}>
+                        <div className="t-head-element">Item</div>
+                      </th>
+                      <th>
+                        <div className="t-head-element">Quantity</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="tbody">
+                    {popupDetails.data?.map((item, i) => (
+                      <tr
+                        key={item?.item_uuid || Math.random()}
+                        style={{
+                          height: "30px",
+                        }}
+                      >
+                        <td colSpan={2}>
+                          {items.find((a) => a.item_uuid === item.item_uuid)
+                            ?.item_title || ""}
+                        </td>
+                        <td>
+                          {item?.b || 0}:{item.p || 0}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
               ""
             )}

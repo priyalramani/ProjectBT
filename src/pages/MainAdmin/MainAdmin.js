@@ -444,6 +444,78 @@ const MainAdmin = () => {
     }
     return data;
   }, [counter, orders, routesData]);
+  const TripsOrderLength = useMemo(() => {
+    let data = [
+      {
+        trip_uuid: 0,
+        trip_title: "Unknown",
+        orderLength: orders.filter((b) => !b.trip_uuid).length,
+        processingLength: orders.filter(
+          (b) =>
+            !b.trip_uuid &&
+            (b.status.length > 1
+              ? +b.status
+                  .map((x) => +x.stage)
+                  .reduce((c, d) => Math.max(c, d)) === 1
+              : +b?.status[0]?.stage === 1)
+        ).length,
+        checkingLength: orders.filter(
+          (b) =>
+            !b.trip_uuid &&
+            (b.status.length > 1
+              ? +b.status
+                  .map((x) => +x.stage)
+                  .reduce((c, d) => Math.max(c, d)) === 2
+              : +b?.status[0]?.stage === 2)
+        ).length,
+        deliveryLength: orders.filter(
+          (b) =>
+            !b.trip_uuid &&
+            (b.status.length > 1
+              ? +b.status
+                  .map((x) => +x.stage)
+                  .reduce((c, d) => Math.max(c, d)) === 3
+              : +b?.status[0]?.stage === 3)
+        ).length,
+      },
+    ];
+
+    for (let trip of tripData) {
+      data.push({
+        ...trip,
+        orderLength: orders.filter((b) => trip.trip_uuid === b.trip_uuid)
+            .length,
+          processingLength: orders.filter(
+            (b) =>
+              trip.trip_uuid === b.trip_uuid &&
+              (b.status.length > 1
+                ? +b.status
+                    .map((x) => +x.stage)
+                    .reduce((c, d) => Math.max(c, d)) === 1
+                : +b?.status[0]?.stage === 1)
+          ).length,
+          checkingLength: orders.filter(
+            (b) =>
+              trip.trip_uuid === b.trip_uuid &&
+              (b.status.length > 1
+                ? +b.status
+                    .map((x) => +x.stage)
+                    .reduce((c, d) => Math.max(c, d)) === 2
+                : +b?.status[0]?.stage === 2)
+          ).length,
+          deliveryLength: orders.filter(
+            (b) =>
+              trip.trip_uuid === b.trip_uuid &&
+              (b.status.length > 1
+                ? +b.status
+                    .map((x) => +x.stage)
+                    .reduce((c, d) => Math.max(c, d)) === 3
+                : +b?.status[0]?.stage === 3)
+          ).length,
+      });
+    }
+    return data;
+  }, [orders, tripData]);
 
   return (
     <>
@@ -854,12 +926,12 @@ const MainAdmin = () => {
                                     a.invoice_number
                                       ?.toString()
                                       ?.includes(
-                                        searchItems.toLocaleLowerCase()
+                                        searchItems?.toLocaleLowerCase()
                                       ) ||
                                     a.counter_title
                                       ?.toLocaleLowerCase()
                                       ?.includes(
-                                        searchItems.toLocaleLowerCase()
+                                        searchItems?.toLocaleLowerCase()
                                       )
                                 )
                                 .sort(
@@ -999,13 +1071,13 @@ const MainAdmin = () => {
                       ({orders.filter((a) => !a?.trip_uuid).length}) [
                       processing:{" "}
                       {
-                        tripData.find((a) => +a.trip_uuid === 0)
+                        TripsOrderLength.find((a) => +a.trip_uuid === 0)
                           ?.processingLength
                       }
                       , Checking:{" "}
-                      {tripData.find((a) => +a.trip_uuid === 0)?.checkingLength}
+                      {TripsOrderLength.find((a) => +a.trip_uuid === 0)?.checkingLength}
                       , Delivery:{" "}
-                      {tripData.find((a) => +a.trip_uuid === 0)?.deliveryLength}
+                      {TripsOrderLength.find((a) => +a.trip_uuid === 0)?.deliveryLength}
                       ]
                       {selectOrder ? (
                         <input
@@ -1173,9 +1245,9 @@ const MainAdmin = () => {
                 ) : (
                   ""
                 )}
-                {tripData.length ? (
+                {TripsOrderLength.length ? (
                   <>
-                    {tripData.map((trip) => {
+                    {TripsOrderLength.map((trip) => {
                       if (
                         orders
                           .filter((a) => a.trip_uuid === trip.trip_uuid)
@@ -1317,7 +1389,7 @@ const MainAdmin = () => {
                                     a.counter_title
                                       ?.toLocaleLowerCase()
                                       ?.includes(
-                                        searchItems.toLocaleLowerCase()
+                                        searchItems?.toLocaleLowerCase()
                                       )
                                 )
                                 .sort(
@@ -1625,7 +1697,7 @@ const MainAdmin = () => {
           setRoutesData={setRoutesData}
           popupInfo={popupForm}
           orders={selectedOrder}
-          trips={tripData}
+          trips={TripsOrderLength}
           onClose={() => {
             setPopupForm(null);
             setSelectOrder("");
@@ -2237,7 +2309,7 @@ function HoldPopup({
                                     b.item_title
                                       .toLocaleLowerCase()
                                       .includes(
-                                        filterItemTitle.toLocaleLowerCase()
+                                        filterItemTitle?.toLocaleLowerCase()
                                       )) &&
                                   a.category_uuid === b.category_uuid
                               ).length
@@ -2253,9 +2325,9 @@ function HoldPopup({
                                   (b) =>
                                     (!filterItemTitle ||
                                       b.item_title
-                                        .toLocaleLowerCase()
-                                        .includes(
-                                          filterItemTitle.toLocaleLowerCase()
+                                        ?.toLocaleLowerCase()
+                                        ?.includes(
+                                          filterItemTitle?.toLocaleLowerCase()
                                         )) &&
                                     a.category_uuid === b.category_uuid
                                 )

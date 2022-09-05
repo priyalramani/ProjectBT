@@ -118,9 +118,12 @@ export default CurrentStock;
 
 function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
   const CovertedQty = (qty, conversion) => {
-    let b = Math.floor(qty / +conversion);
+    let b = qty / +conversion;
+   
+    b = Math.sign(b) * Math.floor(Math.sign(b) * b);
 
     let p = Math.floor(qty % +conversion);
+    console.log(b, p);
     return b + ":" + p;
   };
   return (

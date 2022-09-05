@@ -5,7 +5,7 @@ const FreeItems = ({ onSave, orders, itemsData, holdPopup, setOrder }) => {
   useEffect(() => {
     setItems(
       itemsData
-        .filter((a) => a.free_issue === "Y")
+        .filter((a) => a.free_issue === "Y" && a.status)
         .map((a) => {
           let itemData = orders?.item_details?.find(
             (b) => b.item_uuid === a.item_uuid
@@ -17,7 +17,8 @@ const FreeItems = ({ onSave, orders, itemsData, holdPopup, setOrder }) => {
           }
         })
     );
-  }, []);
+  }, [itemsData, orders?.item_details]);
+ 
   const postOrderData = async () => {
     let data = orders;
     let itemsdata = items.filter((a) => a.free);
@@ -95,7 +96,6 @@ const FreeItems = ({ onSave, orders, itemsData, holdPopup, setOrder }) => {
                         key={item?.item_uuid || Math.random()}
                         style={{
                           height: "30px",
-                          
                         }}
                       >
                         <td colSpan={3}>{item.item_title}</td>
@@ -121,7 +121,6 @@ const FreeItems = ({ onSave, orders, itemsData, holdPopup, setOrder }) => {
                               )
                             }
                             maxLength={42}
-                           
                           />
                         </td>
                       </tr>

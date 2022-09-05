@@ -46,9 +46,9 @@ import CancelOrders from "./pages/Reports/CancelOrder";
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
-  axios.defaults.baseURL = "https://api.btgondia.com";
+  // axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
-  // axios.defaults.baseURL = "http://localhost:9000";
+  axios.defaults.baseURL = "http://localhost:9000";
 
   const getUserType = async () => {
     let user_uuid = localStorage.getItem("user_uuid");

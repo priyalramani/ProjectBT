@@ -476,7 +476,7 @@ function NewUserForm({
       setErrorMassage("Please insert Item Title");
       return;
     }
-    if (items.find((a) => a.item_code === data.item_code)) {
+    if (data?.item_code && items.find((a) => a.item_code === data.item_code)) {
       setErrorMassage("Please insert Different Item Code");
       return;
     }

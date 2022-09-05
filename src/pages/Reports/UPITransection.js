@@ -20,6 +20,7 @@ function formatAMPM(date) {
 }
 const UPITransection = () => {
   const [popupOrder, setPopupOrder] = useState(null);
+  const [remarksPopup, setRemarksPoup] = useState();
 
   const [items, setItems] = useState([]);
   const getActivityData = async () => {
@@ -112,6 +113,7 @@ const UPITransection = () => {
             itemsDetails={items}
             putActivityData={putActivityData}
             getOrderData={getOrderData}
+            setRemarksPoup={setRemarksPoup}
           />
         </div>
       </div>
@@ -127,12 +129,27 @@ const UPITransection = () => {
       ) : (
         ""
       )}
+      {remarksPopup ? (
+        <NotesPopup
+          onSave={() => setRemarksPoup(false)}
+          notesPopup={remarksPopup}
+          setItems={setItems}
+          // postOrderData={() => onSubmit({ stage: 5 })}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default UPITransection;
-function Table({ itemsDetails, putActivityData, getOrderData }) {
+function Table({
+  itemsDetails,
+  putActivityData,
+  getOrderData,
+  setRemarksPoup,
+}) {
   return (
     <table
       className="user-table"
@@ -148,7 +165,7 @@ function Table({ itemsDetails, putActivityData, getOrderData }) {
           <th colSpan={2}>Payment Date</th>
           <th colSpan={3}>User</th>
           <th colSpan={3}>Type</th>
-          <th colSpan={2}>Action</th>
+          <th colSpan={4}>Action</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -185,6 +202,18 @@ function Table({ itemsDetails, putActivityData, getOrderData }) {
                   className="item-sales-search"
                   onClick={(e) => {
                     e.stopPropagation();
+                    setRemarksPoup(item);
+                  }}
+                >
+                  Remarks
+                </button>
+              </td>
+              <td colSpan={2}>
+                <button
+                  type="button"
+                  className="item-sales-search"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     putActivityData(
                       item.order_uuid,
                       item.mode_uuid,
@@ -199,5 +228,108 @@ function Table({ itemsDetails, putActivityData, getOrderData }) {
           ))}
       </tbody>
     </table>
+  );
+}
+function NotesPopup({ onSave, setItems, notesPopup }) {
+  const [notes, setNotes] = useState([]);
+  const [edit, setEdit] = useState(false);
+  useEffect(() => {
+    console.log(notesPopup?.remarks);
+    setNotes(notesPopup?.remarks || []);
+  }, [notesPopup]);
+  const submitHandler = async () => {
+    const response = await axios({
+      method: "put",
+      url: "/receipts/putRemarks",
+      data: {
+        remarks: notes,
+        invoice_number: notesPopup.invoice_number,
+        mode_uuid: notesPopup.mode_uuid,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setItems((prev) =>
+        prev.map((a) =>
+          a.invoice_number === notesPopup.invoice_number &&
+          a.mode_uuid === notesPopup.mode_uuid
+            ? { ...a, remarks: notes }
+            : a
+        )
+      );
+      onSave();
+    }
+  };
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: 9999999999 }}>
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "max-content" }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h3>Please Enter Remarks</h3>
+          </div>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup">
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "start" }}
+                  >
+                    <div style={{ width: "50px" }}>Remarks</div>
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "200px" }}
+                    >
+                      <textarea
+                        name="route_title"
+                        className="numberInput"
+                        style={{ width: "200px", height: "200px" }}
+                        value={notes?.toString()?.replace(/,/g, "\n")}
+                        onChange={(e) => {
+                          setNotes(e.target.value.split("\n"));
+                          setEdit(true);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button onClick={onSave} className="closeButton">
+                    x
+                  </button>
+                  {edit ? (
+                    <button
+                      type="button"
+                      className="submit"
+                      onClick={submitHandler}
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

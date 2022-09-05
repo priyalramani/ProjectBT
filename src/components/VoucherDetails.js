@@ -12,6 +12,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
+  const [category, setCategory] = useState([]);
 
   const [orderData, setOrderData] = useState();
   const [printData, setPrintData] = useState({ item_details: [], status: [] });
@@ -21,6 +22,17 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
   const [focusedInputId, setFocusedInputId] = useState(0);
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
+  const getItemCategories = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/itemCategories/GetItemCategoryList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCategory(response.data.result);
+  };
   function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -155,6 +167,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
     getItemsData();
     getAutoBill();
     getUsers();
+    getItemCategories();
   }, []);
 
   const onSubmit = async (type = { stage: 0 }) => {
@@ -639,7 +652,6 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
             // textAlign: "center",
             height: "128mm",
             // padding: "10px"
-           
           }}
         >
           <table
@@ -695,22 +707,38 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
               </tr>
             </thead>
             <tbody className="tbody">
-              {orderData?.item_details?.map((item, i, array) => (
-                <tr key={Math.random()}>
-                  <td
-                    className="flex"
-                    style={{ justifyContent: "space-between" }}
-                  >
-                    {i + 1}
-                  </td>
+             
+              {category
+    
+                .filter(
+                  (a) =>
+                  orderData?.item_details?.filter(
+                      (b) => a.category_uuid === b.category_uuid
+                    ).length
+                )
+                .map((a,index) => (
+                  <>
+                    <tr style={{ pageBreakAfter: "always", width: "100%" }}>
+                      <td colSpan={11}>{a.category_title}</td>
+                    </tr>
+                    {orderData?.item_details?.map((item, i, array) => (
+                      <tr key={Math.random()}>
+                        <td
+                          className="flex"
+                          style={{ justifyContent: "space-between" }}
+                        >
+                          {i + 1}
+                        </td>
 
-                  <td>{item.item_title || ""}</td>
-                  <td>{item.mrp || 0}</td>
-                  <td>{item.b || 0}</td>
+                        <td>{item.item_title || ""}</td>
+                        <td>{item.mrp || 0}</td>
+                        <td>{item.b || 0}</td>
 
-                  <td>{item.p || 0}</td>
-                </tr>
-              ))}
+                        <td>{item.p || 0}</td>
+                      </tr>
+                    ))}
+                  </>
+                ))}
               <tr key={Math.random()}>
                 <td
                   className="flex"

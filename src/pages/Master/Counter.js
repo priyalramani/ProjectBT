@@ -85,15 +85,15 @@ const Counter = () => {
             (a) =>
               !filterCounterTitle ||
               a.counter_title
-                .toLocaleLowerCase()
-                .includes(filterCounterTitle.toLocaleLowerCase())
+                ?.toLocaleLowerCase()
+                ?.includes(filterCounterTitle?.toLocaleLowerCase())
           )
           .filter(
             (a) =>
               !filterRoute ||
               a.route_title
-                .toLocaleLowerCase()
-                .includes(filterRoute.toLocaleLowerCase())
+                ?.toLocaleLowerCase()
+                ?.includes(filterRoute?.toLocaleLowerCase())
           )
       ),
     [counter, filterCounterTitle, filterRoute]

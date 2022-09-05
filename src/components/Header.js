@@ -8,7 +8,10 @@ const Header = () => {
   return (
     <>
       <div className="header">
-        <h1>Bharat Traders</h1>
+        <div className="name">
+          <h2>Bharat Traders</h2>
+          <h4>{localStorage.getItem("user_title")||""}</h4>
+        </div>
         <div className="header_right">
           <div className="header_right_link" onClick={() => Navigate("/admin")}>
             Dashboard
@@ -27,11 +30,11 @@ const Header = () => {
         <MessagePopup
           onClose={() => {
             localStorage.clear();
-            sessionStorage.clear()
-            window.location.reload()
+            sessionStorage.clear();
+            window.location.reload();
             Navigate("/login");
           }}
-          onSave={()=>setLogoutPopup(false)}
+          onSave={() => setLogoutPopup(false)}
           message="Confirm Logout"
           button1="Logout"
           button2="Cancel"

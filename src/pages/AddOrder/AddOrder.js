@@ -355,8 +355,8 @@ export default function AddOrder() {
                         (a) =>
                           !counterFilter ||
                           a.counter_title
-                            .toLocaleLowerCase()
-                            .includes(counterFilter.toLocaleLowerCase())
+                            ?.toLocaleLowerCase()
+                            ?.includes(counterFilter.toLocaleLowerCase())
                       )
                       .map((a) => ({
                         value: a.counter_uuid,

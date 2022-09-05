@@ -25,6 +25,7 @@ export default function AddStock() {
   const [order, setOrder] = useState(initials);
   const [warehouse, setWarehouse] = useState([]);
   const [counterFilter] = useState("");
+  const [category, setCategory] = useState([]);
 
   // const selectRef = useRef();
   const [itemsData, setItemsData] = useState([]);
@@ -34,6 +35,17 @@ export default function AddStock() {
   const [focusedInputId, setFocusedInputId] = useState(0);
   const [suggestionPopup, setSuggestionPopup] = useState(false);
   const componentRef = useRef(null);
+  const getItemCategories = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/itemCategories/GetItemCategoryList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCategory(response.data.result);
+  };
   const readUploadFile = (e) => {
     e.preventDefault();
     if (e.target.files) {
@@ -71,7 +83,7 @@ export default function AddStock() {
       reader.readAsArrayBuffer(e.target.files[0]);
     }
   };
-console.log(order)
+  console.log(order);
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, []);
@@ -118,6 +130,7 @@ console.log(order)
   useEffect(() => {
     GetWarehouseList();
     getItemsData();
+    getItemCategories();
     // escFunction({ key: "Enter" });
   }, []);
 
@@ -253,8 +266,8 @@ console.log(order)
                         (a) =>
                           !counterFilter ||
                           a.warehouse_title
-                            .toLocaleLowerCase()
-                            .includes(counterFilter.toLocaleLowerCase())
+                            ?.toLocaleLowerCase()
+                            ?.includes(counterFilter.toLocaleLowerCase())
                       )
                       .map((a) => ({
                         value: a.warehouse_uuid,
@@ -579,7 +592,7 @@ console.log(order)
               pageBreakInside: "auto",
               display: "block",
               fontSize: "small",
-              fontWeight:"bolder"
+              fontWeight: "bolder",
             }}
           >
             <thead>
@@ -589,7 +602,6 @@ console.log(order)
                   style={{
                     width: "85mm",
                     backgroundColor: "#fff",
-
                   }}
                 >
                   From:{" "}
@@ -602,7 +614,6 @@ console.log(order)
                   style={{
                     width: "85mm",
                     backgroundColor: "#fff",
-
                   }}
                 >
                   To:{" "}
@@ -623,7 +634,7 @@ console.log(order)
                 </th>
               </tr>
               <tr>
-                <th style={{ width: "10mm",backgroundColor: "#fff" }}>S.N</th>
+                <th style={{ width: "10mm", backgroundColor: "#fff" }}>S.N</th>
                 <th style={{ backgroundColor: "#fff" }}>Item Name</th>
                 <th style={{ backgroundColor: "#fff" }}>MRP</th>
                 <th style={{ backgroundColor: "#fff" }}>Box</th>
@@ -631,22 +642,43 @@ console.log(order)
               </tr>
             </thead>
             <tbody className="tbody">
-              {order?.item_details?.map((item, i, array) => (
-                <tr key={Math.random()}>
-                  <td
-                    className="flex"
-                    style={{ justifyContent: "space-between" }}
-                  >
-                    {i + 1}
-                  </td>
+              {category
+                .sort((a, b) =>
+                  a?.category_title?.localeCompare(b?.category_title)
+                )
+                .filter(
+                  (a) =>
+                    order?.item_details?.filter(
+                      (b) => a.category_uuid === b.category_uuid
+                    ).length
+                )
+                .map((a) => (
+                  <>
+                    <tr style={{ pageBreakAfter: "always", width: "100%" }}>
+                      <td colSpan={11}>{a.category_title}</td>
+                    </tr>
+                    {order?.item_details
+                      ?.sort((a, b) =>
+                        a?.item_title?.localeCompare(b?.item_title)
+                      )
+                      .map((item, i, array) => (
+                        <tr key={Math.random()}>
+                          <td
+                            className="flex"
+                            style={{ justifyContent: "space-between" }}
+                          >
+                            {i + 1}
+                          </td>
 
-                  <td>{item.item_title || ""}</td>
-                  <td>{item.mrp || ""}</td>
-                  <td>{item.b || 0}</td>
+                          <td>{item.item_title || ""}</td>
+                          <td>{item.mrp || ""}</td>
+                          <td>{item.b || 0}</td>
 
-                  <td>{item.p || 0}</td>
-                </tr>
-              ))}
+                          <td>{item.p || 0}</td>
+                        </tr>
+                      ))}
+                  </>
+                ))}
               <tr key={Math.random()}>
                 <td
                   className="flex"
