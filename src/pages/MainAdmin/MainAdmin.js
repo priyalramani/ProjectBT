@@ -484,34 +484,34 @@ const MainAdmin = () => {
       data.push({
         ...trip,
         orderLength: orders.filter((b) => trip.trip_uuid === b.trip_uuid)
-            .length,
-          processingLength: orders.filter(
-            (b) =>
-              trip.trip_uuid === b.trip_uuid &&
-              (b.status.length > 1
-                ? +b.status
-                    .map((x) => +x.stage)
-                    .reduce((c, d) => Math.max(c, d)) === 1
-                : +b?.status[0]?.stage === 1)
-          ).length,
-          checkingLength: orders.filter(
-            (b) =>
-              trip.trip_uuid === b.trip_uuid &&
-              (b.status.length > 1
-                ? +b.status
-                    .map((x) => +x.stage)
-                    .reduce((c, d) => Math.max(c, d)) === 2
-                : +b?.status[0]?.stage === 2)
-          ).length,
-          deliveryLength: orders.filter(
-            (b) =>
-              trip.trip_uuid === b.trip_uuid &&
-              (b.status.length > 1
-                ? +b.status
-                    .map((x) => +x.stage)
-                    .reduce((c, d) => Math.max(c, d)) === 3
-                : +b?.status[0]?.stage === 3)
-          ).length,
+          .length,
+        processingLength: orders.filter(
+          (b) =>
+            trip.trip_uuid === b.trip_uuid &&
+            (b.status.length > 1
+              ? +b.status
+                  .map((x) => +x.stage)
+                  .reduce((c, d) => Math.max(c, d)) === 1
+              : +b?.status[0]?.stage === 1)
+        ).length,
+        checkingLength: orders.filter(
+          (b) =>
+            trip.trip_uuid === b.trip_uuid &&
+            (b.status.length > 1
+              ? +b.status
+                  .map((x) => +x.stage)
+                  .reduce((c, d) => Math.max(c, d)) === 2
+              : +b?.status[0]?.stage === 2)
+        ).length,
+        deliveryLength: orders.filter(
+          (b) =>
+            trip.trip_uuid === b.trip_uuid &&
+            (b.status.length > 1
+              ? +b.status
+                  .map((x) => +x.stage)
+                  .reduce((c, d) => Math.max(c, d)) === 3
+              : +b?.status[0]?.stage === 3)
+        ).length,
       });
     }
     return data;
@@ -520,10 +520,7 @@ const MainAdmin = () => {
   return (
     <>
       <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} />
-      <div
-        className="right-side"
-        style={holdOrders ? { backgroundColor: "#f2e017" } : {}}
-      >
+      <div className="right-side">
         <Header />
         <AiOutlineReload
           style={{
@@ -536,7 +533,13 @@ const MainAdmin = () => {
           }}
           onClick={() => setBtn((prev) => !prev)}
         />
-        <div style={{ display: "flex", height: "100%" }}>
+        <div
+          style={
+            holdOrders
+              ? { backgroundColor: "#f2e017", display: "flex", height: "100%" }
+              : { display: "flex", height: "100%" }
+          }
+        >
           <VerticalTabs />
           <div className="inputs">
             <div
@@ -1075,9 +1078,15 @@ const MainAdmin = () => {
                           ?.processingLength
                       }
                       , Checking:{" "}
-                      {TripsOrderLength.find((a) => +a.trip_uuid === 0)?.checkingLength}
+                      {
+                        TripsOrderLength.find((a) => +a.trip_uuid === 0)
+                          ?.checkingLength
+                      }
                       , Delivery:{" "}
-                      {TripsOrderLength.find((a) => +a.trip_uuid === 0)?.deliveryLength}
+                      {
+                        TripsOrderLength.find((a) => +a.trip_uuid === 0)
+                          ?.deliveryLength
+                      }
                       ]
                       {selectOrder ? (
                         <input

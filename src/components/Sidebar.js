@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import "./style.css";
 import NavLink from "./Navlink";
 import {
@@ -11,8 +11,42 @@ import {
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
+let titleData = [
+  { value: "trip", name: "Trip Order" },
+  { value: "itemCategories", name: "Item Categories" },
+  { value: "counterGroup", name: "Counter Group" },
+  { value: "itemGroup", name: "Item Group" },
+  { value: "adminUsers", name: "Users" },
+  { value: "warehouse", name: "Warehouse" },
+  { value: "autoIncreaseQty", name: "Auto Increase Quantity" },
+  { value: "autoIncreaseItem", name: "Auto Add Items" },
+  { value: "OrderRangeIncentive", name: "Order Range Incentive" },
+  { value: "DeliveryIncentive", name: "Delivery Incentive" },
+  { value: "ItemIncentive", name: "Item Incentive" },
+  { value: "upiTransactionReport", name: "UPI & Cheque Transaction" },
+  { value: "completeOrderReport", name: "Complete Order" },
+  { value: "cancelOrders", name: "cancel Order" },
+  { value: "CompletedTripsReport", name: "Completed Trips Report" },
+  { value: "CounterLeger", name: "Counter Leger" },
+  { value: "Outstandings", name: "Outstandings" },
+  { value: "pendingEntry", name: "Pending Entry" },
+  { value: "stockTransferVochers", name: "Stock Transfer Vochers" },
+  { value: "currentStock", name: "Current Stock" },
+  { value: "signedBills", name: "Signed Bills" },
+  { value: "addOrder", name: "New Order" },
+  { value: "addStock", name: "New Stock Tranfer" },
+  { value: "OrderItemReport", name: "Order Item Report" },
+  { value: "userActivity", name: "User Activities" },
+  { value: "tasks", name: "Taskss" },
+  { value: "counter", name: "Counters" },
+  { value: "routes", name: "Routes" },
+  { value: "items", name: "Items" },
+  { value: "admin", name: "Route Order" },
+];
 const Sidebar = ({ setIsItemAvilableOpen }) => {
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
   const updateMinLevel = async () => {
     if (loading) return;
     setLoading(true);
@@ -27,6 +61,11 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
     console.log(response.data.result.user_type);
     setLoading(false);
   };
+  document.title = useMemo(() => {
+    let title = titleData.find((a) => location.pathname.includes(a.value));
+
+    return title.name || "BT";
+  }, [location]);
   return (
     <div
       className="left-panel"

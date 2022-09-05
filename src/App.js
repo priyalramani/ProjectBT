@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import MainAdmin from "./pages/MainAdmin/MainAdmin";
 import RoutesPage from "./pages/Master/Routes";
@@ -44,8 +45,10 @@ import AddStock from "./pages/AddOrder/AddStock";
 import StockTransferVouchers from "./pages/Reports/StockTransferVouchers";
 import CancelOrders from "./pages/Reports/CancelOrder";
 
+
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
+
   axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
   // axios.defaults.baseURL = "http://localhost:9000";
@@ -81,7 +84,7 @@ function App() {
       }
     }
   }, [userType]);
-  console.log(userType === "0", userType === "1");
+  document.title="BT"
 
   return (
     <div className="App">
@@ -173,10 +176,7 @@ function App() {
                 path="/admin/completeOrderReport"
                 element={<CompleteOrder />}
               />
-              <Route
-                path="/admin/cancelOrders"
-                element={<CancelOrders />}
-              />
+              <Route path="/admin/cancelOrders" element={<CancelOrders />} />
               <Route path="/admin/OrderItemReport" element={<ItemDetails />} />
               <Route
                 path="/admin/CompletedTripsReport"

@@ -1,15 +1,24 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Sidebar from "../../components/Sidebar";
 import Headers from "../../components/Header";
+import * as XLSX from "xlsx";
+import * as FileSaver from "file-saver";
+import Select from "react-select";
 const CurrentStock = () => {
   const [itemsData, setItemsData] = useState([]);
   const [filterTitle, setFilterTitle] = useState("");
+  const [filteritem, setFilterItems] = useState([]);
   const [itemEditPopup, setItemEditPopup] = useState("");
   const [item, setItem] = useState("");
-
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterCompany, setFilterCompany] = useState("");
+  const [itemCategories, setItemCategories] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [warehouseData, setWarehouseData] = useState([]);
-
+  const fileExtension = ".xlsx";
+  const fileType =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
@@ -23,7 +32,32 @@ const CurrentStock = () => {
     if (response.data.success)
       setItemsData(response.data.result.filter((a) => a.item_title));
   };
+  const getItemCategories = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/itemCategories/GetItemCategoryList",
 
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setItemCategories(response.data.result);
+  };
+  const getCompanies = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/companies/getCompanies",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCompanies(response.data.result);
+  };
+  useEffect(() => {
+    getCompanies();
+    getItemCategories();
+  }, []);
   const GetWarehouseList = async () => {
     const response = await axios({
       method: "get",
@@ -41,7 +75,50 @@ const CurrentStock = () => {
     getItemsData();
     GetWarehouseList();
   }, []);
-
+  let sheetData = useMemo(() => {
+    let data = [];
+    for (let item of filteritem?.sort(
+      (a, b) => +a.sort_order - +b.sort_order
+    )) {
+      let obj = { "Item Name": item.item_title };
+      for (let a of warehouseData) {
+        obj = {
+          ...obj,
+          [a.warehouse_title || ""]:
+            CovertedQty(data?.qty || 0, item.conversion) +
+            `(${data?.min_level || 0})`,
+        };
+      }
+      data.push(obj);
+    }
+    return data;
+  }, [filteritem, warehouseData]);
+  console.log(sheetData);
+  const downloadHandler = async () => {
+    const ws = XLSX.utils.json_to_sheet(sheetData);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(data, "Stocks" + fileExtension);
+  };
+  useEffect(
+    () =>
+      setFilterItems(
+        itemsData
+          .filter((a) => a.item_title)
+          .filter(
+            (a) =>
+              !filterTitle ||
+              a.item_title
+                .toLocaleLowerCase()
+                .includes(filterTitle.toLocaleLowerCase())
+          )
+          .filter((a) => !filterCompany || a.company_uuid === filterCompany)
+          .filter((a) => !filterCategory || a.category_uuid === filterCategory)||[]
+          
+      ),
+    [itemsData, filterTitle, filterCategory, filterCompany]
+  );
   return (
     <>
       <Sidebar />
@@ -61,6 +138,9 @@ const CurrentStock = () => {
               width: "100%",
             }}
           >
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">Item</label>
+              <div className="inputGroup" style={{ width: "200px" }}>
             <input
               type="text"
               onChange={(e) => setFilterTitle(e.target.value)}
@@ -68,19 +148,73 @@ const CurrentStock = () => {
               placeholder="Search Item Title..."
               className="searchInput"
             />
-
-            <div>
-              Total Items:{" "}
-              {
-                itemsData.filter(
-                  (a) =>
-                    !filterTitle ||
-                    a.item_title
-                      .toLocaleLowerCase()
-                      .includes(filterTitle.toLocaleLowerCase())
-                ).length
-              }
+                
+              </div>
             </div>
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">Companies</label>
+              <div className="inputGroup" style={{ width: "200px" }}>
+                <Select
+                  options={[
+                    { value: "", label: "All" },
+                    ...companies.map((a) => ({
+                      value: a.company_uuid,
+                      label: a.company_title,
+                    })),
+                  ]}
+                  onChange={(doc) => setFilterCompany(doc.value)}
+                  value={
+                    filterCompany
+                      ? {
+                          value: filterCompany,
+                          label: companies?.find(
+                            (j) => j.company_uuid === filterCompany
+                          )?.company_title,
+                        }
+                      : { value: "", label: "All" }
+                  }
+                  // autoFocus={!order?.from_warehouse}
+                  openMenuOnFocus={true}
+                  menuPosition="fixed"
+                  menuPlacement="auto"
+                  placeholder="Select"
+                />
+              </div>
+            </div>
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">Categories</label>
+              <div className="inputGroup" style={{ width: "200px" }}>
+                <Select
+                  options={[
+                    { value: "", label: "All" },
+                    ...itemCategories.map((a) => ({
+                      value: a.category_uuid,
+                      label: a.category_title,
+                    })),
+                  ]}
+                  onChange={(doc) => setFilterCategory(doc.value)}
+                  value={
+                    filterCategory
+                      ? {
+                          value: filterCategory,
+                          label: itemCategories?.find(
+                            (j) => j.category_uuid === filterCategory
+                          )?.category_title,
+                        }
+                      : { value: "", label: "All" }
+                  }
+                  // autoFocus={!order?.from_warehouse}
+                  openMenuOnFocus={true}
+                  menuPosition="fixed"
+                  menuPlacement="auto"
+                  placeholder="Select"
+                />
+              </div>
+            </div>
+            <div>Total Items: {filteritem.length}</div>
+            <button className="item-sales-search" onClick={downloadHandler}>
+              Excel
+            </button>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
@@ -116,16 +250,16 @@ const CurrentStock = () => {
 
 export default CurrentStock;
 
+const CovertedQty = (qty, conversion) => {
+  let b = qty / +conversion;
+
+  b = Math.sign(b) * Math.floor(Math.sign(b) * b);
+
+  let p = Math.floor(qty % +conversion);
+
+  return b + ":" + p;
+};
 function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
-  const CovertedQty = (qty, conversion) => {
-    let b = qty / +conversion;
-
-    b = Math.sign(b) * Math.floor(Math.sign(b) * b);
-
-    let p = Math.floor(qty % +conversion);
-    console.log(b, p);
-    return b + ":" + p;
-  };
   return (
     <table
       className="user-table"
@@ -206,7 +340,10 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
 }
 function QuantityChanged({ onSave, popupInfo, item, update }) {
   const [data, setdata] = useState({});
-
+  const [warning, setWarning] = useState();
+  useEffect(() => {
+    if (!item.status) setWarning(true);
+  }, [item.status]);
   useEffect(() => {
     let warehouseData = item.stock?.find(
       (a) => a.warehouse_uuid === popupInfo.warehouse_uuid
@@ -229,7 +366,7 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
         min_level: 0,
       });
   }, [item.conversion, item.stock, popupInfo.warehouse_uuid]);
-  console.log(data);
+
   const submitHandler = async (e) => {
     e.preventDefault();
     let qty = +(+data.b * +item.conversion) + +data.p;
@@ -284,94 +421,108 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
             width: "fit-content",
           }}
         >
-          <div style={{ overflowY: "scroll" }}>
-            <form className="form" onSubmit={submitHandler}>
-              <div className="formGroup">
-                {popupInfo.type === "qty" ? (
-                  <div
-                    className="row"
-                    style={{ flexDirection: "row", alignItems: "flex-start" }}
-                  >
-                    <label
-                      className="selectLabel flex"
-                      style={{ width: "100px" }}
-                    >
-                      Box
-                      <input
-                        type="number"
-                        name="route_title"
-                        className="numberInput"
-                        value={data.b}
-                        style={{ width: "100px" }}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            b: e.target.value,
-                          })
-                        }
-                        maxLength={42}
-                        onWheel={(e) => e.preventDefault()}
-                      />
-                      {popupInfo.conversion || 0}
-                    </label>
-                    <label
-                      className="selectLabel flex"
-                      style={{ width: "100px" }}
-                    >
-                      Pcs
-                      <input
-                        type="number"
-                        name="route_title"
-                        className="numberInput"
-                        value={data.p}
-                        style={{ width: "100px" }}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            p: e.target.value,
-                          })
-                        }
-                        maxLength={42}
-                        onWheel={(e) => e.preventDefault()}
-                        autoFocus={true}
-                      />
-                    </label>
-                  </div>
-                ) : (
-                  <div
-                    className="row"
-                    style={{ flexDirection: "row", alignItems: "flex-start" }}
-                  >
-                    <label
-                      className="selectLabel flex"
-                      style={{ width: "100px" }}
-                    >
-                      Min Level
-                      <input
-                        type="number"
-                        name="route_title"
-                        className="numberInput"
-                        value={data?.min_level}
-                        style={{ width: "100px" }}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            min_level: e.target.value,
-                          })
-                        }
-                        maxLength={42}
-                        onWheel={(e) => e.preventDefault()}
-                      />
-                    </label>
-                  </div>
-                )}
-              </div>
+          {warning ? (
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form" onSubmit={() => setWarning(false)}>
+                <div className="formGroup">
+                  <h2>Item Status is Off</h2>
+                </div>
 
-              <button type="submit" className="submit">
-                Save changes
-              </button>
-            </form>
-          </div>
+                <button type="submit" className="submit">
+                  Okay
+                </button>
+              </form>
+            </div>
+          ) : (
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form" onSubmit={submitHandler}>
+                <div className="formGroup">
+                  {popupInfo.type === "qty" ? (
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "flex-start" }}
+                    >
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "100px" }}
+                      >
+                        Box
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          value={data.b}
+                          style={{ width: "100px" }}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              b: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                          onWheel={(e) => e.preventDefault()}
+                        />
+                        {popupInfo.conversion || 0}
+                      </label>
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "100px" }}
+                      >
+                        Pcs
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          value={data.p}
+                          style={{ width: "100px" }}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              p: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                          onWheel={(e) => e.preventDefault()}
+                          autoFocus={true}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "flex-start" }}
+                    >
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "100px" }}
+                      >
+                        Min Level
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          value={data?.min_level}
+                          style={{ width: "100px" }}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              min_level: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                          onWheel={(e) => e.preventDefault()}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+
+                <button type="submit" className="submit">
+                  Save changes
+                </button>
+              </form>
+            </div>
+          )}
           <button onClick={onSave} className="closeButton">
             x
           </button>

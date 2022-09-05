@@ -96,7 +96,7 @@ export default function AddStock() {
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
-      url: "/items/GetItemList",
+      url: "/items/GetItemStockList/" + order.from_warehouse,
 
       headers: {
         "Content-Type": "application/json",
@@ -133,14 +133,15 @@ export default function AddStock() {
     getItemCategories();
     // escFunction({ key: "Enter" });
   }, []);
+  useEffect(() => {
+    getItemsData();
+  }, [order.from_warehouse]);
 
   useEffect(() => {
     setOrder((prev) => ({
       ...prev,
       item_details: prev.item_details.map((a) => ({
         ...a,
-        b: +a.b + parseInt((+a.p || 0) / +a.conversion || 0),
-        p: a.p ? +a.p % +a.conversion : 0,
       })),
     }));
   }, [qty_details]);
@@ -343,10 +344,10 @@ export default function AddStock() {
                 {order.to_warehouse ? (
                   <tbody className="lh-copy">
                     {order?.item_details?.map((item, i) => (
-                      <tr key={item.uuid}>
+                      <tr key={item.uuid} style={{color:item.item_title?item.qty>0?"green":"red":"#000"}}>
                         <td
                           className="ph2 pv1 tl bb b--black-20 bg-white"
-                          style={{ width: "300px" }}
+                          style={{ width: "300px", }}
                         >
                           <div
                             className="inputGroup"
@@ -371,14 +372,18 @@ export default function AddStock() {
                                 )
                                 .map((a, j) => ({
                                   value: a.item_uuid,
-                                  label: a.item_title + "______" + a.mrp,
+                                  label:
+                                    a.item_title +
+                                    "______" +
+                                    a.mrp +
+                                    (a.qty > 0 ? "______" + (a.qty || 0) : ""),
                                   key: a.item_uuid,
                                 }))}
                               onChange={(e) => {
-                                setTimeout(
-                                  () => setQtyDetails((prev) => !prev),
-                                  2000
-                                );
+                                // setTimeout(
+                                //   () => setQtyDetails((prev) => !prev),
+                                //   2000
+                                // );
                                 setOrder((prev) => ({
                                   ...prev,
                                   item_details: prev.item_details.map((a) => {
@@ -401,13 +406,12 @@ export default function AddStock() {
                               }}
                               value={
                                 itemsData
-                                  .sort((a, b) =>
-                                    a?.item_title?.localeCompare(b.item_title)
-                                  )
+
                                   .filter((a) => a.item_uuid === item.uuid)
                                   .map((a, j) => ({
                                     value: a.item_uuid,
-                                    label: a.item_title + "______" + a.mrp,
+                                    label: a.item_title + "______" + a.mrp+
+                                    (a.qty > 0 ? "______" + (a.qty || 0) : ""),
                                     key: a.item_uuid,
                                   }))[0]
                               }
@@ -443,10 +447,10 @@ export default function AddStock() {
                             value={item.b || ""}
                             onChange={(e) => {
                               setOrder((prev) => {
-                                setTimeout(
-                                  () => setQtyDetails((prev) => !prev),
-                                  2000
-                                );
+                                // setTimeout(
+                                //   () => setQtyDetails((prev) => !prev),
+                                //   2000
+                                // );
                                 return {
                                   ...prev,
                                   item_details: prev.item_details.map((a) =>

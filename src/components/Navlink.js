@@ -17,7 +17,7 @@ const NavLink = ({
     <Link
       to={{ pathname: href }}
       className="nav_link_container"
-      onClick={ () => {}}
+      onClick={() => {}}
     >
       <div
         className={`nav-link`}
@@ -61,9 +61,9 @@ const NavLink = ({
                   className="item"
                   key={Math.random()}
                   onClick={() => {
-                    return menu.name === "Trips"
-                      ? setIsItemAvilableOpen((prev) => !prev)
-                      : "";
+                    if (menu.name === "Trips")
+                      setIsItemAvilableOpen((prev) => !prev);
+          
                   }}
                 >
                   {<Link to={menu.link}>{menu.name}</Link>}
