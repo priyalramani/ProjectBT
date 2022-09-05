@@ -48,9 +48,9 @@ const CompleteOrder = () => {
   useEffect(() => {
     let time = new Date();
     let curTime = "yy-mm-dd"
-      .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
-      .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
-      .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
+      .replace("mm", ("00" + (time?.getMonth() + 1)?.toString()).slice(-2))
+      .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
+      .replace("dd", ("00" + time?.getDate()?.toString()).slice(-2));
     setSearchData((prev) => ({
       ...prev,
       startDate: curTime,
@@ -164,7 +164,7 @@ const CompleteOrder = () => {
               (a) =>
                 !invoiceNumberFilter ||
                 a.invoice_number
-                  .toString()
+                  ?.toString()
                   .toLocaleLowerCase()
                   .includes(invoiceNumberFilter.toLocaleLowerCase())
             )}

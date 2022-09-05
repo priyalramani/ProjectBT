@@ -119,7 +119,7 @@ export default CurrentStock;
 function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
   const CovertedQty = (qty, conversion) => {
     let b = qty / +conversion;
-   
+
     b = Math.sign(b) * Math.floor(Math.sign(b) * b);
 
     let p = Math.floor(qty % +conversion);
@@ -212,13 +212,16 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
       (a) => a.warehouse_uuid === popupInfo.warehouse_uuid
     );
 
-    if (warehouseData)
+    if (warehouseData) {
+      let b = Math.floor(+warehouseData.qty / +item.conversion);
+      b = Math.sign(b) * Math.floor(Math.sign(b) * b);
+
       setdata({
         ...warehouseData,
-        b: Math.floor(+warehouseData.qty / +item.conversion),
+        b,
         p: Math.floor(+warehouseData.qty % +item.conversion),
       });
-    else
+    } else
       setdata({
         warehouse_uuid: popupInfo.warehouse_uuid,
         b: 0,
