@@ -913,49 +913,55 @@ function Table({
           <th>S.N</th>
           <th colSpan={2}>Item Title</th>
           <th colSpan={2}>MRP</th>
-          <th colSpan={2}>Stock</th>
           <th colSpan={2}>Suggestion Box</th>
+          <th colSpan={2}>Stock</th>
         </tr>
       </thead>
       <tbody className="tbody">
         {itemsDetails
           ?.sort((a, b) => +a.item_uuid - +b.item_uuid)
-          ?.map((item, i, array) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
-              <td
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedOrders((prev) =>
-                    prev.filter((a) => a.item_uuid === item.item_uuid).length
-                      ? prev.filter((a) => a.item_uuid !== item.item_uuid)
-                      : [...(prev || []), item]
-                  );
-                }}
-                className="flex"
-                style={{ justifyContent: "space-between" }}
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedOrders.find(
-                    (a) => a.item_uuid === item.item_uuid
-                  )}
-                  style={{ transform: "scale(1.3)" }}
-                />
-                {i + 1}
-              </td>
+          ?.map((item, i, array) => {
+            let qty = item.stock.find(
+              (a) => a.warehouse_uuid === warehouse_uuid
+            )?.qty;
+            return (
+              <tr key={Math.random()} style={{ height: "30px" }}>
+                <td
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedOrders((prev) =>
+                      prev.filter((a) => a.item_uuid === item.item_uuid).length
+                        ? prev.filter((a) => a.item_uuid !== item.item_uuid)
+                        : [...(prev || []), item]
+                    );
+                  }}
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedOrders.find(
+                      (a) => a.item_uuid === item.item_uuid
+                    )}
+                    style={{ transform: "scale(1.3)" }}
+                  />
+                  {i + 1}
+                </td>
 
-              <td colSpan={2}>{item.item_title || ""}</td>
-              <td colSpan={2}>{item.mrp || ""}</td>
-              <td colSpan={2}>
-                {CovertedQty(
-                  item.stock.find((a) => a.warehouse_uuid === warehouse_uuid)
-                    ?.qty || 0,
-                  item.conversion || 1
-                ) || ""}
-              </td>
-              <td colSpan={2}>{item.b || ""}</td>
-            </tr>
-          ))}
+                <td colSpan={2}>{item.item_title || ""}</td>
+                <td colSpan={2}>{item.mrp || ""}</td>
+                <td colSpan={2}>{item.b || ""}</td>
+                <td
+                  colSpan={2}
+                  style={{
+                    color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red",
+                  }}
+                >
+                  {CovertedQty(qty || 0, item.conversion || 1) || ""}
+                </td>
+              </tr>
+            );
+          })}
       </tbody>
     </table>
   );
