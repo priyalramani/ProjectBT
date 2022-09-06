@@ -281,6 +281,7 @@ const MainAdmin = () => {
       else setNoOrder(false);
     } else {
       setNoOrder(true);
+      setOrders([]);
     }
   };
   const getRunningHoldOrders = async () => {
@@ -295,6 +296,8 @@ const MainAdmin = () => {
         prev.map((a) => data.find((b) => b.order_uuid === a.order_uuid) || a)
       );
       setOrders(response.data.result);
+    } else {
+      setOrders([]);
     }
   };
   // console.log(selectedOrder);
