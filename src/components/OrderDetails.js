@@ -20,7 +20,7 @@ const default_status = [
 ];
 export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
-  const [waiting, setWaiting] = useState([]);
+  const [waiting, setWaiting] = useState(false);
 
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
