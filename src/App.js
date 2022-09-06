@@ -4,7 +4,6 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
 } from "react-router-dom";
 import MainAdmin from "./pages/MainAdmin/MainAdmin";
 import RoutesPage from "./pages/Master/Routes";
