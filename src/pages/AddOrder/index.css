@@ -199,3 +199,9 @@
   align-items: center;
   justify-content: center;
 }
+.greenFont{
+  color: #4ac959;
+}
+.redFont{
+  color: red;
+}

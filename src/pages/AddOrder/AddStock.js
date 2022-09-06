@@ -13,6 +13,15 @@ import Select from "react-select";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useReactToPrint } from "react-to-print";
 let time = new Date();
+const CovertedQty = (qty, conversion) => {
+  let b = qty / +conversion;
+
+  b = Math.sign(b) * Math.floor(Math.sign(b) * b);
+
+  let p = Math.floor(qty % +conversion);
+
+  return b + ":" + p;
+};
 const initials = {
   type: "ST",
   created_by: localStorage.getItem("user_uuid"),
@@ -344,16 +353,7 @@ export default function AddStock() {
                 {order.to_warehouse ? (
                   <tbody className="lh-copy">
                     {order?.item_details?.map((item, i) => (
-                      <tr
-                        key={item.uuid}
-                        style={{
-                          color: item.item_title
-                            ? item.qty > 0
-                              ? "green"
-                              : "red"
-                            : "#000",
-                        }}
-                      >
+                      <tr key={item.uuid}>
                         <td
                           className="ph2 pv1 tl bb b--black-20 bg-white"
                           style={{ width: "300px" }}
@@ -385,9 +385,28 @@ export default function AddStock() {
                                     a.item_title +
                                     "______" +
                                     a.mrp +
-                                    (a.qty > 0 ? "______" + (a.qty || 0) : ""),
+                                    (a.qty > 0
+                                      ? "(" +
+                                        CovertedQty(a.qty || 0, a.conversion) +
+                                        ")"
+                                      : ""),
                                   key: a.item_uuid,
+                                  qty: a.qty,
                                 }))}
+                              styles={{
+                                option: (a, b) => {
+                                  console.log(a, b);
+                                  return {
+                                    ...a,
+                                    color:
+                                      b.data.qty === 0
+                                        ? ""
+                                        : b.data.qty > 0
+                                        ? "#4ac959"
+                                        : "red",
+                                  };
+                                },
+                              }}
                               onChange={(e) => {
                                 // setTimeout(
                                 //   () => setQtyDetails((prev) => !prev),
@@ -424,7 +443,12 @@ export default function AddStock() {
                                       "______" +
                                       a.mrp +
                                       (a.qty > 0
-                                        ? "______" + (a.qty || 0)
+                                        ? "(" +
+                                          CovertedQty(
+                                            a.qty || 0,
+                                            a.conversion
+                                          ) +
+                                          ")"
                                         : ""),
                                     key: a.item_uuid,
                                   }))[0]
@@ -451,7 +475,7 @@ export default function AddStock() {
                           className="ph2 pv1 tc bb b--black-20 bg-white"
                           style={{ textAlign: "center" }}
                         >
-                            <input
+                          <input
                             id={"q" + item.uuid}
                             style={{ width: "100px" }}
                             type="number"
@@ -660,11 +684,27 @@ export default function AddStock() {
                 </th>
               </tr>
               <tr>
-                <th style={{ width: "10mm", backgroundColor: "#fff", fontWeight: "900"  }}>S.N</th>
-                <th style={{ backgroundColor: "#fff", fontWeight: "900"  }}>Item Name</th>
-                <th style={{ backgroundColor: "#fff", fontWeight: "900"  }}>MRP</th>
-                <th style={{ backgroundColor: "#fff", fontWeight: "900"  }}>Box</th>
-                <th style={{ backgroundColor: "#fff", fontWeight: "900"  }}>Pcs</th>
+                <th
+                  style={{
+                    width: "10mm",
+                    backgroundColor: "#fff",
+                    fontWeight: "900",
+                  }}
+                >
+                  S.N
+                </th>
+                <th style={{ backgroundColor: "#fff", fontWeight: "900" }}>
+                  Item Name
+                </th>
+                <th style={{ backgroundColor: "#fff", fontWeight: "900" }}>
+                  MRP
+                </th>
+                <th style={{ backgroundColor: "#fff", fontWeight: "900" }}>
+                  Box
+                </th>
+                <th style={{ backgroundColor: "#fff", fontWeight: "900" }}>
+                  Pcs
+                </th>
               </tr>
             </thead>
             <tbody className="tbody">
@@ -783,27 +823,6 @@ export function SuggestionsPopup({
     }
   };
   useEffect(() => {
-    // let data = [];
-    // for (let item of itemsData) {
-    //   let warehouseData = item?.stock?.find(
-    //     (a) => a.warehouse_uuid === warehouse.warehouse_uuid
-    //   );
-    //   if (warehouseData) {
-    //     if (+warehouseData.qty < +warehouseData.min_level) {
-    //       let b =
-    //         (+warehouseData.min_level - +warehouseData.qty) / +item.conversion;
-
-    //       b =
-    //         +warehouseData.min_level % +item.conversion ||
-    //         +warehouseData.min_level === 0
-    //           ? Math.floor(b + 1)
-    //           : Math.floor(b);
-    //       data.push({ ...item, b, p: 0, uuid: item.item_uuid });
-    //     }
-    //   }
-    // }
-    // setItems(data);
-    // setSeletedItems(data);
     getItemSuggestionsData();
   }, []);
   return (
@@ -835,6 +854,7 @@ export function SuggestionsPopup({
               </div>
               <div className="table-container-user item-sales-container">
                 <Table
+                  warehouse_uuid={warehouse?.warehouse_uuid}
                   itemsDetails={items}
                   setSelectedOrders={setSeletedItems}
                   selectedOrders={selectedItems}
@@ -878,7 +898,7 @@ export function SuggestionsPopup({
 }
 function Table({
   itemsDetails,
-
+  warehouse_uuid,
   selectedOrders,
   setSelectedOrders,
 }) {
@@ -892,6 +912,8 @@ function Table({
         <tr>
           <th>S.N</th>
           <th colSpan={2}>Item Title</th>
+          <th colSpan={2}>MRP</th>
+          <th colSpan={2}>Stock</th>
           <th colSpan={2}>Suggestion Box</th>
         </tr>
       </thead>
@@ -923,6 +945,14 @@ function Table({
               </td>
 
               <td colSpan={2}>{item.item_title || ""}</td>
+              <td colSpan={2}>{item.mrp || ""}</td>
+              <td colSpan={2}>
+                {CovertedQty(
+                  item.stock.find((a) => a.warehouse_uuid === warehouse_uuid)
+                    ?.qty || 0,
+                  item.conversion || 1
+                ) || ""}
+              </td>
               <td colSpan={2}>{item.b || ""}</td>
             </tr>
           ))}
