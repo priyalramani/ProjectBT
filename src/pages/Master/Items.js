@@ -476,10 +476,6 @@ function NewUserForm({
       setErrorMassage("Please insert Item Title");
       return;
     }
-    if (data?.item_code && items.find((a) => a.item_code === data.item_code)) {
-      setErrorMassage("Please insert Different Item Code");
-      return;
-    }
     if (findDuplicates(data.barcode)?.length || barcodeChecking?.length) {
       setErrorMassage("Please insert Unique Barcode");
       return;
@@ -501,6 +497,13 @@ function NewUserForm({
         onSave();
       }
     } else {
+      if (
+        data?.item_code &&
+        items.find((a) => a.item_code === data.item_code)
+      ) {
+        setErrorMassage("Please insert Different Item Code");
+        return;
+      }
       const response = await axios({
         method: "post",
         url: "/items/postItem",

@@ -711,7 +711,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
               pageBreakInside: "auto",
               display: "block",
               fontSize: "small",
-              fontWeight: "bolder",
+              fontWeight: "900",
             }}
           >
             <thead>
@@ -721,6 +721,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                   style={{
                     width: "84mm",
                     backgroundColor: "#fff",
+                    fontWeight: "900",
                   }}
                 >
                   From: {orderData?.from_warehouse_title}
@@ -730,26 +731,49 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                   style={{
                     width: "85mm",
                     backgroundColor: "#fff",
+                    fontWeight: "900",
                   }}
                 >
                   To: {orderData?.to_warehouse_title}
                 </th>
               </tr>
               <tr>
-                <th colSpan={2} style={{ backgroundColor: "#fff" }}>
+                <th
+                  colSpan={2}
+                  style={{ backgroundColor: "#fff", fontWeight: "900" }}
+                >
                   Created At: {new Date(orderData?.created_at).toDateString()} -{" "}
                   {formatAMPM(new Date(orderData?.created_at))}
                 </th>
-                <th colSpan={3} style={{ backgroundColor: "#fff" }}>
+                <th
+                  colSpan={3}
+                  style={{ backgroundColor: "#fff", fontWeight: "900" }}
+                >
                   Created By: {orderData?.created_by_user}
                 </th>
               </tr>
               <tr>
-                <th style={{ width: "10mm", backgroundColor: "#fff" }}>S.N</th>
-                <th style={{ backgroundColor: "#fff" }}>Item Name</th>
-                <th style={{ backgroundColor: "#fff" }}>MRP</th>
-                <th style={{ backgroundColor: "#fff" }}>Box</th>
-                <th style={{ backgroundColor: "#fff" }}>Pcs</th>
+                <th
+                  style={{
+                    width: "10mm",
+                    backgroundColor: "#fff",
+                    fontWeight: "900",
+                  }}
+                >
+                  S.N
+                </th>
+                <th style={{ backgroundColor: "#fff", fontWeight: "900" }}>
+                  Item Name
+                </th>
+                <th style={{ backgroundColor: "#fff", fontWeight: "900" }}>
+                  MRP
+                </th>
+                <th style={{ backgroundColor: "#fff", fontWeight: "900" }}>
+                  Box
+                </th>
+                <th style={{ backgroundColor: "#fff", fontWeight: "900" }}>
+                  Pcs
+                </th>
               </tr>
             </thead>
             <tbody className="tbody">

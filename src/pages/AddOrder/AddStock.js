@@ -344,10 +344,19 @@ export default function AddStock() {
                 {order.to_warehouse ? (
                   <tbody className="lh-copy">
                     {order?.item_details?.map((item, i) => (
-                      <tr key={item.uuid} style={{color:item.item_title?item.qty>0?"green":"red":"#000"}}>
+                      <tr
+                        key={item.uuid}
+                        style={{
+                          color: item.item_title
+                            ? item.qty > 0
+                              ? "green"
+                              : "red"
+                            : "#000",
+                        }}
+                      >
                         <td
                           className="ph2 pv1 tl bb b--black-20 bg-white"
-                          style={{ width: "300px", }}
+                          style={{ width: "300px" }}
                         >
                           <div
                             className="inputGroup"
@@ -410,8 +419,13 @@ export default function AddStock() {
                                   .filter((a) => a.item_uuid === item.uuid)
                                   .map((a, j) => ({
                                     value: a.item_uuid,
-                                    label: a.item_title + "______" + a.mrp+
-                                    (a.qty > 0 ? "______" + (a.qty || 0) : ""),
+                                    label:
+                                      a.item_title +
+                                      "______" +
+                                      a.mrp +
+                                      (a.qty > 0
+                                        ? "______" + (a.qty || 0)
+                                        : ""),
                                     key: a.item_uuid,
                                   }))[0]
                               }
@@ -437,7 +451,7 @@ export default function AddStock() {
                           className="ph2 pv1 tc bb b--black-20 bg-white"
                           style={{ textAlign: "center" }}
                         >
-                          <input
+                            <input
                             id={"q" + item.uuid}
                             style={{ width: "100px" }}
                             type="number"
@@ -596,7 +610,7 @@ export default function AddStock() {
               pageBreakInside: "auto",
               display: "block",
               fontSize: "small",
-              fontWeight: "bolder",
+              fontWeight: "900",
             }}
           >
             <thead>
@@ -606,6 +620,7 @@ export default function AddStock() {
                   style={{
                     width: "85mm",
                     backgroundColor: "#fff",
+                    fontWeight: "900",
                   }}
                 >
                   From:{" "}
@@ -618,6 +633,7 @@ export default function AddStock() {
                   style={{
                     width: "85mm",
                     backgroundColor: "#fff",
+                    fontWeight: "900",
                   }}
                 >
                   To:{" "}
@@ -629,20 +645,26 @@ export default function AddStock() {
                 </th>
               </tr>
               <tr>
-                <th colSpan={2} style={{ backgroundColor: "#fff" }}>
+                <th
+                  colSpan={2}
+                  style={{ backgroundColor: "#fff", fontWeight: "900" }}
+                >
                   Created At: {new Date(order?.created_at).toDateString()} -{" "}
                   {formatAMPM(new Date(order?.created_at))}
                 </th>
-                <th colSpan={3} style={{ backgroundColor: "#fff" }}>
+                <th
+                  colSpan={3}
+                  style={{ backgroundColor: "#fff", fontWeight: "900" }}
+                >
                   Created By: {localStorage.getItem("user_title")}
                 </th>
               </tr>
               <tr>
-                <th style={{ width: "10mm", backgroundColor: "#fff" }}>S.N</th>
-                <th style={{ backgroundColor: "#fff" }}>Item Name</th>
-                <th style={{ backgroundColor: "#fff" }}>MRP</th>
-                <th style={{ backgroundColor: "#fff" }}>Box</th>
-                <th style={{ backgroundColor: "#fff" }}>Pcs</th>
+                <th style={{ width: "10mm", backgroundColor: "#fff", fontWeight: "900"  }}>S.N</th>
+                <th style={{ backgroundColor: "#fff", fontWeight: "900"  }}>Item Name</th>
+                <th style={{ backgroundColor: "#fff", fontWeight: "900"  }}>MRP</th>
+                <th style={{ backgroundColor: "#fff", fontWeight: "900"  }}>Box</th>
+                <th style={{ backgroundColor: "#fff", fontWeight: "900"  }}>Pcs</th>
               </tr>
             </thead>
             <tbody className="tbody">

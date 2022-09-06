@@ -554,10 +554,6 @@ function NewUserForm({
     //   setErrorMassage("Please enter 10 Numbers in Mobile");
     //   return;
     // }
-    if (counters.find((a) => a.counter_code === data.counter_code)) {
-      setErrorMassage("Please insert Different Counter Code");
-      return;
-    }
     if (!data.route_uuid) {
       setdata({ ...data, route_uuid: "0" });
     }
@@ -582,6 +578,10 @@ function NewUserForm({
         onSave();
       }
     } else {
+      if (counters.find((a) => a.counter_code === data.counter_code)) {
+        setErrorMassage("Please insert Different Counter Code");
+        return;
+      }
       const response = await axios({
         method: "post",
         url: "/counters/postCounter",
