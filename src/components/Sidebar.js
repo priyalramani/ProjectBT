@@ -36,6 +36,7 @@ let titleData = [
   { value: "signedBills", name: "Signed Bills" },
   { value: "addOrder", name: "New Order" },
   { value: "addStock", name: "New Stock Tranfer" },
+  { value: "adjustStock", name: "Stock Adjustment" },
   { value: "OrderItemReport", name: "Order Item Report" },
   { value: "userActivity", name: "User Activities" },
   { value: "tasks", name: "Taskss" },
@@ -85,6 +86,10 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
             {
               name: "Stock Transfer",
               link: "/admin/addStock",
+            },
+            {
+              name: "Stock Adjustment",
+              link: "/admin/adjustStock",
             },
           ]}
         />

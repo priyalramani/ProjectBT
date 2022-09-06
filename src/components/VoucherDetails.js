@@ -790,7 +790,9 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                     <tr style={{ pageBreakAfter: "always", width: "100%" }}>
                       <td colSpan={11}>{a.category_title}</td>
                     </tr>
-                    {orderData?.item_details?.map((item, i, array) => (
+                    {orderData?.item_details?.filter(
+                      (b) => a.category_uuid === b.category_uuid
+                    )?.map((item, i, array) => (
                       <tr key={Math.random()}>
                         <td
                           className="flex"

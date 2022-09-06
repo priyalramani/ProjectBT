@@ -44,6 +44,7 @@ import CurrentStock from "./pages/Reports/CurrentStock";
 import AddStock from "./pages/AddOrder/AddStock";
 import StockTransferVouchers from "./pages/Reports/StockTransferVouchers";
 import CancelOrders from "./pages/Reports/CancelOrder";
+import AdjustStock from "./pages/AddOrder/AdjustStock";
 
 
 function App() {
@@ -167,6 +168,7 @@ function App() {
               <Route path="/admin/ItemIncentive" element={<ItemIncentive />} />
               <Route path="/admin/addOrder" element={<AddOrder />} />
               <Route path="/admin/addStock" element={<AddStock />} />
+              <Route path="/admin/adjustStock" element={<AdjustStock />} />
               <Route path="/admin/userActivity" element={<UserActivity />} />
               <Route
                 path="/admin/upiTransactionReport"
