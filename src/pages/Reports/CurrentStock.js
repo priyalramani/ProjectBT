@@ -114,8 +114,9 @@ const CurrentStock = () => {
                 .includes(filterTitle.toLocaleLowerCase())
           )
           .filter((a) => !filterCompany || a.company_uuid === filterCompany)
-          .filter((a) => !filterCategory || a.category_uuid === filterCategory)||[]
-          
+          .filter(
+            (a) => !filterCategory || a.category_uuid === filterCategory
+          ) || []
       ),
     [itemsData, filterTitle, filterCategory, filterCompany]
   );
@@ -141,14 +142,13 @@ const CurrentStock = () => {
             <div className="inputGroup">
               <label htmlFor="Warehouse">Item</label>
               <div className="inputGroup" style={{ width: "200px" }}>
-            <input
-              type="text"
-              onChange={(e) => setFilterTitle(e.target.value)}
-              value={filterTitle}
-              placeholder="Search Item Title..."
-              className="searchInput"
-            />
-                
+                <input
+                  type="text"
+                  onChange={(e) => setFilterTitle(e.target.value)}
+                  value={filterTitle}
+                  placeholder="Search Item Title..."
+                  className="searchInput"
+                />
               </div>
             </div>
             <div className="inputGroup">
@@ -350,7 +350,7 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
     );
 
     if (warehouseData) {
-      let b = Math.floor(+warehouseData.qty / +item.conversion);
+      let b = +warehouseData.qty / +item.conversion;
       b = Math.sign(b) * Math.floor(Math.sign(b) * b);
 
       setdata({
