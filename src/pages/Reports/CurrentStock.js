@@ -5,6 +5,23 @@ import Headers from "../../components/Header";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import Select from "react-select";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import ListItemText from "@mui/material/ListItemText";
+import Checkbox from "@mui/material/Checkbox";
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
 const CurrentStock = () => {
   const [itemsData, setItemsData] = useState([]);
   const [filterTitle, setFilterTitle] = useState("");
@@ -16,6 +33,7 @@ const CurrentStock = () => {
   const [itemCategories, setItemCategories] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [warehouseData, setWarehouseData] = useState([]);
+  const [selectedOptions, setSelectedOptions] = useState([]);
   const fileExtension = ".xlsx";
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -68,13 +86,30 @@ const CurrentStock = () => {
       },
     });
     if (response.data.success)
-      setWarehouseData(response.data.result.filter((a) => a.warehouse_title));
+      setWarehouseData(
+        response.data.result
+          .filter((a) => a.warehouse_title)
+          .map((a) => ({
+            ...a,
+            id: a.warehouse_uuid,
+            name: a.warehouse_title,
+            slug: a.warehouse_title,
+            type: "Main",
+            locale: "en",
+            created_at: "2021-11-15T08:27:23.000Z",
+            updated_at: "2021-11-15T08:27:23.000Z",
+            cover: null,
+          }))
+      );
   };
 
   useEffect(() => {
     getItemsData();
     GetWarehouseList();
   }, []);
+  useEffect(() => {
+    setSelectedOptions(warehouseData);
+  }, [warehouseData]);
   let sheetData = useMemo(() => {
     let data = [];
     for (let item of filteritem?.sort(
@@ -120,6 +155,42 @@ const CurrentStock = () => {
       ),
     [itemsData, filterTitle, filterCategory, filterCompany]
   );
+  const handleWarhouseOptionsChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+
+    console.log(value);
+
+    const filterdValue = value.filter(
+      (item) => selectedOptions.findIndex((o) => o.id === item.id) >= 0
+    );
+
+    let duplicatesRemoved = value.filter((item, itemIndex) =>
+      value.findIndex((o, oIndex) => o.id === item.id && oIndex !== itemIndex)
+    );
+
+    // console.log(duplicatesRemoved);
+
+    // let map = {};
+
+    // for (let list of value) {
+    //   map[Object.values(list).join('')] = list;
+    // }
+    // console.log('Using Map', Object.values(map));
+
+    let duplicateRemoved = [];
+
+    value.forEach((item) => {
+      if (duplicateRemoved.findIndex((o) => o.id === item.id) >= 0) {
+        duplicateRemoved = duplicateRemoved.filter((x) => x.id === item.id);
+      } else {
+        duplicateRemoved.push(item);
+      }
+    });
+
+    setSelectedOptions(duplicateRemoved);
+  };
   return (
     <>
       <Sidebar />
@@ -209,6 +280,37 @@ const CurrentStock = () => {
                   menuPlacement="auto"
                   placeholder="Select"
                 />
+              </div>
+            </div>
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">Warehouse</label>
+              <div className="inputGroup" style={{ width: "200px" }}>
+                <Select
+                  labelId="demo-multiple-checkbox-label"
+                  id="demo-multiple-checkbox"
+                  multiple
+                  value={selectedOptions}
+                  onChange={handleWarhouseOptionsChange}
+                  input={<OutlinedInput label="Warehouses" />}
+                  renderValue={(selected) =>
+                    selected.map((x) => x.name).join(", ")
+                  }
+                  MenuProps={MenuProps}
+                >
+                  {warehouseData.map((variant) => (
+                    <MenuItem key={variant.id} value={variant}>
+                      <Checkbox
+                        checked={
+                          selectedOptions.findIndex(
+                            (item) =>
+                              item.id === variant.id
+                          ) >= 0
+                        }
+                      />
+                      <ListItemText primary={variant.name} />
+                    </MenuItem>
+                  ))}
+                </Select>
               </div>
             </div>
             <div>Total Items: {filteritem.length}</div>

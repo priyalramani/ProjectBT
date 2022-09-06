@@ -31,6 +31,7 @@ export default function AdjustStock() {
   const [warehouse, setWarehouse] = useState([]);
   const [counterFilter] = useState("");
   const [category, setCategory] = useState([]);
+  const [balanceOnly, setBalenceOnly] = useState(false);
 
   // const selectRef = useRef();
   const [itemsData, setItemsData] = useState([]);
@@ -162,9 +163,11 @@ export default function AdjustStock() {
               p,
               adjusment: 0,
             };
-          }),
+          })
+          .filter((a) => !balanceOnly || a.qty),
       }));
-  }, [order.to_warehouse]);
+  }, [order.to_warehouse, balanceOnly]);
+
 
   return (
     <>
@@ -174,8 +177,7 @@ export default function AdjustStock() {
         <div className="inventory">
           <div className="accountGroup" id="voucherForm" action="">
             <div className="inventory_header">
-              <h2>Stock Adjustment </h2>
-              {/* {type === 'edit' && <XIcon className='closeicon' onClick={close} />} */}
+              <h2>Adjust Stock </h2>
             </div>
 
             <div className="topInputs">
@@ -217,6 +219,29 @@ export default function AdjustStock() {
                   />
                 </div>
               </div>
+              {order.to_warehouse ? (
+                <div className="inputGroup">
+                  <div
+                    className="inputGroup"
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      paddingLeft: "60px",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      value={balanceOnly}
+                      onChange={(doc) => setBalenceOnly(doc.target.checked)}
+                      style={{ transform: "scale(2)" }}
+                    />
+                    <label>Balance Only</label>
+                  </div>
+                </div>
+              ) : (
+                ""
+              )}
             </div>
 
             <div className="items_table" style={{ flex: "1", height: "auto" }}>
@@ -452,9 +477,8 @@ export default function AdjustStock() {
                     <tr style={{ pageBreakAfter: "always", width: "100%" }}>
                       <td colSpan={11}>{a.category_title}</td>
                     </tr>
-                    {order?.item_details.filter(
-                      (b) => a.category_uuid === b.category_uuid
-                    )
+                    {order?.item_details
+                      .filter((b) => a.category_uuid === b.category_uuid)
                       ?.sort((a, b) =>
                         a?.item_title?.localeCompare(b?.item_title)
                       )

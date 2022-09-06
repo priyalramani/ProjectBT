@@ -386,9 +386,9 @@ export default function AddStock() {
                                     "______" +
                                     a.mrp +
                                     (a.qty > 0
-                                      ? "(" +
+                                      ? " _______[" +
                                         CovertedQty(a.qty || 0, a.conversion) +
-                                        ")"
+                                        "]"
                                       : ""),
                                   key: a.item_uuid,
                                   qty: a.qty,
@@ -443,12 +443,12 @@ export default function AddStock() {
                                       "______" +
                                       a.mrp +
                                       (a.qty > 0
-                                        ? "(" +
+                                        ? "[" +
                                           CovertedQty(
                                             a.qty || 0,
                                             a.conversion
                                           ) +
-                                          ")"
+                                          "]"
                                         : ""),
                                     key: a.item_uuid,
                                   }))[0]
