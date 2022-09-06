@@ -9,6 +9,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
+  const [waiting, setWaiting] = useState(false);
   useEffect(() => {
     if (selectedWarehouseOrders.length) {
       setSelectedWarehouseOrder(selectedWarehouseOrders[0]);
@@ -17,6 +18,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
     }
   }, [selectedWarehouseOrders]);
   const onSubmit = async (selectedData = orders) => {
+    if(waiting) return;
+    setWaiting(true)
     console.log(selectedData);
     let user_uuid = localStorage.getItem("user_uuid");
     let time = new Date();
@@ -142,6 +145,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
     if (response.data.success) {
       onClose();
     }
+    setWaiting(false)
   };
   const handleWarehouseChacking = async () => {
     let data = [];
@@ -172,6 +176,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
     }
   };
   const updateWarehouse = async (warehouse_uuid, orderData) => {
+    if(waiting) return
+    setWaiting(true)
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
@@ -183,6 +189,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
     if (response.data.success) {
       return true;
     }
+    setWaiting(false)
   };
   return (
     <>
@@ -346,6 +353,7 @@ function DiliveryPopup({
   const [modes, setModes] = useState([]);
   const [error, setError] = useState("");
   const [popup, setPopup] = useState(false);
+  const [waiting, setWaiting] = useState(false);
   // const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
@@ -421,6 +429,8 @@ function DiliveryPopup({
   };
 
   const submitHandler = async () => {
+    if(waiting)return;
+    setWaiting(true)
     setError("");
     // let billingData = await Billing({
     //   replacement: data.actual,
@@ -496,6 +506,7 @@ function DiliveryPopup({
         // setCoinPopup(false);
       }
     }
+    setWaiting(false)
   };
   useEffect(() => {
     updateBillingAmount({

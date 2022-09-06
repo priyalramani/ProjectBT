@@ -20,6 +20,7 @@ const default_status = [
 ];
 export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
+  const [waiting, setWaiting] = useState([]);
 
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
@@ -222,6 +223,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   }, []);
 
   const onSubmit = async (type = { stage: 0 }) => {
+    if (waiting) return;
+    setWaiting(true);
     let counter = counters.find(
       (a) => orderData?.counter_uuid === a.counter_uuid
     );
@@ -351,6 +354,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       }));
       setEditOrder(false);
     }
+    setWaiting(false);
   };
   const handleWarehouseChacking = async (complete, methodType) => {
     let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
@@ -1972,6 +1976,8 @@ function DiliveryPopup({
   const [modes, setModes] = useState([]);
   const [error, setError] = useState("");
   const [popup, setPopup] = useState(false);
+  const [waiting, setWaiting] = useState(false);
+
   // const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
@@ -2063,6 +2069,8 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
+    if(waiting)return
+    setWaiting(true)
     setError("");
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
     //console.log(
@@ -2149,6 +2157,7 @@ function DiliveryPopup({
         onSave();
       }
     }
+    setWaiting(false)
   };
   useEffect(() => {
     updateBilling({

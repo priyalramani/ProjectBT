@@ -2790,6 +2790,8 @@ function DiliveryPopup({
   const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
+  const [waiting, setWaiting] = useState(false);
+
   useEffect(() => {
     setOrder({
       replacement: data?.actual || 0,
@@ -2838,6 +2840,8 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
+    if(waiting)return
+    setWaiting(true)
     setError("");
     let billingData = await Billing({
       replacement: data.actual,
@@ -2914,6 +2918,7 @@ function DiliveryPopup({
       setLoading(false);
       onSave();
     }
+    setWaiting(false)
   };
   return (
     <>
