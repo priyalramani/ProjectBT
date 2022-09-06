@@ -6,9 +6,8 @@ import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import Select from "react-select";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
+import Selected from '@mui/material/Select';
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 const ITEM_HEIGHT = 48;
@@ -21,7 +20,18 @@ const MenuProps = {
     },
   },
 };
-
+const names = [
+  'Oliver Hansen',
+  'Van Henry',
+  'April Tucker',
+  'Ralph Hubbard',
+  'Omar Alexander',
+  'Carlos Abbott',
+  'Miriam Wagner',
+  'Bradley Wilkerson',
+  'Virginia Andrews',
+  'Kelly Snyder',
+];
 const CurrentStock = () => {
   const [itemsData, setItemsData] = useState([]);
   const [filterTitle, setFilterTitle] = useState("");
@@ -34,6 +44,17 @@ const CurrentStock = () => {
   const [companies, setCompanies] = useState([]);
   const [warehouseData, setWarehouseData] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [personName, setPersonName] = React.useState([]);
+
+  const handleChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setPersonName(
+      // On autofill we get a stringified value.
+      typeof value === 'string' ? value.split(',') : value,
+    );
+  };
   const fileExtension = ".xlsx";
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -285,14 +306,14 @@ const CurrentStock = () => {
             <div className="inputGroup">
               <label htmlFor="Warehouse">Warehouse</label>
               <div className="inputGroup" style={{ width: "200px" }}>
-                <Select
+                <Selected
                   labelId="demo-multiple-checkbox-label"
                   id="demo-multiple-checkbox"
                   multiple
                   value={selectedOptions}
                   onChange={handleWarhouseOptionsChange}
-                  input={<OutlinedInput label="Warehouses" />}
-                  renderValue={(selected) =>
+                  // input={<OutlinedInput label="Warehouses" />}
+                  renderValue={(selected) =>selected.length===warehouseData.length?"All":!selected.length?"None":
                     selected.map((x) => x.name).join(", ")
                   }
                   MenuProps={MenuProps}
@@ -307,12 +328,13 @@ const CurrentStock = () => {
                           ) >= 0
                         }
                       />
-                      <ListItemText primary={variant.name} />
+                      <ListItemText placeholder="variant.name" primary={variant.name} />
                     </MenuItem>
                   ))}
-                </Select>
+                </Selected>
               </div>
             </div>
+           
             <div>Total Items: {filteritem.length}</div>
             <button className="item-sales-search" onClick={downloadHandler}>
               Excel
@@ -330,7 +352,7 @@ const CurrentStock = () => {
             )}
             setItemData={setItem}
             setItemEditPopup={setItemEditPopup}
-            warehouseData={warehouseData}
+            warehouseData={selectedOptions}
           />
         </div>
       </div>
