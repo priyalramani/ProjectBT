@@ -344,9 +344,9 @@ export default function AdjustStock() {
                           className="ph2 pv1 tc bb b--black-20 bg-white"
                           style={{ textAlign: "center" }}
                         >
-                          {(+item.b || 0) * (+item.conversion || 0) +
+                          {CovertedQty((+item.b || 0) * (+item.conversion || 0) +
                             (+item.p || 0) -
-                            (+item.qty || 0)}
+                            (+item.qty || 0),item.conversion)}
                         </td>
                       </tr>
                     ))}
