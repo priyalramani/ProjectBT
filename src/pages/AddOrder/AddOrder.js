@@ -13,15 +13,23 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import FreeItems from "../../components/FreeItems";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 const list = ["item_uuid", "q", "p"];
-let user_warehouse=localStorage.getItem("warehouse") || 0;
+const CovertedQty = (qty, conversion) => {
+  let b = qty / +conversion;
+
+  b = Math.sign(b) * Math.floor(Math.sign(b) * b);
+
+  let p = Math.floor(qty % +conversion);
+
+  return b + ":" + p;
+};
+let user_warehouse = localStorage.getItem("warehouse") || 0;
 user_warehouse = user_warehouse ? JSON.parse(user_warehouse)[0] : 0;
-console.log(user_warehouse)
-let inititals= {
+console.log(user_warehouse);
+let inititals = {
   counter_uuid: "",
-  warehouse_uuid:user_warehouse,
+  warehouse_uuid: user_warehouse,
   item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
-  
-}
+};
 export default function AddOrder() {
   const [order, setOrder] = useState(inititals);
   const [deliveryPopup, setDeliveryPopup] = useState(false);
@@ -85,7 +93,7 @@ export default function AddOrder() {
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
-      url: "/items/GetItemList",
+      url: "/items/GetItemStockList/" + order.warehouse_uuid,
 
       headers: {
         "Content-Type": "application/json",
@@ -108,11 +116,13 @@ export default function AddOrder() {
 
   useEffect(() => {
     getCounter();
-    getItemsData();
     getAutoBill();
     // escFunction({ key: "Enter" });
-    GetWarehouseList()
+    GetWarehouseList();
   }, []);
+  useEffect(() => {
+    getItemsData();
+  }, [order.warehouse_uuid]);
 
   useEffect(() => {
     setOrder((prev) => ({
@@ -126,8 +136,6 @@ export default function AddOrder() {
   }, [qty_details]);
 
   const onSubmit = async (type) => {
-
-
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let data = {
       ...order,
@@ -257,9 +265,9 @@ export default function AddOrder() {
         "Content-Type": "application/json",
       },
     });
-    console.log(response)
+    console.log(response);
     if (response.data.success) {
-      window.location.reload()
+      window.location.reload();
       setOrder(inititals);
     }
   };
@@ -361,11 +369,10 @@ export default function AddOrder() {
             </div>
 
             <div className="topInputs">
-            <div className="inputGroup">
+              <div className="inputGroup">
                 <label htmlFor="Warehouse">From Warehouse</label>
                 <div className="inputGroup" style={{ width: "400px" }}>
                   <Select
-
                     options={[
                       { value: 0, label: "None" },
                       ...warehouse.map((a) => ({
@@ -450,7 +457,6 @@ export default function AddOrder() {
                 ) : (
                   ""
                 )}
-                
               </div>
             </div>
 
@@ -497,14 +503,37 @@ export default function AddOrder() {
                                 )
                                 .map((a, j) => ({
                                   value: a.item_uuid,
-                                  label: a.item_title + "______" + a.mrp,
+                                  label:
+                                    a.item_title +
+                                    "______" +
+                                    a.mrp +
+                                    (a.qty > 0
+                                      ? " _______[" +
+                                        CovertedQty(a.qty || 0, a.conversion) +
+                                        "]"
+                                      : ""),
                                   key: a.item_uuid,
+                                  qty: a.qty,
                                 }))}
+                              styles={{
+                                option: (a, b) => {
+                                  console.log(a, b);
+                                  return {
+                                    ...a,
+                                    color:
+                                      b.data.qty === 0
+                                        ? ""
+                                        : b.data.qty > 0
+                                        ? "#4ac959"
+                                        : "red",
+                                  };
+                                },
+                              }}
                               onChange={(e) => {
-                                setTimeout(
-                                  () => setQtyDetails((prev) => !prev),
-                                  2000
-                                );
+                                // setTimeout(
+                                //   () => setQtyDetails((prev) => !prev),
+                                //   2000
+                                // );
                                 setOrder((prev) => ({
                                   ...prev,
                                   item_details: prev.item_details.map((a) => {
@@ -527,13 +556,22 @@ export default function AddOrder() {
                               }}
                               value={
                                 itemsData
-                                  .sort((a, b) =>
-                                    a?.item_title?.localeCompare(b.item_title)
-                                  )
+
                                   .filter((a) => a.item_uuid === item.uuid)
                                   .map((a, j) => ({
                                     value: a.item_uuid,
-                                    label: a.item_title + "______" + a.mrp,
+                                    label:
+                                      a.item_title +
+                                      "______" +
+                                      a.mrp +
+                                      (a.qty > 0
+                                        ? "[" +
+                                          CovertedQty(
+                                            a.qty || 0,
+                                            a.conversion
+                                          ) +
+                                          "]"
+                                        : ""),
                                     key: a.item_uuid,
                                   }))[0]
                               }

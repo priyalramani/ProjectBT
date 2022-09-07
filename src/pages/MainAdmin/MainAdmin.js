@@ -222,7 +222,7 @@ const MainAdmin = () => {
   const getTripData = async () => {
     const response = await axios({
       method: "get",
-      url: "/trips/GetTripList",
+      url: "/trips/GetTripList/" + localStorage.getItem("user_uuid"),
 
       headers: {
         "Content-Type": "application/json",
@@ -1008,6 +1008,13 @@ const MainAdmin = () => {
                                             : selectedRouteOrder ===
                                               item.order_uuid
                                         }
+                                        selectedCounter={
+                                          selectedOrder.filter(
+                                            (a) =>
+                                              a.counter_uuid ===
+                                              item.counter_uuid
+                                          ).length
+                                        }
                                         title2={item?.counter_title || ""}
                                         status={
                                           +item.status[item.status.length - 1]
@@ -1216,6 +1223,13 @@ const MainAdmin = () => {
                                 dateTime={item?.status[0]?.time}
                                 // key={item.seat_uuid}
                                 title1={item?.invoice_number || ""}
+                                selectedCounter={
+                                  selectedOrder.filter(
+                                    (a) =>
+                                      a.counter_uuid ===
+                                      item.counter_uuid
+                                  ).length
+                                }
                                 selectedOrder={
                                   selectOrder
                                     ? selectedOrder.filter(
@@ -1468,6 +1482,13 @@ const MainAdmin = () => {
                                               ).length
                                             : selectedRouteOrder ===
                                               item.order_uuid
+                                        }
+                                        selectedCounter={
+                                          selectedOrder.filter(
+                                            (a) =>
+                                              a.counter_uuid ===
+                                              item.counter_uuid
+                                          ).length
                                         }
                                         title2={item?.counter_title || ""}
                                         status={

@@ -450,7 +450,8 @@ div.unsync-count-container {
   display: flex;
   flex-direction: column;
 }
-.header > .name > h2,.header > .name > h4 {
+.header > .name > h2,
+.header > .name > h4 {
   text-align: center;
   color: #44cd4a;
   padding: none;
@@ -875,6 +876,20 @@ div.unsync-count-container {
 
 .card-focus.selected-seat {
   outline: 3px solid rgba(0, 141, 0, 0.794);
+}
+.card-focus.blinking-seat {
+  animation-name: seat;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+
+}
+@keyframes seat {
+  from {
+    outline: 3px solid rgba(0, 141, 0, 0.794);
+  }
+  to {
+    outline: none;
+  }
 }
 
 .order-request-prompt {

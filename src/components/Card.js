@@ -7,6 +7,7 @@ const Card = ({
   dateTime,
   rounded,
   onDoubleClick,
+  selectedCounter,
   order,
 }) => {
   const getQty = () => {
@@ -67,7 +68,7 @@ const Card = ({
         <button
           className={`card-focus 
             ${rounded ? "rounded" : ""} 
-            ${selectedOrder ? "selected-seat" : ""}
+            ${selectedOrder ? "selected-seat":selectedCounter?"blinking-seat" : ""}
             `}
           style={{ margin: "5px" }}
         >

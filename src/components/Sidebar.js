@@ -13,7 +13,7 @@ import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 let titleData = [
-  { value: "trip", name: "Trip Order" },
+  { value: "trip", name: "DASHBOARD - Trip" },
   { value: "itemCategories", name: "Item Categories" },
   { value: "counterGroup", name: "Counter Group" },
   { value: "itemGroup", name: "Item Group" },
@@ -43,7 +43,7 @@ let titleData = [
   { value: "counter", name: "Counters" },
   { value: "routes", name: "Routes" },
   { value: "items", name: "Items" },
-  { value: "admin", name: "Route Order" },
+  { value: "admin", name: "DASHBOARD - Route" },
 ];
 const Sidebar = ({ setIsItemAvilableOpen }) => {
   const [loading, setLoading] = useState(false);
