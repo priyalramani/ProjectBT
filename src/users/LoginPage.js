@@ -87,6 +87,8 @@ const LoginPage = ({ setUserType }) => {
                   ? "route_uuid"
                   : property === "payment_modes"
                   ? "mode_uuid"
+                  : property === "warehouse"
+                  ? "warehouse_uuid"
                   : ""
               ];
             console.log({ ...item, IDENTIFIER });

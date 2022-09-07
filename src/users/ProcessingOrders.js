@@ -1,12 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-loop-func */
 import axios from "axios";
-import React, { useEffect, useState, useRef } from "react";
+import Select from "react-select";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { AiFillPlayCircle } from "react-icons/ai";
 import { openDB } from "idb";
-import { Billing, audioLoopFunction, audioAPIFunction } from "../Apis/functions";
+import {
+  Billing,
+  audioLoopFunction,
+  audioAPIFunction,
+} from "../Apis/functions";
 import { AiOutlineReload } from "react-icons/ai";
 import { IoArrowBackOutline } from "react-icons/io5";
 import { Phone } from "@mui/icons-material";
@@ -19,6 +24,7 @@ import DiliveryReplaceMent from "../components/DiliveryReplaceMent";
 
 const ProcessingOrders = () => {
   const [BarcodeMessage, setBarcodeMessage] = useState([]);
+  const [minMaxPopup, setMinMaxPopup] = useState();
   const [itemChanged, setItemChanged] = useState([]);
   const [popupDelivery, setPopupDelivery] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -88,7 +94,7 @@ const ProcessingOrders = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("users", response);
+    // console.log("users", response);
     if (response.data.success) setUsers(response.data.result);
   };
 
@@ -147,7 +153,7 @@ const ProcessingOrders = () => {
         user_uuid: localStorage.getItem("user_uuid"),
       },
     });
-    console.log(response);
+    // console.log(response);
     if (response.data.success) {
       setOrders(response.data.result);
       setLoading(false);
@@ -266,7 +272,7 @@ const ProcessingOrders = () => {
       console.log(response);
     }
   };
-  console.log("orders", orders);
+  // console.log("orders", orders);
   const postOrderData = async (
     dataArray = selectedOrder ? [selectedOrder] : orders,
     hold = false
@@ -1001,7 +1007,8 @@ const ProcessingOrders = () => {
                     onClick={() => setFilterItemTile("")}
                   />
                 </div>
-              // ) : !Location.pathname.includes("delivery") ? (
+              ) : (
+                // ) : !Location.pathname.includes("delivery") ? (
                 // <button
                 //   className="item-sales-search"
                 //   style={{ width: "max-content" }}
@@ -1016,7 +1023,6 @@ const ProcessingOrders = () => {
                 // >
                 //   Play
                 // </button>
-              ) : (
                 ""
               )}
               <button
@@ -1220,8 +1226,10 @@ const ProcessingOrders = () => {
                                       ...a,
                                       b: Math.floor(
                                         (+a.b || 0) +
-                                        +((+a?.p || 0) + (+a?.one_pack || 1)) /
-                                          +a.conversion
+                                          +(
+                                            (+a?.p || 0) + (+a?.one_pack || 1)
+                                          ) /
+                                            +a.conversion
                                       ),
                                       p:
                                         ((+a?.p || 0) + (+a?.one_pack || 1)) %
@@ -1288,7 +1296,14 @@ const ProcessingOrders = () => {
                           ""
                         )}
                         <td>{i + 1}</td>
-                        <td colSpan={2}>
+                        <td
+                          colSpan={2}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (Location.pathname.includes("processing"))
+                              setMinMaxPopup(item);
+                          }}
+                        >
                           {
                             items.find((a) => a.item_uuid === item.item_uuid)
                               ?.item_title
@@ -1579,6 +1594,17 @@ const ProcessingOrders = () => {
             setSelectedOrder({ ...selectedOrder, ...a });
           }}
           credit_allowed={selectedOrder.credit_allowed}
+        />
+      ) : (
+        ""
+      )}
+      {minMaxPopup ? (
+        <MinMaxPopup
+          setLoading={setLoading}
+          onSave={() => setMinMaxPopup(false)}
+          popupValue={minMaxPopup}
+          order={selectedOrder}
+          items={items}
         />
       ) : (
         ""
@@ -2682,7 +2708,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
             ?.filter((a) => a.item_uuid === popupInfo.item_uuid)
             .map((a) => ({
               ...a,
-              b:Math.floor(+data.b || 0 || 0),
+              b: Math.floor(+data.b || 0 || 0),
               p: +data?.p || 0,
             }))
     );
@@ -2840,8 +2866,8 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
-    if(waiting)return
-    setWaiting(true)
+    if (waiting) return;
+    setWaiting(true);
     setError("");
     let billingData = await Billing({
       replacement: data.actual,
@@ -2918,7 +2944,7 @@ function DiliveryPopup({
       setLoading(false);
       onSave();
     }
-    setWaiting(false)
+    setWaiting(false);
   };
   return (
     <>
@@ -3177,6 +3203,203 @@ function DiliveryPopup({
       ) : (
         ""
       )}
+    </>
+  );
+}
+function MinMaxPopup({
+  onSave,
+
+  popupValue,
+  order,
+  items,
+
+  setLoading,
+}) {
+  const [PaymentModes, setPaymentModes] = useState([]);
+  const [modes, setModes] = useState([]);
+  const [error, setError] = useState("");
+  const [warehouse, setWarehouse] = useState([]);
+  const [warehouse_uuid, setWarehouse_uuid] = useState("");
+  const [coinPopup, setCoinPopup] = useState(false);
+  const [data, setData] = useState({});
+  const [warehouseSelection, setWarehouseSelection] = useState(false);
+  const [waiting, setWaiting] = useState(false);
+
+  const getWarehouse = async () => {
+    const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
+    let tx = await db
+      .transaction("warehouse", "readwrite")
+      .objectStore("warehouse");
+    let item = await tx.getAll();
+    setWarehouse(item);
+  };
+  useEffect(() => {
+    getWarehouse();
+
+    if (order?.warehouse_uuid) setWarehouse_uuid(order?.warehouse_uuid);
+    else setWarehouseSelection(true);
+  }, []);
+  useEffect(() => {
+    if (!warehouseSelection) {
+      let itemData = items.find((a) => a.item_uuid === popupValue.item_uuid);
+      let warehouseData = itemData?.stock?.find(
+        (b) => b.warehouse_uuid === warehouse_uuid
+      );
+      console.log(itemData, warehouseData, warehouse_uuid);
+      setData((prev) => ({
+        ...prev,
+        item_title: itemData.item_title,
+        max: warehouseData?.qty,
+      }));
+      if (warehouse_uuid) getMinValue();
+    }
+  }, [warehouse_uuid, warehouseSelection]);
+  console.log(data);
+
+  const getMinValue = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/items/minValue/" + warehouse_uuid + "/" + popupValue.item_uuid,
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    setData((prev) => ({
+      ...prev,
+      min: prev.max - (+response.data.result || 0),
+    }));
+  };
+  return (
+    <>
+      <div className="overlay">
+        {warehouseSelection ? (
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "max-content" }}
+          >
+            <div className="flex" style={{ justifyContent: "space-between" }}>
+              <h3>{data?.item_title}</h3>
+            </div>
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "10px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <div className="inputGroup">
+                  <label htmlFor="Warehouse">From Warehouse</label>
+                  <div className="inputGroup" style={{ width: "400px" }}>
+                    <Select
+                      options={[
+                        { value: 0, label: "None" },
+                        ...warehouse.map((a) => ({
+                          value: a.warehouse_uuid,
+                          label: a.warehouse_title,
+                        })),
+                      ]}
+                      onChange={(doc) => setWarehouse_uuid(doc.value)}
+                      value={
+                        warehouse_uuid
+                          ? {
+                              value: order?.warehouse_uuid,
+                              label: warehouse?.find(
+                                (j) => j.warehouse_uuid === warehouse_uuid
+                              )?.warehouse_title,
+                            }
+                          : { value: 0, label: "None" }
+                      }
+                      // autoFocus={!order?.warehouse_uuid}
+                      openMenuOnFocus={true}
+                      menuPosition="fixed"
+                      menuPlacement="auto"
+                      placeholder="Select"
+                    />
+                  </div>
+                  <div
+                    className="flex"
+                    style={{ justifyContent: "space-between" }}
+                  >
+                    <button
+                      type="button"
+                      className="submit"
+                      disabled={!warehouse_uuid}
+                      onClick={() => setWarehouseSelection(false)}
+                    >
+                      Okay
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "max-content" }}
+          >
+            <div className="flex" style={{ justifyContent: "space-between" }}>
+              <h3>{data?.item_title}</h3>
+            </div>
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "10px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form className="form">
+                  <div className="formGroup">
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <label className="selectLabel flex">
+                        Min
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          placeholder="Wait..."
+                          value={data?.min}
+                          onWheel={(e) => e.preventDefault()}
+                          maxLength={42}
+                        />
+                      </label>
+
+                      <label className="selectLabel flex">
+                        Max
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          value={data?.max}
+                          onWheel={(e) => e.preventDefault()}
+                          maxLength={42}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div
+                    className="flex"
+                    style={{ justifyContent: "space-between" }}
+                  >
+                    <button type="button" className="submit" onClick={onSave}>
+                      Okay
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </>
   );
 }
