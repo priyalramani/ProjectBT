@@ -480,11 +480,46 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 className="inventory_header"
                 style={{ backgroundColor: "#fff", color: "#000" }}
               >
-                <h2>
-                  {counters.find(
-                    (a) => a.counter_uuid === orderData?.counter_uuid
-                  )?.counter_title || ""}
-                </h2>
+                {editOrder ? (
+                  <div className="inputGroup">
+                    <label htmlFor="Warehouse">Counter</label>
+                    <div className="inputGroup" style={{ width: "400px",zIndex:"999999999" }}>
+                      <Select
+                        options={counters?.map((a) => ({
+                          value: a.counter_uuid,
+                          label: a.counter_title,
+                        }))}
+                        onChange={(doc) =>
+                          setOrderData((prev) => ({
+                            ...prev,
+                            counter_uuid: doc.value,
+                          }))
+                        }
+                        value={
+                          orderData?.counter_uuid
+                            ? {
+                                value: orderData?.counter_uuid,
+                                label: counters?.find(
+                                  (j) => j.counter_uuid === orderData.counter_uuid
+                                )?.counter_title,
+                              }
+                            : { value: 0, label: "None" }
+                        }
+                        // autoFocus={!order?.warehouse_uuid}
+                        openMenuOnFocus={true}
+                        menuPosition="fixed"
+                        menuPlacement="auto"
+                        placeholder="Select"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <h2>
+                    {counters.find(
+                      (a) => a.counter_uuid === orderData?.counter_uuid
+                    )?.counter_title || ""}
+                  </h2>
+                )}
               </div>
               <div className="inventory_header">
                 <h2>Order Details</h2>
@@ -2069,8 +2104,8 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
-    if(waiting)return
-    setWaiting(true)
+    if (waiting) return;
+    setWaiting(true);
     setError("");
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
     //console.log(
@@ -2157,7 +2192,7 @@ function DiliveryPopup({
         onSave();
       }
     }
-    setWaiting(false)
+    setWaiting(false);
   };
   useEffect(() => {
     updateBilling({
