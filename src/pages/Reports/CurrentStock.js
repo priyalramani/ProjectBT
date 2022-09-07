@@ -393,6 +393,7 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
         <tr>
           <th>S.N</th>
           <th colSpan={2}>Item Name</th>
+          <th colSpan={2}>MRP</th>
           {warehouseData.map((a) => (
             <th colSpan={2}>{a.warehouse_title}</th>
           ))}
@@ -409,6 +410,7 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
               </td>
 
               <td colSpan={2}>{item.item_title || ""}</td>
+              <td colSpan={2}>{item.mrp || ""}</td>
               {warehouseData.map((a) => {
                 let data = item?.stock?.find(
                   (b) => b.warehouse_uuid === a.warehouse_uuid
