@@ -58,7 +58,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
   const getTripData = async () => {
     const response = await axios({
       method: "get",
-      url: "/trips/GetTripListSummary",
+      url: "/trips/GetTripListSummary/" + localStorage.getItem("user_uuid"),
 
       headers: {
         "Content-Type": "application/json",
@@ -130,11 +130,8 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
             <h2>Trips</h2>
           </div>
 
-          <div className="availablecontainer" >
-            <div
-              className="itemavilablelitybox"
-            
-            >
+          <div className="availablecontainer">
+            <div className="itemavilablelitybox">
               <input
                 className="numberInput"
                 type="text"
@@ -146,7 +143,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
                 placeholder="Items Filter"
                 style={{ width: "200px", margin: "10px 0" }}
               />
-              <div className="items_table" >
+              <div className="items_table">
                 <table className="f6 w-100 center" cellSpacing="0">
                   <thead className="lh-copy">
                     <tr className="white">
@@ -190,7 +187,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
                   </thead>
                   <tbody className="lh-copy">
                     {itemsData
-                      .sort((a, b) => a.created_at-b.created_at)
+                      .sort((a, b) => a.created_at - b.created_at)
                       .filter(
                         (a) =>
                           (itemFilter !== ""
@@ -578,10 +575,8 @@ function WarehousePopup({ onSave, tripData }) {
       },
     });
     if (response.data.success) {
- 
       onSave();
     }
-   
   };
 
   return (

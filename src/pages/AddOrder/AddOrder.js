@@ -13,8 +13,12 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import FreeItems from "../../components/FreeItems";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 const list = ["item_uuid", "q", "p"];
+let user_warehouse=localStorage.getItem("warehouse") || 0;
+user_warehouse = user_warehouse ? JSON.parse(user_warehouse)[0] : 0;
+console.log(user_warehouse)
 let inititals= {
   counter_uuid: "",
+  warehouse_uuid:user_warehouse,
   item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
   
 }
@@ -24,6 +28,8 @@ export default function AddOrder() {
   const [counters, setCounters] = useState([]);
   const [counterFilter] = useState("");
   const [holdPopup, setHoldPopup] = useState(false);
+  const [warehouse, setWarehouse] = useState([]);
+
   // const selectRef = useRef();
   const [itemsData, setItemsData] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
@@ -34,7 +40,18 @@ export default function AddOrder() {
   const [edit_prices, setEditPrices] = useState([]);
   const [autoAdd, setAutoAdd] = useState(false);
 
-  
+  const GetWarehouseList = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/warehouse/GetWarehouseList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success)
+      setWarehouse(response.data.result.filter((a) => a.warehouse_title));
+  };
   const getAutoBill = async () => {
     let data = [];
     const response = await axios({
@@ -94,6 +111,7 @@ export default function AddOrder() {
     getItemsData();
     getAutoBill();
     // escFunction({ key: "Enter" });
+    GetWarehouseList()
   }, []);
 
   useEffect(() => {
@@ -108,8 +126,7 @@ export default function AddOrder() {
   }, [qty_details]);
 
   const onSubmit = async (type) => {
-    let warehouse_uuid = localStorage.getItem("warehouse");
-    warehouse_uuid= warehouse_uuid?JSON.parse(warehouse_uuid)[0]:""
+
 
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let data = {
@@ -167,7 +184,6 @@ export default function AddOrder() {
         status: 0,
         price: a.price || a.item_price || 0,
       })),
-      warehouse_uuid,
       status:
         type.stage === 1
           ? [
@@ -345,6 +361,42 @@ export default function AddOrder() {
             </div>
 
             <div className="topInputs">
+            <div className="inputGroup">
+                <label htmlFor="Warehouse">From Warehouse</label>
+                <div className="inputGroup" style={{ width: "400px" }}>
+                  <Select
+
+                    options={[
+                      { value: 0, label: "None" },
+                      ...warehouse.map((a) => ({
+                        value: a.warehouse_uuid,
+                        label: a.warehouse_title,
+                      })),
+                    ]}
+                    onChange={(doc) =>
+                      setOrder((prev) => ({
+                        ...prev,
+                        warehouse_uuid: doc.value,
+                      }))
+                    }
+                    value={
+                      order?.warehouse_uuid
+                        ? {
+                            value: order?.warehouse_uuid,
+                            label: warehouse?.find(
+                              (j) => j.warehouse_uuid === order.warehouse_uuid
+                            )?.warehouse_title,
+                          }
+                        : { value: 0, label: "None" }
+                    }
+                    // autoFocus={!order?.warehouse_uuid}
+                    openMenuOnFocus={true}
+                    menuPosition="fixed"
+                    menuPlacement="auto"
+                    placeholder="Select"
+                  />
+                </div>
+              </div>
               <div className="inputGroup">
                 <label htmlFor="Warehouse">Counter</label>
                 <div className="inputGroup" style={{ width: "500px" }}>
