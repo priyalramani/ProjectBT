@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
+import { DeleteOutline } from "@mui/icons-material";
 import axios from "axios";
 const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
@@ -9,6 +10,7 @@ const ItemsPage = () => {
   const [itemCategories, setItemCategories] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
+  const [deletePopup, setDeletePopup] = useState(false);
   const [filterTitle, setFilterTitle] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
@@ -147,6 +149,7 @@ const ItemsPage = () => {
             categories={itemCategories}
             companies={companies}
             setPopupForm={setPopupForm}
+            setDeletePopup={setDeletePopup}
           />
         </div>
       </div>
@@ -162,12 +165,21 @@ const ItemsPage = () => {
       ) : (
         ""
       )}
+      {deletePopup ? (
+        <DeleteItemPopup
+          onSave={() => setDeletePopup(false)}
+          setItemsData={setItemsData}
+          popupInfo={deletePopup}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default ItemsPage;
-function Table({ itemsDetails, setPopupForm }) {
+function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
 
@@ -388,7 +400,7 @@ function Table({ itemsDetails, setPopupForm }) {
               </div>
             </div>
           </th>
-          <th colSpan={2}>Group</th>
+          <th colSpan={1}></th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -419,7 +431,16 @@ function Table({ itemsDetails, setPopupForm }) {
               <td colSpan={2}>{item.conversion}</td>
               <td colSpan={2}>{item.item_gst}</td>
               <td colSpan={2}>{item.one_pack}</td>
-              <td colSpan={2}>-</td>
+              <td
+                colSpan={1}
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  setDeletePopup(item);
+                }}
+              >
+                <DeleteOutline />
+              </td>
             </tr>
           ))}
       </tbody>
@@ -835,7 +856,6 @@ function NewUserForm({
                         />
                         Off
                       </div>
-                      {console.log(data)}
                     </div>
                   </label>
                 </div>
@@ -869,6 +889,102 @@ function NewUserForm({
           <button onClick={onSave} className="closeButton">
             x
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function DeleteItemPopup({ onSave, popupInfo, setItemsData }) {
+  const [errMassage, setErrorMassage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await axios({
+        method: "delete",
+        url: "/items/deleteItem",
+        data: { item_uuid: popupInfo.item_uuid },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        setItemsData((prev) =>
+          prev.filter((i) => i.item_uuid !== popupInfo.item_uuid)
+        );
+        onSave();
+      }
+    } catch (err) {
+      console.log(err);
+      setErrorMassage("Order already exist");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="overlay">
+      <div className="modal" style={{ width: "fit-content" }}>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="row">
+                <h1>Delete Items</h1>
+              </div>
+              <div className="row">
+                <h1>{popupInfo.item_title}</h1>
+              </div>
+
+              <i style={{ color: "red" }}>
+                {errMassage === "" ? "" : "Error: " + errMassage}
+              </i>
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                {loading ? (
+                  <button
+                    className="submit"
+                    id="loading-screen"
+                    style={{ background: "red", width: "120px" }}
+                  >
+                    <svg viewBox="0 0 100 100">
+                      <path
+                        d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                        fill="#ffffff"
+                        stroke="none"
+                      >
+                        <animateTransform
+                          attributeName="transform"
+                          type="rotate"
+                          dur="1s"
+                          repeatCount="indefinite"
+                          keyTimes="0;1"
+                          values="0 50 51;360 50 51"
+                        ></animateTransform>
+                      </path>
+                    </svg>
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="submit"
+                    style={{ background: "red" }}
+                  >
+                    Confirm
+                  </button>
+                )}
+                <button type="button" className="submit" onClick={onSave}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>

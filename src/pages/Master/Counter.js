@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import axios from "axios";
+import { DeleteOutline } from "@mui/icons-material";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import CounterSequence from "../../components/CounterSequence";
 import * as XLSX from "xlsx";
@@ -17,6 +18,8 @@ const Counter = () => {
   const [selectedRoutes, setSelectedRoutes] = useState([]);
   const [xlSelection, seXlSelection] = useState(false);
   const [itemPopup, setItemPopup] = useState(false);
+  const [deletePopup, setDeletePopup] = useState(false);
+
   const [sequencePopup, setSequencePopup] = useState(false);
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -208,6 +211,7 @@ const Counter = () => {
             routesData={routesData}
             setPopupForm={setPopupForm}
             setItemPopup={setItemPopup}
+            setDeletePopup={setDeletePopup}
           />
         </div>
       </div>
@@ -233,6 +237,15 @@ const Counter = () => {
           onSave={() => setSequencePopup(false)}
           counters={counter}
           routesData={routesData}
+        />
+      ) : (
+        ""
+      )}
+      {deletePopup ? (
+        <DeleteCounterPopup
+          onSave={() => setDeletePopup(false)}
+          setItemsData={setCounter}
+          popupInfo={deletePopup}
         />
       ) : (
         ""
@@ -309,7 +322,7 @@ const Counter = () => {
 };
 
 export default Counter;
-function Table({ itemsDetails, setPopupForm, setItemPopup }) {
+function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
   return (
@@ -435,7 +448,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup }) {
               </div>
             </div>
           </th>
-          <th colSpan={3}>Actions</th>
+          <th colSpan={4}>Actions</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -504,6 +517,16 @@ function Table({ itemsDetails, setPopupForm, setItemPopup }) {
                 >
                   Item Special Discounts
                 </button>
+              </td>
+              <td
+                colSpan={1}
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  setDeletePopup(item);
+                }}
+              >
+                <DeleteOutline />
               </td>
             </tr>
           ))}
@@ -1272,3 +1295,95 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
     </div>
   );
 };
+function DeleteCounterPopup({ onSave, popupInfo, setItemsData }) {
+  const [errMassage, setErrorMassage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await axios({
+        method: "delete",
+        url: "/counters/deleteCounter",
+        data: { counter_uuid: popupInfo.counter_uuid },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        setItemsData((prev) =>
+          prev.filter((i) => i.counter_uuid !== popupInfo.counter_uuid)
+        );
+        onSave();
+      }
+    } catch (err) {
+      console.log(err);
+      setErrorMassage("Order already exist");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="overlay">
+      <div className="modal" style={{ width: "fit-content" }}>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="row">
+                <h1>Delete Counter</h1>
+              </div>
+              <div className="row">
+                <h1>{popupInfo.counter_title}</h1>
+              </div>
+
+              <i style={{ color: "red" }}>
+                {errMassage === "" ? "" : "Error: " + errMassage}
+              </i>
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                {loading ? (
+                  <button className="submit" id="loading-screen" style={{ background: "red",width:"120px" }}>
+                    <svg viewBox="0 0 100 100">
+                      <path
+                        d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                        fill="#ffffff"
+                        stroke="none"
+                      >
+                        <animateTransform
+                          attributeName="transform"
+                          type="rotate"
+                          dur="1s"
+                          repeatCount="indefinite"
+                          keyTimes="0;1"
+                          values="0 50 51;360 50 51"
+                        ></animateTransform>
+                      </path>
+                    </svg>
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="submit"
+                    style={{ background: "red" }}
+                  >
+                    Confirm
+                  </button>
+                )}
+                <button type="button" className="submit" onClick={onSave}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
