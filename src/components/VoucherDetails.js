@@ -13,6 +13,8 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
   const [category, setCategory] = useState([]);
+  const [warehouse, setWarehouse] = useState([]);
+
 
   const [orderData, setOrderData] = useState();
   const [printData, setPrintData] = useState({ item_details: [], status: [] });
@@ -22,6 +24,18 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
   const [focusedInputId, setFocusedInputId] = useState(0);
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
+  const GetWarehouseList = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/warehouse/GetWarehouseList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success)
+      setWarehouse(response.data.result.filter((a) => a.warehouse_title));
+  };
   const getItemCategories = async () => {
     const response = await axios({
       method: "get",
@@ -135,7 +149,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
         })),
     });
   }, [itemsData, category, order]);
-console.log(orderData)
+  console.log(orderData);
   useEffect(() => {
     setPrintData({
       ...printData,
@@ -178,6 +192,7 @@ console.log(orderData)
     getAutoBill();
     getUsers();
     getItemCategories();
+    GetWarehouseList();
   }, []);
 
   const onSubmit = async (type = { stage: 0 }) => {
@@ -232,8 +247,89 @@ console.log(orderData)
                 className="inventory_header"
                 style={{ backgroundColor: "#fff", color: "#000" }}
               >
-                <h2>From:{orderData?.from_warehouse_title || ""}</h2>
-                <h2>To:{orderData?.to_warehouse_title || ""}</h2>
+                {editOrder ? (
+                  <>
+                    {" "}
+                    <div className="inputGroup">
+                      <label htmlFor="Warehouse">From Warehouse</label>
+                      <div className="inputGroup" style={{ width: "400px" }}>
+                        <Select
+                          ref={(ref) => (reactInputsRef.current["0"] = ref)}
+                          options={[
+                            { value: 0, label: "None" },
+                            ...warehouse.map((a) => ({
+                              value: a.warehouse_uuid,
+                              label: a.warehouse_title,
+                            })),
+                          ]}
+                          onChange={(doc) =>
+                            setOrderData((prev) => ({
+                              ...prev,
+                              from_warehouse: doc.value,
+                            }))
+                          }
+                          value={
+                            order?.from_warehouse
+                              ? {
+                                  value: order?.from_warehouse,
+                                  label: warehouse?.find(
+                                    (j) =>
+                                      j.warehouse_uuid === order.from_warehouse
+                                  )?.warehouse_title,
+                                }
+                              : { value: 0, label: "None" }
+                          }
+                          // autoFocus={!order?.from_warehouse}
+                          openMenuOnFocus={true}
+                          menuPosition="fixed"
+                          menuPlacement="auto"
+                          placeholder="Select"
+                        />
+                      </div>
+                    </div>
+                    <div className="inputGroup">
+                      <label htmlFor="Warehouse">To Warehouse</label>
+                      <div className="inputGroup" style={{ width: "400px" }}>
+                        <Select
+                          ref={(ref) => (reactInputsRef.current["1"] = ref)}
+                          options={warehouse
+                           
+                            .map((a) => ({
+                              value: a.warehouse_uuid,
+                              label: a.warehouse_title,
+                            }))}
+                          onChange={(doc) =>
+                            setOrderData((prev) => ({
+                              ...prev,
+                              to_warehouse: doc.value,
+                            }))
+                          }
+                          value={
+                            order?.to_warehouse
+                              ? {
+                                  value: order?.to_warehouse,
+                                  label: warehouse?.find(
+                                    (j) =>
+                                      j.warehouse_uuid === order.to_warehouse
+                                  )?.warehouse_title,
+                                }
+                              : ""
+                          }
+                          autoFocus={!order?.to_warehouse}
+                          openMenuOnFocus={true}
+                          menuPosition="fixed"
+                          menuPlacement="auto"
+                          placeholder="Select"
+                        />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h2>From:{orderData?.from_warehouse_title || ""}</h2>
+                    <h2>To:{orderData?.to_warehouse_title || ""}</h2>
+                  </>
+                )}
               </div>
               <div className="inventory_header">
                 <h2>Voucher Details</h2>

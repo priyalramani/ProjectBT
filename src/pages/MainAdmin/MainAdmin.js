@@ -325,7 +325,7 @@ const MainAdmin = () => {
           order_uuid: a.order_uuid,
           trip_uuid:
             +selectedTrip?.trip_uuid === 0 ? "" : selectedTrip?.trip_uuid,
-          warehouse_uuid: +selectedTrip?.warehouse_uuid,
+          warehouse_uuid: selectedTrip?.warehouse_uuid,
         })),
       headers: {
         "Content-Type": "application/json",
@@ -1225,9 +1225,7 @@ const MainAdmin = () => {
                                 title1={item?.invoice_number || ""}
                                 selectedCounter={
                                   selectedOrder.filter(
-                                    (a) =>
-                                      a.counter_uuid ===
-                                      item.counter_uuid
+                                    (a) => a.counter_uuid === item.counter_uuid
                                   ).length
                                 }
                                 selectedOrder={
@@ -1922,7 +1920,7 @@ function NewUserForm({
       setEdit(warehouse_uuid ? false : true);
     }
     getItemsData();
-  }, [popupInfo?.type, setSelectedTrip]);
+  }, [popupInfo?.type]);
   const submitHandler = async (e) => {
     e.preventDefault();
     if (popupInfo?.type === "edit") {
@@ -1947,7 +1945,6 @@ function NewUserForm({
       }
     }
   };
-
   return (
     <div className="overlay">
       <div
@@ -1971,10 +1968,10 @@ function NewUserForm({
               </div>
 
               <div className="formGroup">
-                <div className="row">
-                  <label className="selectLabel">
-                    {popupInfo.type === "edit" ? "Trip" : "Trip Title"}
-                    {popupInfo.type === "edit" ? (
+                {popupInfo.type === "edit" ? "Trip" : "Trip Title"}
+                {popupInfo.type === "edit" ? (
+                  <div className="row">
+                    <label className="selectLabel">
                       <select
                         name="route_title"
                         className="numberInput"
@@ -1997,65 +1994,67 @@ function NewUserForm({
                             <option value={a.trip_uuid}>{a.trip_title}</option>
                           ))}
                       </select>
-                    ) : (
-                      <input
-                        type="text"
-                        name="route_title"
-                        className="numberInput"
-                        value={data?.trip_title}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            trip_title: e.target.value,
-                          })
-                        }
-                        maxLength={42}
-                      />
-                    )}
-                  </label>
-                </div>
-                {popupInfo.type !== "edit" ? (
-                  <div className="row">
-                    <label className="selectLabel">
-                      Warehouse
-                      <div className="inputGroup" style={{ width: "200px" }}>
-                        <Select
-                          options={[
-                            { value: 0, label: "None" },
-                            ...warehouse.map((a) => ({
-                              value: a.warehouse_uuid,
-                              label: a.warehouse_title,
-                            })),
-                          ]}
-                          onChange={(doc) =>
-                            setdata((prev) => ({
-                              ...prev,
-                              warehouse_uuid: doc.value,
-                            }))
-                          }
-                          value={
-                            data?.warehouse_uuid
-                              ? {
-                                  value: data?.warehouse_uuid,
-                                  label: warehouse?.find(
-                                    (j) =>
-                                      j.warehouse_uuid === data.warehouse_uuid
-                                  )?.warehouse_title,
-                                }
-                              : { value: 0, label: "None" }
-                          }
-                          autoFocus={!data?.warehouse_uuid}
-                          openMenuOnFocus={true}
-                          menuPosition="fixed"
-                          menuPlacement="auto"
-                          placeholder="Select"
-                          isDisabled={!edit}
-                        />
-                      </div>
                     </label>
                   </div>
                 ) : (
-                  ""
+                  <>
+                    <div className="row">
+                      <label className="selectLabel">
+                        <input
+                          type="text"
+                          name="route_title"
+                          className="numberInput"
+                          value={data?.trip_title}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              trip_title: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                        />
+                      </label>
+                    </div>{" "}
+                    <div className="row">
+                      <label className="selectLabel">
+                        Warehouse
+                        <div className="inputGroup" style={{ width: "200px" }}>
+                          <Select
+                            options={[
+                              { value: 0, label: "None" },
+                              ...warehouse.map((a) => ({
+                                value: a.warehouse_uuid,
+                                label: a.warehouse_title,
+                              })),
+                            ]}
+                            onChange={(doc) =>
+                              setdata((prev) => ({
+                                ...prev,
+                                warehouse_uuid: doc.value,
+                              }))
+                            }
+                            value={
+                              data?.warehouse_uuid
+                                ? {
+                                    value: data?.warehouse_uuid,
+                                    label: warehouse?.find(
+                                      (j) =>
+                                        j.warehouse_uuid === data.warehouse_uuid
+                                    )?.warehouse_title,
+                                  }
+                                : { value: 0, label: "None" }
+                            }
+                            autoFocus={!data?.warehouse_uuid}
+                            openMenuOnFocus={true}
+                            menuPosition="fixed"
+                            menuPlacement="auto"
+                            placeholder="Select"
+                            isDisabled={!edit}
+                          />
+                        </div>
+                      </label>
+                    </div>{" "}
+                  </>
                 )}
               </div>
               <i style={{ color: "red" }}>

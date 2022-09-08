@@ -33,7 +33,7 @@ const initials = {
 export default function AddStock() {
   const [order, setOrder] = useState(initials);
   const [warehouse, setWarehouse] = useState([]);
-  const [counterFilter] = useState("");
+
   const [category, setCategory] = useState([]);
 
   // const selectRef = useRef();
@@ -272,13 +272,7 @@ export default function AddStock() {
                   <Select
                     ref={(ref) => (reactInputsRef.current["1"] = ref)}
                     options={warehouse
-                      ?.filter(
-                        (a) =>
-                          !counterFilter ||
-                          a.warehouse_title
-                            ?.toLocaleLowerCase()
-                            ?.includes(counterFilter.toLocaleLowerCase())
-                      )
+                      
                       .map((a) => ({
                         value: a.warehouse_uuid,
                         label: a.warehouse_title,

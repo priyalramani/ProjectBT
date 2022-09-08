@@ -885,10 +885,10 @@ div.unsync-count-container {
 }
 @keyframes seat {
   from {
-    outline: 3px solid rgba(0, 141, 0, 0.794);
+    opacity: 0.3;
   }
   to {
-    outline: none;
+    outline: 1;
   }
 }
 
