@@ -1695,7 +1695,7 @@ const ProcessingOrders = () => {
         ""
       )}
       {loading ? (
-        <div className="overlay" style={{ zIndex: "99999999" }}>
+        <div className="overlay" style={{ zIndex: "99999999999999999" }}>
           <div className="flex" style={{ width: "40px", height: "40px" }}>
             <svg viewBox="0 0 100 100">
               <path
@@ -2866,8 +2866,7 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
-    if (waiting) return;
-    setWaiting(true);
+   
     setError("");
     let billingData = await Billing({
       replacement: data.actual,
@@ -2944,7 +2943,7 @@ function DiliveryPopup({
       setLoading(false);
       onSave();
     }
-    setWaiting(false);
+    
   };
   return (
     <>
