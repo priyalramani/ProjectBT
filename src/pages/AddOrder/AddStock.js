@@ -271,12 +271,10 @@ export default function AddStock() {
                 <div className="inputGroup" style={{ width: "400px" }}>
                   <Select
                     ref={(ref) => (reactInputsRef.current["1"] = ref)}
-                    options={warehouse
-                      
-                      .map((a) => ({
-                        value: a.warehouse_uuid,
-                        label: a.warehouse_title,
-                      }))}
+                    options={warehouse.map((a) => ({
+                      value: a.warehouse_uuid,
+                      label: a.warehouse_title,
+                    }))}
                     onChange={(doc) =>
                       setOrder((prev) => ({ ...prev, to_warehouse: doc.value }))
                     }
@@ -718,6 +716,7 @@ export default function AddStock() {
                       <td colSpan={11}>{a.category_title}</td>
                     </tr>
                     {order?.item_details
+                      ?.filter((b) => a.category_uuid === b.category_uuid)
                       ?.sort((a, b) =>
                         a?.item_title?.localeCompare(b?.item_title)
                       )

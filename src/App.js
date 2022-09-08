@@ -44,6 +44,7 @@ import AddStock from "./pages/AddOrder/AddStock";
 import StockTransferVouchers from "./pages/Reports/StockTransferVouchers";
 import CancelOrders from "./pages/Reports/CancelOrder";
 import AdjustStock from "./pages/AddOrder/AdjustStock";
+import InvoiceNumberWiseOrder from "./pages/Reports/InvoiceNumberWiseOrder";
 
 
 function App() {
@@ -138,6 +139,7 @@ function App() {
               <Route path="/admin" element={<MainAdmin />} />
               <Route path="/trip" element={<MainAdmin />} />
               <Route path="/admin/routes" element={<RoutesPage />} />
+              <Route path="/admin/InvoiceNumberWiseOrder" element={<InvoiceNumberWiseOrder />} />
               <Route
                 path="/admin/itemCategories"
                 element={<ItemCategories />}

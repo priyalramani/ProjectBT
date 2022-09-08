@@ -13,6 +13,7 @@ import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 let titleData = [
+  { value: "InvoiceNumberWiseOrder", name: "Invoice Number Wise Order" },
   { value: "trip", name: "DASHBOARD - Trip" },
   { value: "itemCategories", name: "Item Categories" },
   { value: "counterGroup", name: "Counter Group" },
@@ -201,6 +202,10 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
             {
               name: "Cancel Order",
               link: "/admin/cancelOrders",
+            },
+            {
+              name: "Invoice Number Wise Order",
+              link: "/admin/InvoiceNumberWiseOrder",
             },
           ]}
         />

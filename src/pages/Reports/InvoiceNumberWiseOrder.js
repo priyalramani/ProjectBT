@@ -4,12 +4,8 @@ import Header from "../../components/Header";
 import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
 import Select from "react-select";
-const CompleteOrder = () => {
-  const [searchData, setSearchData] = useState({
-    startDate: "",
-    endDate: "",
-    counter_uuid: "",
-  });
+const InvoiceNumberWiseOrder = () => {
+
   const [popupOrder, setPopupOrder] = useState(null);
   const [items, setItems] = useState([]);
   const [counter, setCounter] = useState([]);
@@ -28,14 +24,12 @@ const CompleteOrder = () => {
     if (response.data.success) setCounter(response.data.result);
   };
   const getCompleteOrders = async () => {
-    let startDate = new Date(searchData.startDate + " 00:00:00 AM");
-    startDate = startDate.getTime();
-    let endDate = new Date(searchData.endDate + " 00:00:00 AM");
-    endDate = endDate.getTime();
+      if(!invoiceNumberFilter)return;
+   
     const response = await axios({
       method: "post",
-      url: "/orders/getCompleteOrderList",
-      data: { startDate, endDate, counter_uuid: searchData.counter_uuid },
+      url: "/orders/getOrderData",
+      data: { invoice_number:invoiceNumberFilter },
       headers: {
         "Content-Type": "application/json",
       },
@@ -46,20 +40,7 @@ const CompleteOrder = () => {
   };
 
   useEffect(() => {
-    let time = new Date();
-    let curTime = "yy-mm-dd"
-      .replace("mm", ("00" + (time?.getMonth() + 1)?.toString()).slice(-2))
-      .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
-      .replace("dd", ("00" + time?.getDate()?.toString()).slice(-2));
-    let sTime = "yy-mm-dd"
-      .replace("mm", ("00" + (time?.getMonth())?.toString()).slice(-2))
-      .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
-      .replace("dd", ("00" + time?.getDate()?.toString()).slice(-2));
-    setSearchData((prev) => ({
-      ...prev,
-      startDate: sTime,
-      endDate: curTime,
-    }));
+
     getCounter();
   }, []);
   useEffect(() => {
@@ -73,7 +54,7 @@ const CompleteOrder = () => {
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading">
-          <h2>Completed Order</h2>
+          <h2>Invoice Number Wise Order</h2>
         </div>
         <div id="item-sales-top">
           <div
@@ -86,29 +67,7 @@ const CompleteOrder = () => {
               width: "100%",
             }}
           >
-            <input
-              type="date"
-              onChange={(e) =>
-                setSearchData((prev) => ({
-                  ...prev,
-                  startDate: e.target.value,
-                }))
-              }
-              value={searchData.startDate}
-              placeholder="Search Counter Title..."
-              className="searchInput"
-              pattern="\d{4}-\d{2}-\d{2}"
-            />
-            <input
-              type="date"
-              onChange={(e) =>
-                setSearchData((prev) => ({ ...prev, endDate: e.target.value }))
-              }
-              value={searchData.endDate}
-              placeholder="Search Route Title..."
-              className="searchInput"
-              pattern="\d{4}-\d{2}-\d{2}"
-            />
+        
             <input
               type="number"
               onChange={(e) => setInvoiceNumberFilter(e.target.value)}
@@ -117,43 +76,7 @@ const CompleteOrder = () => {
               className="searchInput"
               onWheel={(e) => e.preventDefault()}
             />
-            <div className="inputGroup" style={{ width: "50%" }}>
-              <Select
-                options={[
-                  {
-                    value: "",
-                    label: "All",
-                  },
-                  ...counter.map((a) => ({
-                    value: a.counter_uuid,
-                    label: a.counter_title + " , " + a.route_title,
-                  })),
-                ]}
-                onChange={(doc) =>
-                  setSearchData((prev) => ({
-                    ...prev,
-                    counter_uuid: doc.value,
-                  }))
-                }
-                value={
-                  searchData?.counter_uuid
-                    ? {
-                        value: searchData?.counter_uuid,
-                        label: counter?.find(
-                          (j) => j.counter_uuid === searchData.counter_uuid
-                        )?.counter_title,
-                      }
-                    : {
-                        value: "",
-                        label: "All",
-                      }
-                }
-                openMenuOnFocus={true}
-                menuPosition="fixed"
-                menuPlacement="auto"
-                placeholder="Select"
-              />
-            </div>
+           
             <button
               className="item-sales-search"
               onClick={() => getCompleteOrders()}
@@ -193,7 +116,7 @@ const CompleteOrder = () => {
   );
 };
 
-export default CompleteOrder;
+export default InvoiceNumberWiseOrder;
 
 function Table({ itemsDetails, setPopupOrder, counter }) {
   function formatAMPM(date) {
@@ -216,7 +139,6 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
         <tr>
           <th>S.N</th>
           <th colSpan={2}>Order Date</th>
-          <th colSpan={2}>Delivery Date</th>
           <th colSpan={3}>Counter</th>
           <th colSpan={2}>Invoice</th>
           <th colSpan={2}>Qty</th>
@@ -234,23 +156,17 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
             >
               <td>{i + 1}</td>
               <td colSpan={2}>
-                {new Date(+item.order_date).toDateString()} -{" "}
-                {formatAMPM(new Date(+item.order_date))}
+                {new Date(+item.status[0].time).toDateString()} -{" "}
+                {formatAMPM(new Date(+item.status[0].time))}
               </td>
-              <td colSpan={2}>
-                {item.delivery_date
-                  ? new Date(item.delivery_date).toDateString() +
-                    " - " +
-                    formatAMPM(new Date(item.delivery_date))
-                  : ""}
-              </td>
+             
               <td colSpan={3}>
                 {counter.find((a) => a.counter_uuid === item.counter_uuid)
                   ?.counter_title || ""}
               </td>
               <td colSpan={2}>{item.invoice_number || ""}</td>
-              <td colSpan={2}>{item.qty || ""}</td>
-              <td colSpan={2}>{item.amt || ""}</td>
+              <td colSpan={2}>{item?.item_details?.length || ""}</td>
+              <td colSpan={2}>{item.order_grandtotal || ""}</td>
             </tr>
           ))}
       </tbody>
