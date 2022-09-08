@@ -18,7 +18,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
     }
   }, [selectedWarehouseOrders]);
   const onSubmit = async (selectedData = orders) => {
-    if(waiting) return;
+  
     setWaiting(true)
     console.log(selectedData);
     let user_uuid = localStorage.getItem("user_uuid");
@@ -176,7 +176,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
     }
   };
   const updateWarehouse = async (warehouse_uuid, orderData) => {
-    if(waiting) return
+
     setWaiting(true)
     const response = await axios({
       method: "put",
@@ -303,6 +303,30 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
           </div>
         </div>
       </div>
+      {waiting ? (
+        <div className="overlay" style={{ zIndex: "99999999999999999" }}>
+          <div className="flex" style={{ width: "40px", height: "40px" }}>
+            <svg viewBox="0 0 100 100">
+              <path
+                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                fill="#ffffff"
+                stroke="none"
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  dur="1s"
+                  repeatCount="indefinite"
+                  keyTimes="0;1"
+                  values="0 50 51;360 50 51"
+                ></animateTransform>
+              </path>
+            </svg>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
       {deliveryPopup ? (
         <DiliveryPopup
           onSave={() => setDeliveryPopup(false)}
@@ -429,7 +453,7 @@ function DiliveryPopup({
   };
 
   const submitHandler = async () => {
-    if(waiting)return;
+  
     setWaiting(true)
     setError("");
     // let billingData = await Billing({
@@ -655,6 +679,30 @@ function DiliveryPopup({
           </div>
         </div>
       </div>
+      {waiting ? (
+        <div className="overlay" style={{ zIndex: "99999999999999999" }}>
+          <div className="flex" style={{ width: "40px", height: "40px" }}>
+            <svg viewBox="0 0 100 100">
+              <path
+                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                fill="#ffffff"
+                stroke="none"
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  dur="1s"
+                  repeatCount="indefinite"
+                  keyTimes="0;1"
+                  values="0 50 51;360 50 51"
+                ></animateTransform>
+              </path>
+            </svg>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
       {popup ? (
         <DiliveryReplaceMent
           onSave={() => {

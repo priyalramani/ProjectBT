@@ -2816,7 +2816,7 @@ function DiliveryPopup({
   const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
-  const [waiting, setWaiting] = useState(false);
+
 
   useEffect(() => {
     setOrder({
@@ -3214,15 +3214,14 @@ function MinMaxPopup({
 
   setLoading,
 }) {
-  const [PaymentModes, setPaymentModes] = useState([]);
-  const [modes, setModes] = useState([]);
-  const [error, setError] = useState("");
+
+
   const [warehouse, setWarehouse] = useState([]);
   const [warehouse_uuid, setWarehouse_uuid] = useState("");
-  const [coinPopup, setCoinPopup] = useState(false);
+
   const [data, setData] = useState({});
   const [warehouseSelection, setWarehouseSelection] = useState(false);
-  const [waiting, setWaiting] = useState(false);
+
 
   const getWarehouse = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
