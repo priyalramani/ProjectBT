@@ -739,9 +739,9 @@ const ProcessingOrders = () => {
   const updateBillingAmount = async (order = selectedOrder) => {
     // console.log(order);
     let billingData = await Billing({
-      replacement: order.replacement,
-      adjustment: order.adjustment,
-      shortage: order.shortage,
+      replacement: order?.replacement,
+      adjustment: order?.adjustment,
+      shortage: order?.shortage,
       counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
 
       items: order.item_details.map((a) => {
@@ -2817,7 +2817,6 @@ function DiliveryPopup({
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
 
-
   useEffect(() => {
     setOrder({
       replacement: data?.actual || 0,
@@ -2866,7 +2865,6 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
-   
     setError("");
     let billingData = await Billing({
       replacement: data.actual,
@@ -2943,7 +2941,6 @@ function DiliveryPopup({
       setLoading(false);
       onSave();
     }
-    
   };
   return (
     <>
@@ -3214,14 +3211,11 @@ function MinMaxPopup({
 
   setLoading,
 }) {
-
-
   const [warehouse, setWarehouse] = useState([]);
   const [warehouse_uuid, setWarehouse_uuid] = useState("");
 
   const [data, setData] = useState({});
   const [warehouseSelection, setWarehouseSelection] = useState(false);
-
 
   const getWarehouse = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
@@ -3290,7 +3284,7 @@ function MinMaxPopup({
               <div style={{ overflowY: "scroll" }}>
                 <div className="inputGroup">
                   <label htmlFor="Warehouse">From Warehouse</label>
-                  <div className="inputGroup" style={{ width: "400px" }}>
+                  <div className="inputGroup" style={{ width: "300px" }}>
                     <Select
                       options={[
                         { value: 0, label: "None" },
@@ -3331,6 +3325,9 @@ function MinMaxPopup({
                     </button>
                   </div>
                 </div>
+                  <button onClick={onSave} className="closeButton">
+                    x
+                  </button>
               </div>
             </div>
           </div>
@@ -3999,7 +3996,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
       let data = orderObject;
 
       let billingData = await Billing({
-        replacement: data.replacement,
+        replacement: data?.replacement,
         adjustment: data.adjustment,
         shortage: data.shortage,
         counter: counter.find((a) => a.counter_uuid === data.counter_uuid),

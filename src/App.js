@@ -45,6 +45,7 @@ import StockTransferVouchers from "./pages/Reports/StockTransferVouchers";
 import CancelOrders from "./pages/Reports/CancelOrder";
 import AdjustStock from "./pages/AddOrder/AdjustStock";
 import InvoiceNumberWiseOrder from "./pages/Reports/InvoiceNumberWiseOrder";
+import PartyWiseCompanyDiscount from "./pages/Reports/PartyWiseCompanyDiscount";
 
 
 function App() {
@@ -193,6 +194,7 @@ function App() {
                 element={<StockTransferVouchers />}
               />
               <Route path="/admin/currentStock" element={<CurrentStock />} />
+              <Route path="/admin/PartyWiseCompanyDiscount" element={<PartyWiseCompanyDiscount />} />
               <Route path="/admin/signedBills" element={<SignedBills />} />
               <Route path="/admin/tasks" element={<TasksPage />} />
               <Route path="*" element={<Navigate replace to={"/admin"} />} />
