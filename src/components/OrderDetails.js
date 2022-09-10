@@ -3,7 +3,7 @@ import axios from "axios";
 import Select from "react-select";
 import { v4 as uuid } from "uuid";
 import { Billing, jumpToNextIndex } from "../Apis/functions";
-import { CheckCircle, ContentCopy, Fullscreen } from "@mui/icons-material";
+import { CheckCircle, ContentCopy } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 import OrderPrint from "./OrderPrint";
@@ -21,7 +21,7 @@ const default_status = [
 export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
   const [waiting, setWaiting] = useState(false);
-
+  const [category, setCategory] = useState([]);
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
   const [deliveryPopup, setDeliveryPopup] = useState(false);
@@ -40,6 +40,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
+  const getItemCategories = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/itemCategories/GetItemCategoryList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCategory(response.data.result);
+  };
   const getWarehouseData = async () => {
     const response = await axios({
       method: "get",
@@ -184,6 +195,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       ...orderData,
       item_details:
         orderData?.item_details
+          .map((a) => ({
+            ...a,
+            category_sort: category.find(
+              (b) => b.category_uuid === a.category_uuid
+            )?.sort_order,
+          }))
+          .sort(
+            (a, b) =>
+              a.category_sort - b.category_sort +
+              a?.item_title?.localeCompare(b.item_title)
+          )
           ?.filter((a) => +a.status !== 3)
           ?.map((a, i) => ({
             ...a,
@@ -220,6 +242,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     getAutoBill();
     getUsers();
     getWarehouseData();
+    getItemCategories();
   }, []);
 
   const onSubmit = async (type = { stage: 0 }) => {
@@ -1740,60 +1763,7 @@ const DeleteOrderPopup = ({
     </div>
   );
 };
-// function NewUserForm({ onSubmit, onClose }) {
-//   return (
-//     <div className="overlay">
-//       <div
-//         className="modal"
-//         style={{ height: "fit-content", width: "fit-content" }}
-//       >
-//         <div
-//           className="content"
-//           style={{
-//             height: "fit-content",
-//             padding: "20px",
-//             width: "fit-content",
-//           }}
-//         >
-//           <div style={{ overflowY: "scroll" }}>
-//             <form
-//               className="form"
-//               onSubmit={(e) => {
-//                 e.preventDefault();
-//                 onSubmit("auto_add");
-//                 onClose();
-//               }}
-//             >
-//               <div className="row">
-//                 <h1> Auto Add</h1>
-//               </div>
 
-//               <div className="formGroup">
-//                 <div className="row">
-//                   <button type="submit" className="submit">
-//                     Yes
-//                   </button>
-//                   <button
-//                     type="button"
-//                     onClick={() => {
-//                       onSubmit();
-//                     }}
-//                     className="submit"
-//                   >
-//                     No
-//                   </button>
-//                 </div>
-//               </div>
-//             </form>
-//           </div>
-//           <button onClick={onClose} className="closeButton">
-//             x
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
 function CheckingValues({ onSave, popupDetails, users, items }) {
   function formatAMPM(date) {
     var hours = date.getHours();
@@ -2406,87 +2376,6 @@ function DiliveryPopup({
       ) : (
         ""
       )}
-      {/* {coinPopup ? (
-        <div className="overlay">
-          <div
-            className="modal"
-            style={{ height: "fit-content", width: "max-content" }}
-          >
-            <h3>Cash Coin</h3>
-            <div
-              className="content"
-              style={{
-                height: "fit-content",
-                padding: "10px",
-                width: "fit-content",
-              }}
-            >
-              <div style={{ overflowY: "scroll" }}>
-                <form className="form">
-                  <div className="formGroup">
-                    <div
-                      className="row"
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      <div style={{ width: "50px" }}>Cash</div>
-
-                      <label
-                        className="selectLabel flex"
-                        style={{ width: "80px" }}
-                      >
-                        <input
-                          type="number"
-                          name="route_title"
-                          className="numberInput"
-                          placeholder="Coins"
-                          value={
-                            modes.find(
-                              (a) =>
-                                a.mode_uuid ===
-                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-                            )?.coin
-                          }
-                          style={{ width: "70px" }}
-                          onChange={(e) =>
-                            setModes((prev) =>
-                              prev.map((a) =>
-                                a.mode_uuid ===
-                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-                                  ? {
-                                      ...a,
-                                      coin: e.target.value,
-                                    }
-                                  : a
-                              )
-                            )
-                          }
-                          maxLength={42}
-                          onWheel={(e) => e.preventDefault()}
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  <div
-                    className="flex"
-                    style={{ justifyContent: "space-between" }}
-                  >
-                    <button
-                      type="button"
-                      className="submit"
-                      onClick={() => submitHandler()}
-                    >
-                      Save
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        ""
-      )} */}
     </>
   );
 }
