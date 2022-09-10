@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import "./style.css";
 import { Link, useLocation } from "react-router-dom";
@@ -171,22 +171,25 @@ function Logout({ onSave, popupForm }) {
       const result = await axios({
         method: "get",
         url: "/users/getDetails",
-
         headers: {
           "Content-Type": "application/json",
         },
       });
       let data = result.data.result;
       console.log(data);
-      const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
-        upgrade(db) {
-          for (const property in data) {
-            db.createObjectStore(property, {
-              keyPath: "IDENTIFIER",
-            });
-          }
-        },
-      });
+      const db = await openDB(
+        "BT",
+        +localStorage.getItem("IDBVersion") || 1,
+        {
+          upgrade(db) {
+            for (const property in data) {
+              db.createObjectStore(property, {
+                keyPath: "IDENTIFIER",
+              });
+            }
+          },
+        }
+      );
 
       let store;
       for (const property in data) {
@@ -212,15 +215,18 @@ function Logout({ onSave, popupForm }) {
                 ? "route_uuid"
                 : property === "payment_modes"
                 ? "mode_uuid"
+                : property === "warehouse"
+                ? "warehouse_uuid"
                 : ""
             ];
           console.log({ ...item, IDENTIFIER });
           await store.put({ ...item, IDENTIFIER });
         }
       }
+      setIsLoading(false);
+      db.close();
       let time = new Date();
       localStorage.setItem("indexed_time", time.getTime());
-      db.close();
       onSave();
     } else {
       await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);

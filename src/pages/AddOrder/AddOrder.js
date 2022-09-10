@@ -369,41 +369,7 @@ export default function AddOrder() {
             </div>
 
             <div className="topInputs">
-              <div className="inputGroup">
-                <label htmlFor="Warehouse">From Warehouse</label>
-                <div className="inputGroup" style={{ width: "400px" }}>
-                  <Select
-                    options={[
-                      { value: 0, label: "None" },
-                      ...warehouse.map((a) => ({
-                        value: a.warehouse_uuid,
-                        label: a.warehouse_title,
-                      })),
-                    ]}
-                    onChange={(doc) =>
-                      setOrder((prev) => ({
-                        ...prev,
-                        warehouse_uuid: doc.value,
-                      }))
-                    }
-                    value={
-                      order?.warehouse_uuid
-                        ? {
-                            value: order?.warehouse_uuid,
-                            label: warehouse?.find(
-                              (j) => j.warehouse_uuid === order.warehouse_uuid
-                            )?.warehouse_title,
-                          }
-                        : { value: 0, label: "None" }
-                    }
-                    // autoFocus={!order?.warehouse_uuid}
-                    openMenuOnFocus={true}
-                    menuPosition="fixed"
-                    menuPlacement="auto"
-                    placeholder="Select"
-                  />
-                </div>
-              </div>
+              
               <div className="inputGroup">
                 <label htmlFor="Warehouse">Counter</label>
                 <div className="inputGroup" style={{ width: "500px" }}>
@@ -457,6 +423,41 @@ export default function AddOrder() {
                 ) : (
                   ""
                 )}
+              </div>
+              <div className="inputGroup">
+                <label htmlFor="Warehouse">From Warehouse</label>
+                <div className="inputGroup" style={{ width: "400px" }}>
+                  <Select
+                    options={[
+                      { value: 0, label: "None" },
+                      ...warehouse.map((a) => ({
+                        value: a.warehouse_uuid,
+                        label: a.warehouse_title,
+                      })),
+                    ]}
+                    onChange={(doc) =>
+                      setOrder((prev) => ({
+                        ...prev,
+                        warehouse_uuid: doc.value,
+                      }))
+                    }
+                    value={
+                      order?.warehouse_uuid
+                        ? {
+                            value: order?.warehouse_uuid,
+                            label: warehouse?.find(
+                              (j) => j.warehouse_uuid === order.warehouse_uuid
+                            )?.warehouse_title,
+                          }
+                        : { value: 0, label: "None" }
+                    }
+                    // autoFocus={!order?.warehouse_uuid}
+                    openMenuOnFocus={true}
+                    menuPosition="fixed"
+                    menuPlacement="auto"
+                    placeholder="Select"
+                  />
+                </div>
               </div>
             </div>
 

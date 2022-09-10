@@ -493,10 +493,7 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
 }
 function QuantityChanged({ onSave, popupInfo, item, update }) {
   const [data, setdata] = useState({});
-  const [warning, setWarning] = useState();
-  useEffect(() => {
-    if (!item.status) setWarning(true);
-  }, [item.status]);
+
   useEffect(() => {
     let CompanyData = item.company_discount?.find(
       (a) => a.company_uuid === popupInfo.company_uuid
@@ -555,56 +552,43 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
             width: "fit-content",
           }}
         >
-          {warning ? (
-            <div style={{ overflowY: "scroll" }}>
-              <form className="form" onSubmit={() => setWarning(false)}>
-                <div className="formGroup">
-                  <h2>Counter Status is Off</h2>
-                </div>
-
-                <button type="submit" className="submit">
-                  Okay
-                </button>
-              </form>
-            </div>
-          ) : (
-            <div style={{ overflowY: "scroll" }}>
-              <form className="form" onSubmit={submitHandler}>
-                <div className="formGroup">
-                  <div
-                    className="row"
-                    style={{ flexDirection: "row", alignItems: "flex-start" }}
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="formGroup">
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "flex-start" }}
+                >
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
                   >
-                    <label
-                      className="selectLabel flex"
+                    Discount
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data?.discount}
                       style={{ width: "100px" }}
-                    >
-                      Discount
-                      <input
-                        type="number"
-                        name="route_title"
-                        className="numberInput"
-                        value={data?.discount}
-                        style={{ width: "100px" }}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            discount: e.target.value,
-                          })
-                        }
-                        maxLength={42}
-                        onWheel={(e) => e.preventDefault()}
-                      />
-                    </label>
-                  </div>
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          discount: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
+                    />
+                  </label>
                 </div>
+              </div>
 
-                <button type="submit" className="submit">
-                  Save changes
-                </button>
-              </form>
-            </div>
-          )}
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+
           <button onClick={onSave} className="closeButton">
             x
           </button>

@@ -785,7 +785,14 @@ const ProcessingOrders = () => {
             onClick={() => {
               if (selectedOrder) {
                 setConfirmPopup(true);
-              } else Navigate(-1);
+              } else {
+                if(Location.pathname.includes("processing"))
+                Navigate("/users/processing");
+                else if(Location.pathname.includes("checking"))
+                Navigate("/users/checking");
+                else if(Location.pathname.includes("delivery"))
+                Navigate("/users/delivery");
+              }
             }}
           />
           {!selectedOrder ? (
@@ -1641,7 +1648,7 @@ const ProcessingOrders = () => {
             postOrderContained(selectedOrder);
             setSelectedOrder(false);
             clearInterval(+sessionStorage.getItem("intervalId"));
-            audiosRef.current.forEach((audio) => audio.pause());
+            // audiosRef?.current.forEach((audio) => audio.pause());
             navigator.mediaSession.playbackState = "none";
             audiosRef.current = null;
             console.clear();
@@ -3325,9 +3332,9 @@ function MinMaxPopup({
                     </button>
                   </div>
                 </div>
-                  <button onClick={onSave} className="closeButton">
-                    x
-                  </button>
+                <button onClick={onSave} className="closeButton">
+                  x
+                </button>
               </div>
             </div>
           </div>

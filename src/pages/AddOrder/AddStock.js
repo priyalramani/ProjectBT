@@ -780,6 +780,7 @@ export default function AddStock() {
           warehouse={warehouse.find(
             (a) => a.warehouse_uuid === suggestionPopup
           )}
+          warehouseData={warehouse}
           itemsData={itemsData}
           order={order}
           setOrder={setOrder}
@@ -796,6 +797,7 @@ export function SuggestionsPopup({
   warehouse,
   itemsData,
   order,
+  warehouseData,
   setOrder,
 }) {
   const [items, setItems] = useState([]);
@@ -851,6 +853,8 @@ export function SuggestionsPopup({
                   itemsDetails={items}
                   setSelectedOrders={setSeletedItems}
                   selectedOrders={selectedItems}
+                  warehouseData={warehouseData}
+                  order={order}
                 />
               </div>
               <div className="flex" style={{ justifyContent: "space-between" }}>
@@ -894,6 +898,8 @@ function Table({
   warehouse_uuid,
   selectedOrders,
   setSelectedOrders,
+  warehouseData,
+  order,
 }) {
   console.log(selectedOrders);
   return (
@@ -907,7 +913,24 @@ function Table({
           <th colSpan={2}>Item Title</th>
           <th colSpan={2}>MRP</th>
           <th colSpan={2}>Suggestion Box</th>
-          <th colSpan={2}>Stock</th>
+          {order.from_warehouse ? (
+            <th colSpan={2}>
+              {
+                warehouseData.find(
+                  (a) => a.warehouse_uuid === order?.from_warehouse
+                )?.warehouse_title
+              }
+            </th>
+          ) : (
+            ""
+          )}
+          <th colSpan={2}>
+            {
+              warehouseData.find(
+                (a) => a.warehouse_uuid === order?.to_warehouse
+              )?.warehouse_title
+            }
+          </th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -944,6 +967,23 @@ function Table({
                 <td colSpan={2}>{item.item_title || ""}</td>
                 <td colSpan={2}>{item.mrp || ""}</td>
                 <td colSpan={2}>{item.b || ""}</td>
+                {order.from_warehouse ? (
+                  <td
+                    colSpan={2}
+                    style={{
+                      color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red",
+                    }}
+                  >
+                    {CovertedQty(
+                      item?.stock?.find(
+                        (a) => a.warehouse_uuid === order.from_warehouse
+                      )?.qty || 0,
+                      item.conversion || 1
+                    ) || ""}
+                  </td>
+                ) : (
+                  ""
+                )}
                 <td
                   colSpan={2}
                   style={{

@@ -42,7 +42,7 @@ const Processing = () => {
         >
           <IoArrowBackOutline
             className="user_Back_icon"
-            onClick={() => Navigate(-1)}
+            onClick={() => Navigate("/users")}
           />
           
   

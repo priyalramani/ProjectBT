@@ -201,6 +201,8 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
       data: {
         voucher_uuid: orderData?.voucher_uuid,
         item_details: orderData?.item_details,
+        from_warehouse: orderData?.from_warehouse,
+        to_warehouse: orderData?.to_warehouse,
       },
       headers: {
         "Content-Type": "application/json",
@@ -214,7 +216,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
   useEffect(() => {
     if (!editOrder) return;
     reactInputsRef.current?.[orderData?.item_details?.[0]?.uuid]?.focus();
-  }, [editOrder]);
+  }, [editOrder, orderData?.item_details]);
 
   let listItemIndexCount = 0;
 
@@ -268,12 +270,12 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                             }))
                           }
                           value={
-                            order?.from_warehouse
+                            orderData?.from_warehouse
                               ? {
-                                  value: order?.from_warehouse,
+                                  value: orderData?.from_warehouse,
                                   label: warehouse?.find(
                                     (j) =>
-                                      j.warehouse_uuid === order.from_warehouse
+                                      j.warehouse_uuid === orderData.from_warehouse
                                   )?.warehouse_title,
                                 }
                               : { value: 0, label: "None" }
@@ -302,17 +304,17 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                             }))
                           }
                           value={
-                            order?.to_warehouse
+                            orderData?.to_warehouse
                               ? {
-                                  value: order?.to_warehouse,
+                                  value: orderData?.to_warehouse,
                                   label: warehouse?.find(
                                     (j) =>
-                                      j.warehouse_uuid === order.to_warehouse
+                                      j.warehouse_uuid === orderData.to_warehouse
                                   )?.warehouse_title,
                                 }
                               : ""
                           }
-                          autoFocus={!order?.to_warehouse}
+                        
                           openMenuOnFocus={true}
                           menuPosition="fixed"
                           menuPlacement="auto"

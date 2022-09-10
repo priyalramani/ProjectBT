@@ -5,9 +5,10 @@ import Headers from "../../components/Header";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import Select from "react-select";
-import OutlinedInput from "@mui/material/OutlinedInput";
+import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
+
 import MenuItem from "@mui/material/MenuItem";
-import Selected from '@mui/material/Select';
+import Selected from "@mui/material/Select";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
 const ITEM_HEIGHT = 48;
@@ -21,16 +22,16 @@ const MenuProps = {
   },
 };
 const names = [
-  'Oliver Hansen',
-  'Van Henry',
-  'April Tucker',
-  'Ralph Hubbard',
-  'Omar Alexander',
-  'Carlos Abbott',
-  'Miriam Wagner',
-  'Bradley Wilkerson',
-  'Virginia Andrews',
-  'Kelly Snyder',
+  "Oliver Hansen",
+  "Van Henry",
+  "April Tucker",
+  "Ralph Hubbard",
+  "Omar Alexander",
+  "Carlos Abbott",
+  "Miriam Wagner",
+  "Bradley Wilkerson",
+  "Virginia Andrews",
+  "Kelly Snyder",
 ];
 const CurrentStock = () => {
   const [itemsData, setItemsData] = useState([]);
@@ -52,7 +53,7 @@ const CurrentStock = () => {
     } = event;
     setPersonName(
       // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
+      typeof value === "string" ? value.split(",") : value
     );
   };
   const fileExtension = ".xlsx";
@@ -137,19 +138,37 @@ const CurrentStock = () => {
       (a, b) => +a.sort_order - +b.sort_order
     )) {
       let obj = { "Item Name": item.item_title };
-      for (let a of warehouseData) {
+      for (let a of selectedOptions) {
+        let objData = item.stock.find(
+          (b) => b.warehouse_uuid === a.warehouse_uuid
+        );
         obj = {
           ...obj,
-          [a.warehouse_title || ""]:
-            CovertedQty(data?.qty || 0, item.conversion) +
-            `(${data?.min_level || 0})`,
+          [a.warehouse_title || ""]: CovertedQty(
+            objData?.qty || 0,
+            item.conversion
+          ),
         };
       }
+      let stock = item?.stock?.filter((a) =>
+        selectedOptions?.find((b) => b.warehouse_uuid === a.warehouse_uuid)
+      );
+      obj = {
+        ...obj,
+        total: CovertedQty(
+          stock?.length > 1
+            ? stock.map((a) => +a.qty || 0).reduce((a, b) => a + b)
+            : stock?.length
+            ? stock[0]?.qty
+            : 0,
+          item.conversion
+        ),
+      };
       data.push(obj);
     }
     return data;
-  }, [filteritem, warehouseData]);
-  console.log(sheetData);
+  }, [filteritem, selectedOptions]);
+
   const downloadHandler = async () => {
     const ws = XLSX.utils.json_to_sheet(sheetData);
     const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
@@ -313,8 +332,12 @@ const CurrentStock = () => {
                   value={selectedOptions}
                   onChange={handleWarhouseOptionsChange}
                   // input={<OutlinedInput label="Warehouses" />}
-                  renderValue={(selected) =>selected.length===warehouseData.length?"All":!selected.length?"None":
-                    selected.map((x) => x.name).join(", ")
+                  renderValue={(selected) =>
+                    selected.length === warehouseData.length
+                      ? "All"
+                      : !selected.length
+                      ? "None"
+                      : selected.map((x) => x.name).join(", ")
                   }
                   MenuProps={MenuProps}
                 >
@@ -323,18 +346,20 @@ const CurrentStock = () => {
                       <Checkbox
                         checked={
                           selectedOptions.findIndex(
-                            (item) =>
-                              item.id === variant.id
+                            (item) => item.id === variant.id
                           ) >= 0
                         }
                       />
-                      <ListItemText placeholder="variant.name" primary={variant.name} />
+                      <ListItemText
+                        placeholder="variant.name"
+                        primary={variant.name}
+                      />
                     </MenuItem>
                   ))}
                 </Selected>
               </div>
             </div>
-           
+
             <div>Total Items: {filteritem.length}</div>
             <button className="item-sales-search" onClick={downloadHandler}>
               Excel
@@ -384,6 +409,8 @@ const CovertedQty = (qty, conversion) => {
   return b + ":" + p;
 };
 function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
+  const [items, setItems] = useState("sort_order");
+  const [order, setOrder] = useState("");
   return (
     <table
       className="user-table"
@@ -392,17 +419,105 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
       <thead>
         <tr>
           <th>S.N</th>
-          <th colSpan={2}>Item Name</th>
-          <th colSpan={2}>MRP</th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Item Name</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("item_title");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("item_title");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>MRP</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("mrp");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("mrp");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
           {warehouseData.map((a) => (
-            <th colSpan={2}>{a.warehouse_title}</th>
+            <th colSpan={2}>
+              <div className="t-head-element">
+                <span>{a.warehouse_title}</span>
+                <div className="sort-buttons-container">
+                  <button
+                    onClick={() => {
+                      setItems(a);
+                      setOrder("asc");
+                    }}
+                  >
+                    <ChevronUpIcon className="sort-up sort-button" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setItems(a);
+                      setOrder("desc");
+                    }}
+                  >
+                    <ChevronDownIcon className="sort-down sort-button" />
+                  </button>
+                </div>
+              </div>
+            </th>
           ))}
           <th>Total</th>
         </tr>
       </thead>
       <tbody className="tbody">
         {itemsDetails
-          ?.sort((a, b) => +a.sort_order - +b.sort_order)
+          .sort((a, b) =>
+            items?.warehouse_uuid
+              ? order === "asc"
+                ? (a?.stock?.find(
+                    (c) => items.warehouse_uuid === c.warehouse_uuid
+                  )?.qty || 0) -
+                  (b?.stock?.find(
+                    (c) => items.warehouse_uuid === c.warehouse_uuid
+                  )?.qty || 0)
+                : (b?.stock?.find(
+                    (c) => items.warehouse_uuid === c.warehouse_uuid
+                  )?.qty || 0) -
+                  (a?.stock?.find(
+                    (c) => items.warehouse_uuid === c.warehouse_uuid
+                  )?.qty || 0)
+              : order === "asc"
+              ? typeof a[items] === "string"
+                ? a[items].localeCompare(b[items])
+                : a[items] - b[items]
+              : typeof a[items] === "string"
+              ? b[items].localeCompare(a[items])
+              : b[items] - a[items]
+          )
           ?.map((item, i, array) => (
             <tr key={Math.random()} style={{ height: "30px" }}>
               <td className="flex" style={{ justifyContent: "space-between" }}>
@@ -424,7 +539,7 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setItemEditPopup({ type: "qty", ...a });
+                        setItemEditPopup({ ...a, type: "qty" });
                         setItemData(item);
                       }}
                     >
@@ -437,7 +552,7 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setItemEditPopup({ type: "min_level", ...a });
+                        setItemEditPopup({ ...a, type: "min_level" });
                         setItemData(item);
                       }}
                     >
@@ -467,6 +582,11 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
 function QuantityChanged({ onSave, popupInfo, item, update }) {
   const [data, setdata] = useState({});
   const [warning, setWarning] = useState();
+  const [itemDetails, setItemDetails] = useState();
+  const [searchData, setSearchData] = useState({
+    startDate: "",
+    endDate: "",
+  });
   useEffect(() => {
     if (!item.status) setWarning(true);
   }, [item.status]);
@@ -492,7 +612,50 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
         min_level: 0,
       });
   }, [item.conversion, item.stock, popupInfo.warehouse_uuid]);
+  const dateConverter = () => {
+    let dateIn = new Date();
 
+    dateIn.setHours(12);
+    let dateFor10days = new Date(dateIn.setDate(dateIn.getDate() - 10));
+
+    let strFor10Days =
+      dateFor10days.getFullYear() +
+      "-" +
+      ("0" + (dateFor10days.getMonth() + 1)).slice(-2) +
+      "-" +
+      ("0" + dateFor10days.getDate()).slice(-2);
+    strFor10Days = new Date(strFor10Days);
+
+    return strFor10Days;
+  };
+
+  useEffect(() => {
+    if (popupInfo.type !== "qty") {
+      let time = new Date();
+      let curTime = "yy-mm-dd"
+        .replace("mm", ("00" + (time?.getMonth() + 1)?.toString()).slice(-2))
+        .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
+        .replace("dd", ("00" + time?.getDate()?.toString()).slice(-2));
+      let sTime = "yy-mm-dd"
+        .replace(
+          "mm",
+          ("00" + (dateConverter()?.getMonth() + 1)?.toString()).slice(-2)
+        )
+        .replace(
+          "yy",
+          ("0000" + dateConverter()?.getFullYear()?.toString()).slice(-4)
+        )
+        .replace(
+          "dd",
+          ("00" + dateConverter()?.getDate()?.toString()).slice(-2)
+        );
+      setSearchData((prev) => ({
+        ...prev,
+        startDate: sTime,
+        endDate: curTime,
+      }));
+    }
+  }, [popupInfo.type]);
   const submitHandler = async (e) => {
     e.preventDefault();
     let qty = +(+data.b * +item.conversion) + +data.p;
@@ -532,8 +695,31 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
       update();
     }
   };
-
-  return (
+  const getItemData = async () => {
+    let startDate = new Date(searchData.startDate + " 00:00:00 AM");
+    startDate = startDate.getTime();
+    let endDate = new Date(searchData.endDate + " 00:00:00 AM");
+    endDate = endDate.getTime();
+    const response = await axios({
+      method: "post",
+      url: "/orders/getStockDetails",
+      data: {
+        startDate,
+        endDate,
+        counter_uuid: searchData.counter_uuid,
+        item_uuid: item.item_uuid,
+        warehouse_uuid: popupInfo.warehouse_uuid,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("activity", response);
+    if (response.data.success) setItemDetails(response.data.result);
+    else setItemDetails([]);
+  };
+  console.log(popupInfo);
+  return popupInfo.type === "qty" ? (
     <div className="overlay">
       <div
         className="modal"
@@ -563,84 +749,55 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
             <div style={{ overflowY: "scroll" }}>
               <form className="form" onSubmit={submitHandler}>
                 <div className="formGroup">
-                  {popupInfo.type === "qty" ? (
-                    <div
-                      className="row"
-                      style={{ flexDirection: "row", alignItems: "flex-start" }}
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "flex-start" }}
+                  >
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "100px" }}
                     >
-                      <label
-                        className="selectLabel flex"
+                      Box
+                      <input
+                        type="number"
+                        name="route_title"
+                        className="numberInput"
+                        value={data.b}
                         style={{ width: "100px" }}
-                      >
-                        Box
-                        <input
-                          type="number"
-                          name="route_title"
-                          className="numberInput"
-                          value={data.b}
-                          style={{ width: "100px" }}
-                          onChange={(e) =>
-                            setdata({
-                              ...data,
-                              b: e.target.value,
-                            })
-                          }
-                          maxLength={42}
-                          onWheel={(e) => e.preventDefault()}
-                        />
-                        {popupInfo.conversion || 0}
-                      </label>
-                      <label
-                        className="selectLabel flex"
-                        style={{ width: "100px" }}
-                      >
-                        Pcs
-                        <input
-                          type="number"
-                          name="route_title"
-                          className="numberInput"
-                          value={data.p}
-                          style={{ width: "100px" }}
-                          onChange={(e) =>
-                            setdata({
-                              ...data,
-                              p: e.target.value,
-                            })
-                          }
-                          maxLength={42}
-                          onWheel={(e) => e.preventDefault()}
-                          autoFocus={true}
-                        />
-                      </label>
-                    </div>
-                  ) : (
-                    <div
-                      className="row"
-                      style={{ flexDirection: "row", alignItems: "flex-start" }}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            b: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                        onWheel={(e) => e.preventDefault()}
+                      />
+                      {popupInfo.conversion || 0}
+                    </label>
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "100px" }}
                     >
-                      <label
-                        className="selectLabel flex"
+                      Pcs
+                      <input
+                        type="number"
+                        name="route_title"
+                        className="numberInput"
+                        value={data.p}
                         style={{ width: "100px" }}
-                      >
-                        Min Level
-                        <input
-                          type="number"
-                          name="route_title"
-                          className="numberInput"
-                          value={data?.min_level}
-                          style={{ width: "100px" }}
-                          onChange={(e) =>
-                            setdata({
-                              ...data,
-                              min_level: e.target.value,
-                            })
-                          }
-                          maxLength={42}
-                          onWheel={(e) => e.preventDefault()}
-                        />
-                      </label>
-                    </div>
-                  )}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            p: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                        onWheel={(e) => e.preventDefault()}
+                        autoFocus={true}
+                      />
+                    </label>
+                  </div>
                 </div>
 
                 <button type="submit" className="submit">
@@ -649,6 +806,123 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
               </form>
             </div>
           )}
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{
+          height: "fit-content",
+          width: "90vw",
+          padding: "50px",
+          zIndex: "999999999",
+          border: "2px solid #000",
+        }}
+      >
+        <div className="inventory">
+          <div
+            className="accountGroup"
+            id="voucherForm"
+            action=""
+            style={{
+              height: "400px",
+              maxHeight: "500px",
+              overflow: "scroll",
+            }}
+          >
+            <div className="inventory_header">
+              <h2>
+                {item.item_title}{" "}
+                {CovertedQty(
+                  item.stock?.find(
+                    (a) => a.warehouse_uuid === popupInfo.warehouse_uuid
+                  )?.qty || 0,
+                  item.conversion
+                )}
+              </h2>
+            </div>
+            <div id="item-sales-top">
+              <div
+                id="date-input-container"
+                style={{
+                  overflow: "visible",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
+                <input
+                  type="date"
+                  onChange={(e) =>
+                    setSearchData((prev) => ({
+                      ...prev,
+                      startDate: e.target.value,
+                    }))
+                  }
+                  value={searchData.startDate}
+                  placeholder="Search Counter Title..."
+                  className="searchInput"
+                  pattern="\d{4}-\d{2}-\d{2}"
+                />
+                <input
+                  type="date"
+                  onChange={(e) =>
+                    setSearchData((prev) => ({
+                      ...prev,
+                      endDate: e.target.value,
+                    }))
+                  }
+                  value={searchData.endDate}
+                  placeholder="Search Route Title..."
+                  className="searchInput"
+                  pattern="\d{4}-\d{2}-\d{2}"
+                />
+
+                <button className="item-sales-search" onClick={getItemData}>
+                  Search
+                </button>
+              </div>
+            </div>
+            <div className="table-container-user item-sales-container">
+              <table
+                className="user-table"
+                style={{
+                  maxWidth: "100vw",
+                  height: "fit-content",
+                  overflowX: "scroll",
+                }}
+              >
+                <thead>
+                  <tr>
+                    <th>S.N</th>
+                    <th colSpan={2}>Date</th>
+                    <th colSpan={2}>To</th>
+                    <th colSpan={2}>Added</th>
+                    <th colSpan={2}>Reduce</th>
+                  </tr>
+                </thead>
+                <tbody className="tbody">
+                  {itemDetails?.map((item, i, array) => {
+                    return (
+                      <tr key={Math.random()} style={{ height: "30px" }}>
+                        <td>{i + 1}</td>
+                        <td colSpan={2}>{new Date(item.date)?.toDateString() || ""}</td>
+                        <td colSpan={2}>{item.to || ""}</td>
+                        <td colSpan={2}>{item.added || 0}</td>
+                        <td colSpan={2}>{item.reduce || 0}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
           <button onClick={onSave} className="closeButton">
             x
           </button>
