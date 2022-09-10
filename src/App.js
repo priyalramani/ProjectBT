@@ -46,6 +46,7 @@ import CancelOrders from "./pages/Reports/CancelOrder";
 import AdjustStock from "./pages/AddOrder/AdjustStock";
 import InvoiceNumberWiseOrder from "./pages/Reports/InvoiceNumberWiseOrder";
 import PartyWiseCompanyDiscount from "./pages/Reports/PartyWiseCompanyDiscount";
+import RetailerMarginReport from "./pages/Reports/RetailerMarginReport";
 
 
 function App() {
@@ -179,6 +180,10 @@ function App() {
               <Route
                 path="/admin/completeOrderReport"
                 element={<CompleteOrder />}
+              />
+              <Route
+                path="/admin/RetailerMarginReport"
+                element={<RetailerMarginReport />}
               />
               <Route path="/admin/cancelOrders" element={<CancelOrders />} />
               <Route path="/admin/OrderItemReport" element={<ItemDetails />} />

@@ -13,6 +13,7 @@ import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 let titleData = [
+  { value: "RetailerMarginReport", name: "Retailer Margin Report" },
   { value: "InvoiceNumberWiseOrder", name: "Invoice Number Wise Order" },
   { value: "PartyWiseCompanyDiscount", name: "Party Wise Company Discount" },
   { value: "trip", name: "DASHBOARD - Trip" },
@@ -211,6 +212,10 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
             {
               name: "Party Wise Company Discount",
               link: "/admin/PartyWiseCompanyDiscount",
+            },
+            {
+              name: "Retailer Margin Report",
+              link: "/admin/RetailerMarginReport",
             },
           ]}
         />
