@@ -694,9 +694,49 @@ function NewUserForm({
                         setdata({
                           ...data,
                           item_price: e.target.value,
+                          margin: (data.mrp / e.target.value - 1) * 100,
                         })
                       }
                       maxLength={5}
+                    />
+                  </label>
+                  <label className="selectLabel">
+                    Item Margin
+                    <input
+                      type="number"
+                      onWheel={(e) => e.target.blur()}
+                      name="route_title"
+                      className="numberInput"
+                      step="0.001"
+                      value={data?.margin}
+                      onChange={(e) => {
+                        let item_price = data?.mrp * (e.target.value / 100 + 1);
+
+                        setdata({
+                          ...data,
+                          margin: e.target.value,
+                          item_price,
+                        });
+                      }}
+                      maxLength={5}
+                    />
+                  </label>{" "}
+                </div>
+
+                <div className="row">
+                  <label className="selectLabel">
+                    Item Code
+                    <input
+                      type="text"
+                      name="one_pack"
+                      className="numberInput"
+                      value={data?.item_code}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          item_code: e.target.value,
+                        })
+                      }
                     />
                   </label>
                   <label className="selectLabel">
@@ -717,7 +757,6 @@ function NewUserForm({
                     />
                   </label>
                 </div>
-
                 <div className="row">
                   <label className="selectLabel">
                     Conversion
@@ -857,23 +896,6 @@ function NewUserForm({
                         Off
                       </div>
                     </div>
-                  </label>
-                </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    Item Code
-                    <input
-                      type="text"
-                      name="one_pack"
-                      className="numberInput"
-                      value={data?.item_code}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          item_code: e.target.value,
-                        })
-                      }
-                    />
                   </label>
                 </div>
               </div>
