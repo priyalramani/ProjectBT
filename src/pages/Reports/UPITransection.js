@@ -20,6 +20,7 @@ function formatAMPM(date) {
 }
 const UPITransection = () => {
   const [popupOrder, setPopupOrder] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [remarksPopup, setRemarksPoup] = useState();
 
   const [items, setItems] = useState([]);
@@ -33,6 +34,7 @@ const UPITransection = () => {
     });
     console.log("transactions", response);
     if (response.data.success) setItems(response.data.result);
+    setLoading(false);
   };
   const getOrderData = async (order_uuid) => {
     const response = await axios({
@@ -56,13 +58,7 @@ const UPITransection = () => {
     });
     console.log("transactions", response);
     if (response.data.success) {
-      setItems((prev) =>
-        prev.filter(
-          (a) =>
-            a.invoice_number !== invoice_number && a.mode_uuid !== mode_uuid
-        )
-      );
-      // getActivityData();
+      getActivityData();
     }
   };
   useEffect(() => {
@@ -114,6 +110,8 @@ const UPITransection = () => {
             putActivityData={putActivityData}
             getOrderData={getOrderData}
             setRemarksPoup={setRemarksPoup}
+            loading={loading}
+            setLoading={setLoading}
           />
         </div>
       </div>
@@ -131,7 +129,10 @@ const UPITransection = () => {
       )}
       {remarksPopup ? (
         <NotesPopup
-          onSave={() => setRemarksPoup(false)}
+          onSave={() => {
+            setRemarksPoup(false);
+            getActivityData();
+          }}
           notesPopup={remarksPopup}
           setItems={setItems}
           // postOrderData={() => onSubmit({ stage: 5 })}
@@ -149,6 +150,8 @@ function Table({
   putActivityData,
   getOrderData,
   setRemarksPoup,
+  loading,
+  setLoading,
 }) {
   return (
     <table
@@ -209,20 +212,46 @@ function Table({
                 </button>
               </td>
               <td colSpan={2}>
-                <button
-                  type="button"
-                  className="item-sales-search"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    putActivityData(
-                      item.order_uuid,
-                      item.mode_uuid,
-                      item.invoice_number
-                    );
-                  }}
-                >
-                  Complete
-                </button>
+                {loading?.order_uuid === item.order_uuid &&
+                loading?.mode_uuid === item?.mode_uuid ? (
+                  <button className="item-sales-search" id="loading-screen">
+                    <svg viewBox="0 0 100 100">
+                      <path
+                        d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                        fill="#ffffff"
+                        stroke="none"
+                      >
+                        <animateTransform
+                          attributeName="transform"
+                          type="rotate"
+                          dur="1s"
+                          repeatCount="indefinite"
+                          keyTimes="0;1"
+                          values="0 50 51;360 50 51"
+                        ></animateTransform>
+                      </path>
+                    </svg>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="item-sales-search"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLoading({
+                        order_uuid: item.order_uuid,
+                        mode_uuid: item.mode_uuid,
+                      });
+                      putActivityData(
+                        item.order_uuid,
+                        item.mode_uuid,
+                        item.invoice_number
+                      );
+                    }}
+                  >
+                    Complete
+                  </button>
+                )}
               </td>
             </tr>
           ))}
@@ -251,14 +280,6 @@ function NotesPopup({ onSave, setItems, notesPopup }) {
       },
     });
     if (response.data.success) {
-      setItems((prev) =>
-        prev.map((a) =>
-          a.invoice_number === notesPopup.invoice_number &&
-          a.mode_uuid === notesPopup.mode_uuid
-            ? { ...a, remarks: notes }
-            : a
-        )
-      );
       onSave();
     }
   };
