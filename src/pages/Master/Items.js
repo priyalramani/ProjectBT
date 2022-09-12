@@ -710,7 +710,11 @@ function NewUserForm({
                       step="0.001"
                       value={data?.margin}
                       onChange={(e) => {
-                        let item_price = data?.mrp * (e.target.value / 100 + 1);
+                        let item_price = data?.mrp / (e.target.value / 100 + 1);
+                        item_price =
+                          item_price - Math.floor(item_price) !== 0
+                            ? item_price.toString().match(new RegExp('^-?\\d+(?:\.\\d{0,' + (2 || -1) + '})?'))[0]
+                            : item_price;
 
                         setdata({
                           ...data,

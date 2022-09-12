@@ -11,7 +11,6 @@ import MenuItem from "@mui/material/MenuItem";
 import Selected from "@mui/material/Select";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
-import { Category } from "@mui/icons-material";
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -212,7 +211,7 @@ const RetailerMarginReport = () => {
       <Headers />
       <div className="item-sales-container orders-report-container">
         <div id="heading" className="flex">
-          <h2 style={{ width: "70%" }}>Current Stock</h2>
+          <h2 style={{ width: "70%" }}>Retailer Margin Report</h2>
         </div>
         <div id="item-sales-top">
           <div
@@ -544,12 +543,12 @@ function Table({ itemsDetails, setItemEditPopup, setItemData }) {
         {itemsDetails
           .sort((a, b) =>
             order === "asc"
-              ? typeof a[items] === "string"
+              ? typeof a[items] === "string" && items !== "margin"
                 ? a[items]?.localeCompare(b[items])
-                : a[items] - b[items]
-              : typeof a[items] === "string"
+                : +a[items] - +b[items]
+              : typeof a[items] === "string" && items !== "margin"
               ? b[items]?.localeCompare(a[items])
-              : b[items] - a[items]
+              : +b[items] - +a[items]
           )
           ?.map((item, i, array) => (
             <tr
@@ -652,8 +651,11 @@ function QuantityChanged({ onSave, item, update }) {
                       step="0.001"
                       value={data?.margin}
                       onChange={(e) => {
-                        let item_price = data?.mrp * (e.target.value / 100 + 1);
-
+                        let item_price = data?.mrp / (e.target.value / 100 + 1);
+                        item_price =
+                        item_price - Math.floor(item_price) !== 0
+                          ? item_price.toString().match(new RegExp('^-?\\d+(?:\.\\d{0,' + (2 || -1) + '})?'))[0]
+                          : item_price;
                         setdata({
                           ...data,
                           margin: e.target.value,
