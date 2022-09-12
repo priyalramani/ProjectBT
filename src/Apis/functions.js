@@ -1,7 +1,6 @@
 import axios from "axios";
 import { deleteDB, openDB } from "idb";
 
-
 export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
   let eligibleItems = items;
   let auto_added = [];
@@ -365,9 +364,14 @@ export const Billing = async ({
   let order_grandtotal = Math.floor(
     newPriceItems.length > 1
       ? newPriceItems.map((a) => +a.item_total || 0).reduce((a, b) => a + b) -
-        replacement-shortage-adjustment
+          replacement -
+          shortage -
+          adjustment
       : newPriceItems.length
-      ? (newPriceItems.map((a) => a.item_total)[0] || 0) - replacement-shortage-adjustment
+      ? (newPriceItems.map((a) => a.item_total)[0] || 0) -
+        replacement -
+        shortage -
+        adjustment
       : 0
   );
 
@@ -380,7 +384,7 @@ export const Billing = async ({
 };
 
 export const updateIndexedDb = async () => {
-   await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+  await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
   //console.log(response);
   const result = await axios({
     method: "get",
@@ -578,4 +582,62 @@ export const jumpToNextIndex = (
       return;
     }
   } else appendData();
+};
+
+export const refreshDb = async () => {
+  let response = await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+  console.log(response);
+  const result = await axios({
+    method: "get",
+    url: "/users/getDetails",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  let data = result.data.result;
+  console.log(data);
+  const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
+    upgrade(db) {
+      for (const property in data) {
+        db.createObjectStore(property, {
+          keyPath: "IDENTIFIER",
+        });
+      }
+    },
+  });
+
+  let store;
+  for (const property in data) {
+    store = await db.transaction(property, "readwrite").objectStore(property);
+    for (let item of data[property]) {
+      let IDENTIFIER =
+        item[
+          property === "autobill"
+            ? "auto_uuid"
+            : property === "companies"
+            ? "company_uuid"
+            : property === "counter"
+            ? "counter_uuid"
+            : property === "counter_groups"
+            ? "counter_group_uuid"
+            : property === "item_category"
+            ? "category_uuid"
+            : property === "items"
+            ? "item_uuid"
+            : property === "routes"
+            ? "route_uuid"
+            : property === "payment_modes"
+            ? "mode_uuid"
+            : property === "warehouse"
+            ? "warehouse_uuid"
+            : ""
+        ];
+      console.log({ ...item, IDENTIFIER });
+      await store.put({ ...item, IDENTIFIER });
+    }
+  }
+
+  db.close();
+  let time = new Date();
+  localStorage.setItem("indexed_time", time.getTime());
 };

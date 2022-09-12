@@ -7,6 +7,7 @@ import { deleteDB, openDB } from "idb";
 import CloseIcon from "@mui/icons-material/Close";
 import MenuIcon from "@mui/icons-material/Menu";
 import axios from "axios";
+import { refreshDb } from "../Apis/functions";
 const Main = () => {
   const [userRole, setUserRole] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
@@ -163,70 +164,8 @@ function Logout({ onSave, popupForm }) {
     setIsLoading(true);
     console.log(popupForm);
     if (popupForm === "refresh") {
-      let response = await deleteDB(
-        "BT",
-        +localStorage.getItem("IDBVersion") || 1
-      );
-      console.log(response);
-      const result = await axios({
-        method: "get",
-        url: "/users/getDetails",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      let data = result.data.result;
-      console.log(data);
-      const db = await openDB(
-        "BT",
-        +localStorage.getItem("IDBVersion") || 1,
-        {
-          upgrade(db) {
-            for (const property in data) {
-              db.createObjectStore(property, {
-                keyPath: "IDENTIFIER",
-              });
-            }
-          },
-        }
-      );
-
-      let store;
-      for (const property in data) {
-        store = await db
-          .transaction(property, "readwrite")
-          .objectStore(property);
-        for (let item of data[property]) {
-          let IDENTIFIER =
-            item[
-              property === "autobill"
-                ? "auto_uuid"
-                : property === "companies"
-                ? "company_uuid"
-                : property === "counter"
-                ? "counter_uuid"
-                : property === "counter_groups"
-                ? "counter_group_uuid"
-                : property === "item_category"
-                ? "category_uuid"
-                : property === "items"
-                ? "item_uuid"
-                : property === "routes"
-                ? "route_uuid"
-                : property === "payment_modes"
-                ? "mode_uuid"
-                : property === "warehouse"
-                ? "warehouse_uuid"
-                : ""
-            ];
-          console.log({ ...item, IDENTIFIER });
-          await store.put({ ...item, IDENTIFIER });
-        }
-      }
-      setIsLoading(false);
-      db.close();
-      let time = new Date();
-      localStorage.setItem("indexed_time", time.getTime());
+     await refreshDb();
+     setIsLoading(false);
       onSave();
     } else {
       await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);

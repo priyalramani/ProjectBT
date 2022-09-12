@@ -140,14 +140,23 @@ const RetailerMarginReport = () => {
           let companyData = companies.find(
             (b) => b.company_uuid === categoryData.company_uuid
           );
+          let margin =
+            a.mrp && a.item_price ? (a.mrp / a.item_price - 1) * 100 : 0;
+          let decimal = margin
+            ?.toString()
+            ?.match(new RegExp("^-?\\d+(?:.\\d{0," + 2 + "})?"));
+          margin = margin
+            ? margin - Math.floor(margin) !== 0
+              ? decimal
+                ? decimal[0]
+                : 0
+              : margin
+            : 0;
           return {
             ...a,
             company_title: companyData.company_title,
             category_title: categoryData.category_title,
-            margin: (a.mrp && a.item_price
-              ? (a.mrp / a.item_price - 1) * 100
-              : 0
-            ).toFixed(2),
+            margin,
           };
         })
     );
@@ -631,13 +640,25 @@ function QuantityChanged({ onSave, item, update }) {
                       className="numberInput"
                       step="0.001"
                       value={data?.item_price}
-                      onChange={(e) =>
+                      onChange={(e) => {
+                        let margin = (data.mrp / e.target.value - 1) * 100;
+                        margin = margin
+                          ? margin - Math.floor(margin) !== 0
+                            ? margin
+                                .toString()
+                                .match(
+                                  new RegExp(
+                                    "^-?\\d+(?:.\\d{0," + (2 || -1) + "})?"
+                                  )
+                                )[0]
+                            : margin
+                          : 0;
                         setdata({
                           ...data,
                           item_price: e.target.value,
-                          margin: (data.mrp / e.target.value - 1) * 100,
-                        })
-                      }
+                          margin,
+                        });
+                      }}
                       maxLength={5}
                     />
                   </label>
@@ -652,10 +673,17 @@ function QuantityChanged({ onSave, item, update }) {
                       value={data?.margin}
                       onChange={(e) => {
                         let item_price = data?.mrp / (e.target.value / 100 + 1);
-                        item_price =
-                        item_price - Math.floor(item_price) !== 0
-                          ? item_price.toString().match(new RegExp('^-?\\d+(?:\.\\d{0,' + (2 || -1) + '})?'))[0]
-                          : item_price;
+                        item_price = item_price
+                          ? item_price - Math.floor(item_price) !== 0
+                            ? item_price
+                                .toString()
+                                .match(
+                                  new RegExp(
+                                    "^-?\\d+(?:.\\d{0," + (2 || -1) + "})?"
+                                  )
+                                )[0]
+                            : item_price
+                          : 0;
                         setdata({
                           ...data,
                           margin: e.target.value,

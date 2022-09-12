@@ -197,13 +197,13 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         orderData?.item_details
           .map((a) => ({
             ...a,
-            category_sort: category.find(
+            category_title: category.find(
               (b) => b.category_uuid === a.category_uuid
-            )?.sort_order,
+            )?.category_title,
           }))
           .sort(
             (a, b) =>
-              a.category_sort - b.category_sort +
+              a?.category_title?.localeCompare(b.category_title) +
               a?.item_title?.localeCompare(b.item_title)
           )
           ?.filter((a) => +a.status !== 3)
@@ -480,21 +480,27 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         <div
           className="modal"
           style={{
-            height: "fit-content",
+            maxHeight: "100vh",
+            height: "max-content",
             width: "90vw",
-            padding: "50px",
+            padding: "10px 50px",
             zIndex: "999999999",
             border: "2px solid #000",
+            fontSize: "12px",
           }}
         >
-          <div className="inventory">
+          <div
+            className="inventory"
+            style={{ height: "max-content", maxHeight: "100vh" }}
+          >
             <div
               className="accountGroup"
               id="voucherForm"
               action=""
               style={{
-                height: "400px",
-                maxHeight: "500px",
+                // height: "400px",
+                height: "max-content",
+                maxHeight: "75vh",
                 overflow: "scroll",
               }}
             >
@@ -885,7 +891,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                         <tr
                           key={i}
                           style={{
-                            height: "50px",
+                            height: "30px",
                             backgroundColor:
                               item.price_approval === "N"
                                 ? "#00edff"

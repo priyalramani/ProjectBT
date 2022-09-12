@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { IoArrowBackOutline } from "react-icons/io5";
 import axios from "axios";
 import { Phone } from "@mui/icons-material";
+import { refreshDb } from "../Apis/functions";
 const Orders = () => {
   const [counters, setCounters] = useState([]);
   const [counterFilter, setCounterFilter] = useState("");
@@ -269,6 +270,7 @@ function NewUserForm({ onSave, popupInfo, setRefresh }) {
   const [paymentModes, setPaymentModes] = useState([]);
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
+  const [loading, setLoading] = useState("");
   const getRoutesData = async () => {
     const response = await axios({
       method: "get",
@@ -317,6 +319,7 @@ function NewUserForm({ onSave, popupInfo, setRefresh }) {
       setErrorMassage("Please insert  Title");
       return;
     }
+    setLoading(true);
     // if (data?.mobile?.length !== 10) {
     //   setErrorMassage("Please enter 10 Numbers in Mobile");
     //   return;
@@ -334,65 +337,9 @@ function NewUserForm({ onSave, popupInfo, setRefresh }) {
       },
     });
     if (response.data.success) {
-      let response = await deleteDB(
-        "BT",
-        +localStorage.getItem("IDBVersion") || 1
-      );
-      console.log(response);
-      const result = await axios({
-        method: "get",
-        url: "/users/getDetails",
-
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      let data = result.data.result;
-      console.log(data);
-      const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
-        upgrade(db) {
-          for (const property in data) {
-            db.createObjectStore(property, {
-              keyPath: "IDENTIFIER",
-            });
-          }
-        },
-      });
-
-      let store;
-      for (const property in data) {
-        store = await db
-          .transaction(property, "readwrite")
-          .objectStore(property);
-        for (let item of data[property]) {
-          let IDENTIFIER =
-            item[
-              property === "autobill"
-                ? "auto_uuid"
-                : property === "companies"
-                ? "company_uuid"
-                : property === "counter"
-                ? "counter_uuid"
-                : property === "counter_groups"
-                ? "counter_group_uuid"
-                : property === "item_category"
-                ? "category_uuid"
-                : property === "items"
-                ? "item_uuid"
-                : property === "routes"
-                ? "route_uuid"
-                : property === "payment_modes"
-                ? "mode_uuid"
-                : ""
-            ];
-          console.log({ ...item, IDENTIFIER });
-          await store.put({ ...item, IDENTIFIER });
-        }
-      }
-      let time = new Date();
-      localStorage.setItem("indexed_time", time.getTime());
-      db.close();
+      await refreshDb();
       setRefresh((prev) => !prev);
+      setLoading(false);
       onSave();
     }
   };
@@ -663,9 +610,30 @@ function NewUserForm({ onSave, popupInfo, setRefresh }) {
                 {errMassage === "" ? "" : "Error: " + errMassage}
               </i>
 
-              <button type="submit" className="submit">
-                Save changes
-              </button>
+              {loading ? (
+                <button className="submit" id="loading-screen">
+                  <svg viewBox="0 0 100 100">
+                    <path
+                      d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                      fill="#ffffff"
+                      stroke="none"
+                    >
+                      <animateTransform
+                        attributeName="transform"
+                        type="rotate"
+                        dur="1s"
+                        repeatCount="indefinite"
+                        keyTimes="0;1"
+                        values="0 50 51;360 50 51"
+                      ></animateTransform>
+                    </path>
+                  </svg>
+                </button>
+              ) : (
+                <button type="submit" className="submit">
+                  Save changes
+                </button>
+              )}
             </form>
           </div>
           <button onClick={onSave} className="closeButton">
