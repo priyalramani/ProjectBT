@@ -41,6 +41,8 @@ const PartyWiseCompanyDiscount = () => {
   const [filterCategory, setFilterCategory] = useState("");
   const [routes, setRoutes] = useState([]);
   const [companies, setCompanies] = useState([]);
+  const [showsale, setShowsale] = useState(false);
+  const [showsalePopup, setShowsalePopup] = useState(false);
 
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [personName, setPersonName] = React.useState([]);
@@ -110,6 +112,9 @@ const PartyWiseCompanyDiscount = () => {
     getRoutesData();
     getItemsData();
   }, []);
+  // useEffect(() => {
+  //   if (!showsale) getItemsData();
+  // }, [showsale]);
 
   useEffect(() => {
     setSelectedOptions(companies);
@@ -305,7 +310,35 @@ const PartyWiseCompanyDiscount = () => {
                 </Selected>
               </div>
             </div>
-
+            <div className="inputGroup">
+              <div
+                className="inputGroup"
+                style={{
+                  width: "200px",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  onChange={(e) => {
+                    if (showsale) {
+                      setShowsale(false);
+                    } else {
+                      setShowsalePopup(true);
+                    }
+                  }}
+                  value={showsale}
+                  placeholder="Search Counter Title..."
+                  className="searchInput"
+                  style={{ transform: "scale(2)" }}
+                />
+                <label htmlFor="Warehouse" style={{ width: "170px" }}>
+                  Show Sales
+                </label>
+              </div>
+            </div>
             <div>Total Items: {filteritem.length}</div>
             <button className="item-sales-search" onClick={downloadHandler}>
               Excel
@@ -318,6 +351,7 @@ const PartyWiseCompanyDiscount = () => {
             setItemData={setItem}
             setItemEditPopup={setItemEditPopup}
             warehouseData={selectedOptions}
+            showsale={showsale}
           />
         </div>
       </div>
@@ -329,6 +363,17 @@ const PartyWiseCompanyDiscount = () => {
             setItemEditPopup("");
           }}
           update={getItemsData}
+        />
+      ) : (
+        ""
+      )}
+      {showsalePopup ? (
+        <ShowSaleValue
+          setShowsale={setShowsale}
+          onSave={() => {
+            setShowsalePopup(false);
+          }}
+          setCountersData={setCountersData}
         />
       ) : (
         ""
@@ -348,7 +393,13 @@ const CovertedQty = (qty, conversion) => {
 
   return b + ":" + p;
 };
-function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
+function Table({
+  itemsDetails,
+  warehouseData,
+  setItemEditPopup,
+  setItemData,
+  showsale,
+}) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
   return (
@@ -406,29 +457,32 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
             </div>
           </th>
           {warehouseData.map((a) => (
-            <th>
-              <div className="t-head-element">
-                <span>{a.company_title}</span>
-                <div className="sort-buttons-container">
-                  <button
-                    onClick={() => {
-                      setItems(a);
-                      setOrder("asc");
-                    }}
-                  >
-                    <ChevronUpIcon className="sort-up sort-button" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setItems(a);
-                      setOrder("desc");
-                    }}
-                  >
-                    <ChevronDownIcon className="sort-down sort-button" />
-                  </button>
+            <>
+              <th style={{width:"120px"}}>
+                <div className="t-head-element">
+                  <span>{a.company_title}</span>
+                  <div className="sort-buttons-container">
+                    <button
+                      onClick={() => {
+                        setItems(a);
+                        setOrder("asc");
+                      }}
+                    >
+                      <ChevronUpIcon className="sort-up sort-button" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setItems(a);
+                        setOrder("desc");
+                      }}
+                    >
+                      <ChevronDownIcon className="sort-down sort-button" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </th>
+              </th>
+              {showsale ? <th style={{width:"70px"}}>Sale</th> : ""}
+            </>
           ))}
         </tr>
       </thead>
@@ -469,20 +523,42 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
                 let data = item?.company_discount?.find(
                   (b) => b.company_uuid === a.company_uuid
                 );
+                let value =
+                  item?.sales?.find((b) => b.company_uuid === a.company_uuid)
+                    ?.value || 0;
                 return (
-                  <td
-                    style={{
-                      textAlign: "left",
-                      cursor: "pointer",
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setItemEditPopup(a);
-                      setItemData(item);
-                    }}
-                  >
-                    {data?.discount || 0}
-                  </td>
+                  <>
+                    <td
+                      style={{
+                        textAlign: "left",
+                        cursor: "pointer",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setItemEditPopup(a);
+                        setItemData(item);
+                      }}
+                    >
+                      {data?.discount || 0}
+                    </td>
+                    {showsale ? (
+                      <td
+                        style={{
+                          textAlign: "left",
+                          cursor: "pointer",
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setItemEditPopup(a);
+                          setItemData(item);
+                        }}
+                      >
+                        {value || 0}
+                      </td>
+                    ) : (
+                      ""
+                    )}
+                  </>
                 );
               })}
             </tr>
@@ -586,6 +662,107 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
               <button type="submit" className="submit">
                 Save changes
               </button>
+            </form>
+          </div>
+
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function ShowSaleValue({ onSave, setShowsale, setCountersData }) {
+  const [data, setdata] = useState(0);
+  const [loading, setLoading] = useState(0);
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    if (!data) return;
+    setLoading(true);
+    const response = await axios({
+      method: "get",
+      url: "/counters/getCounterSales/" + data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setCountersData(response.data.result);
+      setShowsale(true);
+      onSave();
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="formGroup">
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "flex-start" }}
+                >
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    Days
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data}
+                      style={{ width: "100px" }}
+                      onChange={(e) => setdata(e.target.value)}
+                      maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
+                    />
+                  </label>
+                </div>
+              </div>
+              {loading ? (
+                <button
+                  className="submit"
+                  id="loading-screen"
+                  style={{  width: "120px" }}
+                >
+                  <svg viewBox="0 0 100 100">
+                    <path
+                      d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                      fill="#ffffff"
+                      stroke="none"
+                    >
+                      <animateTransform
+                        attributeName="transform"
+                        type="rotate"
+                        dur="1s"
+                        repeatCount="indefinite"
+                        keyTimes="0;1"
+                        values="0 50 51;360 50 51"
+                      ></animateTransform>
+                    </path>
+                  </svg>
+                </button>
+              ) : (
+                <button type="submit" className="submit">
+                  Search
+                </button>
+              )}
             </form>
           </div>
 
