@@ -122,7 +122,9 @@ const Counter = () => {
       return {
         "Route Title": a.route_title,
         "Counter Title": a.counter_title,
-        Mobile: a.mobile,
+        "Mobile 1": a.mobile[0] || "",
+        "Mobile 2": a.mobile[1]?.replace(",", "") || "",
+        "Mobile 3": a.mobile[2]?.replace(",", "") || "",
         "Food License": a.food_license,
         GST: a.gst || "",
       };
@@ -1349,7 +1351,11 @@ function DeleteCounterPopup({ onSave, popupInfo, setItemsData }) {
               </i>
               <div className="flex" style={{ justifyContent: "space-between" }}>
                 {loading ? (
-                  <button className="submit" id="loading-screen" style={{ background: "red",width:"120px" }}>
+                  <button
+                    className="submit"
+                    id="loading-screen"
+                    style={{ background: "red", width: "120px" }}
+                  >
                     <svg viewBox="0 0 100 100">
                       <path
                         d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"

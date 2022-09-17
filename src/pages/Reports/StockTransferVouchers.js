@@ -11,12 +11,16 @@ const StockTransferVouchers = () => {
   const [filterItemsData, setFilterItemsData] = useState([]);
   const [filterToWarehouse, setFilterToWarehouse] = useState();
   const [filterFromWarehouse, setFilterFromWarehouse] = useState();
+  const [filterType, setFilterType] = useState("ST");
   const [warehouse, setWarehouse] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
   const [popupOrder, setPopupOrder] = useState(null);
   const [users, setUsers] = useState([]);
   const [completed, setCompleted] = useState(0);
-
+  const [searchData, setSearchData] = useState({
+    startDate: "",
+    endDate: "",
+  });
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -72,6 +76,10 @@ const StockTransferVouchers = () => {
         }))
       );
     else setItemsData([]);
+    setSearchData({
+      startDate: "",
+      endDate: "",
+    });
   };
   useEffect(() => {
     getItemsData();
@@ -93,8 +101,52 @@ const StockTransferVouchers = () => {
               .toLocaleLowerCase()
               .includes(filterToWarehouse.toLocaleLowerCase())
         )
+        .filter(
+          (a) =>
+            !filterType ||
+            a.type.toLocaleLowerCase().includes(filterType.toLocaleLowerCase())
+        )
+        .filter(
+          (a) =>
+            !completed ||
+            !searchData.startDate ||
+            a.created_at >
+              new Date(searchData.startDate + " 00:00:00 AM").getTime()
+        )
+        .filter(
+          (a) =>
+            !completed ||
+            !searchData.endDate ||
+            a.created_at <
+              new Date(searchData.endDate + " 00:00:00 AM").getTime() + 86400000
+        )
+        .map((a) => {
+          let itemsDetails = a.item_details;
+          let qty =
+            itemsDetails.length > 1
+              ? itemsDetails.reduce((c, d) => ({
+                  b: +c.b + +d.b,
+                  p: +c.p + +d.p,
+                }))
+              : itemsDetails.length
+              ? itemsDetails[0]
+              : { b: 0, p: 0 };
+          return {
+            ...a,
+            type: a.type === "ST" ? "Stock Transfer" : "Adjustment",
+            qty,
+          };
+        })
     );
-  }, [filterFromWarehouse, filterToWarehouse, itemsData]);
+  }, [
+    completed,
+    filterFromWarehouse,
+    filterToWarehouse,
+    filterType,
+    itemsData,
+    searchData.endDate,
+    searchData.startDate,
+  ]);
 
   useEffect(() => {
     GetWarehouseList();
@@ -106,7 +158,7 @@ const StockTransferVouchers = () => {
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading">
-          <h2>Stock Tranfer Vouchers</h2>
+          <h2>Vouchers</h2>
         </div>
         <div id="item-sales-top">
           <div
@@ -119,34 +171,97 @@ const StockTransferVouchers = () => {
               width: "100%",
             }}
           >
-            <input
-              type="text"
-              onChange={(e) => setFilterFromWarehouse(e.target.value)}
-              value={filterFromWarehouse}
-              placeholder="Search From Warehouse..."
-              className="searchInput"
-            />
-            <input
-              type="text"
-              onChange={(e) => setFilterToWarehouse(e.target.value)}
-              value={filterToWarehouse}
-              placeholder="Search To Warehouse..."
-              className="searchInput"
-            />
-            <select
-              type="text"
-              onChange={(e) => {
-                setCompleted(e.target.value);
-                console.log(e.target.value);
-              }}
-              value={completed}
-              placeholder="Search User..."
-              className="searchInput"
-            >
-              <option value={0}>Pending</option>
-              <option value={1}>Delivered</option>
-            </select>
-
+            {" "}
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">From Warehouse</label>
+              <input
+                type="text"
+                onChange={(e) => setFilterFromWarehouse(e.target.value)}
+                value={filterFromWarehouse}
+                placeholder="From Warehouse..."
+                className="searchInput"
+              />
+            </div>
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">To Warehouse</label>
+              <input
+                type="text"
+                onChange={(e) => setFilterToWarehouse(e.target.value)}
+                value={filterToWarehouse}
+                placeholder="To Warehouse..."
+                className="searchInput"
+              />
+            </div>
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">Type</label>
+              <select
+                type="text"
+                onChange={(e) => {
+                  setFilterType(e.target.value);
+                  console.log(e.target.value);
+                }}
+                value={filterType}
+                placeholder="Type..."
+                className="searchInput"
+              >
+                <option value="ST">Stock Transfer</option>
+                <option value="SA">Adjustment</option>
+              </select>
+            </div>
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">Status</label>
+              <select
+                type="text"
+                onChange={(e) => {
+                  setCompleted(e.target.value);
+                  console.log(e.target.value);
+                }}
+                value={completed}
+                placeholder="Search User..."
+                className="searchInput"
+              >
+                <option value={0}>Pending</option>
+                <option value={1}>Delivered</option>
+              </select>
+            </div>
+            {completed ? (
+              <>
+                <div className="inputGroup">
+                  <label htmlFor="Warehouse">Start Date</label>
+                  <input
+                    type="date"
+                    onChange={(e) =>
+                      setSearchData((prev) => ({
+                        ...prev,
+                        startDate: e.target.value,
+                      }))
+                    }
+                    value={searchData.startDate}
+                    placeholder="Search Counter Title..."
+                    className="searchInput"
+                    pattern="\d{4}-\d{2}-\d{2}"
+                  />
+                </div>
+                <div className="inputGroup">
+                  <label htmlFor="Warehouse">End Date</label>
+                  <input
+                    type="date"
+                    onChange={(e) =>
+                      setSearchData((prev) => ({
+                        ...prev,
+                        endDate: e.target.value,
+                      }))
+                    }
+                    value={searchData.endDate}
+                    placeholder="Search Route Title..."
+                    className="searchInput"
+                    pattern="\d{4}-\d{2}-\d{2}"
+                  />
+                </div>
+              </>
+            ) : (
+              ""
+            )}
             <div>Total Vouchers: {filterItemsData.length}</div>
           </div>
         </div>
@@ -210,6 +325,29 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
         <tr>
           <th>S.N</th>
 
+          <th colSpan={3}>
+            <div className="t-head-element">
+              <span>Type</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("type");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("type");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
           <th colSpan={3}>
             <div className="t-head-element">
               <span>Created by</span>
@@ -302,6 +440,29 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
               </div>
             </div>
           </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>Quantity</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("qty");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("qty");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
 
           {+completed ? "" : <th colSpan={3}></th>}
         </tr>
@@ -312,9 +473,13 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
             order === "asc"
               ? typeof a[items] === "string"
                 ? a[items].localeCompare(b[items])
+                : typeof a[items] === "object"
+                ? a[items]?.b - b[items]?.b + (a[items]?.p - b[items]?.p)
                 : a[items] - b[items]
               : typeof a[items] === "string"
               ? b[items].localeCompare(a[items])
+              : typeof a[items] === "object"
+              ? b[items]?.b - a[items]?.b + (b[items]?.p - a[items]?.p)
               : b[items] - a[items]
           )
           ?.map((item, i) => (
@@ -330,6 +495,7 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
             >
               <td>{i + 1}</td>
 
+              <td colSpan={3}>{item.type}</td>
               <td colSpan={3}>{item.created_by_user}</td>
               <td colSpan={3}>
                 {new Date(+item.created_at).toDateString()} -{" "}
@@ -337,6 +503,9 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
               </td>
               <td colSpan={3}>{item.from_warehouse_title || ""}</td>
               <td colSpan={3}>{item.to_warehouse_title || ""}</td>
+              <td colSpan={2}>
+                {item.qty.b || 0}:{item.qty.p || 0}
+              </td>
 
               {+completed ? (
                 ""
@@ -437,7 +606,7 @@ function NewUserForm({ onSave, popupInfo }) {
                 className="submit"
                 disabled={disabled}
               >
-                {disabled?"Please Wait...":"Confirm"}
+                {disabled ? "Please Wait..." : "Confirm"}
               </button>
             </form>
           </div>

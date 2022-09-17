@@ -385,7 +385,20 @@ export const Billing = async ({
 
 export const updateIndexedDb = async () => {
   await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
-  //console.log(response);
+  const response = await axios({
+    method: "get",
+    url: "/users/GetUser/" + localStorage.getItem("user_uuid"),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  console.log(response.data.result.status);
+  if (!response.data.result.status) {
+    localStorage.clear();
+    sessionStorage.clear();
+    return;
+  }
   const result = await axios({
     method: "get",
     url: "/users/getDetails",
@@ -395,7 +408,7 @@ export const updateIndexedDb = async () => {
     },
   });
   let data = result.data.result;
-  //console.log(data);
+  console.log(data);
   const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
     upgrade(db) {
       for (const property in data) {

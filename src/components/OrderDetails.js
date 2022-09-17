@@ -190,8 +190,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   }, [itemsData]);
 
   useEffect(() => {
-    setPrintData({
-      ...printData,
+    setPrintData(prev=>({
+      ...prev,
       ...orderData,
       item_details:
         orderData?.item_details
@@ -203,7 +203,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           }))
           .sort(
             (a, b) =>
-              a?.category_title?.localeCompare(b.category_title) +
+              a?.category_title?.localeCompare(b.category_title) ||
               a?.item_title?.localeCompare(b.item_title)
           )
           ?.filter((a) => +a.status !== 3)
@@ -211,8 +211,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             ...a,
             sr: i + 1,
           })) || [],
-    });
-  }, [orderData]);
+    }));
+  }, [category, orderData]);
   const getItemsData = async () => {
     const response = await axios({
       method: "get",

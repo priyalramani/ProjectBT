@@ -784,6 +784,7 @@ export default function AddStock() {
           itemsData={itemsData}
           order={order}
           setOrder={setOrder}
+          category={category}
         />
       ) : (
         ""
@@ -799,6 +800,7 @@ export function SuggestionsPopup({
   order,
   warehouseData,
   setOrder,
+  category,
 }) {
   const [items, setItems] = useState([]);
   const [selectedItems, setSeletedItems] = useState([]);
@@ -855,6 +857,7 @@ export function SuggestionsPopup({
                   selectedOrders={selectedItems}
                   warehouseData={warehouseData}
                   order={order}
+                  category={category}
                 />
               </div>
               <div className="flex" style={{ justifyContent: "space-between" }}>
@@ -900,6 +903,7 @@ function Table({
   setSelectedOrders,
   warehouseData,
   order,
+  category,
 }) {
   console.log(selectedOrders);
   return (
@@ -934,67 +938,85 @@ function Table({
         </tr>
       </thead>
       <tbody className="tbody">
-        {itemsDetails
-          ?.sort((a, b) => +a.item_uuid - +b.item_uuid)
-          ?.map((item, i, array) => {
-            let qty = item.stock.find(
-              (a) => a.warehouse_uuid === warehouse_uuid
-            )?.qty;
-            return (
-              <tr key={Math.random()} style={{ height: "30px" }}>
-                <td
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedOrders((prev) =>
-                      prev.filter((a) => a.item_uuid === item.item_uuid).length
-                        ? prev.filter((a) => a.item_uuid !== item.item_uuid)
-                        : [...(prev || []), item]
-                    );
-                  }}
-                  className="flex"
-                  style={{ justifyContent: "space-between" }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedOrders.find(
-                      (a) => a.item_uuid === item.item_uuid
-                    )}
-                    style={{ transform: "scale(1.3)" }}
-                  />
-                  {i + 1}
-                </td>
-
-                <td colSpan={2}>{item.item_title || ""}</td>
-                <td colSpan={2}>{item.mrp || ""}</td>
-                <td colSpan={2}>{item.b || ""}</td>
-                {order.from_warehouse ? (
-                  <td
-                    colSpan={2}
-                    style={{
-                      color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red",
-                    }}
-                  >
-                    {CovertedQty(
-                      item?.stock?.find(
-                        (a) => a.warehouse_uuid === order.from_warehouse
-                      )?.qty || 0,
-                      item.conversion || 1
-                    ) || ""}
-                  </td>
-                ) : (
-                  ""
-                )}
-                <td
-                  colSpan={2}
-                  style={{
-                    color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red",
-                  }}
-                >
-                  {CovertedQty(qty || 0, item.conversion || 1) || ""}
-                </td>
+        {category
+          .sort((a, b) => a?.category_title?.localeCompare(b?.category_title))
+          .filter(
+            (a) =>
+              itemsDetails?.filter((b) => a.category_uuid === b.category_uuid)
+                .length
+          )
+          .map((a) => (
+            <>
+              <tr style={{ pageBreakAfter: "always", width: "100%" }}>
+                <td colSpan={10}>{a.category_title}</td>
               </tr>
-            );
-          })}
+              {itemsDetails
+                ?.filter((b) => a.category_uuid === b.category_uuid)
+                ?.sort((a, b) => +a.item_uuid - +b.item_uuid)
+                ?.map((item, i, array) => {
+                  let qty = item.stock.find(
+                    (a) => a.warehouse_uuid === warehouse_uuid
+                  )?.qty;
+                  return (
+                    <tr key={Math.random()} style={{ height: "30px" }}>
+                      <td
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedOrders((prev) =>
+                            prev.filter((a) => a.item_uuid === item.item_uuid)
+                              .length
+                              ? prev.filter(
+                                  (a) => a.item_uuid !== item.item_uuid
+                                )
+                              : [...(prev || []), item]
+                          );
+                        }}
+                        className="flex"
+                        style={{ justifyContent: "space-between" }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedOrders.find(
+                            (a) => a.item_uuid === item.item_uuid
+                          )}
+                          style={{ transform: "scale(1.3)" }}
+                        />
+                        {i + 1}
+                      </td>
+
+                      <td colSpan={2}>{item.item_title || ""}</td>
+                      <td colSpan={2}>{item.mrp || ""}</td>
+                      <td colSpan={2}>{item.b || ""}</td>
+                      {order.from_warehouse ? (
+                        <td
+                          colSpan={2}
+                          style={{
+                            color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red",
+                          }}
+                        >
+                          {CovertedQty(
+                            item?.stock?.find(
+                              (a) => a.warehouse_uuid === order.from_warehouse
+                            )?.qty || 0,
+                            item.conversion || 1
+                          ) || ""}
+                        </td>
+                      ) : (
+                        ""
+                      )}
+                      <td
+                        colSpan={2}
+                        style={{
+                          color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red",
+                        }}
+                      >
+                        {CovertedQty(qty || 0, item.conversion || 1) || ""}
+                      </td>
+                    </tr>
+                  );
+                })}
+            </>
+          ))}
       </tbody>
     </table>
   );

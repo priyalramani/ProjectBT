@@ -34,7 +34,7 @@ let titleData = [
   { value: "CounterLeger", name: "Counter Leger" },
   { value: "Outstandings", name: "Outstandings" },
   { value: "pendingEntry", name: "Pending Entry" },
-  { value: "stockTransferVochers", name: "Stock Transfer Vochers" },
+  { value: "stockTransferVochers", name: "Vochers" },
   { value: "currentStock", name: "Current Stock" },
   { value: "signedBills", name: "Signed Bills" },
   { value: "addOrder", name: "New Order" },
@@ -198,7 +198,7 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
               link: "/admin/currentStock",
             },
             {
-              name: "Stock Transfer Vochers",
+              name: "Vochers",
               link: "/admin/stockTransferVochers",
             },
             {

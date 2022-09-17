@@ -643,6 +643,26 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
                           >
                             None
                           </div>
+                          <div
+                            style={{
+                              marginBottom: "5px",
+                              textAlign: "center",
+                              backgroundColor: data.warehouse?.filter(
+                                (a) => +a === 1
+                              ).length
+                                ? "#caf0f8"
+                                : "#fff",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setdata((prev) => ({
+                                ...prev,
+                                warehouse: [1],
+                              }));
+                            }}
+                          >
+                            All
+                          </div>
                           {warehouseData.map((occ) => (
                             <div
                               style={{
@@ -661,13 +681,15 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
                                   warehouse: prev?.warehouse?.find(
                                     (a) => a === occ.warehouse_uuid
                                   )
-                                    ? [0]
-                                    : // ? prev?.routes?.filter(
-                                      //     (a) => a !== occ.route_uuid
-                                      //   )
-                                      // : prev?.routes?.length
-                                      // ? [...prev?.routes, occ?.route_uuid]
-                                      [occ?.warehouse_uuid],
+                                    ? prev?.warehouse?.filter(
+                                        (a) => a !== occ.warehouse_uuid
+                                      )
+                                    : prev?.warehouse?.length &&
+                                      !prev.warehouse.filter(
+                                        (a) => +a === 1 || +a === 0
+                                      ).length
+                                    ? [...prev?.warehouse, occ?.warehouse_uuid]
+                                    : [occ?.warehouse_uuid],
                                 }));
                               }}
                             >

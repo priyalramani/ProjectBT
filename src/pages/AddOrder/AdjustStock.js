@@ -32,6 +32,7 @@ export default function AdjustStock() {
   const [counterFilter] = useState("");
   const [category, setCategory] = useState([]);
   const [balanceOnly, setBalenceOnly] = useState(false);
+  const [filterItems, setFilterItem] = useState("");
 
   // const selectRef = useRef();
   const [itemsData, setItemsData] = useState([]);
@@ -168,7 +169,6 @@ export default function AdjustStock() {
       }));
   }, [order.to_warehouse, balanceOnly]);
 
-
   return (
     <>
       <Sidebar />
@@ -219,26 +219,39 @@ export default function AdjustStock() {
                   />
                 </div>
               </div>
+
               {order.to_warehouse ? (
-                <div className="inputGroup">
-                  <div
-                    className="inputGroup"
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      paddingLeft: "60px",
-                    }}
-                  >
+                <>
+                  <div className="inputGroup">
+                    <label htmlFor="Warehouse">Item Title</label>
                     <input
-                      type="checkbox"
-                      value={balanceOnly}
-                      onChange={(doc) => setBalenceOnly(doc.target.checked)}
-                      style={{ transform: "scale(2)" }}
+                      type="text"
+                      onChange={(e) => setFilterItem(e.target.value)}
+                      value={filterItems}
+                      placeholder="Item Title..."
+                      className="searchInput"
                     />
-                    <label>Balance Only</label>
                   </div>
-                </div>
+                  <div className="inputGroup">
+                    <div
+                      className="inputGroup"
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        paddingLeft: "60px",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        value={balanceOnly}
+                        onChange={(doc) => setBalenceOnly(doc.target.checked)}
+                        style={{ transform: "scale(2)" }}
+                      />
+                      <label>Balance Only</label>
+                    </div>
+                  </div>
+                </>
               ) : (
                 ""
               )}
@@ -259,97 +272,108 @@ export default function AdjustStock() {
                 </thead>
                 {order.to_warehouse ? (
                   <tbody className="lh-copy">
-                    {order?.item_details?.map((item, i) => (
-                      <tr key={item.uuid}>
-                        <td
-                          className="ph2 pv1 tl bb b--black-20 bg-white"
-                          style={{ width: "300px" }}
-                        >
-                          <div
-                            className="inputGroup"
+                    {order?.item_details
+                      ?.filter(
+                        (a) =>
+                          !filterItems ||
+                          a.item_title
+                            .toLocaleLowerCase()
+                            .includes(filterItems.toLocaleLowerCase())
+                      )
+                      .map((item, i) => (
+                        <tr key={item.uuid}>
+                          <td
+                            className="ph2 pv1 tl bb b--black-20 bg-white"
                             style={{ width: "300px" }}
                           >
-                            {item.item_title}
-                          </div>
-                        </td>
-                        <td
-                          className="ph2 pv1 tl bb b--black-20 bg-white"
-                          style={{ textAlign: "center" }}
-                        >
-                          {item.mrp}
-                        </td>
-                        <td
-                          className="ph2 pv1 tc bb b--black-20 bg-white"
-                          style={{ textAlign: "center" }}
-                        >
-                          <input
-                            id={"q" + item.uuid}
-                            style={{ width: "100px" }}
-                            type="number"
-                            className="numberInput"
-                            onWheel={(e) => e.preventDefault()}
-                            value={item.b || ""}
-                            onChange={(e) => {
-                              setOrder((prev) => {
-                                // setTimeout(
-                                //   () => setQtyDetails((prev) => !prev),
-                                //   2000
-                                // );
-                                return {
-                                  ...prev,
-                                  item_details: prev.item_details.map((a) =>
-                                    a.uuid === item.uuid
-                                      ? { ...a, b: e.target.value }
-                                      : a
-                                  ),
-                                };
-                              });
-                            }}
-                            onFocus={(e) => e.target.select()}
-                            disabled={!item.item_uuid}
-                          />
-                        </td>
-                        <td
-                          className="ph2 pv1 tc bb b--black-20 bg-white"
-                          style={{ textAlign: "center" }}
-                        >
-                          <input
-                            id={"p" + item.uuid}
-                            style={{ width: "100px" }}
-                            type="number"
-                            className="numberInput"
-                            onWheel={(e) => e.preventDefault()}
-                            value={item.p || ""}
-                            onChange={(e) => {
-                              setOrder((prev) => {
-                                setTimeout(
-                                  () => setQtyDetails((prev) => !prev),
-                                  2000
-                                );
-                                return {
-                                  ...prev,
-                                  item_details: prev.item_details.map((a) =>
-                                    a.uuid === item.uuid
-                                      ? { ...a, p: e.target.value }
-                                      : a
-                                  ),
-                                };
-                              });
-                            }}
-                            onFocus={(e) => e.target.select()}
-                            disabled={!item.item_uuid}
-                          />
-                        </td>
-                        <td
-                          className="ph2 pv1 tc bb b--black-20 bg-white"
-                          style={{ textAlign: "center" }}
-                        >
-                          {CovertedQty((+item.b || 0) * (+item.conversion || 0) +
-                            (+item.p || 0) -
-                            (+item.qty || 0),item.conversion)}
-                        </td>
-                      </tr>
-                    ))}
+                            <div
+                              className="inputGroup"
+                              style={{ width: "300px" }}
+                            >
+                              {item.item_title}
+                            </div>
+                          </td>
+                          <td
+                            className="ph2 pv1 tl bb b--black-20 bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            {item.mrp}
+                          </td>
+                          <td
+                            className="ph2 pv1 tc bb b--black-20 bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            <input
+                              id={"q" + item.uuid}
+                              style={{ width: "100px" }}
+                              type="number"
+                              className="numberInput"
+                              onWheel={(e) => e.preventDefault()}
+                              value={item.b || ""}
+                              onChange={(e) => {
+                                setOrder((prev) => {
+                                  // setTimeout(
+                                  //   () => setQtyDetails((prev) => !prev),
+                                  //   2000
+                                  // );
+                                  return {
+                                    ...prev,
+                                    item_details: prev.item_details.map((a) =>
+                                      a.uuid === item.uuid
+                                        ? { ...a, b: e.target.value }
+                                        : a
+                                    ),
+                                  };
+                                });
+                              }}
+                              onFocus={(e) => e.target.select()}
+                              disabled={!item.item_uuid}
+                            />
+                          </td>
+                          <td
+                            className="ph2 pv1 tc bb b--black-20 bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            <input
+                              id={"p" + item.uuid}
+                              style={{ width: "100px" }}
+                              type="number"
+                              className="numberInput"
+                              onWheel={(e) => e.preventDefault()}
+                              value={item.p || ""}
+                              onChange={(e) => {
+                                setOrder((prev) => {
+                                  setTimeout(
+                                    () => setQtyDetails((prev) => !prev),
+                                    2000
+                                  );
+                                  return {
+                                    ...prev,
+                                    item_details: prev.item_details.map((a) =>
+                                      a.uuid === item.uuid
+                                        ? { ...a, p: e.target.value }
+                                        : a
+                                    ),
+                                  };
+                                });
+                              }}
+                              onFocus={(e) => e.target.select()}
+                              disabled={!item.item_uuid}
+                            />
+                          </td>
+                          <td
+                            className="ph2 pv1 tc bb b--black-20 bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            {CovertedQty(
+                              (+item.b || 0) * (+item.conversion || 0) +
+                                (+item.p || 0) -
+                                (+item.qty || 0),
+                              item.conversion
+                            )}
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 ) : (
                   ""
