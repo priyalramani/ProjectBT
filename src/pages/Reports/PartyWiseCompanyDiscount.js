@@ -405,7 +405,7 @@ function Table({
   return (
     <table
       className="user-table"
-      style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}
+      style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll",fontSize:"10px" }}
     >
       <thead>
         <tr>
@@ -481,7 +481,7 @@ function Table({
                   </div>
                 </div>
               </th>
-              {showsale ? <th style={{width:"70px"}}>Sale</th> : ""}
+              {showsale ? <th style={{width:"90px"}}>Sale</th> : ""}
             </>
           ))}
         </tr>
