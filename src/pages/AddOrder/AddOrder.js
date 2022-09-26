@@ -267,7 +267,7 @@ export default function AddOrder() {
     });
     console.log(response);
     if (response.data.success) {
-      window.location.reload();
+      // window.location.reload();
       setOrder(inititals);
     }
   };

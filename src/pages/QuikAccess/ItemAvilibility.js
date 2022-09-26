@@ -64,7 +64,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success)
+    if (response.data.success) {
       setItemsData(
         response.data.result
           .filter((a) => a.status)
@@ -72,11 +72,14 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
             ...b,
 
             users_name:
-              b?.users?.map(
-                (a) => users.find((c) => a === c.user_uuid)?.user_title
-              ) || [],
+              b?.users?.map((a) => {
+                let data = users.find((c) => a === c.user_uuid)?.user_title;
+                console.log(a)
+                return data;
+              }) || [],
           }))
       );
+    }
   };
   const getTripDetails = async () => {
     const response = await axios({
@@ -101,7 +104,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
   }, [statementTrip_uuid]);
   useEffect(() => {
     getTripData();
-  }, [btn, warehousePopup]);
+  }, [btn, warehousePopup,users]);
   useEffect(() => {
     getUsers();
   }, []);

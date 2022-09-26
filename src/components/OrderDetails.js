@@ -26,15 +26,18 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [editOrder, setEditOrder] = useState(false);
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [orderData, setOrderData] = useState();
+  const [selectedTrip, setSelectedTrip] = useState("");
   const [printData, setPrintData] = useState({ item_details: [], status: [] });
   const [holdPopup, setHoldPopup] = useState(false);
   const [taskPopup, setTaskPopup] = useState(false);
   const [warehousePopup, setWarhousePopup] = useState(false);
   const [users, setUsers] = useState([]);
+  const [tripData, setTripData] = useState([]);
   const [uuids, setUuid] = useState();
   const [popupDetails, setPopupDetails] = useState();
   const [copymsg, setCopymsg] = useState();
   const [notesPopup, setNotesPoup] = useState();
+  const [popupForm, setPopupForm] = useState();
   const [focusedInputId, setFocusedInputId] = useState(0);
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
@@ -62,7 +65,20 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     });
     if (response.data.success) setWarehouse(response.data.result);
   };
-  console.log("ORDERDATA", orderData);
+  const getTripData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/trips/GetTripList/" + localStorage.getItem("user_uuid"),
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setTripData(response.data.result);
+  };
+  useEffect(() => {
+    getTripData();
+  }, [popupForm]);
   useEffect(() => {
     if (order.order_status === "A") setEditOrder(true);
   }, [order.order_status]);
@@ -184,13 +200,14 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       })),
       fulfillment: [],
     });
+
     if (order.notes.length) {
       setNotesPoup(true);
     }
   }, [itemsData]);
 
   useEffect(() => {
-    setPrintData(prev=>({
+    setPrintData((prev) => ({
       ...prev,
       ...orderData,
       item_details:
@@ -474,6 +491,30 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       setTaskPopup(response.data.result);
     } else handlePrint();
   };
+  const postOrderData = async () => {
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: [
+        {
+          order_uuid: orderData.order_uuid,
+          invoice_number: orderData.invoice_number,
+          trip_uuid: +selectedTrip === 0 ? "" : selectedTrip,
+          // warehouse_uuid: selectedTrip?.warehouse_uuid,
+        },
+      ],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setOrderData((prev) => ({
+        ...prev,
+        trip_uuid: +selectedTrip === 0 ? "" : selectedTrip,
+      }));
+      setSelectedTrip("");
+    }
+  };
   return (
     <>
       <div className="overlay">
@@ -643,6 +684,18 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     }}
                   >
                     Edit
+                  </button>
+                  <button
+                    style={{ width: "fit-Content" }}
+                    className="item-sales-search"
+                    onClick={(e) => {
+                      reactInputsRef.current = {};
+                      e.target.blur();
+                      setPopupForm(true);
+                      setSelectedTrip(orderData?.trip_uuid || 0);
+                    }}
+                  >
+                    Assign Trip
                   </button>
                   <button
                     style={{ width: "fit-Content" }}
@@ -1529,6 +1582,26 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           // postOrderData={() => onSubmit({ stage: 5 })}
           setSelectedOrder={setOrderData}
           order={orderData}
+        />
+      ) : (
+        ""
+      )}
+      {popupForm ? (
+        <TripPopup
+          onSave={() => {
+            setPopupForm(false);
+            postOrderData();
+          }}
+          selectedTrip={selectedTrip}
+          setSelectedTrip={setSelectedTrip}
+          popupInfo={popupForm}
+          orders={orderData}
+          trips={tripData}
+          onClose={() => {
+            setPopupForm(null);
+
+            setSelectedTrip(null);
+          }}
         />
       ) : (
         ""
@@ -2567,6 +2640,77 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
                         placeholder="Select"
                       />
                     </div>
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+          <button
+            type="button"
+            onClick={() => onClose()}
+            className="closeButton"
+          >
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
+  const [data, setdata] = useState("");
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+
+    console.log(data);
+    onSave();
+  };
+  return (
+    <div className="overlay" style={{ zIndex: "99999999999" }}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          // style={{ flexDirection: "row", flexWrap: "wrap", gap: "5" }}
+          style={{
+            height: "fit-content",
+            padding: "20p0",
+            marginBottom: "10px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="row">
+                <h1>Assign Trip</h1>
+              </div>
+
+              <div className="formGroup">
+                Trip
+                <div className="row">
+                  <label className="selectLabel">
+                    <select
+                      name="route_title"
+                      className="numberInput"
+                      value={selectedTrip}
+                      onChange={(e) => setSelectedTrip(e.target.value)}
+                      maxLength={42}
+                      style={{ width: "200px" }}
+                    >
+                      <option value="0">None</option>
+                      {trips
+                        .filter((a) => a.trip_uuid && a.status)
+                        .map((a) => (
+                          <option value={a.trip_uuid}>{a.trip_title}</option>
+                        ))}
+                    </select>
                   </label>
                 </div>
               </div>
