@@ -196,14 +196,9 @@ function Table({ itemsDetails, setPopupForm, setAddItems }) {
 function NewUserForm({ onSave, popupInfo, setRoutesData }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
-  useEffect(
-    popupInfo?.type === "edit"
-      ? () => {
-          setdata(popupInfo.data);
-        }
-      : () => {},
-    []
-  );
+  useEffect(() => {
+    if (popupInfo?.type === "edit") setdata(popupInfo.data);
+  }, [popupInfo.data, popupInfo?.type]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -335,20 +330,17 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
     getCounter();
     getRoutesData();
   }, []);
-  useEffect(
-    Counters?.length
-      ? () =>
-          setItemGroupings(
-            Counters.filter(
-              (a) =>
-                a.counter_group_uuid.filter(
-                  (b) => b === ItemGroup.counter_group_uuid
-                ).length
-            )
-          )
-      : () => {},
-    [Counters]
-  );
+  useEffect(() => {
+    if (Counters?.length)
+      setItemGroupings(
+        Counters.filter(
+          (a) =>
+            a.counter_group_uuid.filter(
+              (b) => b === ItemGroup.counter_group_uuid
+            ).length
+        )
+      );
+  }, [Counters, ItemGroup.counter_group_uuid]);
   const searchedItems = useMemo(
     () =>
       Counters.map((a) => ({
@@ -496,47 +488,67 @@ function ItemsTable({
   includesArray,
   onItemIncludeToggle,
   route,
-  pattern,filterRoute
+  pattern,
+  filterRoute,
 }) {
   const [filterItemData, setFilterItemData] = useState([]);
+  const [includesItem, setIncludesItems] = useState([]);
+  const [firstTime, setFirstTime] = useState(true);
   useEffect(() => {
-    setFilterItemData(
-      items.sort((a, b) => {
-        let aLength = includesArray?.filter(
-          (c) =>
-            c?.counter_uuid === a?.counter_uuid &&
-            c.counter_group_uuid.filter(
-              (d) => d === itemGroup.counter_group_uuid
-            ).length
-        )?.length
+    if (firstTime)
+      setFilterItemData(
+        items?.sort((a, b) => {
+          let aLength = includesArray?.filter(
+            (c) =>
+              c?.counter_uuid === a?.counter_uuid &&
+              c.counter_group_uuid.filter(
+                (d) => d === itemGroup.counter_group_uuid
+              ).length
+          )?.length;
 
-        let bLength = includesArray?.filter(
-          (c) =>
-            c?.counter_uuid === b?.counter_uuid &&
-            c.counter_group_uuid.filter(
-              (d) => d === itemGroup.counter_group_uuid
-            ).length
-        )?.length
-        console.log(includesArray?.filter(
-          (c) =>
-            c?.counter_uuid === a?.counter_uuid &&
-            c.counter_group_uuid.filter(
-              (d) => d === itemGroup.counter_group_uuid
-            ).length
-        )?.length,a
-)
-        if (aLength && bLength) {
-          return a.counter_title.localeCompare(b.counter_title);
-        } else if (aLength) {
-          return -1;
-        } else if (bLength) {
-          return 1;
-        } else {
-          return a.counter_title.localeCompare(b.counter_title);
-        }
-      })
-    );
-  }, [items, pattern, filterRoute, includesArray, itemGroup.counter_group_uuid]);
+          let bLength = includesArray?.filter(
+            (c) =>
+              c?.counter_uuid === b?.counter_uuid &&
+              c.counter_group_uuid.filter(
+                (d) => d === itemGroup.counter_group_uuid
+              ).length
+          )?.length;
+          console.log(
+            includesArray?.filter(
+              (c) =>
+                c?.counter_uuid === a?.counter_uuid &&
+                c.counter_group_uuid.filter(
+                  (d) => d === itemGroup.counter_group_uuid
+                ).length
+            )?.length,
+            a
+          );
+          if (aLength && bLength) {
+            return a.counter_title.localeCompare(b.counter_title);
+          } else if (aLength) {
+            return -1;
+          } else if (bLength) {
+            return 1;
+          } else {
+            return a.counter_title.localeCompare(b.counter_title);
+          }
+        })
+      );
+    setTimeout(() => {
+      if(items.length)
+      setFirstTime(false);
+    }, 1000);
+  }, [
+    items,
+    pattern,
+    filterRoute,
+    includesArray,
+    itemGroup.counter_group_uuid,
+    firstTime,
+  ]);
+  useEffect(() => {
+    setIncludesItems(includesArray);
+  }, [includesArray]);
   return (
     <div
       style={{
@@ -572,7 +584,7 @@ function ItemsTable({
                       type="button"
                       className="noBgActionButton"
                       style={{
-                        backgroundColor: includesArray?.filter(
+                        backgroundColor: includesItem?.filter(
                           (a) =>
                             a?.counter_uuid === item?.counter_uuid &&
                             a.counter_group_uuid.filter(
@@ -587,7 +599,7 @@ function ItemsTable({
                       onClick={(event) =>
                         onItemIncludeToggle(
                           item.counter_uuid,
-                          includesArray?.filter(
+                          includesItem?.filter(
                             (a) =>
                               a?.counter_uuid === item?.counter_uuid &&
                               a.counter_group_uuid.filter(
@@ -599,7 +611,7 @@ function ItemsTable({
                         )
                       }
                     >
-                      {includesArray?.filter(
+                      {includesItem?.filter(
                         (a) =>
                           a?.counter_uuid === item?.counter_uuid &&
                           a.counter_group_uuid.filter(
