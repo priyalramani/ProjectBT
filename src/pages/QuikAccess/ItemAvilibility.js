@@ -51,7 +51,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
     if (response.data.success)
       setUsers(
         response.data.result
-          .filter((a) => a.status)
+          .filter((a) => a.status&&+a.user_type)
           .sort((a, b) => a.user_title?.localeCompare(b.user_title))
       );
   };

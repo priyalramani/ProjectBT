@@ -2188,6 +2188,11 @@ function HoldPopup({
             : +itemsFilteredData[0]?.free || 0;
         let obj = {
           ...item,
+          order_count: orders.filter(
+            (a) =>
+              a.item_details.filter((b) => b.item_uuid === item.item_uuid)
+                .length
+          ).length,
           b: parseInt(
             +b +
               (+p + free) /
@@ -2237,7 +2242,7 @@ function HoldPopup({
           style={{
             height: "600px",
             width: "max-content",
-            minWidth: "250px",
+            minWidth: "300px",
             paddingTop: "50px",
           }}
         >
@@ -2329,7 +2334,7 @@ function HoldPopup({
                     <table
                       className="user-table"
                       style={{
-                        width: "500px",
+                        width: "600px",
                         height: "fit-content",
                       }}
                     >
@@ -2344,6 +2349,9 @@ function HoldPopup({
                           </th>
                           <th colSpan={2}>
                             <div className="t-head-element">Qty</div>
+                          </th>
+                          <th colSpan={2}>
+                            <div className="t-head-element">Order Count</div>
                           </th>
                         </tr>
                       </thead>
@@ -2413,6 +2421,7 @@ function HoldPopup({
                                       {Math.floor(item?.b || 0)} :{" "}
                                       {item?.p || 0}
                                     </td>
+                                    <td colSpan={2}>{item.order_count || 0}</td>
                                   </tr>
                                 ))}
                             </>
