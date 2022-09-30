@@ -523,7 +523,14 @@ const MainAdmin = () => {
   return (
     <>
       <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} />
-      <div className="right-side">
+      <div
+        className="right-side"
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setSelectOrder(false);
+        }}
+      >
         <Header />
         <AiOutlineReload
           style={{
@@ -994,6 +1001,7 @@ const MainAdmin = () => {
                                         onDoubleClick={() =>
                                           setPopupOrder(item)
                                         }
+                                        setSelectOrder={setSelectOrder}
                                         // on_order={on_order && on_order}
                                         // key={item.seat_uuid}
                                         dateTime={item?.status[0]?.time}
@@ -1217,6 +1225,7 @@ const MainAdmin = () => {
 
                               <Card
                                 details={details}
+                                setSelectOrder={setSelectOrder}
                                 order={item}
                                 onDoubleClick={() => setPopupOrder(item)}
                                 // on_order={order}
@@ -1467,6 +1476,7 @@ const MainAdmin = () => {
                                         onDoubleClick={() =>
                                           setPopupOrder(item)
                                         }
+                                        setSelectOrder={setSelectOrder}
                                         // on_order={on_order && on_order}
                                         // key={item.seat_uuid}
                                         dateTime={item?.status[0]?.time}

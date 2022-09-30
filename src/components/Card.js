@@ -8,6 +8,7 @@ const Card = ({
   rounded,
   onDoubleClick,
   selectedCounter,
+  setSelectOrder,
   order,
 }) => {
   const getQty = () => {
@@ -59,22 +60,41 @@ const Card = ({
     return finalHours;
   }
 
-  const order_time_1 = +details.map((a) => a.order_time_1)[0]
+  const order_time_1 = +details.map((a) => a.order_time_1)[0];
   const cardColor1Height = (hours(new Date(dateTime)) * 100) / order_time_1;
-  const cardColor2Height = ((hours(new Date(dateTime)) - order_time_1) * 100) / +details.map((a) => +a.order_time_2 - order_time_1)[0];
+  const cardColor2Height =
+    ((hours(new Date(dateTime)) - order_time_1) * 100) /
+    +details.map((a) => +a.order_time_2 - order_time_1)[0];
   return (
     <>
-      <div onDoubleClick={onDoubleClick}>
+      <div
+        onDoubleClick={onDoubleClick}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setSelectOrder(true);
+        }}
+      >
         <button
           className={`card-focus 
             ${rounded ? "rounded" : ""} 
-            ${selectedOrder ? "selected-seat":selectedCounter?"blinking-seat" : ""}
+            ${
+              selectedOrder
+                ? "selected-seat"
+                : selectedCounter
+                ? "blinking-seat"
+                : ""
+            }
             `}
           style={{ margin: "5px" }}
         >
           <div
             className={`card ${rounded ? "rounded" : ""}`}
-            style={{ padding: "10px 15px", gap: "2px",backgroundColor:order.order_status==="A"?"#00edff":"#fff" }}
+            style={{
+              padding: "10px 15px",
+              gap: "2px",
+              backgroundColor: order.order_status === "A" ? "#00edff" : "#fff",
+            }}
           >
             <p
               className="title2"
@@ -104,13 +124,27 @@ const Card = ({
 
             <div>{status}</div>
             <div style={{ fontSize: "10px" }}>
-              {`${days[new Date(dateTime).getDay()] || ""} ${new Date(dateTime).getDate() || ""
-                } ${monthNames[(new Date()).getMonth()] || ""}`}
+              {`${days[new Date(dateTime).getDay()] || ""} ${
+                new Date(dateTime).getDate() || ""
+              } ${monthNames[new Date().getMonth()] || ""}`}
               {formatAMPM(new Date(dateTime)) || ""}
             </div>
             <div style={{ fontSize: "10px" }}>{getQty()}</div>
-            <div className="card-color-sheet" id="sheet1" style={{ height: `calc(${cardColor1Height}% + 2px)` }} />
-            <div className="card-color-sheet" id="sheet2" style={{ height: cardColor1Height >= 100 ? `calc(${cardColor2Height}% + 2px)` : 0 }} />
+            <div
+              className="card-color-sheet"
+              id="sheet1"
+              style={{ height: `calc(${cardColor1Height}% + 2px)` }}
+            />
+            <div
+              className="card-color-sheet"
+              id="sheet2"
+              style={{
+                height:
+                  cardColor1Height >= 100
+                    ? `calc(${cardColor2Height}% + 2px)`
+                    : 0,
+              }}
+            />
           </div>
         </button>
       </div>
