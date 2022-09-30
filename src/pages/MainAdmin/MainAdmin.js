@@ -58,7 +58,7 @@ const MainAdmin = () => {
   const [selectedtasks, setSelectedTasks] = useState(false);
   let user_uuid = localStorage.getItem("user_uuid");
   useEffect(() => {
-    if (selectedWarehouseOrders.length) {
+    if (selectedWarehouseOrders?.length) {
       setSelectedWarehouseOrder(selectedWarehouseOrders[0]);
     } else {
       setSelectedWarehouseOrder(false);
@@ -150,7 +150,7 @@ const MainAdmin = () => {
     if (response.data.success) setDetails(response.data.result);
   };
   useEffect(() => {
-    if (tasks.length) setSelectedTasks(tasks[0]);
+    if (tasks?.length) setSelectedTasks(tasks[0]);
   }, [tasks]);
   const getRoutesData = async () => {
     const response = await axios({
@@ -277,7 +277,7 @@ const MainAdmin = () => {
         prev.map((a) => data.find((b) => b.order_uuid === a.order_uuid) || a)
       );
       setOrders(response.data.result);
-      if (response.data.result.length === 0) setNoOrder(true);
+      if (response.data.result?.length === 0) setNoOrder(true);
       else setNoOrder(false);
     } else {
       setNoOrder(true);
@@ -348,47 +348,47 @@ const MainAdmin = () => {
               (c) =>
                 c.counter_uuid === a.counter_uuid &&
                 (!c.route_uuid || +c.route_uuid === 0)
-            ).length
-        ).length,
+            )?.length
+        )?.length,
         checkingLength: orders.filter(
           (b) =>
             counter.filter(
               (c) =>
                 c.counter_uuid === b.counter_uuid &&
                 (!c.route_uuid || +c.route_uuid === 0)
-            ).length &&
-            (b.status.length > 1
+            )?.length &&
+            (b.status?.length > 1
               ? +b.status
                   .map((x) => +x.stage || 0)
                   .reduce((c, d) => Math.max(c, d)) === 2
               : +b?.status[0]?.stage === 2)
-        ).length,
+        )?.length,
         processingLength: orders.filter(
           (b) =>
             counter.filter(
               (c) =>
                 c.counter_uuid === b.counter_uuid &&
                 (!c.route_uuid || +c.route_uuid === 0)
-            ).length &&
-            (b.status.length > 1
+            )?.length &&
+            (b.status?.length > 1
               ? +b.status
                   .map((x) => +x.stage || 0)
                   .reduce((c, d) => Math.max(c, d)) === 1
               : +b?.status[0]?.stage === 1)
-        ).length,
+        )?.length,
         deliveryLength: orders.filter(
           (b) =>
             counter.filter(
               (c) =>
                 c.counter_uuid === b.counter_uuid &&
                 (!c.route_uuid || +c.route_uuid === 0)
-            ).length &&
-            (b.status.length > 1
+            )?.length &&
+            (b.status?.length > 1
               ? +b.status
                   .map((x) => +x.stage || 0)
                   .reduce((c, d) => Math.max(c, d)) === 3
               : +b?.status[0]?.stage === 3)
-        ).length,
+        )?.length,
       },
     ];
 
@@ -401,8 +401,8 @@ const MainAdmin = () => {
               (c) =>
                 c.counter_uuid === b.counter_uuid &&
                 route.route_uuid === c.route_uuid
-            ).length
-        ).length,
+            )?.length
+        )?.length,
 
         processingLength: orders.filter(
           (b) =>
@@ -410,39 +410,39 @@ const MainAdmin = () => {
               (c) =>
                 c.counter_uuid === b.counter_uuid &&
                 route.route_uuid === c.route_uuid
-            ).length &&
-            (b.status.length > 1
+            )?.length &&
+            (b.status?.length > 1
               ? +b.status
                   .map((x) => +x.stage || 0)
                   .reduce((c, d) => Math.max(c, d)) === 1
               : +b?.status[0]?.stage === 1)
-        ).length,
+        )?.length,
         checkingLength: orders.filter(
           (b) =>
             counter.filter(
               (c) =>
                 c.counter_uuid === b.counter_uuid &&
                 route.route_uuid === c.route_uuid
-            ).length &&
-            (b.status.length > 1
+            )?.length &&
+            (b.status?.length > 1
               ? +b.status
                   .map((x) => +x.stage || 0)
                   .reduce((c, d) => Math.max(c, d)) === 2
               : +b?.status[0]?.stage === 2)
-        ).length,
+        )?.length,
         deliveryLength: orders.filter(
           (b) =>
             counter.filter(
               (c) =>
                 c.counter_uuid === b.counter_uuid &&
                 route.route_uuid === c.route_uuid
-            ).length &&
-            (b.status.length > 1
+            )?.length &&
+            (b.status?.length > 1
               ? +b.status
                   .map((x) => +x.stage || 0)
                   .reduce((c, d) => Math.max(c, d)) === 3
               : +b?.status[0]?.stage === 3)
-        ).length,
+        )?.length,
       });
     }
     return data;
@@ -452,34 +452,34 @@ const MainAdmin = () => {
       {
         trip_uuid: 0,
         trip_title: "Unknown",
-        orderLength: orders.filter((b) => !b.trip_uuid).length,
+        orderLength: orders.filter((b) => !b.trip_uuid)?.length,
         processingLength: orders.filter(
           (b) =>
             !b.trip_uuid &&
-            (b.status.length > 1
+            (b.status?.length > 1
               ? +b.status
                   .map((x) => +x.stage)
                   .reduce((c, d) => Math.max(c, d)) === 1
               : +b?.status[0]?.stage === 1)
-        ).length,
+        )?.length,
         checkingLength: orders.filter(
           (b) =>
             !b.trip_uuid &&
-            (b.status.length > 1
+            (b.status?.length > 1
               ? +b.status
                   .map((x) => +x.stage)
                   .reduce((c, d) => Math.max(c, d)) === 2
               : +b?.status[0]?.stage === 2)
-        ).length,
+        )?.length,
         deliveryLength: orders.filter(
           (b) =>
             !b.trip_uuid &&
-            (b.status.length > 1
+            (b.status?.length > 1
               ? +b.status
                   .map((x) => +x.stage)
                   .reduce((c, d) => Math.max(c, d)) === 3
               : +b?.status[0]?.stage === 3)
-        ).length,
+        )?.length,
       },
     ];
 
@@ -487,34 +487,34 @@ const MainAdmin = () => {
       data.push({
         ...trip,
         orderLength: orders.filter((b) => trip.trip_uuid === b.trip_uuid)
-          .length,
+          ?.length,
         processingLength: orders.filter(
           (b) =>
             trip.trip_uuid === b.trip_uuid &&
-            (b.status.length > 1
+            (b.status?.length > 1
               ? +b.status
                   .map((x) => +x.stage)
                   .reduce((c, d) => Math.max(c, d)) === 1
               : +b?.status[0]?.stage === 1)
-        ).length,
+        )?.length,
         checkingLength: orders.filter(
           (b) =>
             trip.trip_uuid === b.trip_uuid &&
-            (b.status.length > 1
+            (b.status?.length > 1
               ? +b.status
                   .map((x) => +x.stage)
                   .reduce((c, d) => Math.max(c, d)) === 2
               : +b?.status[0]?.stage === 2)
-        ).length,
+        )?.length,
         deliveryLength: orders.filter(
           (b) =>
             trip.trip_uuid === b.trip_uuid &&
-            (b.status.length > 1
+            (b.status?.length > 1
               ? +b.status
                   .map((x) => +x.stage)
                   .reduce((c, d) => Math.max(c, d)) === 3
               : +b?.status[0]?.stage === 3)
-        ).length,
+        )?.length,
       });
     }
     return data;
@@ -635,7 +635,7 @@ const MainAdmin = () => {
                   >
                     Cancel
                   </button>
-                  {selectedOrder.length ? (
+                  {selectedOrder?.length ? (
                     <>
                       <button
                         // style={{ padding: "10px" }}
@@ -664,12 +664,12 @@ const MainAdmin = () => {
                         type="button"
                         onClick={() => {
                           let stage = selectedOrder.map(
-                            (a) => a.status[a.status.length - 1]?.stage
+                            (a) => a.status[a.status?.length - 1]?.stage
                           );
                           if (
                             stage.filter((a, i) =>
                               i === 0 ? false : !(stage[0] === a)
-                            ).length
+                            )?.length
                           ) {
                             setMessagePopup("Select Orders of Same Stage");
                           } else {
@@ -703,7 +703,7 @@ const MainAdmin = () => {
               <div className="noOrder">No Order</div>
             ) : window.location.pathname.includes("admin") ? (
               <>
-                {routesData.length ? (
+                {routesData?.length ? (
                   <>
                     {routeOrderLength.map((route) => {
                       if (
@@ -716,7 +716,7 @@ const MainAdmin = () => {
                                   (route.route_uuid === c.route_uuid ||
                                     ((!c.route_uuid || +c.route_uuid === 0) &&
                                       +route.route_uuid === 0))
-                              ).length
+                              )?.length
                           )
                           .filter(
                             (a) =>
@@ -727,7 +727,7 @@ const MainAdmin = () => {
                               a.counter_title
                                 ?.toLocaleLowerCase()
                                 ?.includes(searchItems.toLocaleLowerCase())
-                          ).length
+                          )?.length
                       )
                         return (
                           <div key={Math.random()} className="sectionDiv">
@@ -746,7 +746,7 @@ const MainAdmin = () => {
                                               ((!c.route_uuid ||
                                                 +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
-                                        ).length
+                                        )?.length
                                     )
                                   )
                                 }
@@ -775,11 +775,11 @@ const MainAdmin = () => {
                                               ((!c.route_uuid ||
                                                 +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
-                                        ).length &&
+                                        )?.length &&
                                         selectedOrder.filter(
                                           (b) => b.order_uuid === a.order_uuid
-                                        ).length
-                                    ).length ===
+                                        )?.length
+                                    )?.length ===
                                     orders.filter(
                                       (a) =>
                                         counter.filter(
@@ -790,8 +790,8 @@ const MainAdmin = () => {
                                               ((!c.route_uuid ||
                                                 +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
-                                        ).length
-                                    ).length
+                                        )?.length
+                                    )?.length
                                       ? setSelectedOrder(
                                           selectedOrder.filter(
                                             (b) =>
@@ -808,13 +808,13 @@ const MainAdmin = () => {
                                                             0) &&
                                                           +route.route_uuid ===
                                                             0))
-                                                  ).length &&
+                                                  )?.length &&
                                                   b.order_uuid === a.order_uuid
-                                              ).length
+                                              )?.length
                                           )
                                         )
                                       : setSelectedOrder(
-                                          selectedOrder.length
+                                          selectedOrder?.length
                                             ? [
                                                 ...selectedOrder.filter(
                                                   (b) =>
@@ -831,10 +831,10 @@ const MainAdmin = () => {
                                                                   0) &&
                                                                 +route.route_uuid ===
                                                                   0))
-                                                        ).length &&
+                                                        )?.length &&
                                                         b.order_uuid ===
                                                           a.order_uuid
-                                                    ).length
+                                                    )?.length
                                                 ),
                                                 ...orders.filter(
                                                   (a) =>
@@ -849,7 +849,7 @@ const MainAdmin = () => {
                                                               0) &&
                                                             +route.route_uuid ===
                                                               0))
-                                                    ).length
+                                                    )?.length
                                                 ),
                                               ]
                                             : orders.filter(
@@ -865,7 +865,7 @@ const MainAdmin = () => {
                                                             0) &&
                                                           +route.route_uuid ===
                                                             0))
-                                                  ).length
+                                                  )?.length
                                               )
                                         )
                                   }
@@ -880,11 +880,11 @@ const MainAdmin = () => {
                                               ((!c.route_uuid ||
                                                 +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
-                                        ).length &&
+                                        )?.length &&
                                         selectedOrder.filter(
                                           (b) => b.order_uuid === a.order_uuid
-                                        ).length
-                                    ).length ===
+                                        )?.length
+                                    )?.length ===
                                     orders.filter(
                                       (a) =>
                                         counter.filter(
@@ -895,8 +895,8 @@ const MainAdmin = () => {
                                               ((!c.route_uuid ||
                                                 +c.route_uuid === 0) &&
                                                 +route.route_uuid === 0))
-                                        ).length
-                                    ).length
+                                        )?.length
+                                    )?.length
                                   }
                                 />
                               ) : (
@@ -924,7 +924,7 @@ const MainAdmin = () => {
                                           ((!c.route_uuid ||
                                             +c.route_uuid === 0) &&
                                             +route.route_uuid === 0))
-                                    ).length
+                                    )?.length
                                 )
                                 .filter(
                                   (a) =>
@@ -963,13 +963,13 @@ const MainAdmin = () => {
                                                 (a) =>
                                                   a.order_uuid ===
                                                   item.order_uuid
-                                              ).length
+                                              )?.length
                                                 ? prev.filter(
                                                     (a) =>
                                                       a.order_uuid !==
                                                       item.order_uuid
                                                   )
-                                                : prev.length
+                                                : prev?.length
                                                 ? [...prev, item]
                                                 : [item]
                                             )
@@ -1004,7 +1004,7 @@ const MainAdmin = () => {
                                                 (a) =>
                                                   a.order_uuid ===
                                                   item.order_uuid
-                                              ).length
+                                              )?.length
                                             : selectedRouteOrder ===
                                               item.order_uuid
                                         }
@@ -1013,27 +1013,27 @@ const MainAdmin = () => {
                                             (a) =>
                                               a.counter_uuid ===
                                               item.counter_uuid
-                                          ).length
+                                          )?.length
                                         }
                                         title2={item?.counter_title || ""}
                                         status={
-                                          +item.status[item.status.length - 1]
+                                          +item.status[item.status?.length - 1]
                                             ?.stage === 1
                                             ? "Processing"
                                             : +item.status[
-                                                item.status.length - 1
+                                                item.status?.length - 1
                                               ]?.stage === 2
                                             ? "Checking"
                                             : +item.status[
-                                                item.status.length - 1
+                                                item.status?.length - 1
                                               ]?.stage === 3
                                             ? "Delivery"
                                             : +item.status[
-                                                item.status.length - 1
+                                                item.status?.length - 1
                                               ]?.stage === 4
                                             ? "Complete"
                                             : +item.status[
-                                                item.status.length - 1
+                                                item.status?.length - 1
                                               ]?.stage === 5
                                             ? "Cancelled"
                                             : ""
@@ -1070,7 +1070,7 @@ const MainAdmin = () => {
                         ?.toLocaleLowerCase()
                         ?.includes(searchItems.toLocaleLowerCase())
                   )
-                  .filter((a) => !a?.trip_uuid).length ? (
+                  .filter((a) => !a?.trip_uuid)?.length ? (
                   <div key={Math.random()} className="sectionDiv">
                     <h2>
                       <span
@@ -1081,7 +1081,7 @@ const MainAdmin = () => {
                       >
                         UnKnown
                       </span>{" "}
-                      ({orders.filter((a) => !a?.trip_uuid).length}) [
+                      ({orders.filter((a) => !a?.trip_uuid)?.length}) [
                       processing:{" "}
                       {
                         TripsOrderLength.find((a) => +a.trip_uuid === 0)
@@ -1111,9 +1111,9 @@ const MainAdmin = () => {
                                 !a?.trip_uuid &&
                                 selectedOrder.filter(
                                   (b) => b.order_uuid === a.order_uuid
-                                ).length
-                            ).length ===
-                            orders.filter((a) => !a?.trip_uuid).length
+                                )?.length
+                            )?.length ===
+                            orders.filter((a) => !a?.trip_uuid)?.length
                           }
                           onClick={() =>
                             orders?.filter(
@@ -1122,7 +1122,7 @@ const MainAdmin = () => {
                                 selectedOrder?.filter(
                                   (b) => b.order_uuid === a.order_uuid
                                 )?.length
-                            ).length ===
+                            )?.length ===
                             orders?.filter((a) => !a?.trip_uuid)?.length
                               ? setSelectedOrder(
                                   selectedOrder.filter(
@@ -1131,11 +1131,11 @@ const MainAdmin = () => {
                                         (a) =>
                                           !a?.trip_uuid &&
                                           b.order_uuid === a.order_uuid
-                                      ).length
+                                      )?.length
                                   )
                                 )
                               : setSelectedOrder(
-                                  selectedOrder.length
+                                  selectedOrder?.length
                                     ? [
                                         ...selectedOrder.filter(
                                           (b) =>
@@ -1143,7 +1143,7 @@ const MainAdmin = () => {
                                               (a) =>
                                                 !a?.trip_uuid &&
                                                 b.order_uuid === a.order_uuid
-                                            ).length
+                                            )?.length
                                         ),
                                         ...orders.filter((a) => !a?.trip_uuid),
                                       ]
@@ -1195,12 +1195,12 @@ const MainAdmin = () => {
                                   ? setSelectedOrder((prev) =>
                                       prev.filter(
                                         (a) => a.order_uuid === item.order_uuid
-                                      ).length
+                                      )?.length
                                         ? prev.filter(
                                             (a) =>
                                               a.order_uuid !== item.order_uuid
                                           )
-                                        : prev.length
+                                        : prev?.length
                                         ? [...prev, item]
                                         : [item]
                                     )
@@ -1226,30 +1226,30 @@ const MainAdmin = () => {
                                 selectedCounter={
                                   selectedOrder.filter(
                                     (a) => a.counter_uuid === item.counter_uuid
-                                  ).length
+                                  )?.length
                                 }
                                 selectedOrder={
                                   selectOrder
                                     ? selectedOrder.filter(
                                         (a) => a.order_uuid === item.order_uuid
-                                      ).length
+                                      )?.length
                                     : selectedRouteOrder === item.order_uuid
                                 }
                                 title2={item?.counter_title || ""}
                                 status={
-                                  +item.status[item.status.length - 1]
+                                  +item.status[item.status?.length - 1]
                                     ?.stage === 1
                                     ? "Processing"
-                                    : +item.status[item.status.length - 1]
+                                    : +item.status[item.status?.length - 1]
                                         ?.stage === 2
                                     ? "Checking"
-                                    : +item.status[item.status.length - 1]
+                                    : +item.status[item.status?.length - 1]
                                         ?.stage === 3
                                     ? "Delivery"
-                                    : +item.status[item.status.length - 1]
+                                    : +item.status[item.status?.length - 1]
                                         ?.stage === 4
                                     ? "Complete"
-                                    : +item.status[item.status.length - 1]
+                                    : +item.status[item.status?.length - 1]
                                         ?.stage === 5
                                     ? "Cancelled"
                                     : ""
@@ -1269,7 +1269,7 @@ const MainAdmin = () => {
                 ) : (
                   ""
                 )}
-                {TripsOrderLength.length ? (
+                {TripsOrderLength?.length ? (
                   <>
                     {TripsOrderLength.map((trip) => {
                       if (
@@ -1284,7 +1284,7 @@ const MainAdmin = () => {
                               a.counter_title
                                 ?.toLocaleLowerCase()
                                 ?.includes(searchItems.toLocaleLowerCase())
-                          ).length
+                          )?.length
                       )
                         return (
                           <div key={Math.random()} className="sectionDiv">
@@ -1305,7 +1305,7 @@ const MainAdmin = () => {
                               {
                                 orders.filter(
                                   (a) => a.trip_uuid === trip.trip_uuid
-                                ).length
+                                )?.length
                               }
                               ) [ processing: {trip?.processingLength},
                               Checking: {trip?.checkingLength}, Delivery:{" "}
@@ -1332,11 +1332,11 @@ const MainAdmin = () => {
                                         a.trip_uuid === trip.trip_uuid &&
                                         selectedOrder.filter(
                                           (b) => b.order_uuid === a.order_uuid
-                                        ).length
-                                    ).length ===
+                                        )?.length
+                                    )?.length ===
                                     orders.filter(
                                       (a) => a.trip_uuid === trip.trip_uuid
-                                    ).length
+                                    )?.length
                                   }
                                   onClick={() =>
                                     orders?.filter(
@@ -1345,7 +1345,7 @@ const MainAdmin = () => {
                                         selectedOrder?.filter(
                                           (b) => b.order_uuid === a.order_uuid
                                         )?.length
-                                    ).length ===
+                                    )?.length ===
                                     orders?.filter(
                                       (a) => a.trip_uuid === trip.trip_uuid
                                     )?.length
@@ -1357,11 +1357,11 @@ const MainAdmin = () => {
                                                   a.trip_uuid ===
                                                     trip.trip_uuid &&
                                                   b.order_uuid === a.order_uuid
-                                              ).length
+                                              )?.length
                                           )
                                         )
                                       : setSelectedOrder(
-                                          selectedOrder.length
+                                          selectedOrder?.length
                                             ? [
                                                 ...selectedOrder.filter(
                                                   (b) =>
@@ -1371,7 +1371,7 @@ const MainAdmin = () => {
                                                           trip.trip_uuid &&
                                                         b.order_uuid ===
                                                           a.order_uuid
-                                                    ).length
+                                                    )?.length
                                                 ),
                                                 ...orders.filter(
                                                   (a) =>
@@ -1439,13 +1439,13 @@ const MainAdmin = () => {
                                                 (a) =>
                                                   a.order_uuid ===
                                                   item.order_uuid
-                                              ).length
+                                              )?.length
                                                 ? prev.filter(
                                                     (a) =>
                                                       a.order_uuid !==
                                                       item.order_uuid
                                                   )
-                                                : prev.length
+                                                : prev?.length
                                                 ? [...prev, item]
                                                 : [item]
                                             )
@@ -1477,7 +1477,7 @@ const MainAdmin = () => {
                                                 (a) =>
                                                   a.order_uuid ===
                                                   item.order_uuid
-                                              ).length
+                                              )?.length
                                             : selectedRouteOrder ===
                                               item.order_uuid
                                         }
@@ -1486,27 +1486,27 @@ const MainAdmin = () => {
                                             (a) =>
                                               a.counter_uuid ===
                                               item.counter_uuid
-                                          ).length
+                                          )?.length
                                         }
                                         title2={item?.counter_title || ""}
                                         status={
-                                          +item.status[item.status.length - 1]
+                                          +item.status[item.status?.length - 1]
                                             ?.stage === 1
                                             ? "Processing"
                                             : +item.status[
-                                                item.status.length - 1
+                                                item.status?.length - 1
                                               ]?.stage === 2
                                             ? "Checking"
                                             : +item.status[
-                                                item.status.length - 1
+                                                item.status?.length - 1
                                               ]?.stage === 3
                                             ? "Delivery"
                                             : +item.status[
-                                                item.status.length - 1
+                                                item.status?.length - 1
                                               ]?.stage === 4
                                             ? "Complete"
                                             : +item.status[
-                                                item.status.length - 1
+                                                item.status?.length - 1
                                               ]?.stage === 5
                                             ? "Cancelled"
                                             : ""
@@ -1596,117 +1596,28 @@ const MainAdmin = () => {
                   )?.sort_order,
                 }))
                 .sort((a, b) => a.sort_order - b.sort_order);
-              return (
-                <>
-                  {/* {index === 0 ? "" : <div style={{ height: "20mm" }}></div>} */}
-                  <OrderPrint
-                    counter={counter.find(
-                      (a) => a.counter_uuid === orderData?.counter_uuid
-                    )}
-                    order={orderData}
-                    date={new Date(orderData?.status[0]?.time)}
-                    user={
-                      users.find(
-                        (a) => a.user_uuid === orderData.status[0].user_uuid
-                      )?.user_title || ""
-                    }
-                    itemData={items}
-                    item_details={
-                      orderData?.item_details?.length > 12
-                        ? orderData?.item_details?.slice(0, 12)
-                        : orderData?.item_details
-                    }
-                    footer={!(orderData?.item_details?.length > 12)}
-                  />
-                  {orderData?.item_details?.length > 12 ? (
-                    <>
-                      {/* <div style={{ height: "20mm" }}></div> */}
-                      <OrderPrint
-                        counter={counter.find(
-                          (a) => a.counter_uuid === orderData?.counter_uuid
-                        )}
-                        order={orderData}
-                        date={new Date(orderData?.status[0]?.time)}
-                        user={
-                          users.find(
-                            (a) =>
-                              a.user_uuid === orderData?.status[0]?.user_uuid
-                          )?.user_title || ""
-                        }
-                        itemData={items}
-                        item_details={
-                          orderData?.item_details?.length > 24
-                            ? orderData?.item_details?.slice(12, 24)
-                            : orderData?.item_details?.slice(
-                                12,
-                                orderData?.item_details?.length
-                              )
-                        }
-                        footer={!(orderData?.item_details?.length > 24)}
-                      />
-                    </>
-                  ) : (
-                    ""
+              return Array.from(
+                Array(Math.ceil(orderData?.item_details?.length / 12)).keys()
+              )?.map((a, i) => (
+                <OrderPrint
+                  counter={counter.find(
+                    (a) => a.counter_uuid === orderData?.counter_uuid
                   )}
-                  {orderData?.item_details?.length > 24 ? (
-                    <>
-                      {/* <div style={{ height: "20mm" }}></div> */}
-                      <OrderPrint
-                        counter={counter.find(
-                          (a) => a.counter_uuid === orderData?.counter_uuid
-                        )}
-                        order={orderData}
-                        date={new Date(orderData?.status[0]?.time)}
-                        user={
-                          users.find(
-                            (a) =>
-                              a.user_uuid === orderData?.status[0]?.user_uuid
-                          )?.user_title || ""
-                        }
-                        itemData={items}
-                        item_details={
-                          orderData?.item_details?.length > 36
-                            ? orderData?.item_details?.slice(24, 36)
-                            : orderData?.item_details?.slice(
-                                24,
-                                orderData?.item_details?.length
-                              )
-                        }
-                        footer={!(orderData?.item_details?.length > 36)}
-                      />
-                    </>
-                  ) : (
-                    ""
+                  order={orderData}
+                  date={new Date(orderData?.status[0]?.time)}
+                  user={
+                    users.find(
+                      (a) => a.user_uuid === orderData?.status[0]?.user_uuid
+                    )?.user_title || ""
+                  }
+                  itemData={items}
+                  item_details={orderData?.item_details?.slice(
+                    a * 12,
+                    12 * (a + 1)
                   )}
-
-                  {orderData?.item_details?.length > 36 ? (
-                    <>
-                      {/* <div style={{ height: "20mm" }}></div> */}
-                      <OrderPrint
-                        counter={counter.find(
-                          (a) => a.counter_uuid === orderData?.counter_uuid
-                        )}
-                        order={orderData}
-                        date={new Date(orderData?.status[0]?.time)}
-                        user={
-                          users.find(
-                            (a) =>
-                              a.user_uuid === orderData?.status[0]?.user_uuid
-                          )?.user_title || ""
-                        }
-                        itemData={items}
-                        item_details={orderData?.item_details?.slice(
-                          36,
-                          orderData?.item_details.length
-                        )}
-                        footer={true}
-                      />
-                    </>
-                  ) : (
-                    ""
-                  )}
-                </>
-              );
+                  footer={!(orderData?.item_details?.length > 12 * (a + 1))}
+                />
+              ));
             })}
         </div>
       </div>
@@ -1714,7 +1625,7 @@ const MainAdmin = () => {
         <WarehouseUpdatePopup
           onClose={() =>
             setSelectedWarehouseOrders((prev) => {
-              if (prev.length === 1) {
+              if (prev?.length === 1) {
                 getTasksData();
                 return [];
               } else {
@@ -1758,7 +1669,7 @@ const MainAdmin = () => {
       {selectedtasks ? (
         <TaskPopupMenu
           onSave={() => {
-            if (tasks.length === 1) {
+            if (tasks?.length === 1) {
               handlePrint();
               setTasks([]);
               setSelectedTasks(false);
@@ -2130,7 +2041,7 @@ function HoldPopup({
     let orderStage = orders.map((a) => ({
       ...a,
       stage:
-        a.status.length > 1
+        a.status?.length > 1
           ? a.status.map((b) => +b.stage || 0).reduce((c, b) => Math.max(c, b))
           : a.status[0].stage,
     }));
@@ -2168,20 +2079,20 @@ function HoldPopup({
         return v.item_uuid === item.item_uuid;
       });
 
-      if (existing.length === 0) {
+      if (existing?.length === 0) {
         let itemsFilteredData = data.filter(
           (a) => a.item_uuid === item.item_uuid
         );
         let b =
-          itemsFilteredData.length > 1
+          itemsFilteredData?.length > 1
             ? itemsFilteredData?.map((c) => +c.b || 0).reduce((c, d) => c + d)
             : +itemsFilteredData[0]?.b || 0;
         let p =
-          itemsFilteredData.length > 1
+          itemsFilteredData?.length > 1
             ? itemsFilteredData?.map((c) => +c.p || 0).reduce((c, d) => c + d)
             : +itemsFilteredData[0]?.p || 0;
         let free =
-          itemsFilteredData.length > 1
+          itemsFilteredData?.length > 1
             ? itemsFilteredData
                 ?.map((c) => +c.free || 0)
                 .reduce((c, d) => c + d)
@@ -2191,8 +2102,8 @@ function HoldPopup({
           order_count: orders.filter(
             (a) =>
               a.item_details.filter((b) => b.item_uuid === item.item_uuid)
-                .length
-          ).length,
+                ?.length
+          )?.length,
           b: parseInt(
             +b +
               (+p + free) /
@@ -2225,7 +2136,7 @@ function HoldPopup({
     //   return acc;
     // }, []);
     setOrderTotal(
-      orderStage.length > 1
+      orderStage?.length > 1
         ? orderStage
             .map((a) => +a?.order_grandtotal || 0)
             .reduce((a, b) => a + b)
@@ -2326,7 +2237,7 @@ function HoldPopup({
           >
             <div style={{ overflowY: "scroll", width: "100%" }}>
               {stage && (itemStatus || itemStatus === 0) ? (
-                items.length ? (
+                items?.length ? (
                   <div
                     className="flex"
                     style={{ flexDirection: "column", width: "100%" }}
@@ -2368,7 +2279,7 @@ function HoldPopup({
                                         filterItemTitle?.toLocaleLowerCase()
                                       )) &&
                                   a.category_uuid === b.category_uuid
-                              ).length
+                              )?.length
                           )
                           .map((a) => (
                             <>
@@ -2437,14 +2348,14 @@ function HoldPopup({
                           <td colSpan={2}></td>
                           <td colSpan={2}>
                             {Math.floor(
-                              items.length > 1
+                              items?.length > 1
                                 ? items
                                     .map((a) => +a.b || 0)
                                     .reduce((a, b) => a + b)
                                 : items[0].b || 0
                             )}{" "}
                             :{" "}
-                            {items.length > 1
+                            {items?.length > 1
                               ? items
                                   .map((a) => +a.p || 0)
                                   .reduce((a, b) => a + b)
@@ -2587,7 +2498,7 @@ function HoldPopup({
                   .filter(
                     (a) =>
                       items?.filter((b) => a.category_uuid === b.category_uuid)
-                        .length
+                        ?.length
                   )
                   .sort((a, b) =>
                     a?.category_title?.localeCompare(b?.category_title)
@@ -2650,12 +2561,12 @@ function HoldPopup({
                   <td colSpan={3} style={{ padding: "5px" }}></td>
                   <td colSpan={3} style={{ padding: "5px" }}>
                     {Math.floor(
-                      items.length > 1
+                      items?.length > 1
                         ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
                         : items[0]?.b || 0
                     )}{" "}
                     :{" "}
-                    {items.length > 1
+                    {items?.length > 1
                       ? items.map((a) => +a.p || 0).reduce((a, b) => a + b)
                       : items[0].p || 0}
                   </td>
@@ -2724,7 +2635,7 @@ function HoldPopup({
                     (a) =>
                       items?.filter(
                         (b) => a.category_uuid === b.category_uuid && b.b
-                      ).length
+                      )?.length
                   )
                   .sort((a, b) =>
                     a?.category_title?.localeCompare(b?.category_title)
@@ -2790,7 +2701,7 @@ function HoldPopup({
                   <td colSpan={3} style={{ padding: "5px" }}></td>
                   <td colSpan={3} style={{ padding: "5px" }}>
                     {Math.floor(
-                      items.length > 1
+                      items?.length > 1
                         ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
                         : items[0]?.b || 0
                     )}{" "}
@@ -2838,7 +2749,7 @@ function SummaryPopup({
     let orderStage = orders.map((a) => ({
       ...a,
       stage:
-        a.status.length > 1
+        a.status?.length > 1
           ? a.status.map((b) => +b.stage || 0).reduce((c, b) => Math.max(c, b))
           : a.status[0].stage,
     }));
@@ -2867,20 +2778,20 @@ function SummaryPopup({
         return v.item_uuid === item.item_uuid;
       });
 
-      if (existing.length === 0) {
+      if (existing?.length === 0) {
         let itemsFilteredData = data.filter(
           (a) => a.item_uuid === item.item_uuid
         );
         let b =
-          itemsFilteredData.length > 1
+          itemsFilteredData?.length > 1
             ? itemsFilteredData?.map((c) => +c.b || 0).reduce((c, d) => c + d)
             : +itemsFilteredData[0]?.b || 0;
         let p =
-          itemsFilteredData.length > 1
+          itemsFilteredData?.length > 1
             ? itemsFilteredData?.map((c) => +c.p || 0).reduce((c, d) => c + d)
             : +itemsFilteredData[0]?.p || 0;
         let free =
-          itemsFilteredData.length > 1
+          itemsFilteredData?.length > 1
             ? itemsFilteredData
                 ?.map((c) => +c.free || 0)
                 .reduce((c, d) => c + d)
@@ -2903,7 +2814,7 @@ function SummaryPopup({
       }
     }
     setOrderTotal(
-      orderStage.length > 1
+      orderStage?.length > 1
         ? orderStage
             .map((a) => +a?.order_grandtotal || 0)
             .reduce((a, b) => a + b)
@@ -2916,15 +2827,15 @@ function SummaryPopup({
   const GetItemsQty = (category_uuid) => {
     let itemsData = items?.filter((b) => category_uuid === b.category_uuid);
     let box =
-      itemsData.length > 1
+      itemsData?.length > 1
         ? itemsData.map((a) => +a.b || 0).reduce((a, b) => a + b)
-        : itemsData.length
+        : itemsData?.length
         ? itemsData[0]?.b
         : 0;
     let pcs =
-      itemsData.length > 1
+      itemsData?.length > 1
         ? itemsData.map((a) => +a.p || 0).reduce((a, b) => a + b)
-        : itemsData.length
+        : itemsData?.length
         ? itemsData[0]?.p
         : 0;
     console.log(
@@ -2940,18 +2851,18 @@ function SummaryPopup({
           (a) =>
             a.company_uuid === company_uuid &&
             a.category_uuid === b.category_uuid
-        ).length
+        )?.length
     );
     let box =
-      itemsData.length > 1
+      itemsData?.length > 1
         ? itemsData.map((a) => +a.b || 0).reduce((a, b) => a + b)
-        : itemsData.length
+        : itemsData?.length
         ? itemsData[0]?.b
         : 0;
     let pcs =
-      itemsData.length > 1
+      itemsData?.length > 1
         ? itemsData.map((a) => +a.p || 0).reduce((a, b) => a + b)
-        : itemsData.length
+        : itemsData?.length
         ? itemsData[0]?.p
         : 0;
     return box + " : " + pcs;
@@ -2986,7 +2897,7 @@ function SummaryPopup({
             }}
           >
             <div style={{ overflowY: "scroll", width: "100%" }}>
-              {items.length ? (
+              {items?.length ? (
                 <div
                   className="flex"
                   style={{ flexDirection: "column", width: "100%" }}
@@ -3018,8 +2929,8 @@ function SummaryPopup({
                               (a) =>
                                 items?.filter(
                                   (b) => a.category_uuid === b.category_uuid
-                                ).length && c.company_uuid === a.company_uuid
-                            ).length
+                                )?.length && c.company_uuid === a.company_uuid
+                            )?.length
                         )
                         .map((c) => (
                           <>
@@ -3028,7 +2939,7 @@ function SummaryPopup({
                                 (a) =>
                                   items?.filter(
                                     (b) => a.category_uuid === b.category_uuid
-                                  ).length && c.company_uuid === a.company_uuid
+                                  )?.length && c.company_uuid === a.company_uuid
                               )
                               .map((a, i) => (
                                 <>
@@ -3171,7 +3082,7 @@ function SummaryPopup({
                   .filter(
                     (a) =>
                       items?.filter((b) => a.category_uuid === b.category_uuid)
-                        .length
+                        ?.length
                   )
                   .map((a) => (
                     <>
@@ -3213,12 +3124,12 @@ function SummaryPopup({
                   <td colSpan={3}></td>
                   <td colSpan={3}>
                     {Math.floor(
-                      items.length > 1
+                      items?.length > 1
                         ? items?.map((a) => +a.b || 0).reduce((a, b) => a + b)
                         : items[0]?.b || 0
                     )}{" "}
                     :{" "}
-                    {items.length > 1
+                    {items?.length > 1
                       ? items.map((a) => +a.p || 0).reduce((a, b) => a + b)
                       : items[0].p || 0}
                   </td>
@@ -3278,10 +3189,10 @@ const OrdersEdit = ({
           .filter(
             (a) =>
               a.edit ||
-              deleteItemsOrder.filter((b) => b === a.order_uuid).length
+              deleteItemsOrder.filter((b) => b === a.order_uuid)?.length
           )
           .map((a) =>
-            deleteItemsOrder.filter((b) => b === a.order_uuid).length
+            deleteItemsOrder.filter((b) => b === a.order_uuid)?.length
               ? {
                   ...a,
                   item_details: a.item_details.filter(
@@ -3359,7 +3270,7 @@ const OrdersEdit = ({
             }}
           >
             <div style={{ overflowY: "scroll", width: "100%" }}>
-              {order.length ? (
+              {order?.length ? (
                 <div
                   className="flex"
                   style={{ flexDirection: "column", width: "100%" }}
@@ -3400,7 +3311,7 @@ const OrdersEdit = ({
                             color: "#fff",
                             backgroundColor: +deleteItemsOrder.filter(
                               (a) => a === item.order_uuid
-                            ).length
+                            )?.length
                               ? "red"
                               : "#7990dd",
                           }}
@@ -3449,7 +3360,7 @@ const OrdersEdit = ({
                               e.stopPropagation();
                               setDeleteItemOrders((prev) =>
                                 prev?.filter((a) => a === item.order_uuid)
-                                  .length
+                                  ?.length
                                   ? prev.filter((a) => !(a === item.order_uuid))
                                   : [...(prev || []), item.order_uuid]
                               );
@@ -3457,7 +3368,7 @@ const OrdersEdit = ({
                           >
                             {!deleteItemsOrder.filter(
                               (a) => a === item.order_uuid
-                            ).length ? (
+                            )?.length ? (
                               <DeleteOutlineIcon />
                             ) : (
                               ""
@@ -3493,8 +3404,8 @@ const OrdersEdit = ({
               x
             </button>
           </div>
-          {updateOrders.filter((a) => a.edit).length ||
-          deleteItemsOrder.length ? (
+          {updateOrders.filter((a) => a.edit)?.length ||
+          deleteItemsOrder?.length ? (
             <button
               className="simple_Logout_button"
               onClick={() => postOrderData()}

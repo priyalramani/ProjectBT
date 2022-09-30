@@ -515,6 +515,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       setSelectedTrip("");
     }
   };
+
   return (
     <>
       <div className="overlay">
@@ -590,7 +591,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                   <h2>
                     {counters.find(
                       (a) => a.counter_uuid === orderData?.counter_uuid
-                    )?.counter_title || ""}
+                    )?.counter_title || ""}{" "}
+                    : {orderData?.invoice_number || ""}
                   </h2>
                 )}
               </div>
@@ -1614,125 +1616,29 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           zIndex: "-1000",
         }}
       >
-        <div
-          ref={componentRef}
-          id="item-container"
-          style={
-            {
-              // marginTop: "20mm",
-              // marginLeft: "20mm",
-              // marginRight: "20mm",
-              // margin: "45mm 40mm 30mm 60mm",
-              // textAlign: "center",
-              // padding: "10px"
-            }
-          }
-        >
-          <OrderPrint
-            counter={counters.find(
-              (a) => a.counter_uuid === printData?.counter_uuid
-            )}
-            order={printData}
-            date={new Date(printData?.status[0]?.time)}
-            user={
-              users.find((a) => a.user_uuid === printData?.status[0]?.user_uuid)
-                ?.user_title || ""
-            }
-            itemData={itemsData}
-            item_details={
-              printData?.item_details?.length > 12
-                ? printData?.item_details?.slice(0, 12)
-                : printData?.item_details
-            }
-            footer={!(printData?.item_details?.length > 12)}
-          />
-          {printData?.item_details?.length > 12 ? (
-            <>
-              <div style={{ height: "20mm" }}></div>
-              <OrderPrint
-                counter={counters.find(
-                  (a) => a.counter_uuid === printData?.counter_uuid
-                )}
-                order={printData}
-                date={new Date(printData?.status[0]?.time)}
-                user={
-                  users.find(
-                    (a) => a.user_uuid === printData?.status[0]?.user_uuid
-                  )?.user_title || ""
-                }
-                itemData={itemsData}
-                item_details={
-                  printData.item_details?.length > 12
-                    ? printData?.item_details?.slice(12, 24)
-                    : printData?.item_details?.slice(
-                        12,
-                        printData?.item_details?.filter(
-                          (a) => !(+a.status === 3)
-                        )?.length
-                      )
-                }
-                footer={!(printData?.item_details?.length > 24)}
-              />
-            </>
-          ) : (
-            ""
-          )}
-
-          {printData?.item_details?.length > 24 ? (
-            <>
-              <div style={{ height: "20mm" }}></div>
-              <OrderPrint
-                counter={counters.find(
-                  (a) => a.counter_uuid === printData?.counter_uuid
-                )}
-                order={printData}
-                date={new Date(printData?.status[0]?.time)}
-                user={
-                  users.find(
-                    (a) => a.user_uuid === printData?.status[0]?.user_uuid
-                  )?.user_title || ""
-                }
-                itemData={itemsData}
-                item_details={
-                  printData?.item_details?.length > 24
-                    ? printData?.item_details?.slice(24, 36)
-                    : printData?.item_details?.slice(
-                        24,
-                        printData?.item_details?.length
-                      )
-                }
-                footer={!(printData?.item_details?.length > 36)}
-              />
-            </>
-          ) : (
-            ""
-          )}
-
-          {orderData?.item_details?.length > 36 ? (
-            <>
-              <div style={{ height: "20mm" }}></div>
-              <OrderPrint
-                counter={counters.find(
-                  (a) => a.counter_uuid === printData?.counter_uuid
-                )}
-                order={printData}
-                date={new Date(printData?.status[0]?.time)}
-                user={
-                  users.find(
-                    (a) => a.user_uuid === printData?.status[0]?.user_uuid
-                  )?.user_title || ""
-                }
-                itemData={itemsData}
-                item_details={printData?.item_details?.slice(
-                  36,
-                  printData?.item_details.length
-                )}
-                footer={true}
-              />
-            </>
-          ) : (
-            ""
-          )}
+        <div ref={componentRef} id="item-container">
+          {Array.from(
+            Array(Math.ceil(printData?.item_details?.length / 12)).keys()
+          )?.map((a, i) => (
+            <OrderPrint
+              counter={counters.find(
+                (a) => a.counter_uuid === printData?.counter_uuid
+              )}
+              order={printData}
+              date={new Date(printData?.status[0]?.time)}
+              user={
+                users.find(
+                  (a) => a.user_uuid === printData?.status[0]?.user_uuid
+                )?.user_title || ""
+              }
+              itemData={itemsData}
+              item_details={printData?.item_details?.slice(
+                a * 12,
+                12 * (a + 1)
+              )}
+              footer={!(printData?.item_details?.length > 12 * (a + 1))}
+            />
+          ))}
         </div>
       </div>
     </>
@@ -2191,7 +2097,7 @@ function DiliveryPopup({
       +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
-      setWaiting(false)
+      setWaiting(false);
       return;
     }
     if (
