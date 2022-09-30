@@ -21,6 +21,7 @@ const default_status = [
 export function OrderDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
   const [waiting, setWaiting] = useState(false);
+  const [reminderDate, setReminderDate] = useState();
   const [category, setCategory] = useState([]);
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
@@ -241,6 +242,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     });
     if (response.data.success) setItemsData(response.data.result);
   };
+  const getItemsDataReminder = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/items/getNewItemReminder",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setReminderDate(response.data.result);
+  };
 
   const getCounter = async () => {
     const response = await axios({
@@ -260,6 +272,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     getUsers();
     getWarehouseData();
     getItemCategories();
+    getItemsDataReminder();
   }, []);
 
   const onSubmit = async (type = { stage: 0 }) => {
@@ -1624,6 +1637,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               counter={counters.find(
                 (a) => a.counter_uuid === printData?.counter_uuid
               )}
+              reminderDate={reminderDate}
               order={printData}
               date={new Date(printData?.status[0]?.time)}
               user={

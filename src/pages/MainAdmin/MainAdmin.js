@@ -55,8 +55,20 @@ const MainAdmin = () => {
   const [messagePopup, setMessagePopup] = useState("");
   const [company, setCompanies] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [reminderDate, setReminderDate] = useState();
   const [selectedtasks, setSelectedTasks] = useState(false);
   let user_uuid = localStorage.getItem("user_uuid");
+  const getItemsDataReminder = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/items/getNewItemReminder",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setReminderDate(response.data.result);
+  };
   useEffect(() => {
     if (selectedWarehouseOrders?.length) {
       setSelectedWarehouseOrder(selectedWarehouseOrders[0]);
@@ -263,6 +275,7 @@ const MainAdmin = () => {
     getItemsData();
     getItemCategories();
     getCompanies();
+    getItemsDataReminder();
   }, []);
 
   const getRunningOrders = async () => {
@@ -1613,6 +1626,7 @@ const MainAdmin = () => {
                   counter={counter.find(
                     (a) => a.counter_uuid === orderData?.counter_uuid
                   )}
+                  reminderDate={reminderDate}
                   order={orderData}
                   date={new Date(orderData?.status[0]?.time)}
                   user={

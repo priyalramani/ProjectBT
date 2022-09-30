@@ -7,6 +7,7 @@ const OrderPrint = ({
   user = {},
   itemData = [],
   item_details = [],
+  reminderDate,
   footer = false,
 }) => {
   const [gstValues, setGstVAlues] = useState([]);
@@ -16,7 +17,7 @@ const OrderPrint = ({
     gst_value = gst_value.filter((item, pos) => {
       return gst_value.indexOf(item) === pos;
     });
-   
+
     for (let a of gst_value) {
       let data = order.item_details.filter((b) => +b.gst_percentage === a);
       let amt =
@@ -81,7 +82,6 @@ const OrderPrint = ({
                   style={{
                     fontWeight: "600",
                     fontSize: "larger",
-                    fontWeight: "600",
                     lineHeight: 0.5,
                   }}
                 >
@@ -274,6 +274,8 @@ const OrderPrint = ({
           let dsc_amt =
             (+(item.price || item.item_price || 0) - (+unit_price || 0)) *
             itemQty;
+          let time = new Date().getTime();
+          let boldedItem = time - item?.created_at < reminderDate * 86400000;
 
           return (
             <tr
@@ -284,7 +286,15 @@ const OrderPrint = ({
                 {item?.sr || i + 1}.
               </td>
               <td
-                style={{ fontWeight: "600", fontSize: "x-small" }}
+                style={
+                  boldedItem
+                    ? {
+                        fontWeight: "900",
+                        border: "1px solid #000",
+                        fontSize: "x-small",
+                      }
+                    : { fontWeight: "600", fontSize: "x-small" }
+                }
                 colSpan={3}
               >
                 {itemInfo?.item_title || ""}
