@@ -2920,7 +2920,7 @@ function SummaryPopup({
         total:
           (+a.b *
             +itemsData?.find((b) => b.item_uuid === a.item_uuid)?.conversion +
-            a.p) *
+            +a.p) *
           +a.price,
       }));
     let box =

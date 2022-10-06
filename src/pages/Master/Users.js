@@ -216,7 +216,7 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
               </div>
             </div>
           </th>
-          <th style={{ width: "170px" }}>
+          <th style={{ width: "200px" }}>
             <div className="t-head-element">
               <span>Balance Incentive</span>
               <div className="sort-buttons-container">
