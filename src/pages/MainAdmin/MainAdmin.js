@@ -25,13 +25,16 @@ import OrderPrint from "../../components/OrderPrint";
 import ChangeStage from "../../components/ChangeStage";
 import MessagePopup from "../../components/MessagePopup";
 import TaskPopupMenu from "../../components/TaskPopupMenu";
+import SalesPersoneFilterPopup from "../../components/SalesPersoneFilterPopup";
 const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
   const [noOrder, setNoOrder] = useState(false);
-  const [orders, setOrders] = useState([]);
+  const [ordersData, setOrdersData] = useState([]);
   const [details, setDetails] = useState([]);
   const [routesData, setRoutesData] = useState([]);
+  const [salesPersonFilterPopup, setSalesPersoneFilter] = useState(false);
+  const [salesPersoneList, setSalesPersoneList] = useState([]);
   const [tripData, setTripData] = useState([]);
   const [counter, setCounter] = useState([]);
   const [btn, setBtn] = useState(false);
@@ -58,6 +61,7 @@ const MainAdmin = () => {
   const [reminderDate, setReminderDate] = useState();
   const [selectedtasks, setSelectedTasks] = useState(false);
   let user_uuid = localStorage.getItem("user_uuid");
+  console.log(salesPersoneList);
   const getItemsDataReminder = async () => {
     const response = await axios({
       method: "get",
@@ -127,7 +131,6 @@ const MainAdmin = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("users", response);
     if (response.data.success) setUsers(response.data.result);
   };
 
@@ -277,7 +280,17 @@ const MainAdmin = () => {
     getCompanies();
     getItemsDataReminder();
   }, []);
-
+  const orders = useMemo(
+    () =>
+      ordersData.filter(
+        (a) =>
+          !salesPersoneList.length ||
+          salesPersoneList.filter(
+            (b) => b === a.status.find((b) => +b.stage === 1)?.user_uuid
+          ).length
+      ),
+    [ordersData, salesPersoneList]
+  );
   const getRunningOrders = async () => {
     const response = await axios({
       method: "get",
@@ -289,12 +302,12 @@ const MainAdmin = () => {
       setSelectedOrder((prev) =>
         prev.map((a) => data.find((b) => b.order_uuid === a.order_uuid) || a)
       );
-      setOrders(response.data.result);
+      setOrdersData(response.data.result);
       if (response.data.result?.length === 0) setNoOrder(true);
       else setNoOrder(false);
     } else {
       setNoOrder(true);
-      setOrders([]);
+      setOrdersData([]);
     }
   };
   const getRunningHoldOrders = async () => {
@@ -308,9 +321,9 @@ const MainAdmin = () => {
       setSelectedOrder((prev) =>
         prev.map((a) => data.find((b) => b.order_uuid === a.order_uuid) || a)
       );
-      setOrders(response.data.result);
+      setOrdersData(response.data.result);
     } else {
-      setOrders([]);
+      setOrdersData([]);
     }
   };
   // console.log(selectedOrder);
@@ -541,7 +554,8 @@ const MainAdmin = () => {
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          setSelectOrder(false);
+          setSelectOrder((prev) => !prev);
+          setSelectedOrder([]);
         }}
       >
         <Header />
@@ -591,6 +605,18 @@ const MainAdmin = () => {
               style={{ top: "100px", flexDirection: "column", zIndex: "200" }}
               onMouseLeave={() => setDropDown(false)}
             >
+              <button
+                className="simple_Logout_button"
+                onClick={() => {
+                  setSalesPersoneFilter(!salesPersoneList.length);
+                  setSalesPersoneList([]);
+                }}
+                // style={{ padding: "10px" }}
+              >
+                {!salesPersoneList.length
+                  ? "Sales Person Filter"
+                  : "Cancel Filter"}
+              </button>
               {!selectOrder ? (
                 <>
                   <button
@@ -622,7 +648,7 @@ const MainAdmin = () => {
                       type="button"
                       onClick={() => {
                         setHoldOrders(false);
-                        setOrders([]);
+                        setOrdersData([]);
                       }}
                     >
                       Show Running Orders
@@ -634,7 +660,7 @@ const MainAdmin = () => {
                       type="button"
                       onClick={() => {
                         setHoldOrders(true);
-                        setOrders([]);
+                        setOrdersData([]);
                       }}
                     >
                       Show hold Orders
@@ -1735,6 +1761,17 @@ const MainAdmin = () => {
       ) : (
         ""
       )}
+      {salesPersonFilterPopup ? (
+        <SalesPersoneFilterPopup
+          onClose={() => {
+            setSalesPersoneFilter(false);
+          }}
+          users={users}
+          setSalesPersoneList={setSalesPersoneList}
+        />
+      ) : (
+        ""
+      )}
       {summaryPopup ? (
         <HoldPopup
           onSave={() => {
@@ -1772,7 +1809,7 @@ const MainAdmin = () => {
             if (holdOrders) getRunningHoldOrders();
             else getRunningOrders();
           }}
-          setOrders={setOrders}
+          setOrdersData={setOrdersData}
           orders={joinSummary}
           itemsData={items}
           counter={counter}
@@ -2751,7 +2788,7 @@ function SummaryPopup({
   company,
   setPopupOrder,
   updateOrders,
-  setOrders,
+  setOrdersData,
 }) {
   const [items, setItems] = useState([]);
 
@@ -2847,49 +2884,67 @@ function SummaryPopup({
     console.log(result);
 
     setItems(result);
-  }, [itemsData, orders, setOrders, popup]);
+  }, [itemsData, orders, setOrdersData, popup]);
   const GetItemsQty = (category_uuid) => {
-    let itemsData = items?.filter((b) => category_uuid === b.category_uuid);
+    let itemData = items?.filter((b) => category_uuid === b.category_uuid);
     let box =
-      itemsData?.length > 1
-        ? itemsData.map((a) => +a.b || 0).reduce((a, b) => a + b)
-        : itemsData?.length
-        ? itemsData[0]?.b
+      itemData?.length > 1
+        ? itemData.map((a) => +a.b || 0).reduce((a, b) => a + b)
+        : itemData?.length
+        ? itemData[0]?.b
         : 0;
     let pcs =
-      itemsData?.length > 1
-        ? itemsData.map((a) => +a.p || 0).reduce((a, b) => a + b)
-        : itemsData?.length
-        ? itemsData[0]?.p
+      itemData?.length > 1
+        ? itemData.map((a) => +a.p || 0).reduce((a, b) => a + b)
+        : itemData?.length
+        ? itemData[0]?.p
         : 0;
     console.log(
       category.find((a) => a.category_uuid === category_uuid)?.category_title,
-      itemsData
+      itemData
     );
     return box + " : " + pcs;
   };
   const getTotalItems = (company_uuid) => {
-    let itemsData = items?.filter(
-      (b) =>
-        category.filter(
-          (a) =>
-            a.company_uuid === company_uuid &&
-            a.category_uuid === b.category_uuid
-        )?.length
-    );
+    let itemData = items
+      ?.filter(
+        (b) =>
+          category.filter(
+            (a) =>
+              a.company_uuid === company_uuid &&
+              a.category_uuid === b.category_uuid
+          )?.length
+      )
+      .map((a) => ({
+        ...a,
+        total:
+          (+a.b *
+            +itemsData?.find((b) => b.item_uuid === a.item_uuid)?.conversion +
+            a.p) *
+          +a.price,
+      }));
     let box =
-      itemsData?.length > 1
-        ? itemsData.map((a) => +a.b || 0).reduce((a, b) => a + b)
-        : itemsData?.length
-        ? itemsData[0]?.b
+      itemData?.length > 1
+        ? itemData.map((a) => +a.b || 0).reduce((a, b) => a + b)
+        : itemData?.length
+        ? itemData[0]?.b
         : 0;
     let pcs =
-      itemsData?.length > 1
-        ? itemsData.map((a) => +a.p || 0).reduce((a, b) => a + b)
-        : itemsData?.length
-        ? itemsData[0]?.p
+      itemData?.length > 1
+        ? itemData.map((a) => +a.p || 0).reduce((a, b) => a + b)
+        : itemData?.length
+        ? itemData[0]?.p
         : 0;
-    return box + " : " + pcs;
+
+    let Price = Math.floor(
+      itemData?.length > 1
+        ? itemData.map((a) => +a.total || 0).reduce((a, b) => a + b)
+        : itemData?.length
+        ? itemData[0]?.total
+        : 0
+    );
+
+    return box + " : " + pcs + " (Rs " + Price + " )";
   };
   return (
     <>
@@ -2940,7 +2995,7 @@ function SummaryPopup({
                           <div className="t-head-element">Item</div>
                         </th>
 
-                        <th colSpan={2}>
+                        <th colSpan={3}>
                           <div className="t-head-element">Qty</div>
                         </th>
                       </tr>
@@ -2990,7 +3045,7 @@ function SummaryPopup({
                               <td></td>
                               <td colSpan={3}>{c.company_title}</td>
 
-                              <td colSpan={2}>
+                              <td colSpan={3}>
                                 {getTotalItems(c.company_uuid)}
                               </td>
                             </tr>

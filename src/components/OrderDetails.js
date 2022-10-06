@@ -928,6 +928,13 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 <table className="f6 w-100 center" cellSpacing="0">
                   <thead className="lh-copy" style={{ position: "static" }}>
                     <tr className="white">
+                      {editOrder ? (
+                        <>
+                          <th style={{width:"8px"}}></th>
+                        </>
+                      ) : (
+                        ""
+                      )}
                       <th className="pa2 tl bb b--black-20 w-30">Sr.</th>
                       <th className="pa2 tl bb b--black-20 w-30">Item Name</th>
                       <th className="pa2 tl bb b--black-20 w-30">MRP</th>
@@ -942,7 +949,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       <th className="pa2 tc bb b--black-20 ">Price(b)</th>
                       {editOrder ? (
                         <>
-                          <th className="pa2 tc bb b--black-20 "></th>
                           <th className="pa2 tc bb b--black-20 ">Old Price</th>
                         </>
                       ) : (
@@ -979,6 +985,103 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             borderBottom: "2px solid #fff",
                           }}
                         >
+                          {editOrder ? (
+                            <>
+                              <td
+                              style={{width:"8px"}}
+                              >
+                                {item.price_approval === "N" ? (
+                                  <span
+                                    onClick={() =>
+                                      setOrderData((prev) => ({
+                                        ...prev,
+                                        item_details: prev.item_details.map(
+                                          (a) =>
+                                            a.uuid === item.uuid
+                                              ? { ...a, price_approval: "Y" }
+                                              : a
+                                        ),
+                                      }))
+                                    }
+                                  >
+                                    <CheckCircle
+                                      sx={{ fontSize: 20 }}
+                                      style={{
+                                        cursor: "pointer",
+                                        color: "blue",
+                                      }}
+                                    />
+                                  </span>
+                                ) : (
+                                  ""
+                                )}
+                                <span
+                                  onClick={() =>
+                                    setOrderData((prev) => {
+                                      let exicting = order?.fulfillment?.find(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      );
+                                      let difference = 0;
+                                      if (exicting) {
+                                        difference =
+                                          +(item.b || 0) *
+                                            (+item.conversion || 0) +
+                                          (+item.p || 0) +
+                                          (+(exicting.b || 0) *
+                                            (+item.conversion || 0) +
+                                            (+exicting.p || 0));
+                                      }
+                                      let fulfillment = exicting
+                                        ? [
+                                            ...(prev.fulfillment || []),
+
+                                            {
+                                              item_uuid: item.item_uuid,
+                                              b: Math.floor(
+                                                difference /
+                                                  (+item.conversion || 1)
+                                              ),
+                                              p: Math.floor(
+                                                difference %
+                                                  (+item.conversion || 1)
+                                              ),
+                                            },
+                                          ]
+                                        : [
+                                            ...(prev.fulfillment || []),
+                                            {
+                                              item_uuid: item.item_uuid,
+                                              b: item.b,
+                                              p: item.p,
+                                            },
+                                          ];
+
+                                      return {
+                                        ...prev,
+                                        item_details: prev.item_details.filter(
+                                          (a) => !(a.uuid === item.uuid)
+                                        ),
+                                        fulfillment,
+                                      };
+                                    })
+                                  }
+                                >
+                                  <RemoveCircle
+                                    sx={{
+                                      fontSize:
+                                        item.price_approval === "N" ? 20 : 40,
+                                    }}
+                                    style={{
+                                      cursor: "pointer",
+                                      color: "red",
+                                    }}
+                                  />
+                                </span>
+                              </td>
+                            </>
+                          ) : (
+                            ""
+                          )}
                           <td
                             className="ph2 pv1 tl bb b--black-20 bg-white"
                             style={{ textAlign: "center", width: "3ch" }}
@@ -1278,89 +1381,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           </td>
                           {editOrder ? (
                             <>
-                              <td>
-                                {item.price_approval === "N" ? (
-                                  <span
-                                    onClick={() =>
-                                      setOrderData((prev) => ({
-                                        ...prev,
-                                        item_details: prev.item_details.map(
-                                          (a) =>
-                                            a.uuid === item.uuid
-                                              ? { ...a, price_approval: "Y" }
-                                              : a
-                                        ),
-                                      }))
-                                    }
-                                  >
-                                    <CheckCircle
-                                      sx={{ fontSize: 40 }}
-                                      style={{
-                                        cursor: "pointer",
-                                        color: "blue",
-                                      }}
-                                    />
-                                  </span>
-                                ) : (
-                                  ""
-                                )}
-                                <span
-                                  onClick={() =>
-                                    setOrderData((prev) => {
-                                      let exicting = order?.fulfillment?.find(
-                                        (a) => a.item_uuid === item.item_uuid
-                                      );
-                                      let difference = 0;
-                                      if (exicting) {
-                                        difference =
-                                          +(item.b || 0) *
-                                            (+item.conversion || 0) +
-                                          (+item.p || 0) +
-                                          (+(exicting.b || 0) *
-                                            (+item.conversion || 0) +
-                                            (+exicting.p || 0));
-                                      }
-                                      let fulfillment = exicting
-                                        ? [
-                                            ...(prev.fulfillment || []),
-
-                                            {
-                                              item_uuid: item.item_uuid,
-                                              b: Math.floor(
-                                                difference /
-                                                  (+item.conversion || 1)
-                                              ),
-                                              p: Math.floor(
-                                                difference %
-                                                  (+item.conversion || 1)
-                                              ),
-                                            },
-                                          ]
-                                        : [
-                                            ...(prev.fulfillment || []),
-                                            {
-                                              item_uuid: item.item_uuid,
-                                              b: item.b,
-                                              p: item.p,
-                                            },
-                                          ];
-                                      console.log(fulfillment);
-                                      return {
-                                        ...prev,
-                                        item_details: prev.item_details.filter(
-                                          (a) => !(a.uuid === item.uuid)
-                                        ),
-                                        fulfillment,
-                                      };
-                                    })
-                                  }
-                                >
-                                  <RemoveCircle
-                                    sx={{ fontSize: 40 }}
-                                    style={{ cursor: "pointer", color: "red" }}
-                                  />
-                                </span>
-                              </td>
                               <td>Rs.{item.old_price || item.item_price}</td>
                             </>
                           ) : (

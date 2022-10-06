@@ -735,7 +735,13 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
         >
           {warning ? (
             <div style={{ overflowY: "scroll" }}>
-              <form className="form" onSubmit={() => setWarning(false)}>
+              <form
+                className="form"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  setWarning(false);
+                }}
+              >
                 <div className="formGroup">
                   <h2>Item Status is Off</h2>
                 </div>
@@ -912,7 +918,9 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
                     return (
                       <tr key={Math.random()} style={{ height: "30px" }}>
                         <td>{i + 1}</td>
-                        <td colSpan={2}>{new Date(item.date)?.toDateString() || ""}</td>
+                        <td colSpan={2}>
+                          {new Date(item.date)?.toDateString() || ""}
+                        </td>
                         <td colSpan={2}>{item.to || ""}</td>
                         <td colSpan={2}>{item.added || 0}</td>
                         <td colSpan={2}>{item.reduce || 0}</td>

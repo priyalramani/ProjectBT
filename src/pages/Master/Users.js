@@ -11,6 +11,7 @@ const Users = () => {
   const [usersTitle, setUsersTitle] = useState("");
   const [popupForm, setPopupForm] = useState(false);
   const [payoutPopup, setPayoutPopup] = useState(false);
+  const [disabledItem, setDisabledItem] = useState(false);
 
   const getUsers = async () => {
     const response = await axios({
@@ -33,6 +34,7 @@ const Users = () => {
       setFilterUsers(
         users
           .filter((a) => a.user_title)
+          .filter((a) => disabledItem || a.status)
           .filter(
             (a) =>
               !usersTitle ||
@@ -41,7 +43,7 @@ const Users = () => {
                 ?.includes(usersTitle.toLocaleLowerCase())
           )
       ),
-    [users, usersTitle]
+    [disabledItem, users, usersTitle]
   );
   const getRoutesData = async () => {
     const response = await axios({
@@ -97,6 +99,17 @@ const Users = () => {
             />
 
             <div>Total Items: {filterUsers.length}</div>
+            <div style={{display:"flex",width:"120px",alignItems:"center",justifyContent:"space-between"}}>
+              <input
+                type="checkbox"
+                onChange={(e) => setDisabledItem(e.target.checked)}
+                value={disabledItem}
+                className="searchInput"
+                style={{scale:"1.2"}}
+              />
+              <div style={{width:"100px"}}>Disabled Items</div>
+            </div>
+
             <button
               className="item-sales-search"
               onClick={() => setPopupForm(true)}

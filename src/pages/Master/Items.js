@@ -6,6 +6,8 @@ import { DeleteOutline } from "@mui/icons-material";
 import axios from "axios";
 const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
+  const [disabledItem, setDisabledItem] = useState(false);
+
   const [filterItemsData, setFilterItemsData] = useState([]);
   const [itemCategories, setItemCategories] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -55,6 +57,7 @@ const ItemsPage = () => {
       setFilterItemsData(
         itemsData
           .filter((a) => a.item_title)
+          .filter((a) => disabledItem || a.status)
           .filter(
             (a) =>
               !filterTitle ||
@@ -77,7 +80,7 @@ const ItemsPage = () => {
                 .includes(filterCategory.toLocaleLowerCase())
           )
       ),
-    [itemsData, filterTitle, filterCategory, filterCompany]
+    [itemsData, filterTitle, filterCategory, filterCompany, disabledItem]
   );
   const getCompanies = async () => {
     const response = await axios({
@@ -135,6 +138,17 @@ const ItemsPage = () => {
               className="searchInput"
             />
             <div>Total Items: {filterItemsData.length}</div>
+            <div style={{display:"flex",width:"120px",alignItems:"center",justifyContent:"space-between"}}>
+              <input
+                type="checkbox"
+                onChange={(e) => setDisabledItem(e.target.checked)}
+                value={disabledItem}
+                className="searchInput"
+                style={{scale:"1.2"}}
+              />
+              <div style={{width:"100px"}}>Disabled Items</div>
+            </div>
+
             <button
               className="item-sales-search"
               onClick={() => setPopupForm(true)}
@@ -713,7 +727,13 @@ function NewUserForm({
                         let item_price = data?.mrp / (e.target.value / 100 + 1);
                         item_price =
                           item_price - Math.floor(item_price) !== 0
-                            ? item_price.toString().match(new RegExp('^-?\\d+(?:\.\\d{0,' + (2 || -1) + '})?'))[0]
+                            ? item_price
+                                .toString()
+                                .match(
+                                  new RegExp(
+                                    "^-?\\d+(?:.\\d{0," + (2 || -1) + "})?"
+                                  )
+                                )[0]
                             : item_price;
 
                         setdata({
