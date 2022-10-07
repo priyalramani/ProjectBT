@@ -107,7 +107,7 @@ const Users = () => {
                 className="searchInput"
                 style={{scale:"1.2"}}
               />
-              <div style={{width:"100px"}}>Disabled Items</div>
+              <div style={{width:"100px"}}>Disabled Users</div>
             </div>
 
             <button
