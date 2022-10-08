@@ -11,7 +11,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
   const [waiting, setWaiting] = useState(false);
   useEffect(() => {
-    if (selectedWarehouseOrders.length) {
+    console.log(selectedWarehouseOrders)
+    if (selectedWarehouseOrders?.length) {
       setSelectedWarehouseOrder(selectedWarehouseOrders[0]);
     } else {
       setSelectedWarehouseOrder(false);
@@ -83,13 +84,13 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
 
           processing_canceled:
             +stage === 2
-              ? obj.processing_canceled.length
+              ? obj.processing_canceled?.length
                 ? [...obj.processing_canceled, ...obj.item_details]
                 : obj.item_details
               : obj.processing_canceled || [],
           delivery_return:
             +stage === 4
-              ? obj.delivery_return.length
+              ? obj.delivery_return?.length
                 ? [...obj.delivery_return, ...obj.item_details]
                 : obj.item_details
               : obj.delivery_return || [],
@@ -187,7 +188,21 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
       },
     });
     if (response.data.success) {
-      return true;
+  
+      setSelectedWarehouseOrders((prev) => {
+        console.log(prev)
+        if (prev?.length === 1) {
+          setDeliveryPopup(true);
+          return [];
+        } else {
+          return prev.filter(
+            (a) =>
+              a.orderData.order_uuid !==
+              orderData.order_uuid
+          );
+        }
+      })
+
     }
     setWaiting(false)
   };
@@ -340,19 +355,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
       )}
             {selectedWarehouseOrder ? (
         <WarehouseUpdatePopup
-          onClose={() =>
-            setSelectedWarehouseOrders((prev) => {
-              if (prev.length === 1) {
-                setDeliveryPopup(true);
-                return [];
-              } else {
-                prev.filter(
-                  (a) =>
-                    a.orderData.order_uuid !==
-                    selectedWarehouseOrder.orderData.order_uuid
-                );
-              }
-            })
+          onClose={() =>{}
+            
           }
           updateChanges={updateWarehouse}
           popupInfo={selectedWarehouseOrder}
@@ -412,7 +416,7 @@ function DiliveryPopup({
     GetPaymentModes();
   }, [order]);
   useEffect(() => {
-    if (PaymentModes.length)
+    if (PaymentModes?.length)
       setModes(
         PaymentModes.map((a) => ({
           ...a,
@@ -519,7 +523,7 @@ function DiliveryPopup({
         },
       });
     if (response.data.success) {
-      if (count + 1 === orders.length) {
+      if (count + 1 === orders?.length) {
         postOrderData([...editedOrders, order]);
         onSave();
       } else {
@@ -819,6 +823,7 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
   }, [popupInfo]);
   const submitHandler = async (e) => {
     e.preventDefault();
+    console.log(data,popupInfo)
     updateChanges(data, popupInfo.orderData);
     onClose();
   };

@@ -24,7 +24,7 @@ const SalesPersoneFilterPopup = ({ onClose, users, setSalesPersoneList }) => {
               className="form"
               onSubmit={(e) => {
                 e.preventDefault();
-                setSalesPersoneList(list)
+                setSalesPersoneList(list);
                 onClose();
               }}
             >
@@ -34,35 +34,40 @@ const SalesPersoneFilterPopup = ({ onClose, users, setSalesPersoneList }) => {
                     Sales Persons
                     <div
                       className="formGroup"
-                      style={{ height: "200px", overflow: "scroll" }}
+                      style={{ height: "350px", overflow: "scroll" }}
                     >
-                      {users.map((occ) => (
-                        <div
-                          style={{
-                            marginBottom: "5px",
-                            textAlign: "center",
-                            backgroundColor: list?.filter(
-                              (a) => a === occ.user_uuid
-                            ).length
-                              ? "#caf0f8"
-                              : "#fff",
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setList((prev) =>
-                              prev?.find((a) => a === occ.user_uuid)
-                                ? prev?.filter((a) => a !== occ.user_uuid)
-                                : prev?.length &&
-                                  !prev.filter((a) => +a === 1 || +a === 0)
-                                    .length
-                                ? [...prev, occ?.user_uuid]
-                                : [occ?.user_uuid]
-                            );
-                          }}
-                        >
-                          {occ.user_title}
-                        </div>
-                      ))}
+                      {users
+                        .filter((a) => a.status)
+                        .sort((a, b) =>
+                          a?.user_title?.localeCompare(b.user_title)
+                        )
+                        .map((occ) => (
+                          <div
+                            style={{
+                              marginBottom: "5px",
+                              textAlign: "center",
+                              backgroundColor: list?.filter(
+                                (a) => a === occ.user_uuid
+                              ).length
+                                ? "#caf0f8"
+                                : "#fff",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setList((prev) =>
+                                prev?.find((a) => a === occ.user_uuid)
+                                  ? prev?.filter((a) => a !== occ.user_uuid)
+                                  : prev?.length &&
+                                    !prev.filter((a) => +a === 1 || +a === 0)
+                                      .length
+                                  ? [...prev, occ?.user_uuid]
+                                  : [occ?.user_uuid]
+                              );
+                            }}
+                          >
+                            {occ.user_title}
+                          </div>
+                        ))}
                     </div>
                   </label>
                 </div>
@@ -76,6 +81,9 @@ const SalesPersoneFilterPopup = ({ onClose, users, setSalesPersoneList }) => {
             </form>
           </div>
         </div>
+      <button onClick={onClose} className="closeButton">
+        x
+      </button>
       </div>
     </div>
   );
