@@ -7,7 +7,6 @@ import { CheckCircle } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 
-
 export default function VoucherDetails({ order, onSave, orderStatus }) {
   const [counters, setCounters] = useState([]);
   const [itemsData, setItemsData] = useState([]);
@@ -275,7 +274,8 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                                   value: orderData?.from_warehouse,
                                   label: warehouse?.find(
                                     (j) =>
-                                      j.warehouse_uuid === orderData.from_warehouse
+                                      j.warehouse_uuid ===
+                                      orderData.from_warehouse
                                   )?.warehouse_title,
                                 }
                               : { value: 0, label: "None" }
@@ -309,12 +309,12 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                                   value: orderData?.to_warehouse,
                                   label: warehouse?.find(
                                     (j) =>
-                                      j.warehouse_uuid === orderData.to_warehouse
+                                      j.warehouse_uuid ===
+                                      orderData.to_warehouse
                                   )?.warehouse_title,
                                 }
                               : ""
                           }
-                        
                           openMenuOnFocus={true}
                           menuPosition="fixed"
                           menuPlacement="auto"
@@ -332,6 +332,17 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
               </div>
               <div className="inventory_header">
                 <h2>Voucher Details</h2>
+              </div>
+              <div
+                className="inventory_header"
+                style={{
+                  fontWeght: 400,
+                  color: "black",
+                  background: "none",
+                  alignItems: "start",
+                }}
+              >
+                <h2>Vocher Number: {orderData?.vocher_number || ""}</h2>
               </div>
 
               <div className="topInputs">
@@ -690,7 +701,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                                   b: 0,
                                   p: 0,
                                   edit: true,
-                                  sr: prev.item_details.length+1,
+                                  sr: prev.item_details.length + 1,
                                 },
                               ],
                             }))
@@ -817,6 +828,18 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
             }}
           >
             <thead>
+              <tr>
+                <th
+                  colSpan={5}
+                  style={{
+                    width: "84mm",
+                    backgroundColor: "#fff",
+                    fontWeight: "900",
+                  }}
+                >
+                  Vocher Number: {orderData?.vocher_number}
+                </th>
+              </tr>
               <tr>
                 <th
                   colSpan={2}

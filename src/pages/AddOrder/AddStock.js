@@ -6,7 +6,7 @@ import Sidebar from "../../components/Sidebar";
 import "./index.css";
 import * as XLSX from "xlsx";
 
-import { AddCircle as AddIcon } from "@mui/icons-material";
+import { AddCircle as AddIcon, Preview } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import Select from "react-select";
 
@@ -166,6 +166,10 @@ export default function AddStock() {
     });
     console.log(response);
     if (response.data.success) {
+      setOrder((Prev) => ({
+        ...Prev,
+        vocher_number: response.data.result.vocher_number,
+      }));
       handlePrint();
     }
   };
@@ -630,6 +634,20 @@ export default function AddStock() {
             }}
           >
             <thead>
+              <tr>
+                <th
+                  colSpan={5}
+                  style={{
+                    width: "85mm",
+                    backgroundColor: "#fff",
+                    fontWeight: "900",
+                  }}
+                >
+                  Vocher Number:{" "}
+                  {order?.vocher_number || "0"}
+                </th>
+           
+              </tr>
               <tr>
                 <th
                   colSpan={2}

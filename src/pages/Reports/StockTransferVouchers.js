@@ -350,6 +350,29 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
           </th>
           <th colSpan={3}>
             <div className="t-head-element">
+              <span>Vocher Number</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("type");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("type");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={3}>
+            <div className="t-head-element">
               <span>Created by</span>
               <div className="sort-buttons-container">
                 <button
@@ -472,12 +495,12 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
           .sort((a, b) =>
             order === "asc"
               ? typeof a[items] === "string"
-                ? a[items].localeCompare(b[items])
+                ? a[items]?.localeCompare(b[items])
                 : typeof a[items] === "object"
                 ? a[items]?.b - b[items]?.b + (a[items]?.p - b[items]?.p)
                 : a[items] - b[items]
               : typeof a[items] === "string"
-              ? b[items].localeCompare(a[items])
+              ? b[items]?.localeCompare(a[items])
               : typeof a[items] === "object"
               ? b[items]?.b - a[items]?.b + (b[items]?.p - a[items]?.p)
               : b[items] - a[items]
@@ -496,6 +519,7 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
               <td>{i + 1}</td>
 
               <td colSpan={3}>{item.type}</td>
+              <td colSpan={3}>{item?.vocher_number||""}</td>
               <td colSpan={3}>{item.created_by_user}</td>
               <td colSpan={3}>
                 {new Date(+item.created_at).toDateString()} -{" "}
