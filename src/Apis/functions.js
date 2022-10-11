@@ -596,10 +596,7 @@ export const jumpToNextIndex = (
     }
   } else appendData();
 };
-
-export const refreshDb = async () => {
-  let response = await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
-  console.log(response);
+const GetData = async () => {
   const result = await axios({
     method: "get",
     url: "/users/getDetails",
@@ -653,4 +650,15 @@ export const refreshDb = async () => {
   db.close();
   let time = new Date();
   localStorage.setItem("indexed_time", time.getTime());
+};
+export const refreshDb = async () => {
+  deleteDB("BT", +localStorage.getItem("IDBVersion") || 1)
+    .then((res) => {
+      GetData();
+    })
+    .catch((err) => {
+      deleteDB("BT", +localStorage.getItem("IDBVersion") || 1).then((res) => {
+        GetData();
+      });
+    });
 };
