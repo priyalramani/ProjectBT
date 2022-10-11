@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { v4 as uuid } from "uuid";
@@ -30,6 +30,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [selectedTrip, setSelectedTrip] = useState("");
   const [printData, setPrintData] = useState({ item_details: [], status: [] });
   const [holdPopup, setHoldPopup] = useState(false);
+  const [paymentModes, setPaymentModes] = useState([]);
+
   const [taskPopup, setTaskPopup] = useState(false);
   const [warehousePopup, setWarhousePopup] = useState(false);
   const [users, setUsers] = useState([]);
@@ -44,6 +46,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
+  const GetPaymentModes = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/paymentModes/GetPaymentModesList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setPaymentModes(response.data.result);
+  };
   const getItemCategories = async () => {
     const response = await axios({
       method: "get",
@@ -273,6 +286,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     getWarehouseData();
     getItemCategories();
     getItemsDataReminder();
+    GetPaymentModes();
   }, []);
 
   const onSubmit = async (type = { stage: 0 }) => {
@@ -528,6 +542,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       setSelectedTrip("");
     }
   };
+
 
   return (
     <>
@@ -930,7 +945,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     <tr className="white">
                       {editOrder ? (
                         <>
-                          <th style={{width:"8px"}}></th>
+                          <th style={{ width: "8px" }}></th>
                         </>
                       ) : (
                         ""
@@ -987,9 +1002,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                         >
                           {editOrder ? (
                             <>
-                              <td
-                              style={{width:"8px"}}
-                              >
+                              <td style={{ width: "8px" }}>
                                 {item.price_approval === "N" ? (
                                   <span
                                     onClick={() =>
@@ -1671,6 +1684,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                 12 * (a + 1)
               )}
               footer={!(printData?.item_details?.length > 12 * (a + 1))}
+              paymentModes={paymentModes}
+              counters={counters}
             />
           ))}
         </div>

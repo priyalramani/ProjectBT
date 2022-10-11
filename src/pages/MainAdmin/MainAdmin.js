@@ -30,6 +30,7 @@ const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
   const [noOrder, setNoOrder] = useState(false);
+  const [paymentModes, setPaymentModes] = useState([]);
   const [ordersData, setOrdersData] = useState([]);
   const [details, setDetails] = useState([]);
   const [routesData, setRoutesData] = useState([]);
@@ -269,7 +270,17 @@ const MainAdmin = () => {
       clearInterval(intervalOrder);
     };
   }, [holdOrders]);
+  const GetPaymentModes = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/paymentModes/GetPaymentModesList",
 
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setPaymentModes(response.data.result);
+  };
   useEffect(() => {
     getCounter();
 
@@ -279,6 +290,7 @@ const MainAdmin = () => {
     getItemCategories();
     getCompanies();
     getItemsDataReminder();
+    GetPaymentModes();
   }, []);
   const orders = useMemo(
     () =>
@@ -1666,6 +1678,8 @@ const MainAdmin = () => {
                     12 * (a + 1)
                   )}
                   footer={!(orderData?.item_details?.length > 12 * (a + 1))}
+                  paymentModes={paymentModes}
+                  counters={counter}
                 />
               ));
             })}
