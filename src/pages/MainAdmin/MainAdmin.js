@@ -2920,7 +2920,17 @@ function SummaryPopup({
     return box + " : " + pcs;
   };
   const getTotalItems = (company_uuid) => {
-    let itemData = items
+    let itemData = [].concat
+      .apply(
+        [],
+        orders.map((a) => a.item_details)
+      )
+      .map((a) => ({
+        ...itemsData?.find((b) => b.item_uuid === a.item_uuid),
+        ...a,
+      }));
+
+    itemData = itemData
       ?.filter(
         (b) =>
           category.filter(
@@ -2929,14 +2939,12 @@ function SummaryPopup({
               a.category_uuid === b.category_uuid
           )?.length
       )
-      .map((a) => ({
-        ...a,
-        total:
-          (+a.b *
-            +itemsData?.find((b) => b.item_uuid === a.item_uuid)?.conversion +
-            +a.p) *
-          +a.price,
-      }));
+      .map((a) => {
+        return {
+          ...a,
+          total: (+a.b * +a?.conversion + +a.p) * +a.item_price,
+        };
+      });
     let box =
       itemData?.length > 1
         ? itemData.map((a) => +a.b || 0).reduce((a, b) => a + b)
@@ -2952,7 +2960,7 @@ function SummaryPopup({
 
     let Price = Math.floor(
       itemData?.length > 1
-        ? itemData.map((a) => +a.total || 0).reduce((a, b) => a + b)
+        ? itemData.map((a) => +a.item_total || 0).reduce((a, b) => a + b)
         : itemData?.length
         ? itemData[0]?.total
         : 0
