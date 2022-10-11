@@ -390,12 +390,6 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                   <thead className="lh-copy" style={{ position: "static" }}>
                     <tr className="white">
                       <th className="pa2 tl bb b--black-20 w-30">Sr.</th>
-                      <th className="pa2 tl bb b--black-20 w-30">Item Name</th>
-                      <th className="pa2 tl bb b--black-20 w-30">MRP</th>
-
-                      <th className="pa2 tc bb b--black-20">Quantity(b)</th>
-                      <th className="pa2 tc bb b--black-20">Quantity(p)</th>
-
                       {editOrder ? (
                         <>
                           <th className="pa2 tc bb b--black-20 "></th>
@@ -403,6 +397,12 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                       ) : (
                         ""
                       )}
+                      <th className="pa2 tl bb b--black-20 w-30">Item Name</th>
+                      <th className="pa2 tl bb b--black-20 w-30">MRP</th>
+
+                      <th className="pa2 tc bb b--black-20">Quantity(b)</th>
+                      <th className="pa2 tc bb b--black-20">Quantity(p)</th>
+
                     </tr>
                   </thead>
                   <tbody className="lh-copy">
@@ -445,6 +445,60 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                             >
                               {item.sr}
                             </td>
+                            {editOrder ? (
+                              <>
+                                <td>
+                                  {item.price_approval === "N" ? (
+                                    <span
+                                      onClick={() =>
+                                        setOrderData((prev) => ({
+                                          ...prev,
+                                          item_details: prev.item_details.map(
+                                            (a) =>
+                                              a.uuid === item.uuid
+                                                ? {
+                                                    ...a,
+                                                    price_approval: "Y",
+                                                  }
+                                                : a
+                                          ),
+                                        }))
+                                      }
+                                    >
+                                      <CheckCircle
+                                        sx={{ fontSize: 40 }}
+                                        style={{
+                                          cursor: "pointer",
+                                          color: "blue",
+                                        }}
+                                      />
+                                    </span>
+                                  ) : (
+                                    ""
+                                  )}
+                                  <span
+                                    onClick={() =>
+                                      setOrderData((prev) => ({
+                                        ...prev,
+                                        item_details: prev.item_details.filter(
+                                          (a) => !(a.uuid === item.uuid)
+                                        ),
+                                      }))
+                                    }
+                                  >
+                                    <RemoveCircle
+                                      sx={{ fontSize: 40 }}
+                                      style={{
+                                        cursor: "pointer",
+                                        color: "red",
+                                      }}
+                                    />
+                                  </span>
+                                </td>
+                              </>
+                            ) : (
+                              ""
+                            )}
                             <td className="ph2 pv1 tl bb b--black-20 bg-white">
                               <div
                                 className="inputGroup"
@@ -630,60 +684,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                               )}
                             </td>
 
-                            {editOrder ? (
-                              <>
-                                <td>
-                                  {item.price_approval === "N" ? (
-                                    <span
-                                      onClick={() =>
-                                        setOrderData((prev) => ({
-                                          ...prev,
-                                          item_details: prev.item_details.map(
-                                            (a) =>
-                                              a.uuid === item.uuid
-                                                ? {
-                                                    ...a,
-                                                    price_approval: "Y",
-                                                  }
-                                                : a
-                                          ),
-                                        }))
-                                      }
-                                    >
-                                      <CheckCircle
-                                        sx={{ fontSize: 40 }}
-                                        style={{
-                                          cursor: "pointer",
-                                          color: "blue",
-                                        }}
-                                      />
-                                    </span>
-                                  ) : (
-                                    ""
-                                  )}
-                                  <span
-                                    onClick={() =>
-                                      setOrderData((prev) => ({
-                                        ...prev,
-                                        item_details: prev.item_details.filter(
-                                          (a) => !(a.uuid === item.uuid)
-                                        ),
-                                      }))
-                                    }
-                                  >
-                                    <RemoveCircle
-                                      sx={{ fontSize: 40 }}
-                                      style={{
-                                        cursor: "pointer",
-                                        color: "red",
-                                      }}
-                                    />
-                                  </span>
-                                </td>
-                              </>
-                            ) : (
-                              ""
-                            )}
+                     
                           </tr>
                         );
                       })}
