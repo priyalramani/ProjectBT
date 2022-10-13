@@ -166,7 +166,7 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
               link: "/admin/userActivity",
             },
             {
-              name: "UPI Transaction",
+              name: "UPI and Cheque Transaction",
               link: "/admin/upiTransactionReport",
             },
             {
