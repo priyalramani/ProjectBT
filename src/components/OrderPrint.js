@@ -13,15 +13,17 @@ const OrderPrint = ({
   paymentModes = [],
 }) => {
   const [gstValues, setGstVAlues] = useState([]);
-  console.log(counter)
-  let deliveryMessage=useMemo(()=>
-    paymentModes?.filter(
-      (a) =>
-        !counters
-          ?.find((a) => order?.counter_uuid === a.counter_uuid)
-          ?.payment_modes?.filter((b) => b === a.mode_uuid)?.length
-    )
-  ,[counters, order?.counter_uuid, paymentModes])
+  console.log(counter);
+  let deliveryMessage = useMemo(
+    () =>
+      paymentModes?.filter(
+        (a) =>
+          counters
+            ?.find((a) => order?.counter_uuid === a.counter_uuid)
+            ?.payment_modes?.filter((b) => b === a.mode_uuid)?.length
+      ),
+    [counters, order?.counter_uuid, paymentModes]
+  );
   useEffect(() => {
     let arr = [];
     let gst_value = order.item_details.map((a) => a.gst_percentage);
@@ -721,29 +723,18 @@ const OrderPrint = ({
             <tr>
               {deliveryMessage?.length ? (
                 <>
-                  <td colSpan={28}  style={{
-                        fontWeight: "600",
-                        fontSize: "xx-small",
-                        textAlign: "left",
-                      }}>
+                  <td
+                    colSpan={28}
+                    style={{
+                      fontWeight: "600",
+                      fontSize: "xx-small",
+                      textAlign: "left",
+                    }}
+                  >
                     {deliveryMessage.map((a, i) =>
-                      i === 0 ? (
-                        <b >
-                          <u>{a.mode_title}</u>
-                        </b>
-                      ) : deliveryMessage.length === i + 1 ? (
-                        <>
-                          {" "}
-                          and{" "}
-                          <b >
-                            <u>{a.mode_title}</u>
-                          </b>
-                        </>
-                      ) : (
-                        ", " + a.mode_title
-                      )
+                      i === 0 ? a.mode_title : ", " + a.mode_title
                     )}{" "}
-                    not allowed
+                    Allowed
                   </td>
                   <th colSpan={28}>
                     <hr
