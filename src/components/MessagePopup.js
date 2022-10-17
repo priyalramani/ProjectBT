@@ -1,8 +1,8 @@
 import React from "react";
 
-const MessagePopup = ({ onClose, message, onSave, button1, button2 }) => {
+const MessagePopup = ({ onClose, message,message2, onSave, button1, button2 }) => {
   return (
-    <div className="overlay" style={{position:"fixed",top:0,left:0,zIndex:9999999}}>
+    <div className="overlay" style={{position:"fixed",top:0,left:0,zIndex:9999999999}}>
       <div
         className="modal"
         style={{ height: "fit-content", width: "fit-content" }}
@@ -24,8 +24,9 @@ const MessagePopup = ({ onClose, message, onSave, button1, button2 }) => {
               }}
             >
               <div className="formGroup">
-                <div className="row">
+                <div className="row" style={{flexDirection:"column",alignItems:"start"}}>
                   <h1 style={{ textAlign: "center" }}>{message}</h1>
+                  {message2?<h3 style={{ textAlign: "center" }}>{message2}</h3>:""}
                 </div>
 
                 <div className="row">
