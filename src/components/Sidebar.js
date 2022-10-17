@@ -14,6 +14,7 @@ import axios from "axios";
 import { useLocation } from "react-router-dom";
 let titleData = [
   { value: "RetailerMarginReport", name: "Retailer Margin Report" },
+  { value: "SalesmanItemSuggestion", name: "Salesman Item Suggestion" },
   { value: "InvoiceNumberWiseOrder", name: "Invoice Number Wise Order" },
   { value: "PartyWiseCompanyDiscount", name: "Party Wise Company Discount" },
   { value: "trip", name: "DASHBOARD - Trip" },
@@ -243,6 +244,10 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
             {
               name: "Order Item Incentive",
               link: "/admin/ItemIncentive",
+            },
+            {
+              name: "Salesman Item Suggestion",
+              link: "/admin/SalesmanItemSuggestion",
             },
           ]}
         />
