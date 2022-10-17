@@ -2644,7 +2644,7 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
                 <div className="row">
                   <label className="selectLabel">
                     Warehouse
-                    <div className="inputGroup" style={{ width: "20px" }}>
+                    <div className="inputGroup" >
                       <Select
                         options={[
                           { value: 0, label: "None" },
