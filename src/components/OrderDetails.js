@@ -424,13 +424,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   };
   const handleWarehouseChacking = async (complete, methodType) => {
     let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
-
     if (
       warehouse_uuid &&
-      +warehouse_uuid !== 0 &&
-      warehouse_uuid !== orderData.warehouse_uuid
+      +warehouse_uuid !== 0
+       && warehouse_uuid !== orderData.warehouse_uuid
     ) {
-      console.log(orderData.warehouse_uuid);
+      console.log("data",orderData.warehouse_uuid);
       if (!orderData.warehouse_uuid) {
         updateWarehouse(warehouse_uuid, methodType);
       } else {
@@ -526,7 +525,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         {
           order_uuid: orderData.order_uuid,
           invoice_number: orderData.invoice_number,
-          trip_uuid: +selectedTrip === 0 ? "" : selectedTrip,
+          trip_uuid:
+            +selectedTrip.trip_uuid === 0 ? "" : selectedTrip?.trip_uuid,
+          warehouse_uuid:
+            +selectedTrip?.trip_uuid === 0 ? "" : selectedTrip?.warehouse_uuid,
           // warehouse_uuid: selectedTrip?.warehouse_uuid,
         },
       ],
@@ -537,12 +539,13 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     if (response.data.success) {
       setOrderData((prev) => ({
         ...prev,
-        trip_uuid: +selectedTrip === 0 ? "" : selectedTrip,
+        trip_uuid: +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.trip_uuid,
+        warehouse_uuid:
+          +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.warehouse_uuid,
       }));
-      setSelectedTrip("");
+      setSelectedTrip({ trip_uuid: 0, warehouse_uuid: "" });
     }
   };
-
 
   return (
     <>
@@ -683,7 +686,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     onClick={() => {
                       if (
                         window.location.pathname.includes("admin") ||
-                        window.location.pathname.includes("trips")
+                        window.location.pathname.includes("trip")
                       )
                         handleWarehouseChacking();
                       else handlePrint();
@@ -2655,8 +2658,15 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
                     <select
                       name="route_title"
                       className="numberInput"
-                      value={selectedTrip}
-                      onChange={(e) => setSelectedTrip(e.target.value)}
+                      value={selectedTrip.trip_uuid}
+                      onChange={(e) =>
+                        setSelectedTrip({
+                          trip_uuid: e.target.value,
+                          warehouse_uuid:
+                            trips?.find((a) => a.trip_uuid === e.target.value)
+                              ?.warehouse_uuid || "",
+                        })
+                      }
                       maxLength={42}
                       style={{ width: "200px" }}
                     >
