@@ -12,6 +12,7 @@ import { useIdleTimer } from "react-idle-timer";
 import FreeItems from "./FreeItems";
 import DiliveryReplaceMent from "./DiliveryReplaceMent";
 import TaskPopupMenu from "./TaskPopupMenu";
+import MessagePopup from "./MessagePopup";
 const default_status = [
   { value: 0, label: "Preparing" },
   { value: 1, label: "Ready" },
@@ -30,6 +31,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [selectedTrip, setSelectedTrip] = useState("");
   const [printData, setPrintData] = useState({ item_details: [], status: [] });
   const [holdPopup, setHoldPopup] = useState(false);
+  const [messagePopup, setMessagePopup] = useState(false);
   const [paymentModes, setPaymentModes] = useState([]);
 
   const [taskPopup, setTaskPopup] = useState(false);
@@ -290,7 +292,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   }, []);
 
   const onSubmit = async (type = { stage: 0 }) => {
-    setWaiting(true);
+
     let counter = counters.find(
       (a) => orderData?.counter_uuid === a.counter_uuid
     );
@@ -404,11 +406,15 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               ) || []),
             ],
           };
-    console.log(data);
+    console.log("data",data);
+    setMessagePopup(data)
+  };
+  const updateOrder=async()=>{
+    setWaiting(true);
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
-      data: [data],
+      data: [messagePopup],
       headers: {
         "Content-Type": "application/json",
       },
@@ -416,20 +422,22 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     if (response.data.success) {
       setOrderData((prev) => ({
         ...prev,
-        ...data,
+        ...messagePopup,
       }));
       setEditOrder(false);
     }
     setWaiting(false);
-  };
+    setMessagePopup(false)
+
+  }
   const handleWarehouseChacking = async (complete, methodType) => {
     let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
     if (
       warehouse_uuid &&
-      +warehouse_uuid !== 0
-       && warehouse_uuid !== orderData.warehouse_uuid
+      +warehouse_uuid !== 0 &&
+      warehouse_uuid !== orderData.warehouse_uuid
     ) {
-      console.log("data",orderData.warehouse_uuid);
+      console.log("data", orderData.warehouse_uuid);
       if (!orderData.warehouse_uuid) {
         updateWarehouse(warehouse_uuid, methodType);
       } else {
@@ -1520,6 +1528,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           </div>
         </div>
       </div>
+
       {waiting ? (
         <div className="overlay" style={{ zIndex: "99999999999999999" }}>
           <div className="flex" style={{ width: "40px", height: "40px" }}>
@@ -1551,6 +1560,18 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           holdPopup={holdPopup}
           itemsData={itemsData}
           setOrder={setOrderData}
+        />
+      ) : (
+        ""
+      )}
+      {messagePopup ? (
+        <MessagePopup
+          onClose={updateOrder}
+          message="Update Amount"
+          message2={"Rs. "+order?.order_grandtotal+"=> Rs. "+messagePopup?.order_grandtotal}
+          button1="Save"
+          button2="Cancel"
+          onSave={() => setMessagePopup(false)}
         />
       ) : (
         ""
