@@ -8,7 +8,6 @@ import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 
 export default function VoucherDetails({ order, onSave, orderStatus }) {
-  const [counters, setCounters] = useState([]);
   const [itemsData, setItemsData] = useState([]);
   const [editOrder, setEditOrder] = useState(false);
   const [category, setCategory] = useState([]);
@@ -16,8 +15,6 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
 
   const [orderData, setOrderData] = useState();
   const [printData, setPrintData] = useState({ item_details: [], status: [] });
-
-  const [users, setUsers] = useState([]);
 
   const [focusedInputId, setFocusedInputId] = useState(0);
   const reactInputsRef = useRef({});
@@ -88,18 +85,18 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
     documentTitle: "Statement",
     removeAfterPrint: true,
   });
-  const getUsers = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/users/GetUserList",
+  // const getUsers = async () => {
+  //   const response = await axios({
+  //     method: "get",
+  //     url: "/users/GetUserList",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    // console.log("users", response);
-    if (response.data.success) setUsers(response.data.result);
-  };
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
+  //   // console.log("users", response);
+  //   if (response.data.success) setUsers(response.data.result);
+  // };
 
   const getAutoBill = async () => {
     let data = [];
@@ -173,22 +170,10 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
     if (response.data.success) setItemsData(response.data.result);
   };
 
-  const getCounter = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/counters/GetCounterList",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setCounters(response.data.result);
-  };
   useEffect(() => {
-    getCounter();
     getItemsData();
     getAutoBill();
-    getUsers();
+
     getItemCategories();
     GetWarehouseList();
   }, []);
@@ -225,21 +210,26 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
         <div
           className="modal"
           style={{
-            height: "fit-content",
+            maxHeight: "100vh",
+            height: "max-content",
             width: "90vw",
-            padding: "50px",
+            padding: "10px 50px",
             zIndex: "999999999",
             border: "2px solid #000",
+            fontSize: "12px",
           }}
         >
-          <div className="inventory">
+          <div
+            className="inventory"
+            style={{ height: "max-content", maxHeight: "100vh" }}
+          >
             <div
               className="accountGroup"
               id="voucherForm"
               action=""
               style={{
-                height: "400px",
-                maxHeight: "500px",
+                height: "max-content",
+                maxHeight: "75vh",
                 overflow: "scroll",
               }}
             >
@@ -402,7 +392,6 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
 
                       <th className="pa2 tc bb b--black-20">Quantity(b)</th>
                       <th className="pa2 tc bb b--black-20">Quantity(p)</th>
-
                     </tr>
                   </thead>
                   <tbody className="lh-copy">
@@ -416,7 +405,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                           <tr
                             key={i}
                             style={{
-                              height: "50px",
+                              height: "20px",
                               backgroundColor:
                                 item.price_approval === "N"
                                   ? "#00edff"
@@ -466,7 +455,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                                       }
                                     >
                                       <CheckCircle
-                                        sx={{ fontSize: 40 }}
+                                        sx={{ fontSize: 20 }}
                                         style={{
                                           cursor: "pointer",
                                           color: "blue",
@@ -487,7 +476,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                                     }
                                   >
                                     <RemoveCircle
-                                      sx={{ fontSize: 40 }}
+                                      sx={{ fontSize: 20 }}
                                       style={{
                                         cursor: "pointer",
                                         color: "red",
@@ -518,6 +507,12 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                                     }
                                     id={"1_item_uuid" + item.uuid}
                                     styles={{
+                                      control: (styles) => ({
+                                        ...styles,
+                                        minHeight: 20,
+                                        maxHeight: 20,
+                                        borderRadius: 2,
+                                        padding: 0,}),
                                       option: (a, b) => {
                                         return {
                                           ...a,
@@ -605,7 +600,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                                   type="number"
                                   className="numberInput"
                                   index={listItemIndexCount++}
-                                  style={{ width: "10ch" }}
+                                  style={{ width: "10ch",height:"20px" }}
                                   value={item.b || 0}
                                   onChange={(e) => {
                                     setOrderData((prev) => {
@@ -646,7 +641,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                               {editOrder ? (
                                 <input
                                   id={"p" + item.uuid}
-                                  style={{ width: "10ch" }}
+                                  style={{ width: "10ch", height:"20px" }}
                                   type="number"
                                   className="numberInput"
                                   onWheel={(e) => e.preventDefault()}
@@ -683,8 +678,6 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                                 item.p || 0
                               )}
                             </td>
-
-                     
                           </tr>
                         );
                       })}
