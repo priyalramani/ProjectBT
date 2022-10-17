@@ -99,15 +99,22 @@ const Users = () => {
             />
 
             <div>Total Items: {filterUsers.length}</div>
-            <div style={{display:"flex",width:"120px",alignItems:"center",justifyContent:"space-between"}}>
+            <div
+              style={{
+                display: "flex",
+                width: "120px",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
               <input
                 type="checkbox"
                 onChange={(e) => setDisabledItem(e.target.checked)}
                 value={disabledItem}
                 className="searchInput"
-                style={{scale:"1.2"}}
+                style={{ scale: "1.2" }}
               />
-              <div style={{width:"100px"}}>Disabled Users</div>
+              <div style={{ width: "100px" }}>Disabled Users</div>
             </div>
 
             <button
@@ -572,26 +579,25 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
                               marginBottom: "5px",
                               textAlign: "center",
                               backgroundColor: data.routes?.filter(
-                                (a) => a === 0 || +a === 0
+                                (a) => a === "none"
                               ).length
                                 ? "#caf0f8"
                                 : "#fff",
                             }}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setdata((prev) => ({
-                                ...prev,
-                                routes: prev?.routes?.find(
-                                  (a) => a === 0 || +a === 0
-                                )
-                                  ? prev?.routes?.filter(
-                                      (a) => a !== 0 && +a !== 0
-                                    )
+                              setdata((prev) => {
+                                let routes = prev?.routes?.find((a) => a === "none")
+                                  ? prev?.routes?.filter((a) => a !== "none")
                                   : prev?.routes?.length &&
                                     !prev.routes.filter((a) => +a === 1).length
-                                  ? [...prev?.routes, 0]
-                                  : [0],
-                              }));
+                                  ? [...prev?.routes, "none"]
+                                  : ["none"];
+                                return {
+                                  ...prev,
+                                  routes,
+                                };
+                              });
                             }}
                           >
                             UnKnown
@@ -641,7 +647,7 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
                               marginBottom: "5px",
                               textAlign: "center",
                               backgroundColor: data.warehouse?.filter(
-                                (a) => +a === 0
+                                (a) => a === "none"
                               ).length
                                 ? "#caf0f8"
                                 : "#fff",
@@ -650,7 +656,15 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
                               e.stopPropagation();
                               setdata((prev) => ({
                                 ...prev,
-                                warehouse: [0],
+                                warehouse: prev?.warehouse?.find(
+                                  (a) => a === "none"
+                                )
+                                  ? prev?.warehouse?.filter((a) => a !== "none")
+                                  : prev?.warehouse?.length &&
+                                    !prev.warehouse.filter((a) => +a === 1)
+                                      .length
+                                  ? [...prev?.warehouse, "none"]
+                                  : ["none"],
                               }));
                             }}
                           >
@@ -698,9 +712,8 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
                                         (a) => a !== occ.warehouse_uuid
                                       )
                                     : prev?.warehouse?.length &&
-                                      !prev.warehouse.filter(
-                                        (a) => +a === 1 || +a === 0
-                                      ).length
+                                      !prev.warehouse.filter((a) => +a === 1)
+                                        .length
                                     ? [...prev?.warehouse, occ?.warehouse_uuid]
                                     : [occ?.warehouse_uuid],
                                 }));
