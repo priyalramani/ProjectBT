@@ -148,6 +148,7 @@ const MainAdmin = () => {
       setCounter(
         response.data.result.map((b) => ({
           ...b,
+          route_uuid: b.route_uuid || "none",
           route_title:
             routesData.find((a) => a.route_uuid === b.route_uuid)
               ?.route_title || "-",
@@ -378,22 +379,20 @@ const MainAdmin = () => {
   const routeOrderLength = useMemo(() => {
     let data = [
       {
-        route_uuid: 0,
+        route_uuid: "none",
         route_title: "Unknown",
         orderLength: orders.filter(
           (a) =>
             counter.filter(
               (c) =>
-                c.counter_uuid === a.counter_uuid &&
-                (!c.route_uuid || +c.route_uuid === 0)
+                c.counter_uuid === a.counter_uuid && c.route_uuid === "none"
             )?.length
         )?.length,
         checkingLength: orders.filter(
           (b) =>
             counter.filter(
               (c) =>
-                c.counter_uuid === b.counter_uuid &&
-                (!c.route_uuid || +c.route_uuid === 0)
+                c.counter_uuid === b.counter_uuid && c.route_uuid === "none"
             )?.length &&
             (b.status?.length > 1
               ? +b.status
@@ -405,8 +404,7 @@ const MainAdmin = () => {
           (b) =>
             counter.filter(
               (c) =>
-                c.counter_uuid === b.counter_uuid &&
-                (!c.route_uuid || +c.route_uuid === 0)
+                c.counter_uuid === b.counter_uuid && c.route_uuid === "none"
             )?.length &&
             (b.status?.length > 1
               ? +b.status
@@ -418,8 +416,7 @@ const MainAdmin = () => {
           (b) =>
             counter.filter(
               (c) =>
-                c.counter_uuid === b.counter_uuid &&
-                (!c.route_uuid || +c.route_uuid === 0)
+                c.counter_uuid === b.counter_uuid && c.route_uuid === "none"
             )?.length &&
             (b.status?.length > 1
               ? +b.status
@@ -485,6 +482,7 @@ const MainAdmin = () => {
     }
     return data;
   }, [counter, orders, routesData]);
+
   const TripsOrderLength = useMemo(() => {
     let data = [
       {
@@ -771,9 +769,7 @@ const MainAdmin = () => {
                               counter.filter(
                                 (c) =>
                                   c.counter_uuid === a.counter_uuid &&
-                                  (route.route_uuid === c.route_uuid ||
-                                    ((!c.route_uuid || +c.route_uuid === 0) &&
-                                      +route.route_uuid === 0))
+                                  route.route_uuid === c.route_uuid
                               )?.length
                           )
                           .filter(
@@ -802,8 +798,8 @@ const MainAdmin = () => {
                                             (route.route_uuid ===
                                               c.route_uuid ||
                                               ((!c.route_uuid ||
-                                                +c.route_uuid === 0) &&
-                                                +route.route_uuid === 0))
+                                                c.route_uuid === "none") &&
+                                                route.route_uuid === "none"))
                                         )?.length
                                     )
                                   )
@@ -831,8 +827,8 @@ const MainAdmin = () => {
                                             (route.route_uuid ===
                                               c.route_uuid ||
                                               ((!c.route_uuid ||
-                                                +c.route_uuid === 0) &&
-                                                +route.route_uuid === 0))
+                                                c.route_uuid === "none") &&
+                                                route.route_uuid === "none"))
                                         )?.length &&
                                         selectedOrder.filter(
                                           (b) => b.order_uuid === a.order_uuid
@@ -846,8 +842,8 @@ const MainAdmin = () => {
                                             (route.route_uuid ===
                                               c.route_uuid ||
                                               ((!c.route_uuid ||
-                                                +c.route_uuid === 0) &&
-                                                +route.route_uuid === 0))
+                                                c.route_uuid === "none") &&
+                                                route.route_uuid === "none"))
                                         )?.length
                                     )?.length
                                       ? setSelectedOrder(
@@ -936,8 +932,8 @@ const MainAdmin = () => {
                                             (route.route_uuid ===
                                               c.route_uuid ||
                                               ((!c.route_uuid ||
-                                                +c.route_uuid === 0) &&
-                                                +route.route_uuid === 0))
+                                                c.route_uuid === "none") &&
+                                                route.route_uuid === "none"))
                                         )?.length &&
                                         selectedOrder.filter(
                                           (b) => b.order_uuid === a.order_uuid
@@ -951,8 +947,8 @@ const MainAdmin = () => {
                                             (route.route_uuid ===
                                               c.route_uuid ||
                                               ((!c.route_uuid ||
-                                                +c.route_uuid === 0) &&
-                                                +route.route_uuid === 0))
+                                                c.route_uuid === "none") &&
+                                                route.route_uuid === "none"))
                                         )?.length
                                     )?.length
                                   }
@@ -980,8 +976,8 @@ const MainAdmin = () => {
                                         c.counter_uuid === b.counter_uuid &&
                                         (route.route_uuid === c.route_uuid ||
                                           ((!c.route_uuid ||
-                                            +c.route_uuid === 0) &&
-                                            +route.route_uuid === 0))
+                                            c.route_uuid === "none") &&
+                                            route.route_uuid === "none"))
                                     )?.length
                                 )
                                 .filter(
