@@ -292,7 +292,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   }, []);
 
   const onSubmit = async (type = { stage: 0 }) => {
-
     let counter = counters.find(
       (a) => orderData?.counter_uuid === a.counter_uuid
     );
@@ -406,10 +405,10 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               ) || []),
             ],
           };
-    console.log("data",data);
-    setMessagePopup(data)
+    console.log("data", data);
+    setMessagePopup(data);
   };
-  const updateOrder=async()=>{
+  const updateOrder = async () => {
     setWaiting(true);
     const response = await axios({
       method: "put",
@@ -427,9 +426,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       setEditOrder(false);
     }
     setWaiting(false);
-    setMessagePopup(false)
-
-  }
+    setMessagePopup(false);
+  };
   const handleWarehouseChacking = async (complete, methodType) => {
     let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
     if (
@@ -991,7 +989,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                         <tr
                           key={i}
                           style={{
-                            height: "30px",
+                            height: "20px",
                             backgroundColor:
                               item.price_approval === "N"
                                 ? "#00edff"
@@ -1029,7 +1027,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                     }
                                   >
                                     <CheckCircle
-                                      sx={{ fontSize: 20 }}
+                                      sx={{ fontSize: 15 }}
                                       style={{
                                         cursor: "pointer",
                                         color: "blue",
@@ -1093,7 +1091,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                   <RemoveCircle
                                     sx={{
                                       fontSize:
-                                        item.price_approval === "N" ? 20 : 40,
+                                        item.price_approval === "N" ? 15 : 20,
                                     }}
                                     style={{
                                       cursor: "pointer",
@@ -1117,6 +1115,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                               className="inputGroup"
                               index={!item.default ? listItemIndexCount++ : ""}
                               id={!item.default ? item_title_component_id : ""}
+                              style={{ height: "20px" }}
                             >
                               {editOrder && !item.default ? (
                                 <Select
@@ -1125,6 +1124,15 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                       item_title_component_id
                                     ] = ref)
                                   }
+                                  styles={{
+                                    control: (styles) => ({
+                                      ...styles,
+                                      minHeight: 20,
+                                      maxHeight: 20,
+                                      borderRadius: 2,
+                                      padding: 0,
+                                    }),
+                                  }}
                                   id={"1_item_uuid" + item.uuid}
                                   options={itemsData
                                     .filter(
@@ -1193,7 +1201,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           {editOrder ? (
                             <td
                               className="ph2 pv1 tc bb b--black-20 bg-white"
-                              style={{ textAlign: "center", color: "#000" }}
+                              style={{
+                                textAlign: "center",
+                                color: "#000",
+                                height: "20px",
+                              }}
                               index={listItemIndexCount++}
                               id={item_status_component_id}
                             >
@@ -1203,6 +1215,20 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                     item_status_component_id
                                   ] = ref)
                                 }
+                                styles={{
+                                  control: (styles) => {
+                                    console.log(styles);
+                                    return {
+                                      ...styles,
+                                      minHeight: 25,
+                                      maxHeight: 25,
+                                      borderRadius: 2,
+                                      padding: 0,
+                                      justifyContent: "flex-start",
+                                      alignItems: "start",
+                                    };
+                                  },
+                                }}
                                 id={"2_item_uuid" + item.uuid}
                                 options={default_status}
                                 onChange={(e) => {
@@ -1240,7 +1266,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           )}
                           <td
                             className="ph2 pv1 tc bb b--black-20 bg-white"
-                            style={{ textAlign: "center" }}
+                            style={{ textAlign: "center", height: "20px" }}
                           >
                             {editOrder ? (
                               <input
@@ -1248,7 +1274,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 type="number"
                                 className="numberInput"
                                 index={listItemIndexCount++}
-                                style={{ width: "10ch" }}
+                                style={{
+                                  width: "10ch",
+                                  fontSize: "12px",
+                                  padding: 0,
+                                  height: "20px",
+                                }}
                                 value={item.b || 0}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
@@ -1285,7 +1316,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             {editOrder ? (
                               <input
                                 id={"p" + item.uuid}
-                                style={{ width: "10ch" }}
+                                style={{
+                                  width: "10ch",
+                                  fontSize: "12px",
+                                  padding: 0,
+                                  height: "20px",
+                                }}
                                 type="number"
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
@@ -1325,7 +1361,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             {editOrder ? (
                               <input
                                 type="number"
-                                style={{ width: "15ch" }}
+                                style={{
+                                  width: "15ch",
+                                  fontSize: "12px",
+                                  padding: 0,
+                                  height: "20px",
+                                }}
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
@@ -1364,7 +1405,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             {editOrder ? (
                               <input
                                 type="number"
-                                style={{ width: "15ch" }}
+                                style={{
+                                  width: "15ch",
+                                  fontSize: "12px",
+                                  padding: 0,
+                                  height: "20px",
+                                }}
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
@@ -1568,7 +1614,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         <MessagePopup
           onClose={updateOrder}
           message="Update Amount"
-          message2={"Rs. "+order?.order_grandtotal+"=> Rs. "+messagePopup?.order_grandtotal}
+          message2={
+            "Rs. " +
+            order?.order_grandtotal +
+            "=> Rs. " +
+            messagePopup?.order_grandtotal
+          }
           button1="Save"
           button2="Cancel"
           onSave={() => setMessagePopup(false)}
@@ -2593,7 +2644,7 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
                 <div className="row">
                   <label className="selectLabel">
                     Warehouse
-                    <div className="inputGroup" style={{ width: "200px" }}>
+                    <div className="inputGroup" style={{ width: "20px" }}>
                       <Select
                         options={[
                           { value: 0, label: "None" },
@@ -2689,7 +2740,7 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
                         })
                       }
                       maxLength={42}
-                      style={{ width: "200px" }}
+                      style={{ width: "200px", height: "20px" }}
                     >
                       <option value="0">None</option>
                       {trips
