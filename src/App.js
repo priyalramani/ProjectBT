@@ -47,6 +47,7 @@ import AdjustStock from "./pages/AddOrder/AdjustStock";
 import InvoiceNumberWiseOrder from "./pages/Reports/InvoiceNumberWiseOrder";
 import PartyWiseCompanyDiscount from "./pages/Reports/PartyWiseCompanyDiscount";
 import RetailerMarginReport from "./pages/Reports/RetailerMarginReport";
+import SalesmanItemSuggestion from "./pages/others/SalesmanItemSuggestion";
 
 
 function App() {
@@ -54,7 +55,7 @@ function App() {
 
   axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
-  // axios.defaults.baseURL = "http://localhost:9000";
+  // axios.defaults.baseURL = "http://localhost:9000"; 
 
   const getUserType = async () => {
     let user_uuid = localStorage.getItem("user_uuid");
@@ -140,6 +141,7 @@ function App() {
               {/* admin Routes */}
               <Route path="/admin" element={<MainAdmin />} />
               <Route path="/trip" element={<MainAdmin />} />
+              <Route path="/admin/SalesmanItemSuggestion" element={<SalesmanItemSuggestion />} />
               <Route path="/admin/routes" element={<RoutesPage />} />
               <Route path="/admin/InvoiceNumberWiseOrder" element={<InvoiceNumberWiseOrder />} />
               <Route
