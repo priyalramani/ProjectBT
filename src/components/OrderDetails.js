@@ -122,11 +122,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
 
   const shiftFocus = (id) =>
     jumpToNextIndex(id, reactInputsRef, setFocusedInputId, appendNewRow);
-
+// console.log(orderData)
   const callBilling = async (data) => {
-    console.log(!data && !editOrder);
+    // console.log(!data && !editOrder);
     if (!data && !editOrder) return;
-    console.log(data);
+    // console.log(data);
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let time = new Date();
     let autoBilling = await Billing({
@@ -201,7 +201,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     });
     if (response1.data.success)
       data = data ? response1.data.result : [...data, ...response1.data.result];
-    console.log(data);
+    // console.log(data);
   };
 
   useEffect(() => {
@@ -319,7 +319,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         });
       }
     }
-    console.log(fulfillment);
+    // console.log(fulfillment);
     let data = {
       ...orderData,
 
@@ -405,7 +405,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               ) || []),
             ],
           };
-    console.log("data", data);
+    // console.log("data", data);
     setMessagePopup(data);
   };
   const updateOrder = async () => {
@@ -435,7 +435,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       +warehouse_uuid !== 0 &&
       warehouse_uuid !== orderData.warehouse_uuid
     ) {
-      console.log("data", orderData.warehouse_uuid);
+      // console.log("data", orderData.warehouse_uuid);
       if (!orderData.warehouse_uuid) {
         updateWarehouse(warehouse_uuid, methodType);
       } else {
@@ -518,7 +518,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         "Content-Type": "application/json",
       },
     });
-    console.log(response);
+    // console.log(response);
     if (response.data.success) {
       setTaskPopup(response.data.result);
     } else handlePrint();
@@ -1217,7 +1217,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 }
                                 styles={{
                                   control: (styles) => {
-                                    console.log(styles);
+                                    // console.log(styles);
                                     return {
                                       ...styles,
                                       minHeight: 25,
@@ -1614,12 +1614,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         <MessagePopup
           onClose={updateOrder}
           message="Update Amount"
-          message2={
-            "Rs. " +
-            order?.order_grandtotal +
-            "=> Rs. " +
-            messagePopup?.order_grandtotal
-          }
+          message2={"Rs. " + messagePopup?.order_grandtotal}
           button1="Save"
           button2="Cancel"
           onSave={() => setMessagePopup(false)}
@@ -2452,7 +2447,7 @@ function DiliveryPopup({
         </div>
       </div>
       {waiting ? (
-        <div className="overlay" style={{ zIndex: "99999999999999999" }}>
+        <div className="overlay" style={{ zIndex: "999999999999999999" }}>
           <div className="flex" style={{ width: "40px", height: "40px" }}>
             <svg viewBox="0 0 100 100">
               <path
@@ -2500,7 +2495,7 @@ function NotesPopup({
   const [notes, setNotes] = useState([]);
   const [edit, setEdit] = useState(false);
   useEffect(() => {
-    console.log(order?.notes);
+    // console.log(order?.notes);
     setNotes(order?.notes || []);
   }, [order]);
   const submitHandler = async () => {
@@ -2644,7 +2639,7 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
                 <div className="row">
                   <label className="selectLabel">
                     Warehouse
-                    <div className="inputGroup" >
+                    <div className="inputGroup">
                       <Select
                         options={[
                           { value: 0, label: "None" },
@@ -2698,7 +2693,7 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    console.log(data);
+    // console.log(data);
     onSave();
   };
   return (
@@ -2740,7 +2735,7 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
                         })
                       }
                       maxLength={42}
-                      style={{ width: "200px", height: "20px" }}
+                      style={{ width: "200px" }}
                     >
                       <option value="0">None</option>
                       {trips

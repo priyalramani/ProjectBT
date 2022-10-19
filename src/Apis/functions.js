@@ -253,19 +253,16 @@ export const Billing = async ({
   // let add_discounts = true;
   for (let item of items) {
     item = { ...item, item_total: 0 };
-    let edit_price = edit_prices.find(
-      (a) => a.item_uuid === item.item_uuid
-    )?.item_price;
+    let edit_price = +edit_prices.find((a) => a.item_uuid === item.item_uuid)
+      ?.item_price;
     let charges_discount =
       add_discounts || item.edit
         ? []
         : item.charges_discount?.filter((a) => a.value) || [];
-    let price =
-      add_discounts || item.edit
-        ? counter?.item_special_price?.find(
-            (a) => a.item_uuid === item.item_uuid
-          )?.price || 0
-        : 0;
+    let price = +(add_discounts || item.edit
+      ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
+          ?.price || 0
+      : 0);
     let special_discount_percentage =
       add_discounts || item.edit
         ? counter?.item_special_discount?.find(
@@ -278,9 +275,10 @@ export const Billing = async ({
             (a) => a.company_uuid === item.company_uuid
           )?.discount || 0
         : 0;
+     
     item = {
       ...item,
-      qty: +item.conversion * +item.b + item.p,
+      qty: +item.conversion * +item.b + +item.p,
     };
     if (price) item = { ...item, item_price: price };
 
@@ -323,7 +321,7 @@ export const Billing = async ({
         item_desc_total: item.item_desc_total
           ? item.item_desc_total *
               ((100 - company_discount_percentage) / 100) || 0
-          : (+edit_price || +item?.price || item.item_price || 0) *
+          : (+edit_price || +item?.price || +item.item_price || 0) *
               ((100 - company_discount_percentage) / 100) || 0,
       };
     }
@@ -350,7 +348,7 @@ export const Billing = async ({
       item_total:
         item.status !== 3
           ? (
-              (+item.item_desc_total || item?.price || +item.item_price || 0) *
+              (+item.item_desc_total || +item?.price || +item.item_price || 0) *
               (+item.qty || 0)
             ).toFixed(2)
           : 0,
