@@ -82,7 +82,7 @@ const SelectedCounterOrder = () => {
     confirmItemsPopup,
     userData?.salesman_suggestion,
   ]);
-console.log(salesman_suggestion)
+  console.log(salesman_suggestion);
   const putCounterData = async (e) => {
     e.preventDefault();
     if (!food_license) return;
@@ -682,7 +682,7 @@ console.log(salesman_suggestion)
               {confirmItemsPopup ? (
                 <div
                   style={{
-                    backgroundColor: "rgba(128, 128, 128,0.5)",
+                    backgroundColor: "rgba(128, 128, 128,0.8)",
                     zIndex: 9999999,
                     top: "0",
                     position: "fixed",
@@ -690,13 +690,16 @@ console.log(salesman_suggestion)
                     height: "100vh",
                   }}
                 >
+                  <button onClick={()=>setConfirmItemPopup(false)} className="closeButton" style={{top:"35%",right:"40%"}}>
+                    x
+                  </button>
                   <div
                     className="menus"
                     style={{
                       position: "fixed",
-
+                      boxShadow: "0 -10px 50px #4ac959",
                       width: "100vw",
-                      maxHeight: "50vh",
+                      maxHeight: "70vh",
                       bottom: "0px",
                       backgroundColor: "#fff",
                       overflow: "scroll",
@@ -904,11 +907,11 @@ console.log(salesman_suggestion)
                       setFilterItemTile("");
 
                       setCartPage(true);
-                      setConfirmItemPopup(false)
-                      setEnable(false)
+                      setConfirmItemPopup(false);
+                      setEnable(false);
                     }}
                     className="cartBtn"
-                    style={{ padding: "3px",opacity:enable?1:0.5 }}
+                    style={{ padding: "3px", opacity: enable ? 1 : 0.5 }}
                     disabled={!enable}
                   >
                     Done
@@ -1114,7 +1117,7 @@ console.log(salesman_suggestion)
           onClick={() => {
             if (salesman_suggestion.length) {
               setConfirmItemPopup(true);
-              setTimeout(()=>setEnable(true),5000)
+              setTimeout(() => setEnable(true), 5000);
               return;
             }
             setFilterItemTile("");

@@ -107,7 +107,7 @@ const Main = () => {
               fontSize: "20px",
             }}
           >
-            Version 43
+            Version 44
           </div>
 
           <button
@@ -164,6 +164,7 @@ function Logout({ onSave, popupForm }) {
     setIsLoading(true);
     console.log(popupForm);
     if (popupForm === "refresh") {
+      setTimeout(()=>setIsLoading(false),10000)
      await refreshDb();
      setIsLoading(false);
       onSave();
