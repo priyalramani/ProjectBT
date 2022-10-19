@@ -879,10 +879,10 @@ function UserPayouts({ onSave, popupInfo, getUsers }) {
                               }}
                               onClick={(event) => {
                                 if (
-                                  salesmanSuggestion.filter(
-                                    (a) => a !== item.item_uuid
+                                  !salesmanSuggestion.find(
+                                    (a) => a === item.item_uuid
                                   ) &&
-                                  salesmanSuggestion.length === 6
+                                  salesmanSuggestion.length >= 6
                                 ) {
                                   setErrorMassage(
                                     "Max 6 items (Maximum 6 selections allowed)"
