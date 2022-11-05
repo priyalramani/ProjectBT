@@ -690,7 +690,7 @@ const SelectedCounterOrder = () => {
                     height: "100vh",
                   }}
                 >
-                  <button onClick={()=>setConfirmItemPopup(false)} className="closeButton" style={{top:"35%",right:"40%"}}>
+                  <button onClick={()=>setConfirmItemPopup(false)} className="closeButton" style={{top:"20vh",left:"40%"}}>
                     x
                   </button>
                   <div
@@ -707,13 +707,13 @@ const SelectedCounterOrder = () => {
                     }}
                   >
                     {itemsCategory
-                      ?.filter((a) => a.company_uuid === filterCompany)
+                     
                       ?.sort((a, b) => a.sort_order - b.sort_order)
                       ?.map(
                         (category) =>
                           salesman_suggestion.filter(
                             (a) => a.category_uuid === category.category_uuid
-                          )?.length > 0 && (
+                          )?.length > 0 ? (
                             <div
                               id={!cartPage ? category?.category_uuid : ""}
                               key={category?.category_uuid}
@@ -898,7 +898,7 @@ const SelectedCounterOrder = () => {
                                   );
                                 })}
                             </div>
-                          )
+                          ):""
                       )}
                   </div>
                   <button
