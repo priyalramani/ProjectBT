@@ -786,12 +786,12 @@ const ProcessingOrders = () => {
               if (selectedOrder) {
                 setConfirmPopup(true);
               } else {
-                if(Location.pathname.includes("processing"))
-                Navigate("/users/processing");
-                else if(Location.pathname.includes("checking"))
-                Navigate("/users/checking");
-                else if(Location.pathname.includes("delivery"))
-                Navigate("/users/delivery");
+                if (Location.pathname.includes("processing"))
+                  Navigate("/users/processing");
+                else if (Location.pathname.includes("checking"))
+                  Navigate("/users/checking");
+                else if (Location.pathname.includes("delivery"))
+                  Navigate("/users/delivery");
               }
             }}
           />
@@ -1473,7 +1473,7 @@ const ProcessingOrders = () => {
                             ? item?.item_details
                                 ?.map((a) => +a.b || 0)
                                 ?.reduce((a, b) => a + b)
-                            : item?.item_details?.b || 0) +
+                            : item?.item_details[0]?.b || 0) +
                             ":" +
                             (item?.item_details?.length > 1
                               ? item?.item_details
