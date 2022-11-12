@@ -2872,6 +2872,7 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
+    setLoading(true)
     setError("");
     let billingData = await Billing({
       replacement: data.actual,
@@ -2906,6 +2907,7 @@ function DiliveryPopup({
       +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
+      setLoading(false)
       return;
     }
     let obj = modes.find((a) => a.mode_title === "Cash");

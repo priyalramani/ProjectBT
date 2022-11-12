@@ -486,6 +486,7 @@ function DiliveryPopup({
       +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
+      setWaiting(false)
       return;
     }
     // let obj = modes.find((a) => a.mode_title === "Cash");
