@@ -33,6 +33,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [holdPopup, setHoldPopup] = useState(false);
   const [messagePopup, setMessagePopup] = useState(false);
   const [paymentModes, setPaymentModes] = useState([]);
+  const [complete, setComplete] = useState(false);
 
   const [taskPopup, setTaskPopup] = useState(false);
   const [warehousePopup, setWarhousePopup] = useState(false);
@@ -122,7 +123,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
 
   const shiftFocus = (id) =>
     jumpToNextIndex(id, reactInputsRef, setFocusedInputId, appendNewRow);
-// console.log(orderData)
+  // console.log(orderData)
   const callBilling = async (data) => {
     // console.log(!data && !editOrder);
     if (!data && !editOrder) return;
@@ -430,12 +431,16 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   };
   const handleWarehouseChacking = async (complete, methodType) => {
     let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
+    if (methodType === "complete") {
+      setComplete(true);
+    }
     if (
       warehouse_uuid &&
       +warehouse_uuid !== 0 &&
       warehouse_uuid !== orderData.warehouse_uuid
     ) {
       // console.log("data", orderData.warehouse_uuid);
+
       if (!orderData.warehouse_uuid) {
         updateWarehouse(warehouse_uuid, methodType);
       } else {
@@ -444,7 +449,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     } else {
       if (methodType === "complete" || complete) {
         setDeliveryPopup(true);
-      } else handleTaskChecking();
+      } else {
+        handleTaskChecking();
+      }
     }
   };
   const updateWarehouse = async (warehouse_uuid, method) => {
@@ -461,7 +468,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         ...prev,
         warehouse_uuid,
       }));
-      if (method === "complete") {
+      if (method === "complete" || complete) {
         setDeliveryPopup(true);
       } else handleTaskChecking();
     }
