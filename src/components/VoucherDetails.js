@@ -717,16 +717,16 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                         borderBottom: "2px solid #fff",
                       }}
                     >
-                      <td className="ph2 pv1 tl bb b--black-20 bg-white">
-                        <div className="inputGroup"></div>
+                      <td >
+                      
                       </td>
-                      <td className="ph2 pv1 tl bb b--black-20 bg-white">
-                        <div className="inputGroup">Total</div>
+                      <td >
+                        
                       </td>
                       <td
                         className="ph2 pv1 tc bb b--black-20 bg-white"
                         style={{ textAlign: "center" }}
-                      ></td>
+                      ><div className="inputGroup">Total</div></td>
                       {editOrder ? (
                         <td
                           className="ph2 pv1 tc bb b--black-20 bg-white"
