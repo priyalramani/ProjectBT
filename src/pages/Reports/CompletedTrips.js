@@ -60,6 +60,7 @@ const CompletedTrips = () => {
       date.toDateString() + " - " + hours + ":" + minutes + " " + ampm;
     return strTime;
   }
+  console.log(searchData)
   const getActivityData = async () => {
     let startDate = new Date(searchData.startDate + " 00:00:00 AM");
     startDate = startDate.getTime();
