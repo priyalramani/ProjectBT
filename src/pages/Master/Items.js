@@ -300,6 +300,29 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
           </th>
           <th colSpan={2}>
             <div className="t-head-element">
+              <span>Code</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("item_code");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("item_code");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
               <span>Discount</span>
               <div className="sort-buttons-container">
                 <button
@@ -440,6 +463,7 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
               <td colSpan={3}>{item.category_title}</td>
               <td colSpan={3}>{item.item_title}</td>
               <td colSpan={2}>{item.mrp}</td>
+              <td colSpan={2}>{item.item_code}</td>
               <td colSpan={2}>{item.item_discount || 0}</td>
               <td colSpan={2}>{item.item_price}</td>
               <td colSpan={2}>{item.conversion}</td>
