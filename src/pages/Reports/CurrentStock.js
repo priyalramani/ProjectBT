@@ -46,7 +46,8 @@ const CurrentStock = () => {
   const [warehouseData, setWarehouseData] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [personName, setPersonName] = React.useState([]);
-
+  const [disabledItem, setDisabledItem] = useState(false);
+  const [flushPopup, setFlushPopup] = useState(false);
   const handleChange = (event) => {
     const {
       target: { value },
@@ -181,6 +182,7 @@ const CurrentStock = () => {
       setFilterItems(
         itemsData
           .filter((a) => a.item_title)
+          .filter((a) => disabledItem || a.status)
           .filter(
             (a) =>
               !filterTitle ||
@@ -193,7 +195,7 @@ const CurrentStock = () => {
             (a) => !filterCategory || a.category_uuid === filterCategory
           ) || []
       ),
-    [itemsData, filterTitle, filterCategory, filterCompany]
+    [itemsData, filterTitle, filterCategory, filterCompany, disabledItem]
   );
   const handleWarhouseOptionsChange = (event) => {
     const {
@@ -252,7 +254,7 @@ const CurrentStock = () => {
           >
             <div className="inputGroup">
               <label htmlFor="Warehouse">Item</label>
-              <div className="inputGroup" style={{ width: "200px" }}>
+              <div className="inputGroup" style={{ width: "150px" }}>
                 <input
                   type="text"
                   onChange={(e) => setFilterTitle(e.target.value)}
@@ -264,7 +266,7 @@ const CurrentStock = () => {
             </div>
             <div className="inputGroup">
               <label htmlFor="Warehouse">Companies</label>
-              <div className="inputGroup" style={{ width: "200px" }}>
+              <div className="inputGroup" style={{ width: "150px" }}>
                 <Select
                   options={[
                     { value: "", label: "All" },
@@ -294,7 +296,7 @@ const CurrentStock = () => {
             </div>
             <div className="inputGroup">
               <label htmlFor="Warehouse">Categories</label>
-              <div className="inputGroup" style={{ width: "200px" }}>
+              <div className="inputGroup" style={{ width: "150px" }}>
                 <Select
                   options={[
                     { value: "", label: "All" },
@@ -324,7 +326,7 @@ const CurrentStock = () => {
             </div>
             <div className="inputGroup">
               <label htmlFor="Warehouse">Warehouse</label>
-              <div className="inputGroup" style={{ width: "200px" }}>
+              <div className="inputGroup" style={{ width: "150px" }}>
                 <Selected
                   labelId="demo-multiple-checkbox-label"
                   id="demo-multiple-checkbox"
@@ -359,7 +361,29 @@ const CurrentStock = () => {
                 </Selected>
               </div>
             </div>
-
+            <div
+              style={{
+                display: "flex",
+                width: "120px",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <input
+                type="checkbox"
+                onChange={(e) => setDisabledItem(e.target.checked)}
+                value={disabledItem}
+                className="searchInput"
+                style={{ scale: "1.2" }}
+              />
+              <div style={{ width: "100px" }}>Disabled Items</div>
+            </div>
+            <button
+              className="item-sales-search"
+              onClick={() => setFlushPopup(true)}
+            >
+              Flush
+            </button>
             <div>Total Items: {filteritem.length}</div>
             <button className="item-sales-search" onClick={downloadHandler}>
               Excel
@@ -389,6 +413,17 @@ const CurrentStock = () => {
             setItemEditPopup("");
           }}
           update={getItemsData}
+        />
+      ) : (
+        ""
+      )}
+      {flushPopup ? (
+        <FlushPopup
+          warehouseData={warehouseData}
+          onSave={() => {
+            setFlushPopup("");
+            getItemsData();
+          }}
         />
       ) : (
         ""
@@ -738,7 +773,7 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
               <form
                 className="form"
                 onSubmit={(e) => {
-                  e.preventDefault()
+                  e.preventDefault();
                   setWarning(false);
                 }}
               >
@@ -929,6 +964,170 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
                   })}
                 </tbody>
               </table>
+            </div>
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function FlushPopup({ onSave, warehouseData }) {
+  const [data, setdata] = useState([]);
+  const [loading, setLoading] = useState();
+
+  const submitHandler = async (e) => {
+    setLoading(true)
+    e.preventDefault();
+    console.log(data);
+    const response = await axios({
+      method: "put",
+      url: "/items/flushWarehouse",
+      data: data.map((a) => a.warehouse_uuid),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+    }
+    setLoading(false)
+  };
+  const handleWarhouseOptionsChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+
+    console.log(value);
+
+    const filterdValue = value.filter(
+      (item) => data.findIndex((o) => o.id === item.id) >= 0
+    );
+
+    let duplicatesRemoved = value.filter((item, itemIndex) =>
+      value.findIndex((o, oIndex) => o.id === item.id && oIndex !== itemIndex)
+    );
+
+    // console.log(duplicatesRemoved);
+
+    // let map = {};
+
+    // for (let list of value) {
+    //   map[Object.values(list).join('')] = list;
+    // }
+    // console.log('Using Map', Object.values(map));
+
+    let duplicateRemoved = [];
+
+    value.forEach((item) => {
+      if (duplicateRemoved.findIndex((o) => o.id === item.id) >= 0) {
+        duplicateRemoved = duplicateRemoved.filter((x) => x.id === item.id);
+      } else {
+        duplicateRemoved.push(item);
+      }
+    });
+
+    setdata(duplicateRemoved);
+  };
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{
+          height: "fit-content",
+          width: "400px",
+          padding: "50px",
+          zIndex: "999",
+          border: "2px solid #000",
+        }}
+      >
+        <div className="inventory">
+          <div
+            className="accountGroup"
+            id="voucherForm"
+            action=""
+            style={{
+              height: "200px",
+              maxHeight: "500px",
+              overflow: "scroll",
+            }}
+          >
+            <div className="inventory_header">
+              <h2>Select Warehouses</h2>
+            </div>
+
+            <div className="table-container-user item-sales-container">
+              <div className="inputGroup">
+                <label htmlFor="Warehouse">Warehouse</label>
+                <div className="inputGroup" style={{ width: "250px" }}>
+                  <Selected
+                    labelId="demo-multiple-checkbox-label"
+                    id="demo-multiple-checkbox"
+                    multiple
+                    value={data}
+                    onChange={handleWarhouseOptionsChange}
+                    // input={<OutlinedInput label="Warehouses" />}
+                    renderValue={(selected) =>
+                      selected.length === warehouseData.length
+                        ? "All"
+                        : !selected.length
+                        ? "None"
+                        : selected.map((x) => x.name).join(", ")
+                    }
+                    MenuProps={MenuProps}
+                    style={{ zIndex: 99999999999 }}
+                  >
+                    {warehouseData.map((variant) => (
+                      <MenuItem
+                        key={variant.id}
+                        value={variant}
+                        style={{ zIndex: 99999999999 }}
+                      >
+                        <Checkbox
+                          checked={
+                            data.findIndex((item) => item.id === variant.id) >=
+                            0
+                          }
+                        />
+                        <ListItemText
+                          placeholder="variant.name"
+                          primary={variant.name}
+                        />
+                      </MenuItem>
+                    ))}
+                  </Selected>
+                </div>
+                {!loading ? (
+                  <button
+                    type="button"
+                    className="submit"
+                    onClick={submitHandler}
+                  >
+                    Confirm
+                  </button>
+                ) : (
+                  <button type="button" className="submit" onClick={() => {}}>
+                    <svg viewBox="0 0 100 100" style={{width:"25px"}}>
+                      <path
+                        d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                        fill="#ffffff"
+                        stroke="none"
+                      >
+                        <animateTransform
+                          attributeName="transform"
+                          type="rotate"
+                          dur="1s"
+                          repeatCount="indefinite"
+                          keyTimes="0;1"
+                          values="0 50 51;360 50 51"
+                        ></animateTransform>
+                      </path>
+                    </svg>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
           <button onClick={onSave} className="closeButton">
