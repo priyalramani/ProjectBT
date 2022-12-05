@@ -124,16 +124,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const shiftFocus = (id) =>
     jumpToNextIndex(id, reactInputsRef, setFocusedInputId, appendNewRow);
   // console.log(orderData)
-  const callBilling = async (data) => {
+  const callBilling = async (data = orderData) => {
     // console.log(!data && !editOrder);
     if (!data && !editOrder) return;
     // console.log(data);
-    let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
+    let counter = counters.find((a) => data.counter_uuid === a.counter_uuid);
     let time = new Date();
     let autoBilling = await Billing({
       shortage: data.shortage,
       adjustment: data.adjustment,
       replacement: data.replacement,
+      counter_uuid: data.counter_uuid,
       counter,
       items: orderData?.item_details,
       others: {
@@ -559,7 +560,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       setSelectedTrip({ trip_uuid: 0, warehouse_uuid: "" });
     }
   };
-
+  console.log(order?.counter_uuid);
   return (
     <>
       <div className="overlay">
@@ -606,12 +607,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           value: a.counter_uuid,
                           label: a.counter_title,
                         }))}
-                        onChange={(doc) =>
+                        onChange={(doc) => {
                           setOrderData((prev) => ({
                             ...prev,
                             counter_uuid: doc.value,
-                          }))
-                        }
+                          }));
+                        }}
                         value={
                           orderData?.counter_uuid
                             ? {
@@ -1495,16 +1496,14 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                         borderBottom: "2px solid #fff",
                       }}
                     >
-                      <td >
-                        
-                      </td>
-                      <td >
-                        
-                      </td>
+                      <td></td>
+                      <td></td>
                       <td
                         className="ph2 pv1 tc bb b--black-20 bg-white"
                         style={{ textAlign: "center" }}
-                      ><div className="inputGroup">Total</div></td>
+                      >
+                        <div className="inputGroup">Total</div>
+                      </td>
                       {editOrder ? (
                         <td
                           className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -1561,7 +1560,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               <button
                 type="button"
                 onClick={
-                  window.location.pathname.includes("completeOrderReport")
+                  window.location.pathname.includes("completeOrderReport") 
                     ? () => setDeliveryPopup("edit")
                     : onSubmit
                 }
@@ -2124,6 +2123,7 @@ function DiliveryPopup({
   // const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
+
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -2213,6 +2213,13 @@ function DiliveryPopup({
   }, [PaymentModes]);
   const submitHandler = async () => {
     setWaiting(true);
+    updateBilling({
+      ...order,
+      replacement: data?.actual || 0,
+      shortage: data?.shortage || 0,
+      adjustment: data?.adjustment || 0,
+      adjustment_remarks: data?.adjustment_remarks || "",
+    });
     setError("");
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
     //console.log(
@@ -2302,14 +2309,7 @@ function DiliveryPopup({
     }
     setWaiting(false);
   };
-  useEffect(() => {
-    updateBilling({
-      replacement: data?.actual || 0,
-      shortage: data?.shortage || 0,
-      adjustment: data?.adjustment || 0,
-      adjustment_remarks: data?.adjustment_remarks || "",
-    });
-  }, [data]);
+
   return (
     <>
       <div className="overlay" style={{ zIndex: 9999999999 }}>

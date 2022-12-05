@@ -36,7 +36,7 @@ const names = [
 const CurrentStock = () => {
   const [itemsData, setItemsData] = useState([]);
   const [filterTitle, setFilterTitle] = useState("");
-  const [filteritem, setFilterItems] = useState([]);
+
   const [itemEditPopup, setItemEditPopup] = useState("");
   const [item, setItem] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
@@ -48,6 +48,21 @@ const CurrentStock = () => {
   const [personName, setPersonName] = React.useState([]);
   const [disabledItem, setDisabledItem] = useState(false);
   const [flushPopup, setFlushPopup] = useState(false);
+  const filteritem = useMemo(
+    () =>
+      itemsData.filter(
+        (a) =>
+          a.item_title &&
+          (disabledItem || a.status) &&
+          (!filterTitle ||
+            a.item_title
+              .toLocaleLowerCase()
+              .includes(filterTitle.toLocaleLowerCase())) &&
+          (!filterCompany || a.company_uuid === filterCompany) &&
+          (!filterCategory || a.category_uuid === filterCategory)
+      ) || [],
+    [itemsData, filterTitle, filterCategory, filterCompany, disabledItem]
+  );
   const handleChange = (event) => {
     const {
       target: { value },
@@ -177,26 +192,8 @@ const CurrentStock = () => {
     const data = new Blob([excelBuffer], { type: fileType });
     FileSaver.saveAs(data, "Stocks" + fileExtension);
   };
-  useEffect(
-    () =>
-      setFilterItems(
-        itemsData
-          .filter((a) => a.item_title)
-          .filter((a) => disabledItem || a.status)
-          .filter(
-            (a) =>
-              !filterTitle ||
-              a.item_title
-                .toLocaleLowerCase()
-                .includes(filterTitle.toLocaleLowerCase())
-          )
-          .filter((a) => !filterCompany || a.company_uuid === filterCompany)
-          .filter(
-            (a) => !filterCategory || a.category_uuid === filterCategory
-          ) || []
-      ),
-    [itemsData, filterTitle, filterCategory, filterCompany, disabledItem]
-  );
+ 
+
   const handleWarhouseOptionsChange = (event) => {
     const {
       target: { value },
@@ -392,13 +389,7 @@ const CurrentStock = () => {
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-            itemsDetails={itemsData.filter(
-              (a) =>
-                !filterTitle ||
-                a.item_title
-                  .toLocaleLowerCase()
-                  .includes(filterTitle.toLocaleLowerCase())
-            )}
+            itemsDetails={filteritem}
             setItemData={setItem}
             setItemEditPopup={setItemEditPopup}
             warehouseData={selectedOptions}
@@ -979,7 +970,7 @@ function FlushPopup({ onSave, warehouseData }) {
   const [loading, setLoading] = useState();
 
   const submitHandler = async (e) => {
-    setLoading(true)
+    setLoading(true);
     e.preventDefault();
     console.log(data);
     const response = await axios({
@@ -993,7 +984,7 @@ function FlushPopup({ onSave, warehouseData }) {
     if (response.data.success) {
       onSave();
     }
-    setLoading(false)
+    setLoading(false);
   };
   const handleWarhouseOptionsChange = (event) => {
     const {
@@ -1109,7 +1100,7 @@ function FlushPopup({ onSave, warehouseData }) {
                   </button>
                 ) : (
                   <button type="button" className="submit" onClick={() => {}}>
-                    <svg viewBox="0 0 100 100" style={{width:"25px"}}>
+                    <svg viewBox="0 0 100 100" style={{ width: "25px" }}>
                       <path
                         d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
                         fill="#ffffff"
