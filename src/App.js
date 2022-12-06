@@ -48,6 +48,7 @@ import InvoiceNumberWiseOrder from "./pages/Reports/InvoiceNumberWiseOrder";
 import PartyWiseCompanyDiscount from "./pages/Reports/PartyWiseCompanyDiscount";
 import RetailerMarginReport from "./pages/Reports/RetailerMarginReport";
 import SalesmanItemSuggestion from "./pages/others/SalesmanItemSuggestion";
+import StockTransfer from "./users/StockTransfer";
 
 
 function App() {
@@ -105,6 +106,7 @@ function App() {
               <Route path="/users/processing" element={<Processing />} />
               <Route path="/users/checking" element={<Processing />} />
               <Route path="/users/delivery" element={<Processing />} />
+              <Route path="/users/stock-transfer" element={<StockTransfer />} />
               <Route
                 path="/users/processing/:trip_uuid"
                 element={<ProcessingOrders />}

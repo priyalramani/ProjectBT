@@ -40,6 +40,12 @@ const Main = () => {
       link: "/delivery",
       img: "dinein.png",
     },
+    {
+      type: 5,
+      name: "Stock Transfer",
+      link: "/stock-transfer",
+      img: "dinein.png",
+    },
   ];
 
   useEffect(() => {

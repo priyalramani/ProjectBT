@@ -544,6 +544,7 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
                         <option value="2">Processing</option>
                         <option value="3">Checking</option>
                         <option value="4">Delivery</option>
+                        <option value="5">Stock Transfer</option>
                       </select>
                     </label>
                   ) : (
