@@ -643,10 +643,8 @@ export default function AddStock() {
                     fontWeight: "900",
                   }}
                 >
-                  Vocher Number:{" "}
-                  {order?.vocher_number || "0"}
+                  Vocher Number: {order?.vocher_number || "0"}
                 </th>
-           
               </tr>
               <tr>
                 <th
@@ -966,7 +964,55 @@ function Table({
           .map((a) => (
             <>
               <tr style={{ pageBreakAfter: "always", width: "100%" }}>
-                <td colSpan={10}>{a.category_title}</td>
+                <td colSpan={10}>
+                  {a.category_title}
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedOrders((prev) =>
+                        prev.filter((c) =>
+                          itemsDetails?.find(
+                            (b) =>
+                              a.category_uuid === b.category_uuid &&
+                              c.item_uuid === b.item_uuid
+                          )
+                        ).length
+                          ? prev.filter(
+                              (c) =>
+                                !itemsDetails?.find(
+                                  (b) =>
+                                    a.category_uuid === b.category_uuid &&
+                                    c.item_uuid === b.item_uuid
+                                )
+                            )
+                          : [
+                              ...(prev || []),
+                              ...itemsDetails?.filter(
+                                (b) => a.category_uuid === b.category_uuid
+                              ),
+                            ]
+                      );
+                    }}
+                    style={{marginLeft:"10px"}}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedOrders.filter((c) =>
+                          itemsDetails?.find(
+                            (b) =>
+                              a.category_uuid === b.category_uuid &&
+                              c.item_uuid === b.item_uuid
+                          )
+                        ).length ===
+                        itemsDetails?.filter(
+                          (b) => a.category_uuid === b.category_uuid
+                        ).length
+                      }
+                      style={{ transform: "scale(1.3)" }}
+                    />
+                  </span>
+                </td>
               </tr>
               {itemsDetails
                 ?.filter((b) => a.category_uuid === b.category_uuid)

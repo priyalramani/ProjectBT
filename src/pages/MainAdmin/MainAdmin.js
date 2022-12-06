@@ -2540,7 +2540,7 @@ function HoldPopup({
                 // marginLeft: "20mm",
                 // marginRight: "20mm",
                 border: "1px solid black",
-                pageBreakInside: "auto",
+                // pageBreakInside: "auto",
                 display: "block",
               }}
             >
@@ -2578,7 +2578,7 @@ function HoldPopup({
                     <>
                       <tr
                         style={{
-                          pageBreakAfter: "always",
+                          pageBreakAfter: "auto",
                           width: "100%",
                           height: "8px",
                           fontSize: "12px",
@@ -2599,7 +2599,7 @@ function HoldPopup({
                             key={item?.item_uuid || Math.random()}
                             style={{
                               height: "8px",
-                              pageBreakAfter: "always",
+                              pageBreakAfter: "auto",
                               color: "#000",
                               backgroundColor: "#fff",
                               fontSize: "12px",
