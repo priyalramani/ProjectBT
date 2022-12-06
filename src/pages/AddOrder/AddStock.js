@@ -159,7 +159,10 @@ export default function AddStock() {
     const response = await axios({
       method: "post",
       url: "/vouchers/postVoucher",
-      data: order,
+      data: {
+        ...order,
+        item_details: order.item_details.map((a) => ({ ...a, status: 0 })),
+      },
       headers: {
         "Content-Type": "application/json",
       },
@@ -993,7 +996,7 @@ function Table({
                             ]
                       );
                     }}
-                    style={{marginLeft:"10px"}}
+                    style={{ marginLeft: "10px" }}
                   >
                     <input
                       type="checkbox"

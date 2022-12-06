@@ -85,6 +85,7 @@ const StockTransfer = () => {
     if (response.data.success) setItemsData(response.data.result);
     else setItemsData([]);
   };
+  console.log(warehouse);
   const filterItems = useMemo(
     () =>
       itemsData.map((a) => {
@@ -103,26 +104,19 @@ const StockTransfer = () => {
           type: a.type === "ST" ? "Stock Transfer" : "Adjustment",
           qty,
 
-          ...a,
-
-          created_by_user:
-            +a.created_by === 240522
-              ? "Admin"
-              : users.find((a) => a.created_by === a.user_uuid)?.user_title ||
-                "-",
           from_warehouse_title:
             +a.from_warehouse === 0
               ? "None"
-              : warehouse.find((a) => a.warehouse_uuid === a.from_warehouse)
+              : warehouse.find((b) => b.warehouse_uuid === a.from_warehouse)
                   ?.warehouse_title || "-",
           to_warehouse_title:
             +a.to_warehouse === 0
               ? "None"
-              : warehouse.find((a) => a.warehouse_uuid === a.to_warehouse)
+              : warehouse.find((b) => b.warehouse_uuid === a.to_warehouse)
                   ?.warehouse_title || "-",
         };
       }),
-    [itemsData, users, warehouse]
+    [itemsData, warehouse]
   );
 
   useEffect(() => {
@@ -170,7 +164,7 @@ const StockTransfer = () => {
             left: "0",
             top: "0",
             display: "flex",
-            minHeight: "80vh",
+            minHeight: "85vh",
           }}
         >
           <table
@@ -387,7 +381,7 @@ function HoldPopup({ onSave, orders, itemsData, categories }) {
     const response = await axios({
       method: "put",
       url: "/vouchers/PutVoucher",
-      data: { voucher_uuid: orders?.voucher_uuid, item_details: items },
+      data: { voucher_uuid: orders?.voucher_uuid, item_details: items.filter(a=>+a.status!==3) },
       headers: {
         "Content-Type": "application/json",
       },
@@ -461,6 +455,9 @@ function HoldPopup({ onSave, orders, itemsData, categories }) {
                         </th>
                         <th colSpan={2}>
                           <div className="t-head-element">Qty</div>
+                        </th>
+                        <th>
+                          <div className="t-head-element"></div>
                         </th>
                       </tr>
                     </thead>
@@ -583,6 +580,20 @@ function HoldPopup({ onSave, orders, itemsData, categories }) {
                                   >
                                     {item?.b || 0} :{" "}
                                     {(item?.p || 0) + (item?.free || 0)}
+                                  </td>
+                                  <td
+                                    style={{ width: "50px", padding: "0 2px" }}
+                                    onClick={() => {
+                                      setItems((prev) =>
+                                        prev.map((a) =>
+                                          a.item_uuid === item.item_uuid
+                                            ? { ...a, status: 3 }
+                                            : a
+                                        )
+                                      );
+                                    }}
+                                  >
+                                    <DeleteOutlineIcon />
                                   </td>
                                 </tr>
                               ))}
