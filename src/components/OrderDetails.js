@@ -147,8 +147,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     });
     setOrderData((prev) => ({
       ...prev,
-      ...autoBilling,
       ...(data || {}),
+      ...autoBilling,
+
       item_details: autoBilling.items.map((a) => ({
         ...(prev.item_details.find((b) => b.item_uuid === a.item_uuid) || {}),
         ...a,
@@ -2483,6 +2484,13 @@ function DiliveryPopup({
             setPopup(false);
           }}
           setData={setData}
+          updateBilling={(e)=> updateBilling({
+            ...order,
+            replacement: e?.actual || 0,
+            shortage: e?.shortage || 0,
+            adjustment: e?.adjustment || 0,
+            adjustment_remarks: e?.adjustment_remarks || "",
+          })}
           data={data}
         />
       ) : (

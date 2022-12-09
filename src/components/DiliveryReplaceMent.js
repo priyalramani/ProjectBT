@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-function DiliveryReplaceMent({ onSave, data, setData }) {
+function DiliveryReplaceMent({ onSave, data, setData,updateBilling=()=>{} }) {
   const [error, setError] = useState(false);
   const [values, setValues] = useState(false);
   useEffect(() => {
@@ -156,6 +156,7 @@ function DiliveryReplaceMent({ onSave, data, setData }) {
                   onClick={() => {
                     if (!values.adjustment || values.adjustment_remarks) {
                       setData((prev) => ({ ...prev, ...values }));
+                      updateBilling(values );
                       onSave()
                     } else {
                       setError(true);
