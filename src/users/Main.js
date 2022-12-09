@@ -175,7 +175,7 @@ function Logout({ onSave, popupForm }) {
      setIsLoading(false);
       onSave();
     } else {
-      await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+      deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
       localStorage.clear();
       sessionStorage.clear()
       window.location.assign("/login");

@@ -906,7 +906,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
                 )
                 .map((a, index) => (
                   <>
-                    <tr style={{ pageBreakAfter: "always", width: "100%" }}>
+                    <tr style={{ pageBreakAfter: "auto", width: "100%" }}>
                       <td colSpan={11}>{a.category_title}</td>
                     </tr>
                     {orderData?.item_details
