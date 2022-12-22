@@ -1782,7 +1782,7 @@ const DeleteOrderPopup = ({
 }) => {
   const [disable, setDisabled] = useState(true);
   useEffect(() => {
-    setTimeout(() => setDisabled(false), deletePopup === "hold" ? 100 : 5000);
+    setTimeout(() => setDisabled(false), deletePopup === "hold" ? 100 : 0);
   }, []);
   const PutOrder = async () => {
     if (deletePopup === "hold") {

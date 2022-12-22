@@ -519,7 +519,7 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
               <td>{i + 1}</td>
 
               <td colSpan={3}>{item.type}</td>
-              <td colSpan={3}>{item?.vocher_number||""}</td>
+              <td colSpan={3}>{item?.vocher_number || ""}</td>
               <td colSpan={3}>{item.created_by_user}</td>
               <td colSpan={3}>
                 {new Date(+item.created_at).toDateString()} -{" "}
@@ -570,9 +570,8 @@ function NewUserForm({ onSave, popupInfo }) {
 
   useEffect(() => {
     setdata(popupInfo.data);
-    setTimeout(() => {
-      setDisabled(false);
-    }, 5000);
+
+    setDisabled(false);
   }, [popupInfo.data]);
 
   const submitHandler = async (e) => {

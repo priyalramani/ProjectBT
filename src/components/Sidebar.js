@@ -251,7 +251,7 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
             },
           ]}
         />
-        <div
+        {/* <div
           className="nav_link_container"
           onClick={updateMinLevel}
           style={{ width: "100%" }}
@@ -263,9 +263,9 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
                 <span className={`nav_title`}>Update MinLevel</span>
               </p>
             </>
-            {/* Submenu popup*/}
+             Submenu popup
           </div>
-        </div>
+        </div>*/}
       </div>
     </div>
   );

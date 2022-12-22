@@ -62,7 +62,15 @@ const MainAdmin = () => {
   const [reminderDate, setReminderDate] = useState();
   const [selectedtasks, setSelectedTasks] = useState(false);
   let user_uuid = localStorage.getItem("user_uuid");
-  console.log(salesPersoneList);
+  const selectedOrderGrandTotal = useMemo(
+    () =>
+      selectedOrder?.length > 1
+        ? selectedOrder.map((a) => +a.order_grandtotal).reduce((a, b) => a + b)
+        : selectedOrder.length
+        ? selectedOrder[0].order_grandtotal
+        : "",
+    [selectedOrder]
+  );
   const getItemsDataReminder = async () => {
     const response = await axios({
       method: "get",
@@ -558,6 +566,20 @@ const MainAdmin = () => {
 
   return (
     <>
+      <div
+        style={{
+          position: "fixed",
+          bottom: "10vh",
+          left: 0,
+          fontSize: "20px",
+          zIndex: "9999999999999",
+          fontWeight: "bold",
+          width: "100px",
+          textAlign: "center",
+        }}
+      >
+        {selectedOrderGrandTotal}
+      </div>
       <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} />
       <div
         className="right-side"
