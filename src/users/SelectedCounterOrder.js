@@ -690,7 +690,11 @@ const SelectedCounterOrder = () => {
                     height: "100vh",
                   }}
                 >
-                  <button onClick={()=>setConfirmItemPopup(false)} className="closeButton" style={{top:"20vh",left:"40%"}}>
+                  <button
+                    onClick={() => setConfirmItemPopup(false)}
+                    className="closeButton"
+                    style={{ top: "20vh", left: "40%" }}
+                  >
                     x
                   </button>
                   <div
@@ -707,83 +711,53 @@ const SelectedCounterOrder = () => {
                     }}
                   >
                     {itemsCategory
-                     
+
                       ?.sort((a, b) => a.sort_order - b.sort_order)
-                      ?.map(
-                        (category) =>
-                          salesman_suggestion.filter(
-                            (a) => a.category_uuid === category.category_uuid
-                          )?.length > 0 ? (
-                            <div
-                              id={!cartPage ? category?.category_uuid : ""}
-                              key={category?.category_uuid}
-                              name={category?.category_uuid}
-                              className="categoryItemMap"
-                            >
-                              <h1 className="categoryHeadline">
-                                {category?.category_title}
-                              </h1>
+                      ?.map((category) =>
+                        salesman_suggestion.filter(
+                          (a) => a.category_uuid === category.category_uuid
+                        )?.length > 0 ? (
+                          <div
+                            id={!cartPage ? category?.category_uuid : ""}
+                            key={category?.category_uuid}
+                            name={category?.category_uuid}
+                            className="categoryItemMap"
+                          >
+                            <h1 className="categoryHeadline">
+                              {category?.category_title}
+                            </h1>
 
-                              {salesman_suggestion
-                                ?.filter(
-                                  (a) =>
-                                    !filterItemTitle ||
-                                    a.item_title
-                                      ?.toLocaleLowerCase()
-                                      .includes(
-                                        filterItemTitle.toLocaleLowerCase()
-                                      )
-                                )
-                                ?.sort((a, b) => a.sort_order - b.sort_order)
+                            {salesman_suggestion
+                              ?.filter(
+                                (a) =>
+                                  !filterItemTitle ||
+                                  a.item_title
+                                    ?.toLocaleLowerCase()
+                                    .includes(
+                                      filterItemTitle.toLocaleLowerCase()
+                                    )
+                              )
+                              ?.sort((a, b) => a.sort_order - b.sort_order)
 
-                                .filter(
-                                  (a) =>
-                                    a.category_uuid === category.category_uuid
-                                )
-                                ?.map((item) => {
-                                  return (
-                                    <div
-                                      key={item?.item_uuid}
-                                      className="menu"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOrder((prev) => ({
-                                          ...prev,
-                                          items: prev?.items?.filter(
-                                            (a) =>
+                              .filter(
+                                (a) =>
+                                  a.category_uuid === category.category_uuid
+                              )
+                              ?.map((item) => {
+                                return (
+                                  <div
+                                    key={item?.item_uuid}
+                                    className="menu"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setOrder((prev) => ({
+                                        ...prev,
+                                        items: prev?.items?.filter(
+                                          (a) => a.item_uuid === item.item_uuid
+                                        )?.length
+                                          ? prev?.items?.map((a) =>
                                               a.item_uuid === item.item_uuid
-                                          )?.length
-                                            ? prev?.items?.map((a) =>
-                                                a.item_uuid === item.item_uuid
-                                                  ? {
-                                                      ...a,
-                                                      b:
-                                                        +(a.b || 0) +
-                                                        parseInt(
-                                                          ((a?.p || 0) +
-                                                            (+item?.one_pack ||
-                                                              1)) /
-                                                            +item.conversion
-                                                        ),
-
-                                                      p:
-                                                        ((a?.p || 0) +
-                                                          (+item?.one_pack ||
-                                                            1)) %
-                                                        +item.conversion,
-                                                    }
-                                                  : a
-                                              )
-                                            : prev?.items?.length
-                                            ? [
-                                                ...prev.items,
-                                                ...items
-                                                  ?.filter(
-                                                    (a) =>
-                                                      a.item_uuid ===
-                                                      item.item_uuid
-                                                  )
-                                                  .map((a) => ({
+                                                ? {
                                                     ...a,
                                                     b:
                                                       +(a.b || 0) +
@@ -799,9 +773,13 @@ const SelectedCounterOrder = () => {
                                                         (+item?.one_pack ||
                                                           1)) %
                                                       +item.conversion,
-                                                  })),
-                                              ]
-                                            : items
+                                                  }
+                                                : a
+                                            )
+                                          : prev?.items?.length
+                                          ? [
+                                              ...prev.items,
+                                              ...items
                                                 ?.filter(
                                                   (a) =>
                                                     a.item_uuid ===
@@ -823,82 +801,105 @@ const SelectedCounterOrder = () => {
                                                       (+item?.one_pack || 1)) %
                                                     +item.conversion,
                                                 })),
-                                        }));
-                                      }}
-                                    >
-                                      <div className="menuItemDetails">
-                                        <h1 className="item-name">
-                                          {item?.item_title}
-                                        </h1>
+                                            ]
+                                          : items
+                                              ?.filter(
+                                                (a) =>
+                                                  a.item_uuid === item.item_uuid
+                                              )
+                                              .map((a) => ({
+                                                ...a,
+                                                b:
+                                                  +(a.b || 0) +
+                                                  parseInt(
+                                                    ((a?.p || 0) +
+                                                      (+item?.one_pack || 1)) /
+                                                      +item.conversion
+                                                  ),
 
-                                        <div
-                                          className="item-mode flex"
-                                          style={{
-                                            justifyContent: "space-between",
-                                          }}
+                                                p:
+                                                  ((a?.p || 0) +
+                                                    (+item?.one_pack || 1)) %
+                                                  +item.conversion,
+                                              })),
+                                      }));
+                                    }}
+                                  >
+                                    <div className="menuItemDetails">
+                                      <h1 className="item-name">
+                                        {item?.item_title}
+                                      </h1>
+
+                                      <div
+                                        className="item-mode flex"
+                                        style={{
+                                          justifyContent: "space-between",
+                                        }}
+                                      >
+                                        <h3
+                                          className={`item-price`}
+                                          style={{ cursor: "pointer" }}
                                         >
-                                          <h3
-                                            className={`item-price`}
-                                            style={{ cursor: "pointer" }}
-                                          >
-                                            {+item?.item_discount ? (
-                                              <>
-                                                <span
-                                                  style={{
-                                                    color: "red",
-                                                    textDecoration:
-                                                      "line-through",
-                                                  }}
-                                                >
-                                                  Price: {item?.item_price}
-                                                </span>
-                                                <br />
-                                                <span
-                                                  style={{
-                                                    color: "red",
-                                                    paddingLeft: "10px",
-                                                    marginLeft: "10px",
-                                                    fontWeight: "500",
-                                                    borderLeft: "2px solid red",
-                                                  }}
-                                                >
-                                                  {item?.item_discount} % OFF
-                                                </span>
-                                              </>
-                                            ) : (
-                                              <>Price: {item?.item_price}</>
-                                            )}
-                                          </h3>
-                                          <h3 className={`item-price`}>
-                                            MRP: {item?.mrp || ""}
-                                          </h3>
-                                        </div>
-                                      </div>
-                                      <div className="menuleft">
-                                        <input
-                                          value={`${
-                                            order?.items?.find(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            )?.b || 0
-                                          } : ${
-                                            order?.items?.find(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            )?.p || 0
-                                          }`}
-                                          className="boxPcsInput"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setPopupForm(item);
-                                          }}
-                                        />
+                                          {+item?.item_discount ? (
+                                            <>
+                                              <span
+                                                style={{
+                                                  color: "red",
+                                                  textDecoration:
+                                                    "line-through",
+                                                }}
+                                              >
+                                                Price: {item?.item_price}
+                                              </span>
+                                              <br />
+                                              <span
+                                                style={{
+                                                  color: "red",
+                                                  paddingLeft: "10px",
+                                                  marginLeft: "10px",
+                                                  fontWeight: "500",
+                                                  borderLeft: "2px solid red",
+                                                }}
+                                              >
+                                                {item?.item_discount} % OFF
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <>Price: {item?.item_price}</>
+                                          )}
+                                        </h3>
+                                        <h3 className={`item-price`}>
+                                          MRP: {item?.mrp || ""}
+                                        </h3>
                                       </div>
                                     </div>
-                                  );
-                                })}
-                            </div>
-                          ):""
+                                    <div className="menuleft">
+                                      <input
+                                        value={`${
+                                          order?.items?.find(
+                                            (a) =>
+                                              a.item_uuid === item.item_uuid
+                                          )?.b || 0
+                                        } : ${
+                                          order?.items?.find(
+                                            (a) =>
+                                              a.item_uuid === item.item_uuid
+                                          )?.p || 0
+                                        }`}
+                                        className="boxPcsInput"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setPopupForm(item);
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        ) : (
+                          ""
+                        )
                       )}
                   </div>
                   <button
@@ -1398,6 +1399,7 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 }
 function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
   const [item, setItem] = useState([]);
+  const [discount, setDiscount] = useState(0);
   useEffect(() => {
     setItem(() => {
       let data = itemsData.find((a) => a.item_uuid === holdPopup.item_uuid);
@@ -1497,6 +1499,7 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                         maxLength={42}
                       />
                     </td>
+
                     <td colSpan={2}>
                       <input
                         type="number"
@@ -1517,6 +1520,47 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                             ).toFixed(2),
                           }))
                         }
+                        onWheel={(e) => e.preventDefault()}
+                        maxLength={42}
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+                <thead>
+                  <tr>
+                    <th colSpan={4}>
+                      <div className="t-head-element">Discount</div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="tbody">
+                  <tr>
+                    <td colSpan={4}>
+                      <input
+                        type="number"
+                        name="route_title"
+                        className="numberInput"
+                        value={item?.discount}
+                        style={{
+                          width: "100px",
+                          backgroundColor: "transparent",
+                          color: "#000",
+                        }}
+                        onChange={(e) => {
+                          setDiscount(e.target.value);
+                          let item_price = +item.item_price * +item.conversion;
+                          setItem((prev) => ({
+                            ...prev,
+                            b_price: (
+                              item_price -
+                              (item_price * e.target.value) / 100
+                            )?.toFixed(2),
+                            p_price: (
+                              +item.item_price -
+                              (+item.item_price * e.target.value) / 100
+                            )?.toFixed(2),
+                          }));
+                        }}
                         onWheel={(e) => e.preventDefault()}
                         maxLength={42}
                       />

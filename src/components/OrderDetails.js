@@ -34,6 +34,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [messagePopup, setMessagePopup] = useState(false);
   const [paymentModes, setPaymentModes] = useState([]);
   const [complete, setComplete] = useState(false);
+  const [completeOrder, setCompleteOrder] = useState(false);
 
   const [taskPopup, setTaskPopup] = useState(false);
   const [warehousePopup, setWarhousePopup] = useState(false);
@@ -409,14 +410,18 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             ],
           };
     // console.log("data", data);
-    setMessagePopup(data);
+    if (completeOrder) {
+      updateOrder(data)
+    }else{
+      setMessagePopup(data);
+    }
   };
-  const updateOrder = async () => {
+  const updateOrder = async (data=messagePopup) => {
     setWaiting(true);
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
-      data: [messagePopup],
+      data: [data],
       headers: {
         "Content-Type": "application/json",
       },
@@ -424,12 +429,14 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     if (response.data.success) {
       setOrderData((prev) => ({
         ...prev,
-        ...messagePopup,
+        ...data,
       }));
       setEditOrder(false);
     }
     setWaiting(false);
-    setMessagePopup(false);
+    if (!completeOrder) {
+      setMessagePopup(false);
+    }
   };
   const handleWarehouseChacking = async (complete, methodType) => {
     let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
@@ -691,6 +698,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     className="item-sales-search"
                     onClick={() => {
                       handleWarehouseChacking(true, "complete");
+                      setCompleteOrder(true);
                     }}
                   >
                     Complete Order
@@ -1561,7 +1569,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               <button
                 type="button"
                 onClick={
-                  window.location.pathname.includes("completeOrderReport") 
+                  window.location.pathname.includes("completeOrderReport")
                     ? () => setDeliveryPopup("edit")
                     : onSubmit
                 }
@@ -2484,13 +2492,15 @@ function DiliveryPopup({
             setPopup(false);
           }}
           setData={setData}
-          updateBilling={(e)=> updateBilling({
-            ...order,
-            replacement: e?.actual || 0,
-            shortage: e?.shortage || 0,
-            adjustment: e?.adjustment || 0,
-            adjustment_remarks: e?.adjustment_remarks || "",
-          })}
+          updateBilling={(e) =>
+            updateBilling({
+              ...order,
+              replacement: e?.actual || 0,
+              shortage: e?.shortage || 0,
+              adjustment: e?.adjustment || 0,
+              adjustment_remarks: e?.adjustment_remarks || "",
+            })
+          }
           data={data}
         />
       ) : (
