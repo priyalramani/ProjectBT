@@ -50,6 +50,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
+  useEffect(() => {
+    if (order?.receipt_number) {
+      setDeliveryPopup("edit");
+    }
+  }, [order?.receipt_number]);
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -114,7 +119,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
               uuid: item_uuid,
               b: 0,
               p: 0,
-              sr: prev.item_details.length + 1,
+              sr: prev.item_details?.length + 1,
             },
           ],
         })),
@@ -151,7 +156,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       ...(data || {}),
       ...autoBilling,
 
-      item_details: autoBilling.items.map((a) => ({
+      item_details: autoBilling.items?.map((a) => ({
         ...(prev.item_details.find((b) => b.item_uuid === a.item_uuid) || {}),
         ...a,
       })),
@@ -211,7 +216,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   useEffect(() => {
     setOrderData({
       ...order,
-      item_details: order.item_details.map((a, i) => ({
+      item_details: order.item_details?.map((a, i) => ({
         ...itemsData.find((b) => b.item_uuid === a.item_uuid),
         ...a,
         uuid: uuid(),
@@ -221,7 +226,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       fulfillment: [],
     });
 
-    if (order.notes.length) {
+    if (order.notes?.length) {
       setNotesPoup(true);
     }
   }, [itemsData]);
@@ -232,7 +237,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       ...orderData,
       item_details:
         orderData?.item_details
-          .map((a) => ({
+          ?.map((a) => ({
             ...a,
             category_title: category.find(
               (b) => b.category_uuid === a.category_uuid
@@ -348,14 +353,14 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     data = {
       ...data,
 
-      item_details: data.item_details.map((a) => ({
+      item_details: data.item_details?.map((a) => ({
         ...a,
         gst_percentage: a.item_gst,
         status: a.status || 0,
         price: a?.price || a.item_price || 0,
       })),
       order_status: data?.item_details.filter((a) => a.price_approval === "N")
-        .length
+        ?.length
         ? "A"
         : "R",
       orderStatus,
@@ -411,12 +416,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           };
     // console.log("data", data);
     if (completeOrder) {
-      updateOrder(data)
-    }else{
+      updateOrder(data);
+    } else {
       setMessagePopup(data);
     }
   };
-  const updateOrder = async (data=messagePopup) => {
+  const updateOrder = async (data = messagePopup) => {
     setWaiting(true);
     const response = await axios({
       method: "put",
@@ -494,7 +499,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     //   shortage: data.shortage,
     //   counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
 
-    //   items: data.item_details.map((a) => {
+    //   items: data.item_details?.map((a) => {
     //     let itemData = itemsData.find((b) => a.item_uuid === b.item_uuid);
     //     return {
     //       ...itemData,
@@ -569,7 +574,24 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     }
   };
   console.log(order?.counter_uuid);
-  return (
+  return deliveryPopup ? (
+    <DiliveryPopup
+      onSave={() => {
+        if (order?.receipt_number) {
+          onSave();
+        }
+        if (deliveryPopup === "edit") onSubmit();
+        setDeliveryPopup(false);
+      }}
+      deliveryPopup={deliveryPopup}
+      postOrderData={() => onSubmit({ stage: 5 })}
+      setSelectedOrder={setOrderData}
+      order={orderData}
+      counters={counters}
+      items={itemsData}
+      updateBilling={callBilling}
+    />
+  ) : (
     <>
       <div className="overlay">
         <div
@@ -675,7 +697,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       style={{ width: "fit-Content", backgroundColor: "blue" }}
                       className="item-sales-search"
                       onClick={() => {
-                        if (orderData.notes.length) {
+                        if (orderData.notes?.length) {
                           setDeletePopup("hold");
                         } else setNotesPoup("hold");
                       }}
@@ -783,7 +805,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                             <Select
                               options={[
                                 { value: "", label: "None" },
-                                ...warehouse.map((a, j) => ({
+                                ...warehouse?.map((a, j) => ({
                                   value: a.warehouse_uuid,
                                   label: a.warehouse_title,
                                 })),
@@ -1034,7 +1056,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                     onClick={() =>
                                       setOrderData((prev) => ({
                                         ...prev,
-                                        item_details: prev.item_details.map(
+                                        item_details: prev.item_details?.map(
                                           (a) =>
                                             a.uuid === item.uuid
                                               ? { ...a, price_approval: "Y" }
@@ -1156,12 +1178,12 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                       (a) =>
                                         !order.item_details.filter(
                                           (b) => a.item_uuid === b.item_uuid
-                                        ).length && a.status !== 0
+                                        )?.length && a.status !== 0
                                     )
                                     .sort((a, b) =>
                                       a?.item_title?.localeCompare(b.item_title)
                                     )
-                                    .map((a, j) => ({
+                                    ?.map((a, j) => ({
                                       value: a.item_uuid,
                                       label: a.item_title + "______" + a.mrp,
                                       key: a.item_uuid,
@@ -1169,18 +1191,19 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                   onChange={(e) => {
                                     setOrderData((prev) => ({
                                       ...prev,
-                                      item_details: prev.item_details.map((a) =>
-                                        a.uuid === item.uuid
-                                          ? {
-                                              ...a,
-                                              ...itemsData.find(
-                                                (b) => b.item_uuid === e.value
-                                              ),
-                                              price: itemsData.find(
-                                                (b) => b.item_uuid === e.value
-                                              )?.item_price,
-                                            }
-                                          : a
+                                      item_details: prev.item_details?.map(
+                                        (a) =>
+                                          a.uuid === item.uuid
+                                            ? {
+                                                ...a,
+                                                ...itemsData.find(
+                                                  (b) => b.item_uuid === e.value
+                                                ),
+                                                price: itemsData.find(
+                                                  (b) => b.item_uuid === e.value
+                                                )?.item_price,
+                                              }
+                                            : a
                                       ),
                                     }));
                                     shiftFocus(item_title_component_id);
@@ -1251,7 +1274,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                 onChange={(e) => {
                                   setOrderData((prev) => ({
                                     ...prev,
-                                    item_details: prev.item_details.map((a) =>
+                                    item_details: prev.item_details?.map((a) =>
                                       a.uuid === item.uuid
                                         ? { ...a, status: e.value }
                                         : a
@@ -1302,10 +1325,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                   setOrderData((prev) => {
                                     return {
                                       ...prev,
-                                      item_details: prev.item_details.map((a) =>
-                                        a.uuid === item.uuid
-                                          ? { ...a, b: e.target.value }
-                                          : a
+                                      item_details: prev.item_details?.map(
+                                        (a) =>
+                                          a.uuid === item.uuid
+                                            ? { ...a, b: e.target.value }
+                                            : a
                                       ),
                                     };
                                   });
@@ -1348,10 +1372,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                   setOrderData((prev) => {
                                     return {
                                       ...prev,
-                                      item_details: prev.item_details.map((a) =>
-                                        a.uuid === item.uuid
-                                          ? { ...a, p: e.target.value }
-                                          : a
+                                      item_details: prev.item_details?.map(
+                                        (a) =>
+                                          a.uuid === item.uuid
+                                            ? { ...a, p: e.target.value }
+                                            : a
                                       ),
                                     };
                                   });
@@ -1392,10 +1417,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                   setOrderData((prev) => {
                                     return {
                                       ...prev,
-                                      item_details: prev.item_details.map((a) =>
-                                        a.uuid === item.uuid
-                                          ? { ...a, price: e.target.value }
-                                          : a
+                                      item_details: prev.item_details?.map(
+                                        (a) =>
+                                          a.uuid === item.uuid
+                                            ? { ...a, price: e.target.value }
+                                            : a
                                       ),
                                     };
                                   });
@@ -1438,15 +1464,16 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                   setOrderData((prev) => {
                                     return {
                                       ...prev,
-                                      item_details: prev.item_details.map((a) =>
-                                        a.uuid === item.uuid
-                                          ? {
-                                              ...a,
-                                              price:
-                                                e.target.value /
-                                                item.conversion,
-                                            }
-                                          : a
+                                      item_details: prev.item_details?.map(
+                                        (a) =>
+                                          a.uuid === item.uuid
+                                            ? {
+                                                ...a,
+                                                price:
+                                                  e.target.value /
+                                                  item.conversion,
+                                              }
+                                            : a
                                       ),
                                     };
                                   });
@@ -1527,19 +1554,23 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       >
                         {(orderData?.item_details?.length > 1
                           ? orderData?.item_details
-                              .map((a) => +a?.b || 0)
+                              ?.map((a) => +a?.b || 0)
                               .reduce((a, b) => a + b)
-                          : orderData?.item_details[0]?.b) || 0}
+                          : orderData?.item_details?.length
+                          ? orderData?.item_details[0]?.b
+                          : 0) || 0}
                       </td>
                       <td
                         className="ph2 pv1 tc bb b--black-20 bg-white"
                         style={{ textAlign: "center" }}
                       >
-                        {(orderData?.item_details.length > 1
+                        {(orderData?.item_details?.length > 1
                           ? orderData?.item_details
-                              .map((a) => +a?.p || 0)
+                              ?.map((a) => +a?.p || 0)
                               .reduce((a, b) => a + b)
-                          : orderData?.item_details[0]?.p) || 0}
+                          : orderData?.item_details?.length
+                          ? orderData?.item_details[0]?.p
+                          : 0) || 0}
                       </td>
                       <td
                         className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -1674,6 +1705,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       {deletePopup ? (
         <DeleteOrderPopup
           onSave={() => {
+         
             setDeletePopup(false);
           }}
           onDeleted={() => {
@@ -1690,23 +1722,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       ) : (
         ""
       )}
-      {deliveryPopup ? (
-        <DiliveryPopup
-          onSave={() => {
-            if (deliveryPopup === "edit") onSubmit();
-            setDeliveryPopup(false);
-          }}
-          deliveryPopup={deliveryPopup}
-          postOrderData={() => onSubmit({ stage: 5 })}
-          setSelectedOrder={setOrderData}
-          order={orderData}
-          counters={counters}
-          items={itemsData}
-          updateBilling={callBilling}
-        />
-      ) : (
-        ""
-      )}
+
       {notesPopup ? (
         <NotesPopup
           onSave={() => setNotesPoup(false)}
@@ -1813,10 +1829,10 @@ const DeleteOrderPopup = ({
           time: time.getTime(),
         },
       ],
-      fulfillment: order.fulfillment.length
+      fulfillment: order.fulfillment?.length
         ? [...order.fulfillment, ...order.item_details]
         : order.item_details,
-      item_details: order.item_details.map((a) => ({ ...a, b: 0, p: 0 })),
+      item_details: order.item_details?.map((a) => ({ ...a, b: 0, p: 0 })),
     };
 
     let billingData = await Billing({
@@ -1825,7 +1841,7 @@ const DeleteOrderPopup = ({
       shortage: data.shortage,
       counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
 
-      items: data.item_details.map((a) => {
+      items: data.item_details?.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {
           ...itemData,
@@ -2206,9 +2222,9 @@ function DiliveryPopup({
     order.trip_uuid,
   ]);
   useEffect(() => {
-    if (PaymentModes.length)
+    if (PaymentModes?.length)
       setModes(
-        PaymentModes.map((a) => ({
+        PaymentModes?.map((a) => ({
           ...a,
           amt: "",
           coin: "",
@@ -2230,7 +2246,7 @@ function DiliveryPopup({
       adjustment_remarks: data?.adjustment_remarks || "",
     });
     setError("");
-    let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
+    let modeTotal = modes?.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
     //console.log(
     // Tempdata?.order_grandtotal,
     //   +(+modeTotal + (+outstanding?.amount || 0))
@@ -2290,7 +2306,7 @@ function DiliveryPopup({
         counter_uuid: order.counter_uuid,
         trip_uuid: order.trip_uuid,
         invoice_number: order.invoice_number,
-        modes: modes.map((a) =>
+        modes: modes?.map((a) =>
           a.mode_title === "Cash" ? { ...a, coin: 0 } : a
         ),
       };
@@ -2341,7 +2357,7 @@ function DiliveryPopup({
             <div style={{ overflowY: "scroll" }}>
               <form className="form">
                 <div className="formGroup">
-                  {PaymentModes.map((item) => (
+                  {PaymentModes?.map((item) => (
                     <div
                       className="row"
                       style={{ flexDirection: "row", alignItems: "center" }}
@@ -2363,7 +2379,7 @@ function DiliveryPopup({
                           style={{ width: "80px" }}
                           onChange={(e) =>
                             setModes((prev) =>
-                              prev.map((a) =>
+                              prev?.map((a) =>
                                 a.mode_uuid === item.mode_uuid
                                   ? {
                                       ...a,
@@ -2668,7 +2684,7 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
                       <Select
                         options={[
                           { value: 0, label: "None" },
-                          ...warehouse.map((a) => ({
+                          ...warehouse?.map((a) => ({
                             value: a.warehouse_uuid,
                             label: a.warehouse_title,
                           })),
@@ -2765,7 +2781,7 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
                       <option value="0">None</option>
                       {trips
                         .filter((a) => a.trip_uuid && a.status)
-                        .map((a) => (
+                        ?.map((a) => (
                           <option value={a.trip_uuid}>{a.trip_title}</option>
                         ))}
                     </select>

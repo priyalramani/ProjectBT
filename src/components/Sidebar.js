@@ -183,7 +183,7 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
               link: "/admin/CompletedTripsReport",
             },
             {
-              name: "Counter Ledger",
+              name: "Ledger",
               link: "/admin/CounterLeger",
             },
             {

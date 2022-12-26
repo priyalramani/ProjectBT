@@ -65,7 +65,7 @@ const CounterLeger = () => {
           <Header />
           <div className="item-sales-container orders-report-container">
             <div id="heading">
-              <h2>Completed Order</h2>
+              <h2>Ledger</h2>
             </div>
             <div id="item-sales-top">
               <div
@@ -153,6 +153,7 @@ const CounterLeger = () => {
               }}
               order={popupOrder}
               orderStatus="edit"
+              
             />
           ) : (
             ""
@@ -212,7 +213,7 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
                   {item.amt1 ||
                     ""}
                 </td>
-                <td colSpan={1}>{item.amt2 || ""}</td>
+                <td colSpan={1}>{item.amt2 || "0"}</td>
                 
               </tr>
             ))}
