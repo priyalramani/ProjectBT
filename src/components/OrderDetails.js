@@ -1705,7 +1705,6 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       {deletePopup ? (
         <DeleteOrderPopup
           onSave={() => {
-         
             setDeletePopup(false);
           }}
           onDeleted={() => {
@@ -2148,7 +2147,28 @@ function DiliveryPopup({
   // const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
-
+  let reminder = useMemo(() => {
+    let time2 = new Date();
+    time2.setHours(12);
+    console.log(
+      "timer",
+      new Date(
+        time2.setDate(
+          time2.getDate() +
+            (counters.find((a) => a.counter_uuid === order.counter_uuid)
+              ?.payment_reminder_days || 0)
+        )
+      )
+    );
+    return new Date(
+      time2.setDate(
+        time2.getDate() +
+          (counters.find((a) => a.counter_uuid === order.counter_uuid)
+            ?.payment_reminder_days || 0)
+      )
+    ).getTime();
+  }, [counters, order.counter_uuid]);
+  console.log(outstanding);
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -2187,6 +2207,7 @@ function DiliveryPopup({
     if (response.data.success) setOutstanding(response.data.result);
     else {
       let time = new Date();
+
       setOutstanding({
         order_uuid: order.order_uuid,
         amount: "",
@@ -2195,6 +2216,7 @@ function DiliveryPopup({
         invoice_number: order.invoice_number,
         trip_uuid: order.trip_uuid,
         counter_uuid: order.counter_uuid,
+        reminder,
       });
     }
   };
@@ -2211,6 +2233,7 @@ function DiliveryPopup({
         invoice_number: order.invoice_number,
         trip_uuid: order.trip_uuid,
         counter_uuid: order.counter_uuid,
+        reminder,
       });
     }
     GetPaymentModes();
@@ -2220,6 +2243,7 @@ function DiliveryPopup({
     order.invoice_number,
     order.order_uuid,
     order.trip_uuid,
+    reminder,
   ]);
   useEffect(() => {
     if (PaymentModes?.length)
@@ -2264,20 +2288,23 @@ function DiliveryPopup({
       window.location.pathname.includes("pendingEntry") ||
       window.location.pathname.includes("upiTransactionReport")
     ) {
-      const response = await axios({
-        method: "put",
-        url: "/receipts/putReceipt",
-        data: {
-          modes,
-          order_uuid: order.order_uuid,
-          counter_uuid: order.counter_uuid,
-        },
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (outstanding?.amount)
-        await axios({
+      let response;
+      if (modeTotal) {
+        response = await axios({
+          method: "put",
+          url: "/receipts/putReceipt",
+          data: {
+            modes,
+            order_uuid: order.order_uuid,
+            counter_uuid: order.counter_uuid,
+          },
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      }
+      if (outstanding?.amount) {
+        response = await axios({
           method: "put",
           url: "/Outstanding/putOutstanding",
           data: {
@@ -2289,6 +2316,7 @@ function DiliveryPopup({
             "Content-Type": "application/json",
           },
         });
+      }
       if (response.data.success) {
         onSave();
       }
@@ -2310,16 +2338,19 @@ function DiliveryPopup({
           a.mode_title === "Cash" ? { ...a, coin: 0 } : a
         ),
       };
-      const response = await axios({
-        method: "post",
-        url: "/receipts/postReceipt",
-        data: obj,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      let response;
+      if (modeTotal) {
+        response = await axios({
+          method: "post",
+          url: "/receipts/postReceipt",
+          data: obj,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      }
       if (outstanding?.amount)
-        await axios({
+        response =await axios({
           method: "post",
           url: "/Outstanding/postOutstanding",
           data: outstanding,
@@ -2433,6 +2464,42 @@ function DiliveryPopup({
                       {/* {popupInfo.conversion || 0} */}
                     </label>
                   </div>
+                  {outstanding?.amount ? (
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "100%" }}
+                      >
+                        <input
+                          type="text"
+                          name="route_title"
+                          className="numberInput"
+                          value={outstanding?.remarks}
+                          placeholder={"Remarks"}
+                          style={{
+                            width: "100%",
+                            backgroundColor: "light",
+                            fontSize: "12px",
+                            color: "#fff",
+                          }}
+                          onChange={(e) =>
+                            setOutstanding((prev) => ({
+                              ...prev,
+                              remarks: e.target.value,
+                            }))
+                          }
+                          maxLength={42}
+                          onWheel={(e) => e.preventDefault()}
+                        />
+                        {/* {popupInfo.conversion || 0} */}
+                      </label>
+                    </div>
+                  ) : (
+                    ""
+                  )}
                   <div
                     className="row"
                     style={{ flexDirection: "row", alignItems: "center" }}

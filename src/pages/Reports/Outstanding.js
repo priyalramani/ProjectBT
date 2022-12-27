@@ -1,13 +1,18 @@
+import { ArrowDropDown } from "@mui/icons-material";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 
 const Outstanding = () => {
   const [outstanding, setOutstanding] = useState();
+  const [filterTitle, setFilterTitle] = useState("");
+  const [routesData, setRoutesData] = useState([]);
   const [users, setUsers] = useState([]);
   const [counters, setCounters] = useState([]);
-
+  const [deliveryPopup, setDeliveryPopup] = useState(false);
+  const [datePopup, setDatePopup] = useState(false);
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -30,16 +35,7 @@ const Outstanding = () => {
       },
     });
     console.log("users", response);
-    if (response.data.success)
-      setOutstanding(
-        response.data.result.map((a) => ({
-          ...a,
-          user_title: users.find((b) => b.user_uuid === a.user_uuid)
-            ?.user_title,
-          counter_title: counters.find((b) => b.counter_uuid === a.counter_uuid)
-            ?.counter_title,
-        }))
-      );
+    if (response.data.success) setOutstanding(response.data.result);
   };
   const getCounter = async () => {
     const response = await axios({
@@ -52,13 +48,57 @@ const Outstanding = () => {
     });
     if (response.data.success) setCounters(response.data.result);
   };
+  const getRoutesData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/routes/GetRouteList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setRoutesData(response.data.result);
+  };
   useEffect(() => {
     getCounter();
     getUsers();
-  }, []);
-  useEffect(() => {
+    getRoutesData();
     getOutstanding();
-  }, [counters, users]);
+  }, []);
+
+  const outstandingList = useMemo(
+    () =>
+      outstanding
+
+        ?.map((a) => ({
+          ...a,
+          user_title: users.find((b) => b.user_uuid === a.user_uuid)
+            ?.user_title,
+          counter_title:
+            counters.find((b) => b.counter_uuid === a.counter_uuid)
+              ?.counter_title || "-",
+          route_title:
+            routesData.find((b) =>
+              counters.find(
+                (c) =>
+                  c.counter_uuid === a.counter_uuid &&
+                  b.route_uuid === c.route_uuid
+              )
+            )?.route_title || "-",
+        }))
+        ?.filter(
+          (a) =>
+            !filterTitle ||
+            a.counter_title
+              .toLocaleLowerCase()
+              .includes(filterTitle.toLocaleLowerCase()) ||
+            a.invoice_number
+              .toString()
+              .toLocaleLowerCase()
+              .includes(filterTitle.toLocaleLowerCase())
+        ) || [],
+    [counters, filterTitle, outstanding, routesData, users]
+  );
   return (
     <>
       <Sidebar />
@@ -67,18 +107,75 @@ const Outstanding = () => {
         <div id="heading">
           <h2>Outstanding</h2>
         </div>
+        <div id="item-sales-top">
+          <div
+            id="date-input-container"
+            style={{
+              overflow: "visible",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
+            <input
+              type="text"
+              onChange={(e) => setFilterTitle(e.target.value)}
+              value={filterTitle}
+              placeholder="Search ..."
+              className="searchInput"
+            />
 
+            <div>Total Items: {outstandingList?.length}</div>
+          </div>
+        </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={outstanding} />
+          <Table
+            itemsDetails={outstandingList}
+            setDeliveryPopup={setDeliveryPopup}
+            setDatePopup={setDatePopup}
+          />
         </div>
       </div>
+      {deliveryPopup ? (
+        <DiliveryPopup
+          onSave={() => {
+            setDeliveryPopup(false);
+            getOutstanding();
+          }}
+          // postOrderData={() => onSubmit({ stage: 5 })}
+          // setSelectedOrder={setOrderData}
+          order={deliveryPopup}
+          counters={counters}
+          // items={itemsData}
+          // updateBilling={callBilling}
+        />
+      ) : (
+        ""
+      )}
+      {datePopup ? (
+        <DateChangePopup
+          onSave={() => {
+            setDatePopup(false);
+            getOutstanding();
+          }}
+          // postOrderData={() => onSubmit({ stage: 5 })}
+          // setSelectedOrder={setOrderData}
+          order={datePopup}
+          counters={counters}
+          // items={itemsData}
+          // updateBilling={callBilling}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default Outstanding;
 
-function Table({ itemsDetails }) {
+function Table({ itemsDetails, setDeliveryPopup, setDatePopup }) {
   function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -94,12 +191,12 @@ function Table({ itemsDetails }) {
     time = time.getTime() - date;
 
     var hours = time / 3600000;
-    var minutes = Math.floor(+(hours-(+hours.toString().split(".")[0])) * 60);
+    var minutes = Math.floor(+(hours - +hours.toString().split(".")[0]) * 60);
 
     minutes = +minutes < 10 ? "0" + minutes : minutes;
 
     var strTime = Math.floor(hours) + ":" + minutes;
-    return strTime;
+    return Math.ceil(time / (1000 * 3600 * 24)) - 1;
   }
   return (
     <table
@@ -109,10 +206,13 @@ function Table({ itemsDetails }) {
       <thead>
         <tr>
           <th>S.N</th>
-          <th colSpan={3}>Time Stamp</th>
-          <th colSpan={2}>User</th>
-          <th colSpan={2}>Invoice Number</th>
+          <th colSpan={3}>Created At</th>
+          <th colSpan={3}>Reminder</th>
+          <th colSpan={2}>Created By</th>
+          <th>Invoice</th>
           <th colSpan={2}>Counter</th>
+          <th colSpan={2}>Route</th>
+          <th colSpan={2}>Remarks</th>
           <th colSpan={2}>Duration</th>
           <th colSpan={2}>Amount</th>
         </tr>
@@ -121,20 +221,431 @@ function Table({ itemsDetails }) {
         {itemsDetails
           ?.sort((a, b) => a.time - b.time)
           ?.map((item, i, array) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
+            <tr
+              key={Math.random()}
+              style={{ height: "30px" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setDeliveryPopup(item);
+              }}
+            >
               <td>{i + 1}</td>
               <td colSpan={3}>
                 {new Date(item.time).toDateString()} -{" "}
                 {formatAMPM(new Date(item.time))}
               </td>
+              <td colSpan={3}>
+                {item?.reminder ? (
+                  <>
+                    {`${new Date(item.reminder).toDateString()} - 
+                    ${formatAMPM(new Date(item.reminder))}`}
+                  </>
+                ) : (
+                  ""
+                )}
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDatePopup(item);
+                  }}
+                >
+                  <ArrowDropDown />
+                </span>
+              </td>
               <td colSpan={2}>{item.user_title || ""}</td>
-              <td colSpan={2}>{item.invoice_number || ""}</td>
+              <td>{item.invoice_number || ""}</td>
               <td colSpan={2}>{item.counter_title || ""}</td>
-              <td colSpan={2}>{i !== 0 ? format(+item.time) : ""}</td>
+              <td colSpan={2}>{item.route_title || ""}</td>
+              <td colSpan={2}>{item.remarks || ""}</td>
+              <td colSpan={2}>{format(+item.time)}</td>
               <td colSpan={2}>{item.amount || ""}</td>
             </tr>
           ))}
       </tbody>
     </table>
+  );
+}
+function DiliveryPopup({
+  onSave,
+
+  order,
+  updateBilling,
+}) {
+  const [PaymentModes, setPaymentModes] = useState([]);
+  const [modes, setModes] = useState([]);
+  const [error, setError] = useState("");
+  const [popup, setPopup] = useState(false);
+  const [waiting, setWaiting] = useState(false);
+
+  // const [coinPopup, setCoinPopup] = useState(false);
+  const [data, setData] = useState({});
+  const [outstanding, setOutstanding] = useState({});
+
+  const GetPaymentModes = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/paymentModes/GetPaymentModesList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setPaymentModes(response.data.result);
+    }
+  };
+
+  useEffect(() => {
+    GetPaymentModes();
+  }, []);
+
+  useEffect(() => {
+    if (PaymentModes?.length)
+      setModes(
+        PaymentModes?.map((a) => ({
+          ...a,
+          amt: "",
+          coin: "",
+          status:
+            a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
+            a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+              ? "0"
+              : 1,
+        }))
+      );
+  }, [PaymentModes]);
+  console.log(order);
+  const submitHandler = async () => {
+    setWaiting(true);
+
+    setError("");
+    let modeTotal = modes?.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
+    let amount = +order.amount - modeTotal;
+    if (amount < 0) {
+      setError("Amount should not be greater than outstanding");
+      setWaiting(false);
+      return "";
+    }
+    let response;
+    if (modeTotal) {
+      response = await axios({
+        method: "put",
+        url: "/receipts/putReceipt",
+        data: {
+          modes,
+          order_uuid: order.order_uuid,
+          counter_uuid: order.counter_uuid,
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
+    if (amount) {
+      response = await axios({
+        method: "put",
+        url: "/Outstanding/putOutstanding",
+        data: {
+          ...outstanding,
+          order_uuid: order.order_uuid,
+          counter_uuid: order.counter_uuid,
+          amount,
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
+    if (response.data.success) {
+      onSave();
+    }
+
+    setWaiting(false);
+  };
+
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: 9999999999 }}>
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "max-content" }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h3>Payments</h3>
+            <h3>Rs. {order.amount}</h3>
+          </div>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup">
+                  {PaymentModes?.map((item) => (
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                      key={item.mode_uuid}
+                    >
+                      <div style={{ width: "50px" }}>{item.mode_title}</div>
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "80px" }}
+                      >
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          value={
+                            modes.find((a) => a.mode_uuid === item.mode_uuid)
+                              ?.amt
+                          }
+                          style={{ width: "80px" }}
+                          onChange={(e) =>
+                            setModes((prev) =>
+                              prev?.map((a) =>
+                                a.mode_uuid === item.mode_uuid
+                                  ? {
+                                      ...a,
+                                      amt: e.target.value,
+                                    }
+                                  : a
+                              )
+                            )
+                          }
+                          maxLength={42}
+                          onWheel={(e) => e.preventDefault()}
+                        />
+                        {/* {popupInfo.conversion || 0} */}
+                      </label>
+                    </div>
+                  ))}
+
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <button
+                      type="button"
+                      className="submit"
+                      style={{ color: "#fff", backgroundColor: "#7990dd" }}
+                      onClick={() => setPopup(true)}
+                    >
+                      Deductions
+                    </button>
+                  </div>
+                  <i style={{ color: "red" }}>{error}</i>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "red" }}
+                    className="submit"
+                    onClick={onSave}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="submit"
+                    onClick={submitHandler}
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {waiting ? (
+        <div className="overlay" style={{ zIndex: "999999999999999999" }}>
+          <div className="flex" style={{ width: "40px", height: "40px" }}>
+            <svg viewBox="0 0 100 100">
+              <path
+                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                fill="#ffffff"
+                stroke="none"
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  dur="1s"
+                  repeatCount="indefinite"
+                  keyTimes="0;1"
+                  values="0 50 51;360 50 51"
+                ></animateTransform>
+              </path>
+            </svg>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+      {popup ? (
+        <DiliveryReplaceMent
+          onSave={() => {
+            setPopup(false);
+          }}
+          setData={setData}
+          updateBilling={(e) =>
+            updateBilling({
+              ...order,
+              replacement: e?.actual || 0,
+              shortage: e?.shortage || 0,
+              adjustment: e?.adjustment || 0,
+              adjustment_remarks: e?.adjustment_remarks || "",
+            })
+          }
+          data={data}
+        />
+      ) : (
+        ""
+      )}
+    </>
+  );
+}
+function DateChangePopup({
+  onSave,
+
+  order,
+}) {
+  const [error, setError] = useState("");
+  const [popup, setPopup] = useState(false);
+  const [waiting, setWaiting] = useState(false);
+
+  // const [coinPopup, setCoinPopup] = useState(false);
+  const [data, setData] = useState({});
+
+  useEffect(() => {
+    let time = new Date(order.reminder);
+    let curTime = "yy-mm-dd"
+      .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
+      .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
+      .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
+    setData(curTime);
+  }, [order.reminder]);
+  const submitHandler = async () => {
+    setWaiting(true);
+
+    let response = await axios({
+      method: "put",
+      url: "/Outstanding/putOutstandingReminder",
+      data: {
+        order_uuid: order.order_uuid,
+        counter_uuid: order.counter_uuid,
+        reminder: new Date(data).getTime(),
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.data.success) {
+      onSave();
+    }
+
+    setWaiting(false);
+  };
+
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: 9999999999 }}>
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "max-content" }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h3>Reminder</h3>
+          </div>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup">
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <label className={"selectLabel"}>
+                      Reminder
+                      <input
+                        type="date"
+                        name="category_title"
+                        className={"numberInput"}
+                        value={data || ""}
+                        onChange={(e) => setData(e.target.value)}
+                        style={{ width: "250px" }}
+                        // maxLength={60}
+                      />
+                    </label>
+                  </div>
+                  <i style={{ color: "red" }}>{error}</i>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "red" }}
+                    className="submit"
+                    onClick={onSave}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="submit"
+                    onClick={submitHandler}
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {waiting ? (
+        <div className="overlay" style={{ zIndex: "999999999999999999" }}>
+          <div className="flex" style={{ width: "40px", height: "40px" }}>
+            <svg viewBox="0 0 100 100">
+              <path
+                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                fill="#ffffff"
+                stroke="none"
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  dur="1s"
+                  repeatCount="indefinite"
+                  keyTimes="0;1"
+                  values="0 50 51;360 50 51"
+                ></animateTransform>
+              </path>
+            </svg>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+    </>
   );
 }

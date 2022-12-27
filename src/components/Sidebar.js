@@ -95,6 +95,10 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
               name: "Adjust Stock",
               link: "/admin/adjustStock",
             },
+            {
+              name: "Add Outstanding",
+              link: "/admin/AddOutStanding",
+            },
           ]}
         />
         <NavLink

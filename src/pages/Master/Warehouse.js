@@ -10,11 +10,10 @@ const Warehouse = () => {
   const [popupForm, setPopupForm] = useState(false);
   const [filterTitle, setFilterTitle] = useState("");
 
-
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
-      url: "/warehouse/GetWarehouseList",
+      url: "/warehouse/GetWarehouseAllList",
 
       headers: {
         "Content-Type": "application/json",
@@ -160,12 +159,7 @@ function Table({ itemsDetails, setPopupForm }) {
     </table>
   );
 }
-function NewUserForm({
-  onSave,
-  popupInfo,
-  setItemsData,
-
-}) {
+function NewUserForm({ onSave, popupInfo, setItemsData }) {
   const [data, setdata] = useState({});
 
   const [errMassage, setErrorMassage] = useState("");
@@ -218,7 +212,7 @@ function NewUserForm({
 
   return (
     <div className="overlay">
-      <div className="modal" style={{  width: "fit-content" }}>
+      <div className="modal" style={{ width: "fit-content" }}>
         <div
           className="content"
           style={{
@@ -250,6 +244,23 @@ function NewUserForm({
                         })
                       }
                       maxLength={60}
+                    />
+                  </label>
+          
+                  <label className="selectLabel">
+                    Status
+                    <input
+                      type="checkbox"
+                      name="status"
+                      className="numberInput"
+                      checked={data?.status}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          status: e.target.checked,
+                        })
+                      }
+               
                     />
                   </label>
                 </div>

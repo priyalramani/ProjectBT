@@ -11,7 +11,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
   const [waiting, setWaiting] = useState(false);
   useEffect(() => {
-    console.log(selectedWarehouseOrders)
+    console.log(selectedWarehouseOrders);
     if (selectedWarehouseOrders?.length) {
       setSelectedWarehouseOrder(selectedWarehouseOrders[0]);
     } else {
@@ -19,8 +19,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
     }
   }, [selectedWarehouseOrders]);
   const onSubmit = async (selectedData = orders) => {
-  
-    setWaiting(true)
+    setWaiting(true);
     console.log(selectedData);
     let user_uuid = localStorage.getItem("user_uuid");
     let time = new Date();
@@ -146,7 +145,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
     if (response.data.success) {
       onClose();
     }
-    setWaiting(false)
+    setWaiting(false);
   };
   const handleWarehouseChacking = async () => {
     let data = [];
@@ -177,8 +176,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
     }
   };
   const updateWarehouse = async (warehouse_uuid, orderData) => {
-
-    setWaiting(true)
+    setWaiting(true);
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
@@ -188,23 +186,19 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
       },
     });
     if (response.data.success) {
-  
       setSelectedWarehouseOrders((prev) => {
-        console.log(prev)
+        console.log(prev);
         if (prev?.length === 1) {
           setDeliveryPopup(true);
           return [];
         } else {
           return prev.filter(
-            (a) =>
-              a.orderData.order_uuid !==
-              orderData.order_uuid
+            (a) => a.orderData.order_uuid !== orderData.order_uuid
           );
         }
-      })
-
+      });
     }
-    setWaiting(false)
+    setWaiting(false);
   };
   return (
     <>
@@ -353,11 +347,9 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
       ) : (
         ""
       )}
-            {selectedWarehouseOrder ? (
+      {selectedWarehouseOrder ? (
         <WarehouseUpdatePopup
-          onClose={() =>{}
-            
-          }
+          onClose={() => {}}
           updateChanges={updateWarehouse}
           popupInfo={selectedWarehouseOrder}
         />
@@ -404,6 +396,8 @@ function DiliveryPopup({
   };
   useEffect(() => {
     let time = new Date();
+    let time2 = new Date();
+    time2.setHours(12);
     setOutstanding({
       order_uuid: order?.order_uuid,
       amount: "",
@@ -412,9 +406,12 @@ function DiliveryPopup({
       invoice_number: order.invoice_number,
       trip_uuid: order.trip_uuid,
       counter_uuid: order.counter_uuid,
+      reminder: new Date(
+        time2.setDate(time2.getDate() + (counters.payment_reminder_days || 0))
+      ).getTime(),
     });
     GetPaymentModes();
-  }, [order]);
+  }, [counters.payment_reminder_days, order]);
   useEffect(() => {
     if (PaymentModes?.length)
       setModes(
@@ -457,8 +454,7 @@ function DiliveryPopup({
   };
 
   const submitHandler = async () => {
-  
-    setWaiting(true)
+    setWaiting(true);
     setError("");
     // let billingData = await Billing({
     //   replacement: data.actual,
@@ -486,7 +482,7 @@ function DiliveryPopup({
       +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
-      setWaiting(false)
+      setWaiting(false);
       return;
     }
     // let obj = modes.find((a) => a.mode_title === "Cash");
@@ -506,16 +502,19 @@ function DiliveryPopup({
         a.mode_title === "Cash" ? { ...a, cash: 0 } : a
       ),
     };
-    const response = await axios({
-      method: "post",
-      url: "/receipts/postReceipt",
-      data: obj,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    let response;
+    if (modeTotal) {
+      response = await axios({
+        method: "post",
+        url: "/receipts/postReceipt",
+        data: obj,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
     if (outstanding?.amount)
-      await axios({
+      response =await axios({
         method: "post",
         url: "/Outstanding/postOutstanding",
         data: outstanding,
@@ -535,7 +534,7 @@ function DiliveryPopup({
         // setCoinPopup(false);
       }
     }
-    setWaiting(false)
+    setWaiting(false);
   };
   useEffect(() => {
     updateBillingAmount({
@@ -824,7 +823,7 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
   }, [popupInfo]);
   const submitHandler = async (e) => {
     e.preventDefault();
-    console.log(data,popupInfo)
+    console.log(data, popupInfo);
     updateChanges(data, popupInfo.orderData);
     onClose();
   };

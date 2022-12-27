@@ -1066,11 +1066,9 @@ const ProcessingOrders = () => {
           <table
             className="user-table"
             style={{
-              width:
-                
-                Location.pathname.includes("delivery")
-                  ? "100%"
-                  : "max-content",
+              width: Location.pathname.includes("delivery")
+                ? "100%"
+                : "max-content",
               height: "fit-content",
             }}
           >
@@ -2872,7 +2870,7 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
-    setLoading(true)
+    setLoading(true);
     setError("");
     let billingData = await Billing({
       replacement: data.actual,
@@ -2907,7 +2905,7 @@ function DiliveryPopup({
       +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
-      setLoading(false)
+      setLoading(false);
       return;
     }
     let obj = modes.find((a) => a.mode_title === "Cash");
@@ -2926,18 +2924,21 @@ function DiliveryPopup({
       modes,
     };
     setLoading(true);
-    const response = await axios({
-      method: "post",
-      url: "/receipts/postReceipt",
-      data: obj,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    let response;
+    if (modeTotal) {
+      response = await axios({
+        method: "post",
+        url: "/receipts/postReceipt",
+        data: obj,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    }
 
     setTimeout(() => setLoading(false), 45000);
     if (outstanding?.amount)
-      await axios({
+      response = await axios({
         method: "post",
         url: "/Outstanding/postOutstanding",
         data: outstanding,

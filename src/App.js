@@ -49,6 +49,8 @@ import PartyWiseCompanyDiscount from "./pages/Reports/PartyWiseCompanyDiscount";
 import RetailerMarginReport from "./pages/Reports/RetailerMarginReport";
 import SalesmanItemSuggestion from "./pages/others/SalesmanItemSuggestion";
 import StockTransfer from "./users/StockTransfer";
+import AddOutStanding from "./pages/AddOrder/AddOutStanding";
+import OutstangingsCollection from "./users/OutstangingsCollection";
 
 
 function App() {
@@ -107,6 +109,7 @@ function App() {
               <Route path="/users/checking" element={<Processing />} />
               <Route path="/users/delivery" element={<Processing />} />
               <Route path="/users/stock-transfer" element={<StockTransfer />} />
+              <Route path="/users/outstandingCollection" element={<OutstangingsCollection />} />
               <Route
                 path="/users/processing/:trip_uuid"
                 element={<ProcessingOrders />}
@@ -174,6 +177,7 @@ function App() {
               />
               <Route path="/admin/ItemIncentive" element={<ItemIncentive />} />
               <Route path="/admin/addOrder" element={<AddOrder />} />
+              <Route path="/admin/AddOutStanding" element={<AddOutStanding />} />
               <Route path="/admin/addStock" element={<AddStock />} />
               <Route path="/admin/adjustStock" element={<AdjustStock />} />
               <Route path="/admin/userActivity" element={<UserActivity />} />

@@ -882,6 +882,22 @@ function NewUserForm({
                       }
                     />
                   </label>
+                  <label className="selectLabel">
+                    Payment Reminder Days
+                    <input
+                      type="number"
+                      name="payment_reminder_days"
+                      className="numberInput"
+                      value={data?.payment_reminder_days}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          payment_reminder_days: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                    />
+                  </label>
                 </div>
               </div>
               <i style={{ color: "red" }}>

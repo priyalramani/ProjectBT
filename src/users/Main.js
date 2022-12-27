@@ -46,6 +46,12 @@ const Main = () => {
       link: "/stock-transfer",
       img: "dinein.png",
     },
+    {
+      type: 6,
+      name: "Collection",
+      link: "/outstandingCollection",
+      img: "dinein.png",
+    },
   ];
 
   useEffect(() => {
@@ -113,7 +119,7 @@ const Main = () => {
               fontSize: "20px",
             }}
           >
-            Version 44
+            Version 45
           </div>
 
           <button
