@@ -4,7 +4,7 @@ import { IoArrowBackOutline } from "react-icons/io5";
 import { AiOutlineReload } from "react-icons/ai";
 
 import axios from "axios";
-
+import { Phone } from "@mui/icons-material";
 import { openDB } from "idb";
 import DiliveryReplaceMent from "../components/DiliveryReplaceMent";
 const OutstangingsCollection = () => {
@@ -15,6 +15,7 @@ const OutstangingsCollection = () => {
   const [filterTitle, setFilterTitle] = useState("");
   const [order, setOrder] = useState();
   const [itemsData, setItemsData] = useState([]);
+  const [phonePopup, setPhonePopup] = useState(false);
 
   const [warehouse, setWarehouse] = useState([]);
 
@@ -117,13 +118,17 @@ const OutstangingsCollection = () => {
     () =>
       itemsData
 
-        ?.map((a) => ({
-          ...a,
+        ?.map((a) => {
+          let counterData = counters.find(
+            (b) => b.counter_uuid === a.counter_uuid
+          );
 
-          counter_title:
-            counters.find((b) => b.counter_uuid === a.counter_uuid)
-              ?.counter_title || "-",
-        }))
+          return {
+            ...a,
+            counter_title: counterData?.counter_title || "-",
+            mobile: counterData?.mobile || [],
+          };
+        })
         ?.filter(
           (a) =>
             !filterTitle ||
@@ -239,7 +244,10 @@ const OutstangingsCollection = () => {
                     <div className="t-head-element">Invoice</div>
                   </th>
                   <th>
-                    <div className="t-head-element"></div>
+                    <div className="t-head-element" ></div>
+                  </th>
+                  <th>
+                    <div className="t-head-element" ></div>
                   </th>
                 </tr>
               )}
@@ -291,6 +299,26 @@ const OutstangingsCollection = () => {
                         <td>{item.counter_title || "-"}</td>
 
                         <td>{item.invoice_number || ""}</td>
+                        <td>
+                          {item?.mobile?.length ? (
+                            <Phone
+                              className="user_Back_icon"
+                              style={{ color: "#4ac959" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (item.mobile.length === 1) {
+                                  window.location.assign(
+                                    "tel:" + item?.mobile[0]
+                                  );
+                                } else {
+                                  setPhonePopup(item.mobile);
+                                }
+                              }}
+                            />
+                          ) : (
+                            "-"
+                          )}
+                        </td>
                         <td>
                           {" "}
                           <button
