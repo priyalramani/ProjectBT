@@ -870,9 +870,9 @@ export default function AddOrder() {
                   }}
                   type="button"
                   onClick={() => {
-                    if (!order.item_details.filter((a) => a.item_uuid).length)
-                      return;
-                    setPopup(true);
+                    // if (!order.item_details.filter((a) => a.item_uuid).length)
+                    //   return;
+                    // setPopup(true);
                   }}
                 >
                   Total: {order?.order_grandtotal || 0}

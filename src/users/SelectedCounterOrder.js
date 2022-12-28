@@ -7,6 +7,7 @@ import { AutoAdd, Billing } from "../Apis/functions";
 import { Link as ScrollLink } from "react-scroll";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
+
 import CloseIcon from "@mui/icons-material/Close";
 const SelectedCounterOrder = () => {
   const [items, setItems] = useState([]);
@@ -24,6 +25,7 @@ const SelectedCounterOrder = () => {
   const [cartPage, setCartPage] = useState(false);
   const [counters, setCounters] = useState([]);
   const [counter, setCounter] = useState({});
+
   const params = useParams();
   const [filterItemTitle, setFilterItemTile] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
@@ -31,9 +33,33 @@ const SelectedCounterOrder = () => {
   const [companies, setCompanies] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
+  const [total, setTotal] = useState(0);
   const [holdPopup, setHoldPopup] = useState(false);
   const [loading, setLoading] = useState(false);
   const Navigate = useNavigate();
+  const callBilling = async () => {
+    let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
+    let time = new Date();
+    Billing({
+      counter,
+      items: order.items,
+      others: {
+        stage: 1,
+        user_uuid: localStorage.getItem("user_uuid"),
+        time: time.getTime(),
+
+        type: "NEW",
+      },
+      add_discounts: true,
+    }).then((data) => {
+      setTotal(data.order_grandtotal);
+    });
+  };
+  useEffect(() => {
+    callBilling();
+  }, [order?.items]);
+
+  console.log(total);
   const getCounter = async () => {
     const response = await axios({
       method: "post",
@@ -1109,7 +1135,7 @@ const SelectedCounterOrder = () => {
               }, 2000);
             }}
           >
-            Submit
+            {total ? "Rs: " + total : ""} Submit
           </button>
         </>
       ) : order?.items?.length ? (
