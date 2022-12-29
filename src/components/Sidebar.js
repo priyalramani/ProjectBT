@@ -34,7 +34,8 @@ let titleData = [
   { value: "CompletedTripsReport", name: "Completed Trips Report" },
   { value: "CounterLeger", name: "Counter Leger" },
   { value: "Outstandings", name: "Outstandings" },
-  { value: "pendingEntry", name: "Pending Entry" },
+  { value: "pendingEntry", name: "Pending Order Entry" },
+  { value: "pendingReciptsEntry", name: "Pending Recipt Entry" },
   { value: "stockTransferVochers", name: "Vochers" },
   { value: "currentStock", name: "Current Stock" },
   { value: "signedBills", name: "Signed Bills" },
@@ -195,8 +196,12 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
               link: "/admin/Outstandings",
             },
             {
-              name: "Pending Entry",
+              name: "Pending Order Entry",
               link: "/admin/pendingEntry",
+            },
+            {
+              name: "Pending Recipts Entry",
+              link: "/admin/pendingReciptsEntry",
             },
             {
               name: "Current Stock",

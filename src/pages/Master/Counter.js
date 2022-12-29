@@ -546,28 +546,25 @@ function NewUserForm({
 }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
-  useEffect(
-    popupInfo?.type === "edit"
-      ? () => {
-          setdata({
-            ...popupInfo.data,
-          });
-        }
-      : () => {
-          setdata({
-            payment_modes: paymentModes
-              .filter(
-                (a) =>
-                  a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" ||
-                  a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
-              )
-              .map((a) => a.mode_uuid),
-            credit_allowed: "N",
-            status: 1,
-          });
-        },
-    []
-  );
+  useEffect(() => {
+    if (popupInfo?.type === "edit") {
+      setdata({
+        ...popupInfo.data,
+      });
+    } else {
+      setdata({
+        payment_modes: paymentModes
+          .filter(
+            (a) =>
+              a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" ||
+              a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+          )
+          .map((a) => a.mode_uuid),
+        credit_allowed: "N",
+        status: 1,
+      });
+    }
+  }, [paymentModes, popupInfo.data, popupInfo?.type]);
   console.log(data);
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -638,7 +635,7 @@ function NewUserForm({
     setdata((prev) => ({ ...prev, payment_modes: temp }));
   };
   return (
-    <div className="overlay">
+    <div className="overlay" style={{ zIndex: "99999999999999" }}>
       <div
         className="modal"
         style={{ height: "fit-content", width: "fit-content" }}
@@ -651,7 +648,7 @@ function NewUserForm({
             width: "fit-content",
           }}
         >
-          <div style={{ overflowY: "scroll" }}>
+          <div style={{ overflowY: "scroll",height:"fit-content" }}>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
                 <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Counter </h1>
@@ -897,6 +894,27 @@ function NewUserForm({
                       }
                       maxLength={42}
                     />
+                  </label>
+                </div>
+                <div className="row">
+                  <label className="selectLabel">
+                    Outstanding Type
+                    <select
+                      className="numberInput"
+                      value={data.outstanding_type}
+                      onChange={(e) =>
+                        setdata((prev) => ({
+                          ...prev,
+                          outstanding_type: e.target.value,
+                        }))
+                      }
+                    >
+                      {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+
+                      <option value={0}>None</option>
+                      <option value={1}>Visit</option>
+                      <option value={2}>Call</option>
+                    </select>
                   </label>
                 </div>
               </div>

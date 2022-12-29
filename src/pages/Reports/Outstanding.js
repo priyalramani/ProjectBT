@@ -4,15 +4,21 @@ import React, { useEffect, useMemo, useState } from "react";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
-
+let typesData = [
+  { index: 0, name: "None" },
+  { index: 1, name: "Visit" },
+  { index: 2, name: "Call" },
+];
 const Outstanding = () => {
   const [outstanding, setOutstanding] = useState();
+  const [type, setType] = useState("");
   const [filterTitle, setFilterTitle] = useState("");
   const [routesData, setRoutesData] = useState([]);
   const [users, setUsers] = useState([]);
   const [counters, setCounters] = useState([]);
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [datePopup, setDatePopup] = useState(false);
+  const [typePopup, setTypePopup] = useState(false);
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -88,16 +94,17 @@ const Outstanding = () => {
         }))
         ?.filter(
           (a) =>
-            !filterTitle ||
-            a.counter_title
-              .toLocaleLowerCase()
-              .includes(filterTitle.toLocaleLowerCase()) ||
-            a.invoice_number
-              .toString()
-              .toLocaleLowerCase()
-              .includes(filterTitle.toLocaleLowerCase())
+            (!filterTitle ||
+              a.counter_title
+                .toLocaleLowerCase()
+                .includes(filterTitle.toLocaleLowerCase()) ||
+              a.invoice_number
+                .toString()
+                .toLocaleLowerCase()
+                .includes(filterTitle.toLocaleLowerCase())) &&
+            (!type || +type === a.type)
         ) || [],
-    [counters, filterTitle, outstanding, routesData, users]
+    [counters, filterTitle, outstanding, routesData, type, users]
   );
   return (
     <>
@@ -125,6 +132,21 @@ const Outstanding = () => {
               placeholder="Search ..."
               className="searchInput"
             />
+            <label className="selectLabel">
+              Outstanding Type
+              <select
+                className="numberInput"
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+              >
+                {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+
+                <option value="">All</option>
+                <option value={0}>None</option>
+                <option value={1}>Visit</option>
+                <option value={2}>Call</option>
+              </select>
+            </label>
 
             <div>Total Items: {outstandingList?.length}</div>
           </div>
@@ -134,6 +156,7 @@ const Outstanding = () => {
             itemsDetails={outstandingList}
             setDeliveryPopup={setDeliveryPopup}
             setDatePopup={setDatePopup}
+            setTypePopup={setTypePopup}
           />
         </div>
       </div>
@@ -169,13 +192,29 @@ const Outstanding = () => {
       ) : (
         ""
       )}
+      {typePopup ? (
+        <TypeChangePopup
+          onSave={() => {
+            setTypePopup(false);
+            getOutstanding();
+          }}
+          // postOrderData={() => onSubmit({ stage: 5 })}
+          // setSelectedOrder={setOrderData}
+          order={typePopup}
+          counters={counters}
+          // items={itemsData}
+          // updateBilling={callBilling}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default Outstanding;
 
-function Table({ itemsDetails, setDeliveryPopup, setDatePopup }) {
+function Table({ itemsDetails, setDeliveryPopup, setDatePopup, setTypePopup }) {
   function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -209,9 +248,10 @@ function Table({ itemsDetails, setDeliveryPopup, setDatePopup }) {
           <th colSpan={3}>Created At</th>
           <th colSpan={3}>Reminder</th>
           <th colSpan={2}>Created By</th>
-          <th>Invoice</th>
+          <th colSpan={2}>Invoice</th>
           <th colSpan={2}>Counter</th>
           <th colSpan={2}>Route</th>
+          <th colSpan={2}>Type</th>
           <th colSpan={2}>Remarks</th>
           <th colSpan={2}>Duration</th>
           <th colSpan={2}>Amount</th>
@@ -253,9 +293,20 @@ function Table({ itemsDetails, setDeliveryPopup, setDatePopup }) {
                 </span>
               </td>
               <td colSpan={2}>{item.user_title || ""}</td>
-              <td>{item.invoice_number || ""}</td>
+              <td colSpan={2}>{item.invoice_number || ""}</td>
               <td colSpan={2}>{item.counter_title || ""}</td>
               <td colSpan={2}>{item.route_title || ""}</td>
+              <td colSpan={2}>
+                {typesData.find((a) => a.index === item.type)?.name || ""}
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setTypePopup(item);
+                  }}
+                >
+                  <ArrowDropDown />
+                </span>
+              </td>
               <td colSpan={2}>{item.remarks || ""}</td>
               <td colSpan={2}>{format(+item.time)}</td>
               <td colSpan={2}>{item.amount || ""}</td>
@@ -329,33 +380,36 @@ function DiliveryPopup({
     let response;
     if (modeTotal) {
       response = await axios({
-        method: "put",
-        url: "/receipts/putReceipt",
+        method: "post",
+        url: "/receipts/postReceipt",
         data: {
           modes,
           order_uuid: order.order_uuid,
+          invoice_number: order.invoice_number,
           counter_uuid: order.counter_uuid,
+          entry: 0,
+          user_uuid: localStorage.getItem("user_uuid"),
         },
         headers: {
           "Content-Type": "application/json",
         },
       });
     }
-    if (amount) {
-      response = await axios({
-        method: "put",
-        url: "/Outstanding/putOutstanding",
-        data: {
-          ...outstanding,
-          order_uuid: order.order_uuid,
-          counter_uuid: order.counter_uuid,
-          amount,
-        },
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    }
+
+    response = await axios({
+      method: "put",
+      url: "/Outstanding/putOutstanding",
+      data: {
+        ...outstanding,
+        order_uuid: order.order_uuid,
+        counter_uuid: order.counter_uuid,
+        amount,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
     if (response.data.success) {
       onSave();
     }
@@ -592,6 +646,141 @@ function DateChangePopup({
                         style={{ width: "250px" }}
                         // maxLength={60}
                       />
+                    </label>
+                  </div>
+                  <i style={{ color: "red" }}>{error}</i>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "red" }}
+                    className="submit"
+                    onClick={onSave}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="submit"
+                    onClick={submitHandler}
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {waiting ? (
+        <div className="overlay" style={{ zIndex: "999999999999999999" }}>
+          <div className="flex" style={{ width: "40px", height: "40px" }}>
+            <svg viewBox="0 0 100 100">
+              <path
+                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                fill="#ffffff"
+                stroke="none"
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  dur="1s"
+                  repeatCount="indefinite"
+                  keyTimes="0;1"
+                  values="0 50 51;360 50 51"
+                ></animateTransform>
+              </path>
+            </svg>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+    </>
+  );
+}
+function TypeChangePopup({
+  onSave,
+
+  order,
+}) {
+  const [error, setError] = useState("");
+
+  const [waiting, setWaiting] = useState(false);
+
+  // const [coinPopup, setCoinPopup] = useState(false);
+  const [data, setData] = useState(0);
+
+  useEffect(() => {
+    setData(order.type || 0);
+  }, [order.type]);
+  const submitHandler = async () => {
+    setWaiting(true);
+
+    let response = await axios({
+      method: "put",
+      url: "/Outstanding/putOutstandingType",
+      data: {
+        invoice_number: order.invoice_number,
+        order_uuid: order.order_uuid,
+        counter_uuid: order.counter_uuid,
+        outstanding_uuid: order.outstanding_uuid,
+        type: data,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.data.success) {
+      onSave();
+    }
+
+    setWaiting(false);
+  };
+
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: 9999999999 }}>
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "max-content" }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h3>Reminder</h3>
+          </div>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup">
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <label className="selectLabel">
+                      Outstanding Type
+                      <select
+                        className="numberInput"
+                        value={data}
+                        onChange={(e) => setData(e.target.value)}
+                      >
+                        {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+
+                        <option value={0}>None</option>
+                        <option value={1}>Visit</option>
+                        <option value={2}>Call</option>
+                      </select>
                     </label>
                   </div>
                   <i style={{ color: "red" }}>{error}</i>

@@ -411,6 +411,7 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
           modes,
           order_uuid: order.order_uuid,
           counter_uuid: order.counter_uuid,
+          entry:0
         },
         headers: {
           "Content-Type": "application/json",

@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Header from "../../components/Header";
 import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
@@ -9,13 +9,14 @@ const fileExtension = ".xlsx";
 const fileType =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
-const PendingsEntry = () => {
+const PendingReciptsEntry = () => {
   const [orders, setOrders] = useState([]);
   const [itemsData, setItemsData] = useState([]);
-  const [warningCodes, setWarningCodes] = useState(false);
+
   const [popupOrder, setPopupOrder] = useState(false);
   const [allDoneConfimation, setAllDoneConfimation] = useState(false);
   const [doneDisabled, setDoneDisabled] = useState(false);
+  const [users, setUsers] = useState([]);
 
   const [counters, setCounters] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
@@ -25,25 +26,44 @@ const PendingsEntry = () => {
       setTimeout(() => setDoneDisabled(false), 5000);
     }
   }, [allDoneConfimation]);
-  const getOrders = async () => {
+  const getUsers = async () => {
     const response = await axios({
       method: "get",
-      url: "/orders/getPendingEntry",
+      url: "/users/GetUserList",
 
       headers: {
         "Content-Type": "application/json",
       },
     });
     console.log("users", response);
-    if (response.data.success)
-      setOrders(
-        response.data.result.map((a) => ({
-          ...a,
-          ...counters.find((b) => b.counter_uuid === a.counter_uuid),
-          status: a.status,
-        }))
-      );
+    if (response.data.success) setUsers(response.data.result);
   };
+
+  useEffect(() => {
+    getUsers();
+  }, []);
+  const getOrders = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/receipts/getPendingEntry",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("users", response);
+    if (response.data.success) setOrders(response.data.result);
+  };
+  const orderList = useMemo(
+    () =>
+      orders.map((a) => ({
+        ...a,
+        ...counters.find((b) => b.counter_uuid === a.counter_uuid),
+        user_title: users.find((b) => a.user_uuid === b.user_uuid)?.user_title,
+        status: a.status,
+      })),
+    [counters, orders, users]
+  );
   const getCounter = async () => {
     const response = await axios({
       method: "get",
@@ -72,18 +92,18 @@ const PendingsEntry = () => {
   }, []);
   useEffect(() => {
     getOrders();
-  }, [counters]);
-  const putOrder = async (invoice_number) => {
+  }, []);
+  const putOrder = async (receipt_number) => {
     const response = await axios({
       method: "put",
-      url: "/orders/putCompleteOrder",
-      data: { entry: 1, invoice_number },
+      url: "/receipts/putCompleteOrder",
+      data: { entry: 1, receipt_number },
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.success) {
-      setOrders(prev=>prev.filter(a=>a.invoice_number!==invoice_number))
+      getOrders();
       return;
     }
   };
@@ -91,43 +111,41 @@ const PendingsEntry = () => {
     let sheetData = [];
     // console.log(sheetData)
     for (let order of selectedOrders?.sort(
-      (a, b) => +a.invoice_number - +b.invoice_number
+      (a, b) => +a.receipt_number - +b.receipt_number
     )) {
-      for (let item of order.item_details.filter(
-        (a) => a.status !== 3 && (a.b || a.p || a.free)
-      )) {
-        let date = new Date(+order.status[0]?.time);
-        let itemData = itemsData.find((a) => a.item_uuid === item.item_uuid);
-        sheetData.push({
-          "Party Code": order.counter_code || "",
-          "Invoice Number": "N" + order.invoice_number,
-          "Invoice Date": "dd/mm/yy"
-            .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
-            .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))
-            .replace("dd", ("00" + date?.getDate().toString()).slice(-2)),
-          "Item Code": itemData.item_code || "",
-          Box: item.b || 0,
-          Pcs: item.p || 0,
-          Free: item.free || 0,
-          "Item Price":
-            +(item.price || itemData?.item_price || 0) *
-            +(itemData?.conversion || 1),
-          "Cash Credit":
-            order.modes.filter(
-              (a) =>
-                a.amt && a.mode_uuid !== "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-            ).length || order.unpaid
-              ? "Credit"
-              : "Cash",
-          "Discount 1": item.charges_discount?.length
-            ? item.charges_discount[0]?.value
-            : 0,
-          "Discount 2": item.charges_discount?.length
-            ? item.charges_discount[1]?.value
-            : 0,
-          Deductions: -(+order.replacement+order.shortage+order.adjustment) || 0,
-        });
-      }
+      sheetData.push({
+        Amount: order.modes.map((a) => +a.amt).reduce((a, b) => a + b) || "0",
+        Type: "Recipt",
+        "Party Code": order?.counter_code,
+        Date: "dd/mm/yy"
+          .replace(
+            "mm",
+            ("00" + (new Date(order.time)?.getMonth() + 1).toString()).slice(-2)
+          )
+          .replace(
+            "yy",
+            ("0000" + new Date(order.time)?.getFullYear().toString()).slice(-4)
+          )
+          .replace(
+            "dd",
+            ("00" + new Date(order.time)?.getDate().toString()).slice(-2)
+          ),
+        Cash:
+          order.modes.find(
+            (a) => a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+          )?.amt || 0,
+        Cheque:
+          order.modes.find(
+            (a) => a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002"
+          )?.amt || 0,
+        UPI:
+          order.modes.find(
+            (a) => a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+          )?.amt || 0,
+        "REM 1": "N"+order.invoice_number,
+        "REM 2": order.user_title,
+        "Voucher No.": order.receipt_number,
+      });
     }
 
     const ws = XLSX.utils.json_to_sheet(sheetData);
@@ -143,7 +161,7 @@ const PendingsEntry = () => {
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading" className="flex">
-          <h2 style={{ width: "70%" }}>Pending Order Entry</h2>
+          <h2 style={{ width: "70%" }}>Pending Recipt Entry</h2>
           <button
             type="button"
             className="submit flex"
@@ -170,7 +188,7 @@ const PendingsEntry = () => {
 
         <div className="table-container-user item-sales-container">
           <Table
-            itemsDetails={orders}
+            itemsDetails={orderList}
             setPopupOrder={setPopupOrder}
             putOrder={putOrder}
             selectedOrders={selectedOrders}
@@ -182,13 +200,7 @@ const PendingsEntry = () => {
           <div className="flex" style={{ justifyContent: "start" }}>
             <button
               className="item-sales-search"
-              // onClick={async (e) => {
-              //   e.stopPropagation();
-              //   for (let order of selectedOrders)
-              //     await putOrder(order.invoice_number);
-              //   setSelectedOrders([]);
-              //   getOrders();
-              // }}
+              
               onClick={() => {
                 setAllDoneConfimation(true);
               }}
@@ -209,25 +221,8 @@ const PendingsEntry = () => {
                         (t) => t.counter_uuid === value.counter_uuid
                       )
                   );
-                let itemCodes = [].concat
-                  .apply(
-                    [],
-                    selectedOrders.map((a) => a.item_details)
-                  )
-                  .filter(
-                    (value, index, self) =>
-                      index ===
-                      self.findIndex((t) => t.item_uuid === value.item_uuid)
-                  )
-
-                  .map((a) =>
-                    itemsData.find((b) => b.item_uuid === a.item_uuid)
-                  )
-                  .filter((a) => !a.item_code);
-
-                if (countersCodes.length || itemCodes.length) {
-                  setWarningCodes({ countersCodes, itemCodes });
-                } else downloadHandler();
+                
+                downloadHandler();
               }}
               style={{ margin: "20px" }}
             >
@@ -250,78 +245,7 @@ const PendingsEntry = () => {
       ) : (
         ""
       )}
-      {warningCodes ? (
-        <div className="overlay">
-          <div
-            className="modal"
-            style={{ height: "70vh", width: "fit-content" }}
-          >
-            <div
-              className="content"
-              style={{
-                height: "fit-content",
-                padding: "20px",
-                width: "fit-content",
-              }}
-            >
-              <div style={{ overflowY: "scroll" }}>
-                <form className="form" onSubmit={downloadHandler}>
-                  <div className="row">
-                    <h1> Code missing</h1>
-                  </div>
-
-                  <div className="formGroup">
-                    {warningCodes.countersCodes.length ? (
-                      <div
-                        className="row"
-                        style={{
-                          flexDirection: "column",
-                          alignItems: "flex-start",
-                        }}
-                      >
-                        <h2>Counters:</h2>
-                        {warningCodes.countersCodes.map((a) => (
-                          <div>{a.counter_title}</div>
-                        ))}
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                    {warningCodes.itemCodes.length ? (
-                      <div
-                        className="row"
-                        style={{
-                          flexDirection: "column",
-                          alignItems: "flex-start",
-                        }}
-                      >
-                        <h2>item:</h2>
-                        {warningCodes.itemCodes.map((a) => (
-                          <div>{a.item_title}</div>
-                        ))}
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                  </div>
-
-                  <button type="submit" className="submit">
-                    Okay
-                  </button>
-                </form>
-              </div>
-              <button
-                onClick={() => setWarningCodes(false)}
-                className="closeButton"
-              >
-                x
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        ""
-      )}
+     
       {allDoneConfimation ? (
         <div className="overlay">
           <div
@@ -339,13 +263,12 @@ const PendingsEntry = () => {
               <div style={{ overflowY: "scroll" }}>
                 <form
                   className="form"
-                  onSubmit={async(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
                     for (let a of selectedOrders) {
-                      await putOrder(a.invoice_number);
+                      await putOrder(a.receipt_number);
                     }
                     setAllDoneConfimation(false);
-            
                   }}
                 >
                   <div className="row">
@@ -404,36 +327,36 @@ function Table({
       <thead>
         <tr>
           <th>S.N</th>
-          <th colSpan={2}>Counter</th>
-          <th colSpan={2}>Invoice Number</th>
           <th colSpan={2}>Amount</th>
+          <th colSpan={2}>Type</th>
+          <th colSpan={2}>Party Code</th>
+          <th colSpan={2}>Date</th>
           <th colSpan={2}>Cash</th>
           <th colSpan={2}>Cheque</th>
           <th colSpan={2}>UPI</th>
-          <th colSpan={2}>Unpaid</th>
+          <th colSpan={2}>REM 1</th>
+          <th colSpan={2}>REM 2</th>
+          <th colSpan={2}>Voucher No.</th>
           <th colSpan={2}>Action</th>
         </tr>
       </thead>
       <tbody className="tbody">
         {itemsDetails
-          ?.sort((a, b) => +a.invoice_number - +b.invoice_number)
+          ?.sort((a, b) => +a.receipt_number - +b.receipt_number)
           ?.map((item, i, array) => (
             <tr
               key={Math.random()}
               style={{ height: "30px" }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setPopupOrder(item);
-              }}
+              
             >
               <td
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedOrders((prev) =>
-                    prev.filter((a) => a.invoice_number === item.invoice_number)
+                    prev.filter((a) => a.receipt_number === item.receipt_number)
                       .length
                       ? prev.filter(
-                          (a) => a.invoice_number !== item.invoice_number
+                          (a) => a.receipt_number !== item.receipt_number
                         )
                       : [...(prev || []), item]
                   );
@@ -444,16 +367,37 @@ function Table({
                 <input
                   type="checkbox"
                   checked={selectedOrders.find(
-                    (a) => a.invoice_number === item.invoice_number
+                    (a) => a.receipt_number === item.receipt_number
                   )}
                   style={{ transform: "scale(1.3)" }}
                 />
                 {i + 1}
               </td>
 
-              <td colSpan={2}>{item.counter_title || ""}</td>
-              <td colSpan={2}>{item.invoice_number || ""}</td>
-              <td colSpan={2}>{item.order_grandtotal || ""}</td>
+              <td colSpan={2}>
+                {item.modes.map((a) => +a.amt).reduce((a, b) => a + b) || "0"}
+              </td>
+              <td colSpan={2}>Recipt</td>
+              <td colSpan={2}>{item.counter_code || ""}</td>
+              <td colSpan={2}>
+                {"dd/mm/yy"
+                  .replace(
+                    "mm",
+                    (
+                      "00" + (new Date(item.time)?.getMonth() + 1).toString()
+                    ).slice(-2)
+                  )
+                  .replace(
+                    "yy",
+                    (
+                      "0000" + new Date(item.time)?.getFullYear().toString()
+                    ).slice(-4)
+                  )
+                  .replace(
+                    "dd",
+                    ("00" + new Date(item.time)?.getDate().toString()).slice(-2)
+                  )}
+              </td>
               <td colSpan={2}>
                 {item.modes.find(
                   (a) => a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002"
@@ -469,14 +413,15 @@ function Table({
                   (a) => a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
                 )?.amt || 0}
               </td>
-              <td colSpan={2}>{item.unpaid || 0}</td>
+              <td colSpan={2}>N{item.invoice_number || ""}</td>
+              <td colSpan={2}>{item.user_title || ""}</td>
+              <td colSpan={2}>{item.receipt_number || ""}</td>
               <td colSpan={2}>
                 <button
                   className="item-sales-search"
                   onClick={async (e) => {
                     e.stopPropagation();
-                    await putOrder(item.invoice_number);
-                
+                    await putOrder(item.receipt_number);
                   }}
                 >
                   Done
@@ -489,4 +434,4 @@ function Table({
   );
 }
 
-export default PendingsEntry;
+export default PendingReciptsEntry;

@@ -409,6 +409,7 @@ function DiliveryPopup({
       reminder: new Date(
         time2.setDate(time2.getDate() + (counters.payment_reminder_days || 0))
       ).getTime(),
+      
     });
     GetPaymentModes();
   }, [counters.payment_reminder_days, order]);

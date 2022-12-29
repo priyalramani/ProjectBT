@@ -51,6 +51,7 @@ import SalesmanItemSuggestion from "./pages/others/SalesmanItemSuggestion";
 import StockTransfer from "./users/StockTransfer";
 import AddOutStanding from "./pages/AddOrder/AddOutStanding";
 import OutstangingsCollection from "./users/OutstangingsCollection";
+import PendingReciptsEntry from "./pages/Reports/PendingReciptsEntry";
 
 
 function App() {
@@ -202,6 +203,7 @@ function App() {
               <Route path="/admin/CounterLeger" element={<CounterLeger />} />
               <Route path="/admin/Outstandings" element={<Outstanding />} />
               <Route path="/admin/pendingEntry" element={<PendingsEntry />} />
+              <Route path="/admin/pendingReciptsEntry" element={<PendingReciptsEntry />} />
               <Route
                 path="/admin/stockTransferVochers"
                 element={<StockTransferVouchers />}

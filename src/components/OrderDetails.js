@@ -2147,19 +2147,10 @@ function DiliveryPopup({
   // const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
+  const time2 = new Date();
+  time2.setHours(12);
   let reminder = useMemo(() => {
-    let time2 = new Date();
-    time2.setHours(12);
-    console.log(
-      "timer",
-      new Date(
-        time2.setDate(
-          time2.getDate() +
-            (counters.find((a) => a.counter_uuid === order.counter_uuid)
-              ?.payment_reminder_days || 0)
-        )
-      )
-    );
+
     return new Date(
       time2.setDate(
         time2.getDate() +
@@ -2167,6 +2158,12 @@ function DiliveryPopup({
             ?.payment_reminder_days || 0)
       )
     ).getTime();
+  }, [counters, order.counter_uuid]);
+  let type = useMemo(() => {
+    return (
+      counters.find((a) => a.counter_uuid === order.counter_uuid)
+        ?.outstanding_type || 0
+    );
   }, [counters, order.counter_uuid]);
   console.log(outstanding);
   const GetPaymentModes = async () => {
@@ -2217,6 +2214,7 @@ function DiliveryPopup({
         trip_uuid: order.trip_uuid,
         counter_uuid: order.counter_uuid,
         reminder,
+        type
       });
     }
   };
@@ -2234,6 +2232,7 @@ function DiliveryPopup({
         trip_uuid: order.trip_uuid,
         counter_uuid: order.counter_uuid,
         reminder,
+        type
       });
     }
     GetPaymentModes();
@@ -2244,6 +2243,7 @@ function DiliveryPopup({
     order.order_uuid,
     order.trip_uuid,
     reminder,
+    type
   ]);
   useEffect(() => {
     if (PaymentModes?.length)
@@ -2350,7 +2350,7 @@ function DiliveryPopup({
         });
       }
       if (outstanding?.amount)
-        response =await axios({
+        response = await axios({
           method: "post",
           url: "/Outstanding/postOutstanding",
           data: outstanding,

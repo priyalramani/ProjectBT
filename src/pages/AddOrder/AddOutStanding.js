@@ -122,7 +122,7 @@ const AddOutStanding = () => {
                   <label className={"selectLabel"}>
                     Invoice Number
                     <input
-                      type="number"
+                      type="text"
                       name="category_title"
                       className={"numberInput"}
                       value={order?.invoice_number || ""}
