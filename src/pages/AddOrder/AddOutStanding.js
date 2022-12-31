@@ -92,11 +92,13 @@ const AddOutStanding = () => {
                           .map((a) => ({
                             value: a.counter_uuid,
                             label: a.counter_title + " , " + a.route_title,
+                            type: a.outstanding_type||0,
                           }))}
                         onChange={(doc) =>
                           setOrder((prev) => ({
                             ...prev,
                             counter_uuid: doc.value,
+                            type:doc.type
                           }))
                         }
                         value={
@@ -170,6 +172,27 @@ const AddOutStanding = () => {
                       style={{ width: "250px" }}
                       // maxLength={60}
                     />
+                  </label>
+                </div>
+                <div className="row">
+                  <label className="selectLabel">
+                    Outstanding Type
+                    <select
+                      className="numberInput"
+                      value={order?.type || ""}
+                      onChange={(e) =>
+                        setOrder((prev) => ({
+                          ...prev,
+                          type: e.target.value,
+                        }))
+                      }
+                    >
+                      {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+
+                      <option value={0}>None</option>
+                      <option value={1}>Visit</option>
+                      <option value={2}>Call</option>
+                    </select>
                   </label>
                 </div>
               </div>

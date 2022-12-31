@@ -50,7 +50,7 @@ let titleData = [
   { value: "items", name: "Items" },
   { value: "admin", name: "DASHBOARD - Route" },
 ];
-const Sidebar = ({ setIsItemAvilableOpen }) => {
+const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
   const [loading, setLoading] = useState(false);
   const location = useLocation();
   const updateMinLevel = async () => {
@@ -145,6 +145,7 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
         <NavLink
           setIsItemAvilableOpen={setIsItemAvilableOpen}
           title={"Quick Access"}
+          setCollectionTags={setCollectionTags}
           icon={<QuickAccessIcon sx={{ fontSize: 50 }} />}
           isActive={false}
           menuList={[
@@ -159,6 +160,10 @@ const Sidebar = ({ setIsItemAvilableOpen }) => {
             {
               name: "Tasks",
               link: "/admin/tasks",
+            },
+            {
+              name: "Collection Tags",
+              link: "#",
             },
           ]}
         />

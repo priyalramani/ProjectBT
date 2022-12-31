@@ -15,6 +15,7 @@ const OutstangingsCollection = () => {
   const [filterTitle, setFilterTitle] = useState("");
   const [order, setOrder] = useState();
   const [itemsData, setItemsData] = useState([]);
+  const [tags, setTags] = useState([]);
   const [phonePopup, setPhonePopup] = useState(false);
 
   const [warehouse, setWarehouse] = useState([]);
@@ -62,10 +63,10 @@ const OutstangingsCollection = () => {
     });
     if (response.data.success) setOrder(response.data.result);
   };
-  const getItemsData = async () => {
+  const getItemsData = async (collection_tag_uuid) => {
     const response = await axios({
       method: "get",
-      url: "/Outstanding/getOutstanding",
+      url: "/Outstanding/getTagOutstanding/" + collection_tag_uuid,
 
       headers: {
         "Content-Type": "application/json",
@@ -75,43 +76,25 @@ const OutstangingsCollection = () => {
     if (response.data.success) setItemsData(response.data.result);
     else setItemsData([]);
   };
-  console.log(warehouse);
-  const filterItems = useMemo(
-    () =>
-      itemsData.map((a) => {
-        let itemsDetails = a.item_details;
-        let qty =
-          itemsDetails?.length > 1
-            ? itemsDetails.reduce((c, d) => ({
-                b: +c.b + +d.b,
-                p: +c.p + +d.p,
-              }))
-            : itemsDetails?.length
-            ? itemsDetails[0]
-            : { b: 0, p: 0 };
-        return {
-          ...a,
-          type: a.type === "ST" ? "Stock Transfer" : "Adjustment",
-          qty,
+  const getTagsData = async () => {
+    const response = await axios({
+      method: "get",
+      url:
+        "/collectionTags/getUserActiveTag/" + localStorage.getItem("user_uuid"),
 
-          from_warehouse_title:
-            +a.from_warehouse === 0
-              ? "None"
-              : warehouse.find((b) => b.warehouse_uuid === a.from_warehouse)
-                  ?.warehouse_title || "-",
-          to_warehouse_title:
-            +a.to_warehouse === 0
-              ? "None"
-              : warehouse.find((b) => b.warehouse_uuid === a.to_warehouse)
-                  ?.warehouse_title || "-",
-        };
-      }),
-    [itemsData, warehouse]
-  );
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("users", response);
+    if (response.data.success) setTags(response.data.result);
+    else setTags([]);
+  };
+  console.log(warehouse);
 
   useEffect(() => {
     getIndexedDbData();
-    getItemsData();
+    getTagsData();
     GetWarehouseList();
   }, []);
   const outstandingList = useMemo(
@@ -142,6 +125,18 @@ const OutstangingsCollection = () => {
         ) || [],
     [counters, filterTitle, itemsData]
   );
+  const TagsList = useMemo(
+    () =>
+      tags?.filter(
+        (a) =>
+          !filterTitle ||
+          a.invoice_number
+            .toString()
+            .toLocaleLowerCase()
+            .includes(filterTitle.toLocaleLowerCase())
+      ) || [],
+    [filterTitle, tags]
+  );
   return (
     <>
       <div className="servicePage">
@@ -159,6 +154,8 @@ const OutstangingsCollection = () => {
               onClick={() => {
                 if (order) {
                   setOrder(null);
+                } else if (outstandingList.length) {
+                  setItemsData([]);
                 } else {
                   Navigate("/users");
                 }
@@ -230,7 +227,7 @@ const OutstangingsCollection = () => {
 
                   <th>Quantity</th>
                 </tr>
-              ) : (
+              ) : outstandingList.length ? (
                 <tr>
                   <th>S.N</th>
 
@@ -244,12 +241,25 @@ const OutstangingsCollection = () => {
                     <div className="t-head-element">Invoice</div>
                   </th>
                   <th>
-                    <div className="t-head-element" ></div>
+                    <div className="t-head-element"></div>
                   </th>
                   <th>
-                    <div className="t-head-element" ></div>
+                    <div className="t-head-element"></div>
                   </th>
                 </tr>
+              ) : TagsList.length ? (
+                <tr>
+                  <th>S.N</th>
+
+                  <th>
+                    <div className="t-head-element">Tag Title</div>
+                  </th>
+                  <th>
+                    <div className="t-head-element">Tag Number</div>
+                  </th>
+                </tr>
+              ) : (
+                ""
               )}
             </thead>
             <tbody className="tbody">
@@ -279,7 +289,8 @@ const OutstangingsCollection = () => {
                       </td>
                     </tr>
                   ))
-                : outstandingList
+                : outstandingList?.length
+                ? outstandingList
                     ?.sort((a, b) => a.time - b.time)
                     ?.map((item, i) => (
                       <tr
@@ -336,7 +347,26 @@ const OutstangingsCollection = () => {
                           </button>
                         </td>
                       </tr>
-                    ))}
+                    ))
+                : TagsList?.length
+                ? TagsList?.sort((a, b) => a.time - b.time)?.map((item, i) => (
+                    <tr
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        getItemsData(item.collection_tag_uuid);
+                      }}
+                      key={Math.random()}
+                      style={{
+                        height: "30px",
+                        backgroundColor: "#fff",
+                      }}
+                    >
+                      <td>{i + 1}</td>
+                      <td>{item.collection_tag_title}</td>
+                      <td>{item.collection_tag_number}</td>
+                    </tr>
+                  ))
+                : ""}
               <tr>
                 <td style={{ height: "80px" }}></td>
               </tr>
@@ -411,7 +441,7 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
           modes,
           order_uuid: order.order_uuid,
           counter_uuid: order.counter_uuid,
-          entry:0
+          entry: 0,
         },
         headers: {
           "Content-Type": "application/json",

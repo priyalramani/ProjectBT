@@ -19,6 +19,10 @@ const Outstanding = () => {
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [datePopup, setDatePopup] = useState(false);
   const [typePopup, setTypePopup] = useState(false);
+  const [tagPopup, setTagPopup] = useState(false);
+  const [assignTagPopup, setAssignTagPopup] = useState(false);
+  const [selectedOrders, setSelectedOrders] = useState([]);
+
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -149,6 +153,44 @@ const Outstanding = () => {
             </label>
 
             <div>Total Items: {outstandingList?.length}</div>
+            <button
+              className="item-sales-search"
+              onClick={() => setTagPopup(true)}
+            >
+              Add Tag
+            </button>
+            {selectedOrders.length ? (
+              <button
+                className="item-sales-search"
+                onClick={() => setAssignTagPopup(true)}
+              >
+                Assigne Tag
+              </button>
+            ) : (
+              ""
+            )}
+            <button
+              type="button"
+              className="submit flex"
+              style={{
+                margin: "0",
+                padding: "1px 10px",
+                fontSize: "15px",
+                height: "30px",
+              }}
+              onClick={() =>
+                setSelectedOrders((prev) =>
+                  prev.length === outstandingList.length ? [] : outstandingList
+                )
+              }
+            >
+              <input
+                type="checkbox"
+                checked={outstandingList.length === selectedOrders.length}
+                style={{ marginRight: "5px" }}
+              />
+              Select All
+            </button>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
@@ -157,6 +199,8 @@ const Outstanding = () => {
             setDeliveryPopup={setDeliveryPopup}
             setDatePopup={setDatePopup}
             setTypePopup={setTypePopup}
+            setSelectedOrders={setSelectedOrders}
+            selectedOrders={selectedOrders}
           />
         </div>
       </div>
@@ -208,13 +252,41 @@ const Outstanding = () => {
       ) : (
         ""
       )}
+      {tagPopup ? (
+        <TagPopup
+          onSave={() => {
+            setTagPopup(false);
+            getOutstanding();
+          }}
+        />
+      ) : (
+        ""
+      )}
+      {assignTagPopup ? (
+        <AssignTagPopup
+          onSave={() => {
+            setAssignTagPopup(false);
+            getOutstanding();
+          }}
+          selectedOrders={selectedOrders}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default Outstanding;
 
-function Table({ itemsDetails, setDeliveryPopup, setDatePopup, setTypePopup }) {
+function Table({
+  itemsDetails,
+  setDeliveryPopup,
+  setDatePopup,
+  setTypePopup,
+  setSelectedOrders,
+  selectedOrders,
+}) {
   function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -269,7 +341,31 @@ function Table({ itemsDetails, setDeliveryPopup, setDatePopup, setTypePopup }) {
                 setDeliveryPopup(item);
               }}
             >
-              <td>{i + 1}</td>
+              <td
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedOrders((prev) =>
+                    prev.filter(
+                      (a) => a.outstanding_uuid === item.outstanding_uuid
+                    ).length
+                      ? prev.filter(
+                          (a) => a.outstanding_uuid !== item.outstanding_uuid
+                        )
+                      : [...(prev || []), item]
+                  );
+                }}
+                className="flex"
+                style={{ justifyContent: "space-between" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedOrders.find(
+                    (a) => a.outstanding_uuid === item.outstanding_uuid
+                  )}
+                  style={{ transform: "scale(1.3)", marginRight: "10px" }}
+                />
+                {i + 1}
+              </td>
               <td colSpan={3}>
                 {new Date(item.time).toDateString()} -{" "}
                 {formatAMPM(new Date(item.time))}
@@ -365,7 +461,7 @@ function DiliveryPopup({
         }))
       );
   }, [PaymentModes]);
-  console.log(order);
+  console.log(order.outstanding_uuid);
   const submitHandler = async () => {
     setWaiting(true);
 
@@ -387,6 +483,7 @@ function DiliveryPopup({
           order_uuid: order.order_uuid,
           invoice_number: order.invoice_number,
           counter_uuid: order.counter_uuid,
+          collection_tag_uuid:order.collection_tag_uuid||"",
           entry: 0,
           user_uuid: localStorage.getItem("user_uuid"),
         },
@@ -781,6 +878,382 @@ function TypeChangePopup({
                         <option value={1}>Visit</option>
                         <option value={2}>Call</option>
                       </select>
+                    </label>
+                  </div>
+                  <i style={{ color: "red" }}>{error}</i>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "red" }}
+                    className="submit"
+                    onClick={onSave}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="submit"
+                    onClick={submitHandler}
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {waiting ? (
+        <div className="overlay" style={{ zIndex: "999999999999999999" }}>
+          <div className="flex" style={{ width: "40px", height: "40px" }}>
+            <svg viewBox="0 0 100 100">
+              <path
+                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                fill="#ffffff"
+                stroke="none"
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  dur="1s"
+                  repeatCount="indefinite"
+                  keyTimes="0;1"
+                  values="0 50 51;360 50 51"
+                ></animateTransform>
+              </path>
+            </svg>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+    </>
+  );
+}
+function AssignTagPopup({ onSave, selectedOrders }) {
+  const [error, setError] = useState("");
+
+  const [waiting, setWaiting] = useState(false);
+  const [tags, setTags] = useState([]);
+
+  // const [coinPopup, setCoinPopup] = useState(false);
+  const [data, setData] = useState("");
+  const getUsers = async () => {
+    let response = await axios({
+      method: "get",
+      url: "/collectionTags/getActiveTag",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("users", response);
+    if (response.data.success) setTags(response.data.result);
+  };
+
+  useEffect(() => {
+    getUsers();
+  }, []);
+  const submitHandler = async () => {
+    setWaiting(true);
+
+    let response = await axios({
+      method: "put",
+      url: "/Outstanding/putOutstandingTag",
+      data: {
+        selectedOrders,
+        collection_tag_uuid: data,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.data.success) {
+      onSave();
+    }
+
+    setWaiting(false);
+  };
+
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: 9999999999 }}>
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "max-content" }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+    /
+          </div>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup">
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <label className="selectLabel">
+                      Collection Tags
+                      <select
+                        className="numberInput"
+                        value={data}
+                        onChange={(e) => setData(e.target.value)}
+                      >
+                        {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+
+                        <option value={0}>None</option>
+                        {tags.map((a) => (
+                          <option value={a.collection_tag_uuid}>
+                            {a.collection_tag_title}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                  <i style={{ color: "red" }}>{error}</i>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "red" }}
+                    className="submit"
+                    onClick={onSave}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="submit"
+                    onClick={submitHandler}
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {waiting ? (
+        <div className="overlay" style={{ zIndex: "999999999999999999" }}>
+          <div className="flex" style={{ width: "40px", height: "40px" }}>
+            <svg viewBox="0 0 100 100">
+              <path
+                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                fill="#ffffff"
+                stroke="none"
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  dur="1s"
+                  repeatCount="indefinite"
+                  keyTimes="0;1"
+                  values="0 50 51;360 50 51"
+                ></animateTransform>
+              </path>
+            </svg>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+    </>
+  );
+}
+function TagPopup({ onSave }) {
+  const [error, setError] = useState("");
+  const [users, setUsers] = useState([]);
+  const [waiting, setWaiting] = useState(false);
+
+  // const [coinPopup, setCoinPopup] = useState(false);
+  const [data, setData] = useState({
+    collection_tag_title: "",
+    assigned_to: [],
+  });
+
+  const submitHandler = async () => {
+    setWaiting(true);
+
+    let response = await axios({
+      method: "post",
+      url: "/collectionTags/postTag",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.data.success) {
+      onSave();
+    }
+
+    setWaiting(false);
+  };
+  const getUsers = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/users/GetUserList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("users", response);
+    if (response.data.success) setUsers(response.data.result);
+  };
+
+  useEffect(() => {
+    getUsers();
+  }, []);
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: 9999999999 }}>
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "max-content" }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h3>New Tag</h3>
+          </div>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup">
+                  <div className="row">
+                    <label className="selectLabel">
+                      Title
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.collection_tag_title}
+                        onChange={(e) =>
+                          setData({
+                            ...data,
+                            collection_tag_title: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                      />
+                    </label>
+                  </div>
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <label className="selectLabel" style={{ width: "100%" }}>
+                      Assigned to
+                      <div
+                        className="formGroup"
+                        style={{ height: "200px", overflow: "scroll" }}
+                      >
+                        <div
+                          style={{
+                            marginBottom: "5px",
+                            textAlign: "center",
+                            backgroundColor: data.assigned_to?.filter(
+                              (a) => a === "none"
+                            ).length
+                              ? "#caf0f8"
+                              : "#fff",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setData((prev) => ({
+                              ...prev,
+                              assigned_to: prev?.assigned_to?.find(
+                                (a) => a === "none"
+                              )
+                                ? prev?.assigned_to?.filter((a) => a !== "none")
+                                : prev?.assigned_to?.length &&
+                                  !prev.assigned_to.filter((a) => +a === 1)
+                                    .length
+                                ? [...prev?.assigned_to, "none"]
+                                : ["none"],
+                            }));
+                          }}
+                        >
+                          None
+                        </div>
+                        <div
+                          style={{
+                            marginBottom: "5px",
+                            textAlign: "center",
+                            backgroundColor: data.assigned_to?.filter(
+                              (a) => +a === 1
+                            ).length
+                              ? "#caf0f8"
+                              : "#fff",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setData((prev) => ({
+                              ...prev,
+                              assigned_to: [1],
+                            }));
+                          }}
+                        >
+                          All
+                        </div>
+                        {users.map((occ) => (
+                          <div
+                            style={{
+                              marginBottom: "5px",
+                              textAlign: "center",
+                              backgroundColor: data.assigned_to?.filter(
+                                (a) => a === occ.user_uuid
+                              ).length
+                                ? "#caf0f8"
+                                : "#fff",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setData((prev) => ({
+                                ...prev,
+                                assigned_to: prev?.assigned_to?.find(
+                                  (a) => a === occ.user_uuid
+                                )
+                                  ? prev?.assigned_to?.filter(
+                                      (a) => a !== occ.user_uuid
+                                    )
+                                  : prev?.assigned_to?.length &&
+                                    !prev.assigned_to.filter((a) => +a === 1)
+                                      .length
+                                  ? [...prev?.assigned_to, occ?.user_uuid]
+                                  : [occ?.user_uuid],
+                              }));
+                            }}
+                          >
+                            {occ.user_title}
+                          </div>
+                        ))}
+                      </div>
                     </label>
                   </div>
                   <i style={{ color: "red" }}>{error}</i>

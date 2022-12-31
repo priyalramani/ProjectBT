@@ -26,8 +26,10 @@ import ChangeStage from "../../components/ChangeStage";
 import MessagePopup from "../../components/MessagePopup";
 import TaskPopupMenu from "../../components/TaskPopupMenu";
 import SalesPersoneFilterPopup from "../../components/SalesPersoneFilterPopup";
+import CollectionTag from "../QuikAccess/CollectionTag";
 const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
+  const [isCollectionTags, setCollectionTags] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
   const [noOrder, setNoOrder] = useState(false);
   const [paymentModes, setPaymentModes] = useState([]);
@@ -580,7 +582,7 @@ const MainAdmin = () => {
       >
         {selectedOrderGrandTotal}
       </div>
-      <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} />
+      <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} setCollectionTags={setCollectionTags}/>
       <div
         className="right-side"
         onContextMenu={(e) => {
@@ -1629,6 +1631,12 @@ const MainAdmin = () => {
             <ItemAvilibility
               isItemAvilableOpen={isItemAvilableOpen}
               setIsItemAvilableOpen={setIsItemAvilableOpen}
+            />
+          )}
+          {isCollectionTags && (
+            <CollectionTag
+              isItemAvilableOpen={isCollectionTags}
+              setIsItemAvilableOpen={setCollectionTags}
             />
           )}
         </div>

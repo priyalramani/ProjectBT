@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ViewGridIcon } from "@heroicons/react/solid";
-import axios from "axios";
+
 const NavLink = ({
   title,
   icon,
@@ -9,6 +9,7 @@ const NavLink = ({
   draggable,
   href,
   setIsItemAvilableOpen,
+  setCollectionTags,
 }) => {
   // console.log(title)
   const [menuVisible, setMenuVisible] = useState(false);
@@ -51,8 +52,13 @@ const NavLink = ({
             className="menu"
             style={{
               display: menuVisible ? "block" : "none",
-              top: title === "Report" ?"-350px": title === "Setup" ? "-190px" : "-10px",
-              width:title === "Report" ?"300px":"200px"
+              top:
+                title === "Report"
+                  ? "-350px"
+                  : title === "Setup"
+                  ? "-190px"
+                  : "-10px",
+              width: title === "Report" ? "300px" : "200px",
             }}
           >
             {menuList
@@ -62,9 +68,11 @@ const NavLink = ({
                   className="item"
                   key={Math.random()}
                   onClick={() => {
-                    if (menu.name === "Trips")
+                    if (menu.name === "Trips") {
                       setIsItemAvilableOpen((prev) => !prev);
-          
+                    } else if (menu.name === "Collection Tags") {
+                      setCollectionTags(true);
+                    }
                   }}
                 >
                   {<Link to={menu.link}>{menu.name}</Link>}
