@@ -461,7 +461,7 @@ function DiliveryPopup({
         }))
       );
   }, [PaymentModes]);
-  console.log(order.outstanding_uuid);
+  console.log(order.collection_tag_uuid);
   const submitHandler = async () => {
     setWaiting(true);
 
@@ -500,6 +500,7 @@ function DiliveryPopup({
         ...outstanding,
         order_uuid: order.order_uuid,
         counter_uuid: order.counter_uuid,
+        outstanding_uuid: order.outstanding_uuid,
         amount,
       },
       headers: {
@@ -694,6 +695,7 @@ function DateChangePopup({
         order_uuid: order.order_uuid,
         counter_uuid: order.counter_uuid,
         reminder: new Date(data).getTime(),
+        outstanding_uuid: order.outstanding_uuid,
       },
       headers: {
         "Content-Type": "application/json",
@@ -966,7 +968,7 @@ function AssignTagPopup({ onSave, selectedOrders }) {
       method: "put",
       url: "/Outstanding/putOutstandingTag",
       data: {
-        selectedOrders,
+        selectedOrders:selectedOrders.map((a) => a.outstanding_uuid),
         collection_tag_uuid: data,
       },
       headers: {
@@ -989,7 +991,7 @@ function AssignTagPopup({ onSave, selectedOrders }) {
           style={{ height: "fit-content", width: "max-content" }}
         >
           <div className="flex" style={{ justifyContent: "space-between" }}>
-    /
+    
           </div>
           <div
             className="content"

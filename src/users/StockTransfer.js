@@ -125,7 +125,7 @@ const StockTransfer = () => {
     GetWarehouseList();
     getUsers();
   }, []);
-  console.log(filterItems);
+
   return (
     <>
       <div className="servicePage">
@@ -204,7 +204,7 @@ const StockTransfer = () => {
                       e.stopPropagation();
                       setHoldPopup(item);
                     }}
-                    key={Math.random()}
+                    key={item.vocher_number}
                     style={{
                       height: "30px",
                       backgroundColor: "#fff",
@@ -249,139 +249,39 @@ const StockTransfer = () => {
 };
 function HoldPopup({ onSave, orders, itemsData, categories }) {
   const [items, setItems] = useState([]);
-  //   const [popupForm, setPopupForm] = useState(false);
+
   const [confirmPopup, setConfirmPopup] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const audiosRef = useRef();
   const [popup, setPopup] = useState(false);
 
-  const audioCallback = (elem_id) => {
-    setItems((prev) =>
-      prev.map((i) => (i.item_uuid === elem_id ? { ...i, status: 1 } : i))
-    );
-  };
-
   const [filterItemTitle, setFilterItemTile] = useState("");
-  console.log(items);
+
   useEffect(() => {
-    let data = orders.item_details
+    let data = orders.item_details?.map((a, index) => {
+      let itemDetails = itemsData?.find((b) => b.item_uuid === a.item_uuid);
+      return {
+        ...a,
+        index,
+        category_uuid: itemDetails?.category_uuid,
+        item_title: itemDetails?.item_title,
+        pronounce: itemDetails?.pronounce,
+        mrp: itemDetails?.mrp,
+        conversion: itemDetails?.conversion,
+      };
+    });
 
-      //   .filter((a) => a.status === 1)
-      .map((a, index) => {
-        let itemDetails = itemsData?.find((b) => b.item_uuid === a.item_uuid);
-        console.log(a, itemsData);
-        return {
-          ...a,
-          index,
-          category_uuid: itemDetails?.category_uuid,
-          item_title: itemDetails?.item_title,
-          pronounce: itemDetails?.pronounce,
-          mrp: itemDetails?.mrp,
-          conversion: itemDetails?.conversion,
-        };
-      });
-
-    // result.map((item) =>
-    //   setTempQuantity((prev) =>
-    //     prev?.filter((a) => a.item_uuid === item.item_uuid)?.length
-    //       ? prev?.map((a) =>
-    //           a.item_uuid === item.item_uuid
-    //             ? {
-    //                 ...a,
-    //                 b: +(data.b || 0),
-    //                 p: data?.p || 0,
-    //               }
-    //             : a
-    //         )
-    //       : prev?.length
-    //       ? [
-    //           ...prev,
-    //           ...itemsData
-    //             ?.filter((a) => a.item_uuid === item.item_uuid)
-    //             .map((a) => ({
-    //               ...a,
-    //               b: +(data.b || 0),
-    //               p: data?.p || 0,
-    //             })),
-    //         ]
-    //       : itemsData
-    //           ?.filter((a) => a.item_uuid === item.item_uuid)
-    //           .map((a) => ({
-    //             ...a,
-    //             b: Math.floor(+data.b || 0 || 0),
-    //             p: +data?.p || 0,
-    //           }))
-    //   )
-    // );
     setItems(data);
-
-    const audioElements = [];
-    let progressCount = 0;
-
-    categories
-      ?.filter(
-        (a) =>
-          data?.filter(
-            (b) =>
-              a.category_uuid ===
-              itemsData?.find((c) => b.item_uuid === c.item_uuid)?.category_uuid
-          ).length
-      )
-      ?.forEach((cat) => {
-        data
-          ?.filter((i) => i.category_uuid === cat.category_uuid)
-          ?.forEach((item, index) => {
-            if (item) {
-              console.log(item.pronounce);
-              const handleQty = (value, label, sufix) =>
-                value ? `${value} ${label}${value > 1 ? sufix : ""}` : "";
-              const speechString = `${item.pronounce} ${
-                item.mrp
-              } MRP ${handleQty(+item.b, "Box", "es")} ${handleQty(
-                +item.p || 0,
-                "Piece",
-                "s"
-              )}`;
-
-              const loopEndFunctioin = (audio) => {
-                audio.index = item.index;
-                audio.category_uuid = item.category_uuid;
-                audioElements.push(audio);
-                console.log(`${++progressCount}/${data?.length}`);
-
-                if (progressCount === data?.length) {
-                  console.log(audioElements);
-                  audiosRef.current = audioElements
-                    .sort((a, b) => +a.index - +b.index)
-                    .map((i) => {
-                      i.volume = 1;
-                      i.currentTime = 0;
-                      return i;
-                    });
-                  // audioLoopFunction({
-                  //   i: 0,
-                  //   recall: true,
-                  //   src: audiosRef.current,
-                  //   callback: audioCallback,
-                  // });
-                }
-              };
-
-              // audioAPIFunction({
-              //   speechString,
-              //   elem_id: item.item_uuid,
-              //   callback: loopEndFunctioin,
-              // });
-            } else progressCount++;
-          });
-      });
-  }, []);
+  }, [categories, itemsData, orders.item_details]);
 
   const postOrderData = async () => {
     const response = await axios({
       method: "put",
       url: "/vouchers/PutVoucher",
-      data: { voucher_uuid: orders?.voucher_uuid, item_details: items.filter(a=>+a.status!==3) },
+      data: {
+        voucher_uuid: orders?.voucher_uuid,
+        item_details: items.filter((a) => +a.status !== 3),
+      },
       headers: {
         "Content-Type": "application/json",
       },
@@ -486,18 +386,7 @@ function HoldPopup({ onSave, orders, itemsData, categories }) {
 
                         .map((a) => (
                           <>
-                            <tr
-                            // onClick={(e) =>
-                            //   audioLoopFunction({
-                            //     i: 0,
-                            //     src: audiosRef.current?.filter(
-                            //       (i) => i.category_uuid === a.category_uuid
-                            //     ),
-                            //     forcePlayCount: 1,
-                            //     callback: audioCallback,
-                            //   })
-                            // }
-                            >
+                            <tr key={a.category_uuid}>
                               <td colSpan={8}>{a.category_title}</td>
                             </tr>
                             {items
@@ -730,7 +619,7 @@ function QuantityChanged({ onSave, setOrder, order, itemsData }) {
 
   useEffect(() => {
     setdata(order);
-  }, []);
+  }, [order]);
 
   const submitHandler = async (e) => {
     e.preventDefault();

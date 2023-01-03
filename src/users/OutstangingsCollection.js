@@ -210,7 +210,7 @@ const OutstangingsCollection = () => {
           <table
             className="user-table"
             style={{
-              width: "max-content",
+              width: order||outstandingList?.length?"max-content":"100%",
               height: "fit-content",
             }}
           >
@@ -379,7 +379,7 @@ const OutstangingsCollection = () => {
         <DiliveryPopup
           onSave={() => {
             setDeliveryPopup(false);
-            getItemsData();
+            getItemsData(outstandingList[0].collection_tag_uuid);
           }}
           PaymentModes={paymentModes}
           // postOrderData={() => onSubmit({ stage: 5 })}

@@ -9,7 +9,7 @@ import React, {
 import { useReactToPrint } from "react-to-print";
 import PopupTripOrderTable from "../../components/PopupTripOrderTable";
 import TripPage from "../../components/TripPage";
-import { ArrowDropDown } from "@mui/icons-material";
+import { Add, ArrowDropDown } from "@mui/icons-material";
 import Select from "react-select";
 export default function CollectionTag({ setIsItemAvilableOpen }) {
   const [itemsData, setItemsData] = useState([]);
@@ -81,17 +81,21 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
         ...b,
 
         users_name:
-          b?.assigned_to?.map((a) => {
-            let data = users.find((c) => a === c.user_uuid)?.user_title;
-            return data;
-          }) || [],
+          b?.assigned_to
+            ?.filter((a) => a)
+            .map((a) => {
+              let data = users.find((c) => a === c.user_uuid)?.user_title;
+
+              return data ? data : "";
+            }) || [],
       })),
     [itemsData, users]
   );
   const getTripDetails = async () => {
     const response = await axios({
       method: "get",
-      url: "/trips/GetTripSummaryDetails/" + statementcollection_tag_uuid,
+      url:
+        "/collectionTags/GetTagSummaryDetails/" + statementcollection_tag_uuid,
 
       headers: {
         "Content-Type": "application/json",
@@ -141,7 +145,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
           style={{ position: "relative" }}
         >
           <div className="itemavilablelity_header">
-            <h2>Trips</h2>
+            <h2>Collection Tags</h2>
           </div>
 
           <div className="availablecontainer">
@@ -333,7 +337,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
                                     : "Complete"}
                                 </button>
 
-                                {/* <button
+                                <button
                                   className="item-sales-search"
                                   style={{
                                     display: "inline",
@@ -342,11 +346,13 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
                                   }}
                                   type="button"
                                   onClick={() => {
-                                    setStatementcollection_tag_uuid(item.collection_tag_uuid);
+                                    setStatementcollection_tag_uuid(
+                                      item.collection_tag_uuid
+                                    );
                                   }}
                                 >
                                   Statement
-                                </button> */}
+                                </button>
 
                                 <button
                                   className="item-sales-search"
@@ -447,7 +453,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
               pageBreakInside: "auto",
             }}
           >
-            <TripPage
+            <TagPage
               collection_tag_title={statementTrip?.collection_tag_title || ""}
               users={
                 statementTrip?.assigned_to.map((a) =>
@@ -464,6 +470,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
               replacement={statementTrip?.replacement}
               sales_return={statementTrip?.sales_return}
               unpaid_invoice={statementTrip?.unpaid_invoice}
+              receipts={statementTrip?.receipts}
             />
           </div>
         </div>
@@ -674,7 +681,7 @@ function WarehousePopup({ onSave, tripData }) {
 }
 function AssignTagPopup({ onSave, selectedOrders }) {
   const [error, setError] = useState("");
-
+  const [tagPopup, setTagPopup] = useState(false);
   const [waiting, setWaiting] = useState(false);
   const [tags, setTags] = useState([]);
 
@@ -703,7 +710,7 @@ function AssignTagPopup({ onSave, selectedOrders }) {
       method: "put",
       url: "/receipts/putReciptTag",
       data: {
-        selectedOrders,
+        selectedOrders: selectedOrders.map((a) => a.outstanding_uuid),
         collection_tag_uuid: data,
       },
       headers: {
@@ -727,6 +734,12 @@ function AssignTagPopup({ onSave, selectedOrders }) {
         >
           <div className="flex" style={{ justifyContent: "space-between" }}>
             <h3>Change Tag</h3>
+            <span
+              style={{ cursor: "pointer" }}
+              onClick={() => setTagPopup(true)}
+            >
+              <Add />
+            </span>
           </div>
           <div
             className="content"
@@ -813,6 +826,386 @@ function AssignTagPopup({ onSave, selectedOrders }) {
       ) : (
         ""
       )}
+      {tagPopup ? (
+        <TagPopup
+          onSave={() => {
+            setTagPopup(false);
+            getUsers();
+          }}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 }
+function TagPopup({ onSave }) {
+  const [error, setError] = useState("");
+  const [users, setUsers] = useState([]);
+  const [waiting, setWaiting] = useState(false);
+
+  // const [coinPopup, setCoinPopup] = useState(false);
+  const [data, setData] = useState({
+    collection_tag_title: "",
+    assigned_to: [],
+  });
+
+  const submitHandler = async () => {
+    setWaiting(true);
+
+    let response = await axios({
+      method: "post",
+      url: "/collectionTags/postTag",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.data.success) {
+      onSave();
+    }
+
+    setWaiting(false);
+  };
+  const getUsers = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/users/GetUserList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("users", response);
+    if (response.data.success) setUsers(response.data.result);
+  };
+
+  useEffect(() => {
+    getUsers();
+  }, []);
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: 9999999999 }}>
+        <div
+          className="modal"
+          style={{ height: "fit-content", width: "max-content" }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h3>New Tag</h3>
+          </div>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup">
+                  <div className="row">
+                    <label className="selectLabel">
+                      Title
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.collection_tag_title}
+                        onChange={(e) =>
+                          setData({
+                            ...data,
+                            collection_tag_title: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                      />
+                    </label>
+                  </div>
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <label className="selectLabel" style={{ width: "100%" }}>
+                      Assigned to
+                      <div
+                        className="formGroup"
+                        style={{ height: "200px", overflow: "scroll" }}
+                      >
+                        <div
+                          style={{
+                            marginBottom: "5px",
+                            textAlign: "center",
+                            backgroundColor: data.assigned_to?.filter(
+                              (a) => a === "none"
+                            ).length
+                              ? "#caf0f8"
+                              : "#fff",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setData((prev) => ({
+                              ...prev,
+                              assigned_to: prev?.assigned_to?.find(
+                                (a) => a === "none"
+                              )
+                                ? prev?.assigned_to?.filter((a) => a !== "none")
+                                : prev?.assigned_to?.length &&
+                                  !prev.assigned_to.filter((a) => +a === 1)
+                                    .length
+                                ? [...prev?.assigned_to, "none"]
+                                : ["none"],
+                            }));
+                          }}
+                        >
+                          None
+                        </div>
+                        <div
+                          style={{
+                            marginBottom: "5px",
+                            textAlign: "center",
+                            backgroundColor: data.assigned_to?.filter(
+                              (a) => +a === 1
+                            ).length
+                              ? "#caf0f8"
+                              : "#fff",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setData((prev) => ({
+                              ...prev,
+                              assigned_to: [1],
+                            }));
+                          }}
+                        >
+                          All
+                        </div>
+                        {users.map((occ) => (
+                          <div
+                            style={{
+                              marginBottom: "5px",
+                              textAlign: "center",
+                              backgroundColor: data.assigned_to?.filter(
+                                (a) => a === occ.user_uuid
+                              ).length
+                                ? "#caf0f8"
+                                : "#fff",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setData((prev) => ({
+                                ...prev,
+                                assigned_to: prev?.assigned_to?.find(
+                                  (a) => a === occ.user_uuid
+                                )
+                                  ? prev?.assigned_to?.filter(
+                                      (a) => a !== occ.user_uuid
+                                    )
+                                  : prev?.assigned_to?.length &&
+                                    !prev.assigned_to.filter((a) => +a === 1)
+                                      .length
+                                  ? [...prev?.assigned_to, occ?.user_uuid]
+                                  : [occ?.user_uuid],
+                              }));
+                            }}
+                          >
+                            {occ.user_title}
+                          </div>
+                        ))}
+                      </div>
+                    </label>
+                  </div>
+                  <i style={{ color: "red" }}>{error}</i>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button
+                    type="button"
+                    style={{ backgroundColor: "red" }}
+                    className="submit"
+                    onClick={onSave}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="submit"
+                    onClick={submitHandler}
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {waiting ? (
+        <div className="overlay" style={{ zIndex: "999999999999999999" }}>
+          <div className="flex" style={{ width: "40px", height: "40px" }}>
+            <svg viewBox="0 0 100 100">
+              <path
+                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                fill="#ffffff"
+                stroke="none"
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  dur="1s"
+                  repeatCount="indefinite"
+                  keyTimes="0;1"
+                  values="0 50 51;360 50 51"
+                ></animateTransform>
+              </path>
+            </svg>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+    </>
+  );
+}
+const TagPage = ({
+  collection_tag_title,
+  users,
+  collection_tag_uuid,
+  created_at,
+
+  formatAMPM,
+
+  receipts,
+}) => {
+  if (!collection_tag_title) return <div />;
+  return (
+    <>
+      <table style={{ width: "100%", margin: "10px" }}>
+        <tr style={{ width: "100%" }}>
+          <td
+            colSpan={2}
+            style={{
+              width: "100%",
+              fontSize: "xx-large",
+              fontWeight: "bolder",
+            }}
+          >
+            {collection_tag_title}
+          </td>
+        </tr>
+        <tr>
+          <td
+            colSpan={2}
+            style={{
+              fontWeight: "600",
+              fontSize: "larger",
+            }}
+          >
+            {users
+              .filter((a) => a)
+              .map((a, i) => (i === 0 ? a?.user_title : ", " + a?.user_title))}
+          </td>{" "}
+        </tr>
+        <tr>
+          <td
+            style={{ fontWeight: "600", fontSize: "small", textAlign: "left" }}
+          ></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td
+            style={{ fontWeight: "600", fontSize: "small", textAlign: "left" }}
+          >
+            Tag UUID : {collection_tag_uuid}
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td
+            style={{ fontWeight: "600", fontSize: "small", textAlign: "left" }}
+          >
+            Tag Created At : {created_at}
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td
+            style={{ fontWeight: "600", fontSize: "small", textAlign: "left" }}
+          >
+            Statement Printed At : {formatAMPM(new Date())}
+          </td>
+          <td></td>
+        </tr>
+      </table>
+
+      {receipts?.length ? (
+        <table style={{ margin: "10px", width: "100%" }}>
+          <tr>
+            <td
+              style={{
+                fontWeight: "600",
+                fontSize: "small",
+                textAlign: "left",
+              }}
+            >
+              Receipts Details
+            </td>
+          </tr>
+          <tr>
+            <th style={{ border: "1px solid #000" }}>Receipt No.</th>
+            <th style={{ border: "1px solid #000" }}>Counter</th>
+            <th style={{ border: "1px solid #000" }}>Invoice Number</th>
+            <th style={{ border: "1px solid #000" }}>Time</th>
+            <th style={{ border: "1px solid #000" }}>Cash</th>
+            <th style={{ border: "1px solid #000" }}>Cheque</th>
+            <th style={{ border: "1px solid #000" }}>UPI</th>
+          </tr>
+          {receipts.map((item) => (
+            <tr>
+              <td style={{ border: "1px solid #000" }}>
+                {item.receipt_number}
+              </td>
+              <td style={{ border: "1px solid #000" }}>{item.counter_title}</td>
+              <td style={{ border: "1px solid #000" }}>
+                {item.invoice_number}
+              </td>
+              <td style={{ border: "1px solid #000" }}>
+                {formatAMPM(new Date(item.time))}
+              </td>
+              <td style={{ border: "1px solid #000" }}>{item.cash}</td>
+              <td style={{ border: "1px solid #000" }}>{item.cheque}</td>
+              <td style={{ border: "1px solid #000" }}>{item.upi}</td>
+            </tr>
+          ))}
+          <tr style={{ fontWeight: "bolder" }}>
+            <td style={{ border: "1px solid #000" }}>Total</td>
+            <td style={{ border: "1px solid #000" }}></td>
+            <td style={{ border: "1px solid #000" }}></td>
+            <td style={{ border: "1px solid #000" }}></td>
+            <td style={{ border: "1px solid #000" }}>
+              {receipts?.length > 1
+                ? receipts.map((a) => a.cash || 0).reduce((a, b) => a + b)
+                : receipts[0]?.cash || 0}
+            </td>
+            <td style={{ border: "1px solid #000" }}>
+              {receipts?.length > 1
+                ? receipts.map((a) => a.cheque || 0).reduce((a, b) => a + b)
+                : receipts[0]?.cheque || 0}
+            </td>
+            <td style={{ border: "1px solid #000" }}>
+              {receipts?.length > 1
+                ? receipts.map((a) => a.upi || 0).reduce((a, b) => a + b)
+                : receipts[0]?.upi || 0}
+            </td>
+          </tr>
+        </table>
+      ) : (
+        ""
+      )}
+    </>
+  );
+};

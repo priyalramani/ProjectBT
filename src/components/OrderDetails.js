@@ -2262,6 +2262,11 @@ function DiliveryPopup({
   }, [PaymentModes]);
   const submitHandler = async () => {
     setWaiting(true);
+    if(outstanding.amount&&!outstanding.remarks){
+      setError("Remarks is mandatory");
+      setWaiting(false);
+      return;
+    }
     updateBilling({
       ...order,
       replacement: data?.actual || 0,
@@ -2483,7 +2488,7 @@ function DiliveryPopup({
                             width: "100%",
                             backgroundColor: "light",
                             fontSize: "12px",
-                            color: "#fff",
+                 
                           }}
                           onChange={(e) =>
                             setOutstanding((prev) => ({
