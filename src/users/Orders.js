@@ -1,6 +1,6 @@
-import { deleteDB, openDB } from "idb";
+import { openDB } from "idb";
 import React, { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { IoArrowBackOutline } from "react-icons/io5";
 import axios from "axios";
 import { Phone } from "@mui/icons-material";

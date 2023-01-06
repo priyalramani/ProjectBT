@@ -483,7 +483,7 @@ function DiliveryPopup({
           order_uuid: order.order_uuid,
           invoice_number: order.invoice_number,
           counter_uuid: order.counter_uuid,
-          collection_tag_uuid:order.collection_tag_uuid||"",
+          collection_tag_uuid: order.collection_tag_uuid || "",
           entry: 0,
           user_uuid: localStorage.getItem("user_uuid"),
         },
@@ -968,7 +968,7 @@ function AssignTagPopup({ onSave, selectedOrders }) {
       method: "put",
       url: "/Outstanding/putOutstandingTag",
       data: {
-        selectedOrders:selectedOrders.map((a) => a.outstanding_uuid),
+        selectedOrders: selectedOrders.map((a) => a.outstanding_uuid),
         collection_tag_uuid: data,
       },
       headers: {
@@ -990,9 +990,10 @@ function AssignTagPopup({ onSave, selectedOrders }) {
           className="modal"
           style={{ height: "fit-content", width: "max-content" }}
         >
-          <div className="flex" style={{ justifyContent: "space-between" }}>
-    
-          </div>
+          <div
+            className="flex"
+            style={{ justifyContent: "space-between" }}
+          ></div>
           <div
             className="content"
             style={{
@@ -1113,7 +1114,7 @@ function TagPopup({ onSave }) {
   const getUsers = async () => {
     const response = await axios({
       method: "get",
-      url: "/users/GetUserList",
+      url: "/users/GetActiveUserList",
 
       headers: {
         "Content-Type": "application/json",
@@ -1223,38 +1224,42 @@ function TagPopup({ onSave }) {
                         >
                           All
                         </div>
-                        {users.map((occ) => (
-                          <div
-                            style={{
-                              marginBottom: "5px",
-                              textAlign: "center",
-                              backgroundColor: data.assigned_to?.filter(
-                                (a) => a === occ.user_uuid
-                              ).length
-                                ? "#caf0f8"
-                                : "#fff",
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setData((prev) => ({
-                                ...prev,
-                                assigned_to: prev?.assigned_to?.find(
+                        {users
+                          ?.sort((a, b) =>
+                            a?.user_title?.localeCompare(b.user_title)
+                          )
+                          .map((occ) => (
+                            <div
+                              style={{
+                                marginBottom: "5px",
+                                textAlign: "center",
+                                backgroundColor: data.assigned_to?.filter(
                                   (a) => a === occ.user_uuid
-                                )
-                                  ? prev?.assigned_to?.filter(
-                                      (a) => a !== occ.user_uuid
-                                    )
-                                  : prev?.assigned_to?.length &&
-                                    !prev.assigned_to.filter((a) => +a === 1)
-                                      .length
-                                  ? [...prev?.assigned_to, occ?.user_uuid]
-                                  : [occ?.user_uuid],
-                              }));
-                            }}
-                          >
-                            {occ.user_title}
-                          </div>
-                        ))}
+                                ).length
+                                  ? "#caf0f8"
+                                  : "#fff",
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setData((prev) => ({
+                                  ...prev,
+                                  assigned_to: prev?.assigned_to?.find(
+                                    (a) => a === occ.user_uuid
+                                  )
+                                    ? prev?.assigned_to?.filter(
+                                        (a) => a !== occ.user_uuid
+                                      )
+                                    : prev?.assigned_to?.length &&
+                                      !prev.assigned_to.filter((a) => +a === 1)
+                                        .length
+                                    ? [...prev?.assigned_to, occ?.user_uuid]
+                                    : [occ?.user_uuid],
+                                }));
+                              }}
+                            >
+                              {occ.user_title}
+                            </div>
+                          ))}
                       </div>
                     </label>
                   </div>

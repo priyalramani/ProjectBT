@@ -1156,13 +1156,13 @@ const TagPage = ({
             </td>
           </tr>
           <tr>
-            <th style={{ border: "1px solid #000" }}>Receipt No.</th>
+            <th style={{ border: "1px solid #000" }}>Rpt. No.</th>
             <th style={{ border: "1px solid #000" }}>Counter</th>
-            <th style={{ border: "1px solid #000" }}>Invoice Number</th>
+            <th style={{ border: "1px solid #000" }}>Inv. No.</th>
             <th style={{ border: "1px solid #000" }}>Time</th>
-            <th style={{ border: "1px solid #000" }}>Cash</th>
-            <th style={{ border: "1px solid #000" }}>Cheque</th>
-            <th style={{ border: "1px solid #000" }}>UPI</th>
+            <th style={{ border: "1px solid #000",width:"100px" }}>Cash</th>
+            <th style={{ border: "1px solid #000",width:"100px" }}>Cheque</th>
+            <th style={{ border: "1px solid #000",width:"100px" }}>UPI</th>
           </tr>
           {receipts.map((item) => (
             <tr>

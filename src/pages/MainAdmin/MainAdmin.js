@@ -2447,7 +2447,7 @@ function HoldPopup({
                           <td>Total</td>
                           <td colSpan={3}></td>
                           <td colSpan={2}></td>
-                          <td colSpan={2}>
+                          <td colSpan={4}>
                             {Math.floor(
                               items?.length > 1
                                 ? items
@@ -2461,6 +2461,26 @@ function HoldPopup({
                                   .map((a) => +a.p || 0)
                                   .reduce((a, b) => a + b)
                               : items[0].p || 0}
+                          </td>
+                        </tr>
+                        <tr
+                          style={{
+                            height: "30px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          <td colSpan={4}>Total Lines</td>
+         
+                          <td colSpan={2}></td>
+                          <td colSpan={4}>
+                            {Math.floor(
+                              orders?.length > 1
+                                ? orders
+                                    .map((a) => a.item_details.length || 0)
+                                    .reduce((a, b) => a + b)
+                                : orders[0]?.item_details.length || 0
+                            )}
+                            
                           </td>
                         </tr>
                       </tbody>

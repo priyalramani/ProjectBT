@@ -514,31 +514,7 @@ const ProcessingOrders = () => {
       );
   }, [selectedOrder]);
 
-  const barcodeFilterUpdate = () => {
-    if (
-      barcodeFilterState.find(
-        (a) =>
-          a?.barcode?.filter((a) => a).filter((a) => a === barcodeFilter)
-            ?.length
-      )
-    ) {
-      setBarcodeFilterState((prev) =>
-        prev.map((a) =>
-          a?.barcode?.filter((a) => a).filter((a) => a === barcodeFilter)
-            ?.length
-            ? { ...a, qty: (+a.qty || 0) + (+a.one_pack || 1) }
-            : a
-        )
-      );
-    } else {
-      setBarcodeFilterState((prev) =>
-        prev.length
-          ? [...prev, { barcode: [barcodeFilter], qty: 1 }]
-          : { barcode: [barcodeFilter], qty: 1 }
-      );
-    }
-    setBarcodeFilter("");
-  };
+
 
   const checkingQuantity = () => {
     let orderData = orders;
@@ -563,7 +539,7 @@ const ProcessingOrders = () => {
 
       return acc;
     }, []);
-    console.log("item_details", item_details, tempQuantity);
+  
     for (let a of item_details) {
       let orderItem = tempQuantity.find((b) => b.item_uuid === a.item_uuid);
       let ItemData = items.find((b) => b.item_uuid === a.item_uuid);

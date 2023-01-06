@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 import { openDB } from "idb";
 
 const LoginPage = ({ setUserType }) => {
@@ -10,7 +10,7 @@ const LoginPage = ({ setUserType }) => {
     login_password: "",
   });
 
-  const Navigate = useNavigate();
+
   const loginHandler = async () => {
     try {
       setIsLoading(true);
@@ -32,10 +32,11 @@ const LoginPage = ({ setUserType }) => {
         localStorage.setItem("user_title", data.user_title);
         localStorage.setItem("user_role", JSON.stringify(data.user_role || []));
         localStorage.setItem("user_mobile", data.user_mobile);
-        localStorage.setItem("warehouse",JSON.stringify( data.warehouse));
-        setUserType(response.data.result.user_type || false);
+        localStorage.setItem("warehouse", JSON.stringify(data.warehouse));
+        
         sessionStorage.setItem("userType", response.data.result.user_type);
-        if (+data.user_type===0) {
+        if (+data.user_type === 0) {
+          setUserType(response.data.result.user_type || false);
           window.location.assign("/admin");
           return;
         }
@@ -95,11 +96,17 @@ const LoginPage = ({ setUserType }) => {
             await store.put({ ...item, IDENTIFIER });
           }
         }
-        setIsLoading(false);
-        db.close();
+       
+       
+
         let time = new Date();
         localStorage.setItem("indexed_time", time.getTime());
-        window.location.assign("/users");
+         setTimeout(() => { 
+          setUserType(response.data.result.user_type || false);
+          setIsLoading(false);
+          db.close();
+          window.location.assign("/users");
+        }, 5000);
       }
     } catch (error) {
       setIsLoading(false);

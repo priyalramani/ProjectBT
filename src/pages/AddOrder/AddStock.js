@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import axios from "axios";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
@@ -39,6 +39,7 @@ export default function AddStock() {
   // const selectRef = useRef();
   const [itemsData, setItemsData] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
+  const [notification, setNotification] = useState();
 
   const reactInputsRef = useRef({});
   const [focusedInputId, setFocusedInputId] = useState(0);
@@ -65,15 +66,38 @@ export default function AddStock() {
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         const json = XLSX.utils.sheet_to_json(worksheet);
+
         let dataJson = [];
         for (let item in json) {
+          // console.log(json[item]["Item Code"] || json[item]["ITEM CODE"]);
+          if (!json[item]["ITEM CODE"] && !json[item]["ITEM CODE"]) {
+            setNotification(
+              "Excel Error: CODE not found in Line Number " +
+                json[item]?.__rowNum__
+            );
+            setTimeout(() => setNotification(false), 5000);
+            return;
+          }
           let itemData = itemsData.find(
             (a) =>
-              a.item_code === json[item]["Item Code"] ||
-              +a.item_code === json[item]["Item Code"] ||
-              a.item_code === +json[item]["Item Code"]
+              a.item_code &&
+              (a.item_code === json[item]["Item Code"] ||
+                +a.item_code === json[item]["Item Code"] ||
+                a.item_code === +json[item]["Item Code"] ||
+                a.item_code === json[item]["ITEM CODE"] ||
+                +a.item_code === json[item]["ITEM CODE"] ||
+                a.item_code === +json[item]["ITEM CODE"])
           );
-          let qty = json[item]["Qty"];
+          console.log(itemData);
+          if (!itemData) {
+            setNotification(
+              "BT Error: ITEM not found for Item Code " +
+                (json[item]["ITEM CODE"] || json[item]["ITEM CODE"])
+            );
+            setTimeout(() => setNotification(false), 5000);
+            return;
+          }
+          let qty = json[item]["Qty"] || json[item]["QTY"] || 0;
           if (itemData) {
             let b = Math.floor(+(qty || 0) / (+itemData.conversion || 1));
             let p = Math.floor(+(qty || 0) % (+itemData.conversion || 1));
@@ -92,7 +116,7 @@ export default function AddStock() {
       reader.readAsArrayBuffer(e.target.files[0]);
     }
   };
-  console.log(order);
+
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, []);
@@ -176,7 +200,21 @@ export default function AddStock() {
       handlePrint();
     }
   };
-
+  const Quantity = useMemo(() => {
+    let q =
+      order.item_details.length > 1
+        ? order.item_details.map((a) => +a.b || 0).reduce((a, b) => a + b)
+        : order.item_details.length
+        ? order.item_details[0].b
+        : 0;
+    let p =
+      order.item_details.length > 1
+        ? order.item_details.map((a) => +a.p || 0).reduce((a, b) => a + b)
+        : order.item_details.length
+        ? order.item_details[0].p
+        : 0;
+    return q + " : " + p;
+  }, [order?.item_details]);
   const jumpToNextIndex = (id) => {
     //console.log(id);
     document.querySelector(`#${id}`).blur();
@@ -383,8 +421,8 @@ export default function AddStock() {
                                   label:
                                     a.item_title +
                                     "______" +
-                                    a.mrp +
-                                    (a.qty > 0
+                                    (a?.mrp || "") +
+                                    (a?.qty > 0
                                       ? " _______[" +
                                         CovertedQty(a.qty || 0, a.conversion) +
                                         "]"
@@ -394,7 +432,6 @@ export default function AddStock() {
                                 }))}
                               styles={{
                                 option: (a, b) => {
-                                  console.log(a, b);
                                   return {
                                     ...a,
                                     color:
@@ -600,6 +637,20 @@ export default function AddStock() {
               >
                 Save
               </button>
+              {order.item_details.length ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    // if (!order.item_details.filter((a) => a.item_uuid).length)
+                    //   return;
+                    // onSubmit();
+                  }}
+                >
+                  {Quantity}
+                </button>
+              ) : (
+                ""
+              )}
             </div>
           </div>
         </div>
@@ -805,6 +856,13 @@ export default function AddStock() {
           setOrder={setOrder}
           category={category}
         />
+      ) : (
+        ""
+      )}
+      {notification ? (
+        <div className="notification-container active-red">
+          <p className="notification-message">{notification}</p>
+        </div>
       ) : (
         ""
       )}

@@ -782,7 +782,7 @@ function NewUserForm({
                       onChange={(e) =>
                         setdata({
                           ...data,
-                          item_code: e.target.value,
+                          item_code: e.target.value.replace(/\s+/g, ''),
                         })
                       }
                     />

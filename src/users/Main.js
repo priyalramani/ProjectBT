@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import "./style.css";
 import { Link, useLocation } from "react-router-dom";
-import { deleteDB, openDB } from "idb";
+import { deleteDB } from "idb";
 import CloseIcon from "@mui/icons-material/Close";
 import MenuIcon from "@mui/icons-material/Menu";
 import axios from "axios";
@@ -119,7 +119,7 @@ const Main = () => {
               fontSize: "20px",
             }}
           >
-            Version 45
+            Version 46
           </div>
 
           <button

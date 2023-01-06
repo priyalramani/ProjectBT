@@ -430,7 +430,7 @@ export default function AddOrder() {
                   <Select
                     options={[
                       { value: 0, label: "None" },
-                      ...warehouse.map((a) => ({
+                      ...warehouse.filter(a=>+user_warehouse||a.warehouse_uuid===user_warehouse).map((a) => ({
                         value: a.warehouse_uuid,
                         label: a.warehouse_title,
                       })),

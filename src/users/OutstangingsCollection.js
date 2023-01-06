@@ -210,7 +210,7 @@ const OutstangingsCollection = () => {
           <table
             className="user-table"
             style={{
-              width: order||outstandingList?.length?"max-content":"100%",
+              width: order || outstandingList?.length ? "max-content" : "100%",
               height: "fit-content",
             }}
           >
@@ -435,33 +435,37 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
     let response;
     if (modeTotal) {
       response = await axios({
-        method: "put",
-        url: "/receipts/putReceipt",
+        method: "post",
+        url: "/receipts/postReceipt",
         data: {
           modes,
           order_uuid: order.order_uuid,
+          invoice_number: order.invoice_number,
           counter_uuid: order.counter_uuid,
+          collection_tag_uuid: order.collection_tag_uuid || "",
           entry: 0,
+          user_uuid: localStorage.getItem("user_uuid"),
         },
         headers: {
           "Content-Type": "application/json",
         },
       });
     }
-    if (amount) {
-      response = await axios({
-        method: "put",
-        url: "/Outstanding/putOutstanding",
-        data: {
-          order_uuid: order.order_uuid,
-          counter_uuid: order.counter_uuid,
-          amount,
-        },
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    }
+
+    response = await axios({
+      method: "put",
+      url: "/Outstanding/putOutstanding",
+      data: {
+        order_uuid: order.order_uuid,
+        counter_uuid: order.counter_uuid,
+        outstanding_uuid: order.outstanding_uuid,
+        amount,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
     if (response.data.success) {
       onSave();
     }
