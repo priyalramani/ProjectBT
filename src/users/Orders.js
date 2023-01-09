@@ -4,8 +4,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { IoArrowBackOutline } from "react-icons/io5";
 import axios from "axios";
 import { Phone } from "@mui/icons-material";
-import { refreshDb } from "../Apis/functions";
-const Orders = () => {
+
+const Orders = ({ refreshDb }) => {
   const [counters, setCounters] = useState([]);
   const [counterFilter, setCounterFilter] = useState("");
   const [routes, setRoutes] = useState([]);
@@ -32,8 +32,7 @@ const Orders = () => {
   };
   useEffect(() => {
     getIndexedDbData();
-    return () => setCounters([]);
-  }, [refresh]);
+  }, []);
   const postActivity = async (counter, route) => {
     let time = new Date();
     let data = {
@@ -72,12 +71,37 @@ const Orders = () => {
           </div>
 
           <h1 style={{ width: "100%", textAlign: "center" }}>Counters</h1>
-          <button
-            className="item-sales-search"
-            onClick={() => setPopupForm(true)}
-          >
-            Add
-          </button>
+          {refresh ? (
+            <button
+              className="submit"
+              id="loading-screen"
+              style={{ padding: 0, margin: 0 }}
+            >
+              <svg viewBox="0 0 100 100">
+                <path
+                  d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                  fill="#ffffff"
+                  stroke="none"
+                >
+                  <animateTransform
+                    attributeName="transform"
+                    type="rotate"
+                    dur="1s"
+                    repeatCount="indefinite"
+                    keyTimes="0;1"
+                    values="0 50 51;360 50 51"
+                  ></animateTransform>
+                </path>
+              </svg>
+            </button>
+          ) : (
+            <button
+              className="item-sales-search"
+              onClick={() => setPopupForm(true)}
+            >
+              Add
+            </button>
+          )}
         </nav>
         <div
           style={{
@@ -253,9 +277,14 @@ const Orders = () => {
       )}
       {popupForm ? (
         <NewUserForm
-          setRefresh={setRefresh}
           onSave={() => setPopupForm(false)}
           popupInfo={popupForm}
+          refreshDbC={async () => {
+            setRefresh(true);
+            await refreshDb();
+            await getIndexedDbData();
+            setRefresh(false);
+          }}
         />
       ) : (
         ""
@@ -265,7 +294,7 @@ const Orders = () => {
 };
 
 export default Orders;
-function NewUserForm({ onSave, popupInfo, setRefresh }) {
+function NewUserForm({ onSave, popupInfo, refreshDbC }) {
   const [routesData, setRoutesData] = useState([]);
   const [paymentModes, setPaymentModes] = useState([]);
   const [data, setdata] = useState({});
@@ -337,8 +366,8 @@ function NewUserForm({ onSave, popupInfo, setRefresh }) {
       },
     });
     if (response.data.success) {
-      await refreshDb();
-      setRefresh((prev) => !prev);
+      refreshDbC();
+
       setLoading(false);
       onSave();
     }

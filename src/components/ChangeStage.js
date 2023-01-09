@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Billing } from "../Apis/functions";
 import DiliveryReplaceMent from "./DiliveryReplaceMent";
 import Select from "react-select";
@@ -380,9 +380,27 @@ function DiliveryPopup({
   const [count, setCount] = useState(0);
   const [order, setOrder] = useState({});
   const [editedOrders, setEditedOrders] = useState([]);
+  const time2 = new Date();
+  time2.setHours(12);
   useEffect(() => {
     setOrder(orders[0]);
   }, []);
+  let reminder = useMemo(() => {
+
+    return new Date(
+      time2.setDate(
+        time2.getDate() +
+          (counters.find((a) => a.counter_uuid === order.counter_uuid)
+            ?.payment_reminder_days || 0)
+      )
+    ).getTime();
+  }, [counters, order.counter_uuid]);
+  let type = useMemo(() => {
+    return (
+      counters.find((a) => a.counter_uuid === order.counter_uuid)
+        ?.outstanding_type || 0
+    );
+  }, [counters, order.counter_uuid]);
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -396,8 +414,7 @@ function DiliveryPopup({
   };
   useEffect(() => {
     let time = new Date();
-    let time2 = new Date();
-    time2.setHours(12);
+ 
     setOutstanding({
       order_uuid: order?.order_uuid,
       amount: "",
@@ -406,13 +423,12 @@ function DiliveryPopup({
       invoice_number: order.invoice_number,
       trip_uuid: order.trip_uuid,
       counter_uuid: order.counter_uuid,
-      reminder: new Date(
-        time2.setDate(time2.getDate() + (counters.payment_reminder_days || 0))
-      ).getTime(),
+      reminder,
+        type
       
     });
     GetPaymentModes();
-  }, [counters.payment_reminder_days, order]);
+  }, [counters.payment_reminder_days, order, reminder, type]);
   useEffect(() => {
     if (PaymentModes?.length)
       setModes(
@@ -457,6 +473,11 @@ function DiliveryPopup({
   const submitHandler = async () => {
     setWaiting(true);
     setError("");
+    if(outstanding.amount&&!outstanding.remarks){
+      setError("Remarks is mandatory");
+      setWaiting(false);
+      return;
+    }
     // let billingData = await Billing({
     //   replacement: data.actual,
     //   replacement_mrp: data.mrp,
@@ -475,10 +496,7 @@ function DiliveryPopup({
     //   item_details: billingData.items,
     // };
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
-    console.log(
-      order?.order_grandtotal,
-      +(+modeTotal + (+outstanding?.amount || 0))
-    );
+
     if (
       +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {
@@ -497,10 +515,10 @@ function DiliveryPopup({
       time: time.getTime(),
       order_uuid: order.order_uuid,
       counter_uuid: order.counter_uuid,
-      invoice_number: order.invoice_number,
       trip_uuid: order.trip_uuid,
-      modes: modes.map((a) =>
-        a.mode_title === "Cash" ? { ...a, cash: 0 } : a
+      invoice_number: order.invoice_number,
+      modes: modes?.map((a) =>
+        a.mode_title === "Cash" ? { ...a, coin: 0 } : a
       ),
     };
     let response;
@@ -515,7 +533,7 @@ function DiliveryPopup({
       });
     }
     if (outstanding?.amount)
-      response =await axios({
+      response = await axios({
         method: "post",
         url: "/Outstanding/postOutstanding",
         data: outstanding,
@@ -643,6 +661,42 @@ function DiliveryPopup({
                       {/* {popupInfo.conversion || 0} */}
                     </label>
                   </div>
+                  {outstanding?.amount ? (
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "100%" }}
+                      >
+                        <input
+                          type="text"
+                          name="route_title"
+                          className="numberInput"
+                          value={outstanding?.remarks}
+                          placeholder={"Remarks"}
+                          style={{
+                            width: "100%",
+                            backgroundColor: "light",
+                            fontSize: "12px",
+                 
+                          }}
+                          onChange={(e) =>
+                            setOutstanding((prev) => ({
+                              ...prev,
+                              remarks: e.target.value,
+                            }))
+                          }
+                          maxLength={42}
+                          onWheel={(e) => e.preventDefault()}
+                        />
+                        {/* {popupInfo.conversion || 0} */}
+                      </label>
+                    </div>
+                  ) : (
+                    ""
+                  )}
                   <div
                     className="row"
                     style={{ flexDirection: "row", alignItems: "center" }}

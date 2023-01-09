@@ -52,14 +52,14 @@ import StockTransfer from "./users/StockTransfer";
 import AddOutStanding from "./pages/AddOrder/AddOutStanding";
 import OutstangingsCollection from "./users/OutstangingsCollection";
 import PendingReciptsEntry from "./pages/Reports/PendingReciptsEntry";
-
+import { refreshDb } from "./Apis/functions";
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
 
   axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
-  // axios.defaults.baseURL = "http://localhost:9000"; 
+  // axios.defaults.baseURL = "http://localhost:9000";
 
   const getUserType = async () => {
     let user_uuid = localStorage.getItem("user_uuid");
@@ -92,7 +92,7 @@ function App() {
       }
     }
   }, [userType]);
-  document.title="BT"
+  document.title = "BT";
 
   return (
     <div className="App">
@@ -104,13 +104,19 @@ function App() {
             <>
               {/* users routes */}
               <Route path="/users" element={<Main />} />
-              <Route path="/users/orders" element={<Orders />} />
+              <Route
+                path="/users/orders"
+                element={<Orders refreshDb={refreshDb} />}
+              />
               <Route path="/users/route/:route_uuid" element={<Orders />} />
               <Route path="/users/processing" element={<Processing />} />
               <Route path="/users/checking" element={<Processing />} />
               <Route path="/users/delivery" element={<Processing />} />
               <Route path="/users/stock-transfer" element={<StockTransfer />} />
-              <Route path="/users/outstandingCollection" element={<OutstangingsCollection />} />
+              <Route
+                path="/users/outstandingCollection"
+                element={<OutstangingsCollection />}
+              />
               <Route
                 path="/users/processing/:trip_uuid"
                 element={<ProcessingOrders />}
@@ -147,9 +153,15 @@ function App() {
               {/* admin Routes */}
               <Route path="/admin" element={<MainAdmin />} />
               <Route path="/trip" element={<MainAdmin />} />
-              <Route path="/admin/SalesmanItemSuggestion" element={<SalesmanItemSuggestion />} />
+              <Route
+                path="/admin/SalesmanItemSuggestion"
+                element={<SalesmanItemSuggestion />}
+              />
               <Route path="/admin/routes" element={<RoutesPage />} />
-              <Route path="/admin/InvoiceNumberWiseOrder" element={<InvoiceNumberWiseOrder />} />
+              <Route
+                path="/admin/InvoiceNumberWiseOrder"
+                element={<InvoiceNumberWiseOrder />}
+              />
               <Route
                 path="/admin/itemCategories"
                 element={<ItemCategories />}
@@ -178,7 +190,10 @@ function App() {
               />
               <Route path="/admin/ItemIncentive" element={<ItemIncentive />} />
               <Route path="/admin/addOrder" element={<AddOrder />} />
-              <Route path="/admin/AddOutStanding" element={<AddOutStanding />} />
+              <Route
+                path="/admin/AddOutStanding"
+                element={<AddOutStanding />}
+              />
               <Route path="/admin/addStock" element={<AddStock />} />
               <Route path="/admin/adjustStock" element={<AdjustStock />} />
               <Route path="/admin/userActivity" element={<UserActivity />} />
@@ -203,13 +218,19 @@ function App() {
               <Route path="/admin/CounterLeger" element={<CounterLeger />} />
               <Route path="/admin/Outstandings" element={<Outstanding />} />
               <Route path="/admin/pendingEntry" element={<PendingsEntry />} />
-              <Route path="/admin/pendingReciptsEntry" element={<PendingReciptsEntry />} />
+              <Route
+                path="/admin/pendingReciptsEntry"
+                element={<PendingReciptsEntry />}
+              />
               <Route
                 path="/admin/stockTransferVochers"
                 element={<StockTransferVouchers />}
               />
               <Route path="/admin/currentStock" element={<CurrentStock />} />
-              <Route path="/admin/PartyWiseCompanyDiscount" element={<PartyWiseCompanyDiscount />} />
+              <Route
+                path="/admin/PartyWiseCompanyDiscount"
+                element={<PartyWiseCompanyDiscount />}
+              />
               <Route path="/admin/signedBills" element={<SignedBills />} />
               <Route path="/admin/tasks" element={<TasksPage />} />
               <Route path="*" element={<Navigate replace to={"/admin"} />} />

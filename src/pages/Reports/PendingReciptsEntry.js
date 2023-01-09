@@ -152,7 +152,7 @@ const PendingReciptsEntry = () => {
     const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const data = new Blob([excelBuffer], { type: fileType });
-    FileSaver.saveAs(data, "Book" + fileExtension);
+    FileSaver.saveAs(data, "Recipts" + fileExtension);
     // setSelectedOrders([]);
   };
   return (
@@ -173,7 +173,7 @@ const PendingReciptsEntry = () => {
             }}
             onClick={() =>
               setSelectedOrders((prev) =>
-                prev.length === orders.length ? [] : orders
+                prev.length === orders.length ? [] : orderList
               )
             }
           >

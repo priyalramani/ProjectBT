@@ -2133,7 +2133,6 @@ function DiliveryPopup({
   postOrderData,
   credit_allowed,
   counters,
-  items,
   order,
   updateBilling,
   deliveryPopup,
@@ -2322,6 +2321,7 @@ function DiliveryPopup({
           },
         });
       }
+      
       if (response.data.success) {
         onSave();
       }

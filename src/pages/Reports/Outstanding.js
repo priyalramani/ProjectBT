@@ -22,7 +22,23 @@ const Outstanding = () => {
   const [tagPopup, setTagPopup] = useState(false);
   const [assignTagPopup, setAssignTagPopup] = useState(false);
   const [selectedOrders, setSelectedOrders] = useState([]);
+  const [tags, setTags] = useState([]);
+  const getTags = async () => {
+    let response = await axios({
+      method: "get",
+      url: "/collectionTags/getActiveTag",
+     
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("users", response);
+    if (response.data.success) setTags(response.data.result);
+  };
 
+  useEffect(() => {
+    getTags();
+  }, [assignTagPopup]);
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -87,6 +103,9 @@ const Outstanding = () => {
           counter_title:
             counters.find((b) => b.counter_uuid === a.counter_uuid)
               ?.counter_title || "-",
+          tag_title:
+            tags.find((b) => b.collection_tag_uuid === a.collection_tag_uuid)
+              ?.collection_tag_title || "-",
           route_title:
             routesData.find((b) =>
               counters.find(
@@ -269,6 +288,7 @@ const Outstanding = () => {
             getOutstanding();
           }}
           selectedOrders={selectedOrders}
+          tags={tags}
         />
       ) : (
         ""
@@ -327,6 +347,7 @@ function Table({
           <th colSpan={2}>Remarks</th>
           <th colSpan={2}>Duration</th>
           <th colSpan={2}>Amount</th>
+          <th colSpan={2}>Tag</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -406,6 +427,7 @@ function Table({
               <td colSpan={2}>{item.remarks || ""}</td>
               <td colSpan={2}>{format(+item.time)}</td>
               <td colSpan={2}>{item.amount || ""}</td>
+              <td colSpan={2}>{item.tag_title || ""}</td>
             </tr>
           ))}
       </tbody>
@@ -937,30 +959,15 @@ function TypeChangePopup({
     </>
   );
 }
-function AssignTagPopup({ onSave, selectedOrders }) {
+function AssignTagPopup({ onSave, selectedOrders,tags }) {
   const [error, setError] = useState("");
 
   const [waiting, setWaiting] = useState(false);
-  const [tags, setTags] = useState([]);
+
 
   // const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState("");
-  const getUsers = async () => {
-    let response = await axios({
-      method: "get",
-      url: "/collectionTags/getActiveTag",
-      data,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log("users", response);
-    if (response.data.success) setTags(response.data.result);
-  };
 
-  useEffect(() => {
-    getUsers();
-  }, []);
   const submitHandler = async () => {
     setWaiting(true);
 

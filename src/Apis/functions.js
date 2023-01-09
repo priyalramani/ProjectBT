@@ -275,7 +275,7 @@ export const Billing = async ({
             (a) => a.company_uuid === item.company_uuid
           )?.discount || 0
         : 0;
-     
+
     item = {
       ...item,
       qty: +item.conversion * +item.b + +item.p,
@@ -596,8 +596,9 @@ export const jumpToNextIndex = (
 };
 
 export const refreshDb = async () => {
-  let response = await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
-  console.log(response);
+  let Version = +(localStorage.getItem("IDBVersion") || 0 )+ 1;
+   await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+  console.log(Version);
   const result = await axios({
     method: "get",
     url: "/users/getDetails",
@@ -607,7 +608,7 @@ export const refreshDb = async () => {
   });
   let data = result.data.result;
   console.log(data);
-  const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
+  const db = await openDB("BT", Version, {
     upgrade(db) {
       for (const property in data) {
         db.createObjectStore(property, {
@@ -616,7 +617,7 @@ export const refreshDb = async () => {
       }
     },
   });
-
+  localStorage.setItem("IDBVersion",Version)
   let store;
   for (const property in data) {
     store = await db.transaction(property, "readwrite").objectStore(property);

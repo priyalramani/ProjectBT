@@ -10,7 +10,6 @@ const LoginPage = ({ setUserType }) => {
     login_password: "",
   });
 
-
   const loginHandler = async () => {
     try {
       setIsLoading(true);
@@ -33,7 +32,7 @@ const LoginPage = ({ setUserType }) => {
         localStorage.setItem("user_role", JSON.stringify(data.user_role || []));
         localStorage.setItem("user_mobile", data.user_mobile);
         localStorage.setItem("warehouse", JSON.stringify(data.warehouse));
-        
+
         sessionStorage.setItem("userType", response.data.result.user_type);
         if (+data.user_type === 0) {
           setUserType(response.data.result.user_type || false);
@@ -63,7 +62,7 @@ const LoginPage = ({ setUserType }) => {
             },
           }
         );
-
+        localStorage.setItem("IDBVersion", 1);
         let store;
         for (const property in data) {
           store = await db
@@ -96,12 +95,10 @@ const LoginPage = ({ setUserType }) => {
             await store.put({ ...item, IDENTIFIER });
           }
         }
-       
-       
 
         let time = new Date();
         localStorage.setItem("indexed_time", time.getTime());
-         setTimeout(() => { 
+        setTimeout(() => {
           setUserType(response.data.result.user_type || false);
           setIsLoading(false);
           db.close();
