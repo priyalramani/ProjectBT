@@ -516,6 +516,7 @@ function NewUserForm({
         )[0]?.category_uuid,
         free_issue: "N",
         status: 1,
+        exclude_discount:0
       });
   }, [companies, itemCategories, popupInfo.data, popupInfo?.type]);
 
@@ -579,8 +580,8 @@ function NewUserForm({
   };
 
   return (
-    <div className="overlay">
-      <div className="modal" style={{ height: "70vh", width: "fit-content" }}>
+    <div className="overlay" style={{zIndex:9999999}}>
+      <div className="modal" style={{ height: "90vh", width: "fit-content" }}>
         <div
           className="content"
           style={{
@@ -939,6 +940,40 @@ function NewUserForm({
                           style={{ height: "25px" }}
                           onClick={() =>
                             setdata((prev) => ({ ...prev, status: 0 }))
+                          }
+                        />
+                        Off
+                      </div>
+                    </div>
+                  </label>
+                  <label className="selectLabel">
+                  Exclude Discount
+                    <div
+                      className="flex"
+                      style={{ justifyContent: "space-between" }}
+                    >
+                      <div className="flex">
+                        <input
+                          type="radio"
+                          name="sort_order"
+                          className="numberInput"
+                          checked={data.exclude_discount}
+                          style={{ height: "25px" }}
+                          onClick={() =>
+                            setdata((prev) => ({ ...prev, exclude_discount: 1 }))
+                          }
+                        />
+                        On
+                      </div>
+                      <div className="flex">
+                        <input
+                          type="radio"
+                          name="sort_order"
+                          className="numberInput"
+                          checked={!data.exclude_discount}
+                          style={{ height: "25px" }}
+                          onClick={() =>
+                            setdata((prev) => ({ ...prev, exclude_discount: 0 }))
                           }
                         />
                         Off

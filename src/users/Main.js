@@ -119,7 +119,7 @@ const Main = () => {
               fontSize: "20px",
             }}
           >
-            Version 47.{localStorage.getItem("IDBVersion")}
+            Version 48.{localStorage.getItem("IDBVersion")}
           </div>
 
           <button

@@ -32,6 +32,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [printData, setPrintData] = useState({ item_details: [], status: [] });
   const [holdPopup, setHoldPopup] = useState(false);
   const [messagePopup, setMessagePopup] = useState(false);
+  const [splitHoldPopup, setSplitHold] = useState(false);
   const [paymentModes, setPaymentModes] = useState([]);
   const [complete, setComplete] = useState(false);
   const [completeOrder, setCompleteOrder] = useState(false);
@@ -421,6 +422,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       setMessagePopup(data);
     }
   };
+
   const updateOrder = async (data = messagePopup) => {
     setWaiting(true);
     const response = await axios({
@@ -443,6 +445,175 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       setMessagePopup(false);
     }
   };
+  const splitOrder = async (type = { stage: 0 }) => {
+    setWaiting(true);
+    let counter = counters.find(
+      (a) => orderData?.counter_uuid === a.counter_uuid
+    );
+    let fulfillment = orderData.fulfillment;
+    for (let item of orderData.item_details) {
+      let itemData = order.item_details.find(
+        (a) => a.item_uuid === item.item_uuid
+      );
+      let aQty = +(item?.b || 0) * (+item?.conversion || 0) + (+item?.p || 0);
+      let bQty =
+        +(itemData?.b || 0) * (+item?.conversion || 0) + (+itemData?.p || 0);
+      let difference = bQty - aQty;
+      if (bQty > aQty) {
+        let exicting = fulfillment?.find((a) => a.item_uuid === item.item_uuid);
+        if (exicting) {
+          difference =
+            difference +
+            (+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0));
+        }
+
+        fulfillment.push({
+          item_uuid: item.item_uuid,
+          b: Math.floor(difference / (+item.conversion || 1)),
+          p: Math.floor(difference % (+item.conversion || 1)),
+        });
+      }
+    }
+    // console.log(fulfillment);
+    let data = {
+      ...orderData,
+
+      item_details:
+        orderData?.item_details.filter((a) => a.item_uuid && +a.status !== 2) ||
+        [],
+    };
+    let data2 = {
+      ...orderData,
+
+      item_details:
+        orderData?.item_details.filter((a) => a.item_uuid && +a.status === 2) ||
+        [],
+    };
+
+    let autoBilling = await Billing({
+      counter,
+      items: data.item_details,
+      replacement: data.replacement,
+      adjustment: data.adjustment,
+      shortage: data.shortage,
+      others: {},
+    });
+    data = {
+      ...data,
+      ...autoBilling,
+      item_details: autoBilling.items,
+    };
+    let autoBilling2 = await Billing({
+      counter,
+      items: data2.item_details,
+      replacement: data2.replacement,
+      adjustment: data2.adjustment,
+      shortage: data2.shortage,
+      others: {},
+    });
+    data2 = {
+      ...data2,
+      ...autoBilling2,
+      item_details: autoBilling2.items,
+    };
+    let time = new Date();
+    let user_uuid = localStorage.getItem("user_uuid");
+    data = {
+      ...data,
+
+      item_details: data.item_details?.map((a) => ({
+        ...a,
+        gst_percentage: a.item_gst,
+        status: a.status || 0,
+        price: a?.price || a.item_price || 0,
+      })),
+      order_status: data?.item_details.filter((a) => a.price_approval === "N")
+        ?.length
+        ? "A"
+        : "R",
+      orderStatus,
+    };
+
+    data =
+      type.stage === 5
+        ? {
+            ...data,
+            status: [
+              {
+                stage: 1,
+                time:
+                  data?.status?.find((a) => +a.stage === 1)?.time ||
+                  time.getTime(),
+                user_uuid:
+                  data?.status?.find((a) => +a.stage === 1)?.user_uuid ||
+                  user_uuid,
+              },
+              {
+                stage: 2,
+                time:
+                  data?.status?.find((a) => +a.stage === 1)?.time ||
+                  time.getTime(),
+                user_uuid:
+                  data?.status?.find((a) => +a.stage === 1)?.user_uuid ||
+                  user_uuid,
+              },
+              {
+                stage: 3,
+                time:
+                  data?.status?.find((a) => +a.stage === 1)?.time ||
+                  time.getTime(),
+                user_uuid:
+                  data?.status?.find((a) => +a.stage === 1)?.user_uuid ||
+                  user_uuid,
+              },
+              {
+                stage: 4,
+                time: time.getTime(),
+                user_uuid,
+              },
+            ],
+          }
+        : {
+            ...data,
+            fulfillment: [
+              ...(fulfillment || []),
+              ...(order.fulfillment.filter(
+                (a) => !fulfillment.find((b) => b.item_uuid === a.item_uuid)
+              ) || []),
+            ],
+          };
+    // console.log("data", data);
+
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: [data],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    delete data2.order_uuid;
+    delete data2.invoice_number;
+    delete data2._id;
+    const response2 = await axios({
+      method: "post",
+      url: "/orders/postOrder",
+      data: data2,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response2.data.success) {
+      // window.location.reload();
+      console.log(response2);
+    }
+    if (response.data.success) {
+      onSave();
+    }
+    setWaiting(false);
+  };
+
   const handleWarehouseChacking = async (complete, methodType) => {
     let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
     if (methodType === "complete") {
@@ -750,7 +921,15 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       Free
                     </button>
                   ) : (
-                    ""
+                    <button
+                      className="item-sales-search"
+                      style={{
+                        width: "max-content",
+                      }}
+                      onClick={() => setSplitHold(true)}
+                    >
+                      Split Hold Order
+                    </button>
                   )}
                   <button
                     style={{ width: "fit-Content" }}
@@ -1668,6 +1847,18 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       ) : (
         ""
       )}
+      {splitHoldPopup ? (
+        <MessagePopup
+          onClose={splitOrder}
+          message="Create Separate Order for Hold ?"
+          message2=""
+          button1="Save"
+          button2="Cancel"
+          onSave={() => setSplitHold(false)}
+        />
+      ) : (
+        ""
+      )}
       {warehousePopup ? (
         <NewUserForm
           onClose={() => setWarhousePopup(false)}
@@ -2149,7 +2340,6 @@ function DiliveryPopup({
   const time2 = new Date();
   time2.setHours(12);
   let reminder = useMemo(() => {
-
     return new Date(
       time2.setDate(
         time2.getDate() +
@@ -2213,7 +2403,7 @@ function DiliveryPopup({
         trip_uuid: order.trip_uuid,
         counter_uuid: order.counter_uuid,
         reminder,
-        type
+        type,
       });
     }
   };
@@ -2231,7 +2421,7 @@ function DiliveryPopup({
         trip_uuid: order.trip_uuid,
         counter_uuid: order.counter_uuid,
         reminder,
-        type
+        type,
       });
     }
     GetPaymentModes();
@@ -2242,7 +2432,7 @@ function DiliveryPopup({
     order.order_uuid,
     order.trip_uuid,
     reminder,
-    type
+    type,
   ]);
   useEffect(() => {
     if (PaymentModes?.length)
@@ -2261,7 +2451,7 @@ function DiliveryPopup({
   }, [PaymentModes]);
   const submitHandler = async () => {
     setWaiting(true);
-    if(outstanding.amount&&!outstanding.remarks){
+    if (outstanding.amount && !outstanding.remarks) {
       setError("Remarks is mandatory");
       setWaiting(false);
       return;
@@ -2321,7 +2511,7 @@ function DiliveryPopup({
           },
         });
       }
-      
+
       if (response.data.success) {
         onSave();
       }
@@ -2488,7 +2678,6 @@ function DiliveryPopup({
                             width: "100%",
                             backgroundColor: "light",
                             fontSize: "12px",
-                 
                           }}
                           onChange={(e) =>
                             setOutstanding((prev) => ({

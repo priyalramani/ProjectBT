@@ -35,6 +35,8 @@ const SelectedCounterOrder = () => {
   const [orderCreated, setOrderCreated] = useState(false);
   const [total, setTotal] = useState(0);
   const [holdPopup, setHoldPopup] = useState(false);
+  const [discountPopup, setDiscountPopup] = useState(false);
+  const [invoice_number, setInvioceNumber] = useState(false);
   const [loading, setLoading] = useState(false);
   const Navigate = useNavigate();
   const callBilling = async () => {
@@ -59,7 +61,6 @@ const SelectedCounterOrder = () => {
     callBilling();
   }, [order?.items]);
 
-  console.log(total);
   const getCounter = async () => {
     const response = await axios({
       method: "post",
@@ -108,7 +109,7 @@ const SelectedCounterOrder = () => {
     confirmItemsPopup,
     userData?.salesman_suggestion,
   ]);
-  console.log(salesman_suggestion);
+
   const putCounterData = async (e) => {
     e.preventDefault();
     if (!food_license) return;
@@ -219,6 +220,8 @@ const SelectedCounterOrder = () => {
       },
     });
     if (response.data.success) {
+      console.log(response.data);
+      setInvioceNumber(response.data.result.invoice_number);
       let qty = `${
         data?.item_details?.length > 1
           ? data?.item_details?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
@@ -239,11 +242,11 @@ const SelectedCounterOrder = () => {
         amt: data.order_grandtotal || 0,
       });
       console.log(response.data.incentives);
+      setLoading(false);
       if (response.data.incentives) {
         setCheckNumberPopup(response.data.incentives);
-        setLoading(false);
         return;
-      } else Navigate(-1);
+      }
     } else {
       setLoading(false);
     }
@@ -295,6 +298,16 @@ const SelectedCounterOrder = () => {
           {cartPage ? (
             <>
               <h1 style={{ width: "100%", textAlign: "center" }}>Cart</h1>
+              <button
+                className="item-sales-search"
+                style={{
+                  width: "max-content",
+                  backgroundColor: "#4ac959",
+                }}
+                onClick={() => setDiscountPopup("Summary")}
+              >
+                Discount
+              </button>
               <button
                 className="item-sales-search"
                 style={{
@@ -1055,6 +1068,15 @@ const SelectedCounterOrder = () => {
       ) : (
         ""
       )}
+      {discountPopup ? (
+        <DiscountPopup
+          onSave={() => setDiscountPopup(false)}
+          setOrder={setOrder}
+          order={order}
+        />
+      ) : (
+        ""
+      )}
       {loading ? (
         <div className="overlay" style={{ zIndex: 9999999 }}>
           <div className="flex" style={{ width: "40px", height: "40px" }}>
@@ -1237,7 +1259,7 @@ const SelectedCounterOrder = () => {
       ) : (
         ""
       )}
-      {checkNumberPopup ? (
+      {invoice_number ? (
         <div className="overlay">
           <div
             className="modal"
@@ -1252,7 +1274,22 @@ const SelectedCounterOrder = () => {
               }}
             >
               <div style={{ overflowY: "scroll" }}>
-                <h2>Incentive Estimate Rs {checkNumberPopup}</h2>
+                <h3>Invoice Number</h3>
+                <h1
+                  style={{
+                    width: "100%",
+                    textAlign: "center",
+                    fontSize: "50px",
+                    color: "var(--main)",
+                  }}
+                >
+                  {invoice_number}
+                </h1>
+                {checkNumberPopup ? (
+                  <h2>Incentive Estimate Rs {checkNumberPopup}</h2>
+                ) : (
+                  ""
+                )}
                 <form className="form" onSubmit={putCounterNumber}>
                   <button type="submit" className="submit">
                     Great
@@ -1724,6 +1761,151 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
                           p: e.target.value,
                         })
                       }
+                      autoFocus={true}
+                      maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
+                    />
+                  </label>
+                </div>
+              </div>
+              <i style={{ color: "red" }}>
+                {errMassage === "" ? "" : "Error: " + errMassage}
+              </i>
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function DiscountPopup({ onSave, setOrder, order }) {
+  const [data, setdata] = useState({});
+  const [errMassage, setErrorMassage] = useState("");
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    setOrder((prev) => ({
+      ...prev,
+      items: prev?.items?.map((a) =>
+        a.exclude_discount === 0
+          ? {
+              ...a,
+              charges_discount: [
+                ...(a.charges_discount || []),
+                { title: "Bill Discounting", value: data },
+              ],
+            }
+          : a
+      ),
+    }));
+    onSave();
+  };
+
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="formGroup">
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "flex-start" }}
+                >
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    Discount
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data}
+                      style={{ width: "100px" }}
+                      onChange={(e) => setdata(e.target.value)}
+                      autoFocus={true}
+                      maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
+                    />
+                  </label>
+                </div>
+              </div>
+              <i style={{ color: "red" }}>
+                {errMassage === "" ? "" : "Error: " + errMassage}
+              </i>
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function FinelPopup({ onSave, setOrder, order }) {
+  const [data, setdata] = useState({});
+  const [errMassage, setErrorMassage] = useState("");
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+  };
+
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="formGroup">
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "flex-start" }}
+                >
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    Discount
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={data}
+                      style={{ width: "100px" }}
+                      onChange={(e) => setdata(e.target.value)}
                       autoFocus={true}
                       maxLength={42}
                       onWheel={(e) => e.preventDefault()}

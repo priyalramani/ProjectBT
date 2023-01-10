@@ -255,6 +255,9 @@ export const Billing = async ({
     item = { ...item, item_total: 0 };
     let edit_price = +edit_prices.find((a) => a.item_uuid === item.item_uuid)
       ?.item_price;
+    let billDiscounts = item.charges_discount?.find(
+      (a) => a.title === "Bill Discounting"
+    );
     let charges_discount =
       add_discounts || item.edit
         ? []
@@ -341,17 +344,31 @@ export const Billing = async ({
               ? (100 - +charges_discount[0]?.value) / 100
               : 1),
     };
-    // console.log(item.item_desc_total);
+    console.log(
+      charges_discount?.length > 1
+        ? charges_discount
+            ?.map((a) => +((100 - +a.value) / 100))
+            ?.reduce((a, b) => a * b)
+        : item?.charges_discount?.length
+        ? (100 - +charges_discount[0]?.value) / 100
+        : 1
+    );
+    let item_total =
+      item.status !== 3
+        ? (+item.item_desc_total === 0
+            ? 0
+            : (+item.item_desc_total || +item?.price || +item.item_price || 0) *
+              (+item.qty || 0)
+          ).toFixed(2)
+        : 0;
+    if (billDiscounts && add_discounts) {
+      charges_discount.push(billDiscounts);
+      item_total = item_total * +((100 - +billDiscounts.value) / 100);
+    }
     item = {
       ...item,
       charges_discount,
-      item_total:
-        item.status !== 3
-          ? (
-              (+item.item_desc_total || +item?.price || +item.item_price || 0) *
-              (+item.qty || 0)
-            ).toFixed(2)
-          : 0,
+      item_total,
       item_desc_total: 0,
     };
 
@@ -596,8 +613,8 @@ export const jumpToNextIndex = (
 };
 
 export const refreshDb = async () => {
-  let Version = +(localStorage.getItem("IDBVersion") || 0 )+ 1;
-   await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+  let Version = +(localStorage.getItem("IDBVersion") || 0) + 1;
+  await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
   console.log(Version);
   const result = await axios({
     method: "get",
@@ -617,7 +634,7 @@ export const refreshDb = async () => {
       }
     },
   });
-  localStorage.setItem("IDBVersion",Version)
+  localStorage.setItem("IDBVersion", Version);
   let store;
   for (const property in data) {
     store = await db.transaction(property, "readwrite").objectStore(property);
