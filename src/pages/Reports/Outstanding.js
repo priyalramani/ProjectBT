@@ -3,14 +3,17 @@ import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import Header from "../../components/Header";
+import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
 let typesData = [
   { index: 0, name: "None" },
   { index: 1, name: "Visit" },
   { index: 2, name: "Call" },
+  { index: 3, name: "Self" },
 ];
 const Outstanding = () => {
   const [outstanding, setOutstanding] = useState();
+  const [popupOrder, setPopupOrder] = useState(null);
   const [type, setType] = useState("");
   const [filterTitle, setFilterTitle] = useState("");
   const [routesData, setRoutesData] = useState([]);
@@ -27,7 +30,7 @@ const Outstanding = () => {
     let response = await axios({
       method: "get",
       url: "/collectionTags/getActiveTag",
-     
+
       headers: {
         "Content-Type": "application/json",
       },
@@ -129,6 +132,17 @@ const Outstanding = () => {
         ) || [],
     [counters, filterTitle, outstanding, routesData, type, users]
   );
+  const getOrderData = async (order) => {
+    const response = await axios({
+      method: "get",
+      url: "/orders/GetOrder/" + order.order_uuid,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("transactions", response);
+    if (response.data.success) setPopupOrder(response.data.result);
+  };
   return (
     <>
       <Sidebar />
@@ -168,6 +182,7 @@ const Outstanding = () => {
                 <option value={0}>None</option>
                 <option value={1}>Visit</option>
                 <option value={2}>Call</option>
+                <option value={3}>Self</option>
               </select>
             </label>
 
@@ -220,9 +235,22 @@ const Outstanding = () => {
             setTypePopup={setTypePopup}
             setSelectedOrders={setSelectedOrders}
             selectedOrders={selectedOrders}
+            getOrderData={getOrderData}
           />
         </div>
       </div>
+      {popupOrder ? (
+        <OrderDetails
+          onSave={() => {
+            setPopupOrder(null);
+            getOutstanding();
+          }}
+          order={popupOrder}
+          orderStatus="edit"
+        />
+      ) : (
+        ""
+      )}
       {deliveryPopup ? (
         <DiliveryPopup
           onSave={() => {
@@ -306,6 +334,7 @@ function Table({
   setTypePopup,
   setSelectedOrders,
   selectedOrders,
+  getOrderData,
 }) {
   function formatAMPM(date) {
     var hours = date.getHours();
@@ -348,6 +377,7 @@ function Table({
           <th colSpan={2}>Duration</th>
           <th colSpan={2}>Amount</th>
           <th colSpan={2}>Tag</th>
+          <th colSpan={2}></th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -428,6 +458,17 @@ function Table({
               <td colSpan={2}>{format(+item.time)}</td>
               <td colSpan={2}>{item.amount || ""}</td>
               <td colSpan={2}>{item.tag_title || ""}</td>
+              <td colSpan={2}>
+                <button
+                  className="item-sales-search"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    getOrderData(item);
+                  }}
+                >
+                  Order
+                </button>
+              </td>
             </tr>
           ))}
       </tbody>
@@ -901,6 +942,7 @@ function TypeChangePopup({
                         <option value={0}>None</option>
                         <option value={1}>Visit</option>
                         <option value={2}>Call</option>
+                        <option value={3}>Self</option>
                       </select>
                     </label>
                   </div>
@@ -959,11 +1001,10 @@ function TypeChangePopup({
     </>
   );
 }
-function AssignTagPopup({ onSave, selectedOrders,tags }) {
+function AssignTagPopup({ onSave, selectedOrders, tags }) {
   const [error, setError] = useState("");
 
   const [waiting, setWaiting] = useState(false);
-
 
   // const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState("");

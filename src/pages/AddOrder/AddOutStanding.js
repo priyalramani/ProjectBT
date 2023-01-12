@@ -192,6 +192,7 @@ const AddOutStanding = () => {
                       <option value={0}>None</option>
                       <option value={1}>Visit</option>
                       <option value={2}>Call</option>
+                      <option value={3}>Self</option>
                     </select>
                   </label>
                 </div>
