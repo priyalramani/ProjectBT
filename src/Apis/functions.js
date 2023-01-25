@@ -365,6 +365,8 @@ export const Billing = async ({
       charges_discount.push(billDiscounts);
       item_total = item_total * +((100 - +billDiscounts.value) / 100);
     }
+    console.log(typeof item_total,item_total)
+    if (item_total) item_total = (+item_total||0).toFixed(2);
     item = {
       ...item,
       charges_discount,

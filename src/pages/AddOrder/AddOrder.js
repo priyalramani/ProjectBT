@@ -157,8 +157,11 @@ export default function AddOrder() {
     }
     let time = new Date();
     let autoBilling = await Billing({
+      replacement: data.replacement,
+      adjustment: data.adjustment,
+      shortage: data.shortage,
       counter,
-      items: data.item_details,
+      items: data.item_details.map((a) => ({ ...a, item_price: a.p_price })),
       others: {
         stage: 1,
         user_uuid: "240522",
@@ -166,12 +169,12 @@ export default function AddOrder() {
 
         type: "NEW",
       },
-      replacement: data.replacement,
       add_discounts: true,
       edit_prices: edit_prices.map((a) => ({
         ...a,
-        item_price: a.p_price || a.item_price,
+        item_price: a.p_price,
       })),
+      ...type,
     });
     data = {
       ...data,

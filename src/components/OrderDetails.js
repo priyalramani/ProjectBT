@@ -901,8 +901,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     className="item-sales-search"
                     onClick={() => {
                       if (
-                        window.location.pathname.includes("admin") ||
-                        window.location.pathname.includes("trip")
+                        !window.location.pathname.includes("completeOrderReport") &&
+                        (window.location.pathname.includes("admin") ||
+                        window.location.pathname.includes("trip"))
                       )
                         handleWarehouseChacking();
                       else handlePrint();

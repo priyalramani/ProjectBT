@@ -10,6 +10,7 @@ let typesData = [
   { index: 1, name: "Visit" },
   { index: 2, name: "Call" },
   { index: 3, name: "Self" },
+  { index: 4, name: "Others" },
 ];
 const Outstanding = () => {
   const [outstanding, setOutstanding] = useState();
@@ -183,6 +184,7 @@ const Outstanding = () => {
                 <option value={1}>Visit</option>
                 <option value={2}>Call</option>
                 <option value={3}>Self</option>
+                <option value={4}>Others</option>
               </select>
             </label>
 
@@ -943,6 +945,7 @@ function TypeChangePopup({
                         <option value={1}>Visit</option>
                         <option value={2}>Call</option>
                         <option value={3}>Self</option>
+                        <option value={4}>Others</option>
                       </select>
                     </label>
                   </div>

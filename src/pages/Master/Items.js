@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
@@ -55,30 +55,23 @@ const ItemsPage = () => {
   useEffect(
     () =>
       setFilterItemsData(
-        itemsData
-          .filter((a) => a.item_title)
-          .filter((a) => disabledItem || a.status)
-          .filter(
-            (a) =>
-              !filterTitle ||
+        itemsData.filter(
+          (a) =>
+            a.item_title &&
+            (disabledItem || a.status) &&
+            (!filterTitle ||
               a.item_title
                 .toLocaleLowerCase()
-                .includes(filterTitle.toLocaleLowerCase())
-          )
-          .filter(
-            (a) =>
-              !filterCompany ||
+                .includes(filterTitle.toLocaleLowerCase())) &&
+            (!filterCompany ||
               a.company_title
                 .toLocaleLowerCase()
-                .includes(filterCompany.toLocaleLowerCase())
-          )
-          .filter(
-            (a) =>
-              !filterCategory ||
+                .includes(filterCompany.toLocaleLowerCase())) &&
+            (!filterCategory ||
               a.category_title
                 .toLocaleLowerCase()
-                .includes(filterCategory.toLocaleLowerCase())
-          )
+                .includes(filterCategory.toLocaleLowerCase()))
+        )
       ),
     [itemsData, filterTitle, filterCategory, filterCompany, disabledItem]
   );
@@ -138,15 +131,22 @@ const ItemsPage = () => {
               className="searchInput"
             />
             <div>Total Items: {filterItemsData.length}</div>
-            <div style={{display:"flex",width:"120px",alignItems:"center",justifyContent:"space-between"}}>
+            <div
+              style={{
+                display: "flex",
+                width: "120px",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
               <input
                 type="checkbox"
                 onChange={(e) => setDisabledItem(e.target.checked)}
                 value={disabledItem}
                 className="searchInput"
-                style={{scale:"1.2"}}
+                style={{ scale: "1.2" }}
               />
-              <div style={{width:"100px"}}>Disabled Items</div>
+              <div style={{ width: "100px" }}>Disabled Items</div>
             </div>
 
             <button
@@ -494,10 +494,27 @@ function NewUserForm({
   items,
 }) {
   const [data, setdata] = useState({});
-
+  const [itemGroupPopup, setItemGroupPopuo] = useState(false);
+  const [itemGroup, setItemGroup] = useState([]);
+  const [pattern, setPattern] = useState();
   const [errMassage, setErrorMassage] = useState("");
   let findDuplicates = (arr) =>
     arr?.filter((item, index) => arr?.indexOf(item) != index);
+  const getCounterGroup = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/itemGroup/GetItemGroupList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setItemGroup(response.data.result);
+  };
+
+  useEffect(() => {
+    getCounterGroup();
+  }, []);
   useEffect(() => {
     if (popupInfo?.type === "edit")
       setdata({
@@ -516,7 +533,7 @@ function NewUserForm({
         )[0]?.category_uuid,
         free_issue: "N",
         status: 1,
-        exclude_discount:0
+        exclude_discount: 0,
       });
   }, [companies, itemCategories, popupInfo.data, popupInfo?.type]);
 
@@ -578,9 +595,17 @@ function NewUserForm({
       }
     }
   };
-
+  const filteredGroups = useMemo(
+    () =>
+      itemGroup.filter(
+        (a) =>
+          !pattern ||
+          a.item_group_title.toLocaleLowerCase().includes(pattern.toLocaleLowerCase())
+      ),
+    [itemGroup, pattern]
+  );
   return (
-    <div className="overlay" style={{zIndex:9999999}}>
+    <div className="overlay" style={{ zIndex: 9999999 }}>
       <div className="modal" style={{ height: "90vh", width: "fit-content" }}>
         <div
           className="content"
@@ -590,407 +615,533 @@ function NewUserForm({
             width: "fit-content",
           }}
         >
-          <div style={{ overflowY: "scroll" }}>
-            <form className="form" onSubmit={submitHandler}>
-              <div className="row">
-                <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Items</h1>
+          {itemGroupPopup ? (
+            <div
+              className="noSpaceForm"
+              style={{
+                padding: "0px 12px",
+                height: "fit-content",
+              }}
+            >
+              <h1>Groups</h1>
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                <input
+                  type="text"
+                  onChange={(e) => setPattern(e.target.value)}
+                  value={pattern}
+                  placeholder="Search Groups..."
+                  className="searchInput"
+                />
               </div>
 
-              <div className="formGroup">
-                <div className="row">
-                  <label className="selectLabel">
-                    Item Title
-                    <input
-                      type="text"
-                      name="route_title"
-                      className="numberInput"
-                      value={data?.item_title}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          item_title: e.target.value,
-                          pronounce: e.target.value,
-                        })
-                      }
-                      maxLength={60}
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    Sort Order
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
-                      className="numberInput"
-                      value={data?.sort_order}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          sort_order: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    Company
-                    <select
-                      name="user_type"
-                      className="select"
-                      value={data?.company_uuid}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          company_uuid: e.target.value,
-                          category_uuid: itemCategories.filter(
-                            (a) => a.company_uuid === e.target.value
-                          )[0]?.category_uuid,
-                        })
-                      }
-                    >
-                      {companies
-                        .sort((a, b) => a.sort_order - b.sort_order)
-                        .map((a) => (
-                          <option value={a.company_uuid}>
-                            {a.company_title}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
-                  <label className="selectLabel">
-                    Item Category
-                    <select
-                      name="user_type"
-                      className="select"
-                      value={data?.category_uuid}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          category_uuid: e.target.value,
-                        })
-                      }
-                    >
-                      {itemCategories
-                        .filter((a) => a.company_uuid === data.company_uuid)
-                        .sort((a, b) => a.sort_order - b.sort_order)
-                        .map((a) => (
-                          <option value={a.category_uuid}>
-                            {a.category_title}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
-                </div>
+              <div
+                style={{
+                  overflowY: "scroll",
+                  height: "45vh",
+                }}
+              >
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th className="description" style={{ width: "10%" }}>
+                        S.r
+                      </th>
+                      <th className="description" style={{ width: "25%" }}>
+                        Group
+                      </th>
 
-                <div className="row">
-                  <label className="selectLabel">
-                    Pronounce
-                    <input
-                      type="text"
-                      name="route_title"
-                      className="numberInput"
-                      value={data?.pronounce}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          pronounce: e.target.value,
-                        })
-                      }
-                      maxLength={42}
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    MRP
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
-                      className="numberInput"
-                      value={data?.mrp}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          mrp: e.target.value,
-                        })
-                      }
-                      maxLength={5}
-                    />
-                  </label>
-                </div>
+                      <th style={{ width: "25%" }}>Action</th>
+                    </tr>
+                  </thead>
 
-                <div className="row">
-                  <label className="selectLabel">
-                    Item Price
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="route_title"
-                      className="numberInput"
-                      step="0.001"
-                      value={data?.item_price}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          item_price: e.target.value,
-                          margin: (data.mrp / e.target.value - 1) * 100,
-                        })
-                      }
-                      maxLength={5}
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    Item Margin
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="route_title"
-                      className="numberInput"
-                      step="0.001"
-                      value={data?.margin}
-                      onChange={(e) => {
-                        let item_price = data?.mrp / (e.target.value / 100 + 1);
-                        item_price =
-                          item_price - Math.floor(item_price) !== 0
-                            ? item_price
-                                .toString()
-                                .match(
-                                  new RegExp(
-                                    "^-?\\d+(?:.\\d{0," + (2 || -1) + "})?"
-                                  )
-                                )[0]
-                            : item_price;
+                  <tbody>
+                    {filteredGroups
+                      ?.filter((a) => a.item_group_uuid)
+                      .map((item, index) => {
+                        return (
+                          <tr key={item.item_group_uuid}>
+                            <td>{index + 1}</td>
+                            <td>{item.item_group_title}</td>
 
-                        setdata({
-                          ...data,
-                          margin: e.target.value,
-                          item_price,
-                        });
-                      }}
-                      maxLength={5}
-                    />
-                  </label>{" "}
-                </div>
-
-                <div className="row">
-                  <label className="selectLabel">
-                    Item Code
-                    <input
-                      type="text"
-                      name="one_pack"
-                      className="numberInput"
-                      value={data?.item_code}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          item_code: e.target.value.replace(/\s+/g, ''),
-                        })
-                      }
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    GST
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
-                      className="numberInput"
-                      value={data?.item_gst}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          item_gst: e.target.value,
-                        })
-                      }
-                      maxLength={3}
-                    />
-                  </label>
-                </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    Conversion
-                    <input
-                      type="text"
-                      name="route_title"
-                      className="numberInput"
-                      value={data?.conversion}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          conversion: e.target.value,
-                        })
-                      }
-                      maxLength={5}
-                      disabled={popupInfo.type === "edit"}
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    One Pack
-                    <input
-                      type="text"
-                      name="one_pack"
-                      className="numberInput"
-                      value={data?.one_pack}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          one_pack: e.target.value,
-                        })
-                      }
-                      maxLength={5}
-                    />
-                  </label>
-                </div>
-
-                <div className="row">
-                  <label className="selectLabel">
-                    Item Discount
-                    <input
-                      type="text"
-                      name="one_pack"
-                      className="numberInput"
-                      value={data?.item_discount}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          item_discount: e.target.value,
-                        })
-                      }
-                      maxLength={5}
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    Free Issue
-                    <div
-                      className="flex"
-                      style={{ justifyContent: "space-between" }}
-                    >
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="statusOnn"
-                          className="numberInput"
-                          checked={data.free_issue === "Y"}
-                          style={{ height: "25px" }}
-                          onClick={() =>
-                            setdata((prev) => ({ ...prev, free_issue: "Y" }))
-                          }
-                        />
-                        Yes
-                      </div>
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="statusOff"
-                          className="numberInput"
-                          checked={data.free_issue === "N"}
-                          style={{ height: "25px" }}
-                          onClick={() =>
-                            setdata((prev) => ({ ...prev, free_issue: "N" }))
-                          }
-                        />
-                        No
-                      </div>
-                    </div>
-                  </label>
-                </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    Barcode
-                    <textarea
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
-                      className="numberInput"
-                      value={data?.barcode?.toString()?.replace(/,/g, "\n")}
-                      style={{ height: "50px" }}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          barcode: e.target.value.split("\n"),
-                        })
-                      }
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    Status
-                    <div
-                      className="flex"
-                      style={{ justifyContent: "space-between" }}
-                    >
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="sort_order"
-                          className="numberInput"
-                          checked={data.status}
-                          style={{ height: "25px" }}
-                          onClick={() =>
-                            setdata((prev) => ({ ...prev, status: 1 }))
-                          }
-                        />
-                        On
-                      </div>
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="sort_order"
-                          className="numberInput"
-                          checked={!data.status}
-                          style={{ height: "25px" }}
-                          onClick={() =>
-                            setdata((prev) => ({ ...prev, status: 0 }))
-                          }
-                        />
-                        Off
-                      </div>
-                    </div>
-                  </label>
-                  <label className="selectLabel">
-                  Exclude Discount
-                    <div
-                      className="flex"
-                      style={{ justifyContent: "space-between" }}
-                    >
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="sort_order"
-                          className="numberInput"
-                          checked={data.exclude_discount}
-                          style={{ height: "25px" }}
-                          onClick={() =>
-                            setdata((prev) => ({ ...prev, exclude_discount: 1 }))
-                          }
-                        />
-                        On
-                      </div>
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="sort_order"
-                          className="numberInput"
-                          checked={!data.exclude_discount}
-                          style={{ height: "25px" }}
-                          onClick={() =>
-                            setdata((prev) => ({ ...prev, exclude_discount: 0 }))
-                          }
-                        />
-                        Off
-                      </div>
-                    </div>
-                  </label>
-                </div>
+                            <td>
+                              <button
+                                type="button"
+                                className="noBgActionButton"
+                                style={{
+                                  backgroundColor: data.item_group_uuid?.filter(
+                                    (a) => a === item?.item_group_uuid
+                                  )?.length
+                                    ? "red"
+                                    : "var(--mainColor)",
+                                  width: "150px",
+                                  fontSize: "large",
+                                }}
+                                onClick={(event) =>
+                                  setdata((prev) => ({
+                                    ...prev,
+                                    item_group_uuid:
+                                      prev.item_group_uuid?.filter(
+                                        (a) => a === item?.item_group_uuid
+                                      )?.length
+                                        ? prev.item_group_uuid?.filter(
+                                            (a) => a !== item?.item_group_uuid
+                                          )
+                                        : [
+                                            ...prev.item_group_uuid,
+                                            item.item_group_uuid,
+                                          ],
+                                  }))
+                                }
+                              >
+                                {data.item_group_uuid?.filter(
+                                  (a) => a === item?.item_group_uuid
+                                )?.length
+                                  ? "Remove"
+                                  : "Add"}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
               </div>
-              <i style={{ color: "red" }}>
-                {errMassage === "" ? "" : "Error: " + errMassage}
-              </i>
+              <div>
+                <button
+                  type="button"
+                  className="fieldEditButton"
+                  onClick={() => setItemGroupPopuo(false)}
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form" onSubmit={submitHandler}>
+                <div className="row">
+                  <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Items</h1>
+                </div>
 
-              <button type="submit" className="submit">
-                Save changes
-              </button>
-            </form>
-          </div>
+                <div className="formGroup">
+                  <div className="row">
+                    <label className="selectLabel">
+                      Item Title
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.item_title}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_title: e.target.value,
+                            pronounce: e.target.value,
+                          })
+                        }
+                        maxLength={60}
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      Sort Order
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="sort_order"
+                        className="numberInput"
+                        value={data?.sort_order}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            sort_order: e.target.value,
+                          })
+                        }
+                      />
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Company
+                      <select
+                        name="user_type"
+                        className="select"
+                        value={data?.company_uuid}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            company_uuid: e.target.value,
+                            category_uuid: itemCategories.filter(
+                              (a) => a.company_uuid === e.target.value
+                            )[0]?.category_uuid,
+                          })
+                        }
+                      >
+                        {companies
+                          .sort((a, b) => a.sort_order - b.sort_order)
+                          .map((a) => (
+                            <option value={a.company_uuid}>
+                              {a.company_title}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                    <label className="selectLabel">
+                      Item Category
+                      <select
+                        name="user_type"
+                        className="select"
+                        value={data?.category_uuid}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            category_uuid: e.target.value,
+                          })
+                        }
+                      >
+                        {itemCategories
+                          .filter((a) => a.company_uuid === data.company_uuid)
+                          .sort((a, b) => a.sort_order - b.sort_order)
+                          .map((a) => (
+                            <option value={a.category_uuid}>
+                              {a.category_title}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="row">
+                    <label className="selectLabel">
+                      Pronounce
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.pronounce}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            pronounce: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      MRP
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="sort_order"
+                        className="numberInput"
+                        value={data?.mrp}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            mrp: e.target.value,
+                          })
+                        }
+                        maxLength={5}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="row">
+                    <label className="selectLabel">
+                      Item Price
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="route_title"
+                        className="numberInput"
+                        step="0.001"
+                        value={data?.item_price}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_price: e.target.value,
+                            margin: (data.mrp / e.target.value - 1) * 100,
+                          })
+                        }
+                        maxLength={5}
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      Item Margin
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="route_title"
+                        className="numberInput"
+                        step="0.001"
+                        value={data?.margin}
+                        onChange={(e) => {
+                          let item_price =
+                            data?.mrp / (e.target.value / 100 + 1);
+                          item_price =
+                            item_price - Math.floor(item_price) !== 0
+                              ? item_price
+                                  .toString()
+                                  .match(
+                                    new RegExp(
+                                      "^-?\\d+(?:.\\d{0," + (2 || -1) + "})?"
+                                    )
+                                  )[0]
+                              : item_price;
+
+                          setdata({
+                            ...data,
+                            margin: e.target.value,
+                            item_price,
+                          });
+                        }}
+                        maxLength={5}
+                      />
+                    </label>{" "}
+                  </div>
+
+                  <div className="row">
+                    <label className="selectLabel">
+                      Item Code
+                      <input
+                        type="text"
+                        name="one_pack"
+                        className="numberInput"
+                        value={data?.item_code}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_code: e.target.value.replace(/\s+/g, ""),
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      GST
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="sort_order"
+                        className="numberInput"
+                        value={data?.item_gst}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_gst: e.target.value,
+                          })
+                        }
+                        maxLength={3}
+                      />
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Conversion
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.conversion}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            conversion: e.target.value,
+                          })
+                        }
+                        maxLength={5}
+                        disabled={popupInfo.type === "edit"}
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      One Pack
+                      <input
+                        type="text"
+                        name="one_pack"
+                        className="numberInput"
+                        value={data?.one_pack}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            one_pack: e.target.value,
+                          })
+                        }
+                        maxLength={5}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="row">
+                    <label className="selectLabel">
+                      Item Discount
+                      <input
+                        type="text"
+                        name="one_pack"
+                        className="numberInput"
+                        value={data?.item_discount}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_discount: e.target.value,
+                          })
+                        }
+                        maxLength={5}
+                      />
+                    </label>
+                    <label className="selectLabel" style={{ width: "100px" }}>
+                      Free Issue
+                      <div
+                        className="flex"
+                        style={{ justifyContent: "space-between" }}
+                      >
+                        <div className="flex">
+                          <input
+                            type="radio"
+                            name="statusOnn"
+                            className="numberInput"
+                            checked={data.free_issue === "Y"}
+                            style={{ height: "25px" }}
+                            onClick={() =>
+                              setdata((prev) => ({ ...prev, free_issue: "Y" }))
+                            }
+                          />
+                          Yes
+                        </div>
+                        <div className="flex">
+                          <input
+                            type="radio"
+                            name="statusOff"
+                            className="numberInput"
+                            checked={data.free_issue === "N"}
+                            style={{ height: "25px" }}
+                            onClick={() =>
+                              setdata((prev) => ({ ...prev, free_issue: "N" }))
+                            }
+                          />
+                          No
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Barcode
+                      <textarea
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="sort_order"
+                        className="numberInput"
+                        value={data?.barcode?.toString()?.replace(/,/g, "\n")}
+                        style={{ height: "50px" }}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            barcode: e.target.value.split("\n"),
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="selectLabel" style={{ width: "100px" }}>
+                      Status
+                      <div
+                        className="flex"
+                        style={{ justifyContent: "space-between" }}
+                      >
+                        <div className="flex">
+                          <input
+                            type="radio"
+                            name="sort_order"
+                            className="numberInput"
+                            checked={data.status}
+                            style={{ height: "25px" }}
+                            onClick={(e) =>
+                              setdata((prev) => ({
+                                ...prev,
+                                status: 1,
+                              }))
+                            }
+                          />
+                          On
+                        </div>
+                        <div className="flex">
+                          <input
+                            type="radio"
+                            name="sort_order"
+                            className="numberInput"
+                            checked={!data?.status}
+                            style={{ height: "25px" }}
+                            onClick={(e) =>
+                              setdata((prev) => ({
+                                ...prev,
+                                status: 0,
+                              }))
+                            }
+                          />
+                          Off
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Exclude Discount
+                      <div
+                        className="flex"
+                        style={{ justifyContent: "space-between" }}
+                      >
+                        <div className="flex">
+                          <input
+                            type="checkbox"
+                            name="sort_order"
+                            className="numberInput"
+                            checked={data.exclude_discount}
+                            style={{ height: "25px" }}
+                            onClick={() =>
+                              setdata((prev) => ({
+                                ...prev,
+                                exclude_discount: 1,
+                              }))
+                            }
+                          />
+                          Yes
+                        </div>
+                        <div className="flex">
+                          <input
+                            type="checkbox"
+                            name="sort_order"
+                            className="numberInput"
+                            checked={!data.exclude_discount}
+                            style={{ height: "25px" }}
+                            onClick={() =>
+                              setdata((prev) => ({
+                                ...prev,
+                                exclude_discount: 0,
+                              }))
+                            }
+                          />
+                          No
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+                <i style={{ color: "red" }}>
+                  {errMassage === "" ? "" : "Error: " + errMassage}
+                </i>
+
+                <button
+                  type="button"
+                  onClick={() => setItemGroupPopuo(true)}
+                  className="submit"
+                  style={{width:"200px"}}
+                >
+                  Item Groups
+                </button>
+                <button type="submit" className="submit">
+                  Save changes
+                </button>
+              </form>
+            </div>
+          )}
           <button onClick={onSave} className="closeButton">
             x
           </button>
