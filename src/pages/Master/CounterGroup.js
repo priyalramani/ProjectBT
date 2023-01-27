@@ -5,8 +5,10 @@ import Sidebar from "../../components/Sidebar";
 import SetupModal from "../../components/setupModel/SetupModel";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import axios from "axios";
+import { DeleteOutline } from "@mui/icons-material";
 const CounterGroup = () => {
   const [counterGroup, setCounterGroup] = useState([]);
+  const [deletePopup, setDeletePopup] = useState(false);
   const [filterCounterGroupTitle, setFilterCounterGroupTitle] = useState("");
   const [popupForm, setPopupForm] = useState(false);
   const [addItems, setAddItems] = useState(false);
@@ -88,6 +90,7 @@ const CounterGroup = () => {
               )}
             setPopupForm={setPopupForm}
             setAddItems={setAddItems}
+            setDeletePopup={setDeletePopup}
           />
         </div>
       </div>
@@ -113,12 +116,21 @@ const CounterGroup = () => {
       ) : (
         ""
       )}
+      {deletePopup ? (
+        <DeleteCounterPopup
+          onSave={() => setDeletePopup(false)}
+          getCounterGroup={getCounterGroup}
+          popupInfo={deletePopup}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default CounterGroup;
-function Table({ itemsDetails, setPopupForm, setAddItems }) {
+function Table({ itemsDetails, setPopupForm, setAddItems,setDeletePopup }) {
   const [items, setItems] = useState("counter_group_title");
   const [order, setOrder] = useState("asc");
   return (
@@ -152,7 +164,7 @@ function Table({ itemsDetails, setPopupForm, setAddItems }) {
               </div>
             </div>
           </th>
-          <th></th>
+          <th colSpan={2}></th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -186,6 +198,16 @@ function Table({ itemsDetails, setPopupForm, setAddItems }) {
                 >
                   Action
                 </button>
+              </td>
+              <td
+                colSpan={1}
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  setDeletePopup(item);
+                }}
+              >
+                <DeleteOutline />
               </td>
             </tr>
           ))}
@@ -627,6 +649,100 @@ function ItemsTable({
             })}
         </tbody>
       </table>
+    </div>
+  );
+}
+function DeleteCounterPopup({ onSave, popupInfo, getCounterGroup }) {
+  const [errMassage, setErrorMassage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await axios({
+        method: "delete",
+        url: "/counterGroup/deleteCounterGroup",
+        data: { counter_group_uuid: popupInfo.counter_group_uuid },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        getCounterGroup();
+        onSave();
+      }
+    } catch (err) {
+      console.log(err);
+      // setErrorMassage("Order already exist");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="overlay">
+      <div className="modal" style={{ width: "fit-content" }}>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="row">
+                <h1>Delete Counter Group</h1>
+              </div>
+              <div className="row">
+                <h1>{popupInfo.counter_group_title}</h1>
+              </div>
+
+              <i style={{ color: "red" }}>
+                {errMassage === "" ? "" : "Error: " + errMassage}
+              </i>
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                {loading ? (
+                  <button
+                    className="submit"
+                    id="loading-screen"
+                    style={{ background: "red", width: "120px" }}
+                  >
+                    <svg viewBox="0 0 100 100">
+                      <path
+                        d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                        fill="#ffffff"
+                        stroke="none"
+                      >
+                        <animateTransform
+                          attributeName="transform"
+                          type="rotate"
+                          dur="1s"
+                          repeatCount="indefinite"
+                          keyTimes="0;1"
+                          values="0 50 51;360 50 51"
+                        ></animateTransform>
+                      </path>
+                    </svg>
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    className="submit"
+                    style={{ background: "red" }}
+                  >
+                    Confirm
+                  </button>
+                )}
+                <button type="button" className="submit" onClick={onSave}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

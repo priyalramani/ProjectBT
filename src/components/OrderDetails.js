@@ -3,7 +3,7 @@ import axios from "axios";
 import Select from "react-select";
 import { v4 as uuid } from "uuid";
 import { Billing, jumpToNextIndex } from "../Apis/functions";
-import { CheckCircle, ContentCopy } from "@mui/icons-material";
+import { Add, CheckCircle, ContentCopy } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 import OrderPrint from "./OrderPrint";
@@ -43,6 +43,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [tripData, setTripData] = useState([]);
   const [uuids, setUuid] = useState();
   const [popupDetails, setPopupDetails] = useState();
+  const [popupDiscount, setPopupDiscount] = useState();
   const [copymsg, setCopymsg] = useState();
   const [notesPopup, setNotesPoup] = useState();
   const [popupForm, setPopupForm] = useState();
@@ -132,7 +133,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     jumpToNextIndex(id, reactInputsRef, setFocusedInputId, appendNewRow);
   // console.log(orderData)
   const callBilling = async (data = orderData) => {
-    // console.log(!data && !editOrder);
+    console.log("orderData", data);
     if (!data && !editOrder) return;
     // console.log(data);
     let counter = counters.find((a) => data.counter_uuid === a.counter_uuid);
@@ -901,9 +902,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     className="item-sales-search"
                     onClick={() => {
                       if (
-                        !window.location.pathname.includes("completeOrderReport") &&
+                        !window.location.pathname.includes(
+                          "completeOrderReport"
+                        ) &&
                         (window.location.pathname.includes("admin") ||
-                        window.location.pathname.includes("trip"))
+                          window.location.pathname.includes("trip"))
                       )
                         handleWarehouseChacking();
                       else handlePrint();
@@ -1193,6 +1196,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                       {editOrder ? (
                         <>
                           <th className="pa2 tc bb b--black-20 ">Old Price</th>
+                          <th className="pa2 tc bb b--black-20 "></th>
                         </>
                       ) : (
                         ""
@@ -1676,6 +1680,19 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                           {editOrder ? (
                             <>
                               <td>Rs.{item.old_price || item.item_price}</td>
+                              <td>
+                                <button
+                                  style={{
+                                    width: "fit-Content",
+                                    fontSize: "12px",
+                                    padding: "5px 10px",
+                                  }}
+                                  className="item-sales-search"
+                                  onClick={() => setPopupDiscount(item)}
+                                >
+                                  Discounts
+                                </button>
+                              </td>
                             </>
                           ) : (
                             ""
@@ -1875,6 +1892,26 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           popupDetails={popupDetails}
           users={users}
           items={itemsData}
+        />
+      ) : (
+        ""
+      )}
+      {popupDiscount ? (
+        <DiscountPopup
+          onSave={() => setPopupDiscount(false)}
+          popupDetails={popupDiscount}
+          items={itemsData}
+          onUpdate={(data) => {
+            setOrderData({
+              ...orderData,
+              item_details: orderData?.item_details?.map((a) =>
+                a.item_uuid === data.item_uuid
+                  ? { ...a, charges_discount: data.charges_discount }
+                  : a
+              ),
+            });
+            setPopupDiscount(false);
+          }}
         />
       ) : (
         ""
@@ -2310,6 +2347,162 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
             )}
 
             <div className="flex" style={{ justifyContent: "space-between" }}>
+              <button type="button" className="submit" onClick={onSave}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+function DiscountPopup({ onSave, popupDetails, onUpdate }) {
+  const [data, setData] = useState([]);
+  const [edit, setEdit] = useState("");
+  useEffect(() => {
+    setData(
+      popupDetails.charges_discount.map((a) => ({
+        ...a,
+        uuid: a._id || a._id || uuid(),
+      }))
+    );
+  }, [popupDetails.charges_discount]);
+
+  return (
+    <div className="overlay" style={{ zIndex: 999999999 }}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <h1>Discount</h1>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll", width: "100%" }}>
+            <div
+              className="flex"
+              style={{ flexDirection: "column", width: "100%" }}
+            >
+              <table
+                className="user-table"
+                style={{
+                  width: "max-content",
+                  height: "fit-content",
+                }}
+              >
+                <thead>
+                  <tr>
+                    <th colSpan={2}>
+                      <div className="t-head-element">Name</div>
+                    </th>
+                    <th colSpan={2}>
+                      <div className="t-head-element">Value</div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="tbody">
+                  {data.length
+                    ? data.map((item, i) => (
+                        <tr
+                          key={item?.uuid || Math.random()}
+                          style={{
+                            height: "30px",
+                          }}
+                        >
+                          <td colSpan={2}>
+                            {item._id ? (
+                              item.title
+                            ) : (
+                              <input
+                                type="text"
+                                className="numberInput"
+                                style={{
+                                  width: "10ch",
+                                  fontSize: "12px",
+                                  padding: 0,
+                                  height: "20px",
+                                }}
+                                value={item.title || 0}
+                                onChange={(e) => {
+                                  setData((prev) =>
+                                    prev?.map((a) =>
+                                      a.uuid === item.uuid
+                                        ? { ...a, title: e.target.value }
+                                        : a
+                                    )
+                                  );
+                                  setEdit(true);
+                                }}
+                                onFocus={(e) => {
+                                  e.target.onwheel = () => false;
+                                  e.target.select();
+                                }}
+                                onWheel={(e) => e.preventDefault()}
+                              />
+                            )}
+                          </td>
+                          <td colSpan={2}>
+                            <input
+                              type="number"
+                              className="numberInput"
+                              style={{
+                                width: "10ch",
+                                fontSize: "12px",
+                                padding: 0,
+                                height: "20px",
+                              }}
+                              value={item.value || 0}
+                              onChange={(e) => {
+                                setData((prev) =>
+                                  prev?.map((a) =>
+                                    a.uuid === item.uuid
+                                      ? { ...a, value: e.target.value }
+                                      : a
+                                  )
+                                );
+                                setEdit(true);
+                              }}
+                              onFocus={(e) => {
+                                e.target.onwheel = () => false;
+                                e.target.select();
+                              }}
+                              onWheel={(e) => e.preventDefault()}
+                            />
+                          </td>
+                        </tr>
+                      ))
+                    : ""}
+                </tbody>
+              </table>
+              <button
+                type="button"
+                className="submit"
+                onClick={() => setData((prev) => [...prev, { uuid: uuid() }])}
+              >
+                <Add />
+              </button>
+            </div>
+
+            <div className="flex" style={{ justifyContent: "space-between" }}>
+              {edit ? (
+                <button
+                  type="button"
+                  className="submit"
+                  onClick={() =>
+                    onUpdate({ ...popupDetails, charges_discount: data })
+                  }
+                >
+                  Save
+                </button>
+              ) : (
+                ""
+              )}
               <button type="button" className="submit" onClick={onSave}>
                 Cancel
               </button>
