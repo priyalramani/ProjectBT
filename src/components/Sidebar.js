@@ -263,6 +263,10 @@ const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
               name: "Salesman Item Suggestion",
               link: "/admin/SalesmanItemSuggestion",
             },
+            {
+              name: "Calculate Lines",
+              link: "/admin/calculateLines",
+            },
           ]}
         />
         {/* <div

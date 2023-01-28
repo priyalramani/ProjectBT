@@ -53,6 +53,7 @@ import AddOutStanding from "./pages/AddOrder/AddOutStanding";
 import OutstangingsCollection from "./users/OutstangingsCollection";
 import PendingReciptsEntry from "./pages/Reports/PendingReciptsEntry";
 import { refreshDb } from "./Apis/functions";
+import CalculateLines from "./pages/QuikAccess/CalculateLines";
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
@@ -172,6 +173,7 @@ function App() {
               <Route path="/admin/adminUsers" element={<Users />} />
               <Route path="/admin/items" element={<ItemsPage />} />
               <Route path="/admin/warehouse" element={<Warehouse />} />
+              <Route path="/admin/calculateLines" element={<CalculateLines />} />
               <Route
                 path="/admin/autoIncreaseQty"
                 element={<AutoIncreaseQuantity />}
