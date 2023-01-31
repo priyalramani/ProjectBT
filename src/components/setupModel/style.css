@@ -1,5 +1,5 @@
 .overlay {
-    position: absolute;
+    position: fixed;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -9,6 +9,7 @@
     width: 100%;
     padding: 1rem;
     background-color: rgba(0, 0, 0, 0.5);
+    z-index: 99999999;
   }
   
   .modal {

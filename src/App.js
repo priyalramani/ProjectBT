@@ -28,7 +28,7 @@ import UPITransection from "./pages/Reports/UPITransection";
 import CompleteOrder from "./pages/Reports/CompleteOrder";
 import ItemDetails from "./pages/Reports/ItemDetails";
 import CompletedTrips from "./pages/Reports/CompletedTrips";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { updateIndexedDb } from "./Apis/functions";
 import CounterLeger from "./pages/Reports/CounterLeger";
 import Outstanding from "./pages/Reports/Outstanding";
@@ -54,10 +54,13 @@ import OutstangingsCollection from "./users/OutstangingsCollection";
 import PendingReciptsEntry from "./pages/Reports/PendingReciptsEntry";
 import { refreshDb } from "./Apis/functions";
 import CalculateLines from "./pages/QuikAccess/CalculateLines";
+import Context from "./context/context";
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
+  const context = useContext(Context);
 
+  const { calculationPopup = "",loading } = context;
   axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
   // axios.defaults.baseURL = "http://localhost:9000";
@@ -93,6 +96,7 @@ function App() {
       }
     }
   }, [userType]);
+
   document.title = "BT";
 
   return (
@@ -173,7 +177,7 @@ function App() {
               <Route path="/admin/adminUsers" element={<Users />} />
               <Route path="/admin/items" element={<ItemsPage />} />
               <Route path="/admin/warehouse" element={<Warehouse />} />
-              <Route path="/admin/calculateLines" element={<CalculateLines />} />
+
               <Route
                 path="/admin/autoIncreaseQty"
                 element={<AutoIncreaseQuantity />}
@@ -248,6 +252,39 @@ function App() {
           )}
         </Routes>
       </Router>
+      {calculationPopup ? (
+        <CalculateLines />
+      ) : loading ? (
+        <div
+          style={{
+            width: "30px",
+            height: "30px",
+            position: "fixed",
+            bottom: "10px",
+            left: "10px",
+            zIndex: "999999999",
+          }}
+        >
+          <svg viewBox="0 0 100 100">
+            <path
+              d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+              fill="#000"
+              stroke="none"
+            >
+              <animateTransform
+                attributeName="transform"
+                type="rotate"
+                dur="1s"
+                repeatCount="indefinite"
+                keyTimes="0;1"
+                values="0 50 51;360 50 51"
+              ></animateTransform>
+            </path>
+          </svg>
+        </div>
+      ) : (
+        ""
+      )}
 
       {/* {window.location.pathname.split('/').at(-2) === 'processing' && <div id="console">
         <h3>CONSOLE <button onClick={e => window.location.reload()}>Reload</button></h3>

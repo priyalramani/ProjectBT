@@ -88,7 +88,7 @@ const Processing = () => {
                 }
                 className="linkDecoration"
                 onClick={() => {
-                  sessionStorage.setItem("trip_title", data.trip_title);
+                  sessionStorage.setItem("trip_title", data?.trip_title);
                   window.location.assign(
                     `/users/${
                       Location.pathname.includes("checking")
@@ -96,7 +96,7 @@ const Processing = () => {
                         : Location.pathname.includes("delivery")
                         ? "delivery"
                         : "processing"
-                    }/` + data.trip_uuid
+                    }/` + data?.trip_uuid
                   );
                 }}
               >

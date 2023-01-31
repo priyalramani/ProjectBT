@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import "./style.css";
 import NavLink from "./Navlink";
 import {
@@ -12,6 +12,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
+import context from "../context/context";
 let titleData = [
   { value: "RetailerMarginReport", name: "Retailer Margin Report" },
   { value: "SalesmanItemSuggestion", name: "Salesman Item Suggestion" },
@@ -52,6 +53,8 @@ let titleData = [
 ];
 const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
   const [loading, setLoading] = useState(false);
+  const {  setcalculationPopup } = useContext(context);
+
   const location = useLocation();
   const updateMinLevel = async () => {
     if (loading) return;
@@ -238,6 +241,7 @@ const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
           title={"Setup"}
           icon={<SettingsIcon sx={{ fontSize: 50 }} />}
           isActive={false}
+          setcalculationPopup={setcalculationPopup}
           menuList={[
             {
               name: "Auto Increase Quantity",
@@ -248,7 +252,7 @@ const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
               link: "/admin/autoIncreaseItem",
             },
             {
-              name: "Order Range Incentive",
+              name: "Order Range Incentive / Discount",
               link: "/admin/OrderRangeIncentive",
             },
             {
@@ -265,7 +269,7 @@ const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
             },
             {
               name: "Calculate Lines",
-              link: "/admin/calculateLines",
+              link: "#",
             },
           ]}
         />

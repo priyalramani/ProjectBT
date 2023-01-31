@@ -10,6 +10,7 @@ const NavLink = ({
   href,
   setIsItemAvilableOpen,
   setCollectionTags,
+  setcalculationPopup
 }) => {
   // console.log(title)
   const [menuVisible, setMenuVisible] = useState(false);
@@ -70,6 +71,8 @@ const NavLink = ({
                   onClick={() => {
                     if (menu.name === "Trips") {
                       setIsItemAvilableOpen((prev) => !prev);
+                    }else if (menu.name === "Calculate Lines") {
+                      setcalculationPopup((prev) => !prev);
                     } else if (menu.name === "Collection Tags") {
                       setCollectionTags(true);
                     }

@@ -48,22 +48,27 @@ const LoginPage = ({ setUserType }) => {
           },
         });
         data = result.data.result;
-
-        const db = await openDB(
-          "BT",
-          +localStorage.getItem("IDBVersion") || 1,
-          {
-            upgrade(db) {
-              for (const property in data) {
-                db.createObjectStore(property, {
-                  keyPath: "IDENTIFIER",
-                });
-              }
-            },
-          }
-        );
-        localStorage.setItem("IDBVersion", 1);
+        let Version = +localStorage.getItem("IDBVersion") + 1;
+        const db = await openDB("BT", Version || 1, {
+          upgrade(db) {
+            for (const property in data) {
+              db.createObjectStore(property, {
+                keyPath: "IDENTIFIER",
+              });
+            }
+          },
+        });
+        const exitFunction = () => {
+          let time = new Date();
+          localStorage.setItem("IDBVersion", Version);
+          localStorage.setItem("indexed_time", time.getTime());
+          setUserType(response.data.result.user_type || false);
+          setIsLoading(false);
+          db.close();
+          window.location.assign("/users");
+        };
         let store;
+        let index = 0;
         for (const property in data) {
           store = await db
             .transaction(property, "readwrite")
@@ -94,16 +99,11 @@ const LoginPage = ({ setUserType }) => {
             console.log({ ...item, IDENTIFIER });
             await store.put({ ...item, IDENTIFIER });
           }
+          index = index + 1;
+          if (index === Object.keys(data).length) {
+            exitFunction();
+          }
         }
-
-        let time = new Date();
-        localStorage.setItem("indexed_time", time.getTime());
-        setTimeout(() => {
-          setUserType(response.data.result.user_type || false);
-          setIsLoading(false);
-          db.close();
-          window.location.assign("/users");
-        }, 5000);
       }
     } catch (error) {
       setIsLoading(false);

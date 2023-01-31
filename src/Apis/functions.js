@@ -365,8 +365,8 @@ export const Billing = async ({
       charges_discount.push(billDiscounts);
       item_total = item_total * +((100 - +billDiscounts.value) / 100);
     }
-    console.log(typeof item_total,item_total)
-    if (item_total) item_total = (+item_total||0).toFixed(2);
+    console.log(typeof item_total, item_total);
+    if (item_total) item_total = (+item_total || 0).toFixed(2);
     item = {
       ...item,
       charges_discount,
@@ -402,6 +402,7 @@ export const Billing = async ({
 
 export const updateIndexedDb = async () => {
   await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+  let Version = +localStorage.getItem("IDBVersion") + 1;
   const response = await axios({
     method: "get",
     url: "/users/GetUser/" + localStorage.getItem("user_uuid"),
@@ -426,7 +427,7 @@ export const updateIndexedDb = async () => {
   });
   let data = result.data.result;
   console.log(data);
-  const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1, {
+  const db = await openDB("BT", Version, {
     upgrade(db) {
       for (const property in data) {
         db.createObjectStore(property, {
@@ -435,8 +436,16 @@ export const updateIndexedDb = async () => {
       }
     },
   });
+  const exitFunction = () => {
+    let time = new Date();
+    localStorage.setItem("indexed_time", time.getTime());
+    localStorage.setItem("IDBVersion", Version);
 
+    db.close();
+    window.location.reload(true);
+  };
   let store;
+  let index = 0;
   for (const property in data) {
     store = await db.transaction(property, "readwrite").objectStore(property);
     for (let item of data[property]) {
@@ -463,11 +472,11 @@ export const updateIndexedDb = async () => {
       //console.log({ ...item, IDENTIFIER });
       await store.put({ ...item, IDENTIFIER });
     }
+    index = index + 1;
+    if (index === Object.keys(data).length) {
+      exitFunction();
+    }
   }
-  let time = new Date();
-  localStorage.setItem("indexed_time", time.getTime());
-  db.close();
-  window.location.reload(true);
 };
 
 export const audioLoopFunction = ({

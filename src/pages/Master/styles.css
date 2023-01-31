@@ -1257,7 +1257,7 @@ input#item-sales-searchbar {
     gap: 10px;
   }
   .overlay {
-    position: absolute;
+    position: fixed;
     display: flex;
     align-items: center;
     justify-content: center;
