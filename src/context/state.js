@@ -7,12 +7,12 @@ import axios from "axios";
 const State = (props) => {
   const [calculationPopup, setcalculationPopup] = useState(null);
   const [loading, setLoading] = useState(null);
-  const CalculateLines = async (days) => {
+  const CalculateLines = async (days,type) => {
     setLoading(true);
     const response = await axios({
       method: "put",
       url: "/counters/CalculateLines",
-      data: { days },
+      data: { days,type },
       headers: {
         "Content-Type": "application/json",
       },

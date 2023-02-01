@@ -365,7 +365,7 @@ function Table({
       </thead>
       <tbody className="tbody">
         {itemsDetails
-          .filter((a) => a.incentive_uuid || a.counter_scheme_uuid)
+          ?.filter((a) => a.incentive_uuid || a.counter_scheme_uuid)
           .sort((a, b) =>
             order === "asc"
               ? typeof a[items] === "string"
@@ -469,7 +469,7 @@ function TableDiscount({
       </thead>
       <tbody className="tbody">
         {itemsDetails
-          .filter((a) => a.incentive_uuid || a.counter_scheme_uuid)
+          ?.filter((a) => a.incentive_uuid || a.counter_scheme_uuid)
           .sort((a, b) =>
             order === "asc"
               ? typeof a[items] === "string"
@@ -555,9 +555,9 @@ function IncentivePopup({ onSave, popupForm }) {
   useEffect(() => {
     setFilterUserData(
       users.sort((a, b) => {
-        let aLength = objData.users.filter((c) => c === a.user_uuid)?.length;
+        let aLength = objData.users?.filter((c) => c === a.user_uuid)?.length;
 
-        let bLength = objData.users.filter((c) => c === b.user_uuid)?.length;
+        let bLength = objData.users?.filter((c) => c === b.user_uuid)?.length;
         if (aLength && bLength) {
           return a.user_title?.localeCompare(b.user_title);
         } else if (aLength) {
@@ -590,8 +590,8 @@ function IncentivePopup({ onSave, popupForm }) {
     );
     setFilterItemData(
       items.sort((a, b) => {
-        let aLength = objData.items.filter((c) => c === a.item_uuid)?.length;
-        let bLength = objData.items.filter((c) => c === b.item_uuid)?.length;
+        let aLength = objData.items?.filter((c) => c === a.item_uuid)?.length;
+        let bLength = objData.items?.filter((c) => c === b.item_uuid)?.length;
         if (aLength && bLength) {
           return a.item_title?.localeCompare(b.item_title);
         } else if (aLength) {
@@ -605,11 +605,11 @@ function IncentivePopup({ onSave, popupForm }) {
     );
     setFilterCounterGroupData(
       counterGroup.sort((a, b) => {
-        let aLength = objData.counter_groups.filter(
+        let aLength = objData.counter_groups?.filter(
           (c) => c === a.counter_group_uuid
         )?.length;
 
-        let bLength = objData.counter_groups.filter(
+        let bLength = objData.counter_groups?.filter(
           (c) => c === b.counter_group_uuid
         )?.length;
         if (aLength && bLength) {
@@ -625,10 +625,10 @@ function IncentivePopup({ onSave, popupForm }) {
     );
     setFilterCounterData(
       counter.sort((a, b) => {
-        let aLength = objData.counters.filter(
+        let aLength = objData.counters?.filter(
           (c) => c === a.counter_uuid
         )?.length;
-        let bLength = objData.counters.filter(
+        let bLength = objData.counters?.filter(
           (c) => c === b.counter_uuid
         )?.length;
         if (aLength && bLength) {
@@ -955,7 +955,7 @@ function IncentivePopup({ onSave, popupForm }) {
                   <tbody>
                     {filterItemGroupData
                       ?.filter((a) => a.item_group_title)
-                      .filter(
+                      ?.filter(
                         (a) =>
                           !itemGroupTitle ||
                           a.item_group_title
@@ -983,13 +983,13 @@ function IncentivePopup({ onSave, popupForm }) {
                                 onClick={(event) =>
                                   setObgData((prev) => ({
                                     ...objData,
-                                    item_groups: prev.item_groups.filter(
+                                    item_groups: prev.item_groups?.filter(
                                       (a) => a === item.item_group_uuid
-                                    ).length
-                                      ? prev.item_groups.filter(
+                                    )?.length
+                                      ? prev.item_groups?.filter(
                                           (a) => a !== item.item_group_uuid
                                         )
-                                      : prev.item_groups.length
+                                      : prev.item_groups?.length
                                       ? [
                                           ...prev.item_groups,
                                           item.item_group_uuid,
@@ -998,9 +998,9 @@ function IncentivePopup({ onSave, popupForm }) {
                                   }))
                                 }
                               >
-                                {objData.item_groups.filter(
+                                {objData.item_groups?.filter(
                                   (a) => a === item.item_group_uuid
-                                ).length
+                                )?.length
                                   ? "Remove"
                                   : "Add"}
                               </button>
@@ -1059,21 +1059,21 @@ function IncentivePopup({ onSave, popupForm }) {
                   <tbody>
                     {filterItemData
                       ?.filter((a) => a.item_uuid)
-                      .filter(
+                      ?.filter(
                         (a) =>
                           !filterTitle ||
                           a.item_title
                             .toLocaleLowerCase()
                             .includes(filterTitle.toLocaleLowerCase())
                       )
-                      .filter(
+                      ?.filter(
                         (a) =>
                           !filterCompany ||
                           a?.company_title
                             .toLocaleLowerCase()
                             .includes(filterCompany.toLocaleLowerCase())
                       )
-                      .filter(
+                      ?.filter(
                         (a) =>
                           !filterCategory ||
                           a?.category_title
@@ -1085,7 +1085,7 @@ function IncentivePopup({ onSave, popupForm }) {
                         return (
                           <tr key={item.item_uuid}>
                             <td>{item.item_title}</td>
-                            <td>{item.company_title}</td>
+                            <td>{item?.company_title}</td>
                             <td>{item.category_title}</td>
 
                             <td>
@@ -1093,7 +1093,7 @@ function IncentivePopup({ onSave, popupForm }) {
                                 type="button"
                                 className="noBgActionButton"
                                 style={{
-                                  backgroundColor: objData.items.filter(
+                                  backgroundColor: objData.items?.filter(
                                     (a) => a === item.item_uuid
                                   )?.length
                                     ? "red"
@@ -1104,19 +1104,19 @@ function IncentivePopup({ onSave, popupForm }) {
                                 onClick={(event) =>
                                   setObgData((prev) => ({
                                     ...objData,
-                                    items: prev.items.filter(
+                                    items: prev.items?.filter(
                                       (a) => a === item.item_uuid
-                                    ).length
-                                      ? prev.items.filter(
+                                    )?.length
+                                      ? prev.items?.filter(
                                           (a) => a !== item.item_uuid
                                         )
-                                      : prev.items.length
+                                      : prev.items?.length
                                       ? [...prev.items, item.item_uuid]
                                       : [item.item_uuid],
                                   }))
                                 }
                               >
-                                {objData.items.filter(
+                                {objData.items?.filter(
                                   (a) => a === item.item_uuid
                                 )?.length
                                   ? "Remove"
@@ -1164,7 +1164,7 @@ function IncentivePopup({ onSave, popupForm }) {
                   <tbody>
                     {filterCounterGroupData
                       ?.filter((a) => a.counter_group_title)
-                      .filter(
+                      ?.filter(
                         (a) =>
                           !filterCounterGroupTitle ||
                           a.counter_group_title
@@ -1185,7 +1185,7 @@ function IncentivePopup({ onSave, popupForm }) {
                                 className="noBgActionButton"
                                 style={{
                                   backgroundColor:
-                                    objData.counter_groups.filter(
+                                    objData.counter_groups?.filter(
                                       (a) => a === item.counter_group_uuid
                                     )?.length
                                       ? "red"
@@ -1196,13 +1196,13 @@ function IncentivePopup({ onSave, popupForm }) {
                                 onClick={(event) =>
                                   setObgData((prev) => ({
                                     ...objData,
-                                    counter_groups: prev.counter_groups.filter(
+                                    counter_groups: prev.counter_groups?.filter(
                                       (a) => a === item.counter_group_uuid
-                                    ).length
-                                      ? prev.counter_groups.filter(
+                                    )?.length
+                                      ? prev.counter_groups?.filter(
                                           (a) => a !== item.counter_group_uuid
                                         )
-                                      : prev.counter_groups.length
+                                      : prev.counter_groups?.length
                                       ? [
                                           ...prev.counter_groups,
                                           item.counter_group_uuid,
@@ -1211,7 +1211,7 @@ function IncentivePopup({ onSave, popupForm }) {
                                   }))
                                 }
                               >
-                                {objData.counter_groups.filter(
+                                {objData.counter_groups?.filter(
                                   (a) => a === item.counter_group_uuid
                                 )?.length
                                   ? "Remove"
@@ -1261,14 +1261,14 @@ function IncentivePopup({ onSave, popupForm }) {
                   <tbody>
                     {filterCounterata
                       ?.filter((a) => a.counter_uuid)
-                      .filter(
+                      ?.filter(
                         (a) =>
                           !filterCounterTitle ||
                           a.counter_title
                             ?.toLocaleLowerCase()
                             .includes(filterCounterTitle.toLocaleLowerCase())
                       )
-                      .filter(
+                      ?.filter(
                         (a) =>
                           !filterRoute ||
                           a?.route_title
@@ -1286,7 +1286,7 @@ function IncentivePopup({ onSave, popupForm }) {
                                 type="button"
                                 className="noBgActionButton"
                                 style={{
-                                  backgroundColor: objData.counters.filter(
+                                  backgroundColor: objData.counters?.filter(
                                     (a) => a === item.counter_uuid
                                   )?.length
                                     ? "red"
@@ -1297,19 +1297,19 @@ function IncentivePopup({ onSave, popupForm }) {
                                 onClick={(event) =>
                                   setObgData((prev) => ({
                                     ...objData,
-                                    counters: prev.counters.filter(
+                                    counters: prev.counters?.filter(
                                       (a) => a === item.counter_uuid
-                                    ).length
-                                      ? prev.counters.filter(
+                                    )?.length
+                                      ? prev.counters?.filter(
                                           (a) => a !== item.counter_uuid
                                         )
-                                      : prev.counters.length
+                                      : prev.counters?.length
                                       ? [...prev.counters, item.counter_uuid]
                                       : [item.counter_uuid],
                                   }))
                                 }
                               >
-                                {objData.counters.filter(
+                                {objData.counters?.filter(
                                   (a) => a === item.counter_uuid
                                 )?.length
                                   ? "Remove"
@@ -1357,7 +1357,7 @@ function IncentivePopup({ onSave, popupForm }) {
                   <tbody>
                     {filterUserData
                       ?.filter((a) => a.user_title)
-                      .filter(
+                      ?.filter(
                         (a) =>
                           !filterUserTitle ||
                           a.user_title
@@ -1375,7 +1375,7 @@ function IncentivePopup({ onSave, popupForm }) {
                                 type="button"
                                 className="noBgActionButton"
                                 style={{
-                                  backgroundColor: objData.users.filter(
+                                  backgroundColor: objData.users?.filter(
                                     (a) => a === item.user_uuid
                                   )?.length
                                     ? "red"
@@ -1386,19 +1386,19 @@ function IncentivePopup({ onSave, popupForm }) {
                                 onClick={(event) =>
                                   setObgData((prev) => ({
                                     ...objData,
-                                    users: prev.users.filter(
+                                    users: prev.users?.filter(
                                       (a) => a === item.user_uuid
-                                    ).length
-                                      ? prev.users.filter(
+                                    )?.length
+                                      ? prev.users?.filter(
                                           (a) => a !== item.user_uuid
                                         )
-                                      : prev.users.length
+                                      : prev.users?.length
                                       ? [...prev.users, item.user_uuid]
                                       : [item.user_uuid],
                                   }))
                                 }
                               >
-                                {objData.users.filter(
+                                {objData.users?.filter(
                                   (a) => a === item.user_uuid
                                 )?.length
                                   ? "Remove"
@@ -1503,13 +1503,13 @@ function IncentivePopup({ onSave, popupForm }) {
 }
 function DiscountPopup({ onSave, popupForm }) {
   const [objData, setObgData] = useState({
-    type: "range-discount",
+    type: "range-discount-company",
     discount_title: "",
     amt: "",
     min_range: "",
-    items: [],
+    company: [],
     users: [],
-    item_groups: [],
+    category: [],
     counters: [],
     counter_groups: [],
   });
@@ -1518,7 +1518,7 @@ function DiscountPopup({ onSave, popupForm }) {
     if (popupForm?.type === "edit") setObgData(popupForm.data);
   }, []);
   const [ui, setUi] = useState(1);
-  const [items, setItems] = useState([]);
+
   const [company, setCompany] = useState([]);
   const [Category, setCategory] = useState([]);
   const [users, setUsers] = useState([]);
@@ -1526,8 +1526,7 @@ function DiscountPopup({ onSave, popupForm }) {
   const [filterCounterGroupTitle, setFilterCounterGroupTitle] = useState("");
   const [itemGroups, setItemsGroup] = useState([]);
   const [filterTitle, setFilterTitle] = useState("");
-  const [filterCategory, setFilterCategory] = useState("");
-  const [filterCompany, setFilterCompany] = useState("");
+ 
   const [filterUserTitle, setFilterUserTitle] = useState("");
   const [itemGroupTitle, setItemGroupTitle] = useState("");
   const [routesData, setRoutesData] = useState([]);
@@ -1542,9 +1541,9 @@ function DiscountPopup({ onSave, popupForm }) {
   useEffect(() => {
     setFilterUserData(
       users.sort((a, b) => {
-        let aLength = objData.users.filter((c) => c === a.user_uuid)?.length;
+        let aLength = objData.users?.filter((c) => c === a.user_uuid)?.length;
 
-        let bLength = objData.users.filter((c) => c === b.user_uuid)?.length;
+        let bLength = objData.users?.filter((c) => c === b.user_uuid)?.length;
         if (aLength && bLength) {
           return a.user_title?.localeCompare(b.user_title);
         } else if (aLength) {
@@ -1557,46 +1556,46 @@ function DiscountPopup({ onSave, popupForm }) {
       })
     );
     setFilterItemGroupData(
-      itemGroups.sort((a, b) => {
-        let aLength = objData.item_groups?.filter(
-          (c) => c === a?.item_group_uuid
+      Category.sort((a, b) => {
+        let aLength = objData.category?.filter(
+          (c) => c === a?.category_uuid
         )?.length;
-        let bLength = objData.item_groups?.filter(
-          (c) => c === b?.item_group_uuid
+        let bLength = objData.category?.filter(
+          (c) => c === b?.category_uuid
         )?.length;
         if (aLength && bLength) {
-          return a.item_group_title?.localeCompare(b.item_group_title);
+          return a.category_title?.localeCompare(b.category_title);
         } else if (aLength) {
           return -1;
         } else if (bLength) {
           return 1;
         } else {
-          return a.item_group_title?.localeCompare(b.item_group_title);
+          return a.category_title?.localeCompare(b.category_title);
         }
       })
     );
     setFilterItemData(
-      items.sort((a, b) => {
-        let aLength = objData.items.filter((c) => c === a.item_uuid)?.length;
-        let bLength = objData.items.filter((c) => c === b.item_uuid)?.length;
+      company.sort((a, b) => {
+        let aLength = objData?.company?.filter((c) => c === a?.company_uuid)?.length;
+        let bLength = objData?.company?.filter((c) => c === b?.company_uuid)?.length;
         if (aLength && bLength) {
-          return a.item_title?.localeCompare(b.item_title);
+          return a?.company_title?.localeCompare(b?.company_title);
         } else if (aLength) {
           return -1;
         } else if (bLength) {
           return 1;
         } else {
-          return a.item_title?.localeCompare(b.item_title);
+          return a?.company_title?.localeCompare(b?.company_title);
         }
       })
     );
     setFilterCounterGroupData(
       counterGroup.sort((a, b) => {
-        let aLength = objData.counter_groups.filter(
+        let aLength = objData.counter_groups?.filter(
           (c) => c === a.counter_group_uuid
         )?.length;
 
-        let bLength = objData.counter_groups.filter(
+        let bLength = objData.counter_groups?.filter(
           (c) => c === b.counter_group_uuid
         )?.length;
         if (aLength && bLength) {
@@ -1612,10 +1611,10 @@ function DiscountPopup({ onSave, popupForm }) {
     );
     setFilterCounterData(
       counter.sort((a, b) => {
-        let aLength = objData.counters.filter(
+        let aLength = objData.counters?.filter(
           (c) => c === a.counter_uuid
         )?.length;
-        let bLength = objData.counters.filter(
+        let bLength = objData.counters?.filter(
           (c) => c === b.counter_uuid
         )?.length;
         if (aLength && bLength) {
@@ -1629,7 +1628,7 @@ function DiscountPopup({ onSave, popupForm }) {
         }
       })
     );
-  }, [ui, items, counter, itemGroups, counterGroup, users]);
+  }, [ui, counter, itemGroups, counterGroup, users]);
 
   const getRoutesData = async () => {
     const response = await axios({
@@ -1700,28 +1699,7 @@ function DiscountPopup({ onSave, popupForm }) {
     });
     if (response.data.success) setCategory(response.data.result);
   };
-  const getItemsData = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/items/GetItemList",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success)
-      setItems(
-        response.data.result.map((b) => ({
-          ...b,
-          company_title: company.find(
-            (a) => a?.company_uuid === b?.company_uuid
-          )?.company_title,
-          category_title: Category.find(
-            (a) => a?.category_uuid === b?.category_uuid
-          )?.category_title,
-        }))
-      );
-  };
   const getCompanies = async () => {
     const response = await axios({
       method: "get",
@@ -1745,9 +1723,7 @@ function DiscountPopup({ onSave, popupForm }) {
     console.log("users", response);
     if (response.data.success) setUsers(response.data.result);
   };
-  useEffect(() => {
-    getItemsData();
-  }, [company, Category]);
+
   useEffect(() => {
     getItemGroup();
     getCompanies();
@@ -1822,6 +1798,35 @@ function DiscountPopup({ onSave, popupForm }) {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "flex-start",
+                        width: "300px",
+                      }}
+                    >
+                      <b>Type: </b>
+                      <select
+                        name="user_type"
+                        className="searchInput"
+                        value={objData?.type}
+                        onChange={(e) =>
+                          setObgData((prev) => ({
+                            ...prev,
+                            type: e.target.value,
+                          }))
+                        }
+                      >
+                        <option value="range-discount-company">Company</option>
+                        <option value="range-discount-category">
+                          Item Category
+                        </option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      colSpan={2}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
                       }}
                     >
                       <b>Discount Title : </b>
@@ -1873,6 +1878,36 @@ function DiscountPopup({ onSave, popupForm }) {
                       />
                     </td>
                   </tr>
+                  <tr>
+                    <td
+                      colSpan={2}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                      }}
+                    >
+                      <b>Discount Percent : </b>
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        className="searchInput"
+                        style={{
+                          border: "none",
+                          borderBottom: "2px solid black",
+                          borderRadius: "0px",
+                        }}
+                        placeholder="Percent"
+                        value={objData.discount_percent}
+                        onChange={(e) =>
+                          setObgData((prev) => ({
+                            ...prev,
+                            discount_percent: e.target.value,
+                          }))
+                        }
+                      />
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1884,7 +1919,7 @@ function DiscountPopup({ onSave, popupForm }) {
                 justifyContent: "center",
               }}
             >
-              <div
+              {objData.type==="range-discount-category"?<div
                 style={{
                   overflowY: "scroll",
                   height: "45vh",
@@ -1894,7 +1929,7 @@ function DiscountPopup({ onSave, popupForm }) {
                   type="text"
                   onChange={(e) => setItemGroupTitle(e.target.value)}
                   value={itemGroupTitle}
-                  placeholder="Search Item Group Title..."
+                  placeholder="Search Category..."
                   className="searchInput"
                 />
 
@@ -1902,145 +1937,24 @@ function DiscountPopup({ onSave, popupForm }) {
                   <thead>
                     <tr>
                       <th className="description" style={{ width: "50%" }}>
-                        Item Group
+                        Category
                       </th>
                       <th style={{ width: "25%" }}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filterItemGroupData
-                      ?.filter((a) => a.item_group_title)
-                      .filter(
+                      ?.filter((a) => a.category_title)
+                      ?.filter(
                         (a) =>
                           !itemGroupTitle ||
-                          a.item_group_title
+                          a.category_title
                             .toLocaleLowerCase()
                             .includes(itemGroupTitle.toLocaleLowerCase())
                       )
                       .map((item, index) => {
                         return (
-                          <tr key={item.item_uuid}>
-                            <td>{item.item_group_title}</td>
-
-                            <td>
-                              <button
-                                type="button"
-                                className="noBgActionButton"
-                                style={{
-                                  backgroundColor: objData.item_groups?.filter(
-                                    (a) => a === item?.item_group_uuid
-                                  )?.length
-                                    ? "red"
-                                    : "var(--mainColor)",
-                                  width: "150px",
-                                  fontSize: "large",
-                                }}
-                                onClick={(event) =>
-                                  setObgData((prev) => ({
-                                    ...objData,
-                                    item_groups: prev.item_groups.filter(
-                                      (a) => a === item.item_group_uuid
-                                    ).length
-                                      ? prev.item_groups.filter(
-                                          (a) => a !== item.item_group_uuid
-                                        )
-                                      : prev.item_groups.length
-                                      ? [
-                                          ...prev.item_groups,
-                                          item.item_group_uuid,
-                                        ]
-                                      : [item.item_group_uuid],
-                                  }))
-                                }
-                              >
-                                {objData.item_groups.filter(
-                                  (a) => a === item.item_group_uuid
-                                ).length
-                                  ? "Remove"
-                                  : "Add"}
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
-              </div>
-              <div
-                style={{
-                  overflowY: "scroll",
-                  height: "45vh",
-                }}
-              >
-                <input
-                  type="text"
-                  onChange={(e) => setFilterTitle(e.target.value)}
-                  value={filterTitle}
-                  placeholder="Search Item Title..."
-                  className="searchInput"
-                />
-                <input
-                  type="text"
-                  onChange={(e) => setFilterCompany(e.target.value)}
-                  value={filterCompany}
-                  placeholder="Search Company Title..."
-                  className="searchInput"
-                />
-                <input
-                  type="text"
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                  value={filterCategory}
-                  placeholder="Search Category Title..."
-                  className="searchInput"
-                />
-
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th className="description" style={{ width: "25%" }}>
-                        Item
-                      </th>
-                      <th className="description" style={{ width: "25%" }}>
-                        Company
-                      </th>
-                      <th className="description" style={{ width: "25%" }}>
-                        Category
-                      </th>
-
-                      <th style={{ width: "25%" }}>Action</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {filterItemData
-                      ?.filter((a) => a.item_uuid)
-                      .filter(
-                        (a) =>
-                          !filterTitle ||
-                          a.item_title
-                            .toLocaleLowerCase()
-                            .includes(filterTitle.toLocaleLowerCase())
-                      )
-                      .filter(
-                        (a) =>
-                          !filterCompany ||
-                          a?.company_title
-                            .toLocaleLowerCase()
-                            .includes(filterCompany.toLocaleLowerCase())
-                      )
-                      .filter(
-                        (a) =>
-                          !filterCategory ||
-                          a?.category_title
-                            .toLocaleLowerCase()
-                            .includes(filterCategory.toLocaleLowerCase())
-                      )
-
-                      .map((item, index) => {
-                        return (
-                          <tr key={item.item_uuid}>
-                            <td>{item.item_title}</td>
-                            <td>{item.company_title}</td>
+                          <tr key={item.category_uuid}>
                             <td>{item.category_title}</td>
 
                             <td>
@@ -2048,8 +1962,8 @@ function DiscountPopup({ onSave, popupForm }) {
                                 type="button"
                                 className="noBgActionButton"
                                 style={{
-                                  backgroundColor: objData.items.filter(
-                                    (a) => a === item.item_uuid
+                                  backgroundColor: objData.category?.filter(
+                                    (a) => a === item?.category_uuid
                                   )?.length
                                     ? "red"
                                     : "var(--mainColor)",
@@ -2059,20 +1973,23 @@ function DiscountPopup({ onSave, popupForm }) {
                                 onClick={(event) =>
                                   setObgData((prev) => ({
                                     ...objData,
-                                    items: prev.items.filter(
-                                      (a) => a === item.item_uuid
-                                    ).length
-                                      ? prev.items.filter(
-                                          (a) => a !== item.item_uuid
+                                    category: prev.category?.filter(
+                                      (a) => a === item.category_uuid
+                                    )?.length
+                                      ? prev.category?.filter(
+                                          (a) => a !== item.category_uuid
                                         )
-                                      : prev.items.length
-                                      ? [...prev.items, item.item_uuid]
-                                      : [item.item_uuid],
+                                      : prev.category?.length
+                                      ? [
+                                          ...prev.category,
+                                          item.category_uuid,
+                                        ]
+                                      : [item.category_uuid],
                                   }))
                                 }
                               >
-                                {objData.items.filter(
-                                  (a) => a === item.item_uuid
+                                {objData.category?.filter(
+                                  (a) => a === item.category_uuid
                                 )?.length
                                   ? "Remove"
                                   : "Add"}
@@ -2083,7 +2000,89 @@ function DiscountPopup({ onSave, popupForm }) {
                       })}
                   </tbody>
                 </table>
-              </div>
+              </div>:
+              <div
+                style={{
+                  overflowY: "scroll",
+                  height: "45vh",
+                }}
+              >
+                <input
+                  type="text"
+                  onChange={(e) => setFilterTitle(e.target.value)}
+                  value={filterTitle}
+                  placeholder="Search Item Company..."
+                  className="searchInput"
+                />
+
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th className="description" style={{ width: "25%" }}>
+                        Company
+                      </th>
+
+                      <th style={{ width: "25%" }}>Action</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {filterItemData
+                      ?.filter((a) => a?.company_uuid)
+                      ?.filter(
+                        (a) =>
+                          !filterTitle ||
+                          a?.company_title
+                            .toLocaleLowerCase()
+                            .includes(filterTitle.toLocaleLowerCase())
+                      )
+
+                      .map((item, index) => {
+                        return (
+                          <tr key={item?.company_uuid}>
+                            <td>{item?.company_title}</td>
+
+                            <td>
+                              <button
+                                type="button"
+                                className="noBgActionButton"
+                                style={{
+                                  backgroundColor: objData?.company?.filter(
+                                    (a) => a === item?.company_uuid
+                                  )?.length
+                                    ? "red"
+                                    : "var(--mainColor)",
+                                  width: "150px",
+                                  fontSize: "large",
+                                }}
+                                onClick={(event) =>
+                                  setObgData((prev) => ({
+                                    ...objData,
+                                    company: prev?.company?.filter(
+                                      (a) => a === item?.company_uuid
+                                    )?.length
+                                      ? prev?.company?.filter(
+                                          (a) => a !== item?.company_uuid
+                                        )
+                                      : prev?.company?.length
+                                      ? [...prev?.company, item?.company_uuid]
+                                      : [item?.company_uuid],
+                                  }))
+                                }
+                              >
+                                {objData?.company?.filter(
+                                  (a) => a === item?.company_uuid
+                                )?.length
+                                  ? "Remove"
+                                  : "Add"}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>}
             </div>
           ) : +ui === 3 ? (
             <div
@@ -2119,7 +2118,7 @@ function DiscountPopup({ onSave, popupForm }) {
                   <tbody>
                     {filterCounterGroupData
                       ?.filter((a) => a.counter_group_title)
-                      .filter(
+                      ?.filter(
                         (a) =>
                           !filterCounterGroupTitle ||
                           a.counter_group_title
@@ -2140,7 +2139,7 @@ function DiscountPopup({ onSave, popupForm }) {
                                 className="noBgActionButton"
                                 style={{
                                   backgroundColor:
-                                    objData.counter_groups.filter(
+                                    objData.counter_groups?.filter(
                                       (a) => a === item.counter_group_uuid
                                     )?.length
                                       ? "red"
@@ -2151,13 +2150,13 @@ function DiscountPopup({ onSave, popupForm }) {
                                 onClick={(event) =>
                                   setObgData((prev) => ({
                                     ...objData,
-                                    counter_groups: prev.counter_groups.filter(
+                                    counter_groups: prev.counter_groups?.filter(
                                       (a) => a === item.counter_group_uuid
-                                    ).length
-                                      ? prev.counter_groups.filter(
+                                    )?.length
+                                      ? prev.counter_groups?.filter(
                                           (a) => a !== item.counter_group_uuid
                                         )
-                                      : prev.counter_groups.length
+                                      : prev.counter_groups?.length
                                       ? [
                                           ...prev.counter_groups,
                                           item.counter_group_uuid,
@@ -2166,7 +2165,7 @@ function DiscountPopup({ onSave, popupForm }) {
                                   }))
                                 }
                               >
-                                {objData.counter_groups.filter(
+                                {objData.counter_groups?.filter(
                                   (a) => a === item.counter_group_uuid
                                 )?.length
                                   ? "Remove"
@@ -2216,14 +2215,14 @@ function DiscountPopup({ onSave, popupForm }) {
                   <tbody>
                     {filterCounterata
                       ?.filter((a) => a.counter_uuid)
-                      .filter(
+                      ?.filter(
                         (a) =>
                           !filterCounterTitle ||
                           a.counter_title
                             ?.toLocaleLowerCase()
                             .includes(filterCounterTitle.toLocaleLowerCase())
                       )
-                      .filter(
+                      ?.filter(
                         (a) =>
                           !filterRoute ||
                           a?.route_title
@@ -2241,7 +2240,7 @@ function DiscountPopup({ onSave, popupForm }) {
                                 type="button"
                                 className="noBgActionButton"
                                 style={{
-                                  backgroundColor: objData.counters.filter(
+                                  backgroundColor: objData.counters?.filter(
                                     (a) => a === item.counter_uuid
                                   )?.length
                                     ? "red"
@@ -2252,19 +2251,19 @@ function DiscountPopup({ onSave, popupForm }) {
                                 onClick={(event) =>
                                   setObgData((prev) => ({
                                     ...objData,
-                                    counters: prev.counters.filter(
+                                    counters: prev.counters?.filter(
                                       (a) => a === item.counter_uuid
-                                    ).length
-                                      ? prev.counters.filter(
+                                    )?.length
+                                      ? prev.counters?.filter(
                                           (a) => a !== item.counter_uuid
                                         )
-                                      : prev.counters.length
+                                      : prev.counters?.length
                                       ? [...prev.counters, item.counter_uuid]
                                       : [item.counter_uuid],
                                   }))
                                 }
                               >
-                                {objData.counters.filter(
+                                {objData.counters?.filter(
                                   (a) => a === item.counter_uuid
                                 )?.length
                                   ? "Remove"
@@ -2312,7 +2311,7 @@ function DiscountPopup({ onSave, popupForm }) {
                   <tbody>
                     {filterUserData
                       ?.filter((a) => a.user_title)
-                      .filter(
+                      ?.filter(
                         (a) =>
                           !filterUserTitle ||
                           a.user_title
@@ -2330,7 +2329,7 @@ function DiscountPopup({ onSave, popupForm }) {
                                 type="button"
                                 className="noBgActionButton"
                                 style={{
-                                  backgroundColor: objData.users.filter(
+                                  backgroundColor: objData.users?.filter(
                                     (a) => a === item.user_uuid
                                   )?.length
                                     ? "red"
@@ -2341,19 +2340,19 @@ function DiscountPopup({ onSave, popupForm }) {
                                 onClick={(event) =>
                                   setObgData((prev) => ({
                                     ...objData,
-                                    users: prev.users.filter(
+                                    users: prev.users?.filter(
                                       (a) => a === item.user_uuid
-                                    ).length
-                                      ? prev.users.filter(
+                                    )?.length
+                                      ? prev.users?.filter(
                                           (a) => a !== item.user_uuid
                                         )
-                                      : prev.users.length
+                                      : prev.users?.length
                                       ? [...prev.users, item.user_uuid]
                                       : [item.user_uuid],
                                   }))
                                 }
                               >
-                                {objData.users.filter(
+                                {objData.users?.filter(
                                   (a) => a === item.user_uuid
                                 )?.length
                                   ? "Remove"

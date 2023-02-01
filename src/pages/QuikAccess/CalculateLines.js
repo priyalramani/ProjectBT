@@ -1,8 +1,9 @@
 import React, { useContext, useState } from "react";
 import context from "../../context/context";
 
-function CalculateLines() {
+function CalculateLinesPopup() {
   const [data, setdata] = useState(0);
+  const [type, setType] = useState("company");
   const { CalculateLines, setcalculationPopup, loading } = useContext(context);
 
   return (
@@ -16,12 +17,36 @@ function CalculateLines() {
             width: "fit-content",
           }}
         >
+          <div className="flex">
+            <button
+              className="fieldEditButton"
+              style={
+                type === "company"
+                  ? { backgroundColor: "var(--main)", color: "#fff" }
+                  : { backgroundColor: "#fff", color: "var(--main)" }
+              }
+              onClick={() => setType("company")}
+            >
+              Company
+            </button>
+            <button
+              style={
+                type === "category"
+                  ? { backgroundColor: "var(--main)", color: "#fff" }
+                  : { backgroundColor: "#fff", color: "var(--main)" }
+              }
+              className="fieldEditButton"
+              onClick={() => setType("category")}
+            >
+              Category
+            </button>
+          </div>
           <div style={{ overflowY: "scroll" }}>
             <form
               className="form"
               onSubmit={(e) => {
                 e.preventDefault();
-                CalculateLines(data);
+                CalculateLines(data,type);
               }}
             >
               <div className="row">
@@ -88,4 +113,4 @@ function CalculateLines() {
     </div>
   );
 }
-export default CalculateLines;
+export default CalculateLinesPopup;
