@@ -119,7 +119,7 @@ const Main = () => {
               fontSize: "20px",
             }}
           >
-            Version 50.{localStorage.getItem("IDBVersion")}
+            Version 51.{localStorage.getItem("IDBVersion")}
           </div>
 
           <button
@@ -176,14 +176,14 @@ function Logout({ onSave, popupForm }) {
     setIsLoading(true);
     console.log(popupForm);
     if (popupForm === "refresh") {
-      setTimeout(()=>setIsLoading(false),10000)
-     await refreshDb();
-     setIsLoading(false);
+      setTimeout(() => setIsLoading(false), 10000);
+      await refreshDb();
+      setIsLoading(false);
       onSave();
     } else {
       deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
       localStorage.clear();
-      sessionStorage.clear()
+      sessionStorage.clear();
       window.location.assign("/login");
     }
     setIsLoading(false);

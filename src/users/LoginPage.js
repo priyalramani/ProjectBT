@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 
 import { openDB } from "idb";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = ({ setUserType }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -9,7 +10,7 @@ const LoginPage = ({ setUserType }) => {
     login_username: "",
     login_password: "",
   });
-
+  const Navigate = useNavigate();
   const loginHandler = async () => {
     try {
       setIsLoading(true);
@@ -36,7 +37,7 @@ const LoginPage = ({ setUserType }) => {
         sessionStorage.setItem("userType", response.data.result.user_type);
         if (+data.user_type === 0) {
           setUserType(response.data.result.user_type || false);
-          window.location.assign("/admin");
+          Navigate("/admin");
           return;
         }
         const result = await axios({
@@ -65,7 +66,7 @@ const LoginPage = ({ setUserType }) => {
           setUserType(response.data.result.user_type || false);
           setIsLoading(false);
           db.close();
-          window.location.assign("/users");
+          Navigate("/users");
         };
         let store;
         let index = 0;

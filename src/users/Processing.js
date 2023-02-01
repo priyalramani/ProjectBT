@@ -38,20 +38,21 @@ const Processing = () => {
       <nav className="user_nav nav_styling" style={{ top: "0" }}>
         <div
           className="user_menubar flex"
-          style={{ width: "100%", justifyContent: "space-between",paddingRight:"5px" }}
+          style={{
+            width: "100%",
+            justifyContent: "space-between",
+            paddingRight: "5px",
+          }}
         >
           <IoArrowBackOutline
             className="user_Back_icon"
             onClick={() => Navigate("/users")}
           />
-          
-  
 
-        <h1 style={{ width: "80%", textAlign: "left", marginLeft: "40px" }}>
-          Trips
-        </h1>
-        
-          
+          <h1 style={{ width: "80%", textAlign: "left", marginLeft: "40px" }}>
+            Trips
+          </h1>
+
           <AiOutlineReload
             className="user_Back_icon"
             onClick={() => {
@@ -72,7 +73,7 @@ const Processing = () => {
           marginTop: "20px",
           backgroundColor: "#f2f2f2",
           overflowY: "scroll",
-          paddingBottom:"100px",
+          paddingBottom: "100px",
         }}
       >
         {tripData.length ? (
@@ -80,7 +81,7 @@ const Processing = () => {
             ?.filter((a) => a.trip_title && a.orderLength)
             ?.sort((a, b) => (a.created_at ? a.created_at - b.created_at : -1))
             .map((data, i) => (
-              <Link
+              <div
                 key={i}
                 to={
                   "#"
@@ -89,21 +90,22 @@ const Processing = () => {
                 className="linkDecoration"
                 onClick={() => {
                   sessionStorage.setItem("trip_title", data?.trip_title);
-                  window.location.assign(
+                  let link =
                     `/users/${
                       Location.pathname.includes("checking")
                         ? "checking"
                         : Location.pathname.includes("delivery")
                         ? "delivery"
                         : "processing"
-                    }/` + data?.trip_uuid
-                  );
+                    }/` + data?.trip_uuid;
+
+                  Navigate(link);
                 }}
               >
                 <div className="service">
                   <span>{data.trip_title}</span>
                 </div>
-              </Link>
+              </div>
             ))
         ) : (
           <h1>No Order</h1>

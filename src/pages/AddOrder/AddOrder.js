@@ -24,7 +24,7 @@ const CovertedQty = (qty, conversion) => {
 };
 let user_warehouse = localStorage.getItem("warehouse") || 0;
 user_warehouse = user_warehouse ? JSON.parse(user_warehouse)[0] : 0;
-console.log(user_warehouse);
+
 let inititals = {
   counter_uuid: "",
   warehouse_uuid: user_warehouse,
