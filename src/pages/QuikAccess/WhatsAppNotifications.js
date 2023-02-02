@@ -217,7 +217,7 @@ function Table({
       </thead>
       <tbody className="tbody">
         {itemsDetails
-          ?.filter((a) => a.message)
+          ?.filter((a) => a.type)
           .sort((a, b) =>
             order === "asc"
               ? typeof a[items] === "string"
@@ -237,7 +237,7 @@ function Table({
                   setPopupForm({ type: "edit", data: item });
                 }}
               >
-                {item.message}
+                {item.type}
               </td>
 
               <td>
@@ -337,24 +337,24 @@ function IncentivePopup({ onSave, popupForm }) {
                     }}
                   >
                     <b style={{ width: "100px" }}>Type : </b>
-                    <select
-                      name="user_type"
+                    <input
+                      onWheel={(e) => e.target.blur()}
+                      type="text"
                       className="searchInput"
-                      value={objData?.type}
+                      style={{
+                        border: "none",
+                        borderBottom: "2px solid black",
+                        borderRadius: "0px",
+                      }}
+                      placeholder=""
+                      value={objData.type}
                       onChange={(e) =>
                         setObgData((prev) => ({
                           ...prev,
                           type: e.target.value,
                         }))
                       }
-                    >
-                      <option value="out-for-delivery">
-                        Payment Reminder Manual
-                      </option>
-                      <option value="payment-reminder-manual">
-                        Payment Reminder Manual
-                      </option>
-                    </select>
+                    />
                   </td>
                 </tr>
                 <tr>
@@ -381,9 +381,7 @@ function IncentivePopup({ onSave, popupForm }) {
                       onChange={(e) =>
                         setObgData((prev) => ({
                           ...prev,
-                          message: !e.target.value.includes(msg)
-                            ? prev.message
-                            : e.target.value,
+                          message: e.target.value,
                         }))
                       }
                     />

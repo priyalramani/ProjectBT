@@ -5,6 +5,7 @@ import Sidebar from "../../components/Sidebar";
 import { OrderDetails } from "../../components/OrderDetails";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
+import { WhatsApp } from "@mui/icons-material";
 const fileExtension = ".xlsx";
 const fileType =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -152,7 +153,15 @@ function Table({
   setRemarksPoup,
   loading,
   setLoading,
+  Counters,
 }) {
+  const sendMessage = async (item) => {
+    await axios({
+      method: "post",
+      url: "/orders/sendMsg",
+      data: item,
+    });
+  };
   return (
     <table
       className="user-table"
@@ -168,7 +177,7 @@ function Table({
           <th colSpan={2}>Payment Date</th>
           <th colSpan={3}>User</th>
           <th colSpan={3}>Type</th>
-          <th colSpan={4}>Action</th>
+          <th colSpan={5}>Action</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -199,6 +208,15 @@ function Table({
               </td>
               <td colSpan={3}>{item.user_title || ""}</td>
               <td colSpan={3}>{item.mode_title || ""}</td>
+              <td
+                style={{ color: "green" }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  sendMessage(item);
+                }}
+              >
+                <WhatsApp />
+              </td>
               <td colSpan={2}>
                 <button
                   type="button"
