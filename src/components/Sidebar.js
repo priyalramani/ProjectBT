@@ -271,6 +271,10 @@ const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
               name: "Calculate Lines",
               link: "#",
             },
+            {
+              name: "WhatsApp Notifications",
+              link: "/admin/WhatsAppNotifications",
+            },
           ]}
         />
         {/* <div

@@ -55,6 +55,7 @@ import PendingReciptsEntry from "./pages/Reports/PendingReciptsEntry";
 import { refreshDb } from "./Apis/functions";
 import CalculateLines from "./pages/QuikAccess/CalculateLines";
 import Context from "./context/context";
+import WhatsAppNotifications from "./pages/QuikAccess/WhatsAppNotifications";
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
@@ -177,6 +178,7 @@ function App() {
               <Route path="/admin/adminUsers" element={<Users />} />
               <Route path="/admin/items" element={<ItemsPage />} />
               <Route path="/admin/warehouse" element={<Warehouse />} />
+              <Route path="/admin/WhatsAppNotifications" element={<WhatsAppNotifications />} />
 
               <Route
                 path="/admin/autoIncreaseQty"

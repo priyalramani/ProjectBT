@@ -1507,10 +1507,10 @@ function DiscountPopup({ onSave, popupForm }) {
     discount_title: "",
     amt: "",
     min_range: "",
-    company: [],
+    company_uuid: "",
     users: [],
-    category: [],
-    counters: [],
+    category_uuid: "",
+    counter_uuid: "",
     counter_groups: [],
   });
   console.log(popupForm);
@@ -1526,7 +1526,7 @@ function DiscountPopup({ onSave, popupForm }) {
   const [filterCounterGroupTitle, setFilterCounterGroupTitle] = useState("");
   const [itemGroups, setItemsGroup] = useState([]);
   const [filterTitle, setFilterTitle] = useState("");
- 
+
   const [filterUserTitle, setFilterUserTitle] = useState("");
   const [itemGroupTitle, setItemGroupTitle] = useState("");
   const [routesData, setRoutesData] = useState([]);
@@ -1557,12 +1557,10 @@ function DiscountPopup({ onSave, popupForm }) {
     );
     setFilterItemGroupData(
       Category.sort((a, b) => {
-        let aLength = objData.category?.filter(
-          (c) => c === a?.category_uuid
-        )?.length;
-        let bLength = objData.category?.filter(
-          (c) => c === b?.category_uuid
-        )?.length;
+        let aLength = objData.category_uuid === a?.category_uuid;
+
+        let bLength = objData.category_uuid === b?.category_uuid;
+
         if (aLength && bLength) {
           return a.category_title?.localeCompare(b.category_title);
         } else if (aLength) {
@@ -1572,12 +1570,19 @@ function DiscountPopup({ onSave, popupForm }) {
         } else {
           return a.category_title?.localeCompare(b.category_title);
         }
-      })
+      }).map((a) => ({
+        ...a,
+        company_title:
+          company?.find((b) => a?.company_uuid === b?.company_uuid)
+            ?.company_title || "",
+      }))
     );
     setFilterItemData(
       company.sort((a, b) => {
-        let aLength = objData?.company?.filter((c) => c === a?.company_uuid)?.length;
-        let bLength = objData?.company?.filter((c) => c === b?.company_uuid)?.length;
+        let aLength = objData?.company_uuid === a?.company_uuid;
+
+        let bLength = objData?.company_uuid === b?.company_uuid;
+
         if (aLength && bLength) {
           return a?.company_title?.localeCompare(b?.company_title);
         } else if (aLength) {
@@ -1611,12 +1616,10 @@ function DiscountPopup({ onSave, popupForm }) {
     );
     setFilterCounterData(
       counter.sort((a, b) => {
-        let aLength = objData.counters?.filter(
-          (c) => c === a.counter_uuid
-        )?.length;
-        let bLength = objData.counters?.filter(
-          (c) => c === b.counter_uuid
-        )?.length;
+        let aLength = objData.counter_uuid === a.counter_uuid;
+
+        let bLength = objData.counter_uuid === b.counter_uuid;
+
         if (aLength && bLength) {
           return a.counter_title?.localeCompare(b.counter_title);
         } else if (aLength) {
@@ -1765,7 +1768,7 @@ function DiscountPopup({ onSave, popupForm }) {
       }
     }
   };
-
+  console.log(objData);
   return (
     <div className="overlay">
       <div
@@ -1919,170 +1922,154 @@ function DiscountPopup({ onSave, popupForm }) {
                 justifyContent: "center",
               }}
             >
-              {objData.type==="range-discount-category"?<div
-                style={{
-                  overflowY: "scroll",
-                  height: "45vh",
-                }}
-              >
-                <input
-                  type="text"
-                  onChange={(e) => setItemGroupTitle(e.target.value)}
-                  value={itemGroupTitle}
-                  placeholder="Search Category..."
-                  className="searchInput"
-                />
+              {objData.type === "range-discount-category" ? (
+                <div
+                  style={{
+                    overflowY: "scroll",
+                    height: "45vh",
+                  }}
+                >
+                  <input
+                    type="text"
+                    onChange={(e) => setItemGroupTitle(e.target.value)}
+                    value={itemGroupTitle}
+                    placeholder="Search Category..."
+                    className="searchInput"
+                  />
 
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th className="description" style={{ width: "50%" }}>
-                        Category
-                      </th>
-                      <th style={{ width: "25%" }}>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filterItemGroupData
-                      ?.filter((a) => a.category_title)
-                      ?.filter(
-                        (a) =>
-                          !itemGroupTitle ||
-                          a.category_title
-                            .toLocaleLowerCase()
-                            .includes(itemGroupTitle.toLocaleLowerCase())
-                      )
-                      .map((item, index) => {
-                        return (
-                          <tr key={item.category_uuid}>
-                            <td>{item.category_title}</td>
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th className="description" style={{ width: "50%" }}>
+                          Company
+                        </th>
+                        <th className="description" style={{ width: "50%" }}>
+                          Category
+                        </th>
+                        <th style={{ width: "25%" }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filterItemGroupData
+                        ?.filter((a) => a.category_title)
+                        ?.filter(
+                          (a) =>
+                            !itemGroupTitle ||
+                            a.category_title
+                              .toLocaleLowerCase()
+                              .includes(itemGroupTitle.toLocaleLowerCase())
+                        )
+                        .map((item, index) => {
+                          return (
+                            <tr key={item.category_uuid}>
+                              <td>{item.company_title}</td>
+                              <td>{item.category_title}</td>
 
-                            <td>
-                              <button
-                                type="button"
-                                className="noBgActionButton"
-                                style={{
-                                  backgroundColor: objData.category?.filter(
-                                    (a) => a === item?.category_uuid
-                                  )?.length
-                                    ? "red"
-                                    : "var(--mainColor)",
-                                  width: "150px",
-                                  fontSize: "large",
-                                }}
-                                onClick={(event) =>
-                                  setObgData((prev) => ({
-                                    ...objData,
-                                    category: prev.category?.filter(
-                                      (a) => a === item.category_uuid
-                                    )?.length
-                                      ? prev.category?.filter(
-                                          (a) => a !== item.category_uuid
-                                        )
-                                      : prev.category?.length
-                                      ? [
-                                          ...prev.category,
-                                          item.category_uuid,
-                                        ]
-                                      : [item.category_uuid],
-                                  }))
-                                }
-                              >
-                                {objData.category?.filter(
-                                  (a) => a === item.category_uuid
-                                )?.length
-                                  ? "Remove"
-                                  : "Add"}
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
-              </div>:
-              <div
-                style={{
-                  overflowY: "scroll",
-                  height: "45vh",
-                }}
-              >
-                <input
-                  type="text"
-                  onChange={(e) => setFilterTitle(e.target.value)}
-                  value={filterTitle}
-                  placeholder="Search Item Company..."
-                  className="searchInput"
-                />
+                              <td>
+                                <button
+                                  type="button"
+                                  className="noBgActionButton"
+                                  style={{
+                                    backgroundColor:
+                                      objData.category_uuid ===
+                                      item?.category_uuid
+                                        ? "red"
+                                        : "var(--mainColor)",
+                                    width: "150px",
+                                    fontSize: "large",
+                                  }}
+                                  onClick={(event) =>
+                                    setObgData((prev) => ({
+                                      ...objData,
+                                      category_uuid: item.category_uuid,
+                                    }))
+                                  }
+                                >
+                                  {objData.category_uuid === item.category_uuid
+                                    ? "Remove"
+                                    : "Add"}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    overflowY: "scroll",
+                    height: "45vh",
+                  }}
+                >
+                  <input
+                    type="text"
+                    onChange={(e) => setFilterTitle(e.target.value)}
+                    value={filterTitle}
+                    placeholder="Search Item Company..."
+                    className="searchInput"
+                  />
 
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th className="description" style={{ width: "25%" }}>
-                        Company
-                      </th>
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th className="description" style={{ width: "25%" }}>
+                          Company
+                        </th>
 
-                      <th style={{ width: "25%" }}>Action</th>
-                    </tr>
-                  </thead>
+                        <th style={{ width: "25%" }}>Action</th>
+                      </tr>
+                    </thead>
 
-                  <tbody>
-                    {filterItemData
-                      ?.filter((a) => a?.company_uuid)
-                      ?.filter(
-                        (a) =>
-                          !filterTitle ||
-                          a?.company_title
-                            .toLocaleLowerCase()
-                            .includes(filterTitle.toLocaleLowerCase())
-                      )
+                    <tbody>
+                      {filterItemData
+                        ?.filter((a) => a?.company_uuid)
+                        ?.filter(
+                          (a) =>
+                            !filterTitle ||
+                            a?.company_title
+                              .toLocaleLowerCase()
+                              .includes(filterTitle.toLocaleLowerCase())
+                        )
 
-                      .map((item, index) => {
-                        return (
-                          <tr key={item?.company_uuid}>
-                            <td>{item?.company_title}</td>
+                        .map((item, index) => {
+                          return (
+                            <tr key={item?.company_uuid}>
+                              <td>{item?.company_title}</td>
 
-                            <td>
-                              <button
-                                type="button"
-                                className="noBgActionButton"
-                                style={{
-                                  backgroundColor: objData?.company?.filter(
-                                    (a) => a === item?.company_uuid
-                                  )?.length
-                                    ? "red"
-                                    : "var(--mainColor)",
-                                  width: "150px",
-                                  fontSize: "large",
-                                }}
-                                onClick={(event) =>
-                                  setObgData((prev) => ({
-                                    ...objData,
-                                    company: prev?.company?.filter(
-                                      (a) => a === item?.company_uuid
-                                    )?.length
-                                      ? prev?.company?.filter(
-                                          (a) => a !== item?.company_uuid
-                                        )
-                                      : prev?.company?.length
-                                      ? [...prev?.company, item?.company_uuid]
-                                      : [item?.company_uuid],
-                                  }))
-                                }
-                              >
-                                {objData?.company?.filter(
-                                  (a) => a === item?.company_uuid
-                                )?.length
-                                  ? "Remove"
-                                  : "Add"}
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
-              </div>}
+                              <td>
+                                <button
+                                  type="button"
+                                  className="noBgActionButton"
+                                  style={{
+                                    backgroundColor:
+                                      objData?.company_uuid ===
+                                      item?.company_uuid
+                                        ? "red"
+                                        : "var(--mainColor)",
+                                    width: "150px",
+                                    fontSize: "large",
+                                  }}
+                                  onClick={(event) =>
+                                    setObgData((prev) => ({
+                                      ...objData,
+                                      company_uuid: item?.company_uuid,
+                                    }))
+                                  }
+                                >
+                                  {objData?.company_uuid === item?.company_uuid
+                                    ? "Remove"
+                                    : "Add"}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           ) : +ui === 3 ? (
             <div
@@ -2092,7 +2079,7 @@ function DiscountPopup({ onSave, popupForm }) {
                 justifyContent: "center",
               }}
             >
-              <div
+              {/* <div
                 style={{
                   overflowY: "scroll",
                   height: "45vh",
@@ -2177,7 +2164,7 @@ function DiscountPopup({ onSave, popupForm }) {
                       })}
                   </tbody>
                 </table>
-              </div>
+              </div> */}
               <div
                 style={{
                   overflowY: "scroll",
@@ -2240,32 +2227,21 @@ function DiscountPopup({ onSave, popupForm }) {
                                 type="button"
                                 className="noBgActionButton"
                                 style={{
-                                  backgroundColor: objData.counters?.filter(
-                                    (a) => a === item.counter_uuid
-                                  )?.length
-                                    ? "red"
-                                    : "var(--mainColor)",
+                                  backgroundColor:
+                                    objData.counter_uuid === item.counter_uuid
+                                      ? "red"
+                                      : "var(--mainColor)",
                                   width: "150px",
                                   fontSize: "large",
                                 }}
                                 onClick={(event) =>
                                   setObgData((prev) => ({
                                     ...objData,
-                                    counters: prev.counters?.filter(
-                                      (a) => a === item.counter_uuid
-                                    )?.length
-                                      ? prev.counters?.filter(
-                                          (a) => a !== item.counter_uuid
-                                        )
-                                      : prev.counters?.length
-                                      ? [...prev.counters, item.counter_uuid]
-                                      : [item.counter_uuid],
+                                    counter_uuid: item.counter_uuid,
                                   }))
                                 }
                               >
-                                {objData.counters?.filter(
-                                  (a) => a === item.counter_uuid
-                                )?.length
+                                {objData.counter_uuid === item.counter_uuid
                                   ? "Remove"
                                   : "Add"}
                               </button>

@@ -1788,7 +1788,8 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
 function DiscountPopup({ onSave, setOrder, order }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
-
+  const [itemsData, setItemsData] = useState([]);
+  const { counter_uuid } = useParams();
   const submitHandler = async (e) => {
     e.preventDefault();
     setOrder((prev) => ({
@@ -1807,72 +1808,20 @@ function DiscountPopup({ onSave, setOrder, order }) {
     }));
     onSave();
   };
-
-  return (
-    <div className="overlay">
-      <div
-        className="modal"
-        style={{ height: "fit-content", width: "max-content" }}
-      >
-        <div
-          className="content"
-          style={{
-            height: "fit-content",
-            padding: "20px",
-            width: "fit-content",
-          }}
-        >
-          <div style={{ overflowY: "scroll" }}>
-            <form className="form" onSubmit={submitHandler}>
-              <div className="formGroup">
-                <div
-                  className="row"
-                  style={{ flexDirection: "row", alignItems: "flex-start" }}
-                >
-                  <label
-                    className="selectLabel flex"
-                    style={{ width: "100px" }}
-                  >
-                    Discount
-                    <input
-                      type="number"
-                      name="route_title"
-                      className="numberInput"
-                      value={data}
-                      style={{ width: "100px" }}
-                      onChange={(e) => setdata(e.target.value)}
-                      autoFocus={true}
-                      maxLength={42}
-                      onWheel={(e) => e.preventDefault()}
-                    />
-                  </label>
-                </div>
-              </div>
-              <i style={{ color: "red" }}>
-                {errMassage === "" ? "" : "Error: " + errMassage}
-              </i>
-
-              <button type="submit" className="submit">
-                Save changes
-              </button>
-            </form>
-          </div>
-          <button onClick={onSave} className="closeButton">
-            x
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-function FinelPopup({ onSave, setOrder, order }) {
-  const [data, setdata] = useState({});
-  const [errMassage, setErrorMassage] = useState("");
-
-  const submitHandler = async (e) => {
-    e.preventDefault();
+  const DiscountEligablilityChecking = async () => {
+    const response = await axios({
+      method: "post",
+      url: "/counter_scheme/getRangeOrderEligibleDiscounts",
+      data: { ...order, counter_uuid,user_uuid:localStorage.getItem("user_uuid") },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setItemsData(response.data.result);
   };
-
+  useEffect(() => {
+    DiscountEligablilityChecking();
+  }, []);
   return (
     <div className="overlay">
       <div
@@ -1912,6 +1861,18 @@ function FinelPopup({ onSave, setOrder, order }) {
                     />
                   </label>
                 </div>
+                {itemsData?.map(item=><div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "flex-start" }}
+                >
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    {item.discount_title||""} is eligible
+                    
+                  </label>
+                </div>)}
               </div>
               <i style={{ color: "red" }}>
                 {errMassage === "" ? "" : "Error: " + errMassage}
