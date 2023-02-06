@@ -1,9 +1,10 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import { OrderDetails } from "../../components/OrderDetails";
 import * as XLSX from "xlsx";
+import Context from "../../context/context";
 import * as FileSaver from "file-saver";
 import { WhatsApp } from "@mui/icons-material";
 const fileExtension = ".xlsx";
@@ -155,12 +156,19 @@ function Table({
   setLoading,
   Counters,
 }) {
+  const context = useContext(Context);
+
+  const { setNotification } = context;
   const sendMessage = async (item) => {
-    await axios({
+    let response = await axios({
       method: "post",
       url: "/orders/sendMsg",
-      data: item,
+      data: { ...item, notification_uuid: "payment-reminder-manual" },
     });
+
+    console.log(response.data);
+    setNotification(response.data);
+    setTimeout(() => setNotification(null), 3000);
   };
   return (
     <table
@@ -211,7 +219,7 @@ function Table({
               <td
                 style={{ color: "green" }}
                 onClick={(e) => {
-                  e.stopPropagation()
+                  e.stopPropagation();
                   sendMessage(item);
                 }}
               >
@@ -280,6 +288,7 @@ function Table({
 function NotesPopup({ onSave, setItems, notesPopup }) {
   const [notes, setNotes] = useState([]);
   const [edit, setEdit] = useState(false);
+
   useEffect(() => {
     console.log(notesPopup?.remarks);
     setNotes(notesPopup?.remarks || []);

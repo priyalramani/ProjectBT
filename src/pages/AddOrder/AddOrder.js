@@ -12,7 +12,7 @@ import { useIdleTimer } from "react-idle-timer";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import FreeItems from "../../components/FreeItems";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
-const list = ["item_uuid", "q", "p"];
+
 const CovertedQty = (qty, conversion) => {
   let b = qty / +conversion;
 
@@ -149,11 +149,11 @@ export default function AddOrder() {
     if (type.autoAdd) {
       let autoAdd = await AutoAdd({
         counter,
-        items: data.item_details,
+        item_details: data.item_details,
         dbItems: itemsData,
         autobills: autoBills.filter((a) => a.status),
       });
-      data = { ...data, ...autoAdd, item_details: autoAdd.items };
+      data = { ...data, ...autoAdd, item_details: autoAdd.item_details };
     }
     let time = new Date();
     let autoBilling = await Billing({
@@ -161,10 +161,13 @@ export default function AddOrder() {
       adjustment: data.adjustment,
       shortage: data.shortage,
       counter,
-      items: data.item_details.map((a) => ({ ...a, item_price: a.p_price })),
+      items: data.item_details.map((a) => ({
+        ...a,
+        item_price: a.p_price || a.item_price,
+      })),
       others: {
         stage: 1,
-        user_uuid: "240522",
+        user_uuid: localStorage.getItem("user_uuid"),
         time: time.getTime(),
 
         type: "NEW",
@@ -174,22 +177,18 @@ export default function AddOrder() {
         ...a,
         item_price: a.p_price,
       })),
-      ...type,
     });
+
     data = {
       ...data,
       ...autoBilling,
-      item_details: autoBilling.items,
-    };
-    data = {
-      ...data,
       order_uuid: uuid(),
       opened_by: 0,
-      item_details: data.item_details.map((a) => ({
+      item_details: autoBilling.items.map((a) => ({
         ...a,
         unit_price:
           a.item_total / (+(+a.conversion * a.b) + a.p + a.free) ||
-          a.unit_price ||
+          a.item_price ||
           a.price,
         gst_percentage: a.item_gst,
         status: 0,
@@ -286,7 +285,7 @@ export default function AddOrder() {
       items: order.item_details.map((a) => ({ ...a, item_price: a.p_price })),
       others: {
         stage: 1,
-        user_uuid: "240522",
+        user_uuid: localStorage.getItem("user_uuid"),
         time: time.getTime(),
 
         type: "NEW",
@@ -372,7 +371,6 @@ export default function AddOrder() {
             </div>
 
             <div className="topInputs">
-              
               <div className="inputGroup">
                 <label htmlFor="Warehouse">Counter</label>
                 <div className="inputGroup" style={{ width: "500px" }}>
@@ -433,10 +431,16 @@ export default function AddOrder() {
                   <Select
                     options={[
                       { value: 0, label: "None" },
-                      ...warehouse.filter(a=>+user_warehouse||a.warehouse_uuid===user_warehouse).map((a) => ({
-                        value: a.warehouse_uuid,
-                        label: a.warehouse_title,
-                      })),
+                      ...warehouse
+                        .filter(
+                          (a) =>
+                            user_warehouse ||
+                            a.warehouse_uuid === user_warehouse
+                        )
+                        .map((a) => ({
+                          value: a.warehouse_uuid,
+                          label: a.warehouse_title,
+                        })),
                     ]}
                     onChange={(doc) =>
                       setOrder((prev) => ({

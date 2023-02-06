@@ -249,7 +249,7 @@ export const Billing = async ({
   edit_prices = [],
 }) => {
   let newPriceItems = [];
-
+console.log("itemsdata",items)
   // let add_discounts = true;
   for (let item of items) {
     item = { ...item, item_total: 0 };
@@ -344,20 +344,11 @@ export const Billing = async ({
               ? (100 - +charges_discount[0]?.value) / 100
               : 1),
     };
-    console.log(
-      charges_discount?.length > 1
-        ? charges_discount
-            ?.map((a) => +((100 - +a.value) / 100))
-            ?.reduce((a, b) => a * b)
-        : item?.charges_discount?.length
-        ? (100 - +charges_discount[0]?.value) / 100
-        : 1
-    );
+
     let item_total =
       item.status !== 3
-        ? (+item.item_desc_total === 0
-            ? 0
-            : (+item.item_desc_total || +item?.price || +item.item_price || 0) *
+        ? (
+             (+item.item_desc_total || +item?.price || +item.item_price || 0) *
               (+item.qty || 0)
           ).toFixed(2)
         : 0;
@@ -365,7 +356,7 @@ export const Billing = async ({
       charges_discount.push(billDiscounts);
       item_total = item_total * +((100 - +billDiscounts.value) / 100);
     }
-    console.log(typeof item_total, item_total);
+  
     if (item_total) item_total = (+item_total || 0).toFixed(2);
     item = {
       ...item,
@@ -391,7 +382,7 @@ export const Billing = async ({
         adjustment
       : 0
   );
-
+console.log("itemsdata",newPriceItems)
   return {
     counter_uuid: counter.counter_uuid,
     order_grandtotal,

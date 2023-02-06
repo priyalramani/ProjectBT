@@ -1,10 +1,11 @@
-import { ArrowDropDown } from "@mui/icons-material";
+import { ArrowDropDown, WhatsApp } from "@mui/icons-material";
 import axios from "axios";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import Header from "../../components/Header";
 import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
+import Context from "../../context/context";
 let typesData = [
   { index: 0, name: "None" },
   { index: 1, name: "Visit" },
@@ -338,6 +339,24 @@ function Table({
   selectedOrders,
   getOrderData,
 }) {
+  const context = useContext(Context);
+
+  const { setNotification } = context;
+  const sendMessage = async (item) => {
+    let response = await axios({
+      method: "post",
+      url: "/orders/sendMsg",
+      data: {
+        ...item,
+        notification_uuid: "outstanding-manual-reminder",
+        user_uuid: localStorage.getItem("user_uuid"),
+      },
+    });
+
+    console.log(response.data);
+    setNotification(response.data);
+    setTimeout(() => setNotification(null), 3000);
+  };
   function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -379,7 +398,7 @@ function Table({
           <th colSpan={2}>Duration</th>
           <th colSpan={2}>Amount</th>
           <th colSpan={2}>Tag</th>
-          <th colSpan={2}></th>
+          <th colSpan={3}></th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -460,11 +479,20 @@ function Table({
               <td colSpan={2}>{format(+item.time)}</td>
               <td colSpan={2}>{item.amount || ""}</td>
               <td colSpan={2}>{item.tag_title || ""}</td>
+              <td
+                style={{ color: "green" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  sendMessage(item);
+                }}
+              >
+                <WhatsApp />
+              </td>
               <td colSpan={2}>
                 <button
                   className="item-sales-search"
                   onClick={(e) => {
-                    e.stopPropagation()
+                    e.stopPropagation();
                     getOrderData(item);
                   }}
                 >

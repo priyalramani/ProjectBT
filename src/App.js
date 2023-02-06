@@ -61,7 +61,7 @@ function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
   const context = useContext(Context);
 
-  const { calculationPopup = "",loading } = context;
+  const { calculationPopup = "", loading,notification } = context;
   axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
   // axios.defaults.baseURL = "http://localhost:9000";
@@ -99,7 +99,7 @@ function App() {
   }, [userType]);
 
   document.title = "BT";
-
+console.log(notification)
   return (
     <div className="App">
       <Router>
@@ -178,7 +178,10 @@ function App() {
               <Route path="/admin/adminUsers" element={<Users />} />
               <Route path="/admin/items" element={<ItemsPage />} />
               <Route path="/admin/warehouse" element={<Warehouse />} />
-              <Route path="/admin/WhatsAppNotifications" element={<WhatsAppNotifications />} />
+              <Route
+                path="/admin/WhatsAppNotifications"
+                element={<WhatsAppNotifications />}
+              />
 
               <Route
                 path="/admin/autoIncreaseQty"
@@ -287,7 +290,17 @@ function App() {
       ) : (
         ""
       )}
-
+      {notification ? (
+        <div
+          className={`notification-container ${
+            notification.success ? "active-green" : "active-red"
+          }`}
+        >
+          <p className="notification-message">{notification.message}</p>
+        </div>
+      ) : (
+        ""
+      )}
       {/* {window.location.pathname.split('/').at(-2) === 'processing' && <div id="console">
         <h3>CONSOLE <button onClick={e => window.location.reload()}>Reload</button></h3>
       </div>} */}

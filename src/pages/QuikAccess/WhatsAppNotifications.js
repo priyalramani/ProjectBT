@@ -169,7 +169,7 @@ function Table({
   const updateStatus = async (data) => {
     const response = await axios({
       method: "put",
-      url: "/incentive/UpdateIncentive",
+      url: "/whatsapp_notifications/UpdateWhatsapp_notifications",
       data,
       headers: {
         "Content-Type": "application/json",
@@ -258,7 +258,7 @@ function Table({
 
 function IncentivePopup({ onSave, popupForm }) {
   const [objData, setObgData] = useState({
-    type: "out-for-delivery",
+    type: "",
     message: "",
   });
   let msg =
@@ -276,7 +276,7 @@ function IncentivePopup({ onSave, popupForm }) {
     if (popupForm?.type === "edit") {
       const response = await axios({
         method: "put",
-        url: "/incentive/UpdateIncentive",
+        url: "/whatsapp_notifications/UpdateWhatsapp_notifications",
         data,
         headers: {
           "Content-Type": "application/json",
@@ -289,7 +289,7 @@ function IncentivePopup({ onSave, popupForm }) {
     } else {
       const response = await axios({
         method: "post",
-        url: "/incentive/CreateIncentive",
+        url: "/whatsapp_notifications/CreateWhatsapp_notifications",
         data,
         headers: {
           "Content-Type": "application/json",
