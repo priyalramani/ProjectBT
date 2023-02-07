@@ -56,6 +56,8 @@ import { refreshDb } from "./Apis/functions";
 import CalculateLines from "./pages/QuikAccess/CalculateLines";
 import Context from "./context/context";
 import WhatsAppNotifications from "./pages/QuikAccess/WhatsAppNotifications";
+import Campaigns from "./pages/Reports/Campaigns";
+import TestCounter from "./pages/Master/TestCounter";
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
@@ -88,7 +90,8 @@ function App() {
     getUserType();
   }, [userType]);
   useEffect(() => {
-    if (userType) {
+
+    if (+userType) {
       let time = +localStorage.getItem("indexed_time") || "";
       let currTime = new Date();
       currTime = currTime.getTime();
@@ -174,7 +177,9 @@ console.log(notification)
               />
               <Route path="/admin/counterGroup" element={<CounterGroup />} />
               <Route path="/admin/itemGroup" element={<ItemGroup />} />
+              <Route path="/admin/Campaigns" element={<Campaigns />} />
               <Route path="/admin/counter" element={<Counter />} />
+              <Route path="/admin/TestCounter" element={<TestCounter />} />
               <Route path="/admin/adminUsers" element={<Users />} />
               <Route path="/admin/items" element={<ItemsPage />} />
               <Route path="/admin/warehouse" element={<Warehouse />} />

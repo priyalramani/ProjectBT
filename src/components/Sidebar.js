@@ -123,6 +123,10 @@ const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
               link: "/admin/counter",
             },
             {
+              name: "Test Counter",
+              link: "/admin/TestCounter",
+            },
+            {
               name: "Routes",
               link: "/admin/routes",
             },
@@ -234,6 +238,10 @@ const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
             {
               name: "Retailer Margin Report",
               link: "/admin/RetailerMarginReport",
+            },
+            {
+              name: "Campaigns",
+              link: "/admin/Campaigns",
             },
           ]}
         />

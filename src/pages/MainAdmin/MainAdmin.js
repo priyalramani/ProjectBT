@@ -165,11 +165,11 @@ const MainAdmin = () => {
         }))
       );
   };
-  const getDetails = async () => {
+  const getDetails = async (controller) => {
     const response = await axios({
       method: "get",
       url: "/details/GetDetails",
-
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
@@ -293,15 +293,19 @@ const MainAdmin = () => {
     if (response.data.success) setPaymentModes(response.data.result);
   };
   useEffect(() => {
+    const controller = new AbortController();
     getCounter();
 
-    getDetails();
+    getDetails(controller);
     getUsers();
     getItemsData();
     getItemCategories();
     getCompanies();
     getItemsDataReminder();
     GetPaymentModes();
+    return () => {
+      controller.abort();
+    };
   }, []);
   const orders = useMemo(
     () =>

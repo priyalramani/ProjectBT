@@ -144,7 +144,7 @@ const OrderPrint = ({
               {counter?.mobile?.length ? (
                 <tr>
                   <td style={{ fontWeight: "600", fontSize: "x-small" }}>
-                    {counter?.mobile?.map((a, i) => (i === 0 ? a : ", " + a)) ||
+                    {counter?.mobile?.map((a, i) => (i === 0 ? a.mobile : ", " + a.mobile)) ||
                       ""}
                   </td>
                 </tr>

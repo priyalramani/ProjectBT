@@ -319,7 +319,7 @@ const OutstangingsCollection = () => {
                                 e.stopPropagation();
                                 if (item.mobile.length === 1) {
                                   window.location.assign(
-                                    "tel:" + item?.mobile[0]
+                                    "tel:" + item?.mobile[0]?.mobile
                                   );
                                 } else {
                                   setPhonePopup(item.mobile);

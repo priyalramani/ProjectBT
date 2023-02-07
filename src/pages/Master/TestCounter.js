@@ -2,16 +2,15 @@ import React, { useState, useEffect, useMemo } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import axios from "axios";
-import { DeleteOutline, Phone, WhatsApp } from "@mui/icons-material";
+import { DeleteOutline } from "@mui/icons-material";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import CounterSequence from "../../components/CounterSequence";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
-import { v4 as uuid } from "uuid";
 const Counter = () => {
   const [counter, setCounter] = useState([]);
   const [paymentModes, setPaymentModes] = useState([]);
-
+  const [filterCounter, setFilterCounter] = useState([]);
   const [filterCounterTitle, setFilterCounterTitle] = useState("");
   const [filterRoute, setFilterRoute] = useState("");
   const [popupForm, setPopupForm] = useState(false);
@@ -24,11 +23,11 @@ const Counter = () => {
   const [sequencePopup, setSequencePopup] = useState(false);
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-  const getRoutesData = async (controller) => {
+  const getRoutesData = async () => {
     const response = await axios({
       method: "get",
       url: "/routes/GetRouteList",
-      signal: controller.signal,
+
       headers: {
         "Content-Type": "application/json",
       },
@@ -37,22 +36,29 @@ const Counter = () => {
   };
 
   useEffect(() => {
-    const controller = new AbortController();
-    getRoutesData(controller);
-    return () => {
-      controller.abort();
-    };
+    getRoutesData();
   }, []);
-  const getCounter = async (controller) => {
+  const getCounter = async () => {
     const response = await axios({
       method: "get",
-      url: "/counters/GetCounterData",
-      signal: controller.signal,
+      url: "/testCounters/GetCounterList",
+
       headers: {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setCounter(response.data.result);
+    if (response.data.success)
+      setCounter(
+        response.data.result.map((b) => ({
+          ...b,
+          route_title:
+            routesData.find((a) => a.route_uuid === b.route_uuid)
+              ?.route_title || "-",
+          route_sort_order:
+            routesData.find((a) => a.route_uuid === b.route_uuid)?.sort_order ||
+            0,
+        }))
+      );
   };
   const GetPaymentModes = async () => {
     const response = await axios({
@@ -68,42 +74,33 @@ const Counter = () => {
   };
 
   useEffect(() => {
-    const controller = new AbortController();
-    getCounter(controller);
-    return () => {
-      controller.abort();
-    };
-  }, [popupForm]);
+    getCounter();
+  }, [popupForm, routesData]);
   useEffect(() => {
     GetPaymentModes();
   }, []);
-  const filterCounter = useMemo(
+  useEffect(
     () =>
-      counter
-        .map((b) => ({
-          ...b,
-          route_title:
-            routesData.find((a) => a.route_uuid === b.route_uuid)
-              ?.route_title || "-",
-          route_sort_order:
-            routesData.find((a) => a.route_uuid === b.route_uuid)?.sort_order ||
-            0,
-        }))
-        .filter(
-          (a) =>
-            a.counter_title &&
-            (!filterCounterTitle ||
+      setFilterCounter(
+        counter
+          .filter((a) => a.counter_title)
+          .filter(
+            (a) =>
+              !filterCounterTitle ||
               a.counter_title
                 ?.toLocaleLowerCase()
-                ?.includes(filterCounterTitle?.toLocaleLowerCase())) &&
-            (!filterRoute ||
+                ?.includes(filterCounterTitle?.toLocaleLowerCase())
+          )
+          .filter(
+            (a) =>
+              !filterRoute ||
               a.route_title
                 ?.toLocaleLowerCase()
-                ?.includes(filterRoute?.toLocaleLowerCase()))
-        ) || [],
-    [counter, filterCounterTitle, filterRoute, routesData]
+                ?.includes(filterRoute?.toLocaleLowerCase())
+          )
+      ),
+    [counter, filterCounterTitle, filterRoute]
   );
-
   const fileExtension = ".xlsx";
   const downloadHandler = async () => {
     seXlSelection(false);
@@ -117,11 +114,9 @@ const Counter = () => {
       )
       ?.map((item, i) => ({
         ...item,
-        mobile: item?.mobile?.map((a, i) =>
-          i === 0 ? a.mobile : ", " + a.mobile
-        ),
+        mobile: item?.mobile?.map((a, i) => (i === 0 ? a : ", " + a)),
       }));
-
+    console.log(selectedRoutes, sheetData);
     sheetData = sheetData.map((a) => {
       // console.log(a)
       return {
@@ -482,9 +477,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
               <td colSpan={2}>{item.route_title}</td>
               <td colSpan={2}>{item.counter_title}</td>
               <td colSpan={2}>
-                {item?.mobile?.map((a, i) =>
-                  i === 0 ? a?.mobile || "" : ", " + a?.mobile
-                )}
+                {/* {item?.mobile?.map((a, i) => (i === 0 ? a : ", " + a))} */}
               </td>
               <td colSpan={2}>{item.food_license || ""}</td>
               <td colSpan={2}>{item.gst || ""}</td>
@@ -551,9 +544,7 @@ function NewUserForm({
   paymentModes,
   counters,
 }) {
-  const [data, setdata] = useState({
-    mobile: [1, 2, 3, 4].map((a) => ({ uuid: uuid(), mobile: "", type: "" })),
-  });
+  const [data, setdata] = useState({});
 
   const [counterGroup, setCounterGroup] = useState([]);
   const [errMassage, setErrorMassage] = useState("");
@@ -581,13 +572,6 @@ function NewUserForm({
     if (popupInfo?.type === "edit") {
       setdata({
         ...popupInfo.data,
-        mobile: [
-          ...(popupInfo?.data?.mobile?.map((a) => ({
-            ...a,
-            uuid: a?.uuid || uuid(),
-          })) || []),
-          ...[1, 2, 3, 4].map((a) => ({ uuid: uuid(), mobile: "", type: "" })),
-        ].slice(0, 4),
       });
     } else {
       setdata({
@@ -620,7 +604,7 @@ function NewUserForm({
     if (popupInfo?.type === "edit") {
       const response = await axios({
         method: "put",
-        url: "/counters/putCounter",
+        url: "/testCounters/putCounter",
         data: [
           {
             ...data,
@@ -644,7 +628,7 @@ function NewUserForm({
       }
       const response = await axios({
         method: "post",
-        url: "/counters/postCounter",
+        url: "/testCounters/postCounter",
         data,
         headers: {
           "Content-Type": "application/json",
@@ -788,105 +772,22 @@ function NewUserForm({
                 <div className="row">
                   <label className="selectLabel" style={{ width: "50%" }}>
                     Mobile
-                    <div>
-                      {data?.mobile?.map((a) => (
-                        <div
-                          key={a.uuid}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            margin: "5px 0",
-                          }}
-                        >
-                          <input
-                            type="number"
-                            name="route_title"
-                            className="numberInput"
-                            value={a?.mobile}
-                            style={{ width: "15ch" }}
-                            onChange={(e) => {
-                              if (e.target.value.length > 10) {
-                                return;
-                              }
-                              setdata((prev) => ({
-                                ...prev,
-                                mobile: prev.mobile.map((b) =>
-                                  b.uuid === a.uuid
-                                    ? { ...b, mobile: e.target.value }
-                                    : b
-                                ),
-                              }));
-                            }}
-                            maxLength={10}
-                          />
-                          <span
-                            style={{
-                              color: a.lable?.find((c) => c.type === "wa")
-                                ? "red"
-                                : "gray",
-                              cursor: "pointer",
-                            }}
-                            onClick={(e) => {
-                              setdata((prev) => ({
-                                ...prev,
-                                mobile: prev.mobile.map((b) =>
-                                  b.uuid === a.uuid
-                                    ? {
-                                        ...b,
-                                        lable: b.lable?.find(
-                                          (c) => c.type === "wa"
-                                        )
-                                          ? b.lable.filter(
-                                              (c) => c.type !== "wa"
-                                            )
-                                          : [
-                                              ...(b?.lable || []),
-                                              { type: "wa", varification: 0 },
-                                            ],
-                                      }
-                                    : b
-                                ),
-                              }));
-                            }}
-                          >
-                            <WhatsApp />
-                          </span>
-                          <span
-                            style={{
-                              color: a.lable?.find((c) => c.type === "cal")
-                                ? "red"
-                                : "gray",
-                              cursor: "pointer",
-                            }}
-                            onClick={(e) => {
-                              setdata((prev) => ({
-                                ...prev,
-                                mobile: prev.mobile.map((b) =>
-                                  b.uuid === a.uuid
-                                    ? {
-                                        ...b,
-                                        lable: b.lable?.find(
-                                          (c) => c.type === "cal"
-                                        )
-                                          ? b.lable.filter(
-                                              (c) => c.type !== "cal"
-                                            )
-                                          : [
-                                              ...(b?.lable || []),
-                                              { type: "cal", varification: 0 },
-                                            ],
-                                      }
-                                    : b
-                                ),
-                              }));
-                            }}
-                          >
-                            <Phone />
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                    <textarea
+                      type="number"
+                      onWheel={(e) => e.target.blur()}
+                      name="sort_order"
+                      className="numberInput"
+                      rows={7}
+                      cols={12}
+                      value={data?.mobile?.toString()?.replace(/,/g, "\n")}
+                      style={{ height: "100px" }}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          mobile: e.target.value.split("\n"),
+                        })
+                      }
+                    />
                   </label>
                   <label className="selectLabel" style={{ width: "50%" }}>
                     Payment Modes
@@ -1167,7 +1068,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
   const submitHandler = async () => {
     const response = await axios({
       method: "put",
-      url: "/counters/putCounter",
+      url: "/testCounters/putCounter",
       data: [
         {
           counter_uuid: itemPopup.item.counter_uuid,
@@ -1504,7 +1405,7 @@ function DeleteCounterPopup({ onSave, popupInfo, setItemsData }) {
     try {
       const response = await axios({
         method: "delete",
-        url: "/counters/deleteCounter",
+        url: "/testCounters/deleteCounter",
         data: { counter_uuid: popupInfo.counter_uuid },
         headers: {
           "Content-Type": "application/json",
