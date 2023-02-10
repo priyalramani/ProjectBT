@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useContext } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import {
@@ -8,11 +8,11 @@ import {
 } from "@heroicons/react/solid";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-import { Delete } from "@mui/icons-material";
+import { Delete, DeleteOutline } from "@mui/icons-material";
 import { Switch } from "@mui/material";
 import { green } from "@mui/material/colors";
 import { alpha, styled } from "@mui/material/styles";
-
+import Context from "../../context/context";
 const GreenSwitch = styled(Switch)(({ theme }) => ({
   "& .MuiSwitch-switchBase.Mui-checked": {
     color: green[500],
@@ -42,6 +42,9 @@ const Incetives = () => {
   const [popupForm, setPopupForm] = useState(false);
   const [itemsData, setItemsData] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
+  const context = useContext(Context);
+
+  const { setNotification } = context;
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
@@ -71,6 +74,21 @@ const Incetives = () => {
       getItemsData();
     }
   };
+  const sendMsg = async (data) => {
+    const response = await axios({
+      method: "post",
+      url: "/Campaigns/sendMsg",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    setNotification(response.data);
+    setTimeout(() => setNotification(null), 5000);
+    if (response.data.success) {
+    }
+  };
   return (
     <>
       <div id="item-sales-top">
@@ -98,6 +116,7 @@ const Incetives = () => {
           setPopupForm={setPopupForm}
           setDeletePopup={setDeletePopup}
           getItemsData={getItemsData}
+          sendMsg={sendMsg}
         />
       </div>
 
@@ -158,12 +177,7 @@ const Incetives = () => {
 };
 
 export default Campaigns;
-function Table({
-  itemsDetails = [],
-  setPopupForm,
-  setDeletePopup,
-  getItemsData,
-}) {
+function Table({ itemsDetails = [], setPopupForm, sendMsg, setDeletePopup }) {
   const [items, setItems] = useState("incentive_title");
   const [order, setOrder] = useState("asc");
 
@@ -198,6 +212,8 @@ function Table({
               </div>
             </div>
           </th>
+          <th>Counter</th>
+          <th colSpan={2}></th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -213,16 +229,36 @@ function Table({
               : b[items] - a[items]
           )
           ?.map((item, i) => (
-            <tr key={item.counter_uuid} style={{ height: "30px" }}>
+            <tr
+              key={item.counter_uuid}
+              style={{ height: "30px" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setPopupForm({ type: "edit", data: item });
+              }}
+            >
               <td>{i + 1}</td>
+              <td colSpan={2}>{item.campaign_title}</td>
+              <td>{item.counters.length}</td>
+              <td>
+                <button
+                  className="item-sales-search"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    sendMsg(item);
+                  }}
+                >
+                  Shoot
+                </button>
+              </td>
               <td
-                colSpan={2}
                 onClick={(e) => {
                   e.stopPropagation();
-                  setPopupForm({ type: "edit", data: item });
+
+                  setDeletePopup(item);
                 }}
               >
-                {item.campaign_title}
+                <DeleteOutline />
               </td>
             </tr>
           ))}
@@ -237,11 +273,12 @@ function IncentivePopup({ onSave, popupForm }) {
     message: "",
     created_by: localStorage.getItem("user_uuid"),
     campaign_title: "",
-    counters:[]
+    counters: [],
   });
   const [counters, setCounter] = useState([]);
   const [routesData, setRoutesData] = useState([]);
   const [filterCounterTitle, setFilterCounterTitle] = useState("");
+  const [filterRouteTitle, setFilterRouteTitle] = useState("");
   const getRoutesData = async () => {
     const response = await axios({
       method: "get",
@@ -314,7 +351,27 @@ function IncentivePopup({ onSave, popupForm }) {
       ),
     [counters, filterCounterTitle]
   );
-  console.log(objData);
+  const filterRoute = useMemo(
+    () =>
+      routesData
+        .filter(
+          (a) =>
+            (!filterRouteTitle ||
+              a.route_title
+                ?.toLocaleLowerCase()
+                ?.includes(filterRouteTitle?.toLocaleLowerCase())) &&
+            a.route_uuid &&
+            filteredCounter?.filter((b) => a.route_uuid === b.route_uuid).length
+        )
+
+        .sort((a, b) => a?.route_title?.localeCompare(b?.route_title)),
+    [filterRouteTitle, filteredCounter, routesData]
+  );
+  const objcounters = useMemo(() => {
+    console.count("counter")
+    return objData.counters;
+  }, [objData.counters]);
+  console.count("render");
   return (
     <div className="overlay">
       <div
@@ -403,6 +460,58 @@ function IncentivePopup({ onSave, popupForm }) {
                     />
                   </td>
                 </tr>
+                <tr>
+                  <td
+                    colSpan={2}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                    }}
+                  >
+                    <button
+                      className="item-sales-search"
+                      onClick={(e) =>
+                        setObgData((prev) => ({
+                          ...prev,
+                          message: prev.message + "{counter_title}",
+                        }))
+                      }
+                    >
+                      Counter Title
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    colSpan={2}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                    }}
+                  >
+                    <b style={{ width: "100px" }}>Mobile : </b>
+                    <textarea
+                      onWheel={(e) => e.target.blur()}
+                      className="searchInput"
+                      style={{
+                        border: "none",
+                        borderBottom: "2px solid black",
+                        borderRadius: "0px",
+                        height: "200px",
+                      }}
+                      placeholder=""
+                      value={objData?.mobile?.toString()?.replace(/,/g, "\n")}
+                      onChange={(e) =>
+                        setObgData((prev) => ({
+                          ...prev,
+                          mobile: e.target.value.split("\n"),
+                        }))
+                      }
+                    />
+                  </td>
+                </tr>
               </tbody>
             </table>
             <div style={{ maxHeight: "500px", overflowY: "scroll" }}>
@@ -411,6 +520,13 @@ function IncentivePopup({ onSave, popupForm }) {
                 onChange={(e) => setFilterCounterTitle(e.target.value)}
                 value={filterCounterTitle}
                 placeholder="Search Counter Title..."
+                className="searchInput"
+              />
+              <input
+                type="text"
+                onChange={(e) => setFilterRouteTitle(e.target.value)}
+                value={filterRouteTitle}
+                placeholder="Search Route Title..."
                 className="searchInput"
               />
               <table
@@ -428,124 +544,106 @@ function IncentivePopup({ onSave, popupForm }) {
                   </tr>
                 </thead>
                 <tbody className="tbody">
-                  {routesData
-                    .filter(
-                      (a) =>
-                        a.route_uuid &&
-                        filteredCounter?.filter(
-                          (b) => a.route_uuid === b.route_uuid
-                        ).length
-                    )
-                    .sort((a, b) =>
-                      a?.route_title?.localeCompare(b?.route_title)
-                    )
-
-                    .map((a) => (
-                      <>
-                        <tr style={{ pageBreakAfter: "auto", width: "100%" }}>
-                          <td colSpan={3}>
-                            {a.route_title}
-                            <span
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setObgData((prev) => ({
-                                  ...prev,
-                                  counters: prev.counters.filter((c) =>
-                                    filteredCounter?.find(
-                                      (b) =>
-                                        a.route_uuid === b.route_uuid &&
-                                        c === b.counter_uuid
+                  {filterRoute.map((a) => (
+                    <>
+                      <tr style={{ pageBreakAfter: "auto", width: "100%" }}>
+                        <td colSpan={3}>
+                          {a.route_title}
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setObgData((prev) => ({
+                                ...prev,
+                                counters: prev.counters.filter((c) =>
+                                  filteredCounter?.find(
+                                    (b) =>
+                                      a.route_uuid === b.route_uuid &&
+                                      c === b.counter_uuid
+                                  )
+                                ).length
+                                  ? prev.counters.filter(
+                                      (c) =>
+                                        !filteredCounter?.find(
+                                          (b) =>
+                                            a.route_uuid === b.route_uuid &&
+                                            c === b.counter_uuid
+                                        )
                                     )
-                                  ).length
-                                    ? prev.counters.filter(
-                                        (c) =>
-                                          !filteredCounter?.find(
-                                            (b) =>
-                                              a.route_uuid ===
-                                                b.route_uuid &&
-                                              c === b.counter_uuid
-                                          )
-                                      )
-                                    : [
-                                        ...(prev.counters || []),
-                                        ...filteredCounter
-                                          ?.filter(
-                                            (b) =>
-                                              a.route_uuid ===
-                                              b.route_uuid
-                                          )
-                                          .map((c) => c.counter_uuid),
-                                      ],
-                                }));
-                              }}
-                              style={{ marginLeft: "10px" }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={
-                                  objData.counters.filter((c) =>
-                                    filteredCounter?.find(
-                                      (b) =>
-                                        a.route_uuid === b.route_uuid &&
-                                        c === b.counter_uuid
-                                    )
-                                  ).length ===
-                                  filteredCounter?.filter(
-                                    (b) => a.route_uuid === b.route_uuid
-                                  ).length
-                                }
-                                style={{ transform: "scale(1.3)" }}
-                              />
-                            </span>
-                          </td>
-                        </tr>
-                        {filteredCounter
-                          ?.filter((b) => a.route_uuid === b.route_uuid)
-                          ?.sort((a, b) =>
-                            a.counter_title?.localeCompare(b.counter_title)
-                          )
-                          ?.map((item, i, array) => {
-                            return (
-                              <tr
-                                key={Math.random()}
-                                style={{ height: "30px" }}
-                              >
-                                <td
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setObgData((prev) => ({
-                                      ...prev,
-                                      counters: prev.counters.filter(
-                                        (a) => a === item.counter_uuid
-                                      ).length
-                                        ? prev.counters.filter(
-                                            (a) => a !== item.counter_uuid
-                                          )
-                                        : [
-                                            ...(prev.counters || []),
-                                            item.counter_uuid,
-                                          ],
-                                    }));
-                                  }}
-                                  className="flex"
-                                  style={{ justifyContent: "space-between" }}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={objData.counters.find(
+                                  : [
+                                      ...(prev.counters || []),
+                                      ...filteredCounter
+                                        ?.filter(
+                                          (b) => a.route_uuid === b.route_uuid
+                                        )
+                                        .map((c) => c.counter_uuid),
+                                    ],
+                              }));
+                            }}
+                            style={{ marginLeft: "10px" }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={
+                                objcounters?.filter((c) =>
+                                  filteredCounter?.find(
+                                    (b) =>
+                                      a.route_uuid === b.route_uuid &&
+                                      c === b.counter_uuid
+                                  )
+                                ).length ===
+                                filteredCounter?.filter(
+                                  (b) => a.route_uuid === b.route_uuid
+                                ).length
+                              }
+                              style={{ transform: "scale(1.3)" }}
+                            />
+                          </span>
+                        </td>
+                      </tr>
+                      {filteredCounter
+                        ?.filter((b) => a.route_uuid === b.route_uuid)
+                        ?.sort((a, b) =>
+                          a.counter_title?.localeCompare(b.counter_title)
+                        )
+                        ?.map((item, i, array) => {
+                          return (
+                            <tr key={Math.random()} style={{ height: "30px" }}>
+                              <td
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setObgData((prev) => ({
+                                    ...prev,
+                                    counters: prev.counters.filter(
                                       (a) => a === item.counter_uuid
-                                    )}
-                                    style={{ transform: "scale(1.3)" }}
-                                  />
-                                  {i + 1}
-                                </td>
+                                    ).length
+                                      ? prev.counters.filter(
+                                          (a) => a !== item.counter_uuid
+                                        )
+                                      : [
+                                          ...(prev.counters || []),
+                                          item.counter_uuid,
+                                        ],
+                                  }));
+                                }}
+                                className="flex"
+                                style={{ justifyContent: "space-between" }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={objcounters.find(
+                                    (a) => a === item.counter_uuid
+                                  )}
+                                  style={{ transform: "scale(1.3)" }}
+                                />
+                                {i + 1}
+                              </td>
 
-                                <td colSpan={2}>{item.counter_title || ""}</td>
-                              </tr>
-                            );
-                          })}
-                      </>
-                    ))}
+                              <td colSpan={2}>{item.counter_title || ""}</td>
+                            </tr>
+                          );
+                        })}
+                    </>
+                  ))}
                 </tbody>
               </table>
             </div>

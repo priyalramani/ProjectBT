@@ -26,10 +26,11 @@ const UPITransection = () => {
   const [remarksPopup, setRemarksPoup] = useState();
 
   const [items, setItems] = useState([]);
-  const getActivityData = async () => {
+  const getActivityData = async (controller=new AbortController()) => {
     const response = await axios({
       method: "get",
       url: "/receipts/getReceipt",
+      signal:controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
@@ -64,7 +65,11 @@ const UPITransection = () => {
     }
   };
   useEffect(() => {
-    getActivityData();
+    const controller = new AbortController();
+    getActivityData(controller);
+    return () => {
+      controller.abort();
+    };
   }, []);
   const downloadHandler = async () => {
     let sheetData = items.map((a) => {

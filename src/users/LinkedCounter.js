@@ -1,6 +1,6 @@
 import { AiOutlineSearch } from "react-icons/ai";
 import { IoArrowBackOutline } from "react-icons/io5";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useContext } from "react";
 import { openDB } from "idb";
 import { useNavigate, useParams } from "react-router-dom";
 import { AutoAdd, Billing } from "../Apis/functions";
@@ -10,12 +10,13 @@ import axios from "axios";
 
 import CloseIcon from "@mui/icons-material/Close";
 import MobileNumberPopup from "../components/MobileNumberPopup";
-const SelectedCounterOrder = () => {
+import context from "../context/context";
+const LinkedCounter = () => {
   const [items, setItems] = useState([]);
   const [foodLicensePopup, setFoodLicencePopup] = useState(false);
   const [checkNumberPopup, setCheckNumberPopup] = useState(false);
   const [pricePopup, setPricePopup] = useState(false);
-  const [number, setNumber] = useState(true);
+  const [number, setNumber] = useState(false);
   const [confirmItemsPopup, setConfirmItemPopup] = useState(false);
   const [enable, setEnable] = useState(false);
   const [userData, setUserData] = useState({});
@@ -39,6 +40,7 @@ const SelectedCounterOrder = () => {
   const [discountPopup, setDiscountPopup] = useState(false);
   const [invoice_number, setInvioceNumber] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { setNotification } = useContext(context);
   const Navigate = useNavigate();
   const callBilling = async () => {
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
@@ -63,22 +65,25 @@ const SelectedCounterOrder = () => {
   }, [order?.items]);
 
   const getCounter = async () => {
+    setLoading(true);
     const response = await axios({
       method: "post",
-      url: "/counters/GetCounter",
-      data: { counter_uuid: params.counter_uuid },
+      url: "/counters/GetCounterByLink",
+      data: { short_link: params.short_link },
       headers: {
         "Content-Type": "application/json",
       },
     });
+    if (response.data.message) setNotification(response.data);
+    setTimeout(() => setNotification(""), 5000);
+    console.log(response.data);
     if (response.data.success) {
-setCounter(response.data.result)
-      if (!response.data.result.food_license) {
-        setFoodLicencePopup(true);
-      } else {
-        // setCheckNumberPopup(true);
-      }
+      setCounter(response.data.result.counter);
+      setItemsCategory(response.data.result.ItemCategories);
+      setItems(response.data.result.items);
+      setCompanies(response.data.result.company);
     }
+    setLoading(false);
   };
   const getUsers = async () => {
     const response = await axios({
@@ -102,12 +107,7 @@ setCounter(response.data.result)
         (a) => !order?.items?.find((b) => b.item_uuid === a)
       ) || [];
     return items.filter((a) => item.find((b) => b === a.item_uuid));
-  }, [
-    confirmItemsPopup,
-    items,
-    confirmItemsPopup,
-    userData?.salesman_suggestion,
-  ]);
+  }, [userData?.salesman_suggestion, items, order?.items]);
 
   const putCounterData = async (e) => {
     e.preventDefault();
@@ -132,60 +132,55 @@ setCounter(response.data.result)
   };
   const putCounterNumber = async (e) => {
     e.preventDefault();
-    Navigate(-1);
+    setCartPage(false);
+    setOrder({});
+    getCounter();
+    setInvioceNumber("")
   };
-  const getIndexedDbData = async () => {
-    const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
-    let tx = await db.transaction("items", "readwrite").objectStore("items");
-    let item = await tx.getAll();
-    setItems(
-      item
-        .filter((a) => a.status !== 0)
-        .map((a) => ({
-          ...a,
-          item_price: a.item_price || 0,
-          gst_percentage: a.gst_percentage || 0,
-        }))
-    );
-    let store = await db
-      .transaction("companies", "readwrite")
-      .objectStore("companies");
-    let company = await store.getAll();
-    setCompanies(company);
-    setFilterCompany(company[0]?.company_uuid);
-    store = await db
-      .transaction("item_category", "readwrite")
-      .objectStore("item_category");
-    let route = await store.getAll();
-    setItemsCategory(route);
-    store = await db.transaction("counter", "readwrite").objectStore("counter");
-    let countersData = await store.getAll();
-    setCounters(countersData);
-    db.close();
-  };
+
   useEffect(() => {
-    getIndexedDbData();
     getCounter();
   }, []);
-  useEffect(() => {
-    if (counters.length)
-      setCounter(counters?.find((a) => params.counter_uuid === a.counter_uuid));
-  }, [counters]);
-  useEffect(() => {
-    setItems((prev) =>
-      prev?.map((a) => ({
-        ...a,
-        item_price:
-          counter.item_special_price?.find((b) => b.item_uuid === a.item_uuid)
-            ?.price || a.item_price,
-        b: 0,
-        p: 0,
-        status: 0,
-      }))
-    );
-  }, [counter]);
+  let filterItems = useMemo(
+    () =>
+      (!cartPage ? items : order.items)
+        ?.map((a) => ({
+          ...a,
+          item_price:
+            counter.item_special_price?.find((b) => b.item_uuid === a.item_uuid)
+              ?.price || a.item_price,
+          b: 0,
+          p: 0,
+          status: 0,
+        }))
+        .filter(
+          (a) =>
+            !filterItemTitle ||
+            a.item_title
+              ?.toLocaleLowerCase()
+              .includes(filterItemTitle.toLocaleLowerCase())
+        ),
+    [cartPage, counter.item_special_price, filterItemTitle, items, order.items]
+  );
+  let filteredCategory = useMemo(
+    () =>
+      itemsCategory?.filter(
+        (b) =>
+          filterItems.filter((a) => a.category_uuid === b.category_uuid)?.length
+      ),
+    [filterItems, itemsCategory]
+  );
+  let filteredCompany = useMemo(
+    () =>
+      companies?.filter(
+        (b) =>
+          filteredCategory.filter((a) => a.company_uuid === b.company_uuid)
+            ?.length
+      ),
+    [companies, filteredCategory]
+  );
 
-  const postOrder = async (orderData) => {
+  const postOrder = async (orderData = order) => {
     console.log(orderData);
     let data = {
       ...orderData,
@@ -203,9 +198,9 @@ setCounter(response.data.result)
       })),
       status: [
         {
-          stage: orderData.others.stage,
-          time: orderData.others.time,
-          user_uuid: orderData.others.user_uuid,
+          stage: orderData?.others?.stage || 1,
+          time: orderData?.others?.time || new Date().getTime(),
+          user_uuid: orderData?.others?.user_uuid || "Link",
         },
       ],
     };
@@ -219,27 +214,26 @@ setCounter(response.data.result)
       },
     });
     if (response.data.success) {
-      console.log(response.data);
       setInvioceNumber(response.data.result.invoice_number);
-      let qty = `${
-        data?.item_details?.length > 1
-          ? data?.item_details?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
-          : data?.item_details?.length
-          ? data?.item_details[0]?.b
-          : 0
-      }:${
-        data?.item_details?.length > 1
-          ? data?.item_details?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
-          : data?.item_details?.length
-          ? data?.item_details[0]?.p
-          : 0
-      }`;
-      postActivity({
-        activity: "Order End",
-        range: data?.item_details?.length,
-        qty,
-        amt: data.order_grandtotal || 0,
-      });
+      //   let qty = `${
+      //     data?.item_details?.length > 1
+      //       ? data?.item_details?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
+      //       : data?.item_details?.length
+      //       ? data?.item_details[0]?.b
+      //       : 0
+      //   }:${
+      //     data?.item_details?.length > 1
+      //       ? data?.item_details?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
+      //       : data?.item_details?.length
+      //       ? data?.item_details[0]?.p
+      //       : 0
+      //   }`;
+      //   postActivity({
+      //     activity: "Order End",
+      //     range: data?.item_details?.length,
+      //     qty,
+      //     amt: data.order_grandtotal || 0,
+      //   });
       console.log(response.data.incentives);
       setLoading(false);
       if (response.data.incentives) {
@@ -250,52 +244,59 @@ setCounter(response.data.result)
       setLoading(false);
     }
   };
-  const postActivity = async (others = {}) => {
-    let time = new Date();
-    let data = {
-      user_uuid: localStorage.getItem("user_uuid"),
-      role: "Order",
-      narration:
-        counter.counter_title +
-        (sessionStorage.getItem("route_title")
-          ? ", " + sessionStorage.getItem("route_title")
-          : ""),
-      timestamp: time.getTime(),
-      ...others,
-    };
-    const response = await axios({
-      method: "post",
-      url: "/userActivity/postUserActivity",
-      data,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) {
-      console.log(response);
-    }
-  };
-  useEffect(() => {
-    if (!orderCreated && order?.items?.length) {
-      postActivity({ activity: "Order Start" });
-      setOrderCreated(true);
-    }
-  }, [order]);
+  //   const postActivity = async (others = {}) => {
+  //     let time = new Date();
+  //     let data = {
+  //       user_uuid: localStorage.getItem("user_uuid"),
+  //       role: "Order",
+  //       narration:
+  //         counter.counter_title +
+  //         (sessionStorage.getItem("route_title")
+  //           ? ", " + sessionStorage.getItem("route_title")
+  //           : ""),
+  //       timestamp: time.getTime(),
+  //       ...others,
+  //     };
+  //     const response = await axios({
+  //       method: "post",
+  //       url: "/userActivity/postUserActivity",
+  //       data,
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+  //     if (response.data.success) {
+  //       console.log(response);
+  //     }
+  //   };
+  //   useEffect(() => {
+  //     if (!orderCreated && order?.items?.length) {
+  //       postActivity({ activity: "Order Start" });
+  //       setOrderCreated(true);
+  //     }
+  //   }, [order]);
   return (
     <>
-      {number ? <MobileNumberPopup counter={counter} getCounter={getCounter} onSave={()=>setNumber(false)}/> : ""}
+      {number ? (
+        <MobileNumberPopup
+          counter={counter}
+          getCounter={getCounter}
+          onSave={() => setNumber(false)}
+        />
+      ) : (
+        ""
+      )}
       <div>
         <nav
           className="user_nav nav_styling"
           style={cartPage ? { backgroundColor: "#000" } : {}}
         >
-          <div className="user_menubar">
-            <IoArrowBackOutline
-              className="user_Back_icon"
-              onClick={() => (!cartPage ? Navigate(-1) : setCartPage(false))}
-            />
+          <div
+            style={{ width: "100%", textAlign: "center", fontWeight: "900" }}
+          >
+            {counter?.counter_title || ""}
           </div>
-          {cartPage ? (
+          {/* {cartPage ? (
             <>
               <h1 style={{ width: "100%", textAlign: "center" }}>Cart</h1>
               <button
@@ -321,8 +322,8 @@ setCounter(response.data.result)
             </>
           ) : (
             ""
-          )}
-          {!cartPage ? (
+          )} */}
+          {/* {!cartPage ? (
             <>
               <div className="user_searchbar flex">
                 <AiOutlineSearch className="user_search_icon" />
@@ -354,123 +355,64 @@ setCounter(response.data.result)
             </>
           ) : (
             ""
-          )}
+          )} */}
         </nav>
         <div className="home">
           <div className="container">
             <div className="menucontainer">
               <div className="menus">
-                {!cartPage
-                  ? itemsCategory
-                      ?.filter((a) => a.company_uuid === filterCompany)
+                {filteredCompany.map((comapany) => (
+                  <div
+                    id={!cartPage ? comapany?.company_uuid : ""}
+                    key={comapany?.company_uuid}
+                    name={comapany?.company_uuid}
+                    className="categoryItemMap"
+                  >
+                    <h1 className="categoryHeadline">
+                      {comapany?.company_title}
+                    </h1>
+                    {filteredCategory
+                      ?.filter((a) => a.company_uuid === comapany.company_uuid)
                       ?.sort((a, b) => a.sort_order - b.sort_order)
-                      ?.map(
-                        (category) =>
-                          items
-                            .filter(
-                              (a) => a.category_uuid === category.category_uuid
-                            )
+                      ?.map((category) => (
+                        <div
+                          id={!cartPage ? category?.category_uuid : ""}
+                          key={category?.category_uuid}
+                          name={category?.category_uuid}
+                          className="categoryItemMap"
+                        >
+                          <h2 className="categoryHeadline small">
+                            {category?.category_title}
+                          </h2>
+
+                          {filterItems
                             ?.filter(
                               (a) =>
                                 !filterItemTitle ||
                                 a.item_title
                                   ?.toLocaleLowerCase()
                                   .includes(filterItemTitle.toLocaleLowerCase())
-                            )?.length > 0 && (
-                            <div
-                              id={!cartPage ? category?.category_uuid : ""}
-                              key={category?.category_uuid}
-                              name={category?.category_uuid}
-                              className="categoryItemMap"
-                            >
-                              <h1 className="categoryHeadline">
-                                {category?.category_title}
-                              </h1>
+                            )
+                            ?.sort((a, b) => a.sort_order - b.sort_order)
 
-                              {items
-                                ?.filter(
-                                  (a) =>
-                                    !filterItemTitle ||
-                                    a.item_title
-                                      ?.toLocaleLowerCase()
-                                      .includes(
-                                        filterItemTitle.toLocaleLowerCase()
-                                      )
-                                )
-                                ?.sort((a, b) => a.sort_order - b.sort_order)
-
-                                .filter(
-                                  (a) =>
-                                    a.category_uuid === category.category_uuid
-                                )
-                                ?.map((item) => {
-                                  return (
-                                    <div
-                                      key={item?.item_uuid}
-                                      className="menu"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOrder((prev) => ({
-                                          ...prev,
-                                          items: prev?.items?.filter(
-                                            (a) =>
-                                              a.item_uuid === item.item_uuid
-                                          )?.length
-                                            ? prev?.items?.map((a) =>
-                                                a.item_uuid === item.item_uuid
-                                                  ? {
-                                                      ...a,
-                                                      b:
-                                                        +(a.b || 0) +
-                                                        parseInt(
-                                                          ((a?.p || 0) +
-                                                            (+item?.one_pack ||
-                                                              1)) /
-                                                            +item.conversion
-                                                        ),
-
-                                                      p:
-                                                        ((a?.p || 0) +
-                                                          (+item?.one_pack ||
-                                                            1)) %
-                                                        +item.conversion,
-                                                    }
-                                                  : a
-                                              )
-                                            : prev?.items?.length
-                                            ? [
-                                                ...prev.items,
-                                                ...items
-                                                  ?.filter(
-                                                    (a) =>
-                                                      a.item_uuid ===
-                                                      item.item_uuid
-                                                  )
-                                                  .map((a) => ({
-                                                    ...a,
-                                                    b:
-                                                      +(a.b || 0) +
-                                                      parseInt(
-                                                        ((a?.p || 0) +
-                                                          (+item?.one_pack ||
-                                                            1)) /
-                                                          +item.conversion
-                                                      ),
-
-                                                    p:
-                                                      ((a?.p || 0) +
-                                                        (+item?.one_pack ||
-                                                          1)) %
-                                                      +item.conversion,
-                                                  })),
-                                              ]
-                                            : items
-                                                ?.filter(
-                                                  (a) =>
-                                                    a.item_uuid ===
-                                                    item.item_uuid
-                                                )
-                                                .map((a) => ({
+                            .filter(
+                              (a) => a.category_uuid === category.category_uuid
+                            )
+                            ?.map((item) => {
+                              return (
+                                <div
+                                  key={item?.item_uuid}
+                                  className="menu"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOrder((prev) => ({
+                                      ...prev,
+                                      items: prev?.items?.filter(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      )?.length
+                                        ? prev?.items?.map((a) =>
+                                            a.item_uuid === item.item_uuid
+                                              ? {
                                                   ...a,
                                                   b:
                                                     +(a.b || 0) +
@@ -485,158 +427,13 @@ setCounter(response.data.result)
                                                     ((a?.p || 0) +
                                                       (+item?.one_pack || 1)) %
                                                     +item.conversion,
-                                                })),
-                                        }));
-                                      }}
-                                    >
-                                      <div className="menuItemDetails">
-                                        <h1 className="item-name">
-                                          {item?.item_title}
-                                        </h1>
-
-                                        <div
-                                          className="item-mode flex"
-                                          style={{
-                                            justifyContent: "space-between",
-                                          }}
-                                        >
-                                          <h3
-                                            className={`item-price`}
-                                            style={{ cursor: "pointer" }}
-                                          >
-                                            {+item?.item_discount ? (
-                                              <>
-                                                <span
-                                                  style={{
-                                                    color: "red",
-                                                    textDecoration:
-                                                      "line-through",
-                                                  }}
-                                                >
-                                                  Price: {item?.item_price}
-                                                </span>
-                                                <br />
-                                                <span
-                                                  style={{
-                                                    color: "red",
-                                                    paddingLeft: "10px",
-                                                    marginLeft: "10px",
-                                                    fontWeight: "500",
-                                                    borderLeft: "2px solid red",
-                                                  }}
-                                                >
-                                                  {item?.item_discount} % OFF
-                                                </span>
-                                              </>
-                                            ) : (
-                                              <>Price: {item?.item_price}</>
-                                            )}
-                                          </h3>
-                                          <h3 className={`item-price`}>
-                                            MRP: {item?.mrp || ""}
-                                          </h3>
-                                        </div>
-                                      </div>
-                                      <div className="menuleft">
-                                        <input
-                                          value={`${
-                                            order?.items?.find(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            )?.b || 0
-                                          } : ${
-                                            order?.items?.find(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            )?.p || 0
-                                          }`}
-                                          className="boxPcsInput"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setPopupForm(item);
-                                          }}
-                                        />
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              <div className="menu">
-                                <div className="menuItemDetails">
-                                  <h1 className="item-name"></h1>
-
-                                  <div className="item-mode">
-                                    <h3 className={`item-price`}></h3>
-                                  </div>
-                                </div>
-                                <div className="menuleft"></div>
-                              </div>
-                            </div>
-                          )
-                      )
-                  : itemsCategory
-                      ?.sort((a, b) => a.sort_order - b.sort_order)
-                      ?.map(
-                        (category) =>
-                          order?.items.filter(
-                            (a) => a.category_uuid === category.category_uuid
-                          )?.length > 0 && (
-                            <div
-                              id={cartPage ? category?.category_uuid : ""}
-                              name={category?.category_uuid}
-                              key={category?.category_uuid}
-                              className="categoryItemMap"
-                            >
-                              <h1 className="categoryHeadline">
-                                {category?.category_title}
-                              </h1>
-
-                              {order?.items
-                                ?.filter(
-                                  (a) =>
-                                    !filterItemTitle ||
-                                    a.item_title
-                                      ?.toLocaleLowerCase()
-                                      .includes(
-                                        filterItemTitle.toLocaleLowerCase()
-                                      )
-                                )
-                                ?.sort((a, b) => a.sort_order - b.sort_order)
-                                .filter(
-                                  (a) =>
-                                    a.category_uuid === category.category_uuid
-                                )
-                                ?.map((item) => {
-                                  return (
-                                    <div
-                                      key={item?.item_uuid}
-                                      className="menu"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOrder((prev) => ({
-                                          ...prev,
-                                          items:
-                                            prev?.items?.map((a) =>
-                                              a.item_uuid === item.item_uuid
-                                                ? {
-                                                    ...a,
-                                                    b:
-                                                      +(a.b || 0) +
-                                                      parseInt(
-                                                        ((a?.p || 0) +
-                                                          (+item?.one_pack ||
-                                                            1)) /
-                                                          +item.conversion
-                                                      ),
-
-                                                    p:
-                                                      ((a?.p || 0) +
-                                                        (+item?.one_pack ||
-                                                          1)) %
-                                                      +item.conversion,
-                                                  }
-                                                : a
-                                            ) ||
-                                            items
+                                                }
+                                              : a
+                                          )
+                                        : prev?.items?.length
+                                        ? [
+                                            ...prev.items,
+                                            ...filterItems
                                               ?.filter(
                                                 (a) =>
                                                   a.item_uuid === item.item_uuid
@@ -656,67 +453,122 @@ setCounter(response.data.result)
                                                     (+item?.one_pack || 1)) %
                                                   +item.conversion,
                                               })),
-                                        }));
-                                      }}
-                                    >
-                                      <div className="menuItemDetails">
-                                        <h1 className="item-name">
-                                          {item?.item_title}
-                                        </h1>
-
-                                        <div
-                                          className="item-mode flex"
-                                          style={{
-                                            justifyContent: "space-between",
-                                            cursor: "pointer",
-                                          }}
-                                        >
-                                          <h3
-                                            className={`item-price`}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setPricePopup(item);
-                                            }}
-                                          >
-                                            Price:
-                                            {order?.items?.find(
+                                          ]
+                                        : filterItems
+                                            ?.filter(
                                               (a) =>
                                                 a.item_uuid === item.item_uuid
-                                            )?.item_price || item?.item_price}
-                                          </h3>
-                                          <h3 className={`item-price`}>
-                                            MRP: {item?.mrp || ""}
-                                          </h3>
-                                        </div>
-                                      </div>
-                                      <div className="menuleft">
-                                        <input
-                                          value={`${item?.b || 0} : ${
-                                            item?.p || 0
-                                          }`}
-                                          className="boxPcsInput"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setPopupForm(item);
-                                          }}
-                                        />
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              <div className="menu">
-                                <div className="menuItemDetails">
-                                  <h1 className="item-name"></h1>
+                                            )
+                                            .map((a) => ({
+                                              ...a,
+                                              b:
+                                                +(a.b || 0) +
+                                                parseInt(
+                                                  ((a?.p || 0) +
+                                                    (+item?.one_pack || 1)) /
+                                                    +item.conversion
+                                                ),
 
-                                  <div className="item-mode">
-                                    <h3 className={`item-price`}></h3>
+                                              p:
+                                                ((a?.p || 0) +
+                                                  (+item?.one_pack || 1)) %
+                                                +item.conversion,
+                                            })),
+                                    }));
+                                  }}
+                                >
+                                  <div className="menuItemDetails">
+                                    <h1 className="item-name">
+                                      {item?.item_title}
+                                    </h1>
+
+                                    <div
+                                      className="item-mode flex"
+                                      style={{
+                                        justifyContent: "space-between",
+                                      }}
+                                    >
+                                      <h3
+                                        className={`item-price`}
+                                        style={{ cursor: "pointer" }}
+                                      >
+                                        {+item?.item_discount ? (
+                                          <>
+                                            <span
+                                              style={{
+                                                color: "red",
+                                                textDecoration: "line-through",
+                                              }}
+                                            >
+                                              Price: {item?.item_price}
+                                            </span>
+                                            <br />
+                                            <span
+                                              style={{
+                                                color: "red",
+                                                paddingLeft: "10px",
+                                                marginLeft: "10px",
+                                                fontWeight: "500",
+                                                borderLeft: "2px solid red",
+                                              }}
+                                            >
+                                              {item?.item_discount} % OFF
+                                            </span>
+                                          </>
+                                        ) : (
+                                          <>Price: {item?.item_price}</>
+                                        )}
+                                      </h3>
+                                      <h3 className={`item-price`}>
+                                        MRP: {item?.mrp || ""}
+                                      </h3>
+                                    </div>
+                                  </div>
+                                  <div className="menuleft">
+                                    <input
+                                      value={`${
+                                        order?.items?.find(
+                                          (a) => a.item_uuid === item.item_uuid
+                                        )?.b || 0
+                                      } : ${
+                                        order?.items?.find(
+                                          (a) => a.item_uuid === item.item_uuid
+                                        )?.p || 0
+                                      }`}
+                                      className="boxPcsInput"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setPopupForm(item);
+                                      }}
+                                    />
                                   </div>
                                 </div>
-                                <div className="menuleft"></div>
+                              );
+                            })}
+                          <div className="menu">
+                            <div className="menuItemDetails">
+                              <h1 className="item-name"></h1>
+
+                              <div className="item-mode">
+                                <h3 className={`item-price`}></h3>
                               </div>
                             </div>
-                          )
-                      )}
+                            <div className="menuleft"></div>
+                          </div>
+                        </div>
+                      ))}
+                    <div className="menu">
+                      <div className="menuItemDetails">
+                        <h1 className="item-name"></h1>
+
+                        <div className="item-mode">
+                          <h3 className={`item-price`}></h3>
+                        </div>
+                      </div>
+                      <div className="menuleft"></div>
+                    </div>
+                  </div>
+                ))}
               </div>
               {confirmItemsPopup ? (
                 <div
@@ -818,7 +670,7 @@ setCounter(response.data.result)
                                           : prev?.items?.length
                                           ? [
                                               ...prev.items,
-                                              ...items
+                                              ...filterItems
                                                 ?.filter(
                                                   (a) =>
                                                     a.item_uuid ===
@@ -841,7 +693,7 @@ setCounter(response.data.result)
                                                     +item.conversion,
                                                 })),
                                             ]
-                                          : items
+                                          : filterItems
                                               ?.filter(
                                                 (a) =>
                                                   a.item_uuid === item.item_uuid
@@ -983,7 +835,7 @@ setCounter(response.data.result)
                       ? order?.items?.filter(
                           (a) => a.category_uuid === category.category_uuid
                         )?.length > 0
-                      : items.filter(
+                      : filterItems.filter(
                           (a) => a.category_uuid === category.category_uuid
                         )?.length > 0) && (
                       <ScrollLink
@@ -1019,7 +871,7 @@ setCounter(response.data.result)
                                 (a) =>
                                   a.category_uuid === category.category_uuid
                               )?.length
-                            : items
+                            : filterItems
                                 .filter(
                                   (a) =>
                                     a.category_uuid === category.category_uuid
@@ -1039,8 +891,8 @@ setCounter(response.data.result)
                   );
                 })}
             </div>
-            {isCategoryOpen && <div id="black-bg" />}
-            {!isCategoryOpen ? (
+            {/* {isCategoryOpen && <div id="black-bg" />} */}
+            {/* {!isCategoryOpen ? (
               <button
                 className="showMenuListBtn"
                 onClick={() => setIsCategoryOpen(!isCategoryOpen)}
@@ -1054,7 +906,7 @@ setCounter(response.data.result)
               >
                 <i className="fas fa-times"></i> Close
               </button>
-            )}
+            )} */}
           </div>
         </div>
       </div>
@@ -1108,53 +960,54 @@ setCounter(response.data.result)
             className="cartBtn"
             onClick={async () => {
               setLoading(true);
-              const db = await openDB(
-                "BT",
-                +localStorage.getItem("IDBVersion") || 1
-              );
-              let tx = await db
-                .transaction("autobill", "readwrite")
-                .objectStore("autobill");
-              let autobills = await tx.getAll();
-              let store = await db
-                .transaction("items", "readwrite")
-                .objectStore("items");
-              let dbItems = await store.getAll();
-              let data = await AutoAdd({
-                counter,
-                items: order.items,
-                dbItems,
-                autobills: autobills.filter((a) => a.status),
-              });
+              //   const db = await openDB(
+              //     "BT",
+              //     +localStorage.getItem("IDBVersion") || 1
+              //   );
+              //   let tx = await db
+              //     .transaction("autobill", "readwrite")
+              //     .objectStore("autobill");
+              //   let autobills = await tx.getAll();
+              //   let store = await db
+              //     .transaction("items", "readwrite")
+              //     .objectStore("items");
+              //   let dbItems = await store.getAll();
+              //   let data = await AutoAdd({
+              //     counter,
+              //     items: order.items,
+              //     dbItems,
+              //     autobills: autobills.filter((a) => a.status),
+              //   });
 
-              setOrder((prev) => ({
-                ...prev,
-                ...data,
-                items: data?.items?.map((a) => ({
-                  ...a,
-                  b: +a.b + parseInt(+a.p / +a.conversion),
-                  p: +a.p % +a.conversion,
-                })),
-              }));
-              setTimeout(async () => {
-                let time = new Date();
-                Billing({
-                  counter,
-                  items: data.items,
-                  others: {
-                    stage: 1,
-                    user_uuid: localStorage.getItem("user_uuid"),
-                    time: time.getTime(),
+              //   setOrder((prev) => ({
+              //     ...prev,
+              //     ...data,
+              //     items: data?.items?.map((a) => ({
+              //       ...a,
+              //       b: +a.b + parseInt(+a.p / +a.conversion),
+              //       p: +a.p % +a.conversion,
+              //     })),
+              //   }));
+              //   setTimeout(async () => {
+              //     let time = new Date();
+              //     Billing({
+              //       counter,
+              //       items: data.items,
+              //       others: {
+              //         stage: 1,
+              //         user_uuid: localStorage.getItem("user_uuid"),
+              //         time: time.getTime(),
 
-                    type: "NEW",
-                  },
-                  add_discounts: true,
-                }).then((data) => {
-                  setOrder((prev) => ({ ...prev, ...data }));
-                  postOrder({ ...order, ...data });
-                  db.close();
-                });
-              }, 2000);
+              //         type: "NEW",
+              //       },
+              //       add_discounts: true,
+              //     }).then((data) => {
+              //       setOrder((prev) => ({ ...prev, ...data }));
+              //       postOrder({ ...order, ...data });
+              //       db.close();
+              //     });
+              // }, 2000);
+              postOrder();
             }}
           >
             {total ? "Rs: " + total : ""} Submit
@@ -1186,7 +1039,7 @@ setCounter(response.data.result)
           onSave={() => setHoldPopup(false)}
           orders={order}
           holdPopup={holdPopup}
-          itemsData={items}
+          itemsData={filterItems}
           setOrder={setOrder}
         />
       ) : (
@@ -1197,7 +1050,7 @@ setCounter(response.data.result)
           onSave={() => setPricePopup(false)}
           orders={order}
           holdPopup={pricePopup}
-          itemsData={items}
+          itemsData={filterItems}
           setOrder={setOrder}
         />
       ) : (
@@ -1306,7 +1159,7 @@ setCounter(response.data.result)
   );
 };
 
-export default SelectedCounterOrder;
+export default LinkedCounter;
 function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
   const [items, setItems] = useState([]);
   useEffect(() => {

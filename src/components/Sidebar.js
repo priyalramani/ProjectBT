@@ -13,6 +13,7 @@ import AddIcon from "@mui/icons-material/Add";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 import context from "../context/context";
+import { Version } from "../App";
 let titleData = [
   { value: "RetailerMarginReport", name: "Retailer Margin Report" },
   { value: "SalesmanItemSuggestion", name: "Salesman Item Suggestion" },
@@ -122,10 +123,10 @@ const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
               name: "Counter",
               link: "/admin/counter",
             },
-            {
-              name: "Test Counter",
-              link: "/admin/TestCounter",
-            },
+            // {
+            //   name: "Test Counter",
+            //   link: "/admin/TestCounter",
+            // },
             {
               name: "Routes",
               link: "/admin/routes",
@@ -243,6 +244,10 @@ const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
               name: "Campaigns",
               link: "/admin/Campaigns",
             },
+            {
+              name: "OrderForm",
+              link: "/admin/OrderForm",
+            },
           ]}
         />
         <NavLink
@@ -301,6 +306,7 @@ const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
           </div>
         </div>*/}
       </div>
+        <div style={{position:"absolute",bottom:"5px",left:"5px"}}>V: {Version}</div>
     </div>
   );
 };

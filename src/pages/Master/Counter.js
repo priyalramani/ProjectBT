@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useContext } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import axios from "axios";
@@ -8,6 +8,7 @@ import CounterSequence from "../../components/CounterSequence";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { v4 as uuid } from "uuid";
+import Context from "../../context/context";
 const Counter = () => {
   const [counter, setCounter] = useState([]);
   const [paymentModes, setPaymentModes] = useState([]);
@@ -20,11 +21,13 @@ const Counter = () => {
   const [xlSelection, seXlSelection] = useState(false);
   const [itemPopup, setItemPopup] = useState(false);
   const [deletePopup, setDeletePopup] = useState(false);
+  const context = useContext(Context);
 
+  const { setNotification } = context;
   const [sequencePopup, setSequencePopup] = useState(false);
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-  const getRoutesData = async (controller) => {
+  const getRoutesData = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
       url: "/routes/GetRouteList",
@@ -43,7 +46,7 @@ const Counter = () => {
       controller.abort();
     };
   }, []);
-  const getCounter = async (controller) => {
+  const getCounter = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
       url: "/counters/GetCounterData",
@@ -52,7 +55,18 @@ const Counter = () => {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setCounter(response.data.result);
+    if (response.data.success) {
+      setCounter(response.data.result);
+      if (popupForm?.item?.counter_uuid) {
+        setPopupForm((prev) => ({
+          ...prev,
+          item:
+            response.data.result?.find(
+              (a) => a.counter_uuid === prev?.item?.counter_uuid
+            ) || prev.item,
+        }));
+      }
+    }
   };
   const GetPaymentModes = async () => {
     const response = await axios({
@@ -230,6 +244,8 @@ const Counter = () => {
           popupInfo={popupForm}
           paymentModes={paymentModes}
           counters={counter}
+          getCounter={getCounter}
+          setNotification={setNotification}
         />
       ) : (
         ""
@@ -482,9 +498,11 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
               <td colSpan={2}>{item.route_title}</td>
               <td colSpan={2}>{item.counter_title}</td>
               <td colSpan={2}>
-                {item?.mobile?.map((a, i) =>
-                  i === 0 ? a?.mobile || "" : ", " + a?.mobile
-                )}
+                {item?.mobile
+                  ?.filter((a) => a.mobile)
+                  .map((a, i) =>
+                    i === 0 ? a?.mobile || "" : ", " + a?.mobile
+                  )}
               </td>
               <td colSpan={2}>{item.food_license || ""}</td>
               <td colSpan={2}>{item.gst || ""}</td>
@@ -546,17 +564,36 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
 function NewUserForm({
   onSave,
   popupInfo,
-  setCounters,
   routesData,
   paymentModes,
   counters,
+  getCounter,
+  setNotification,
 }) {
-  const [data, setdata] = useState({
-    mobile: [1, 2, 3, 4].map((a) => ({ uuid: uuid(), mobile: "", type: "" })),
-  });
-
+  const [data, setdata] = useState({});
+  const [otppoup, setOtpPopup] = useState(false);
+  const [otp, setOtp] = useState("");
   const [counterGroup, setCounterGroup] = useState([]);
+  const [orderFrom, setOrderFrom] = useState([]);
   const [errMassage, setErrorMassage] = useState("");
+  const getItemsData = async (controller = new AbortController()) => {
+    const response = await axios({
+      method: "get",
+      url: "/orderForm/GetFormList",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setOrderFrom(response.data.result);
+  };
+  useEffect(() => {
+    const controller = new AbortController();
+    getItemsData(controller);
+    return () => {
+      controller.abort();
+    };
+  }, []);
   const getCounterGroup = async () => {
     const response = await axios({
       method: "get",
@@ -582,10 +619,12 @@ function NewUserForm({
       setdata({
         ...popupInfo.data,
         mobile: [
-          ...(popupInfo?.data?.mobile?.map((a) => ({
-            ...a,
-            uuid: a?.uuid || uuid(),
-          })) || []),
+          ...(popupInfo?.data?.mobile
+            ?.map((a) => ({
+              ...a,
+              uuid: a?.uuid || uuid(),
+            }))
+            .filter((a) => a.mobile) || []),
           ...[1, 2, 3, 4].map((a) => ({ uuid: uuid(), mobile: "", type: "" })),
         ].slice(0, 4),
       });
@@ -600,15 +639,30 @@ function NewUserForm({
           .map((a) => a.mode_uuid),
         credit_allowed: "N",
         status: 1,
+        mobile: [1, 2, 3, 4].map((a) => ({
+          uuid: uuid(),
+          mobile: "",
+          type: "",
+        })),
       });
     }
   }, [paymentModes, popupInfo.data, popupInfo?.type]);
   console.log(data);
   const submitHandler = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (!data.counter_title) {
       setErrorMassage("Please insert  Title");
       return;
+    }
+    for (let item of data.mobile) {
+      if (
+        data?.mobile?.filter((a) => a.mobile && a.mobile === item.mobile)
+          .length > 1
+      ) {
+        setNotification({ success: false, message: "Dublicat Number Present" });
+        setTimeout(() => setNotification(null), 5000);
+        return;
+      }
     }
     // if (data?.mobile?.length !== 10) {
     //   setErrorMassage("Please enter 10 Numbers in Mobile");
@@ -632,10 +686,7 @@ function NewUserForm({
         },
       });
       if (response.data.success) {
-        setCounters((prev) =>
-          prev.map((i) => (i.counter_uuid === data.counter_uuid ? data : i))
-        );
-        onSave();
+        getCounter();
       }
     } else {
       if (counters.find((a) => a.counter_code === data.counter_code)) {
@@ -651,8 +702,7 @@ function NewUserForm({
         },
       });
       if (response.data.success) {
-        setCounters((prev) => [...prev, data]);
-        onSave();
+        getCounter();
       }
     }
   };
@@ -688,414 +738,603 @@ function NewUserForm({
 
     setdata((prev) => ({ ...prev, counter_group_uuid: temp }));
   };
-
+  const sendOtp = async (mobile) => {
+    if (!mobile.mobile) {
+      return;
+    }
+    if (
+      data?.mobile?.filter((a) => a.mobile && a.mobile === mobile.mobile)
+        .length > 1
+    ) {
+      setNotification({ success: false, message: "Dublicat Number Present" });
+      setTimeout(() => setNotification(null), 5000);
+      return;
+    }
+    submitHandler();
+    setOtpPopup(mobile);
+    const response = await axios({
+      method: "post",
+      url: "/counters/sendWhatsappOtp",
+      data: {
+        ...data,
+        ...mobile,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+    }
+  };
+  const sendCallOtp = async (mobile) => {
+    if (!mobile.mobile) {
+      return;
+    }
+    if (
+      data?.mobile?.filter((a) => a.mobile && a.mobile === mobile.mobile)
+        .length > 1
+    ) {
+      setNotification({ success: false, message: "Dublicat Number Present" });
+      setTimeout(() => setNotification(null), 5000);
+      return;
+    }
+    submitHandler();
+    setOtpPopup(mobile);
+    const response = await axios({
+      method: "post",
+      url: "/counters/sendCallOtp",
+      data: {
+        ...data,
+        ...mobile,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+    }
+  };
+  const VerifyOtp = async (e) => {
+    e?.preventDefault();
+    const response = await axios({
+      method: "post",
+      url: "/counters/verifyOtp",
+      data: {
+        ...data,
+        ...otppoup,
+        otp,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      getCounter();
+      setOtpPopup("");
+      setOtp("");
+    }
+    setNotification(response.data);
+    setTimeout(() => setNotification(null), 5000);
+  };
   return (
-    <div className="overlay" style={{ zIndex: "99999999999999" }}>
-      <div
-        className="modal"
-        style={{ height: "fit-content", width: "fit-content" }}
-      >
+    <>
+      <div className="overlay" style={{ zIndex: "9999999" }}>
         <div
-          className="content"
-          style={{
-            height: "fit-content",
-            padding: "20px",
-            width: "fit-content",
-          }}
+          className="modal"
+          style={{ height: "fit-content", width: "fit-content" }}
         >
-          <div style={{ overflowY: "scroll", height: "fit-content" }}>
-            <form className="form" onSubmit={submitHandler}>
-              <div className="row">
-                <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Counter </h1>
-              </div>
-
-              <div className="form">
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "20px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll", height: "fit-content" }}>
+              <form className="form" onSubmit={submitHandler}>
                 <div className="row">
-                  <label className="selectLabel">
-                    Counter Title
-                    <input
-                      type="text"
-                      name="route_title"
-                      className="numberInput"
-                      value={data?.counter_title}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          counter_title: e.target.value,
-                        })
-                      }
-                      maxLength={42}
-                    />
-                  </label>
-
-                  <label className="selectLabel">
-                    Sort Order
-                    <input
-                      type="number"
-                      onWheel={(e) => e.preventDefault()}
-                      name="sort_order"
-                      className="numberInput"
-                      value={data?.sort_order}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          sort_order: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    Adress
-                    <input
-                      type="text"
-                      name="route_title"
-                      className="numberInput"
-                      value={data?.address}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          address: e.target.value,
-                        })
-                      }
-                      maxLength={42}
-                    />
-                  </label>
-
-                  <label className="selectLabel">
-                    Route
-                    <select
-                      name="user_type"
-                      className="select"
-                      value={data?.route_uuid}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          route_uuid: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="">None</option>
-                      {routesData
-                        ?.sort((a, b) => a.sort_order - b.sort_order)
-                        ?.map((a) => (
-                          <option value={a.route_uuid}>{a.route_title}</option>
-                        ))}
-                    </select>
-                  </label>
-                </div>
-                <div className="row">
-                  <label className="selectLabel" style={{ width: "50%" }}>
-                    Mobile
-                    <div>
-                      {data?.mobile?.map((a) => (
-                        <div
-                          key={a.uuid}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            margin: "5px 0",
-                          }}
-                        >
-                          <input
-                            type="number"
-                            name="route_title"
-                            className="numberInput"
-                            value={a?.mobile}
-                            style={{ width: "15ch" }}
-                            onChange={(e) => {
-                              if (e.target.value.length > 10) {
-                                return;
-                              }
-                              setdata((prev) => ({
-                                ...prev,
-                                mobile: prev.mobile.map((b) =>
-                                  b.uuid === a.uuid
-                                    ? { ...b, mobile: e.target.value }
-                                    : b
-                                ),
-                              }));
-                            }}
-                            maxLength={10}
-                          />
-                          <span
-                            style={{
-                              color: a.lable?.find((c) => c.type === "wa")
-                                ? "red"
-                                : "gray",
-                              cursor: "pointer",
-                            }}
-                            onClick={(e) => {
-                              setdata((prev) => ({
-                                ...prev,
-                                mobile: prev.mobile.map((b) =>
-                                  b.uuid === a.uuid
-                                    ? {
-                                        ...b,
-                                        lable: b.lable?.find(
-                                          (c) => c.type === "wa"
-                                        )
-                                          ? b.lable.filter(
-                                              (c) => c.type !== "wa"
-                                            )
-                                          : [
-                                              ...(b?.lable || []),
-                                              { type: "wa", varification: 0 },
-                                            ],
-                                      }
-                                    : b
-                                ),
-                              }));
-                            }}
-                          >
-                            <WhatsApp />
-                          </span>
-                          <span
-                            style={{
-                              color: a.lable?.find((c) => c.type === "cal")
-                                ? "red"
-                                : "gray",
-                              cursor: "pointer",
-                            }}
-                            onClick={(e) => {
-                              setdata((prev) => ({
-                                ...prev,
-                                mobile: prev.mobile.map((b) =>
-                                  b.uuid === a.uuid
-                                    ? {
-                                        ...b,
-                                        lable: b.lable?.find(
-                                          (c) => c.type === "cal"
-                                        )
-                                          ? b.lable.filter(
-                                              (c) => c.type !== "cal"
-                                            )
-                                          : [
-                                              ...(b?.lable || []),
-                                              { type: "cal", varification: 0 },
-                                            ],
-                                      }
-                                    : b
-                                ),
-                              }));
-                            }}
-                          >
-                            <Phone />
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </label>
-                  <label className="selectLabel" style={{ width: "50%" }}>
-                    Payment Modes
-                    <select
-                      className="numberInput"
-                      style={{ width: "200px", height: "100px" }}
-                      value={
-                        data.credit_allowed === "Y"
-                          ? data.payment_modes.length
-                            ? [...data?.payment_modes, "unpaid"]
-                            : "unpaid"
-                          : data?.payment_modes
-                      }
-                      onChange={onChangeHandler}
-                      multiple
-                    >
-                      {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
-                      {paymentModes?.map((occ) => (
-                        <option
-                          value={occ.mode_uuid}
-                          style={{ marginBottom: "5px", textAlign: "center" }}
-                        >
-                          {occ.mode_title}
-                        </option>
-                      ))}
-                      <option
-                        onClick={() =>
-                          setdata((prev) => ({
-                            ...prev,
-                            credit_allowed:
-                              prev.credit_allowed === "Y" ? "N" : "Y",
-                          }))
-                        }
-                        style={{ marginBottom: "5px", textAlign: "center" }}
-                        value="unpaid"
-                      >
-                        Unpaid
-                      </option>
-                    </select>
-                  </label>
+                  <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Counter </h1>
                 </div>
 
-                <div className="row">
-                  <label className="selectLabel">
-                    Status
-                    <select
-                      className="numberInput"
-                      value={data.status}
-                      onChange={(e) =>
-                        setdata((prev) => ({
-                          ...prev,
-                          status: e.target.value,
-                        }))
-                      }
-                    >
-                      {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
-
-                      <option value={1}>Active</option>
-                      <option value={0}>Hide</option>
-                      <option value={2}>Locked</option>
-                    </select>
-                  </label>
-                  {+data.status === 2 ? (
+                <div className="form">
+                  <div className="row">
                     <label className="selectLabel">
-                      Remarks
+                      Counter Title
                       <input
                         type="text"
                         name="route_title"
                         className="numberInput"
-                        value={data?.remarks}
+                        value={data?.counter_title}
                         onChange={(e) =>
                           setdata({
                             ...data,
-                            remarks: e.target.value,
+                            counter_title: e.target.value,
                           })
                         }
                         maxLength={42}
                       />
                     </label>
-                  ) : (
-                    ""
-                  )}
-                </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    GST
-                    <input
-                      type="text"
-                      name="GST"
-                      className="numberInput"
-                      value={data?.gst}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          gst: e.target.value,
-                        })
-                      }
-                      maxLength={42}
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    Food License
-                    <input
-                      type="text"
-                      name="food_license"
-                      className="numberInput"
-                      value={data?.food_license}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          food_license: e.target.value,
-                        })
-                      }
-                      maxLength={42}
-                    />
-                  </label>
-                </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    Counter Code
-                    <input
-                      type="text"
-                      name="one_pack"
-                      className="numberInput"
-                      value={data?.counter_code}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          counter_code: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    Payment Reminder Days
-                    <input
-                      type="number"
-                      name="payment_reminder_days"
-                      className="numberInput"
-                      value={data?.payment_reminder_days}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          payment_reminder_days: e.target.value,
-                        })
-                      }
-                      maxLength={42}
-                    />
-                  </label>
-                </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    Outstanding Type
-                    <select
-                      className="numberInput"
-                      value={data.outstanding_type}
-                      onChange={(e) =>
-                        setdata((prev) => ({
-                          ...prev,
-                          outstanding_type: e.target.value,
-                        }))
-                      }
-                    >
-                      {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
 
-                      <option value={0}>None</option>
-                      <option value={1}>Visit</option>
-                      <option value={2}>Call</option>
-                      <option value={3}>Self</option>
-                    </select>
-                  </label>
-                  <label className="selectLabel" style={{ width: "50%" }}>
-                    Counter Group
-                    <select
-                      className="numberInput"
-                      style={{ width: "200px", height: "100px" }}
-                      value={data?.counter_group_uuid}
-                      onChange={onChangeGroupHandler}
-                      multiple
-                    >
-                      {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
-                      {counterGroup?.map((occ) => (
+                    <label className="selectLabel">
+                      Sort Order
+                      <input
+                        type="number"
+                        onWheel={(e) => e?.preventDefault()}
+                        name="sort_order"
+                        className="numberInput"
+                        value={data?.sort_order}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            sort_order: e.target.value,
+                          })
+                        }
+                      />
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Adress
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.address}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            address: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                      />
+                    </label>
+
+                    <label className="selectLabel">
+                      Route
+                      <select
+                        name="user_type"
+                        className="select"
+                        value={data?.route_uuid}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            route_uuid: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">None</option>
+                        {routesData
+                          ?.sort((a, b) => a.sort_order - b.sort_order)
+                          ?.map((a) => (
+                            <option value={a.route_uuid}>
+                              {a.route_title}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel" style={{ width: "50%" }}>
+                      Mobile
+                      <div>
+                        {data?.mobile?.map((a) => (
+                          <div
+                            key={a.uuid}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              margin: "5px 0",
+                            }}
+                          >
+                            <input
+                              type="number"
+                              name="route_title"
+                              className="numberInput"
+                              value={a?.mobile}
+                              style={{ width: "15ch" }}
+                              disabled={a.lable?.find(
+                                (c) =>
+                                  (c.type === "cal" || c.type === "wa") &&
+                                  +c.varification
+                              )}
+                              onChange={(e) => {
+                                if (
+                                  e.target.value.length > 10 ||
+                                  a.lable?.find(
+                                    (c) =>
+                                      (c.type === "cal" || c.type === "wa") &&
+                                      +c.varification
+                                  )
+                                ) {
+                                  return;
+                                }
+                                setdata((prev) => ({
+                                  ...prev,
+                                  mobile: prev.mobile.map((b) =>
+                                    b.uuid === a.uuid
+                                      ? { ...b, mobile: e.target.value }
+                                      : b
+                                  ),
+                                }));
+                              }}
+                              maxLength={10}
+                            />
+                            <span
+                              style={{
+                                color: a.lable?.find(
+                                  (c) => c.type === "wa" && !+c.varification
+                                )
+                                  ? "red"
+                                  : a.lable?.find(
+                                      (c) => c.type === "wa" && +c.varification
+                                    )
+                                  ? "green"
+                                  : "gray",
+                                cursor: "pointer",
+                              }}
+                              onClick={(e) => {
+                                if (a.mobile) sendOtp({ ...a, lable: "wa" });
+                                //   setdata((prev) => ({
+                                //     ...prev,
+                                //     mobile: prev.mobile.map((b) =>
+                                //       b.uuid === a.uuid
+                                //         ? {
+                                //             ...b,
+                                //             lable: b.lable?.find(
+                                //               (c) => c.type === "wa"
+                                //             )
+                                //               ? b.lable.filter(
+                                //                   (c) => c.type !== "wa"
+                                //                 )
+                                //               : [
+                                //                   ...(b?.lable || []),
+                                //                   { type: "wa", varification: 0 },
+                                //                 ],
+                                //           }
+                                //         : b
+                                //     ),
+                                //   }));
+                              }}
+                            >
+                              <WhatsApp />
+                            </span>
+                            <span
+                              style={{
+                                color: a.lable?.find(
+                                  (c) => c.type === "cal" && !+c.varification
+                                )
+                                  ? "red"
+                                  : a.lable?.find(
+                                      (c) => c.type === "cal" && +c.varification
+                                    )
+                                  ? "green"
+                                  : "gray",
+                                cursor: "pointer",
+                              }}
+                              onClick={(e) => {
+                                if (a.mobile)
+                                  sendCallOtp({ ...a, lable: "cal" });
+                                //   setdata((prev) => ({
+                                //     ...prev,
+                                //     mobile: prev.mobile.map((b) =>
+                                //       b.uuid === a.uuid
+                                //         ? {
+                                //             ...b,
+                                //             lable: b.lable?.find(
+                                //               (c) => c.type === "cal"
+                                //             )
+                                //               ? b.lable.filter(
+                                //                   (c) => c.type !== "cal"
+                                //                 )
+                                //               : [
+                                //                   ...(b?.lable || []),
+                                //                   { type: "cal", varification: 0 },
+                                //                 ],
+                                //           }
+                                //         : b
+                                //     ),
+                                //   }));
+                              }}
+                            >
+                              <Phone />
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </label>
+                    <label className="selectLabel" style={{ width: "50%" }}>
+                      Payment Modes
+                      <select
+                        className="numberInput"
+                        style={{ width: "200px", height: "100px" }}
+                        value={
+                          data.credit_allowed === "Y"
+                            ? data.payment_modes.length
+                              ? [...data?.payment_modes, "unpaid"]
+                              : "unpaid"
+                            : data?.payment_modes
+                        }
+                        onChange={onChangeHandler}
+                        multiple
+                      >
+                        {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+                        {paymentModes?.map((occ) => (
+                          <option
+                            value={occ.mode_uuid}
+                            style={{ marginBottom: "5px", textAlign: "center" }}
+                          >
+                            {occ.mode_title}
+                          </option>
+                        ))}
                         <option
-                          value={occ.counter_group_uuid}
+                          onClick={() =>
+                            setdata((prev) => ({
+                              ...prev,
+                              credit_allowed:
+                                prev.credit_allowed === "Y" ? "N" : "Y",
+                            }))
+                          }
                           style={{ marginBottom: "5px", textAlign: "center" }}
+                          value="unpaid"
                         >
-                          {occ.counter_group_title}
+                          Unpaid
                         </option>
-                      ))}
-                    </select>
-                  </label>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="row">
+                    <label className="selectLabel">
+                      Status
+                      <select
+                        className="numberInput"
+                        value={data.status}
+                        onChange={(e) =>
+                          setdata((prev) => ({
+                            ...prev,
+                            status: e.target.value,
+                          }))
+                        }
+                      >
+                        {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+
+                        <option value={1}>Active</option>
+                        <option value={0}>Hide</option>
+                        <option value={2}>Locked</option>
+                      </select>
+                    </label>
+                    {+data.status === 2 ? (
+                      <label className="selectLabel">
+                        Remarks
+                        <input
+                          type="text"
+                          name="route_title"
+                          className="numberInput"
+                          value={data?.remarks}
+                          onChange={(e) =>
+                            setdata({
+                              ...data,
+                              remarks: e.target.value,
+                            })
+                          }
+                          maxLength={42}
+                        />
+                      </label>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      GST
+                      <input
+                        type="text"
+                        name="GST"
+                        className="numberInput"
+                        value={data?.gst}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            gst: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      Food License
+                      <input
+                        type="text"
+                        name="food_license"
+                        className="numberInput"
+                        value={data?.food_license}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            food_license: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                      />
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Counter Code
+                      <input
+                        type="text"
+                        name="one_pack"
+                        className="numberInput"
+                        value={data?.counter_code}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            counter_code: e.target.value,
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      Payment Reminder Days
+                      <input
+                        type="number"
+                        name="payment_reminder_days"
+                        className="numberInput"
+                        value={data?.payment_reminder_days}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            payment_reminder_days: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                      />
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Outstanding Type
+                      <select
+                        className="numberInput"
+                        value={data.outstanding_type}
+                        onChange={(e) =>
+                          setdata((prev) => ({
+                            ...prev,
+                            outstanding_type: e.target.value,
+                          }))
+                        }
+                      >
+                        {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+
+                        <option value={0}>None</option>
+                        <option value={1}>Visit</option>
+                        <option value={2}>Call</option>
+                        <option value={3}>Self</option>
+                      </select>
+                    </label>
+                    <label className="selectLabel" style={{ width: "50%" }}>
+                      Counter Group
+                      <select
+                        className="numberInput"
+                        style={{ width: "200px", height: "100px" }}
+                        value={data?.counter_group_uuid}
+                        onChange={onChangeGroupHandler}
+                        multiple
+                      >
+                        {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+                        {counterGroup?.map((occ) => (
+                          <option
+                            value={occ.counter_group_uuid}
+                            style={{ marginBottom: "5px", textAlign: "center" }}
+                          >
+                            {occ.counter_group_title}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
                 </div>
-              </div>
-              <i style={{ color: "red" }}>
-                {errMassage === "" ? "" : "Error: " + errMassage}
-              </i>
+                <div className="row">
+                 
 
-              <button type="submit" className="submit">
-                Save changes
-              </button>
-            </form>
+                    <label className="selectLabel">
+                      Order Form
+                      <select
+                        name="user_type"
+                        className="select"
+                        value={data?.form_uuid}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            form_uuid: e.target.value,
+                          })
+                        }
+                      >
+                        <option value="">None</option>
+                        {orderFrom
+                          ?.map((a) => (
+                            <option value={a.form_uuid}>
+                              {a.form_title}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                  </div>
+                <i style={{ color: "red" }}>
+                  {errMassage === "" ? "" : "Error: " + errMassage}
+                </i>
+
+                <button type="submit" className="submit">
+                  Save changes
+                </button>
+              </form>
+            </div>
+
+            <button onClick={onSave} className="closeButton">
+              x
+            </button>
           </div>
-
-          <button onClick={onSave} className="closeButton">
-            x
-          </button>
         </div>
       </div>
-    </div>
+      {otppoup ? (
+        <div className="overlay" style={{ zindex: "99999999999999999" }}>
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "max-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form className="form" onSubmit={VerifyOtp}>
+                  <div className="formGroup">
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "flex-start" }}
+                    >
+                      <label className="selectLabel flex">
+                        OTP
+                        <input
+                          type="number"
+                          name="route_title"
+                          className="numberInput"
+                          value={otp}
+                          style={{ width: "15ch" }}
+                          onChange={(e) => {
+                            setOtp(e.target.value);
+                          }}
+                          maxLength={10}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <button type="submit" className="submit">
+                    Confirm
+                  </button>
+                </form>
+              </div>
+              <button
+                onClick={() => setOtpPopup(false)}
+                className="closeButton"
+              >
+                x
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+    </>
   );
 }
 const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
@@ -1182,6 +1421,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
       onSave();
     }
   };
+
   return (
     <div className="overlay">
       <div
@@ -1499,7 +1739,7 @@ function DeleteCounterPopup({ onSave, popupInfo, setItemsData }) {
   const [loading, setLoading] = useState(false);
 
   const submitHandler = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     setLoading(true);
     try {
       const response = await axios({

@@ -8,6 +8,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import MenuIcon from "@mui/icons-material/Menu";
 import axios from "axios";
 import { refreshDb } from "../Apis/functions";
+import { Version } from "../App";
 const Main = () => {
   const [userRole, setUserRole] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
@@ -119,7 +120,7 @@ const Main = () => {
               fontSize: "20px",
             }}
           >
-            Version 51.{localStorage.getItem("IDBVersion")}
+            Version {Version}.{localStorage.getItem("IDBVersion")}
           </div>
 
           <button

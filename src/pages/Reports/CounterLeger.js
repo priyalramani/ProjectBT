@@ -381,6 +381,9 @@ function DiliveryPopup({
     getCounter();
   }, []);
   const submitHandler = async () => {
+    if(waiting){
+      return
+    }
     setWaiting(true);
     updateBilling({
       ...order,

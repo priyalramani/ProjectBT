@@ -403,6 +403,12 @@
   font-size: 1.5rem;
   padding-left: 0.5rem;
 }
+.categoryHeadline.small {
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid rgb(221, 221, 221);
+  font-size: 1.2rem;
+  padding-left: 0.7rem;
+}
 
 .allcategoryList {
   position: fixed;

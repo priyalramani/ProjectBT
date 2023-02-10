@@ -8,7 +8,6 @@ const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
   const [disabledItem, setDisabledItem] = useState(false);
 
-  const [filterItemsData, setFilterItemsData] = useState([]);
   const [itemCategories, setItemCategories] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
@@ -16,46 +15,39 @@ const ItemsPage = () => {
   const [filterTitle, setFilterTitle] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
-  const getItemCategories = async () => {
+  const getItemCategories = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
       url: "/itemCategories/GetItemCategoryList",
-
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.success) setItemCategories(response.data.result);
   };
-  const getItemsData = async () => {
+  const getItemsData = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
-      url: "/items/GetItemList",
-
+      url: "/items/GetItemData",
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success)
-      setItemsData(
-        response.data.result.map((b) => ({
-          ...b,
-          company_title:
-            companies.find((a) => a.company_uuid === b.company_uuid)
-              ?.company_title || "-",
-          category_title:
-            itemCategories.find((a) => a.category_uuid === b.category_uuid)
-              ?.category_title || "-",
-        }))
-      );
+    if (response.data.success) setItemsData(response.data.result);
   };
   useEffect(() => {
-    getItemsData();
-  }, [popupForm, itemCategories, companies]);
-  useEffect(
+    const controller = new AbortController();
+    getItemsData(controller);
+    return () => {
+      controller.abort();
+    };
+  }, [popupForm]);
+  const filterItemsData = useMemo(
     () =>
-      setFilterItemsData(
-        itemsData.filter(
+      itemsData
+        .filter(
           (a) =>
             a.item_title &&
             (disabledItem || a.status) &&
@@ -72,14 +64,31 @@ const ItemsPage = () => {
                 .toLocaleLowerCase()
                 .includes(filterCategory.toLocaleLowerCase()))
         )
-      ),
-    [itemsData, filterTitle, filterCategory, filterCompany, disabledItem]
+        .map((b) => ({
+          ...b,
+          company_title:
+            companies.find((a) => a.company_uuid === b.company_uuid)
+              ?.company_title || "-",
+          category_title:
+            itemCategories.find((a) => a.category_uuid === b.category_uuid)
+              ?.category_title || "-",
+        })),
+    [
+      companies,
+      disabledItem,
+      filterCategory,
+      filterCompany,
+      filterTitle,
+      itemCategories,
+      itemsData,
+    ]
   );
-  const getCompanies = async () => {
+
+  const getCompanies = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
       url: "/companies/getCompanies",
-
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
@@ -87,8 +96,12 @@ const ItemsPage = () => {
     if (response.data.success) setCompanies(response.data.result);
   };
   useEffect(() => {
-    getCompanies();
+    const controller = new AbortController();
+    getCompanies(controller);
     getItemCategories();
+    return () => {
+      controller.abort(controller);
+    };
   }, []);
   return (
     <>

@@ -514,8 +514,6 @@ const ProcessingOrders = () => {
       );
   }, [selectedOrder]);
 
-
-
   const checkingQuantity = () => {
     let orderData = orders;
     setLoading(true);
@@ -539,7 +537,7 @@ const ProcessingOrders = () => {
 
       return acc;
     }, []);
-  
+
     for (let a of item_details) {
       let orderItem = tempQuantity.find((b) => b.item_uuid === a.item_uuid);
       let ItemData = items.find((b) => b.item_uuid === a.item_uuid);
@@ -1586,6 +1584,7 @@ const ProcessingOrders = () => {
           popupValue={minMaxPopup}
           order={selectedOrder}
           items={items}
+          loading={loading}
         />
       ) : (
         ""
@@ -2789,6 +2788,7 @@ function DiliveryPopup({
   allowed,
   setOrder,
   setLoading,
+  loading,
 }) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
@@ -2846,6 +2846,9 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
+    if (loading) {
+      return;
+    }
     setLoading(true);
     setError("");
     let billingData = await Billing({

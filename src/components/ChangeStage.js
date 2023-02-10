@@ -386,7 +386,6 @@ function DiliveryPopup({
     setOrder(orders[0]);
   }, []);
   let reminder = useMemo(() => {
-
     return new Date(
       time2.setDate(
         time2.getDate() +
@@ -401,11 +400,11 @@ function DiliveryPopup({
         ?.outstanding_type || 0
     );
   }, [counters, order.counter_uuid]);
-  const GetPaymentModes = async () => {
+  const GetPaymentModes = async (controller) => {
     const response = await axios({
       method: "get",
       url: "/paymentModes/GetPaymentModesList",
-
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
@@ -414,7 +413,7 @@ function DiliveryPopup({
   };
   useEffect(() => {
     let time = new Date();
- 
+    const controller = new AbortController();
     setOutstanding({
       order_uuid: order?.order_uuid,
       amount: "",
@@ -424,10 +423,12 @@ function DiliveryPopup({
       trip_uuid: order.trip_uuid,
       counter_uuid: order.counter_uuid,
       reminder,
-        type
-      
+      type,
     });
-    GetPaymentModes();
+    GetPaymentModes(controller);
+    return () => {
+      controller.abort();
+    };
   }, [counters.payment_reminder_days, order, reminder, type]);
   useEffect(() => {
     if (PaymentModes?.length)
@@ -471,9 +472,12 @@ function DiliveryPopup({
   };
 
   const submitHandler = async () => {
+    if(waiting){
+      return;
+    }
     setWaiting(true);
     setError("");
-    if(outstanding.amount&&!outstanding.remarks){
+    if (outstanding.amount && !outstanding.remarks) {
       setError("Remarks is mandatory");
       setWaiting(false);
       return;
@@ -680,7 +684,6 @@ function DiliveryPopup({
                             width: "100%",
                             backgroundColor: "light",
                             fontSize: "12px",
-                 
                           }}
                           onChange={(e) =>
                             setOutstanding((prev) => ({
@@ -861,11 +864,11 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
   const [data, setdata] = useState("");
 
   const [warehouse, setWarehouse] = useState([]);
-  const getItemsData = async () => {
+  const getItemsData = async (controller) => {
     const response = await axios({
       method: "get",
       url: "/warehouse/GetWarehouseList",
-
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
@@ -873,8 +876,12 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
     if (response.data.success) setWarehouse(response.data.result);
   };
   useEffect(() => {
+    const controller = new AbortController();
     setdata(popupInfo.warehouse_uuid);
-    getItemsData();
+    getItemsData(controller);
+    return () => {
+      controller.abort();
+    };
   }, [popupInfo]);
   const submitHandler = async (e) => {
     e.preventDefault();

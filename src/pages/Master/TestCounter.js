@@ -10,7 +10,7 @@ import * as FileSaver from "file-saver";
 const Counter = () => {
   const [counter, setCounter] = useState([]);
   const [paymentModes, setPaymentModes] = useState([]);
-  const [filterCounter, setFilterCounter] = useState([]);
+
   const [filterCounterTitle, setFilterCounterTitle] = useState("");
   const [filterRoute, setFilterRoute] = useState("");
   const [popupForm, setPopupForm] = useState(false);
@@ -49,16 +49,7 @@ const Counter = () => {
     });
     if (response.data.success)
       setCounter(
-        response.data.result.map((b) => ({
-          ...b,
-          route_title:
-            routesData.find((a) => a.route_uuid === b.route_uuid)
-              ?.route_title || "-",
-          route_sort_order:
-            routesData.find((a) => a.route_uuid === b.route_uuid)?.sort_order ||
-            0,
-        }))
-      );
+        response.data.result)
   };
   const GetPaymentModes = async () => {
     const response = await axios({
@@ -75,31 +66,35 @@ const Counter = () => {
 
   useEffect(() => {
     getCounter();
-  }, [popupForm, routesData]);
+  }, [popupForm]);
   useEffect(() => {
     GetPaymentModes();
   }, []);
-  useEffect(
+  const filterCounter = useMemo(
     () =>
-      setFilterCounter(
-        counter
-          .filter((a) => a.counter_title)
-          .filter(
-            (a) =>
-              !filterCounterTitle ||
+      counter
+        .map((b) => ({
+          ...b,
+          route_title:
+            routesData.find((a) => a.route_uuid === b.route_uuid)
+              ?.route_title || "-",
+          route_sort_order:
+            routesData.find((a) => a.route_uuid === b.route_uuid)?.sort_order ||
+            0,
+        }))
+        .filter(
+          (a) =>
+            a.counter_title &&
+            (!filterCounterTitle ||
               a.counter_title
                 ?.toLocaleLowerCase()
-                ?.includes(filterCounterTitle?.toLocaleLowerCase())
-          )
-          .filter(
-            (a) =>
-              !filterRoute ||
+                ?.includes(filterCounterTitle?.toLocaleLowerCase())) &&
+            (!filterRoute ||
               a.route_title
                 ?.toLocaleLowerCase()
-                ?.includes(filterRoute?.toLocaleLowerCase())
-          )
-      ),
-    [counter, filterCounterTitle, filterRoute]
+                ?.includes(filterRoute?.toLocaleLowerCase()))
+        ) || [],
+    [counter, filterCounterTitle, filterRoute, routesData]
   );
   const fileExtension = ".xlsx";
   const downloadHandler = async () => {
@@ -477,7 +472,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
               <td colSpan={2}>{item.route_title}</td>
               <td colSpan={2}>{item.counter_title}</td>
               <td colSpan={2}>
-                {/* {item?.mobile?.map((a, i) => (i === 0 ? a : ", " + a))} */}
+                {item?.mobile?.map((a, i) => (i === 0 ? a : ", " + a))}
               </td>
               <td colSpan={2}>{item.food_license || ""}</td>
               <td colSpan={2}>{item.gst || ""}</td>

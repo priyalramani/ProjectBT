@@ -58,23 +58,25 @@ import Context from "./context/context";
 import WhatsAppNotifications from "./pages/QuikAccess/WhatsAppNotifications";
 import Campaigns from "./pages/Reports/Campaigns";
 import TestCounter from "./pages/Master/TestCounter";
-
+import OrderForms from "./pages/Reports/OrderForms";
+import LinkedCounter from "./users/LinkedCounter";
+export let Version = 61;
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
   const context = useContext(Context);
 
-  const { calculationPopup = "", loading,notification } = context;
+  const { calculationPopup = "", loading, notification } = context;
   axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
   // axios.defaults.baseURL = "http://localhost:9000";
 
-  const getUserType = async () => {
+  const getUserType = async (controller) => {
     let user_uuid = localStorage.getItem("user_uuid");
     if (user_uuid) {
       const response = await axios({
         method: "get",
         url: "users/GetUser/" + user_uuid,
-
+        signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
         },
@@ -87,10 +89,13 @@ function App() {
   };
   useEffect(() => {
     if (userType === "0" || userType === "1") return;
-    getUserType();
+    const controller = new AbortController();
+    getUserType(controller);
+    return () => {
+      controller.abort();
+    };
   }, [userType]);
   useEffect(() => {
-
     if (+userType) {
       let time = +localStorage.getItem("indexed_time") || "";
       let currTime = new Date();
@@ -102,13 +107,16 @@ function App() {
   }, [userType]);
 
   document.title = "BT";
-console.log(notification)
+
   return (
     <div className="App">
       <Router>
         <Routes>
           <Route path="/" element={<Navigate replace to={"/users"} />} />
-
+          <Route
+                path="/counter/:short_link"
+                element={<LinkedCounter />}
+              />
           {userType === "1" ? (
             <>
               {/* users routes */}
@@ -134,6 +142,7 @@ console.log(notification)
                 path="/users/orders/:counter_uuid"
                 element={<SelectedCounterOrder />}
               />
+          
               <Route
                 path="/users/checking/:trip_uuid"
                 element={<ProcessingOrders />}
@@ -203,6 +212,10 @@ console.log(notification)
               <Route
                 path="/admin/DeliveryIncentive"
                 element={<DeliveryIncentive />}
+              />
+              <Route
+                path="/admin/OrderForm"
+                element={<OrderForms />}
               />
               <Route path="/admin/ItemIncentive" element={<ItemIncentive />} />
               <Route path="/admin/addOrder" element={<AddOrder />} />

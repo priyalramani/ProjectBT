@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { IoArrowBackOutline } from "react-icons/io5";
 import axios from "axios";
 import { Phone } from "@mui/icons-material";
-
+import { v4 as uuid } from "uuid";
 const Orders = ({ refreshDb }) => {
   const [counters, setCounters] = useState([]);
   const [counterFilter, setCounterFilter] = useState("");
@@ -300,6 +300,8 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
   const [data, setdata] = useState({});
   const [errMassage, setErrorMassage] = useState("");
   const [loading, setLoading] = useState("");
+  const [otppoup, setOtpPopup] = useState(false);
+  const [otp, setOtp] = useState("");
   const getRoutesData = async () => {
     const response = await axios({
       method: "get",
@@ -339,6 +341,11 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
         .map((a) => a.mode_uuid),
       credit_allowed: "N",
       status: 1,
+      mobile: [1, 2, 3, 4].map((a) => ({
+        uuid: uuid(),
+        mobile: "",
+        type: "",
+      })),
     });
   }, [paymentModes]);
   console.log(data);
@@ -388,6 +395,9 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 
     setdata((prev) => ({ ...prev, payment_modes: temp }));
   };
+
+ 
+  
   return (
     <div className="overlay">
       <div
@@ -485,25 +495,57 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
                   </label>
                 </div>
                 <div className="row">
-                  <label className="selectLabel" style={{ width: "90%" }}>
-                    Mobile
-                    <textarea
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
-                      className="numberInput"
-                      rows={7}
-                      cols={12}
-                      value={data?.mobile?.toString()?.replace(/,/g, "\n")}
-                      style={{ height: "100px", width: "100%" }}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          mobile: e.target.value.split("\n"),
-                        })
-                      }
-                    />
-                  </label>
+                <label className="selectLabel" style={{ width: "100%"}}>
+                      Mobile
+                      <div>
+                        {data?.mobile?.map((a) => (
+                          <div
+                            key={a.uuid}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              margin: "5px 0",
+                            }}
+                          >
+                            <input
+                              type="number"
+                              name="route_title"
+                              className="numberInput"
+                              value={a?.mobile}
+                              style={{ width: "15ch" }}
+                              disabled={a.lable?.find(
+                                (c) =>
+                                  (c.type === "cal" || c.type === "wa") &&
+                                  +c.varification
+                              )}
+                              onChange={(e) => {
+                                if (
+                                  e.target.value.length > 10 ||
+                                  a.lable?.find(
+                                    (c) =>
+                                      (c.type === "cal" || c.type === "wa") &&
+                                      +c.varification
+                                  )
+                                ) {
+                                  return;
+                                }
+                                setdata((prev) => ({
+                                  ...prev,
+                                  mobile: prev.mobile.map((b) =>
+                                    b.uuid === a.uuid
+                                      ? { ...b, mobile: e.target.value }
+                                      : b
+                                  ),
+                                }));
+                              }}
+                              maxLength={10}
+                            />
+                           
+                          </div>
+                        ))}
+                      </div>
+                    </label>
                   <label className="selectLabel" style={{ width: "100%" }}>
                     Payment Modes
                     <select

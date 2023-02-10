@@ -27,6 +27,7 @@ import MessagePopup from "../../components/MessagePopup";
 import TaskPopupMenu from "../../components/TaskPopupMenu";
 import SalesPersoneFilterPopup from "../../components/SalesPersoneFilterPopup";
 import CollectionTag from "../QuikAccess/CollectionTag";
+import { useLocation } from "react-router-dom";
 const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [isCollectionTags, setCollectionTags] = useState(false);
@@ -63,6 +64,7 @@ const MainAdmin = () => {
   const [tasks, setTasks] = useState([]);
   const [reminderDate, setReminderDate] = useState();
   const [selectedtasks, setSelectedTasks] = useState(false);
+  const location=useLocation()
   let user_uuid = localStorage.getItem("user_uuid");
   const selectedOrderGrandTotal = useMemo(
     () =>
@@ -148,7 +150,7 @@ const MainAdmin = () => {
   const getCounter = async () => {
     const response = await axios({
       method: "get",
-      url: "/counters/GetCounterList",
+      url: "/counters/GetCounterData",
 
       headers: {
         "Content-Type": "application/json",
@@ -246,41 +248,42 @@ const MainAdmin = () => {
     else handlePrint();
   };
 
-  const getTripData = async () => {
+  const getTripData = async (controller) => {
     const response = await axios({
       method: "get",
       url: "/trips/GetTripList/" + localStorage.getItem("user_uuid"),
-
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.success) setTripData(response.data.result);
   };
+
   useEffect(() => {
-    getTripData();
-  }, [popupForm]);
-  useEffect(() => {
+    const controller = new AbortController();
     if (holdOrders) getRunningHoldOrders();
-    else getRunningOrders();
-    if (window.location.pathname.includes("admin")) {
+    else getRunningOrders(controller);
+    if (location.pathname.includes("admin")) {
       getRoutesData();
-    } else if (window.location.pathname.includes("trip")) {
-      getTripData();
+    } else if (location.pathname.includes("trip")) {
+      getTripData(controller);
     }
     let intervalOrder = setInterval(() => {
       if (holdOrders) getRunningHoldOrders();
-      else getRunningOrders();
-      if (window.location.pathname.includes("admin")) {
+      else getRunningOrders(controller);
+      if (location.pathname.includes("admin")) {
         getRoutesData();
-      } else if (window.location.pathname.includes("trip")) {
-        getTripData();
+      } else if (location.pathname.includes("trip")) {
+        getTripData(controller);
       }
     }, 180000);
     return () => {
       clearInterval(intervalOrder);
+
+      controller.abort();
     };
-  }, [holdOrders]);
+  }, [holdOrders,location]);
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -318,9 +321,10 @@ const MainAdmin = () => {
       ),
     [ordersData, salesPersoneList]
   );
-  const getRunningOrders = async () => {
+  const getRunningOrders = async (controller=new AbortController()) => {
     const response = await axios({
       method: "get",
+      signal:controller.signal,
       url: "/orders/GetOrderAllRunningList/" + user_uuid,
     });
 
@@ -355,18 +359,22 @@ const MainAdmin = () => {
   };
   // console.log(selectedOrder);
   useEffect(() => {
+    const controller = new AbortController();
     if (
-      window.location.pathname.includes("admin") ||
-      window.location.pathname.includes("trip")
+      location.pathname.includes("admin") ||
+      location.pathname.includes("trip")
     ) {
       if (holdOrders) getRunningHoldOrders();
-      else getRunningOrders();
+      else getRunningOrders(controller);
     }
-    if (window.location.pathname.includes("admin")) {
+    if (location.pathname.includes("admin")) {
       getRoutesData();
-    } else if (window.location.pathname.includes("trip")) {
-      getTripData();
+    } else if (location.pathname.includes("trip")) {
+      getTripData(controller);
     }
+    return () => {
+      controller.abort();
+    };
   }, [btn, popupForm]);
   const postOrderData = async () => {
     const response = await axios({
@@ -586,7 +594,10 @@ const MainAdmin = () => {
       >
         {selectedOrderGrandTotal}
       </div>
-      <Sidebar setIsItemAvilableOpen={setIsItemAvilableOpen} setCollectionTags={setCollectionTags}/>
+      <Sidebar
+        setIsItemAvilableOpen={setIsItemAvilableOpen}
+        setCollectionTags={setCollectionTags}
+      />
       <div
         className="right-side"
         onContextMenu={(e) => {
@@ -603,7 +614,7 @@ const MainAdmin = () => {
             fontSize: "20px",
             zIndex: "99999",
             top: "10px",
-            right: "250px",
+            right: "280px",
             cursor: "pointer",
           }}
           onClick={() => setBtn((prev) => !prev)}
@@ -785,7 +796,7 @@ const MainAdmin = () => {
           <div className="content-container" id="content-file-container">
             {noOrder ? (
               <div className="noOrder">No Order</div>
-            ) : window.location.pathname.includes("admin") ? (
+            ) : location.pathname.includes("admin") ? (
               <>
                 {routesData?.length ? (
                   <>
@@ -1829,17 +1840,18 @@ const MainAdmin = () => {
           category={category}
           setPopupOrder={setPopupOrder}
           updateOrders={() => {
+            const controller = new AbortController();
             if (
-              window.location.pathname.includes("admin") ||
-              window.location.pathname.includes("trip")
+              location.pathname.includes("admin") ||
+              location.pathname.includes("trip")
             ) {
               if (holdOrders) getRunningHoldOrders();
               else getRunningOrders();
             }
-            if (window.location.pathname.includes("admin")) {
+            if (location.pathname.includes("admin")) {
               getRoutesData();
-            } else if (window.location.pathname.includes("trip")) {
-              getTripData();
+            } else if (location.pathname.includes("trip")) {
+              getTripData(controller);
             }
           }}
         />
@@ -1861,17 +1873,18 @@ const MainAdmin = () => {
           company={company}
           setPopupOrder={setPopupOrder}
           updateOrders={() => {
+            const controller = new AbortController();
             if (
-              window.location.pathname.includes("admin") ||
-              window.location.pathname.includes("trip")
+              location.pathname.includes("admin") ||
+              location.pathname.includes("trip")
             ) {
               if (holdOrders) getRunningHoldOrders();
               else getRunningOrders();
             }
-            if (window.location.pathname.includes("admin")) {
+            if (location.pathname.includes("admin")) {
               getRoutesData();
-            } else if (window.location.pathname.includes("trip")) {
-              getTripData();
+            } else if (location.pathname.includes("trip")) {
+              getTripData(controller);
             }
           }}
         />
@@ -2474,7 +2487,7 @@ function HoldPopup({
                           }}
                         >
                           <td colSpan={4}>Total Lines</td>
-         
+
                           <td colSpan={2}></td>
                           <td colSpan={4}>
                             {Math.floor(
@@ -2484,7 +2497,6 @@ function HoldPopup({
                                     .reduce((a, b) => a + b)
                                 : orders[0]?.item_details.length || 0
                             )}
-                            
                           </td>
                         </tr>
                       </tbody>

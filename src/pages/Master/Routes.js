@@ -3,11 +3,7 @@ import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./styles.css";
 import axios from "axios";
-import {
-  ChevronUpIcon,
-  ChevronDownIcon,
-
-} from "@heroicons/react/solid";
+import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import Select from "react-select";
 
 const RoutesPage = () => {
@@ -97,7 +93,11 @@ const RoutesPage = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table itemsDetails={filterRoutesData} setPopupForm={setPopupForm} warehouseData={warehouseData}/>
+          <Table
+            itemsDetails={filterRoutesData}
+            setPopupForm={setPopupForm}
+            warehouseData={warehouseData}
+          />
         </div>
       </div>
       {popupForm ? (
@@ -127,7 +127,6 @@ function Table({ itemsDetails, setPopupForm }) {
         <tr>
           <th>S.N</th>
           <th colSpan={2}>
-            {" "}
             <div className="t-head-element">
               <span>Routes Title</span>
               <div className="sort-buttons-container">
@@ -178,18 +177,13 @@ function Table({ itemsDetails, setPopupForm }) {
     </table>
   );
 }
-function NewUserForm({ onSave, popupInfo, setRoutesData,warehouseData }) {
+function NewUserForm({ onSave, popupInfo, setRoutesData, warehouseData }) {
   const [data, setdata] = useState({});
 
   const [errMassage, setErrorMassage] = useState("");
-  useEffect(
-    popupInfo?.type === "edit"
-      ? () => {
-          setdata(popupInfo.data);
-        }
-      : () => {},
-    []
-  );
+  useEffect(() => {
+    if (popupInfo?.type === "edit") setdata(popupInfo.data);
+  }, [popupInfo.data, popupInfo?.type]);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -284,36 +278,35 @@ function NewUserForm({ onSave, popupInfo, setRoutesData,warehouseData }) {
                   </label>
                 </div>
                 <div className="row">
-                  <label className="selectLabel" style={{width:"400px"}}>
+                  <label className="selectLabel" style={{ width: "400px" }}>
                     Warehouse
                     <Select
-
-                    options={warehouseData
-                      
-                      .map((a) => ({
+                      options={warehouseData.map((a) => ({
                         value: a.warehouse_uuid,
-                        label: a.warehouse_title ,
+                        label: a.warehouse_title,
                       }))}
-                    onChange={(doc) =>
-                      setdata((prev) => ({ ...prev, warehouse_uuid: doc.value }))
-                    }
-                    value={
-                      data?.warehouse_uuid
-                        ? {
-                            value: data?.warehouse_uuid,
-                            label: warehouseData?.find(
-                              (j) => j.warehouse_uuid === data.warehouse_uuid
-                            )?.warehouse_title,
-                          }
-                        : ""
-                    }
-                    openMenuOnFocus={true}
-                    menuPosition="fixed"
-                    menuPlacement="auto"
-                    placeholder="Select"
-                  />
+                      onChange={(doc) =>
+                        setdata((prev) => ({
+                          ...prev,
+                          warehouse_uuid: doc.value,
+                        }))
+                      }
+                      value={
+                        data?.warehouse_uuid
+                          ? {
+                              value: data?.warehouse_uuid,
+                              label: warehouseData?.find(
+                                (j) => j.warehouse_uuid === data.warehouse_uuid
+                              )?.warehouse_title,
+                            }
+                          : ""
+                      }
+                      openMenuOnFocus={true}
+                      menuPosition="fixed"
+                      menuPlacement="auto"
+                      placeholder="Select"
+                    />
                   </label>
-                
                 </div>
               </div>
               <i style={{ color: "red" }}>

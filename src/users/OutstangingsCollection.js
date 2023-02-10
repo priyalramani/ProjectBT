@@ -422,6 +422,9 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
   }, [PaymentModes]);
 
   const submitHandler = async () => {
+    if(waiting){
+      return
+    }
     setWaiting(true);
 
     setError("");

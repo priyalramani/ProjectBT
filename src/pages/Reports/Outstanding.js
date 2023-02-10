@@ -556,6 +556,9 @@ function DiliveryPopup({
   }, [PaymentModes]);
   console.log(order.collection_tag_uuid);
   const submitHandler = async () => {
+    if(waiting){
+      return
+    }
     setWaiting(true);
 
     setError("");

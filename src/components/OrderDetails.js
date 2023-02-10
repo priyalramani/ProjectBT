@@ -257,11 +257,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           })) || [],
     }));
   }, [category, orderData]);
-  const getItemsData = async () => {
+  const getItemsData = async (items) => {
     const response = await axios({
-      method: "get",
+      method: "post",
       url: "/items/GetItemList",
-
+      data: { items },
       headers: {
         "Content-Type": "application/json",
       },
@@ -293,7 +293,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   };
   useEffect(() => {
     getCounter();
-    getItemsData();
+    getItemsData(order?.item_details?.map((a) => a.item_uuid));
     getAutoBill();
     getUsers();
     getWarehouseData();
@@ -941,6 +941,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     onClick={(e) => {
                       reactInputsRef.current = {};
                       e.target.blur();
+                      if (!editOrder) {
+                        getItemsData([]);
+                      }
                       setEditOrder((prev) => !prev);
                     }}
                   >
@@ -2644,6 +2647,9 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const submitHandler = async () => {
+    if(waiting){
+      return;
+    }
     setWaiting(true);
     if (outstanding.amount && !outstanding.remarks) {
       setError("Remarks is mandatory");
