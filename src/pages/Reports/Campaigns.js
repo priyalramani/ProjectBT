@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/solid";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-import { Delete, DeleteOutline } from "@mui/icons-material";
+import { Add, Delete, DeleteOutline } from "@mui/icons-material";
 import { Switch } from "@mui/material";
 import { green } from "@mui/material/colors";
 import { alpha, styled } from "@mui/material/styles";
@@ -239,7 +239,11 @@ function Table({ itemsDetails = [], setPopupForm, sendMsg, setDeletePopup }) {
             >
               <td>{i + 1}</td>
               <td colSpan={2}>{item.campaign_title}</td>
-              <td>{item.counters.length}</td>
+              <td>
+                {item.type === "general"
+                  ? item.counters.length
+                  : item.counter_status?.length}
+              </td>
               <td>
                 <button
                   className="item-sales-search"
@@ -270,12 +274,15 @@ function Table({ itemsDetails = [], setPopupForm, sendMsg, setDeletePopup }) {
 function IncentivePopup({ onSave, popupForm }) {
   const [objData, setObgData] = useState({
     type: "general",
-    message: "",
+    message: [],
     created_by: localStorage.getItem("user_uuid"),
     campaign_title: "",
     counters: [],
+    counter_status: [],
   });
   const [counters, setCounter] = useState([]);
+  const [active, setActive] = useState("");
+  const [orderForm, setOrderForm] = useState([]);
   const [routesData, setRoutesData] = useState([]);
   const [filterCounterTitle, setFilterCounterTitle] = useState("");
   const [filterRouteTitle, setFilterRouteTitle] = useState("");
@@ -292,16 +299,29 @@ function IncentivePopup({ onSave, popupForm }) {
   };
   const getCounter = async () => {
     const response = await axios({
-      method: "get",
-      url: "/counters/GetCounterList",
-
+      method: "post",
+      url: "/counters/GetCounterData",
+      data: ["counter_uuid", "counter_title", "status", "route_uuid"],
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.success) setCounter(response.data.result);
   };
+  const getOrderForm = async () => {
+    const response = await axios({
+      method: "post",
+      url: "orderForm/GetFormList",
+      data: ["form_uuid", "form_title"],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setOrderForm(response.data.result);
+  };
+
   useEffect(() => {
+    getOrderForm();
     getRoutesData();
     getCounter();
     if (popupForm?.type === "edit") setObgData(popupForm.data);
@@ -368,9 +388,13 @@ function IncentivePopup({ onSave, popupForm }) {
     [filterRouteTitle, filteredCounter, routesData]
   );
   const objcounters = useMemo(() => {
-    console.count("counter")
+    console.count("counter");
     return objData.counters;
   }, [objData.counters]);
+  const objcounter_status = useMemo(() => {
+    console.count("counter");
+    return objData.counter_status;
+  }, [objData.counter_status]);
   console.count("render");
   return (
     <div className="overlay">
@@ -390,130 +414,328 @@ function IncentivePopup({ onSave, popupForm }) {
             className="flex"
             style={{ justifyContent: "flex-start", alignItems: "flex-start" }}
           >
-            <table
-              className="user-table"
-              style={{
-                width: "fit-content",
-
-                overflow: "scroll",
-              }}
-            >
-              <tbody>
-                <tr>
-                  <td
-                    colSpan={2}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-start",
-                      width: "400px",
-                    }}
-                  >
-                    <b style={{ width: "100px" }}>Campaign Title : </b>
-                    <input
-                      onWheel={(e) => e.target.blur()}
-                      type="text"
-                      className="searchInput"
+            <div style={{ maxHeight: "500px", overflowY: "scroll" }}>
+              <table
+                className="user-table"
+                style={{
+                  width: "fit-content",
+                }}
+              >
+                <tbody>
+                  <tr>
+                    <td
+                      colSpan={2}
                       style={{
-                        border: "none",
-                        borderBottom: "2px solid black",
-                        borderRadius: "0px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                        width: "400px",
                       }}
-                      placeholder=""
-                      value={objData.campaign_title}
-                      onChange={(e) =>
-                        setObgData((prev) => ({
-                          ...prev,
-                          campaign_title: e.target.value,
-                        }))
-                      }
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    colSpan={2}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-start",
-                    }}
-                  >
-                    <b style={{ width: "100px" }}>Message : </b>
-                    <textarea
-                      onWheel={(e) => e.target.blur()}
-                      className="searchInput"
-                      style={{
-                        border: "none",
-                        borderBottom: "2px solid black",
-                        borderRadius: "0px",
-                        height: "200px",
-                      }}
-                      placeholder=""
-                      value={objData.message}
-                      onChange={(e) =>
-                        setObgData((prev) => ({
-                          ...prev,
-                          message: e.target.value,
-                        }))
-                      }
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    colSpan={2}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-start",
-                    }}
-                  >
-                    <button
-                      className="item-sales-search"
-                      onClick={(e) =>
-                        setObgData((prev) => ({
-                          ...prev,
-                          message: prev.message + "{counter_title}",
-                        }))
-                      }
                     >
-                      Counter Title
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    colSpan={2}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-start",
-                    }}
-                  >
-                    <b style={{ width: "100px" }}>Mobile : </b>
-                    <textarea
-                      onWheel={(e) => e.target.blur()}
-                      className="searchInput"
+                      <b style={{ width: "100px" }}>Type : </b>
+                      <select
+                        onWheel={(e) => e.target.blur()}
+                        type="text"
+                        className="searchInput"
+                        style={{
+                          border: "none",
+                          borderBottom: "2px solid black",
+                          borderRadius: "0px",
+                        }}
+                        placeholder=""
+                        value={objData.type}
+                        onChange={(e) =>
+                          setObgData((prev) => ({
+                            ...prev,
+                            type: e.target.value,
+                            form_uuid: e.target.value === "order" ? "d" : "",
+                          }))
+                        }
+                      >
+                        <option value="general">General</option>
+                        <option value="order">Order</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      colSpan={2}
                       style={{
-                        border: "none",
-                        borderBottom: "2px solid black",
-                        borderRadius: "0px",
-                        height: "200px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                        width: "400px",
                       }}
-                      placeholder=""
-                      value={objData?.mobile?.toString()?.replace(/,/g, "\n")}
-                      onChange={(e) =>
-                        setObgData((prev) => ({
-                          ...prev,
-                          mobile: e.target.value.split("\n"),
-                        }))
-                      }
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                    >
+                      <b style={{ width: "100px" }}>Campaign Title : </b>
+                      <input
+                        onWheel={(e) => e.target.blur()}
+                        type="text"
+                        className="searchInput"
+                        style={{
+                          border: "none",
+                          borderBottom: "2px solid black",
+                          borderRadius: "0px",
+                        }}
+                        placeholder=""
+                        value={objData.campaign_title}
+                        onChange={(e) =>
+                          setObgData((prev) => ({
+                            ...prev,
+                            campaign_title: e.target.value,
+                          }))
+                        }
+                      />
+                    </td>
+                  </tr>
+                  {objData.type === "general" ? (
+                    <>
+                      <tr>
+                        <td
+                          colSpan={2}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <b style={{ width: "100px" }}>Message : </b>
+                          <span
+                            onClick={(e) => {
+                              console.log(objData);
+                              setObgData((prev) => ({
+                                ...prev,
+                                message: [
+                                  ...(prev.message || []),
+                                  { type: "text", uuid: uuid() },
+                                ],
+                              }));
+                            }}
+                            className="fieldEditButton"
+                          >
+                            <Add />
+                          </span>
+                        </td>
+                      </tr>
+                      {objData?.message?.map((item) => (
+                        <tr key={item.uuid}>
+                          <td
+                            colSpan={2}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-start",
+                            }}
+                          >
+                            <select
+                              className="searchInput"
+                              value={item.type}
+                              onChange={(e) => {
+                                setObgData((prev) => ({
+                                  ...prev,
+                                  message: prev.message.map((a) =>
+                                    a.uuid === item.uuid
+                                      ? { ...a, type: e.target.value }
+                                      : a
+                                  ),
+                                }));
+                              }}
+                            >
+                              <option value="text">Text</option>
+                            </select>
+                            <textarea
+                              onWheel={(e) => e.target.blur()}
+                              className="searchInput"
+                              style={{
+                                border: "none",
+                                borderBottom: "2px solid black",
+                                borderRadius: "0px",
+                                height: "100px",
+                              }}
+                              onFocus={() => setActive(item.uuid)}
+                              placeholder=""
+                              value={item.text}
+                              onChange={(e) => {
+                                setObgData((prev) => ({
+                                  ...prev,
+                                  message: prev.message.map((a) =>
+                                    a.uuid === item.uuid
+                                      ? { ...a, text: e.target.value }
+                                      : a
+                                  ),
+                                }));
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                      <tr>
+                        <td
+                          colSpan={2}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <button
+                            className="item-sales-search"
+                            onClick={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+                                message: prev.message.map((a) =>
+                                  a.uuid === active
+                                    ? {
+                                        ...a,
+                                        text: a.text + "{counter_title}",
+                                      }
+                                    : a
+                                ),
+                              }))
+                            }
+                          >
+                            Counter Title
+                          </button>
+                          <button
+                            className="item-sales-search"
+                            onClick={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+                                message: prev.message.map((a) =>
+                                  a.uuid === active
+                                    ? { ...a, text: a.text + "{short_link}" }
+                                    : a
+                                ),
+                              }))
+                            }
+                          >
+                            Counter Link
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td
+                          colSpan={2}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <button
+                            className="item-sales-search"
+                            onClick={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+                                message: prev.message.map((a) =>
+                                  a.uuid === active
+                                    ? {
+                                        ...a,
+                                        text: a.text + "{invoice_number}",
+                                      }
+                                    : a
+                                ),
+                              }))
+                            }
+                          >
+                            Invoice Number
+                          </button>
+                          <button
+                            className="item-sales-search"
+                            onClick={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+                                message: prev.message.map((a) =>
+                                  a.uuid === active
+                                    ? { ...a, text: a.text + "{amount}" }
+                                    : a
+                                ),
+                              }))
+                            }
+                          >
+                            Amount
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td
+                          colSpan={2}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <b style={{ width: "100px" }}>Mobile : </b>
+                          <textarea
+                            onWheel={(e) => e.target.blur()}
+                            className="searchInput"
+                            style={{
+                              border: "none",
+                              borderBottom: "2px solid black",
+                              borderRadius: "0px",
+                              height: "100px",
+                            }}
+                            placeholder=""
+                            value={objData?.mobile
+                              ?.toString()
+                              ?.replace(/,/g, "\n")}
+                            onChange={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+                                mobile: e.target.value.split("\n"),
+                              }))
+                            }
+                          />
+                        </td>
+                      </tr>
+                    </>
+                  ) : (
+                    <>
+                      <tr>
+                        <td
+                          colSpan={2}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                            width: "400px",
+                          }}
+                        >
+                          <b style={{ width: "100px" }}>Order Form : </b>
+                          <select
+                            onWheel={(e) => e.target.blur()}
+                            type="text"
+                            className="searchInput"
+                            style={{
+                              border: "none",
+                              borderBottom: "2px solid black",
+                              borderRadius: "0px",
+                            }}
+                            placeholder=""
+                            value={objData.form_uuid}
+                            onChange={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+
+                                form_uuid: e.target.value,
+                              }))
+                            }
+                          >
+                            <option value="d">Default</option>
+                            {orderForm.map((a) => (
+                              <option value={a.form_uuid}>
+                                {a.form_title}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                      </tr>
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
             <div style={{ maxHeight: "500px", overflowY: "scroll" }}>
               <input
                 type="text"
@@ -552,48 +774,87 @@ function IncentivePopup({ onSave, popupForm }) {
                           <span
                             onClick={(e) => {
                               e.stopPropagation();
-                              setObgData((prev) => ({
-                                ...prev,
-                                counters: prev.counters.filter((c) =>
-                                  filteredCounter?.find(
-                                    (b) =>
-                                      a.route_uuid === b.route_uuid &&
-                                      c === b.counter_uuid
-                                  )
-                                ).length
-                                  ? prev.counters.filter(
-                                      (c) =>
-                                        !filteredCounter?.find(
-                                          (b) =>
-                                            a.route_uuid === b.route_uuid &&
-                                            c === b.counter_uuid
-                                        )
+                              if (objData.type === "general") {
+                                setObgData((prev) => ({
+                                  ...prev,
+                                  counters: prev.counters.filter((c) =>
+                                    filteredCounter?.find(
+                                      (b) =>
+                                        a.route_uuid === b.route_uuid &&
+                                        c === b.counter_uuid
                                     )
-                                  : [
-                                      ...(prev.counters || []),
-                                      ...filteredCounter
-                                        ?.filter(
+                                  ).length
+                                    ? prev.counters.filter(
+                                        (c) =>
+                                          !filteredCounter?.find(
+                                            (b) =>
+                                              a.route_uuid === b.route_uuid &&
+                                              c === b.counter_uuid
+                                          )
+                                      )
+                                    : [
+                                        ...(prev.counters || []),
+                                        ...filteredCounter
+                                          ?.filter(
+                                            (b) => a.route_uuid === b.route_uuid
+                                          )
+                                          .map((c) => c.counter_uuid),
+                                      ],
+                                }));
+                              } else {
+                                setObgData((prev) => ({
+                                  ...prev,
+                                  counter_status: prev.counter_status.filter(
+                                    (c) =>
+                                      filteredCounter?.find(
+                                        (b) =>
+                                          a.route_uuid === b.route_uuid &&
+                                          c.counter_uuid === b.counter_uuid
+                                      )
+                                  ).length
+                                    ? prev.counter_status.filter(
+                                        (c) =>
+                                          !filteredCounter?.find(
+                                            (b) =>
+                                              a.route_uuid === b.route_uuid &&
+                                              c.counter_uuid === b.counter_uuid
+                                          )
+                                      )
+                                    : [
+                                        ...(prev.counter_status || []),
+                                        ...filteredCounter?.filter(
                                           (b) => a.route_uuid === b.route_uuid
-                                        )
-                                        .map((c) => c.counter_uuid),
-                                    ],
-                              }));
+                                        ),
+                                      ],
+                                }));
+                              }
                             }}
                             style={{ marginLeft: "10px" }}
                           >
                             <input
                               type="checkbox"
                               checked={
-                                objcounters?.filter((c) =>
-                                  filteredCounter?.find(
-                                    (b) =>
-                                      a.route_uuid === b.route_uuid &&
-                                      c === b.counter_uuid
-                                  )
-                                ).length ===
-                                filteredCounter?.filter(
-                                  (b) => a.route_uuid === b.route_uuid
-                                ).length
+                                objData.type === "general"
+                                  ? objcounters?.filter((c) =>
+                                      filteredCounter?.find(
+                                        (b) =>
+                                          a.route_uuid === b.route_uuid &&
+                                          c === b.counter_uuid
+                                      )
+                                    ).length ===
+                                    filteredCounter?.filter(
+                                      (b) => a.route_uuid === b.route_uuid
+                                    ).length
+                                  : objcounter_status?.filter((c) =>
+                                      filteredCounter?.find(
+                                        (b) =>
+                                          a.route_uuid === b.route_uuid &&
+                                          c.counter_uuid === b.counter_uuid
+                                      )
+                                    ).length ===
+                                    filteredCounter?.filter(
+                                      (b) => a.route_uuid === b.route_uuid
+                                    ).length
                               }
                               style={{ transform: "scale(1.3)" }}
                             />
@@ -611,28 +872,55 @@ function IncentivePopup({ onSave, popupForm }) {
                               <td
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setObgData((prev) => ({
-                                    ...prev,
-                                    counters: prev.counters.filter(
-                                      (a) => a === item.counter_uuid
-                                    ).length
-                                      ? prev.counters.filter(
-                                          (a) => a !== item.counter_uuid
-                                        )
-                                      : [
-                                          ...(prev.counters || []),
-                                          item.counter_uuid,
-                                        ],
-                                  }));
+                                  if (objData.type === "general") {
+                                    setObgData((prev) => ({
+                                      ...prev,
+                                      counters: prev.counters.filter(
+                                        (a) => a === item.counter_uuid
+                                      ).length
+                                        ? prev.counters.filter(
+                                            (a) => a !== item.counter_uuid
+                                          )
+                                        : [
+                                            ...(prev.counters || []),
+                                            item.counter_uuid,
+                                          ],
+                                    }));
+                                  } else {
+                                    setObgData((prev) => ({
+                                      ...prev,
+                                      counter_status:
+                                        prev.counter_status.filter(
+                                          (a) =>
+                                            a.counter_uuid === item.counter_uuid
+                                        ).length
+                                          ? prev.counter_status.filter(
+                                              (a) =>
+                                                a.counter_uuid !==
+                                                item.counter_uuid
+                                            )
+                                          : [
+                                              ...(prev.counter_status || []),
+                                              item,
+                                            ],
+                                    }));
+                                  }
                                 }}
                                 className="flex"
                                 style={{ justifyContent: "space-between" }}
                               >
                                 <input
                                   type="checkbox"
-                                  checked={objcounters.find(
-                                    (a) => a === item.counter_uuid
-                                  )}
+                                  checked={
+                                    objData.type === "general"
+                                      ? objcounters.find(
+                                          (a) => a === item.counter_uuid
+                                        )
+                                      : objcounter_status.find(
+                                          (a) =>
+                                            a.counter_uuid === item.counter_uuid
+                                        )
+                                  }
                                   style={{ transform: "scale(1.3)" }}
                                 />
                                 {i + 1}

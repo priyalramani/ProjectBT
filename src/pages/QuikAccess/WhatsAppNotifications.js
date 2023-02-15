@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/solid";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-import { Delete } from "@mui/icons-material";
+import { Add, Delete } from "@mui/icons-material";
 import { Switch } from "@mui/material";
 import { green } from "@mui/material/colors";
 import { alpha, styled } from "@mui/material/styles";
@@ -259,11 +259,9 @@ function Table({
 function IncentivePopup({ onSave, popupForm }) {
   const [objData, setObgData] = useState({
     type: "",
-    message: "",
+    message: [],
   });
-  let msg =
-    "Your order number {invoice_number} of Rs{amount}, is ready for delivery.";
-  console.log(popupForm);
+  const [active, setActive] = useState("");
   useEffect(() => {
     if (popupForm?.type === "edit") setObgData(popupForm.data);
   }, []);
@@ -316,13 +314,11 @@ function IncentivePopup({ onSave, popupForm }) {
             width: "fit-content",
           }}
         >
-          <div style={{ overflowY: "scroll" }}>
+          <div style={{ overflowY: "scroll", maxHeight: "400px" }}>
             <table
               className="user-table"
               style={{
                 width: "fit-content",
-
-                overflow: "scroll",
               }}
             >
               <tbody>
@@ -367,26 +363,163 @@ function IncentivePopup({ onSave, popupForm }) {
                     }}
                   >
                     <b style={{ width: "100px" }}>Message : </b>
-                    <textarea
-                      onWheel={(e) => e.target.blur()}
-                      className="searchInput"
-                      style={{
-                        border: "none",
-                        borderBottom: "2px solid black",
-                        borderRadius: "0px",
-                        height: "200px",
-                      }}
-                      placeholder=""
-                      value={objData.message}
-                      onChange={(e) =>
+                    <span
+                      onClick={(e) => {
+                        console.log(objData);
                         setObgData((prev) => ({
                           ...prev,
-                          message: e.target.value,
-                        }))
-                      }
-                    />
+                          message: [
+                            ...(prev.message || []),
+                            { type: "text", uuid: uuid() },
+                          ],
+                        }));
+                      }}
+                      className="fieldEditButton"
+                    >
+                      <Add />
+                    </span>
                   </td>
                 </tr>
+                {objData?.message?.map((item) => (
+                  <tr key={item.uuid}>
+                    <td
+                      colSpan={2}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                      }}
+                    >
+                      <select
+                        className="searchInput"
+                        value={item.type}
+                        onChange={(e) => {
+                          setObgData((prev) => ({
+                            ...prev,
+                            message: prev.message.map((a) =>
+                              a.uuid === item.uuid
+                                ? { ...a, type: e.target.value }
+                                : a
+                            ),
+                          }));
+                        }}
+                      >
+                        <option value="text">Text</option>
+                      </select>
+                      <textarea
+                        onWheel={(e) => e.target.blur()}
+                        className="searchInput"
+                        style={{
+                          border: "none",
+                          borderBottom: "2px solid black",
+                          borderRadius: "0px",
+                          height: "100px",
+                        }}
+                        onFocus={() => setActive(item.uuid)}
+                        placeholder=""
+                        value={item.text}
+                        onChange={(e) => {
+                          setObgData((prev) => ({
+                            ...prev,
+                            message: prev.message.map((a) =>
+                              a.uuid === item.uuid
+                                ? { ...a, text: e.target.value }
+                                : a
+                            ),
+                          }));
+                        }}
+                      />
+                    </td>
+                  </tr>
+                ))}
+                   <tr>
+                        <td
+                          colSpan={2}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <button
+                            className="item-sales-search"
+                            onClick={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+                                message: prev.message.map((a) =>
+                                  a.uuid === active
+                                    ? {
+                                        ...a,
+                                        text: a.text + "{counter_title}",
+                                      }
+                                    : a
+                                ),
+                              }))
+                            }
+                          >
+                            Counter Title
+                          </button>
+                          <button
+                            className="item-sales-search"
+                            onClick={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+                                message: prev.message.map((a) =>
+                                  a.uuid === active
+                                    ? { ...a, text: a.text + "{short_link}" }
+                                    : a
+                                ),
+                              }))
+                            }
+                          >
+                            Counter Link
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td
+                          colSpan={2}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <button
+                            className="item-sales-search"
+                            onClick={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+                                message: prev.message.map((a) =>
+                                  a.uuid === active
+                                    ? {
+                                        ...a,
+                                        text: a.text + "{invoice_number}",
+                                      }
+                                    : a
+                                ),
+                              }))
+                            }
+                          >
+                            Invoice Number
+                          </button>
+                          <button
+                            className="item-sales-search"
+                            onClick={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+                                message: prev.message.map((a) =>
+                                  a.uuid === active
+                                    ? { ...a, text: a.text + "{amount}" }
+                                    : a
+                                ),
+                              }))
+                            }
+                          >
+                            Amount
+                          </button>
+                        </td>
+                      </tr>
               </tbody>
             </table>
           </div>
@@ -397,6 +530,9 @@ function IncentivePopup({ onSave, popupForm }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              position:"absolute",
+              bottom:0,
+              left:0,
             }}
           >
             <button className="fieldEditButton" onClick={submitHandler}>

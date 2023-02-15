@@ -18,9 +18,9 @@ const CounterLeger = () => {
 
   const getCounter = async () => {
     const response = await axios({
-      method: "get",
+      method: "post",
       url: "/counters/GetCounterList",
-
+      data: { counters: [] },
       headers: {
         "Content-Type": "application/json",
       },
@@ -51,7 +51,7 @@ const CounterLeger = () => {
       .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
       .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
     let sTime = "yy-mm-dd"
-      .replace("mm", ("00" + (time?.getMonth() ).toString()).slice(-2))
+      .replace("mm", ("00" + time?.getMonth().toString()).slice(-2))
       .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
       .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
     setSearchData((prev) => ({
@@ -381,8 +381,8 @@ function DiliveryPopup({
     getCounter();
   }, []);
   const submitHandler = async () => {
-    if(waiting){
-      return
+    if (waiting) {
+      return;
     }
     setWaiting(true);
     updateBilling({
@@ -549,6 +549,52 @@ function DiliveryPopup({
                         />
                         {/* {popupInfo.conversion || 0} */}
                       </label>
+                      {modes.find(
+                        (a) =>
+                          a.mode_uuid === item.mode_uuid &&
+                          item.mode_uuid !==
+                            "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                      )?.amt ? (
+                        <label
+                          className="selectLabel flex"
+                          style={{ width: "200px" }}
+                        >
+                          <input
+                            type="text"
+                            name="route_title"
+                            className="numberInput"
+                            value={outstanding?.remarks}
+                            placeholder={
+                              item.mode_uuid ===
+                              "c67b5794-d2b6-11ec-9d64-0242ac120002"
+                                ? "Cheque number"
+                                : "UPI transaction I'd"
+                            }
+                            style={{
+                              width: "100%",
+                              backgroundColor: "light",
+                              fontSize: "12px",
+                            }}
+                            onChange={(e) =>
+                              setModes((prev) =>
+                                prev?.map((a) =>
+                                  a.mode_uuid === item.mode_uuid
+                                    ? {
+                                        ...a,
+                                        remarks: e.target.value,
+                                      }
+                                    : a
+                                )
+                              )
+                            }
+                            maxLength={42}
+                            onWheel={(e) => e.preventDefault()}
+                          />
+                          {/* {popupInfo.conversion || 0} */}
+                        </label>
+                      ) : (
+                        ""
+                      )}
                     </div>
                   ))}
                   {/* <div

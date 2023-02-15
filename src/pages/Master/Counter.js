@@ -2,7 +2,12 @@ import React, { useState, useEffect, useMemo, useContext } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import axios from "axios";
-import { DeleteOutline, Phone, WhatsApp } from "@mui/icons-material";
+import {
+  CopyAllOutlined,
+  DeleteOutline,
+  Phone,
+  WhatsApp,
+} from "@mui/icons-material";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import CounterSequence from "../../components/CounterSequence";
 import * as XLSX from "xlsx";
@@ -348,6 +353,7 @@ export default Counter;
 function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
+  const [copied, setCopied] = useState("");
   return (
     <table
       className="user-table"
@@ -471,7 +477,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
               </div>
             </div>
           </th>
-          <th colSpan={4}>Actions</th>
+          <th colSpan={5}>Actions</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -506,6 +512,37 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
               </td>
               <td colSpan={2}>{item.food_license || ""}</td>
               <td colSpan={2}>{item.gst || ""}</td>
+              <td
+                colSpan={1}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(
+                    "https://btgondia.com/counter/" + item.short_link
+                  );
+                  setCopied(item.counter_uuid);
+                  setTimeout(() => setCopied(""), 3000);
+                }}
+              >
+                {copied === item?.counter_uuid ? (
+                  <div
+                    style={{
+                      // position: "absolute",
+                      top: "-15px",
+                      right: "10px",
+                      fontSize: "10px",
+                      backgroundColor: "#000",
+                      color: "#fff",
+                      padding: "3px",
+                      borderRadius: "10px",
+                      textAlign: "center",
+                    }}
+                  >
+                    Copied!
+                  </div>
+                ) : (
+                  <CopyAllOutlined />
+                )}
+              </td>
               <td>
                 <button
                   type="button"
@@ -687,6 +724,9 @@ function NewUserForm({
       });
       if (response.data.success) {
         getCounter();
+        if (e.type === "submit") {
+          onSave();
+        }
       }
     } else {
       if (counters.find((a) => a.counter_code === data.counter_code)) {
@@ -703,6 +743,9 @@ function NewUserForm({
       });
       if (response.data.success) {
         getCounter();
+        if (e.type === "submit") {
+          onSave();
+        }
       }
     }
   };
@@ -1213,6 +1256,7 @@ function NewUserForm({
                         <option value={1}>Visit</option>
                         <option value={2}>Call</option>
                         <option value={3}>Self</option>
+                        <option value={4}>Other</option>
                       </select>
                     </label>
                     <label className="selectLabel" style={{ width: "50%" }}>
@@ -1238,31 +1282,26 @@ function NewUserForm({
                   </div>
                 </div>
                 <div className="row">
-                 
-
-                    <label className="selectLabel">
-                      Order Form
-                      <select
-                        name="user_type"
-                        className="select"
-                        value={data?.form_uuid}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            form_uuid: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">None</option>
-                        {orderFrom
-                          ?.map((a) => (
-                            <option value={a.form_uuid}>
-                              {a.form_title}
-                            </option>
-                          ))}
-                      </select>
-                    </label>
-                  </div>
+                  <label className="selectLabel">
+                    Order Form
+                    <select
+                      name="user_type"
+                      className="select"
+                      value={data?.form_uuid}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          form_uuid: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="">None</option>
+                      {orderFrom?.map((a) => (
+                        <option value={a.form_uuid}>{a.form_title}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
                 <i style={{ color: "red" }}>
                   {errMassage === "" ? "" : "Error: " + errMassage}
                 </i>

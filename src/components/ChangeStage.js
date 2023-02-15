@@ -472,7 +472,7 @@ function DiliveryPopup({
   };
 
   const submitHandler = async () => {
-    if(waiting){
+    if (waiting) {
       return;
     }
     setWaiting(true);
@@ -632,6 +632,52 @@ function DiliveryPopup({
                         />
                         {/* {popupInfo.conversion || 0} */}
                       </label>
+                      {modes.find(
+                        (a) =>
+                          a.mode_uuid === item.mode_uuid &&
+                          item.mode_uuid !==
+                            "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+                      )?.amt ? (
+                        <label
+                          className="selectLabel flex"
+                          style={{ width: "200px" }}
+                        >
+                          <input
+                            type="text"
+                            name="route_title"
+                            className="numberInput"
+                            value={outstanding?.remarks}
+                            placeholder={
+                              item.mode_uuid ===
+                              "c67b5794-d2b6-11ec-9d64-0242ac120002"
+                                ? "Cheque number"
+                                : "UPI transaction I'd"
+                            }
+                            style={{
+                              width: "100%",
+                              backgroundColor: "light",
+                              fontSize: "12px",
+                            }}
+                            onChange={(e) =>
+                              setModes((prev) =>
+                                prev?.map((a) =>
+                                  a.mode_uuid === item.mode_uuid
+                                    ? {
+                                        ...a,
+                                        remarks: e.target.value,
+                                      }
+                                    : a
+                                )
+                              )
+                            }
+                            maxLength={42}
+                            onWheel={(e) => e.preventDefault()}
+                          />
+                          {/* {popupInfo.conversion || 0} */}
+                        </label>
+                      ) : (
+                        ""
+                      )}
                     </div>
                   ))}
                   <div
@@ -664,12 +710,8 @@ function DiliveryPopup({
                       />
                       {/* {popupInfo.conversion || 0} */}
                     </label>
-                  </div>
-                  {outstanding?.amount ? (
-                    <div
-                      className="row"
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
+
+                    {outstanding?.amount ? (
                       <label
                         className="selectLabel flex"
                         style={{ width: "100%" }}
@@ -696,10 +738,10 @@ function DiliveryPopup({
                         />
                         {/* {popupInfo.conversion || 0} */}
                       </label>
-                    </div>
-                  ) : (
-                    ""
-                  )}
+                    ) : (
+                      ""
+                    )}
+                  </div>
                   <div
                     className="row"
                     style={{ flexDirection: "row", alignItems: "center" }}

@@ -434,7 +434,7 @@ export default function AddOrder() {
                       ...warehouse
                         .filter(
                           (a) =>
-                            user_warehouse ||
+                            !user_warehouse ||
                             a.warehouse_uuid === user_warehouse
                         )
                         .map((a) => ({

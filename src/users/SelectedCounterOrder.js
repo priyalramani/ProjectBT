@@ -15,7 +15,7 @@ const SelectedCounterOrder = () => {
   const [foodLicensePopup, setFoodLicencePopup] = useState(false);
   const [checkNumberPopup, setCheckNumberPopup] = useState(false);
   const [pricePopup, setPricePopup] = useState(false);
-  const [number, setNumber] = useState(true);
+  const [number, setNumber] = useState(false);
   const [confirmItemsPopup, setConfirmItemPopup] = useState(false);
   const [enable, setEnable] = useState(false);
   const [userData, setUserData] = useState({});
@@ -61,7 +61,22 @@ const SelectedCounterOrder = () => {
   useEffect(() => {
     callBilling();
   }, [order?.items]);
-
+  useEffect(() => {
+    if (counter?.mobile?.length) {
+      if (
+        counter?.mobile.filter((a) =>
+          a?.lable?.find((b) => b.type === "wa" && +b.varification)
+        )?.length &&
+        counter?.mobile.filter(
+          (a) => a?.lable?.find((b) => b.type === "cal" && +b.varification)?.length
+        )
+      ) {
+        setNumber(false);
+      } else {
+        setNumber(true);
+      }
+    }
+  }, [counter?.mobile]);
   const getCounter = async () => {
     const response = await axios({
       method: "post",
@@ -72,7 +87,7 @@ const SelectedCounterOrder = () => {
       },
     });
     if (response.data.success) {
-setCounter(response.data.result)
+      setCounter(response.data.result);
       if (!response.data.result.food_license) {
         setFoodLicencePopup(true);
       } else {
@@ -283,7 +298,15 @@ setCounter(response.data.result)
   }, [order]);
   return (
     <>
-      {number ? <MobileNumberPopup counter={counter} getCounter={getCounter} onSave={()=>setNumber(false)}/> : ""}
+      {number ? (
+        <MobileNumberPopup
+          counter={counter}
+          getCounter={getCounter}
+          onSave={() => setNumber(false)}
+        />
+      ) : (
+        ""
+      )}
       <div>
         <nav
           className="user_nav nav_styling"

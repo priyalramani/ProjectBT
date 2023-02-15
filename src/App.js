@@ -60,7 +60,7 @@ import Campaigns from "./pages/Reports/Campaigns";
 import TestCounter from "./pages/Master/TestCounter";
 import OrderForms from "./pages/Reports/OrderForms";
 import LinkedCounter from "./users/LinkedCounter";
-export let Version = 61;
+export let Version = 63;
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
   const context = useContext(Context);
@@ -113,10 +113,8 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Navigate replace to={"/users"} />} />
-          <Route
-                path="/counter/:short_link"
-                element={<LinkedCounter />}
-              />
+          <Route path="/counter/:short_link" element={<LinkedCounter />} />
+          <Route path="/counter/:short_link/:campaign_short_link" element={<LinkedCounter />} />
           {userType === "1" ? (
             <>
               {/* users routes */}
@@ -142,7 +140,7 @@ function App() {
                 path="/users/orders/:counter_uuid"
                 element={<SelectedCounterOrder />}
               />
-          
+
               <Route
                 path="/users/checking/:trip_uuid"
                 element={<ProcessingOrders />}
@@ -213,10 +211,7 @@ function App() {
                 path="/admin/DeliveryIncentive"
                 element={<DeliveryIncentive />}
               />
-              <Route
-                path="/admin/OrderForm"
-                element={<OrderForms />}
-              />
+              <Route path="/admin/OrderForm" element={<OrderForms />} />
               <Route path="/admin/ItemIncentive" element={<ItemIncentive />} />
               <Route path="/admin/addOrder" element={<AddOrder />} />
               <Route

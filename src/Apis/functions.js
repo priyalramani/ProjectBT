@@ -382,7 +382,8 @@ console.log("itemsdata",items)
         adjustment
       : 0
   );
-console.log("itemsdata",newPriceItems)
+// console.log("itemsdata",newPriceItems)
+console.log("itemsdata",order_grandtotal)
   return {
     counter_uuid: counter.counter_uuid,
     order_grandtotal,

@@ -47,6 +47,16 @@ const ItemsPage = () => {
   const filterItemsData = useMemo(
     () =>
       itemsData
+
+        .map((b) => ({
+          ...b,
+          company_title:
+            companies.find((a) => a.company_uuid === b.company_uuid)
+              ?.company_title || "-",
+          category_title:
+            itemCategories.find((a) => a.category_uuid === b.category_uuid)
+              ?.category_title || "-",
+        }))
         .filter(
           (a) =>
             a.item_title &&
@@ -63,16 +73,7 @@ const ItemsPage = () => {
               a.category_title
                 .toLocaleLowerCase()
                 .includes(filterCategory.toLocaleLowerCase()))
-        )
-        .map((b) => ({
-          ...b,
-          company_title:
-            companies.find((a) => a.company_uuid === b.company_uuid)
-              ?.company_title || "-",
-          category_title:
-            itemCategories.find((a) => a.category_uuid === b.category_uuid)
-              ?.category_title || "-",
-        })),
+        ),
     [
       companies,
       disabledItem,

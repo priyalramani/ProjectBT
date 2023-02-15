@@ -64,7 +64,7 @@ const MainAdmin = () => {
   const [tasks, setTasks] = useState([]);
   const [reminderDate, setReminderDate] = useState();
   const [selectedtasks, setSelectedTasks] = useState(false);
-  const location=useLocation()
+  const location = useLocation();
   let user_uuid = localStorage.getItem("user_uuid");
   const selectedOrderGrandTotal = useMemo(
     () =>
@@ -283,7 +283,7 @@ const MainAdmin = () => {
 
       controller.abort();
     };
-  }, [holdOrders,location]);
+  }, [holdOrders, location]);
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -321,10 +321,10 @@ const MainAdmin = () => {
       ),
     [ordersData, salesPersoneList]
   );
-  const getRunningOrders = async (controller=new AbortController()) => {
+  const getRunningOrders = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
-      signal:controller.signal,
+      signal: controller.signal,
       url: "/orders/GetOrderAllRunningList/" + user_uuid,
     });
 
@@ -1087,6 +1087,11 @@ const MainAdmin = () => {
                                         onDoubleClick={() =>
                                           setPopupOrder(item)
                                         }
+                                        getOrders={() => {
+                                          if (holdOrders)
+                                            getRunningHoldOrders();
+                                          else getRunningOrders();
+                                        }}
                                         setSelectOrder={setSelectOrder}
                                         // on_order={on_order && on_order}
                                         // key={item.seat_uuid}
@@ -1311,6 +1316,11 @@ const MainAdmin = () => {
 
                               <Card
                                 details={details}
+                                getOrders={() => {
+                                  if (holdOrders)
+                                    getRunningHoldOrders();
+                                  else getRunningOrders();
+                                }}
                                 setSelectOrder={setSelectOrder}
                                 order={item}
                                 onDoubleClick={() => setPopupOrder(item)}
@@ -1562,6 +1572,11 @@ const MainAdmin = () => {
                                         onDoubleClick={() =>
                                           setPopupOrder(item)
                                         }
+                                        getOrders={() => {
+                                          if (holdOrders)
+                                            getRunningHoldOrders();
+                                          else getRunningOrders();
+                                        }}
                                         setSelectOrder={setSelectOrder}
                                         // on_order={on_order && on_order}
                                         // key={item.seat_uuid}

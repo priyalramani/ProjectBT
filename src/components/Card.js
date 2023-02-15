@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const Card = ({
   title2,
   title1,
@@ -10,7 +12,50 @@ const Card = ({
   selectedCounter,
   setSelectOrder,
   order,
+  getOrders = () => {},
 }) => {
+  const PutOrder = async (deleteOrder = false) => {
+    let data = {
+      ...order,
+      counter_order: 0,
+      accept_notification: deleteOrder ? "0" : "1",
+    };
+    if (deleteOrder) {
+      let time = new Date();
+      let stage = order?.status?.length
+        ? order?.status
+            ?.map((a) => +a.stage || 0)
+            ?.reduce((a, b) => Math.max(a, b))
+        : order?.status[0]?.stage || 0;
+      data = {
+        ...data,
+        status: [
+          ...order.status,
+          {
+            stage: 5,
+            user_uuid: localStorage.getItem("user_uuid"),
+            time: time.getTime(),
+          },
+        ],
+        fulfillment: order.fulfillment?.length
+          ? [...order.fulfillment, ...order.item_details]
+          : order.item_details,
+        item_details: order.item_details?.map((a) => ({ ...a, b: 0, p: 0 })),
+      };
+    }
+
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: [data],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      getOrders();
+    }
+  };
   const getQty = () => {
     let data = order.item_details;
 
@@ -61,10 +106,15 @@ const Card = ({
   }
 
   const order_time_1 = +details.map((a) => a.order_time_1)[0];
-  const cardColor1Height = (hours(new Date(dateTime)) * 100) / order_time_1;
+  const cardColor1Height =
+    order.order_status === "A" || order.counter_order
+      ? 0
+      : (hours(new Date(dateTime)) * 100) / order_time_1;
   const cardColor2Height =
-    ((hours(new Date(dateTime)) - order_time_1) * 100) /
-    +details.map((a) => +a.order_time_2 - order_time_1)[0];
+    order.order_status === "A" || order.counter_order
+      ? 0
+      : ((hours(new Date(dateTime)) - order_time_1) * 100) /
+        +details.map((a) => +a.order_time_2 - order_time_1)[0];
   return (
     <>
       <div
@@ -93,7 +143,12 @@ const Card = ({
             style={{
               padding: "10px 15px",
               gap: "2px",
-              backgroundColor: order.order_status === "A" ? "#00edff" : "#fff",
+              backgroundColor:
+                order.order_status === "A"
+                  ? "#00edff"
+                  : order.counter_order
+                  ? "#e28743"
+                  : "#fff",
             }}
           >
             <p
@@ -121,8 +176,35 @@ const Card = ({
             >
               {title1 ? title2 : ""}
             </p>
-
-            <div>{status}</div>
+            {order.counter_order ? (
+              <div
+                className="flex"
+                style={{ justifyContent: "space-between", width: "100px" }}
+              >
+                <button
+                  className="acceptrejectButton"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    PutOrder(true);
+                  }}
+                >
+                  Reject
+                </button>
+                <button
+                  className="acceptrejectButton green"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    PutOrder(false);
+                  }}
+                >
+                  Accept
+                </button>
+              </div>
+            ) : (
+              <>
+                <div>{status}</div>
+              </>
+            )}
             <div style={{ fontSize: "10px" }}>
               {`${days[new Date(dateTime).getDay()] || ""} ${
                 new Date(dateTime).getDate() || ""

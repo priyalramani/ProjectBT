@@ -2908,3 +2908,13 @@ button.counter-save-btn {
   font-size: 40px;
   cursor: pointer;
 }
+.acceptrejectButton{
+  border: none;
+  background: red;
+  padding: 3px 5px;
+  color: #fff;
+  font-size: 12px;
+}
+.acceptrejectButton.green{
+  background-color: var(--mainColor);
+}

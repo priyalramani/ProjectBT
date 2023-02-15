@@ -25,7 +25,8 @@ const LinkedCounter = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [clickedId, setClickedId] = useState(false);
   const [cartPage, setCartPage] = useState(false);
-  const [counters, setCounters] = useState([]);
+  const [orderStatus, setOrderStatus] = useState(0);
+  // const [counters, setCounters] = useState([]);
   const [counter, setCounter] = useState({});
 
   const params = useParams();
@@ -43,7 +44,7 @@ const LinkedCounter = () => {
   const { setNotification } = useContext(context);
   const Navigate = useNavigate();
   const callBilling = async () => {
-    let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
+    // let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let time = new Date();
     Billing({
       counter,
@@ -69,7 +70,12 @@ const LinkedCounter = () => {
     const response = await axios({
       method: "post",
       url: "/counters/GetCounterByLink",
-      data: { short_link: params.short_link },
+      data: {
+        short_link: params.short_link,
+        campaign_short_link: params.campaign_short_link?.includes("cam-")
+          ? params?.campaign_short_link?.replace("cam-", "")
+          : "",
+      },
       headers: {
         "Content-Type": "application/json",
       },
@@ -78,7 +84,18 @@ const LinkedCounter = () => {
     setTimeout(() => setNotification(""), 5000);
     console.log(response.data);
     if (response.data.success) {
+      if (!response.data.result.order_status) {
+        setNotification({
+          message: "इस रूट के आर्डर अभी स्वीकार नहीं किये जा रहे है",
+        });
+        setTimeout(() => setNotification(""), 5000);
+      }
+      setOrderStatus(response.data.result.order_status);
       setCounter(response.data.result.counter);
+      localStorage.setItem(
+        "counter_uuid",
+        response.data.result.counter.counter_uuid
+      );
       setItemsCategory(response.data.result.ItemCategories);
       setItems(response.data.result.items);
       setCompanies(response.data.result.company);
@@ -135,7 +152,7 @@ const LinkedCounter = () => {
     setCartPage(false);
     setOrder({});
     getCounter();
-    setInvioceNumber("")
+    setInvioceNumber("");
   };
 
   useEffect(() => {
@@ -181,13 +198,26 @@ const LinkedCounter = () => {
   );
 
   const postOrder = async (orderData = order) => {
-    console.log(orderData);
-    let data = {
+    let time = new Date();
+    let data = await Billing({
+      counter,
+      items: orderData.items,
+      others: {
+        stage: 1,
+        user_uuid: localStorage.getItem("user_uuid"),
+        time: time.getTime(),
+
+        type: "NEW",
+      },
+      add_discounts: true,
+    });
+    data = {
       ...orderData,
+      ...data,
       order_status: orderData?.order_status || "R",
       order_uuid: uuid(),
       opened_by: 0,
-      item_details: orderData.items.map((a) => ({
+      item_details: data.items.map((a) => ({
         ...a,
         b: a.b,
         p: a.p,
@@ -200,9 +230,13 @@ const LinkedCounter = () => {
         {
           stage: orderData?.others?.stage || 1,
           time: orderData?.others?.time || new Date().getTime(),
-          user_uuid: orderData?.others?.user_uuid || "Link",
+          user_uuid: orderData?.others?.user_uuid || orderData?.counter_uuid,
         },
       ],
+      counter_order: 1,
+      campaign_short_link: params.campaign_short_link?.includes("cam-")
+        ? params?.campaign_short_link?.replace("cam-", "")
+        : "",
     };
     console.log(data);
     const response = await axios({
@@ -291,6 +325,25 @@ const LinkedCounter = () => {
           className="user_nav nav_styling"
           style={cartPage ? { backgroundColor: "#000" } : {}}
         >
+          {cartPage ? (
+            <div className="user_menubar">
+              <IoArrowBackOutline
+                className="user_Back_icon"
+                onClick={() => setCartPage(false)}
+              />
+            </div>
+          ) : (
+            <div className="user_menubar">
+              <input
+                style={{ width: "200px" }}
+                className="searchInput"
+                type="text"
+                placeholder="search"
+                value={filterItemTitle}
+                onChange={(e) => setFilterItemTile(e.target.value)}
+              />
+            </div>
+          )}
           <div
             style={{ width: "100%", textAlign: "center", fontWeight: "900" }}
           >
@@ -368,7 +421,10 @@ const LinkedCounter = () => {
                     name={comapany?.company_uuid}
                     className="categoryItemMap"
                   >
-                    <h1 className="categoryHeadline">
+                    <h1
+                      className="categoryHeadline"
+                      style={{ textAlign: "center" }}
+                    >
                       {comapany?.company_title}
                     </h1>
                     {filteredCategory
@@ -405,14 +461,43 @@ const LinkedCounter = () => {
                                   className="menu"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setOrder((prev) => ({
-                                      ...prev,
-                                      items: prev?.items?.filter(
-                                        (a) => a.item_uuid === item.item_uuid
-                                      )?.length
-                                        ? prev?.items?.map((a) =>
-                                            a.item_uuid === item.item_uuid
-                                              ? {
+                                    if (orderStatus)
+                                      setOrder((prev) => ({
+                                        ...prev,
+                                        items: prev?.items?.filter(
+                                          (a) => a.item_uuid === item.item_uuid
+                                        )?.length
+                                          ? prev?.items?.map((a) =>
+                                              a.item_uuid === item.item_uuid
+                                                ? {
+                                                    ...a,
+                                                    b:
+                                                      +(a.b || 0) +
+                                                      parseInt(
+                                                        ((a?.p || 0) +
+                                                          (+item?.one_pack ||
+                                                            1)) /
+                                                          +item.conversion
+                                                      ),
+
+                                                    p:
+                                                      ((a?.p || 0) +
+                                                        (+item?.one_pack ||
+                                                          1)) %
+                                                      +item.conversion,
+                                                  }
+                                                : a
+                                            )
+                                          : prev?.items?.length
+                                          ? [
+                                              ...prev.items,
+                                              ...filterItems
+                                                ?.filter(
+                                                  (a) =>
+                                                    a.item_uuid ===
+                                                    item.item_uuid
+                                                )
+                                                .map((a) => ({
                                                   ...a,
                                                   b:
                                                     +(a.b || 0) +
@@ -427,13 +512,9 @@ const LinkedCounter = () => {
                                                     ((a?.p || 0) +
                                                       (+item?.one_pack || 1)) %
                                                     +item.conversion,
-                                                }
-                                              : a
-                                          )
-                                        : prev?.items?.length
-                                        ? [
-                                            ...prev.items,
-                                            ...filterItems
+                                                })),
+                                            ]
+                                          : filterItems
                                               ?.filter(
                                                 (a) =>
                                                   a.item_uuid === item.item_uuid
@@ -453,28 +534,7 @@ const LinkedCounter = () => {
                                                     (+item?.one_pack || 1)) %
                                                   +item.conversion,
                                               })),
-                                          ]
-                                        : filterItems
-                                            ?.filter(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            )
-                                            .map((a) => ({
-                                              ...a,
-                                              b:
-                                                +(a.b || 0) +
-                                                parseInt(
-                                                  ((a?.p || 0) +
-                                                    (+item?.one_pack || 1)) /
-                                                    +item.conversion
-                                                ),
-
-                                              p:
-                                                ((a?.p || 0) +
-                                                  (+item?.one_pack || 1)) %
-                                                +item.conversion,
-                                            })),
-                                    }));
+                                      }));
                                   }}
                                 >
                                   <div className="menuItemDetails">
@@ -535,10 +595,19 @@ const LinkedCounter = () => {
                                           (a) => a.item_uuid === item.item_uuid
                                         )?.p || 0
                                       }`}
+                                      disabled={!orderStatus}
                                       className="boxPcsInput"
+                                      style={
+                                        !orderStatus
+                                          ? {
+                                              border: "2px solid gray",
+                                              boxShadow: "0 2px 8px gray",
+                                            }
+                                          : {}
+                                      }
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        setPopupForm(item);
+                                        if (orderStatus) setPopupForm(item);
                                       }}
                                     />
                                   </div>
@@ -826,73 +895,46 @@ const LinkedCounter = () => {
               className={`${isCategoryOpen ? "showCategory" : ""} categoryList`}
               style={{ overflow: "scroll" }}
             >
-              {itemsCategory
-                .filter((a) => a.company_uuid === filterCompany)
+              {filteredCategory
                 ?.sort((a, b) => a.sort_order - b.sort_order)
                 ?.map((category, i) => {
                   return (
-                    (cartPage
-                      ? order?.items?.filter(
-                          (a) => a.category_uuid === category.category_uuid
-                        )?.length > 0
-                      : filterItems.filter(
-                          (a) => a.category_uuid === category.category_uuid
-                        )?.length > 0) && (
-                      <ScrollLink
-                        id={`${i}`}
-                        onClick={() => {
-                          var element = document.getElementById(
-                            category.category_uuid
-                          );
+                    <ScrollLink
+                      id={`${i}`}
+                      onClick={() => {
+                        var element = document.getElementById(
+                          category.category_uuid
+                        );
 
-                          element.scrollIntoView();
-                          element.scrollIntoView(false);
-                          element.scrollIntoView({ block: "start" });
-                          element.scrollIntoView({
-                            behavior: "smooth",
-                            block: "end",
-                            inline: "nearest",
-                          });
-                          setIsCategoryOpen(!isCategoryOpen);
-                          setClickedId(i?.toString());
-                        }}
-                        smooth={true}
-                        duration={1000}
-                        to={category?.category_uuid}
-                        className={`${
-                          clickedId === i?.toString() ? "activeMenuList" : ""
-                        } categorybtn`}
-                        key={i}
-                      >
-                        {category?.category_title}
-                        <span className="categoryLength">
-                          {cartPage
-                            ? order?.items?.filter(
-                                (a) =>
-                                  a.category_uuid === category.category_uuid
-                              )?.length
-                            : filterItems
-                                .filter(
-                                  (a) =>
-                                    a.category_uuid === category.category_uuid
-                                )
-                                ?.filter(
-                                  (a) =>
-                                    !filterItemTitle ||
-                                    a.item_title
-                                      ?.toLocaleLowerCase()
-                                      .includes(
-                                        filterItemTitle.toLocaleLowerCase()
-                                      )
-                                )?.length}
-                        </span>
-                      </ScrollLink>
-                    )
+                        element.scrollIntoView();
+                        element.scrollIntoView(false);
+                        element.scrollIntoView({ block: "start" });
+                        element.scrollIntoView({
+                          behavior: "smooth",
+                          block: "end",
+                          inline: "nearest",
+                        });
+                        setIsCategoryOpen(!isCategoryOpen);
+                        setClickedId(i?.toString());
+                      }}
+                      smooth={true}
+                      duration={1000}
+                      to={category?.category_uuid}
+                      className={`${
+                        clickedId === i?.toString() ? "activeMenuList" : ""
+                      } categorybtn`}
+                      key={i}
+                    >
+                      {category?.category_title}
+                      <span className="categoryLength">
+                        {filterItems.length}
+                      </span>
+                    </ScrollLink>
                   );
                 })}
             </div>
-            {/* {isCategoryOpen && <div id="black-bg" />} */}
-            {/* {!isCategoryOpen ? (
+            {isCategoryOpen && <div id="black-bg" />}
+            {!isCategoryOpen ? (
               <button
                 className="showMenuListBtn"
                 onClick={() => setIsCategoryOpen(!isCategoryOpen)}
@@ -906,7 +948,7 @@ const LinkedCounter = () => {
               >
                 <i className="fas fa-times"></i> Close
               </button>
-            )} */}
+            )}
           </div>
         </div>
       </div>
