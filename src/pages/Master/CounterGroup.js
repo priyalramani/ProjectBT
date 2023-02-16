@@ -130,7 +130,7 @@ const CounterGroup = () => {
 };
 
 export default CounterGroup;
-function Table({ itemsDetails, setPopupForm, setAddItems,setDeletePopup }) {
+function Table({ itemsDetails, setPopupForm, setAddItems, setDeletePopup }) {
   const [items, setItems] = useState("counter_group_title");
   const [order, setOrder] = useState("asc");
   return (
@@ -320,22 +320,27 @@ function NewUserForm({ onSave, popupInfo, setRoutesData }) {
 }
 
 function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
-  const [pattern, setPattern] = useState("");
-  const [filterRoute, setFilterRoute] = useState("");
-  const [Counters, setCounters] = useState([]);
-  const [Routes, setRoutes] = useState([]);
 
-  const [itemGroupings, setItemGroupings] = useState([]);
+  const [filterCounterTitle, setFilterCounterTitle] = useState("");
+  const [filterRouteTitle, setFilterRouteTitle] = useState("");
+  const [counters, setCounter] = useState([]);
+  const [routesData, setRoutesData] = useState([]);
+
   const getCounter = async () => {
     const response = await axios({
-      method: "get",
-      url: "/counters/GetCounterList",
-
+      method: "post",
+      url: "/counters/GetCounterData",
+      data: [
+        "counter_uuid",
+        "counter_title",
+        "route_uuid",
+        "counter_group_uuid",
+      ],
       headers: {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setCounters(response.data.result);
+    if (response.data.success) setCounter(response.data.result);
   };
   const getRoutesData = async () => {
     const response = await axios({
@@ -346,109 +351,18 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setRoutes(response.data.result);
+    if (response.data.success) setRoutesData(response.data.result);
   };
   useEffect(() => {
     getCounter();
     getRoutesData();
   }, []);
-  useEffect(() => {
-    if (Counters?.length)
-      setItemGroupings(
-        Counters.filter(
-          (a) =>
-            a.counter_group_uuid.filter(
-              (b) => b === ItemGroup.counter_group_uuid
-            ).length
-        )
-      );
-  }, [Counters, ItemGroup.counter_group_uuid]);
-  const searchedItems = useMemo(
-    () =>
-      Counters.map((a) => ({
-        ...a,
-        route_title:
-          Routes?.find((b) => b?.route_uuid === a?.route_uuid)?.route_title ||
-          "",
-      }))?.filter(
-        (item) =>
-          item?.counter_title
-            ?.toLowerCase()
-            ?.includes(pattern?.toLowerCase()) &&
-          item?.route_title?.toLowerCase()?.includes(filterRoute?.toLowerCase())
-      ),
-    [pattern, Counters, Routes, filterRoute]
-  );
-  const includesArray = useMemo(
-    () =>
-      searchedItems?.map((item) => {
-        itemGroupings[itemGroupingIndex]?.items?.includes(item.counter_uuid);
-      }),
-    [searchedItems]
-  );
 
-  const handleItemIncludeToggle = (counter_uuid, type) => {
-    let data = Counters.find((a) => a.counter_uuid === counter_uuid);
-    if (type === "remove") {
-      data = toggleRemoveItem(itemGroupings, data);
-    } else {
-      data = toggleAddItem(itemGroupings, data);
-    }
-    console.log(data, ItemGroup.counter_group_uuid);
-
-    setItemGroupings(data);
-  };
-  const toggleRemoveItem = (arr, item) =>
-    arr.map((a) =>
-      a?.counter_uuid === item.counter_uuid
-        ? {
-            ...a,
-            counter_group_uuid: a.counter_group_uuid.filter((b) => {
-              console.log("----", b, ItemGroup.counter_group_uuid);
-              return b !== ItemGroup.counter_group_uuid;
-            }),
-          }
-        : a
-    );
-  const toggleAddItem = (arr, item) =>
-    arr?.filter((i) => i?.counter_uuid === item?.counter_uuid)?.length
-      ? [
-          ...arr?.filter((i) => i !== item).map((a) => ({ ...a, one: true })),
-          arr
-            ?.filter((i) => i.counter_uuid === item.counter_uuid)
-            .map((a) => ({
-              ...a,
-              one: true,
-              counter_group_uuid: item?.counter_group_uuid?.length
-                ? [...item.counter_group_uuid, ItemGroup.counter_group_uuid]
-                : [ItemGroup.counter_group_uuid],
-            }))[0],
-        ]
-      : arr?.length
-      ? [
-          ...arr.map((a) => ({ ...a, two: true })),
-          {
-            ...item,
-            two: true,
-            counter_group_uuid: item?.counter_group_uuid?.length
-              ? [...item.counter_group_uuid, ItemGroup.counter_group_uuid]
-              : [ItemGroup.counter_group_uuid],
-          },
-        ]
-      : [
-          {
-            ...item,
-            three: true,
-            counter_group_uuid: item.counter_group_uuid?.length
-              ? [...item.counter_group_uuid, ItemGroup.counter_group_uuid]
-              : [ItemGroup.counter_group_uuid],
-          },
-        ];
   const submitHandler = async () => {
     const response = await axios({
       method: "put",
       url: "/counters/putCounter",
-      data: itemGroupings,
+      data: counters.filter((a) => a.edit),
       headers: {
         "Content-Type": "application/json",
       },
@@ -457,6 +371,37 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
       setItemsModalIndex(null);
     }
   };
+  const filteredCounter = useMemo(
+    () =>
+      counters.filter(
+        (a) =>
+          !filterCounterTitle ||
+          a.counter_title
+            ?.toLocaleLowerCase()
+            ?.includes(filterCounterTitle?.toLocaleLowerCase())
+      ),
+    [counters, filterCounterTitle]
+  );
+  const filterRoute = useMemo(
+    () =>
+      routesData
+        .filter(
+          (a) =>
+            (!filterRouteTitle ||
+              a.route_title
+                ?.toLocaleLowerCase()
+                ?.includes(filterRouteTitle?.toLocaleLowerCase())) &&
+            a.route_uuid &&
+            filteredCounter?.filter((b) => a.route_uuid === b.route_uuid).length
+        )
+
+        .sort((a, b) => a?.route_title?.localeCompare(b?.route_title)),
+    [filterRouteTitle, filteredCounter, routesData]
+  );
+  const objcounters = useMemo(() => {
+    console.count("counter");
+    return counters.counter_group_uuid;
+  }, [counters.counter_group_uuid]);
   return (
     <div
       className="noSpaceForm"
@@ -468,117 +413,165 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
       <h1>Counters</h1>
 
       <div className="flex" style={{ justifyContent: "space-between" }}>
+
         <input
           type="text"
-          onChange={(e) => setPattern(e.target.value)}
-          value={pattern}
-          placeholder="Search Category..."
+          onChange={(e) => setFilterCounterTitle(e.target.value)}
+          value={filterCounterTitle}
+          placeholder="Search Counter..."
           className="searchInput"
-        />{" "}
+        />
         <input
           type="text"
-          onChange={(e) => setFilterRoute(e.target.value)}
-          value={filterRoute}
+          onChange={(e) => setFilterRouteTitle(e.target.value)}
+          value={filterRouteTitle}
           placeholder="Search Routes..."
           className="searchInput"
         />
       </div>
-      <ItemsTable
-        items={searchedItems}
-        onItemIncludeToggle={handleItemIncludeToggle}
-        includesArray={itemGroupings}
-        itemGroup={ItemGroup}
-        route={Routes}
-        pattern={pattern}
-        filterRoute={filterRoute}
-      />
-      <div>
-        <button
-          type="button"
-          className="fieldEditButton"
-          onClick={submitHandler}
+      <div
+        style={{
+          overflowY: "scroll",
+          height: "45vh",
+        }}
+      >
+        <table
+          className="user-table"
+          style={{
+            maxWidth: "500px",
+            height: "fit-content",
+            overflowX: "scroll",
+          }}
         >
-          Done
-        </button>
-      </div>
-    </div>
-  );
-}
-function ItemsTable({
-  items,
-  itemGroup,
-  includesArray,
-  onItemIncludeToggle,
-  route,
-  pattern,
-  filterRoute,
-}) {
-  const [filterItemData, setFilterItemData] = useState([]);
-  const [includesItem, setIncludesItems] = useState([]);
-  const [firstTime, setFirstTime] = useState(true);
-  useEffect(() => {
-    if (firstTime)
-      setFilterItemData(
-        items?.sort((a, b) => {
-          let aLength = includesArray?.filter(
-            (c) =>
-              c?.counter_uuid === a?.counter_uuid &&
-              c.counter_group_uuid.filter(
-                (d) => d === itemGroup.counter_group_uuid
-              ).length
-          )?.length;
+          <thead>
+            <tr>
+              <th>S.N</th>
+              <th colSpan={2}>Counter Title</th>
+            </tr>
+          </thead>
+          <tbody className="tbody">
+            {filterRoute.map((a) => (
+              <>
+                <tr style={{ pageBreakAfter: "auto", width: "100%" }}>
+                  <td colSpan={3}>
+                    {a.route_title}
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
 
-          let bLength = includesArray?.filter(
-            (c) =>
-              c?.counter_uuid === b?.counter_uuid &&
-              c.counter_group_uuid.filter(
-                (d) => d === itemGroup.counter_group_uuid
-              ).length
-          )?.length;
-          console.log(
-            includesArray?.filter(
-              (c) =>
-                c?.counter_uuid === a?.counter_uuid &&
-                c.counter_group_uuid.filter(
-                  (d) => d === itemGroup.counter_group_uuid
-                ).length
-            )?.length,
-            a
-          );
-          if (aLength && bLength) {
-            return a.counter_title.localeCompare(b.counter_title);
-          } else if (aLength) {
-            return -1;
-          } else if (bLength) {
-            return 1;
-          } else {
-            return a.counter_title.localeCompare(b.counter_title);
-          }
-        })
-      );
-    setTimeout(() => {
-      if(items.length)
-      setFirstTime(false);
-    }, 1000);
-  }, [
-    items,
-    pattern,
-    filterRoute,
-    includesArray,
-    itemGroup.counter_group_uuid,
-    firstTime,
-  ]);
-  useEffect(() => {
-    setIncludesItems(includesArray);
-  }, [includesArray]);
-  return (
-    <div
-      style={{
-        overflowY: "scroll",
-        height: "45vh",
-      }}
-    >
-      <table className="table">
+                        setCounter((prev) => {
+                          let counter_form_uuid =
+                            filteredCounter?.filter(
+                              (b) =>
+                                a.route_uuid === b.route_uuid &&
+                                b.counter_group_uuid.find(
+                                  (d) => d === ItemGroup.counter_group_uuid
+                                )
+                            )?.length ===
+                            filteredCounter?.filter(
+                              (b) => a.route_uuid === b.route_uuid
+                            )?.length
+                              ? true
+                              : false;
+                          return prev.map((count) =>
+                            count.route_uuid === a.route_uuid
+                              ? {
+                                  ...count,
+                                  counter_group_uuid: counter_form_uuid
+                                    ? count?.counter_group_uuid?.filter(
+                                        (d) =>
+                                          d !== ItemGroup.counter_group_uuid
+                                      )
+                                    : [
+                                        ...(count.counter_group_uuid || []),
+                                        ItemGroup.counter_group_uuid,
+                                      ],
+                                  edit: true,
+                                }
+                              : count
+                          );
+                        });
+                      }}
+                      style={{ marginLeft: "10px" }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={
+                          filteredCounter?.filter(
+                            (b) =>
+                              a.route_uuid === b.route_uuid &&
+                              b.counter_group_uuid.find(
+                                (d) => d === ItemGroup.counter_group_uuid
+                              )
+                          )?.length ===
+                          filteredCounter?.filter(
+                            (b) => a.route_uuid === b.route_uuid
+                          )?.length
+                        }
+                        style={{ transform: "scale(1.3)" }}
+                      />
+                    </span>
+                  </td>
+                </tr>
+                {filteredCounter
+                  ?.filter((b) => a.route_uuid === b.route_uuid)
+                  ?.sort((a, b) =>
+                    a.counter_title?.localeCompare(b.counter_title)
+                  )
+                  ?.map((item, i, array) => {
+                    return (
+                      <tr key={Math.random()} style={{ height: "30px" }}>
+                        <td
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCounter((prev) =>
+                              prev.map((a) =>
+                                a.counter_uuid === item.counter_uuid
+                                  ? {
+                                      ...a,
+                                      counter_group_uuid:
+                                        a.counter_group_uuid.find(
+                                          (d) =>
+                                            d === ItemGroup.counter_group_uuid
+                                        )
+                                          ? a.counter_group_uuid.filter(
+                                              (d) =>
+                                                d !==
+                                                ItemGroup.counter_group_uuid
+                                            )
+                                          : [
+                                              ...(a.counter_group_uuid || []),
+                                              ItemGroup.counter_group_uuid,
+                                            ],
+                                      edit: true,
+                                    }
+                                  : a
+                              )
+                            );
+                          }}
+                          className="flex"
+                          style={{ justifyContent: "space-between" }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={item.counter_group_uuid.find(
+                              (d) => d === ItemGroup.counter_group_uuid
+                            )}
+                            style={{ transform: "scale(1.3)" }}
+                          />
+                          {i + 1}
+                        </td>
+
+                        <td colSpan={2}>{item.counter_title || ""}</td>
+                      </tr>
+                    );
+                  })}
+              </>
+            ))}
+          </tbody>
+        </table>
+
+        {/* <table className="table">
         <thead>
           <tr>
             <th className="description" style={{ width: "25%" }}>
@@ -648,10 +641,21 @@ function ItemsTable({
               );
             })}
         </tbody>
-      </table>
+      </table> */}
+      </div>
+      <div>
+        <button
+          type="button"
+          className="fieldEditButton"
+          onClick={submitHandler}
+        >
+          Done
+        </button>
+      </div>
     </div>
   );
 }
+
 function DeleteCounterPopup({ onSave, popupInfo, getCounterGroup }) {
   const [errMassage, setErrorMassage] = useState("");
   const [loading, setLoading] = useState(false);

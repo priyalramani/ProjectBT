@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/solid";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-import { Add, Delete, DeleteOutline } from "@mui/icons-material";
+import { Add, CopyAll, Delete, DeleteOutline } from "@mui/icons-material";
 import { Switch } from "@mui/material";
 import { green } from "@mui/material/colors";
 import { alpha, styled } from "@mui/material/styles";
@@ -191,6 +191,29 @@ function Table({ itemsDetails = [], setPopupForm, sendMsg, setDeletePopup }) {
           <th>S.N</th>
           <th colSpan={2}>
             <div className="t-head-element">
+              <span>Type</span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("type");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("type");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
               <span>Campaign Title</span>
               <div className="sort-buttons-container">
                 <button
@@ -238,11 +261,16 @@ function Table({ itemsDetails = [], setPopupForm, sendMsg, setDeletePopup }) {
               }}
             >
               <td>{i + 1}</td>
+              <td colSpan={2}>{item.type?.toLocaleUpperCase()}</td>
               <td colSpan={2}>{item.campaign_title}</td>
               <td>
                 {item.type === "general"
                   ? item.counters.length
-                  : item.counter_status?.length}
+                  : item.counter_status?.length
+                  ? item.counter_status?.filter((a) => +a.status).length +
+                    "/" +
+                    item.counter_status?.length
+                  : 0}
               </td>
               <td>
                 <button
@@ -282,6 +310,7 @@ function IncentivePopup({ onSave, popupForm }) {
   });
   const [counters, setCounter] = useState([]);
   const [active, setActive] = useState("");
+  const [copied, setCopied] = useState("");
   const [orderForm, setOrderForm] = useState([]);
   const [routesData, setRoutesData] = useState([]);
   const [filterCounterTitle, setFilterCounterTitle] = useState("");
@@ -331,7 +360,20 @@ function IncentivePopup({ onSave, popupForm }) {
     e.preventDefault();
 
     let data = objData;
-
+    for (let message of data.message?.filter((a) => a.img)) {
+      const previousFile = message.img;
+      const newFile = new File([previousFile], message.uuid + ".png");
+      const form = new FormData();
+      form.append("file", newFile);
+      await axios({
+        method: "post",
+        url: "/uploadImage",
+        data: form,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    }
     if (popupForm?.type === "edit") {
       const response = await axios({
         method: "put",
@@ -444,6 +486,7 @@ function IncentivePopup({ onSave, popupForm }) {
                         }}
                         placeholder=""
                         value={objData.type}
+                        disabled={popupForm?.type === "edit"}
                         onChange={(e) =>
                           setObgData((prev) => ({
                             ...prev,
@@ -527,6 +570,18 @@ function IncentivePopup({ onSave, popupForm }) {
                               justifyContent: "flex-start",
                             }}
                           >
+                            <span
+                              onClick={() =>
+                                setObgData((prev) => ({
+                                  ...prev,
+                                  message: prev.message.filter(
+                                    (a) => a.uuid !== item.uuid
+                                  ),
+                                }))
+                              }
+                            >
+                              <DeleteOutline />
+                            </span>
                             <select
                               className="searchInput"
                               value={item.type}
@@ -542,30 +597,49 @@ function IncentivePopup({ onSave, popupForm }) {
                               }}
                             >
                               <option value="text">Text</option>
+                              <option value="img">Image</option>
                             </select>
-                            <textarea
-                              onWheel={(e) => e.target.blur()}
-                              className="searchInput"
-                              style={{
-                                border: "none",
-                                borderBottom: "2px solid black",
-                                borderRadius: "0px",
-                                height: "100px",
-                              }}
-                              onFocus={() => setActive(item.uuid)}
-                              placeholder=""
-                              value={item.text}
-                              onChange={(e) => {
-                                setObgData((prev) => ({
-                                  ...prev,
-                                  message: prev.message.map((a) =>
-                                    a.uuid === item.uuid
-                                      ? { ...a, text: e.target.value }
-                                      : a
-                                  ),
-                                }));
-                              }}
-                            />
+
+                            {item?.type === "text" ? (
+                              <textarea
+                                onWheel={(e) => e.target.blur()}
+                                className="searchInput"
+                                style={{
+                                  border: "none",
+                                  borderBottom: "2px solid black",
+                                  borderRadius: "0px",
+                                  height: "100px",
+                                }}
+                                onFocus={() => setActive(item.uuid)}
+                                placeholder=""
+                                value={item.text}
+                                onChange={(e) => {
+                                  setObgData((prev) => ({
+                                    ...prev,
+                                    message: prev.message.map((a) =>
+                                      a.uuid === item.uuid
+                                        ? { ...a, text: e.target.value }
+                                        : a
+                                    ),
+                                  }));
+                                }}
+                              />
+                            ) : (
+                              <input
+                                className="searchInput"
+                                type="file"
+                                onChange={(e) =>
+                                  setObgData((prev) => ({
+                                    ...prev,
+                                    message: prev.message.map((a) =>
+                                      a.uuid === item.uuid
+                                        ? { ...a, img: e.target.files[0] }
+                                        : a
+                                    ),
+                                  }))
+                                }
+                              />
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -731,6 +805,66 @@ function IncentivePopup({ onSave, popupForm }) {
                           </select>
                         </td>
                       </tr>
+                      {objData.campaign_short_link ? (
+                        <tr>
+                          <td
+                            colSpan={2}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-start",
+                            }}
+                          >
+                            <b style={{ width: "100px" }}>
+                              Campaign Short Link :{" "}
+                            </b>
+                            <input
+                              onWheel={(e) => e.target.blur()}
+                              className="searchInput"
+                              style={{
+                                border: "none",
+                                borderBottom: "2px solid black",
+                                borderRadius: "0px",
+                              }}
+                              placeholder=""
+                              value={"cam-" + objData?.campaign_short_link}
+                              disabled
+                            />
+                            <span
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(
+                                  "cam-" + objData.campaign_short_link
+                                );
+                                setCopied(true);
+                                setTimeout(() => setCopied(""), 3000);
+                              }}
+                            >
+                              {copied ? (
+                                <div
+                                  style={{
+                                    // position: "absolute",
+                                    top: "-15px",
+                                    right: "10px",
+                                    fontSize: "10px",
+                                    backgroundColor: "#000",
+                                    color: "#fff",
+                                    padding: "3px",
+                                    borderRadius: "10px",
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  Copied!
+                                </div>
+                              ) : (
+                                <CopyAll />
+                              )}
+                            </span>
+                          </td>
+                        </tr>
+                      ) : (
+                        ""
+                      )}
                     </>
                   )}
                 </tbody>

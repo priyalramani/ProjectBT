@@ -75,6 +75,9 @@ const LinkedCounter = () => {
         campaign_short_link: params.campaign_short_link?.includes("cam-")
           ? params?.campaign_short_link?.replace("cam-", "")
           : "",
+        form_short_link: params.campaign_short_link?.includes("form-")
+          ? params?.campaign_short_link?.replace("form-", "")
+          : "",
       },
       headers: {
         "Content-Type": "application/json",
@@ -423,7 +426,12 @@ const LinkedCounter = () => {
                   >
                     <h1
                       className="categoryHeadline"
-                      style={{ textAlign: "center" }}
+                      style={{
+                        textAlign: "center",
+                        fontSize: "40px",
+                        textDecoration: "underline",
+                        color: "#5BC0F8",
+                      }}
                     >
                       {comapany?.company_title}
                     </h1>
@@ -925,9 +933,22 @@ const LinkedCounter = () => {
                       } categorybtn`}
                       key={i}
                     >
-                      {category?.category_title}
+                      <span style={{ width: "50%" }}>
+                        {category?.category_title}
+                      </span>
+
+                      <i
+                        className="categoryLength"
+                        style={{ color: "var(--main)", fontSize: "15px" }}
+                      >
+                        {companies.find(
+                          (a) => a.company_uuid === category.company_uuid
+                        )?.company_title || ""}
+                      </i>
                       <span className="categoryLength">
-                        {filterItems.length}
+                        {filterItems.filter(
+                          (a) => a.category_uuid === category.category_uuid
+                        )?.length || 0}
                       </span>
                     </ScrollLink>
                   );

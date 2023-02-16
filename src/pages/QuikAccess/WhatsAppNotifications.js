@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import {
@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/solid";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-import { Add, Delete } from "@mui/icons-material";
+import { Add, Delete, DeleteOutline } from "@mui/icons-material";
 import { Switch } from "@mui/material";
 import { green } from "@mui/material/colors";
 import { alpha, styled } from "@mui/material/styles";
@@ -262,6 +262,7 @@ function IncentivePopup({ onSave, popupForm }) {
     message: [],
   });
   const [active, setActive] = useState("");
+
   useEffect(() => {
     if (popupForm?.type === "edit") setObgData(popupForm.data);
   }, []);
@@ -270,6 +271,20 @@ function IncentivePopup({ onSave, popupForm }) {
     e.preventDefault();
 
     let data = objData;
+    for (let message of data.message?.filter((a) => a.img)) {
+      const previousFile = message.img;
+      const newFile = new File([previousFile], message.uuid + ".png");
+      const form = new FormData();
+      form.append("file", newFile);
+      await axios({
+        method: "post",
+        url: "/uploadImage",
+        data: form,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    }
 
     if (popupForm?.type === "edit") {
       const response = await axios({
@@ -299,7 +314,19 @@ function IncentivePopup({ onSave, popupForm }) {
       }
     }
   };
-
+  const addVariable = (name) => {
+    setObgData((prev) => ({
+      ...prev,
+      message: prev.message.map((a) =>
+        a.uuid === active
+          ? {
+              ...a,
+              text: a.text + `{${name}}`,
+            }
+          : a
+      ),
+    }));
+  };
   return (
     <div className="overlay">
       <div
@@ -390,6 +417,18 @@ function IncentivePopup({ onSave, popupForm }) {
                         justifyContent: "flex-start",
                       }}
                     >
+                      <span
+                        onClick={() =>
+                          setObgData((prev) => ({
+                            ...prev,
+                            message: prev.message.filter(
+                              (a) => a.uuid !== item.uuid
+                            ),
+                          }))
+                        }
+                      >
+                        <DeleteOutline />
+                      </span>
                       <select
                         className="searchInput"
                         value={item.type}
@@ -405,121 +444,101 @@ function IncentivePopup({ onSave, popupForm }) {
                         }}
                       >
                         <option value="text">Text</option>
+                        <option value="img">Image</option>
                       </select>
-                      <textarea
-                        onWheel={(e) => e.target.blur()}
-                        className="searchInput"
-                        style={{
-                          border: "none",
-                          borderBottom: "2px solid black",
-                          borderRadius: "0px",
-                          height: "100px",
-                        }}
-                        onFocus={() => setActive(item.uuid)}
-                        placeholder=""
-                        value={item.text}
-                        onChange={(e) => {
-                          setObgData((prev) => ({
-                            ...prev,
-                            message: prev.message.map((a) =>
-                              a.uuid === item.uuid
-                                ? { ...a, text: e.target.value }
-                                : a
-                            ),
-                          }));
-                        }}
-                      />
+
+                      {item?.type === "text" ? (
+                        <textarea
+                          onWheel={(e) => e.target.blur()}
+                          className="searchInput"
+                          style={{
+                            border: "none",
+                            borderBottom: "2px solid black",
+                            borderRadius: "0px",
+                            height: "100px",
+                          }}
+                          id={item.uuid}
+                          onFocus={() => {
+                            setActive(item.uuid);
+                          }}
+                          placeholder=""
+                          value={item.text}
+                          onChange={(e) => {
+                            setObgData((prev) => ({
+                              ...prev,
+                              message: prev.message.map((a) =>
+                                a.uuid === item.uuid
+                                  ? { ...a, text: e.target.value }
+                                  : a
+                              ),
+                            }));
+                          }}
+                        />
+                      ) : (
+                        <input
+                          className="searchInput"
+                          type="file"
+                          onChange={(e) =>
+                            setObgData((prev) => ({
+                              ...prev,
+                              message: prev.message.map((a) =>
+                                a.uuid === item.uuid
+                                  ? { ...a, img: e.target.files[0] }
+                                  : a
+                              ),
+                            }))
+                          }
+                        />
+                      )}
                     </td>
                   </tr>
                 ))}
-                   <tr>
-                        <td
-                          colSpan={2}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-start",
-                          }}
-                        >
-                          <button
-                            className="item-sales-search"
-                            onClick={(e) =>
-                              setObgData((prev) => ({
-                                ...prev,
-                                message: prev.message.map((a) =>
-                                  a.uuid === active
-                                    ? {
-                                        ...a,
-                                        text: a.text + "{counter_title}",
-                                      }
-                                    : a
-                                ),
-                              }))
-                            }
-                          >
-                            Counter Title
-                          </button>
-                          <button
-                            className="item-sales-search"
-                            onClick={(e) =>
-                              setObgData((prev) => ({
-                                ...prev,
-                                message: prev.message.map((a) =>
-                                  a.uuid === active
-                                    ? { ...a, text: a.text + "{short_link}" }
-                                    : a
-                                ),
-                              }))
-                            }
-                          >
-                            Counter Link
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td
-                          colSpan={2}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-start",
-                          }}
-                        >
-                          <button
-                            className="item-sales-search"
-                            onClick={(e) =>
-                              setObgData((prev) => ({
-                                ...prev,
-                                message: prev.message.map((a) =>
-                                  a.uuid === active
-                                    ? {
-                                        ...a,
-                                        text: a.text + "{invoice_number}",
-                                      }
-                                    : a
-                                ),
-                              }))
-                            }
-                          >
-                            Invoice Number
-                          </button>
-                          <button
-                            className="item-sales-search"
-                            onClick={(e) =>
-                              setObgData((prev) => ({
-                                ...prev,
-                                message: prev.message.map((a) =>
-                                  a.uuid === active
-                                    ? { ...a, text: a.text + "{amount}" }
-                                    : a
-                                ),
-                              }))
-                            }
-                          >
-                            Amount
-                          </button>
-                        </td>
-                      </tr>
+                <tr>
+                  <td
+                    colSpan={2}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                    }}
+                  >
+                    <button
+                      className="item-sales-search"
+                      onClick={(e) => addVariable("counter_title")}
+                    >
+                      Counter Title
+                    </button>
+                    <button
+                      className="item-sales-search"
+                      onClick={(e) => addVariable("short_link")}
+                    >
+                      Counter Link
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td
+                    colSpan={2}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                    }}
+                  >
+                    <button
+                      className="item-sales-search"
+                      onClick={(e) => addVariable("invoice_number")}
+                    >
+                      Invoice Number
+                    </button>
+                    <button
+                      className="item-sales-search"
+                      onClick={(e) => addVariable("amount")}
+                    >
+                      Amount
+                    </button>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -530,9 +549,9 @@ function IncentivePopup({ onSave, popupForm }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              position:"absolute",
-              bottom:0,
-              left:0,
+              position: "absolute",
+              bottom: 0,
+              left: 0,
             }}
           >
             <button className="fieldEditButton" onClick={submitHandler}>

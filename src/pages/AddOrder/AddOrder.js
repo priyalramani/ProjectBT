@@ -22,12 +22,10 @@ const CovertedQty = (qty, conversion) => {
 
   return b + ":" + p;
 };
-let user_warehouse = localStorage.getItem("warehouse") || 0;
-user_warehouse = user_warehouse ? JSON.parse(user_warehouse)[0] : 0;
 
 let inititals = {
   counter_uuid: "",
-  warehouse_uuid: user_warehouse,
+
   item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
 };
 export default function AddOrder() {
@@ -37,6 +35,7 @@ export default function AddOrder() {
   const [counterFilter] = useState("");
   const [holdPopup, setHoldPopup] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
+  const [user_warehouse, setUser_warehouse] = useState([]);
 
   // const selectRef = useRef();
   const [itemsData, setItemsData] = useState([]);
@@ -59,6 +58,19 @@ export default function AddOrder() {
     });
     if (response.data.success)
       setWarehouse(response.data.result.filter((a) => a.warehouse_title));
+  };
+
+  const GetUserWarehouse = async () => {
+    const response = await axios({
+      method: "get",
+      url: "users/GetUser/" + localStorage.getItem("user_uuid"),
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success)
+      setUser_warehouse(response.data.result.warehouse);
   };
   const getAutoBill = async () => {
     let data = [];
@@ -117,7 +129,8 @@ export default function AddOrder() {
   useEffect(() => {
     getCounter();
     getAutoBill();
-    // escFunction({ key: "Enter" });
+    GetUserWarehouse();
+
     GetWarehouseList();
   }, []);
   useEffect(() => {
@@ -434,8 +447,9 @@ export default function AddOrder() {
                       ...warehouse
                         .filter(
                           (a) =>
-                            !user_warehouse ||
-                            a.warehouse_uuid === user_warehouse
+                            !user_warehouse.length ||
+                            +user_warehouse[0] === 1 ||
+                            user_warehouse.find((b) => b === a.warehouse_uuid)
                         )
                         .map((a) => ({
                           value: a.warehouse_uuid,

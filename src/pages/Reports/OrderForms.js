@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
-import { DeleteOutline } from "@mui/icons-material";
+import { CopyAll, DeleteOutline } from "@mui/icons-material";
 import axios from "axios";
 const OrderForms = () => {
   const [itemsData, setItemsData] = useState([]);
@@ -89,7 +89,7 @@ const OrderForms = () => {
               className="searchInput"
             />
 
-            <div>Total Form: {filterItemsData.length}</div>
+            <div>Total Form: {filterItemsData?.length}</div>
 
             <button
               className="item-sales-search"
@@ -150,6 +150,7 @@ function Table({
 }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
+  const [copied, setCopied] = useState("");
 
   return (
     <table
@@ -184,7 +185,7 @@ function Table({
             </div>
           </th>
 
-          <th colSpan={2}></th>
+          <th colSpan={3}></th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -218,6 +219,35 @@ function Table({
                 }}
               >
                 <DeleteOutline />
+              </td>
+              <td
+                colSpan={1}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText("form-" + item.form_short_link);
+                  setCopied(item.form_short_link);
+                  setTimeout(() => setCopied(""), 3000);
+                }}
+              >
+                {copied === item.form_short_link ? (
+                  <div
+                    style={{
+                      // position: "absolute",
+                      top: "-15px",
+                      right: "10px",
+                      fontSize: "10px",
+                      backgroundColor: "#000",
+                      color: "#fff",
+                      padding: "3px",
+                      borderRadius: "10px",
+                      textAlign: "center",
+                    }}
+                  >
+                    Copied!
+                  </div>
+                ) : (
+                  <CopyAll />
+                )}
               </td>
               <td>
                 <button
@@ -298,7 +328,7 @@ function NewUserForm({
     }
   };
   const onItemIncludeToggle = (company_uuid, action) => {
-      console.log(company_uuid,action)
+    console.log(company_uuid, action);
     if (action === "add") {
       setdata((prev) => ({
         ...prev,
@@ -553,12 +583,15 @@ function ItemsTable({ items, includesArray, onItemIncludeToggle }) {
 function CounterTable({ form_uuid, onSave }) {
   const [counter, setCounter] = useState([]);
   const [filterCounterTitle, setFilterCounterTitle] = useState("");
+  const [routesData, setRoutesData] = useState([]);
+  const [filterRouteTitle, setFilterRouteTitle] = useState("");
+
   const getCounter = async (controller = new AbortController()) => {
     const response = await axios({
       method: "post",
       url: "/counters/GetCounterData",
       signal: controller.signal,
-      data: ["counter_uuid", "counter_title", "form_uuid"],
+      data: ["counter_uuid", "counter_title", "form_uuid", "route_uuid"],
       headers: {
         "Content-Type": "application/json",
       },
@@ -575,9 +608,21 @@ function CounterTable({ form_uuid, onSave }) {
       );
     }
   };
+  const getRoutesData = async (controller = new AbortController()) => {
+    const response = await axios({
+      method: "get",
+      url: "/routes/GetRouteList",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setRoutesData(response.data.result);
+  };
   useEffect(() => {
     let controller = new AbortController();
     getCounter(controller);
+    getRoutesData(controller);
     return () => {
       controller.abort();
     };
@@ -607,6 +652,24 @@ function CounterTable({ form_uuid, onSave }) {
       ),
     [counter, filterCounterTitle]
   );
+
+  const filterRoute = useMemo(
+    () =>
+      routesData
+        .filter(
+          (a) =>
+            (!filterRouteTitle ||
+              a.route_title
+                ?.toLocaleLowerCase()
+                ?.includes(filterRouteTitle?.toLocaleLowerCase())) &&
+            a.route_uuid &&
+            filterCounter?.filter((b) => a.route_uuid === b.route_uuid)?.length
+        )
+
+        .sort((a, b) => a?.route_title?.localeCompare(b?.route_title)),
+    [filterRouteTitle, filterCounter, routesData]
+  );
+
   return (
     <div className="overlay" style={{ zIndex: 9999999 }}>
       <div
@@ -631,13 +694,23 @@ function CounterTable({ form_uuid, onSave }) {
                 <h1>Counters</h1>
               </div>
               <div className="formGroup">
-                <input
-                  type="text"
-                  onChange={(e) => setFilterCounterTitle(e.target.value)}
-                  value={filterCounterTitle}
-                  placeholder="Search Counter Title..."
-                  className="searchInput"
-                />
+                <div className="flex">
+                  <input
+                    type="text"
+                    onChange={(e) => setFilterCounterTitle(e.target.value)}
+                    value={filterCounterTitle}
+                    placeholder="Search Counter Title..."
+                    className="searchInput"
+                  />
+                  <input
+                    type="text"
+                    onChange={(e) => setFilterRouteTitle(e.target.value)}
+                    value={filterRouteTitle}
+                    placeholder="Search route Title..."
+                    className="searchInput"
+                  />
+                </div>
+
                 <div className="row">
                   <div
                     style={{
@@ -646,7 +719,128 @@ function CounterTable({ form_uuid, onSave }) {
                       minWidth: "600px",
                     }}
                   >
-                    <table className="table">
+                    <table
+                      className="user-table"
+                      style={{
+                        maxWidth: "500px",
+                        height: "fit-content",
+                        overflowX: "scroll",
+                      }}
+                    >
+                      <thead>
+                        <tr>
+                          <th>S.N</th>
+                          <th colSpan={2}>Counter Title</th>
+                        </tr>
+                      </thead>
+                      <tbody className="tbody">
+                        {filterRoute.map((a) => (
+                          <>
+                            <tr
+                              style={{ pageBreakAfter: "auto", width: "100%" }}
+                            >
+                              <td colSpan={3}>
+                                {a.route_title}
+                                <span
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+
+                                    setCounter((prev) => {
+                                      let counter_form_uuid =
+                                        filterCounter?.filter(
+                                          (b) =>
+                                            a.route_uuid === b.route_uuid &&
+                                            form_uuid === b.form_uuid
+                                        )?.length ===
+                                        filterCounter?.filter(
+                                          (b) => a.route_uuid === b.route_uuid
+                                        )?.length
+                                          ? ""
+                                          : form_uuid;
+                                      return prev.map((count) =>
+                                        count.route_uuid === a.route_uuid
+                                          ? {
+                                              ...count,
+                                              form_uuid: counter_form_uuid,
+                                              edit: true,
+                                            }
+                                          : count
+                                      );
+                                    });
+                                  }}
+                                  style={{ marginLeft: "10px" }}
+                                >
+                                 
+                                  <input
+                                    type="checkbox"
+                                    checked={
+                                      filterCounter?.filter(
+                                        (b) =>
+                                          a.route_uuid === b.route_uuid &&
+                                          form_uuid === b.form_uuid
+                                      )?.length ===
+                                      filterCounter?.filter(
+                                        (b) => a.route_uuid === b.route_uuid
+                                      )?.length
+                                    }
+                                    style={{ transform: "scale(1.3)" }}
+                                  />
+                                </span>
+                              </td>
+                            </tr>
+                            {filterCounter
+                              ?.filter((b) => a.route_uuid === b.route_uuid)
+                              ?.sort((a, b) =>
+                                a.counter_title?.localeCompare(b.counter_title)
+                              )
+                              ?.map((item, i, array) => {
+                                return (
+                                  <tr
+                                    key={Math.random()}
+                                    style={{ height: "30px" }}
+                                  >
+                                    <td
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setCounter((prev) =>
+                                          prev.map((a) =>
+                                            a.counter_uuid === item.counter_uuid
+                                              ? {
+                                                  ...a,
+                                                  form_uuid:
+                                                    a.form_uuid === form_uuid
+                                                      ? ""
+                                                      : form_uuid,
+                                                  edit: true,
+                                                }
+                                              : a
+                                          )
+                                        );
+                                      }}
+                                      className="flex"
+                                      style={{
+                                        justifyContent: "space-between",
+                                      }}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={item.form_uuid === form_uuid}
+                                        style={{ transform: "scale(1.3)" }}
+                                      />
+                                      {i + 1}
+                                    </td>
+
+                                    <td colSpan={2}>
+                                      {item.counter_title || ""}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                          </>
+                        ))}
+                      </tbody>
+                    </table>
+                    {/* <table className="table">
                       <thead>
                         <tr>
                           <th className="description" style={{ width: "10%" }}>
@@ -707,7 +901,7 @@ function CounterTable({ form_uuid, onSave }) {
                           );
                         })}
                       </tbody>
-                    </table>
+                    </table> */}
                   </div>
                 </div>
               </div>

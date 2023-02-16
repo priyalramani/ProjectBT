@@ -126,10 +126,10 @@ const Outstanding = () => {
               a.counter_title
                 .toLocaleLowerCase()
                 .includes(filterTitle.toLocaleLowerCase()) ||
-              a.invoice_number
-                .toString()
-                .toLocaleLowerCase()
-                .includes(filterTitle.toLocaleLowerCase())) &&
+              a?.invoice_number
+                ?.toString()
+                ?.toLocaleLowerCase()
+                ?.includes(filterTitle.toLocaleLowerCase())) &&
             (!type || +type === a.type)
         ) || [],
     [counters, filterTitle, outstanding, routesData, type, users]
@@ -464,14 +464,15 @@ function Table({
               <td colSpan={2}>{item.invoice_number || ""}</td>
               <td colSpan={2}>{item.counter_title || ""}</td>
               <td colSpan={2}>{item.route_title || ""}</td>
-              <td colSpan={2}>
+              <td
+                colSpan={2}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTypePopup(item);
+                }}
+              >
                 {typesData.find((a) => a.index === item.type)?.name || ""}
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setTypePopup(item);
-                  }}
-                >
+                <span>
                   <ArrowDropDown />
                 </span>
               </td>
@@ -556,8 +557,8 @@ function DiliveryPopup({
   }, [PaymentModes]);
   console.log(order.collection_tag_uuid);
   const submitHandler = async () => {
-    if(waiting){
-      return
+    if (waiting) {
+      return;
     }
     setWaiting(true);
 

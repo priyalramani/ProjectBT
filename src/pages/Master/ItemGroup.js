@@ -291,7 +291,7 @@ function NewUserForm({ onSave, popupInfo, setRoutesData }) {
                     Item Group Title
                     <input
                       type="text"
-                      name="route_title"
+                      name="category_title"
                       className="numberInput"
                       value={data?.item_group_title}
                       onChange={(e) =>
@@ -324,14 +324,23 @@ function NewUserForm({ onSave, popupInfo, setRoutesData }) {
 }
 
 function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
-  const [pattern, setPattern] = useState("");
-  const [items, setItems] = useState([]);
-  const [company, setCompany] = useState([]);
-  const [Category, setCategory] = useState([]);
-  const [itemGroupings, setItemGroupings] = useState([]);
-  const [filterCategory, setFilterCategory] = useState("");
-  const [filterCompany, setFilterCompany] = useState("");
-  const getItemCategories = async () => {
+  const [filterItemTitle, setFilterItemTitle] = useState("");
+  const [filterCategoryTitle, setFilterCategoryTitle] = useState("");
+  const [Items, setItems] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
+
+  const getCounter = async () => {
+    const response = await axios({
+      method: "post",
+      url: "/items/GetItemData",
+      data: ["item_uuid", "item_title", "category_uuid", "item_group_uuid"],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setItems(response.data.result);
+  };
+  const getRoutesData = async () => {
     const response = await axios({
       method: "get",
       url: "/itemCategories/GetItemCategoryList",
@@ -340,135 +349,18 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setCategory(response.data.result);
-  };
-  const getItemsData = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/items/GetItemList",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setItems(response.data.result);
-  };
-  const getCompanies = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/companies/getCompanies",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setCompany(response.data.result);
+    if (response.data.success) setCategoryData(response.data.result);
   };
   useEffect(() => {
-    getItemsData();
-    getItemCategories();
-    getCompanies();
+    getCounter();
+    getRoutesData();
   }, []);
-  useEffect(
-    items?.length
-      ? () =>
-          setItemGroupings(
-            items.filter(
-              (a) =>
-                a.item_group_uuid.filter((b) => b === ItemGroup.item_group_uuid)
-                  .length
-            )
-          )
-      : () => {},
-    [items]
-  );
-  const searchedItems = useMemo(
-    () =>
-      items
-        ?.map((b) => ({
-          ...b,
-          company_title:
-            company.find((a) => a.company_uuid === b.company_uuid)
-              ?.company_title || "-",
-          category_title:
-            Category.find((a) => a.category_uuid === b.category_uuid)
-              ?.category_title || "-",
-        }))
-        .filter(
-          (item) =>
-            item.item_title.toLowerCase().includes(pattern.toLowerCase()) &&
-            item.category_title
-              .toLowerCase()
-              .includes(filterCategory.toLowerCase()) &&
-            item.company_title
-              .toLowerCase()
-              .includes(filterCompany.toLowerCase())
-        ),
-    [pattern, items, filterCategory, filterCompany, company, Category]
-  );
 
-  const handleItemIncludeToggle = (item_uuid, type) => {
-    let data = items.find((a) => a.item_uuid === item_uuid);
-    if (type === "remove") {
-      data = toggleRemoveItem(itemGroupings, data);
-    } else {
-      data = toggleAddItem(itemGroupings, data);
-    }
-    console.log(data, ItemGroup.item_group_uuid);
-
-    setItemGroupings(data);
-  };
-  const toggleRemoveItem = (arr, item) =>
-    arr.map((a) =>
-      a?.item_uuid === item.item_uuid
-        ? {
-            ...a,
-            item_group_uuid: a.item_group_uuid.filter((b) => {
-              console.log("----", b, ItemGroup.item_group_uuid);
-              return b !== ItemGroup.item_group_uuid;
-            }),
-          }
-        : a
-    );
-  const toggleAddItem = (arr, item) =>
-    arr?.filter((i) => i?.item_uuid === item?.item_uuid)?.length
-      ? [
-          ...arr?.filter((i) => i !== item).map((a) => ({ ...a, one: true })),
-          arr
-            ?.filter((i) => i.item_uuid === item.item_uuid)
-            .map((a) => ({
-              ...a,
-              one: true,
-              item_group_uuid: item?.item_group_uuid?.length
-                ? [...item.item_group_uuid, ItemGroup.item_group_uuid]
-                : [ItemGroup.item_group_uuid],
-            }))[0],
-        ]
-      : arr?.length
-      ? [
-          ...arr.map((a) => ({ ...a, two: true })),
-          {
-            ...item,
-            two: true,
-            item_group_uuid: item?.item_group_uuid?.length
-              ? [...item.item_group_uuid, ItemGroup.item_group_uuid]
-              : [ItemGroup.item_group_uuid],
-          },
-        ]
-      : [
-          {
-            ...item,
-            three: true,
-            item_group_uuid: item.item_group_uuid?.length
-              ? [...item.item_group_uuid, ItemGroup.item_group_uuid]
-              : [ItemGroup.item_group_uuid],
-          },
-        ];
   const submitHandler = async () => {
     const response = await axios({
       method: "put",
       url: "/items/putItem",
-      data: itemGroupings,
+      data: Items.filter((a) => a.edit),
       headers: {
         "Content-Type": "application/json",
       },
@@ -477,6 +369,34 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
       setItemsModalIndex(null);
     }
   };
+  const filteredItems = useMemo(
+    () =>
+      Items.filter(
+        (a) =>
+          !filterItemTitle ||
+          a.item_title
+            ?.toLocaleLowerCase()
+            ?.includes(filterItemTitle?.toLocaleLowerCase())
+      ),
+    [Items, filterItemTitle]
+  );
+  const filterCategory = useMemo(
+    () =>
+      categoryData
+        .filter(
+          (a) =>
+            (!filterCategoryTitle ||
+              a.category_title
+                ?.toLocaleLowerCase()
+                ?.includes(filterCategoryTitle?.toLocaleLowerCase())) &&
+            a.category_uuid &&
+            filteredItems?.filter((b) => a.category_uuid === b.category_uuid).length
+        )
+
+        .sort((a, b) => a?.category_title?.localeCompare(b?.category_title)),
+    [filterCategoryTitle, filteredItems, categoryData]
+  );
+
   return (
     <div
       className="noSpaceForm"
@@ -486,40 +406,233 @@ function ItemsForm({ ItemGroup, itemGroupingIndex, setItemsModalIndex }) {
       }}
     >
       <h1>Items</h1>
+
       <div className="flex" style={{ justifyContent: "space-between" }}>
         <input
           type="text"
-          onChange={(e) => setPattern(e.target.value)}
-          value={pattern}
+          onChange={(e) => setFilterItemTitle(e.target.value)}
+          value={filterItemTitle}
           placeholder="Search Item..."
           className="searchInput"
-        />{" "}
+        />
         <input
           type="text"
-          onChange={(e) => setFilterCompany(e.target.value)}
-          value={filterCompany}
-          placeholder="Search Company..."
-          className="searchInput"
-        />{" "}
-        <input
-          type="text"
-          onChange={(e) => setFilterCategory(e.target.value)}
-          value={filterCategory}
+          onChange={(e) => setFilterCategoryTitle(e.target.value)}
+          value={filterCategoryTitle}
           placeholder="Search Category..."
           className="searchInput"
         />
       </div>
+      <div
+        style={{
+          overflowY: "scroll",
+          height: "45vh",
+        }}
+      >
+        <table
+          className="user-table"
+          style={{
+            maxWidth: "500px",
+            height: "fit-content",
+            overflowX: "scroll",
+          }}
+        >
+          <thead>
+            <tr>
+              <th>S.N</th>
+              <th colSpan={2}>Item Title</th>
+            </tr>
+          </thead>
+          <tbody className="tbody">
+            {filterCategory.map((a) => (
+              <>
+                <tr style={{ pageBreakAfter: "auto", width: "100%" }}>
+                  <td colSpan={3}>
+                    {a.category_title}
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
 
-      <ItemsTable
-        items={searchedItems}
-        onItemIncludeToggle={handleItemIncludeToggle}
-        includesArray={itemGroupings}
-        itemGroup={ItemGroup}
-        company={company}
-        Category={Category}
-        filterCategory={filterCategory}
-        filterCompany={filterCompany}
-      />
+                        setItems((prev) => {
+                          let counter_form_uuid =
+                            filteredItems?.filter(
+                              (b) =>
+                                a.category_uuid === b.category_uuid &&
+                                b.item_group_uuid.find(
+                                  (d) => d === ItemGroup.item_group_uuid
+                                )
+                            )?.length ===
+                            filteredItems?.filter(
+                              (b) => a.category_uuid === b.category_uuid
+                            )?.length
+                              ? true
+                              : false;
+                          return prev.map((count) =>
+                            count.category_uuid === a.category_uuid
+                              ? {
+                                  ...count,
+                                  item_group_uuid: counter_form_uuid
+                                    ? count?.item_group_uuid?.filter(
+                                        (d) => d !== ItemGroup.item_group_uuid
+                                      )
+                                    : [
+                                        ...(count.item_group_uuid || []),
+                                        ItemGroup.item_group_uuid,
+                                      ],
+                                  edit: true,
+                                }
+                              : count
+                          );
+                        });
+                      }}
+                      style={{ marginLeft: "10px" }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={
+                          filteredItems?.filter(
+                            (b) =>
+                              a.category_uuid === b.category_uuid &&
+                              b.item_group_uuid.find(
+                                (d) => d === ItemGroup.item_group_uuid
+                              )
+                          )?.length ===
+                          filteredItems?.filter(
+                            (b) => a.category_uuid === b.category_uuid
+                          )?.length
+                        }
+                        style={{ transform: "scale(1.3)" }}
+                      />
+                    </span>
+                  </td>
+                </tr>
+                {filteredItems
+                  ?.filter((b) => a.category_uuid === b.category_uuid)
+                  ?.sort((a, b) =>
+                    a.item_title?.localeCompare(b.item_title)
+                  )
+                  ?.map((item, i, array) => {
+                    return (
+                      <tr key={Math.random()} style={{ height: "30px" }}>
+                        <td
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setItems((prev) =>
+                              prev.map((a) =>
+                                a.item_uuid === item.item_uuid
+                                  ? {
+                                      ...a,
+                                      item_group_uuid: a.item_group_uuid.find(
+                                        (d) => d === ItemGroup.item_group_uuid
+                                      )
+                                        ? a.item_group_uuid.filter(
+                                            (d) =>
+                                              d !== ItemGroup.item_group_uuid
+                                          )
+                                        : [
+                                            ...(a.item_group_uuid || []),
+                                            ItemGroup.item_group_uuid,
+                                          ],
+                                      edit: true,
+                                    }
+                                  : a
+                              )
+                            );
+                          }}
+                          className="flex"
+                          style={{ justifyContent: "space-between" }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={item.item_group_uuid.find(
+                              (d) => d === ItemGroup.item_group_uuid
+                            )}
+                            style={{ transform: "scale(1.3)" }}
+                          />
+                          {i + 1}
+                        </td>
+
+                        <td colSpan={2}>{item.item_title || ""}</td>
+                      </tr>
+                    );
+                  })}
+              </>
+            ))}
+          </tbody>
+        </table>
+
+        {/* <table className="table">
+        <thead>
+          <tr>
+            <th className="description" style={{ width: "25%" }}>
+              Counter
+            </th>
+            <th className="description" style={{ width: "25%" }}>
+              Route
+            </th>
+
+            <th style={{ width: "25%" }}>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {filterItemData
+            ?.filter((a) => a.item_uuid)
+
+            .map((item, index) => {
+              return (
+                <tr key={item.item_uuid}>
+                  <td>{item.item_title}</td>
+                  <td>{item?.category_title}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="noBgActionButton"
+                      style={{
+                        backgroundColor: includesItem?.filter(
+                          (a) =>
+                            a?.item_uuid === item?.item_uuid &&
+                            a.item_group_uuid.filter(
+                              (a) => a === itemGroup.item_group_uuid
+                            ).length
+                        )?.length
+                          ? "red"
+                          : "var(--mainColor)",
+                        width: "150px",
+                        fontSize: "large",
+                      }}
+                      onClick={(event) =>
+                        onItemIncludeToggle(
+                          item.item_uuid,
+                          includesItem?.filter(
+                            (a) =>
+                              a?.item_uuid === item?.item_uuid &&
+                              a.item_group_uuid.filter(
+                                (a) => a === itemGroup.item_group_uuid
+                              ).length
+                          )?.length
+                            ? "remove"
+                            : "add"
+                        )
+                      }
+                    >
+                      {includesItem?.filter(
+                        (a) =>
+                          a?.item_uuid === item?.item_uuid &&
+                          a.item_group_uuid.filter(
+                            (a) => a === itemGroup.item_group_uuid
+                          ).length
+                      )?.length
+                        ? "Remove"
+                        : "Add"}
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+        </tbody>
+      </table> */}
+      </div>
       <div>
         <button
           type="button"
@@ -587,7 +700,7 @@ function ItemsTable({
     Category,
     includesArray,
     itemGroup.item_group_uuid,
-    itemGroup.counter_group_uuid,
+    itemGroup.item_group_uuid,
   ]);
   return (
     <div
