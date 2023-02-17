@@ -12,7 +12,8 @@ import { Add, Delete, DeleteOutline } from "@mui/icons-material";
 import { Switch } from "@mui/material";
 import { green } from "@mui/material/colors";
 import { alpha, styled } from "@mui/material/styles";
-
+import { server } from "../../App";
+import noimg from "../../assets/noimg.jpg";
 const GreenSwitch = styled(Switch)(({ theme }) => ({
   "& .MuiSwitch-switchBase.Mui-checked": {
     color: green[500],
@@ -475,20 +476,39 @@ function IncentivePopup({ onSave, popupForm }) {
                           }}
                         />
                       ) : (
-                        <input
-                          className="searchInput"
-                          type="file"
-                          onChange={(e) =>
-                            setObgData((prev) => ({
-                              ...prev,
-                              message: prev.message.map((a) =>
-                                a.uuid === item.uuid
-                                  ? { ...a, img: e.target.files[0] }
-                                  : a
-                              ),
-                            }))
-                          }
-                        />
+                        <label htmlFor={item.uuid} className="flex">
+                          Upload Image
+                          <input
+                            className="searchInput"
+                            type="file"
+                            id={item.uuid}
+                            style={{ display: "none" }}
+                            onChange={(e) =>
+                              setObgData((prev) => ({
+                                ...prev,
+                                message: prev.message.map((a) =>
+                                  a.uuid === item.uuid
+                                    ? { ...a, img: e.target.files[0] }
+                                    : a
+                                ),
+                              }))
+                            }
+                          />
+                          {console.log(server + item.uuid + ".png")}
+                          <img
+                            style={{
+                              width: "100px",
+                              height: "100px",
+                              objectFit: "contain",
+                            }}
+                            src={server + "/" + item.uuid + ".png"}
+                            onError={({ currentTarget }) => {
+                              currentTarget.onerror = null; // prevents looping
+                              currentTarget.src = noimg;
+                            }}
+                            alt=""
+                          />
+                        </label>
                       )}
                     </td>
                   </tr>

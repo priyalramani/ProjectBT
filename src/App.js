@@ -61,14 +61,16 @@ import TestCounter from "./pages/Master/TestCounter";
 import OrderForms from "./pages/Reports/OrderForms";
 import LinkedCounter from "./users/LinkedCounter";
 export let Version = 66;
+export const server = "http://localhost:9000";
+// export const server = "https://api.btgondia.com";
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
   const context = useContext(Context);
 
   const { calculationPopup = "", loading, notification } = context;
-  axios.defaults.baseURL = "https://api.btgondia.com";
+  // axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
-  // axios.defaults.baseURL = "http://localhost:9000";
+  axios.defaults.baseURL = server;
 
   const getUserType = async (controller) => {
     let user_uuid = localStorage.getItem("user_uuid");
@@ -114,7 +116,10 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate replace to={"/users"} />} />
           <Route path="/counter/:short_link" element={<LinkedCounter />} />
-          <Route path="/counter/:short_link/:campaign_short_link" element={<LinkedCounter />} />
+          <Route
+            path="/counter/:short_link/:campaign_short_link"
+            element={<LinkedCounter />}
+          />
           {userType === "1" ? (
             <>
               {/* users routes */}
