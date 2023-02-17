@@ -61,8 +61,8 @@ import TestCounter from "./pages/Master/TestCounter";
 import OrderForms from "./pages/Reports/OrderForms";
 import LinkedCounter from "./users/LinkedCounter";
 export let Version = 66;
-export const server = "http://localhost:9000";
-// export const server = "https://api.btgondia.com";
+// export const server = "http://localhost:9000";
+export const server = "https://api.btgondia.com";
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
   const context = useContext(Context);
