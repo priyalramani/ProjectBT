@@ -102,7 +102,7 @@ const Main = () => {
               <Link
                 key={i}
                 to={pathname + rolesArray.find((a) => +a.type === +data)?.link}
-                onClick={() => {}}
+                onClick={() => { }}
                 className="linkDecoration"
                 style={{ textDecoration: "none", height: "fit-content" }}
               >
@@ -182,7 +182,12 @@ function Logout({ onSave, popupForm }) {
       setIsLoading(false);
       onSave();
     } else {
-      deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+      deleteDB("BT", {
+        blocked(currentVersion, blockedVersion, event) {
+          console.log('IDB DELETE REQUEST BLOCKED.', { currentVersion, blockedVersion })
+          window.location.reload()
+        },
+      });
       localStorage.clear();
       sessionStorage.clear();
       window.location.assign("/login");

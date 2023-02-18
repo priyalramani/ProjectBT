@@ -31,11 +31,11 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
             +item.base_qty ===
             +(base_qty_arr.length > 1
               ? base_qty_arr
-                  .map((a) => a.base_qty)
-                  .reduce((a, b) => +Math.max(a, b))
+                .map((a) => a.base_qty)
+                .reduce((a, b) => +Math.max(a, b))
               : base_qty_arr.length === 1
-              ? base_qty_arr[0].base_qty
-              : null)
+                ? base_qty_arr[0].base_qty
+                : null)
         );
         let pice_qty_arr = autobill.qty_details.filter(
           (b) => b.unit === "p" && +b.base_qty <= +a.p
@@ -45,11 +45,11 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
             +item.base_qty ===
             +(pice_qty_arr.length > 1
               ? pice_qty_arr
-                  .map((a) => a.base_qty)
-                  .reduce((a, b) => +Math.max(a, b))
+                .map((a) => a.base_qty)
+                .reduce((a, b) => +Math.max(a, b))
               : pice_qty_arr.length === 1
-              ? pice_qty_arr[0].base_qty
-              : null)
+                ? pice_qty_arr[0].base_qty
+                : null)
         );
         pice_qty_arr = base_qty_arr ? {} : pice_qty_arr;
         if (base_qty_arr || pice_qty_arr) {
@@ -92,15 +92,15 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
       eligibleAddItems.length > 1
         ? eligibleAddItems.map((a) => +a.b || 0).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
-        ? +eligibleAddItems[0].b
-        : 0;
+          ? +eligibleAddItems[0].b
+          : 0;
     console.log("eligibleBox", eligiblesBox);
     let eligiblesPcs =
       eligibleAddItems.length > 1
         ? eligibleAddItems.map((a) => a.p).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
-        ? +eligibleAddItems[0].p
-        : 0;
+          ? +eligibleAddItems[0].p
+          : 0;
     console.log("eligiblePcs", eligiblesPcs);
 
     let base_qty_arr = autobill.qty_details.filter(
@@ -110,16 +110,16 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
     base_qty_arr =
       eligibleAddItems.length >= autobill.min_range
         ? base_qty_arr.find(
-            (item) =>
-              +item.base_qty ===
-              (base_qty_arr.length > 1
-                ? base_qty_arr
-                    .map((a) => a.base_qty)
-                    .reduce((a, b) => +Math.max(a, b))
-                : base_qty_arr.length === 1
+          (item) =>
+            +item.base_qty ===
+            (base_qty_arr.length > 1
+              ? base_qty_arr
+                .map((a) => a.base_qty)
+                .reduce((a, b) => +Math.max(a, b))
+              : base_qty_arr.length === 1
                 ? +base_qty_arr[0]?.base_qty
                 : null)
-          )
+        )
         : null;
     console.log("baseqtyobj", base_qty_arr);
     let pice_qty_arr = autobill.qty_details.filter(
@@ -129,16 +129,16 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
     pice_qty_arr =
       eligibleAddItems.length >= autobill.min_range
         ? pice_qty_arr.find(
-            (item) =>
-              +item.base_qty ===
-              (pice_qty_arr.length > 1
-                ? pice_qty_arr
-                    .map((a) => a.base_qty)
-                    .reduce((a, b) => +Math.max(a, b))
-                : pice_qty_arr.length === 1
+          (item) =>
+            +item.base_qty ===
+            (pice_qty_arr.length > 1
+              ? pice_qty_arr
+                .map((a) => a.base_qty)
+                .reduce((a, b) => +Math.max(a, b))
+              : pice_qty_arr.length === 1
                 ? +pice_qty_arr[0]?.base_qty
                 : null)
-          )
+        )
         : null;
     // console.log("piceqtyobj", pice_qty_arr);
 
@@ -182,8 +182,8 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           ? [...nonFiltered, ...dataItems]
           : nonFiltered
         : dataItems.length
-        ? dataItems
-        : [];
+          ? dataItems
+          : [];
     }
     if (pice_qty_arr?.add_items) {
       let dataItems = dbItems.filter(
@@ -225,8 +225,8 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           ? [...nonFiltered, ...dataItems]
           : nonFiltered
         : dataItems.length
-        ? dataItems
-        : [];
+          ? dataItems
+          : [];
     }
   }
 
@@ -249,7 +249,7 @@ export const Billing = async ({
   edit_prices = [],
 }) => {
   let newPriceItems = [];
-console.log("itemsdata",items)
+  console.log("itemsdata", items)
   // let add_discounts = true;
   for (let item of items) {
     item = { ...item, item_total: 0 };
@@ -264,19 +264,19 @@ console.log("itemsdata",items)
         : item.charges_discount?.filter((a) => a.value) || [];
     let price = +(add_discounts || item.edit
       ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
-          ?.price || 0
+        ?.price || 0
       : 0);
     let special_discount_percentage =
       add_discounts || item.edit
         ? counter?.item_special_discount?.find(
-            (a) => a.item_uuid === item.item_uuid
-          )?.discount || 0
+          (a) => a.item_uuid === item.item_uuid
+        )?.discount || 0
         : 0;
     let company_discount_percentage =
       add_discounts || item.edit
         ? counter?.company_discount?.find(
-            (a) => a.company_uuid === item.company_uuid
-          )?.discount || 0
+          (a) => a.company_uuid === item.company_uuid
+        )?.discount || 0
         : 0;
 
     item = {
@@ -295,7 +295,7 @@ console.log("itemsdata",items)
         special_discount_percentage,
         item_desc_total:
           (+edit_price || +item?.price || +item?.item_price || 0) *
-            ((100 - special_discount_percentage) / 100) || 0,
+          ((100 - special_discount_percentage) / 100) || 0,
       };
     }
 
@@ -309,7 +309,7 @@ console.log("itemsdata",items)
         item_desc_total: item.item_desc_total
           ? item.item_desc_total * ((100 - item.item_discount) / 100) || 0
           : (+edit_price || +item?.price || +item?.item_price || 0) *
-              ((100 - item.item_discount) / 100) || 0,
+          ((100 - item.item_discount) / 100) || 0,
       };
     }
 
@@ -323,9 +323,9 @@ console.log("itemsdata",items)
         company_discount_percentage,
         item_desc_total: item.item_desc_total
           ? item.item_desc_total *
-              ((100 - company_discount_percentage) / 100) || 0
+          ((100 - company_discount_percentage) / 100) || 0
           : (+edit_price || +item?.price || +item.item_price || 0) *
-              ((100 - company_discount_percentage) / 100) || 0,
+          ((100 - company_discount_percentage) / 100) || 0,
       };
     }
 
@@ -336,11 +336,11 @@ console.log("itemsdata",items)
         add_discounts || item.edit
           ? item.item_desc_total
           : (+edit_price || +item?.price || +item?.item_price) *
-            (charges_discount?.length > 1
-              ? charges_discount
-                  ?.map((a) => +((100 - +a.value) / 100))
-                  ?.reduce((a, b) => a * b)
-              : item?.charges_discount?.length
+          (charges_discount?.length > 1
+            ? charges_discount
+              ?.map((a) => +((100 - +a.value) / 100))
+              ?.reduce((a, b) => a * b)
+            : item?.charges_discount?.length
               ? (100 - +charges_discount[0]?.value) / 100
               : 1),
     };
@@ -348,15 +348,15 @@ console.log("itemsdata",items)
     let item_total =
       item.status !== 3
         ? (
-             (+item.item_desc_total || +item?.price || +item.item_price || 0) *
-              (+item.qty || 0)
-          ).toFixed(2)
+          (+item.item_desc_total || +item?.price || +item.item_price || 0) *
+          (+item.qty || 0)
+        ).toFixed(2)
         : 0;
     if (billDiscounts && add_discounts) {
       charges_discount.push(billDiscounts);
       item_total = item_total * +((100 - +billDiscounts.value) / 100);
     }
-  
+
     if (item_total) item_total = (+item_total || 0).toFixed(2);
     item = {
       ...item,
@@ -372,18 +372,18 @@ console.log("itemsdata",items)
   let order_grandtotal = Math.floor(
     newPriceItems.length > 1
       ? newPriceItems.map((a) => +a.item_total || 0).reduce((a, b) => a + b) -
-          replacement -
-          shortage -
-          adjustment
+      replacement -
+      shortage -
+      adjustment
       : newPriceItems.length
-      ? (newPriceItems.map((a) => a.item_total)[0] || 0) -
+        ? (newPriceItems.map((a) => a.item_total)[0] || 0) -
         replacement -
         shortage -
         adjustment
-      : 0
+        : 0
   );
-// console.log("itemsdata",newPriceItems)
-console.log("itemsdata",order_grandtotal)
+  // console.log("itemsdata",newPriceItems)
+  console.log("itemsdata", order_grandtotal)
   return {
     counter_uuid: counter.counter_uuid,
     order_grandtotal,
@@ -393,7 +393,12 @@ console.log("itemsdata",order_grandtotal)
 };
 
 export const updateIndexedDb = async () => {
-  await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+  await deleteDB("BT", {
+    blocked(currentVersion, blockedVersion, event) {
+      console.log('IDB DELETE REQUEST BLOCKED.', { currentVersion, blockedVersion })
+      window.location.reload()
+    },
+  });
   let Version = +localStorage.getItem("IDBVersion") + 1;
   const response = await axios({
     method: "get",
@@ -412,7 +417,6 @@ export const updateIndexedDb = async () => {
   const result = await axios({
     method: "get",
     url: "/users/getDetails",
-
     headers: {
       "Content-Type": "application/json",
     },
@@ -443,23 +447,23 @@ export const updateIndexedDb = async () => {
     for (let item of data[property]) {
       let IDENTIFIER =
         item[
-          property === "autobill"
-            ? "auto_uuid"
-            : property === "companies"
+        property === "autobill"
+          ? "auto_uuid"
+          : property === "companies"
             ? "company_uuid"
             : property === "counter"
-            ? "counter_uuid"
-            : property === "counter_groups"
-            ? "counter_group_uuid"
-            : property === "item_category"
-            ? "category_uuid"
-            : property === "items"
-            ? "item_uuid"
-            : property === "routes"
-            ? "route_uuid"
-            : property === "payment_modes"
-            ? "mode_uuid"
-            : ""
+              ? "counter_uuid"
+              : property === "counter_groups"
+                ? "counter_group_uuid"
+                : property === "item_category"
+                  ? "category_uuid"
+                  : property === "items"
+                    ? "item_uuid"
+                    : property === "routes"
+                      ? "route_uuid"
+                      : property === "payment_modes"
+                        ? "mode_uuid"
+                        : ""
         ];
       //console.log({ ...item, IDENTIFIER });
       await store.put({ ...item, IDENTIFIER });
@@ -617,7 +621,12 @@ export const jumpToNextIndex = (
 
 export const refreshDb = async () => {
   let Version = +(localStorage.getItem("IDBVersion") || 0) + 1;
-  await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
+  await deleteDB("BT", {
+    blocked(currentVersion, blockedVersion, event) {
+      console.log('IDB DELETE REQUEST BLOCKED.', { currentVersion, blockedVersion })
+      window.location.reload()
+    },
+  });
   console.log(Version);
   const result = await axios({
     method: "get",
@@ -644,25 +653,25 @@ export const refreshDb = async () => {
     for (let item of data[property]) {
       let IDENTIFIER =
         item[
-          property === "autobill"
-            ? "auto_uuid"
-            : property === "companies"
+        property === "autobill"
+          ? "auto_uuid"
+          : property === "companies"
             ? "company_uuid"
             : property === "counter"
-            ? "counter_uuid"
-            : property === "counter_groups"
-            ? "counter_group_uuid"
-            : property === "item_category"
-            ? "category_uuid"
-            : property === "items"
-            ? "item_uuid"
-            : property === "routes"
-            ? "route_uuid"
-            : property === "payment_modes"
-            ? "mode_uuid"
-            : property === "warehouse"
-            ? "warehouse_uuid"
-            : ""
+              ? "counter_uuid"
+              : property === "counter_groups"
+                ? "counter_group_uuid"
+                : property === "item_category"
+                  ? "category_uuid"
+                  : property === "items"
+                    ? "item_uuid"
+                    : property === "routes"
+                      ? "route_uuid"
+                      : property === "payment_modes"
+                        ? "mode_uuid"
+                        : property === "warehouse"
+                          ? "warehouse_uuid"
+                          : ""
         ];
       console.log({ ...item, IDENTIFIER });
       await store.put({ ...item, IDENTIFIER });
