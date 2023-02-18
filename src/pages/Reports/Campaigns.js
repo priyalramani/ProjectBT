@@ -439,7 +439,27 @@ function IncentivePopup({ onSave, popupForm }) {
     console.count("counter");
     return objData.counter_status;
   }, [objData.counter_status]);
-  console.count("render");
+  const addVariable = (name) => {
+    let element = document.getElementById(active);
+    console.log(element.selectionStart);
+    setObgData((prev) => ({
+      ...prev,
+      message: prev.message.map((a) =>
+        a.uuid === active
+          ? {
+              ...a,
+              text:
+                (a.text || "")?.slice(0, element.selectionStart) +
+                `{${name}}` +
+                (a.text || "")?.slice(
+                  element.selectionStart,
+                  (a.text || "").length
+                ),
+            }
+          : a
+      ),
+    }));
+  };
   return (
     <div className="overlay">
       <div
@@ -509,7 +529,7 @@ function IncentivePopup({ onSave, popupForm }) {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "flex-start",
-                        width: "400px",
+                        width: "600px",
                       }}
                     >
                       <b style={{ width: "100px" }}>Campaign Title : </b>
@@ -562,108 +582,113 @@ function IncentivePopup({ onSave, popupForm }) {
                           </span>
                         </td>
                       </tr>
-                      {objData?.message?.map((item) => (
-                        <tr key={item.uuid}>
-                          <td
-                            colSpan={2}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "flex-start",
-                            }}
-                          >
-                            <span
-                              onClick={() =>
-                                setObgData((prev) => ({
-                                  ...prev,
-                                  message: prev.message.filter(
-                                    (a) => a.uuid !== item.uuid
-                                  ),
-                                }))
-                              }
-                            >
-                              <DeleteOutline />
-                            </span>
-                            <select
-                              className="searchInput"
-                              value={item.type}
-                              onChange={(e) => {
-                                setObgData((prev) => ({
-                                  ...prev,
-                                  message: prev.message.map((a) =>
-                                    a.uuid === item.uuid
-                                      ? { ...a, type: e.target.value }
-                                      : a
-                                  ),
-                                }));
+                      <div style={{ overflowY: "scroll", maxHeight: "150px" }}>
+                        {objData?.message?.map((item, i) => (
+                          <tr key={item.uuid}>
+                            <td
+                              colSpan={2}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "flex-start",
                               }}
                             >
-                              <option value="text">Text</option>
-                              <option value="img">Image</option>
-                            </select>
-
-                            {item?.type === "text" ? (
-                              <textarea
-                                onWheel={(e) => e.target.blur()}
+                              {i + 1})
+                              <span
+                                onClick={() =>
+                                  setObgData((prev) => ({
+                                    ...prev,
+                                    message: prev.message.filter(
+                                      (a) => a.uuid !== item.uuid
+                                    ),
+                                  }))
+                                }
+                              >
+                                <DeleteOutline />
+                              </span>
+                              <select
                                 className="searchInput"
-                                style={{
-                                  border: "none",
-                                  borderBottom: "2px solid black",
-                                  borderRadius: "0px",
-                                  height: "100px",
-                                }}
-                                onFocus={() => setActive(item.uuid)}
-                                placeholder=""
-                                value={item.text}
+                                value={item.type}
                                 onChange={(e) => {
                                   setObgData((prev) => ({
                                     ...prev,
                                     message: prev.message.map((a) =>
                                       a.uuid === item.uuid
-                                        ? { ...a, text: e.target.value }
+                                        ? { ...a, type: e.target.value }
                                         : a
                                     ),
                                   }));
                                 }}
-                              />
-                            ) : (
-                              <label htmlFor={item.uuid} className="flex">
-                                Upload Image
-                                <input
+                              >
+                                <option value="text">Text</option>
+                                <option value="img">Image</option>
+                              </select>
+                              {item?.type === "text" ? (
+                                <textarea
+                                  onWheel={(e) => e.target.blur()}
                                   className="searchInput"
-                                  type="file"
+                                  style={{
+                                    border: "none",
+                                    borderBottom: "2px solid black",
+                                    borderRadius: "0px",
+                                    height: "100px",
+                                  }}
                                   id={item.uuid}
-                                  style={{ display: "none" }}
-                                  onChange={(e) =>
+                                  onFocus={() => {
+                                    setActive(item.uuid);
+                                  }}
+                                  placeholder=""
+                                  value={item.text}
+                                  onChange={(e) => {
                                     setObgData((prev) => ({
                                       ...prev,
                                       message: prev.message.map((a) =>
                                         a.uuid === item.uuid
-                                          ? { ...a, img: e.target.files[0] }
+                                          ? { ...a, text: e.target.value }
                                           : a
                                       ),
-                                    }))
-                                  }
-                                />
-                                {console.log(server + item.uuid + ".png")}
-                                <img
-                                  style={{
-                                    width: "100px",
-                                    height: "100px",
-                                    objectFit: "contain",
+                                    }));
                                   }}
-                                  src={server + "/" + item.uuid + ".png"}
-                                  onError={({ currentTarget }) => {
-                                    currentTarget.onerror = null; // prevents looping
-                                    currentTarget.src = noimg;
-                                  }}
-                                  alt=""
                                 />
-                              </label>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
+                              ) : (
+                                <label htmlFor={item.uuid} className="flex">
+                                  Upload Image
+                                  <input
+                                    className="searchInput"
+                                    type="file"
+                                    id={item.uuid}
+                                    style={{ display: "none" }}
+                                    onChange={(e) =>
+                                      setObgData((prev) => ({
+                                        ...prev,
+                                        message: prev.message.map((a) =>
+                                          a.uuid === item.uuid
+                                            ? { ...a, img: e.target.files[0] }
+                                            : a
+                                        ),
+                                      }))
+                                    }
+                                  />
+                                  {console.log(server + item.uuid + ".png")}
+                                  <img
+                                    style={{
+                                      width: "100px",
+                                      height: "100px",
+                                      objectFit: "contain",
+                                    }}
+                                    src={server + "/" + item.uuid + ".png"}
+                                    onError={({ currentTarget }) => {
+                                      currentTarget.onerror = null; // prevents looping
+                                      currentTarget.src = noimg;
+                                    }}
+                                    alt=""
+                                  />
+                                </label>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </div>
                       <tr>
                         <td
                           colSpan={2}
@@ -675,34 +700,13 @@ function IncentivePopup({ onSave, popupForm }) {
                         >
                           <button
                             className="item-sales-search"
-                            onClick={(e) =>
-                              setObgData((prev) => ({
-                                ...prev,
-                                message: prev.message.map((a) =>
-                                  a.uuid === active
-                                    ? {
-                                        ...a,
-                                        text: a.text + "{counter_title}",
-                                      }
-                                    : a
-                                ),
-                              }))
-                            }
+                            onClick={(e) => addVariable("counter_title")}
                           >
                             Counter Title
                           </button>
                           <button
                             className="item-sales-search"
-                            onClick={(e) =>
-                              setObgData((prev) => ({
-                                ...prev,
-                                message: prev.message.map((a) =>
-                                  a.uuid === active
-                                    ? { ...a, text: a.text + "{short_link}" }
-                                    : a
-                                ),
-                              }))
-                            }
+                            onClick={(e) => addVariable("short_link")}
                           >
                             Counter Link
                           </button>
@@ -719,34 +723,13 @@ function IncentivePopup({ onSave, popupForm }) {
                         >
                           <button
                             className="item-sales-search"
-                            onClick={(e) =>
-                              setObgData((prev) => ({
-                                ...prev,
-                                message: prev.message.map((a) =>
-                                  a.uuid === active
-                                    ? {
-                                        ...a,
-                                        text: a.text + "{invoice_number}",
-                                      }
-                                    : a
-                                ),
-                              }))
-                            }
+                            onClick={(e) => addVariable("invoice_number")}
                           >
                             Invoice Number
                           </button>
                           <button
                             className="item-sales-search"
-                            onClick={(e) =>
-                              setObgData((prev) => ({
-                                ...prev,
-                                message: prev.message.map((a) =>
-                                  a.uuid === active
-                                    ? { ...a, text: a.text + "{amount}" }
-                                    : a
-                                ),
-                              }))
-                            }
+                            onClick={(e) => addVariable("amount")}
                           >
                             Amount
                           </button>

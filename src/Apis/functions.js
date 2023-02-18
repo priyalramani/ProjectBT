@@ -392,7 +392,7 @@ console.log("itemsdata",order_grandtotal)
   };
 };
 
-export const updateIndexedDb = async () => {
+export const updateIndexedDb = async (setNotification=()=>{}) => {
   await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
   let Version = +localStorage.getItem("IDBVersion") + 1;
   const response = await axios({
@@ -403,10 +403,12 @@ export const updateIndexedDb = async () => {
     },
   });
 
-  console.log(response.data.result.status);
+  console.log(response.data.success);
   if (!response.data.result.status) {
     localStorage.clear();
     sessionStorage.clear();
+    setNotification(response.data);
+    setTimeout(() => setNotification(null), 5000);
     return;
   }
   const result = await axios({
@@ -616,6 +618,7 @@ export const jumpToNextIndex = (
 };
 
 export const refreshDb = async () => {
+  
   let Version = +(localStorage.getItem("IDBVersion") || 0) + 1;
   await deleteDB("BT", +localStorage.getItem("IDBVersion") || 1);
   console.log(Version);

@@ -266,6 +266,7 @@ const MainAdmin = () => {
     else getRunningOrders(controller);
     if (location.pathname.includes("admin")) {
       getRoutesData();
+      getTripData(controller);
     } else if (location.pathname.includes("trip")) {
       getTripData(controller);
     }
@@ -274,8 +275,10 @@ const MainAdmin = () => {
       else getRunningOrders(controller);
       if (location.pathname.includes("admin")) {
         getRoutesData();
+        getTripData(controller);
       } else if (location.pathname.includes("trip")) {
         getTripData(controller);
+        
       }
     }, 180000);
     return () => {
@@ -1775,7 +1778,7 @@ const MainAdmin = () => {
           setRoutesData={setRoutesData}
           popupInfo={popupForm}
           orders={selectedOrder}
-          trips={TripsOrderLength}
+          trips={tripData}
           onClose={() => {
             setPopupForm(null);
             setSelectOrder("");

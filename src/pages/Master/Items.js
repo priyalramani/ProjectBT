@@ -1,9 +1,14 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useContext } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import { DeleteOutline } from "@mui/icons-material";
 import axios from "axios";
+import noimg from "../../assets/noimg.jpg";
+import { server } from "../../App";
+import context from "../../context/context";
+import { v4 as uuid } from "uuid";
+import Compressor from "compressorjs";
 const ItemsPage = () => {
   const [itemsData, setItemsData] = useState([]);
   const [disabledItem, setDisabledItem] = useState(false);
@@ -15,6 +20,7 @@ const ItemsPage = () => {
   const [filterTitle, setFilterTitle] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
+  const { setNotification } = useContext(context);
   const getItemCategories = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
@@ -183,19 +189,26 @@ const ItemsPage = () => {
       </div>
       {popupForm ? (
         <NewUserForm
-          onSave={() => setPopupForm(false)}
+          onSave={() => {
+            setPopupForm(false);
+            getItemsData();
+          }}
           setItemsData={setItemsData}
           companies={companies}
           itemCategories={itemCategories}
           popupInfo={popupForm}
           items={itemsData}
+          setNotification={setNotification}
         />
       ) : (
         ""
       )}
       {deletePopup ? (
         <DeleteItemPopup
-          onSave={() => setDeletePopup(false)}
+          onSave={() => {
+            setDeletePopup(false);
+            getItemsData();
+          }}
           setItemsData={setItemsData}
           popupInfo={deletePopup}
         />
@@ -506,6 +519,7 @@ function NewUserForm({
   companies,
   itemCategories,
   items,
+  setNotification,
 }) {
   const [data, setdata] = useState({});
 
@@ -557,45 +571,78 @@ function NewUserForm({
   }, [companies, itemCategories, popupInfo.data, popupInfo?.type]);
 
   const submitHandler = async (e) => {
+    let obj = { ...data, item_uuid: data.item_uuid || uuid() };
     e.preventDefault();
     let barcodeChecking = items
-      ?.filter((a) => a.item_uuid !== data.item_uuid)
+      ?.filter((a) => a.item_uuid !== obj.item_uuid)
       ?.filter((a) => a?.barcode?.length)
       ?.map((a) => a?.barcode)
       ?.filter(
         (a) =>
-          a?.filter((b) => data?.barcode?.filter((c) => b === c)?.length)
-            ?.length
+          a?.filter((b) => obj?.barcode?.filter((c) => b === c)?.length)?.length
       );
     barcodeChecking = [].concat.apply([], barcodeChecking);
-    if (!data.item_title) {
+    if (!obj.item_title) {
       setErrorMassage("Please insert Item Title");
       return;
     }
-    if (findDuplicates(data.barcode)?.length || barcodeChecking?.length) {
+    if (findDuplicates(obj.barcode)?.length || barcodeChecking?.length) {
       setErrorMassage("Please insert Unique Barcode");
       return;
     }
 
+    if (obj.img) {
+      const previousFile = obj.img;
+      new Compressor(obj.img, {
+        quality: 0.8, // 0.6 can also be used, but its not recommended to go below.
+        success: (compressedResult) => {
+          // compressedResult has the compressed file.
+          // Use the compressed file to upload the images to your server.
+          const FileData = new File(
+            [compressedResult],
+            obj.item_uuid + "thumbnail.png"
+          );
+          const form = new FormData();
+          form.append("file", FileData);
+          axios({
+            method: "post",
+            url: "/uploadImage",
+            data: form,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+        },
+      });
+      const newFile = new File([previousFile], data.item_uuid + ".png");
+      const form = new FormData();
+      form.append("file", newFile);
+      await axios({
+        method: "post",
+        url: "/uploadImage",
+        data: form,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      obj={...obj,img_status:1}
+    }
     if (popupInfo?.type === "edit") {
       const response = await axios({
         method: "put",
         url: "/items/putItem",
-        data: [data],
+        data: [obj],
         headers: {
           "Content-Type": "application/json",
         },
       });
       if (response.data.result[0].success) {
-        setItemsData((prev) =>
-          prev.map((i) => (i.user_uuid === data.user_uuid ? data : i))
-        );
         onSave();
       }
     } else {
       if (
-        data?.item_code &&
-        items.find((a) => a.item_code === data.item_code)
+        obj?.item_code &&
+        items.find((a) => a.item_code === obj.item_code)
       ) {
         setErrorMassage("Please insert Different Item Code");
         return;
@@ -603,13 +650,12 @@ function NewUserForm({
       const response = await axios({
         method: "post",
         url: "/items/postItem",
-        data,
+        data: obj,
         headers: {
           "Content-Type": "application/json",
         },
       });
       if (response.data.success) {
-        setItemsData((prev) => [...prev, data]);
         onSave();
       }
     }
@@ -680,6 +726,41 @@ function NewUserForm({
                           sort_order: e.target.value,
                         })
                       }
+                    />
+                  </label>
+                </div>
+                <div className="row">
+                  <label htmlFor={data.item_uuid} className="flex">
+                    Upload Image
+                    <input
+                      className="searchInput"
+                      type="file"
+                      id={data.item_uuid}
+                      style={{ display: "none" }}
+                      onChange={(e) => {
+                        if (e.target.files[0].size > 500000) {
+                          setNotification({ message: "File is too big!" });
+                          setTimeout(() => setNotification(null), 500);
+                        } else {
+                          setdata((prev) => ({
+                            ...prev,
+                            img: e.target.files[0],
+                          }));
+                        }
+                      }}
+                    />
+                    <img
+                      style={{
+                        width: "100px",
+                        height: "100px",
+                        objectFit: "contain",
+                      }}
+                      src={server + "/" + data.item_uuid + ".png"}
+                      onError={({ currentTarget }) => {
+                        currentTarget.onerror = null; // prevents looping
+                        currentTarget.src = noimg;
+                      }}
+                      alt=""
                     />
                   </label>
                 </div>
@@ -1102,9 +1183,6 @@ function DeleteItemPopup({ onSave, popupInfo, setItemsData }) {
         },
       });
       if (response.data.success) {
-        setItemsData((prev) =>
-          prev.filter((i) => i.item_uuid !== popupInfo.item_uuid)
-        );
         onSave();
       }
     } catch (err) {

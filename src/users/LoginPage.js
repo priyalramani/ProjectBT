@@ -1,8 +1,9 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 
 import { openDB } from "idb";
 import { useNavigate } from "react-router-dom";
+import context from "../context/context";
 
 const LoginPage = ({ setUserType }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,6 +11,8 @@ const LoginPage = ({ setUserType }) => {
     login_username: "",
     login_password: "",
   });
+
+  const { setNotification } = useContext(context);
   const Navigate = useNavigate();
   const loginHandler = async () => {
     try {
@@ -23,8 +26,6 @@ const LoginPage = ({ setUserType }) => {
           "Content-Type": "application/json",
         },
       });
-
-      if (response.status !== 200) return setIsLoading(false);
 
       if (response.data.success) {
         let data = response.data.result;
@@ -105,6 +106,15 @@ const LoginPage = ({ setUserType }) => {
             exitFunction();
           }
         }
+      } else {
+
+        setNotification(response.data);
+        setTimeout(() => {
+          setNotification(null);
+          setIsLoading(false);
+        }, 5000);
+
+        return;
       }
     } catch (error) {
       setIsLoading(false);

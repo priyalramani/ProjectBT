@@ -60,14 +60,19 @@ import Campaigns from "./pages/Reports/Campaigns";
 import TestCounter from "./pages/Master/TestCounter";
 import OrderForms from "./pages/Reports/OrderForms";
 import LinkedCounter from "./users/LinkedCounter";
-export let Version = 66;
+export let Version = 69;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
   const context = useContext(Context);
 
-  const { calculationPopup = "", loading, notification } = context;
+  const {
+    calculationPopup = "",
+    loading,
+    notification,
+    setNotification,
+  } = context;
   // axios.defaults.baseURL = "https://api.btgondia.com";
   // axios.defaults.baseURL = "http://15.207.39.69:9000";
   axios.defaults.baseURL = server;
@@ -103,13 +108,13 @@ function App() {
       let currTime = new Date();
       currTime = currTime.getTime();
       if (64800000 < currTime - time) {
-        updateIndexedDb();
+        updateIndexedDb(setNotification);
       }
     }
   }, [userType]);
 
   document.title = "BT";
-
+console.log(notification)
   return (
     <div className="App">
       <Router>

@@ -316,13 +316,21 @@ function IncentivePopup({ onSave, popupForm }) {
     }
   };
   const addVariable = (name) => {
+    let element = document.getElementById(active);
+    console.log(element.selectionStart);
     setObgData((prev) => ({
       ...prev,
       message: prev.message.map((a) =>
         a.uuid === active
           ? {
               ...a,
-              text: a.text + `{${name}}`,
+              text:
+                (a.text || "")?.slice(0, element.selectionStart) +
+                `{${name}}` +
+                (a.text || "")?.slice(
+                  element.selectionStart,
+                  (a.text || "").length
+                ),
             }
           : a
       ),
@@ -342,7 +350,7 @@ function IncentivePopup({ onSave, popupForm }) {
             width: "fit-content",
           }}
         >
-          <div style={{ overflowY: "scroll", maxHeight: "400px" }}>
+          <div style={{ overflowY: "scroll", maxHeight: "500px" }}>
             <table
               className="user-table"
               style={{
@@ -381,6 +389,44 @@ function IncentivePopup({ onSave, popupForm }) {
                     />
                   </td>
                 </tr>
+                {objData?.notification_uuid === "out-for-delivery" ||
+                objData?.notification_uuid === "payment-reminder-manual" ||
+                objData?.notification_uuid === "outstanding-manual-reminder" ? (
+                  <tr>
+                    <td
+                      colSpan={2}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        width: "400px",
+                      }}
+                    >
+                      <input
+                        onWheel={(e) => e.target.blur()}
+                        type="checkbox"
+                        className="searchInput"
+                        style={{
+                          border: "none",
+                          borderBottom: "2px solid black",
+                          borderRadius: "0px",
+                          scale: "2",
+                        }}
+                        placeholder=""
+                        checked={objData.checkbox}
+                        onChange={(e) =>
+                          setObgData((prev) => ({
+                            ...prev,
+                            checkbox: e.target.checked ? 1 : 0,
+                          }))
+                        }
+                      />
+                      <b style={{ width: "300px" }}>Send invoice pdf </b>
+                    </td>
+                  </tr>
+                ) : (
+                  ""
+                )}
                 <tr>
                   <td
                     colSpan={2}
@@ -408,111 +454,113 @@ function IncentivePopup({ onSave, popupForm }) {
                     </span>
                   </td>
                 </tr>
-                {objData?.message?.map((item) => (
-                  <tr key={item.uuid}>
-                    <td
-                      colSpan={2}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "flex-start",
-                      }}
-                    >
-                      <span
-                        onClick={() =>
-                          setObgData((prev) => ({
-                            ...prev,
-                            message: prev.message.filter(
-                              (a) => a.uuid !== item.uuid
-                            ),
-                          }))
-                        }
-                      >
-                        <DeleteOutline />
-                      </span>
-                      <select
-                        className="searchInput"
-                        value={item.type}
-                        onChange={(e) => {
-                          setObgData((prev) => ({
-                            ...prev,
-                            message: prev.message.map((a) =>
-                              a.uuid === item.uuid
-                                ? { ...a, type: e.target.value }
-                                : a
-                            ),
-                          }));
+                <div style={{ overflowY: "scroll", maxHeight: "150px" }}>
+                  {objData?.message?.map((item, i) => (
+                    <tr key={item.uuid}>
+                      <td
+                        colSpan={2}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "flex-start",
                         }}
                       >
-                        <option value="text">Text</option>
-                        <option value="img">Image</option>
-                      </select>
-
-                      {item?.type === "text" ? (
-                        <textarea
-                          onWheel={(e) => e.target.blur()}
+                        {i + 1})
+                        <span
+                          onClick={() =>
+                            setObgData((prev) => ({
+                              ...prev,
+                              message: prev.message.filter(
+                                (a) => a.uuid !== item.uuid
+                              ),
+                            }))
+                          }
+                        >
+                          <DeleteOutline />
+                        </span>
+                        <select
                           className="searchInput"
-                          style={{
-                            border: "none",
-                            borderBottom: "2px solid black",
-                            borderRadius: "0px",
-                            height: "100px",
-                          }}
-                          id={item.uuid}
-                          onFocus={() => {
-                            setActive(item.uuid);
-                          }}
-                          placeholder=""
-                          value={item.text}
+                          value={item.type}
                           onChange={(e) => {
                             setObgData((prev) => ({
                               ...prev,
                               message: prev.message.map((a) =>
                                 a.uuid === item.uuid
-                                  ? { ...a, text: e.target.value }
+                                  ? { ...a, type: e.target.value }
                                   : a
                               ),
                             }));
                           }}
-                        />
-                      ) : (
-                        <label htmlFor={item.uuid} className="flex">
-                          Upload Image
-                          <input
+                        >
+                          <option value="text">Text</option>
+                          <option value="img">Image</option>
+                        </select>
+                        {item?.type === "text" ? (
+                          <textarea
+                            onWheel={(e) => e.target.blur()}
                             className="searchInput"
-                            type="file"
+                            style={{
+                              border: "none",
+                              borderBottom: "2px solid black",
+                              borderRadius: "0px",
+                              height: "100px",
+                            }}
                             id={item.uuid}
-                            style={{ display: "none" }}
-                            onChange={(e) =>
+                            onFocus={() => {
+                              setActive(item.uuid);
+                            }}
+                            placeholder=""
+                            value={item.text}
+                            onChange={(e) => {
                               setObgData((prev) => ({
                                 ...prev,
                                 message: prev.message.map((a) =>
                                   a.uuid === item.uuid
-                                    ? { ...a, img: e.target.files[0] }
+                                    ? { ...a, text: e.target.value }
                                     : a
                                 ),
-                              }))
-                            }
-                          />
-                          {console.log(server + item.uuid + ".png")}
-                          <img
-                            style={{
-                              width: "100px",
-                              height: "100px",
-                              objectFit: "contain",
+                              }));
                             }}
-                            src={server + "/" + item.uuid + ".png"}
-                            onError={({ currentTarget }) => {
-                              currentTarget.onerror = null; // prevents looping
-                              currentTarget.src = noimg;
-                            }}
-                            alt=""
                           />
-                        </label>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                        ) : (
+                          <label htmlFor={item.uuid} className="flex">
+                            Upload Image
+                            <input
+                              className="searchInput"
+                              type="file"
+                              id={item.uuid}
+                              style={{ display: "none" }}
+                              onChange={(e) =>
+                                setObgData((prev) => ({
+                                  ...prev,
+                                  message: prev.message.map((a) =>
+                                    a.uuid === item.uuid
+                                      ? { ...a, img: e.target.files[0] }
+                                      : a
+                                  ),
+                                }))
+                              }
+                            />
+                            {console.log(server + item.uuid + ".png")}
+                            <img
+                              style={{
+                                width: "100px",
+                                height: "100px",
+                                objectFit: "contain",
+                              }}
+                              src={server + "/" + item.uuid + ".png"}
+                              onError={({ currentTarget }) => {
+                                currentTarget.onerror = null; // prevents looping
+                                currentTarget.src = noimg;
+                              }}
+                              alt=""
+                            />
+                          </label>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </div>
                 <tr>
                   <td
                     colSpan={2}

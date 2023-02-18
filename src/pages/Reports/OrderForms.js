@@ -267,7 +267,7 @@ function Table({
   );
 }
 function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
-  const [data, setdata] = useState({});
+  const [data, setdata] = useState({ items: [] });
   const [filterItemTitle, setFilterItemTitle] = useState("");
   const [filterCategoryTitle, setFilterCategoryTitle] = useState("");
   const [filterCompanyTitle, setFilterCompanyTitle] = useState("");
@@ -384,7 +384,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
         .sort((a, b) => a?.company_title?.localeCompare(b?.company_title)),
     [companies, filterCategory, filterCompanyTitle]
   );
-  console.log(filterCompany);
+  console.log(data);
   return (
     <div className="overlay" style={{ zIndex: 9999999 }}>
       <div
@@ -403,7 +403,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
             width: "fit-content",
           }}
         >
-          <div style={{ overflowY: "scroll" }}>
+          <div >
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
                 <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Form</h1>
@@ -434,6 +434,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                   style={{
                     padding: "0px 12px",
                     height: "fit-content",
+                    maxHeight:"350px"
                   }}
                 >
                   <h1>Items</h1>
@@ -473,7 +474,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                     <table
                       className="user-table"
                       style={{
-                        maxWidth: "500px",
+                        maxWidth: "600px",
                         height: "fit-content",
                         overflowX: "scroll",
                       }}
@@ -488,9 +489,9 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                         {filterCompany.map((company) => (
                           <>
                             <tr
-                              style={{ pageBreakAfter: "auto", width: "100%" }}
+                              style={{ pageBreakAfter: "auto"}}
                             >
-                              <td colSpan={3}>
+                              <td colSpan={3} className="flex">
                                 <span
                                   style={{
                                     color: "var(--main)",
@@ -506,15 +507,24 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
 
                                     setdata((prev) => {
                                       let counter_form_uuid =
-                                        filteredItems?.filter(
-                                          (b) =>
-                                            company.company_uuid ===
-                                              b.company_uuid &&
-                                            data.items.find(
-                                              (d) => d.item_uuid === b.item_uuid
-                                            )
+                                        filterCategory?.filter(
+                                          (a) =>
+                                            filteredItems?.filter(
+                                              (b) =>
+                                                a.category_uuid ===
+                                                  b.category_uuid &&
+                                                data?.items?.find(
+                                                  (d) =>
+                                                    d.item_uuid === b.item_uuid
+                                                )
+                                            )?.length ===
+                                            filteredItems?.filter(
+                                              (b) =>
+                                                a.category_uuid ===
+                                                b.category_uuid
+                                            )?.length
                                         )?.length ===
-                                        filteredItems?.filter(
+                                        filterCategory?.filter(
                                           (b) =>
                                             company.company_uuid ===
                                             b.company_uuid
@@ -524,31 +534,45 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                       return {
                                         ...prev,
                                         items: counter_form_uuid
-                                          ? prev.items.filter(
+                                          ? prev?.items?.filter(
                                               (b) =>
-                                                !filteredItems.find(
+                                                !filteredItems?.find(
                                                   (c) =>
                                                     c.item_uuid ===
                                                       b.item_uuid &&
-                                                    c.company_uuid ===
-                                                      company.company_uuid
+                                                    filterCategory.find(
+                                                      (d) =>
+                                                        d.category_uuid ===
+                                                          c.category_uuid &&
+                                                        d.company_uuid ===
+                                                          company.company_uuid
+                                                    )
                                                 )
                                             )
                                           : [
-                                              ...(prev.items.filter(
+                                              ...(prev?.items?.filter(
                                                 (b) =>
-                                                  !filteredItems.find(
+                                                  !filteredItems?.find(
                                                     (c) =>
                                                       c.item_uuid ===
                                                         b.item_uuid &&
-                                                      c.company_uuid ===
-                                                        company.company_uuid
+                                                      filterCategory.find(
+                                                        (d) =>
+                                                          d.category_uuid ===
+                                                            c.category_uuid &&
+                                                          d.company_uuid ===
+                                                            company.company_uuid
+                                                      )
                                                   )
                                               ) || []),
-                                              ...filteredItems.find(
-                                                (c) =>
-                                                  c.company_uuid ===
-                                                  company.company_uuid
+                                              ...filteredItems?.filter((c) =>
+                                                filterCategory.find(
+                                                  (d) =>
+                                                    d.category_uuid ===
+                                                      c.category_uuid &&
+                                                    d.company_uuid ===
+                                                      company.company_uuid
+                                                )
                                               ),
                                             ],
                                       };
@@ -559,15 +583,24 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                   <input
                                     type="checkbox"
                                     checked={
-                                      filteredItems?.filter(
-                                        (b) =>
-                                          company.company_uuid ===
-                                            b.company_uuid &&
-                                          data.items.find(
-                                            (d) => d.item_uuid === b.item_uuid
-                                          )
+                                      filterCategory?.filter(
+                                        (a) =>
+                                          filteredItems?.filter(
+                                            (b) =>
+                                              a.category_uuid ===
+                                                b.category_uuid &&
+                                              data?.items?.find(
+                                                (d) =>
+                                                  d.item_uuid === b.item_uuid
+                                              )
+                                          )?.length ===
+                                          filteredItems?.filter(
+                                            (b) =>
+                                              a.category_uuid ===
+                                              b.category_uuid
+                                          )?.length
                                       )?.length ===
-                                      filteredItems?.filter(
+                                      filterCategory?.filter(
                                         (b) =>
                                           company.company_uuid ===
                                           b.company_uuid
@@ -578,27 +611,86 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                 </span>
                               </td>
                             </tr>
-                            {filterCategory.map((a) => (
-                              <>
-                                <tr
-                                  style={{
-                                    pageBreakAfter: "auto",
-                                    width: "100%",
-                                  }}
-                                >
-                                  <td colSpan={3}>
-                                    {a.category_title}
-                                    <span
-                                      onClick={(e) => {
-                                        e.stopPropagation();
+                            {filterCategory
+                              .filter(
+                                (a) => a.company_uuid === company.company_uuid
+                              )
+                              .map((a) => (
+                                <>
+                                  <tr
+                                    style={{
+                                      pageBreakAfter: "auto",
+                                      width: "100%",
+                                    }}
+                                  >
+                                    <td colSpan={3}>
+                                      {a.category_title}
+                                      <span
+                                        onClick={(e) => {
+                                          e.stopPropagation();
 
-                                        setdata((prev) => {
-                                          let counter_form_uuid =
+                                          setdata((prev) => {
+                                            let counter_form_uuid =
+                                              filteredItems?.filter(
+                                                (b) =>
+                                                  a.category_uuid ===
+                                                    b.category_uuid &&
+                                                  data?.items?.find(
+                                                    (d) =>
+                                                      d.item_uuid ===
+                                                      b.item_uuid
+                                                  )
+                                              )?.length ===
+                                              filteredItems?.filter(
+                                                (b) =>
+                                                  a.category_uuid ===
+                                                  b.category_uuid
+                                              )?.length
+                                                ? true
+                                                : false;
+                                            return {
+                                              ...prev,
+                                              items: counter_form_uuid
+                                                ? prev?.items?.filter(
+                                                    (b) =>
+                                                      !filteredItems?.find(
+                                                        (c) =>
+                                                          c.item_uuid ===
+                                                            b.item_uuid &&
+                                                          c.category_uuid ===
+                                                            a.category_uuid
+                                                      )
+                                                  )
+                                                : [
+                                                    ...(prev?.items?.filter(
+                                                      (b) =>
+                                                        !filteredItems?.find(
+                                                          (c) =>
+                                                            c.item_uuid ===
+                                                              b.item_uuid &&
+                                                            c.category_uuid ===
+                                                              a.category_uuid
+                                                        )
+                                                    ) || []),
+                                                    ...filteredItems?.filter(
+                                                      (c) =>
+                                                        c.category_uuid ===
+                                                        a.category_uuid
+                                                    ),
+                                                  ],
+                                            };
+                                          });
+                                        }}
+                                        style={{ marginLeft: "10px" }}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={
                                             filteredItems?.filter(
                                               (b) =>
                                                 a.category_uuid ===
                                                   b.category_uuid &&
-                                                data.items.find(
+                                                data?.items?.find(
                                                   (d) =>
                                                     d.item_uuid === b.item_uuid
                                                 )
@@ -608,130 +700,78 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                                 a.category_uuid ===
                                                 b.category_uuid
                                             )?.length
-                                              ? true
-                                              : false;
-                                          return {
-                                            ...prev,
-                                            items: counter_form_uuid
-                                              ? prev.items.filter(
-                                                  (b) =>
-                                                    !filteredItems.find(
-                                                      (c) =>
-                                                        c.item_uuid ===
-                                                          b.item_uuid &&
-                                                        c.category_uuid ===
-                                                          a.category_uuid
-                                                    )
-                                                )
-                                              : [
-                                                  ...(prev.items.filter(
-                                                    (b) =>
-                                                      !filteredItems.find(
-                                                        (c) =>
-                                                          c.item_uuid ===
-                                                            b.item_uuid &&
-                                                          c.category_uuid ===
-                                                            a.category_uuid
-                                                      )
-                                                  ) || []),
-                                                  ...filteredItems.find(
-                                                    (c) =>
-                                                      c.category_uuid ===
-                                                      a.category_uuid
-                                                  ),
-                                                ],
-                                          };
-                                        });
-                                      }}
-                                      style={{ marginLeft: "10px" }}
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        checked={
-                                          filteredItems?.filter(
-                                            (b) =>
-                                              a.category_uuid ===
-                                                b.category_uuid &&
-                                              data.items.find(
-                                                (d) =>
-                                                  d.item_uuid === b.item_uuid
-                                              )
-                                          )?.length ===
-                                          filteredItems?.filter(
-                                            (b) =>
-                                              a.category_uuid ===
-                                              b.category_uuid
-                                          )?.length
-                                        }
-                                        style={{ transform: "scale(1.3)" }}
-                                      />
-                                    </span>
-                                  </td>
-                                </tr>
-                                {filteredItems
-                                  ?.filter(
-                                    (b) => a.category_uuid === b.category_uuid
-                                  )
-                                  ?.sort((a, b) =>
-                                    a.item_title?.localeCompare(b.item_title)
-                                  )
-                                  ?.map((item, i, array) => {
-                                    return (
-                                      <tr
-                                        key={Math.random()}
-                                        style={{ height: "30px" }}
-                                      >
-                                        <td
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setdata((prev) => {
-                                              return {
-                                                ...prev,
-                                                items: prev.items.find(
-                                                  (b) =>
-                                                    b.item_uuid ===
-                                                    item.item_uuid
-                                                )
-                                                  ? prev.items.filter(
-                                                      (b) =>
-                                                        item.item_uuid !==
-                                                        b.item_uuid
-                                                    )
-                                                  : [
-                                                      ...(prev.items || []),
-                                                      filteredItems.find(
-                                                        (c) =>
-                                                          c.item_uuid ===
-                                                          item.item_uuid
-                                                      ),
-                                                    ],
-                                              };
-                                            });
-                                          }}
-                                          className="flex"
-                                          style={{
-                                            justifyContent: "space-between",
-                                          }}
+                                          }
+                                          style={{ transform: "scale(1.3)" }}
+                                        />
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  {filteredItems
+                                    ?.filter(
+                                      (b) => a.category_uuid === b.category_uuid
+                                    )
+                                    ?.sort((a, b) =>
+                                      a.item_title?.localeCompare(b.item_title)
+                                    )
+                                    ?.map((item, i, array) => {
+                                      return (
+                                        <tr
+                                          key={Math.random()}
+                                          style={{ height: "30px" }}
                                         >
-                                          <input
-                                            type="checkbox"
-                                            checked={data.items.find(
-                                              (c) =>
-                                                c.item_uuid === item.item_uuid
-                                            )}
-                                            style={{ transform: "scale(1.3)" }}
-                                          />
-                                          {i + 1}
-                                        </td>
+                                          <td
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setdata((prev) => {
+                                                return {
+                                                  ...prev,
+                                                  items: prev?.items?.find(
+                                                    (b) =>
+                                                      b.item_uuid ===
+                                                      item.item_uuid
+                                                  )
+                                                    ? prev?.items?.filter(
+                                                        (b) =>
+                                                          item.item_uuid !==
+                                                          b.item_uuid
+                                                      )
+                                                    : [
+                                                        ...(prev.items || []),
+                                                        filteredItems?.find(
+                                                          (c) =>
+                                                            c.item_uuid ===
+                                                            item.item_uuid
+                                                        ),
+                                                      ],
+                                                };
+                                              });
+                                            }}
+                                            className="flex"
+                                            style={{
+                                              justifyContent: "space-between",
+                                            }}
+                                          >
+                                            <input
+                                              type="checkbox"
+                                              checked={data?.items?.find(
+                                                (c) =>
+                                                  c.item_uuid === item.item_uuid
+                                              )}
+                                              style={{
+                                                transform: "scale(1.3)",
+                                              }}
+                                            />
+                                            {i + 1}
+                                          </td>
 
-                                        <td colSpan={2}>
-                                          {item.item_title || ""}
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
-                              </>
-                            ))}
+                                          <td colSpan={2}>
+                                            {item.item_title || ""}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                </>
+                              ))}
                           </>
                         ))}
                       </tbody>

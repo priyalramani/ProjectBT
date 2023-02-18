@@ -11,6 +11,7 @@ import axios from "axios";
 import CloseIcon from "@mui/icons-material/Close";
 import MobileNumberPopup from "../components/MobileNumberPopup";
 import context from "../context/context";
+import { server } from "../App";
 const LinkedCounter = () => {
   const [items, setItems] = useState([]);
   const [foodLicensePopup, setFoodLicencePopup] = useState(false);
@@ -593,6 +594,15 @@ const LinkedCounter = () => {
                                     </div>
                                   </div>
                                   <div className="menuleft">
+                        
+                                    {item?.img_status ? (
+                                      <div className="item-image-container">
+                                        <img
+                                          src={`${server}/${item?.item_uuid}thumbnail.png`}
+                                          alt="Food-Item"
+                                        />
+                                      </div>
+                                    ):""}
                                     <input
                                       value={`${
                                         order?.items?.find(

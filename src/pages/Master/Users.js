@@ -644,7 +644,7 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
                           className="formGroup"
                           style={{ height: "200px", overflow: "scroll" }}
                         >
-                          <div
+                          {/* <div
                             style={{
                               marginBottom: "5px",
                               textAlign: "center",
@@ -691,7 +691,7 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
                             }}
                           >
                             All
-                          </div>
+                          </div> */}
                           {warehouseData.map((occ) => (
                             <div
                               style={{
@@ -707,17 +707,19 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
                                 e.stopPropagation();
                                 setdata((prev) => ({
                                   ...prev,
-                                  warehouse: prev?.warehouse?.find(
-                                    (a) => a === occ.warehouse_uuid
-                                  )
-                                    ? prev?.warehouse?.filter(
-                                        (a) => a !== occ.warehouse_uuid
-                                      )
-                                    : prev?.warehouse?.length &&
-                                      !prev.warehouse.filter((a) => +a === 1)
-                                        .length
-                                    ? [...prev?.warehouse, occ?.warehouse_uuid]
-                                    : [occ?.warehouse_uuid],
+                                  warehouse:
+                                  //  prev?.warehouse?.find(
+                                  //   (a) => a === occ.warehouse_uuid
+                                  // )
+                                  //   ? prev?.warehouse?.filter(
+                                  //       (a) => a !== occ.warehouse_uuid
+                                  //     )
+                                  //   : prev?.warehouse?.length &&
+                                  //     !prev.warehouse.filter((a) => +a === 1)
+                                  //       .length
+                                  //   ? [...prev?.warehouse, occ?.warehouse_uuid]
+                                  //   :
+                                     [occ?.warehouse_uuid],
                                 }));
                               }}
                             >

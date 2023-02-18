@@ -617,13 +617,15 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   };
 
   const handleWarehouseChacking = async (complete, methodType) => {
-    let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
+    let warehouse_uuid =
+      users.find((a) => a.user_uuid === localStorage.getItem("user_uuid"))
+        ?.warehouse[0] || JSON.parse(localStorage.getItem("warehouse"))[0];
     if (methodType === "complete") {
       setComplete(true);
     }
     if (
       warehouse_uuid &&
-      +warehouse_uuid !== 0 &&
+      // +warehouse_uuid !== 0 &&
       warehouse_uuid !== orderData.warehouse_uuid
     ) {
       // console.log("data", orderData.warehouse_uuid);
@@ -631,7 +633,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       if (!orderData.warehouse_uuid) {
         updateWarehouse(warehouse_uuid, methodType);
       } else {
-        setWarhousePopup(warehouse_uuid);
+        //   setWarhousePopup(warehouse_uuid);
+        handleTaskChecking();
       }
     } else {
       if (methodType === "complete" || complete) {
