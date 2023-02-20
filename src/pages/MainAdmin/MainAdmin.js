@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, {
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -28,6 +29,7 @@ import TaskPopupMenu from "../../components/TaskPopupMenu";
 import SalesPersoneFilterPopup from "../../components/SalesPersoneFilterPopup";
 import CollectionTag from "../QuikAccess/CollectionTag";
 import { useLocation } from "react-router-dom";
+import context from "../../context/context";
 const MainAdmin = () => {
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [isCollectionTags, setCollectionTags] = useState(false);
@@ -65,6 +67,7 @@ const MainAdmin = () => {
   const [reminderDate, setReminderDate] = useState();
   const [selectedtasks, setSelectedTasks] = useState(false);
   const location = useLocation();
+  const {updateServerPdf}=useContext(context)
   let user_uuid = localStorage.getItem("user_uuid");
   const selectedOrderGrandTotal = useMemo(
     () =>
@@ -278,7 +281,6 @@ const MainAdmin = () => {
         getTripData(controller);
       } else if (location.pathname.includes("trip")) {
         getTripData(controller);
-        
       }
     }, 180000);
     return () => {
@@ -337,6 +339,7 @@ const MainAdmin = () => {
         prev.map((a) => data.find((b) => b.order_uuid === a.order_uuid) || a)
       );
       setOrdersData(response.data.result);
+      if (response.data.pdforders?.length) updateServerPdf(response.data.pdforders);
       if (response.data.result?.length === 0) setNoOrder(true);
       else setNoOrder(false);
     } else {
@@ -361,24 +364,24 @@ const MainAdmin = () => {
     }
   };
   // console.log(selectedOrder);
-  useEffect(() => {
-    const controller = new AbortController();
-    if (
-      location.pathname.includes("admin") ||
-      location.pathname.includes("trip")
-    ) {
-      if (holdOrders) getRunningHoldOrders();
-      else getRunningOrders(controller);
-    }
-    if (location.pathname.includes("admin")) {
-      getRoutesData();
-    } else if (location.pathname.includes("trip")) {
-      getTripData(controller);
-    }
-    return () => {
-      controller.abort();
-    };
-  }, [btn, popupForm]);
+  // useEffect(() => {
+  //   const controller = new AbortController();
+  //   if (
+  //     location.pathname.includes("admin") ||
+  //     location.pathname.includes("trip")
+  //   ) {
+  //     if (holdOrders) getRunningHoldOrders();
+  //     else getRunningOrders(controller);
+  //   }
+  //   if (location.pathname.includes("admin")) {
+  //     getRoutesData();
+  //   } else if (location.pathname.includes("trip")) {
+  //     getTripData(controller);
+  //   }
+  //   return () => {
+  //     controller.abort();
+  //   };
+  // }, [btn, popupForm]);
   const postOrderData = async () => {
     const response = await axios({
       method: "put",
@@ -1320,8 +1323,7 @@ const MainAdmin = () => {
                               <Card
                                 details={details}
                                 getOrders={() => {
-                                  if (holdOrders)
-                                    getRunningHoldOrders();
+                                  if (holdOrders) getRunningHoldOrders();
                                   else getRunningOrders();
                                 }}
                                 setSelectOrder={setSelectOrder}
@@ -2035,8 +2037,16 @@ function NewUserForm({
                         style={{ width: "200px" }}
                       >
                         <option value="0">None</option>
+                  
                         {trips
-                          .filter((a) => a.trip_uuid && a.status)
+                          .filter(
+                            (a) =>
+                              a.trip_uuid &&
+                              a.status &&
+                              (+JSON.parse(localStorage.getItem("warehouse")) === 1 ||
+                              JSON.parse(localStorage.getItem("warehouse")) ===
+                                  a.warehouse_uuid)
+                          )
                           .map((a) => (
                             <option value={a.trip_uuid}>{a.trip_title}</option>
                           ))}

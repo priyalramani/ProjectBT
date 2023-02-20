@@ -5,10 +5,19 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   MenuAlt2Icon,
+  ArrowDownIcon,
+  ArrowUpIcon,
 } from "@heroicons/react/solid";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-import { Add, CopyAll, Delete, DeleteOutline } from "@mui/icons-material";
+import {
+  Add,
+  ArrowDropDown,
+  ArrowDropUp,
+  CopyAll,
+  Delete,
+  DeleteOutline,
+} from "@mui/icons-material";
 import { Switch } from "@mui/material";
 import { green } from "@mui/material/colors";
 import { alpha, styled } from "@mui/material/styles";
@@ -42,6 +51,7 @@ const Campaigns = () => {
 };
 const Incetives = () => {
   const [popupForm, setPopupForm] = useState(false);
+  const [popupOrderForm, setPopupOrderForm] = useState(false);
   const [itemsData, setItemsData] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
   const context = useContext(Context);
@@ -119,6 +129,7 @@ const Incetives = () => {
           setDeletePopup={setDeletePopup}
           getItemsData={getItemsData}
           sendMsg={sendMsg}
+          setPopupOrderForm={setPopupOrderForm}
         />
       </div>
 
@@ -126,6 +137,15 @@ const Incetives = () => {
         <IncentivePopup
           onSave={() => setPopupForm(false)}
           popupForm={popupForm}
+        />
+      ) : (
+        ""
+      )}
+      {popupOrderForm ? (
+        <IncentiveOrderPopup
+          onSave={() => setPopupOrderForm(false)}
+          popupForm={popupOrderForm}
+          sendMsg={sendMsg}
         />
       ) : (
         ""
@@ -179,7 +199,13 @@ const Incetives = () => {
 };
 
 export default Campaigns;
-function Table({ itemsDetails = [], setPopupForm, sendMsg, setDeletePopup }) {
+function Table({
+  itemsDetails = [],
+  setPopupForm,
+  sendMsg,
+  setDeletePopup,
+  setPopupOrderForm,
+}) {
   const [items, setItems] = useState("incentive_title");
   const [order, setOrder] = useState("asc");
 
@@ -279,7 +305,11 @@ function Table({ itemsDetails = [], setPopupForm, sendMsg, setDeletePopup }) {
                   className="item-sales-search"
                   onClick={(e) => {
                     e.stopPropagation();
-                    sendMsg(item);
+                    if (item.type === "order") {
+                      setPopupOrderForm(item);
+                    } else {
+                      sendMsg(item);
+                    }
                   }}
                 >
                   Shoot
@@ -326,7 +356,8 @@ function IncentivePopup({ onSave, popupForm }) {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setRoutesData(response.data.result);
+    if (response.data.success)
+      setRoutesData(response.data.result.map((a) => ({ ...a, expand: false })));
   };
   const getCounter = async () => {
     const response = await axios({
@@ -583,111 +614,145 @@ function IncentivePopup({ onSave, popupForm }) {
                         </td>
                       </tr>
                       <div style={{ overflowY: "scroll", maxHeight: "150px" }}>
-                        {objData?.message?.map((item, i) => (
-                          <tr key={item.uuid}>
-                            <td
-                              colSpan={2}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "flex-start",
-                              }}
-                            >
-                              {i + 1})
-                              <span
-                                onClick={() =>
-                                  setObgData((prev) => ({
-                                    ...prev,
-                                    message: prev.message.filter(
-                                      (a) => a.uuid !== item.uuid
-                                    ),
-                                  }))
-                                }
-                              >
-                                <DeleteOutline />
-                              </span>
-                              <select
-                                className="searchInput"
-                                value={item.type}
-                                onChange={(e) => {
-                                  setObgData((prev) => ({
-                                    ...prev,
-                                    message: prev.message.map((a) =>
-                                      a.uuid === item.uuid
-                                        ? { ...a, type: e.target.value }
-                                        : a
-                                    ),
-                                  }));
+                        {objData?.message
+                          ?.filter((item) => !item.delete)
+                          ?.map((item, i) => (
+                            <tr key={item.uuid}>
+                              <td
+                                colSpan={2}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "flex-start",
                                 }}
                               >
-                                <option value="text">Text</option>
-                                <option value="img">Image</option>
-                              </select>
-                              {item?.type === "text" ? (
-                                <textarea
-                                  onWheel={(e) => e.target.blur()}
+                                {i + 1})
+                                <span
+                                  onClick={() =>
+                                    setObgData((prev) => ({
+                                      ...prev,
+                                      message: prev.message.map((a) =>
+                                        a.uuid === item.uuid
+                                          ? { ...a, delete: true }
+                                          : a
+                                      ),
+                                    }))
+                                  }
+                                >
+                                  <DeleteOutline />
+                                </span>
+                                <select
                                   className="searchInput"
-                                  style={{
-                                    border: "none",
-                                    borderBottom: "2px solid black",
-                                    borderRadius: "0px",
-                                    height: "100px",
-                                  }}
-                                  id={item.uuid}
-                                  onFocus={() => {
-                                    setActive(item.uuid);
-                                  }}
-                                  placeholder=""
-                                  value={item.text}
+                                  value={item.type}
                                   onChange={(e) => {
                                     setObgData((prev) => ({
                                       ...prev,
                                       message: prev.message.map((a) =>
                                         a.uuid === item.uuid
-                                          ? { ...a, text: e.target.value }
+                                          ? { ...a, type: e.target.value }
                                           : a
                                       ),
                                     }));
                                   }}
-                                />
-                              ) : (
-                                <label htmlFor={item.uuid} className="flex">
-                                  Upload Image
-                                  <input
+                                >
+                                  <option value="text">Text</option>
+                                  <option value="img">Image</option>
+                                </select>
+                                {item?.type === "text" ? (
+                                  <textarea
+                                    onWheel={(e) => e.target.blur()}
                                     className="searchInput"
-                                    type="file"
+                                    style={{
+                                      border: "none",
+                                      borderBottom: "2px solid black",
+                                      borderRadius: "0px",
+                                      height: "100px",
+                                    }}
                                     id={item.uuid}
-                                    style={{ display: "none" }}
-                                    onChange={(e) =>
+                                    onFocus={() => {
+                                      setActive(item.uuid);
+                                    }}
+                                    placeholder=""
+                                    value={item.text}
+                                    onChange={(e) => {
                                       setObgData((prev) => ({
                                         ...prev,
                                         message: prev.message.map((a) =>
                                           a.uuid === item.uuid
-                                            ? { ...a, img: e.target.files[0] }
+                                            ? { ...a, text: e.target.value }
                                             : a
                                         ),
-                                      }))
-                                    }
-                                  />
-                                  {console.log(server + item.uuid + ".png")}
-                                  <img
-                                    style={{
-                                      width: "100px",
-                                      height: "100px",
-                                      objectFit: "contain",
+                                      }));
                                     }}
-                                    src={server + "/" + item.uuid + ".png"}
-                                    onError={({ currentTarget }) => {
-                                      currentTarget.onerror = null; // prevents looping
-                                      currentTarget.src = noimg;
-                                    }}
-                                    alt=""
                                   />
-                                </label>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
+                                ) : (
+                                  <div>
+                                    <label htmlFor={item.uuid} className="flex">
+                                      Upload Image
+                                      <input
+                                        className="searchInput"
+                                        type="file"
+                                        id={item.uuid}
+                                        style={{ display: "none" }}
+                                        onChange={(e) =>
+                                          setObgData((prev) => ({
+                                            ...prev,
+                                            message: prev.message.map((a) =>
+                                              a.uuid === item.uuid
+                                                ? {
+                                                    ...a,
+                                                    img: e.target.files[0],
+                                                  }
+                                                : a
+                                            ),
+                                          }))
+                                        }
+                                      />
+                                      {console.log(server + item.uuid + ".png")}
+                                      <img
+                                        style={{
+                                          width: "100px",
+                                          height: "100px",
+                                          objectFit: "contain",
+                                        }}
+                                        src={server + "/" + item.uuid + ".png"}
+                                        onError={({ currentTarget }) => {
+                                          currentTarget.onerror = null; // prevents looping
+                                          currentTarget.src = noimg;
+                                        }}
+                                        alt=""
+                                      />
+                                    </label>
+                                    <input
+                                      type="text"
+                                      onWheel={(e) => e.target.blur()}
+                                      className="searchInput"
+                                      style={{
+                                        border: "none",
+                                        borderBottom: "2px solid black",
+                                        borderRadius: "0px",
+                                      }}
+                                      placeholder="caption"
+                                      value={item.caption}
+                                      onChange={(e) => {
+                                        setObgData((prev) => ({
+                                          ...prev,
+                                          message: prev.message.map((a) =>
+                                            a.uuid === item.uuid
+                                              ? {
+                                                  ...a,
+                                                  caption: e.target.value,
+                                                }
+                                              : a
+                                          ),
+                                        }));
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
                       </div>
                       <tr>
                         <td
@@ -907,7 +972,7 @@ function IncentivePopup({ onSave, popupForm }) {
                   {filterRoute.map((a) => (
                     <>
                       <tr style={{ pageBreakAfter: "auto", width: "100%" }}>
-                        <td colSpan={3}>
+                        <td colSpan={2}>
                           {a.route_title}
                           <span
                             onClick={(e) => {
@@ -998,76 +1063,135 @@ function IncentivePopup({ onSave, popupForm }) {
                             />
                           </span>
                         </td>
+                        <td
+                          onClick={() =>
+                            setRoutesData((prev) =>
+                              prev.map((b) =>
+                                b.route_uuid === a.route_uuid
+                                  ? { ...b, expand: !b.expand }
+                                  : b
+                              )
+                            )
+                          }
+                          style={{
+                            // fontSize: "20px",
+                            // width: "20px",
+                            transition: "all ease 1s",
+                          }}
+                        >
+                          {objData.type === "general"
+                            ? objcounters?.filter((c) =>
+                                filteredCounter?.find(
+                                  (b) =>
+                                    a.route_uuid === b.route_uuid &&
+                                    c === b.counter_uuid
+                                )
+                              ).length +
+                              "/" +
+                              filteredCounter?.filter(
+                                (b) => a.route_uuid === b.route_uuid
+                              ).length
+                            : objcounter_status?.filter((c) =>
+                                filteredCounter?.find(
+                                  (b) =>
+                                    a.route_uuid === b.route_uuid &&
+                                    c.counter_uuid === b.counter_uuid
+                                )
+                              ).length +
+                              "/" +
+                              filteredCounter?.filter(
+                                (b) => a.route_uuid === b.route_uuid
+                              ).length}
+                          {a.expand ? (
+                            <ArrowDropUp
+                              style={{ fontSize: "20px", width: "20px" }}
+                            />
+                          ) : (
+                            <ArrowDropDown
+                              style={{ fontSize: "20px", width: "20px" }}
+                            />
+                          )}
+                        </td>
                       </tr>
-                      {filteredCounter
-                        ?.filter((b) => a.route_uuid === b.route_uuid)
-                        ?.sort((a, b) =>
-                          a.counter_title?.localeCompare(b.counter_title)
-                        )
-                        ?.map((item, i, array) => {
-                          return (
-                            <tr key={Math.random()} style={{ height: "30px" }}>
-                              <td
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (objData.type === "general") {
-                                    setObgData((prev) => ({
-                                      ...prev,
-                                      counters: prev.counters.filter(
-                                        (a) => a === item.counter_uuid
-                                      ).length
-                                        ? prev.counters.filter(
-                                            (a) => a !== item.counter_uuid
-                                          )
-                                        : [
-                                            ...(prev.counters || []),
-                                            item.counter_uuid,
-                                          ],
-                                    }));
-                                  } else {
-                                    setObgData((prev) => ({
-                                      ...prev,
-                                      counter_status:
-                                        prev.counter_status.filter(
-                                          (a) =>
-                                            a.counter_uuid === item.counter_uuid
-                                        ).length
-                                          ? prev.counter_status.filter(
+                      {a.expand
+                        ? filteredCounter
+                            ?.filter((b) => a.route_uuid === b.route_uuid)
+                            ?.sort((a, b) =>
+                              a.counter_title?.localeCompare(b.counter_title)
+                            )
+                            ?.map((item, i, array) => {
+                              return (
+                                <tr
+                                  key={Math.random()}
+                                  style={{ height: "30px" }}
+                                >
+                                  <td
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (objData.type === "general") {
+                                        setObgData((prev) => ({
+                                          ...prev,
+                                          counters: prev.counters.filter(
+                                            (a) => a === item.counter_uuid
+                                          ).length
+                                            ? prev.counters.filter(
+                                                (a) => a !== item.counter_uuid
+                                              )
+                                            : [
+                                                ...(prev.counters || []),
+                                                item.counter_uuid,
+                                              ],
+                                        }));
+                                      } else {
+                                        setObgData((prev) => ({
+                                          ...prev,
+                                          counter_status:
+                                            prev.counter_status.filter(
                                               (a) =>
-                                                a.counter_uuid !==
+                                                a.counter_uuid ===
+                                                item.counter_uuid
+                                            ).length
+                                              ? prev.counter_status.filter(
+                                                  (a) =>
+                                                    a.counter_uuid !==
+                                                    item.counter_uuid
+                                                )
+                                              : [
+                                                  ...(prev.counter_status ||
+                                                    []),
+                                                  item,
+                                                ],
+                                        }));
+                                      }
+                                    }}
+                                    className="flex"
+                                    style={{ justifyContent: "space-between" }}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={
+                                        objData.type === "general"
+                                          ? objcounters.find(
+                                              (a) => a === item.counter_uuid
+                                            )
+                                          : objcounter_status.find(
+                                              (a) =>
+                                                a.counter_uuid ===
                                                 item.counter_uuid
                                             )
-                                          : [
-                                              ...(prev.counter_status || []),
-                                              item,
-                                            ],
-                                    }));
-                                  }
-                                }}
-                                className="flex"
-                                style={{ justifyContent: "space-between" }}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={
-                                    objData.type === "general"
-                                      ? objcounters.find(
-                                          (a) => a === item.counter_uuid
-                                        )
-                                      : objcounter_status.find(
-                                          (a) =>
-                                            a.counter_uuid === item.counter_uuid
-                                        )
-                                  }
-                                  style={{ transform: "scale(1.3)" }}
-                                />
-                                {i + 1}
-                              </td>
+                                      }
+                                      style={{ transform: "scale(1.3)" }}
+                                    />
+                                    {i + 1}
+                                  </td>
 
-                              <td colSpan={2}>{item.counter_title || ""}</td>
-                            </tr>
-                          );
-                        })}
+                                  <td colSpan={2}>
+                                    {item.counter_title || ""}
+                                  </td>
+                                </tr>
+                              );
+                            })
+                        : ""}
                     </>
                   ))}
                 </tbody>
@@ -1085,6 +1209,423 @@ function IncentivePopup({ onSave, popupForm }) {
           >
             <button className="fieldEditButton" onClick={submitHandler}>
               {popupForm?.type === "edit" ? "Update" : "Save"}
+            </button>
+          </div>
+
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function IncentiveOrderPopup({ onSave, popupForm,sendMsg }) {
+  const [type, setType] = useState("all");
+  const [message, setMessage] = useState([]);
+  const [counters, setCounter] = useState([]);
+  const [active, setActive] = useState("");
+  const [copied, setCopied] = useState("");
+  const [orderForm, setOrderForm] = useState([]);
+  const [routesData, setRoutesData] = useState([]);
+  const [filterCounterTitle, setFilterCounterTitle] = useState("");
+  const [filterRouteTitle, setFilterRouteTitle] = useState("");
+  const getRoutesData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/routes/GetRouteList",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success)
+      setRoutesData(response.data.result.map((a) => ({ ...a, expand: false })));
+  };
+  const getCounter = async () => {
+    const response = await axios({
+      method: "post",
+      url: "/counters/GetCounterData",
+      data: ["counter_uuid", "counter_title", "status", "route_uuid"],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCounter(response.data.result);
+  };
+  const getOrderForm = async () => {
+    const response = await axios({
+      method: "post",
+      url: "orderForm/GetFormList",
+      data: ["form_uuid", "form_title"],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setOrderForm(response.data.result);
+  };
+
+  useEffect(() => {
+    getOrderForm();
+    getRoutesData();
+    getCounter();
+  }, []);
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+
+    let data = message;
+    for (let message of data?.filter((a) => a.img)) {
+      const previousFile = message.img;
+      const newFile = new File([previousFile], message.uuid + ".png");
+      const form = new FormData();
+      form.append("file", newFile);
+      await axios({
+        method: "post",
+        url: "/uploadImage",
+        data: form,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    }
+    sendMsg({...popupForm,message,all:type});
+    onSave()
+  };
+  const filteredCounter = useMemo(
+    () =>
+      counters.filter(
+        (a) =>
+          !filterCounterTitle ||
+          a.counter_title
+            ?.toLocaleLowerCase()
+            ?.includes(filterCounterTitle?.toLocaleLowerCase())
+      ),
+    [counters, filterCounterTitle]
+  );
+  const filterRoute = useMemo(
+    () =>
+      routesData
+        .filter(
+          (a) =>
+            (!filterRouteTitle ||
+              a.route_title
+                ?.toLocaleLowerCase()
+                ?.includes(filterRouteTitle?.toLocaleLowerCase())) &&
+            a.route_uuid &&
+            filteredCounter?.filter((b) => a.route_uuid === b.route_uuid).length
+        )
+
+        .sort((a, b) => a?.route_title?.localeCompare(b?.route_title)),
+    [filterRouteTitle, filteredCounter, routesData]
+  );
+
+  const addVariable = (name) => {
+    let element = document.getElementById(active);
+    console.log(element.selectionStart);
+    setMessage((prev) =>
+      prev.message.map((a) =>
+        a.uuid === active
+          ? {
+              ...a,
+              text:
+                (a.text || "")?.slice(0, element.selectionStart) +
+                `{${name}}` +
+                (a.text || "")?.slice(
+                  element.selectionStart,
+                  (a.text || "").length
+                ),
+            }
+          : a
+      )
+    );
+  };
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div
+            className="flex"
+            style={{ justifyContent: "flex-start", alignItems: "flex-start" }}
+          >
+            <div style={{ maxHeight: "500px", overflowY: "scroll" }}>
+              <table
+                className="user-table"
+                style={{
+                  width: "fit-content",
+                }}
+              >
+                <tbody>
+                  <tr>
+                    <td
+                      colSpan={2}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                        width: "400px",
+                      }}
+                    >
+                      <input
+                        onWheel={(e) => e.target.blur()}
+                        type="checkbox"
+                        className="searchInput"
+                        style={{
+                          border: "none",
+                          borderBottom: "2px solid black",
+                          borderRadius: "0px",
+                        }}
+                        placeholder=""
+                        checked={type}
+                        onChange={(e) => setType(e.target.checked)}
+                      />
+                      <b style={{ width: "100px" }}>All  </b>
+                      <input
+                        onWheel={(e) => e.target.blur()}
+                        type="checkbox"
+                        className="searchInput"
+                        style={{
+                          border: "none",
+                          borderBottom: "2px solid black",
+                          borderRadius: "0px",
+                        }}
+                        placeholder=""
+                        checked={!type}
+                        onChange={(e) => setType(!e.target.checked)}
+                      />
+                      <b style={{ width: "100px" }}>Not Ordered  </b>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td
+                      colSpan={2}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                      }}
+                    >
+                      <b style={{ width: "100px" }}>Message : </b>
+                      <span
+                        onClick={(e) => {
+                          setMessage((prev) => [
+                            ...(prev.message || []),
+                            { type: "text", uuid: uuid() },
+                          ]);
+                        }}
+                        className="fieldEditButton"
+                      >
+                        <Add />
+                      </span>
+                    </td>
+                  </tr>
+                  <div style={{ overflowY: "scroll", maxHeight: "150px" }}>
+                    {message
+                      ?.filter((item) => !item.delete)
+                      ?.map((item, i) => (
+                        <tr key={item.uuid}>
+                          <td
+                            colSpan={2}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-start",
+                            }}
+                          >
+                            {i + 1})
+                            <span
+                              onClick={() =>
+                                setMessage((prev) =>
+                                  prev.map((a) =>
+                                    a.uuid === item.uuid
+                                      ? { ...a, delete: true }
+                                      : a
+                                  )
+                                )
+                              }
+                            >
+                              <DeleteOutline />
+                            </span>
+                            <select
+                              className="searchInput"
+                              value={item.type}
+                              onChange={(e) => {
+                                setMessage((prev) =>
+                                  prev.map((a) =>
+                                    a.uuid === item.uuid
+                                      ? { ...a, type: e.target.value }
+                                      : a
+                                  )
+                                );
+                              }}
+                            >
+                              <option value="text">Text</option>
+                              <option value="img">Image</option>
+                            </select>
+                            {item?.type === "text" ? (
+                              <textarea
+                                onWheel={(e) => e.target.blur()}
+                                className="searchInput"
+                                style={{
+                                  border: "none",
+                                  borderBottom: "2px solid black",
+                                  borderRadius: "0px",
+                                  height: "100px",
+                                }}
+                                id={item.uuid}
+                                onFocus={() => {
+                                  setActive(item.uuid);
+                                }}
+                                placeholder=""
+                                value={item.text}
+                                onChange={(e) => {
+                                  setMessage((prev) =>
+                                    prev.map((a) =>
+                                      a.uuid === item.uuid
+                                        ? { ...a, text: e.target.value }
+                                        : a
+                                    )
+                                  );
+                                }}
+                              />
+                            ) : (
+                              <div>
+                                <label htmlFor={item.uuid} className="flex">
+                                  Upload Image
+                                  <input
+                                    className="searchInput"
+                                    type="file"
+                                    id={item.uuid}
+                                    style={{ display: "none" }}
+                                    onChange={(e) =>
+                                      setMessage((prev) =>
+                                        prev.map((a) =>
+                                          a.uuid === item.uuid
+                                            ? {
+                                                ...a,
+                                                img: e.target.files[0],
+                                              }
+                                            : a
+                                        )
+                                      )
+                                    }
+                                  />
+                                  <img
+                                    style={{
+                                      width: "100px",
+                                      height: "100px",
+                                      objectFit: "contain",
+                                    }}
+                                    src={item.img?URL.createObjectURL(item.img):noimg}
+                                    onError={({ currentTarget }) => {
+                                      currentTarget.onerror = null; // prevents looping
+                                      currentTarget.src = noimg;
+                                    }}
+                                    alt=""
+                                  />
+                                </label>
+                                <input
+                                  type="text"
+                                  onWheel={(e) => e.target.blur()}
+                                  className="searchInput"
+                                  style={{
+                                    border: "none",
+                                    borderBottom: "2px solid black",
+                                    borderRadius: "0px",
+                                  }}
+                                  placeholder="caption"
+                                  value={item.caption}
+                                  onChange={(e) => {
+                                    setMessage((prev) =>
+                                      prev.map((a) =>
+                                        a.uuid === item.uuid
+                                          ? {
+                                              ...a,
+                                              caption: e.target.value,
+                                            }
+                                          : a
+                                      )
+                                    );
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </div>
+                  <tr>
+                    <td
+                      colSpan={2}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                      }}
+                    >
+                      <button
+                        className="item-sales-search"
+                        onClick={(e) => addVariable("counter_title")}
+                      >
+                        Counter Title
+                      </button>
+                      <button
+                        className="item-sales-search"
+                        onClick={(e) => addVariable("short_link")}
+                      >
+                        Counter Link
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      colSpan={2}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-start",
+                      }}
+                    >
+                      <button
+                        className="item-sales-search"
+                        onClick={(e) => addVariable("invoice_number")}
+                      >
+                        Invoice Number
+                      </button>
+                      <button
+                        className="item-sales-search"
+                        onClick={(e) => addVariable("amount")}
+                      >
+                        Amount
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <button className="fieldEditButton" onClick={submitHandler}>
+              Shoot
             </button>
           </div>
 

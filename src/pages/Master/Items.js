@@ -625,7 +625,7 @@ function NewUserForm({
           "Content-Type": "multipart/form-data",
         },
       });
-      obj={...obj,img_status:1}
+      obj = { ...obj, img_status: 1 };
     }
     if (popupInfo?.type === "edit") {
       const response = await axios({
@@ -640,10 +640,7 @@ function NewUserForm({
         onSave();
       }
     } else {
-      if (
-        obj?.item_code &&
-        items.find((a) => a.item_code === obj.item_code)
-      ) {
+      if (obj?.item_code && items.find((a) => a.item_code === obj.item_code)) {
         setErrorMassage("Please insert Different Item Code");
         return;
       }
@@ -755,7 +752,11 @@ function NewUserForm({
                         height: "100px",
                         objectFit: "contain",
                       }}
-                      src={server + "/" + data.item_uuid + ".png"}
+                      src={
+                        data.img_status
+                          ? server + "/" + data.item_uuid + ".png"
+                          : noimg
+                      }
                       onError={({ currentTarget }) => {
                         currentTarget.onerror = null; // prevents looping
                         currentTarget.src = noimg;
@@ -763,6 +764,19 @@ function NewUserForm({
                       alt=""
                     />
                   </label>
+                  {data.img_status ? (
+                    <span
+                      className="flex"
+                      style={{ width: "10%", height: "100px" }}
+                      onClick={() =>
+                        setdata((prev) => ({ ...prev, img_status: false }))
+                      }
+                    >
+                      <DeleteOutline />
+                    </span>
+                  ) : (
+                    ""
+                  )}
                 </div>
                 <div className="row">
                   <label className="selectLabel">

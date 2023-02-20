@@ -634,7 +634,11 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         updateWarehouse(warehouse_uuid, methodType);
       } else {
         //   setWarhousePopup(warehouse_uuid);
-        handleTaskChecking();
+        if (methodType === "complete" || complete) {
+          setDeliveryPopup(true);
+        } else {
+          handleTaskChecking();
+        }
       }
     } else {
       if (methodType === "complete" || complete) {

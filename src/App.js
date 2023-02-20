@@ -60,7 +60,7 @@ import Campaigns from "./pages/Reports/Campaigns";
 import TestCounter from "./pages/Master/TestCounter";
 import OrderForms from "./pages/Reports/OrderForms";
 import LinkedCounter from "./users/LinkedCounter";
-export let Version = 70;
+export let Version = 71;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 function App() {
@@ -73,8 +73,7 @@ function App() {
     notification,
     setNotification,
   } = context;
-  // axios.defaults.baseURL = "https://api.btgondia.com";
-  // axios.defaults.baseURL = "http://15.207.39.69:9000";
+
   axios.defaults.baseURL = server;
 
   const getUserType = async (controller) => {
@@ -114,7 +113,7 @@ function App() {
   }, [userType]);
 
   document.title = "BT";
-console.log(notification)
+  console.log(notification);
   return (
     <div className="App">
       <Router>

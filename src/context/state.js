@@ -22,6 +22,9 @@ const State = (props) => {
       setLoading(false);
     }
   };
+  const updateServerPdf = async (data) => {
+    console.log(data);
+  };
   return (
     <Context.Provider
       value={{
@@ -32,6 +35,7 @@ const State = (props) => {
         setLoading,
         notification,
         setNotification,
+        updateServerPdf,
       }}
     >
       {props.children}

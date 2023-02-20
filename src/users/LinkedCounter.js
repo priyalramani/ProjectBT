@@ -1,6 +1,6 @@
 import { AiOutlineSearch } from "react-icons/ai";
 import { IoArrowBackOutline } from "react-icons/io5";
-import { useState, useEffect, useMemo, useContext } from "react";
+import { useState, useEffect, useMemo, useContext, useRef } from "react";
 import { openDB } from "idb";
 import { useNavigate, useParams } from "react-router-dom";
 import { AutoAdd, Billing } from "../Apis/functions";
@@ -12,6 +12,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import MobileNumberPopup from "../components/MobileNumberPopup";
 import context from "../context/context";
 import { server } from "../App";
+import noimg from "../assets/noimg.jpg";
 const LinkedCounter = () => {
   const [items, setItems] = useState([]);
   const [foodLicensePopup, setFoodLicencePopup] = useState(false);
@@ -27,6 +28,8 @@ const LinkedCounter = () => {
   const [clickedId, setClickedId] = useState(false);
   const [cartPage, setCartPage] = useState(false);
   const [orderStatus, setOrderStatus] = useState(0);
+  const [imgpopup, setImgPopup] = useState("");
+  const wrapperRef = useRef();
   // const [counters, setCounters] = useState([]);
   const [counter, setCounter] = useState({});
 
@@ -44,6 +47,22 @@ const LinkedCounter = () => {
   const [loading, setLoading] = useState(false);
   const { setNotification } = useContext(context);
   const Navigate = useNavigate();
+
+  useEffect(() => {
+    if (imgpopup) {
+      function handleClickOutside(event) {
+        if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+          setImgPopup("");
+        }
+      }
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [imgpopup, wrapperRef]);
+
   const callBilling = async () => {
     // let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let time = new Date();
@@ -594,15 +613,22 @@ const LinkedCounter = () => {
                                     </div>
                                   </div>
                                   <div className="menuleft">
-                        
                                     {item?.img_status ? (
-                                      <div className="item-image-container">
+                                      <div
+                                        className="item-image-container"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setImgPopup(item?.item_uuid + ".png");
+                                        }}
+                                      >
                                         <img
                                           src={`${server}/${item?.item_uuid}thumbnail.png`}
                                           alt="Food-Item"
                                         />
                                       </div>
-                                    ):""}
+                                    ) : (
+                                      ""
+                                    )}
                                     <input
                                       value={`${
                                         order?.items?.find(
@@ -1222,6 +1248,60 @@ const LinkedCounter = () => {
                   </button>
                 </form>
               </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+      {imgpopup ? (
+        <div className="overlay" style={{ zIndex: 999999999 }}>
+          <div
+            className="modal"
+            style={{
+              height: "fit-content",
+              width: "max-content",
+              minWidth: "250px",
+              backgroundColor: "transparent",
+            }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div
+                style={{
+                  overflowY: "scroll",
+                  width: "100%",
+                }}
+                ref={wrapperRef}
+              >
+                <img
+                  style={{
+                    width: "90vw",
+                    height: "90vw",
+                    objectFit: "contain",
+                    maxWidth: "400px",
+                    maxHeight: "400px",
+                  }}
+                  src={imgpopup ? server + "/" + imgpopup : noimg}
+                  onError={({ currentTarget }) => {
+                    currentTarget.onerror = null; // prevents looping
+                    currentTarget.src = noimg;
+                  }}
+                  alt=""
+                />
+              </div>
+              <button
+                onClick={() => setImgPopup(false)}
+                className="closeButton"
+              >
+                x
+              </button>
             </div>
           </div>
         </div>
