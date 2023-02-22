@@ -3291,7 +3291,16 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
                     >
                       <option value="0">None</option>
                       {trips
-                        .filter((a) => a.trip_uuid && a.status)
+
+                        .filter(
+                          (a) =>
+                            a.trip_uuid &&
+                            a.status &&
+                            (+JSON.parse(localStorage.getItem("warehouse")) ===
+                              1 ||
+                              JSON.parse(localStorage.getItem("warehouse")) ===
+                                a.warehouse_uuid)
+                        )
                         ?.map((a) => (
                           <option value={a.trip_uuid}>{a.trip_title}</option>
                         ))}

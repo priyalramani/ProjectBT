@@ -60,7 +60,8 @@ import Campaigns from "./pages/Reports/Campaigns";
 import TestCounter from "./pages/Master/TestCounter";
 import OrderForms from "./pages/Reports/OrderForms";
 import LinkedCounter from "./users/LinkedCounter";
-export let Version = 71;
+import OrderPdf from "./components/OrderPdf";
+export let Version = 73;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 function App() {
@@ -118,8 +119,10 @@ function App() {
     <div className="App">
       <Router>
         <Routes>
+    
           <Route path="/" element={<Navigate replace to={"/users"} />} />
           <Route path="/counter/:short_link" element={<LinkedCounter />} />
+          <Route path="/pdf/:order_uuid" element={<OrderPdf />} />
           <Route
             path="/counter/:short_link/:campaign_short_link"
             element={<LinkedCounter />}
