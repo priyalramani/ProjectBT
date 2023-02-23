@@ -288,7 +288,7 @@ const MainAdmin = () => {
 
       controller.abort();
     };
-  }, [holdOrders, location]);
+  }, [holdOrders, location,popupForm]);
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
