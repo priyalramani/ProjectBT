@@ -248,7 +248,7 @@ const Outstanding = () => {
             setPopupOrder(null);
             getOutstanding();
           }}
-          order={popupOrder}
+          order_uuid={popupOrder.order_uuid}
           orderStatus="edit"
         />
       ) : (

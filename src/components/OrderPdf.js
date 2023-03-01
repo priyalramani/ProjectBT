@@ -10,6 +10,7 @@ const OrderPdf = () => {
   const [counter, setCounter] = useState([]);
   const [counters, setCounters] = useState([]);
   const [order, setorder] = useState(null);
+  const [category, setCategory] = useState([]);
   const [user, setUser] = useState({});
   const [reminderDate, setReminderDate] = useState();
   const [itemData, setItemsData] = useState([]);
@@ -46,17 +47,17 @@ const OrderPdf = () => {
     });
     if (response.data.success) setItemsData(response.data.result);
   };
-  const getCounter = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/counters/GetCounter",
+  // const getCounter = async () => {
+  //   const response = await axios({
+  //     method: "get",
+  //     url: "/counters/GetCounter",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setCounter(response.data.result);
-  };
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
+  //   if (response.data.success) setCounter(response.data.result);
+  // };
   const getOrder = async () => {
     const response = await axios({
       method: "get",
@@ -68,6 +69,7 @@ const OrderPdf = () => {
     });
     if (response.data.success) setorder(response.data.result);
   };
+  console.log(order?.item_details);
   const getUser = async () => {
     const response = await axios({
       method: "get",
@@ -90,16 +92,28 @@ const OrderPdf = () => {
     });
     if (response.data.success) setPaymentModes(response.data.result);
   };
+  const getItemCategories = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/itemCategories/GetItemCategoryList",
 
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCategory(response.data.result);
+  };
   useEffect(() => {
     getOrder();
     getItemsDataReminder();
-    getCounters();
+
+    getItemCategories();
   }, []);
   useEffect(() => {
     if (order) {
       getItemsData(order.item_details.map((a) => a.item_uuid));
-      getCounter();
+      // getCounter();
+      getCounters([order?.counter_uuid]);
       GetPaymentModes();
       getUser();
     }
@@ -111,9 +125,7 @@ const OrderPdf = () => {
         Array(Math.ceil(order?.item_details?.length / 12)).keys()
       )?.map((a, i) => (
         <OrderPrint
-          counter={counter.find(
-            (a) => a.counter_uuid === order?.counter_uuid
-          )}
+          counter={counter.find((a) => a.counter_uuid === order?.counter_uuid)}
           reminderDate={reminderDate}
           order={order}
           date={new Date(order?.status[0]?.time)}

@@ -5,6 +5,7 @@ import axios from "axios";
 import {
   CopyAllOutlined,
   DeleteOutline,
+  NoteAdd,
   Phone,
   WhatsApp,
 } from "@mui/icons-material";
@@ -17,7 +18,7 @@ import Context from "../../context/context";
 const Counter = () => {
   const [counter, setCounter] = useState([]);
   const [paymentModes, setPaymentModes] = useState([]);
-
+  const [counterNotesPopup, setCounterNotesPoup] = useState();
   const [filterCounterTitle, setFilterCounterTitle] = useState("");
   const [filterRoute, setFilterRoute] = useState("");
   const [popupForm, setPopupForm] = useState(false);
@@ -146,6 +147,7 @@ const Counter = () => {
       return {
         "Route Title": a.route_title,
         "Counter Title": a.counter_title,
+        "Counter Code": a.counter_code,
         "Mobile 1": a.mobile[0] || "",
         "Mobile 2": a.mobile[1]?.replace(",", "") || "",
         "Mobile 3": a.mobile[2]?.replace(",", "") || "",
@@ -238,9 +240,23 @@ const Counter = () => {
             setPopupForm={setPopupForm}
             setItemPopup={setItemPopup}
             setDeletePopup={setDeletePopup}
+            setCounterNotesPoup={setCounterNotesPoup}
           />
         </div>
       </div>
+      {counterNotesPopup ? (
+        <CounterNotesPopup
+          onSave={() => {
+            getCounter()
+            setCounterNotesPoup(false);
+          }}
+          notesPopup={counterNotesPopup}
+
+          // postOrderData={() => onSubmit({ stage: 5 })}
+        />
+      ) : (
+        ""
+      )}
       {popupForm ? (
         <NewUserForm
           onSave={() => setPopupForm(false)}
@@ -350,19 +366,30 @@ const Counter = () => {
 };
 
 export default Counter;
-function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
+function Table({
+  itemsDetails,
+  setPopupForm,
+  setItemPopup,
+  setDeletePopup,
+  setCounterNotesPoup,
+}) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
   const [copied, setCopied] = useState("");
   return (
     <table
       className="user-table"
-      style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}
+      style={{
+        maxWidth: "100vw",
+        height: "fit-content",
+        overflowX: "scroll",
+        fontSize: "15px",
+      }}
     >
       <thead>
         <tr>
           <th>S.N</th>
-          <th colSpan={2}>
+          <th colSpan={3}>
             <div className="t-head-element">
               <span>Router Title</span>
               <div className="sort-buttons-container">
@@ -385,7 +412,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
               </div>
             </div>
           </th>
-          <th colSpan={2}>
+          <th colSpan={3}>
             <div className="t-head-element">
               <span>Counter Title</span>
               <div className="sort-buttons-container">
@@ -400,6 +427,32 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
                 <button
                   onClick={() => {
                     setItems("counter_title");
+                    setOrder("desc");
+                  }}
+                >
+                  <ChevronDownIcon className="sort-down sort-button" />
+                </button>
+              </div>
+            </div>
+          </th>
+          <th colSpan={2}>
+            <div className="t-head-element">
+              <span>
+                Counter
+                <br /> Code
+              </span>
+              <div className="sort-buttons-container">
+                <button
+                  onClick={() => {
+                    setItems("counter_code");
+                    setOrder("asc");
+                  }}
+                >
+                  <ChevronUpIcon className="sort-up sort-button" />
+                </button>
+                <button
+                  onClick={() => {
+                    setItems("counter_code");
                     setOrder("desc");
                   }}
                 >
@@ -477,7 +530,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
               </div>
             </div>
           </th>
-          <th colSpan={5}>Actions</th>
+          <th colSpan={9}>Actions</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -501,8 +554,9 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
               }}
             >
               <td>{i + 1}</td>
-              <td colSpan={2}>{item.route_title}</td>
-              <td colSpan={2}>{item.counter_title}</td>
+              <td colSpan={3}>{item.route_title}</td>
+              <td colSpan={3}>{item.counter_title}</td>
+              <td colSpan={2}>{item.counter_code}</td>
               <td colSpan={2}>
                 {item?.mobile
                   ?.filter((a) => a.mobile)
@@ -543,7 +597,16 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
                   <CopyAllOutlined />
                 )}
               </td>
-              <td>
+              <td
+                colSpan={1}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCounterNotesPoup(item);
+                }}
+              >
+                <NoteAdd />
+              </td>
+              <td colSpan={2}>
                 <button
                   type="button"
                   style={{ fontSize: "10px" }}
@@ -556,7 +619,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
                   Company Discount
                 </button>
               </td>
-              <td>
+              <td colSpan={2}>
                 <button
                   type="button"
                   style={{ fontSize: "10px" }}
@@ -569,7 +632,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
                   Item Special Prices
                 </button>
               </td>
-              <td>
+              <td colSpan={2}>
                 <button
                   type="button"
                   style={{ fontSize: "10px" }}
@@ -596,6 +659,108 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup }) {
           ))}
       </tbody>
     </table>
+  );
+}
+function CounterNotesPopup({ onSave, notesPopup }) {
+  const [notes, setNotes] = useState([]);
+  const [edit, setEdit] = useState(false);
+  useEffect(() => {
+    // console.log(order?.notes);
+    setNotes(notesPopup?.notes || []);
+  }, [notesPopup?.notes]);
+  console.log(notesPopup);
+  const submitHandler = async () => {
+    const response = await axios({
+      method: "put",
+      url: "/counters/putCounter",
+      data: [
+        {
+          counter_uuid: notesPopup.counter_uuid,
+          notes,
+        },
+      ],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+    }
+  };
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: 9999999999 }}>
+        <div
+          className="modal"
+          style={{
+            height: "fit-content",
+            width: "max-content",
+            backgroundColor: "cyan",
+          }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h3>Counter Notes</h3>
+            {/* <h3>Please Enter Notes</h3> */}
+          </div>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup" style={{ backgroundColor: "#fff" }}>
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "start" }}
+                  >
+                    <div style={{ width: "50px" }}>Notes</div>
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "200px" }}
+                    >
+                      <textarea
+                        name="route_title"
+                        className="numberInput"
+                        style={{ width: "200px", height: "200px" }}
+                        value={notes?.toString()?.replace(/,/g, "\n")}
+                        onChange={(e) => {
+                          setNotes(e.target.value.split("\n"));
+                          setEdit(true);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button onClick={onSave} className="closeButton">
+                    x
+                  </button>
+                  {edit ? (
+                    <button
+                      type="button"
+                      className="submit"
+                      onClick={submitHandler}
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 function NewUserForm({
@@ -892,7 +1057,7 @@ function NewUserForm({
                         onChange={(e) =>
                           setdata({
                             ...data,
-                            counter_title: e.target.value,
+                            counter_title: e.target.value.trim(),
                           })
                         }
                         maxLength={42}
@@ -958,178 +1123,30 @@ function NewUserForm({
                       </select>
                     </label>
                   </div>
-                  <div className="row">
-                    <label className="selectLabel" style={{ width: "50%" }}>
-                      Mobile
-                      <div>
-                        {data?.mobile?.map((a) => (
-                          <div
-                            key={a.uuid}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                              margin: "5px 0",
-                            }}
-                          >
-                            <input
-                              type="number"
-                              name="route_title"
-                              className="numberInput"
-                              value={a?.mobile}
-                              style={{ width: "15ch" }}
-                              disabled={a.lable?.find(
-                                (c) =>
-                                  (c.type === "cal" || c.type === "wa") &&
-                                  +c.varification
-                              )}
-                              onChange={(e) => {
-                                if (
-                                  e.target.value.length > 10 ||
-                                  a.lable?.find(
-                                    (c) =>
-                                      (c.type === "cal" || c.type === "wa") &&
-                                      +c.varification
-                                  )
-                                ) {
-                                  return;
-                                }
-                                setdata((prev) => ({
-                                  ...prev,
-                                  mobile: prev.mobile.map((b) =>
-                                    b.uuid === a.uuid
-                                      ? { ...b, mobile: e.target.value }
-                                      : b
-                                  ),
-                                }));
-                              }}
-                              maxLength={10}
-                            />
-                            <span
-                              style={{
-                                color: a.lable?.find(
-                                  (c) => c.type === "wa" && !+c.varification
-                                )
-                                  ? "red"
-                                  : a.lable?.find(
-                                      (c) => c.type === "wa" && +c.varification
-                                    )
-                                  ? "green"
-                                  : "gray",
-                                cursor: "pointer",
-                              }}
-                              onClick={(e) => {
-                                if (a.mobile) sendOtp({ ...a, lable: "wa" });
-                                //   setdata((prev) => ({
-                                //     ...prev,
-                                //     mobile: prev.mobile.map((b) =>
-                                //       b.uuid === a.uuid
-                                //         ? {
-                                //             ...b,
-                                //             lable: b.lable?.find(
-                                //               (c) => c.type === "wa"
-                                //             )
-                                //               ? b.lable.filter(
-                                //                   (c) => c.type !== "wa"
-                                //                 )
-                                //               : [
-                                //                   ...(b?.lable || []),
-                                //                   { type: "wa", varification: 0 },
-                                //                 ],
-                                //           }
-                                //         : b
-                                //     ),
-                                //   }));
-                              }}
-                            >
-                              <WhatsApp />
-                            </span>
-                            <span
-                              style={{
-                                color: a.lable?.find(
-                                  (c) => c.type === "cal" && !+c.varification
-                                )
-                                  ? "red"
-                                  : a.lable?.find(
-                                      (c) => c.type === "cal" && +c.varification
-                                    )
-                                  ? "green"
-                                  : "gray",
-                                cursor: "pointer",
-                              }}
-                              onClick={(e) => {
-                                if (a.mobile)
-                                  sendCallOtp({ ...a, lable: "cal" });
-                                //   setdata((prev) => ({
-                                //     ...prev,
-                                //     mobile: prev.mobile.map((b) =>
-                                //       b.uuid === a.uuid
-                                //         ? {
-                                //             ...b,
-                                //             lable: b.lable?.find(
-                                //               (c) => c.type === "cal"
-                                //             )
-                                //               ? b.lable.filter(
-                                //                   (c) => c.type !== "cal"
-                                //                 )
-                                //               : [
-                                //                   ...(b?.lable || []),
-                                //                   { type: "cal", varification: 0 },
-                                //                 ],
-                                //           }
-                                //         : b
-                                //     ),
-                                //   }));
-                              }}
-                            >
-                              <Phone />
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </label>
-                    <label className="selectLabel" style={{ width: "50%" }}>
-                      Payment Modes
-                      <select
-                        className="numberInput"
-                        style={{ width: "200px", height: "100px" }}
-                        value={
-                          data.credit_allowed === "Y"
-                            ? data.payment_modes.length
-                              ? [...data?.payment_modes, "unpaid"]
-                              : "unpaid"
-                            : data?.payment_modes
-                        }
-                        onChange={onChangeHandler}
-                        multiple
-                      >
-                        {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
-                        {paymentModes?.map((occ) => (
-                          <option
-                            value={occ.mode_uuid}
-                            style={{ marginBottom: "5px", textAlign: "center" }}
-                          >
-                            {occ.mode_title}
-                          </option>
-                        ))}
-                        <option
-                          onClick={() =>
-                            setdata((prev) => ({
-                              ...prev,
-                              credit_allowed:
-                                prev.credit_allowed === "Y" ? "N" : "Y",
-                            }))
-                          }
-                          style={{ marginBottom: "5px", textAlign: "center" }}
-                          value="unpaid"
-                        >
-                          Unpaid
-                        </option>
-                      </select>
-                    </label>
-                  </div>
 
                   <div className="row">
+                    <label className="selectLabel">
+                      Outstanding Type
+                      <select
+                        className="numberInput"
+                        value={data.outstanding_type}
+                        onChange={(e) =>
+                          setdata((prev) => ({
+                            ...prev,
+                            outstanding_type: e.target.value,
+                          }))
+                        }
+                      >
+                        {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
+
+                        <option value={0}>None</option>
+                        <option value={1}>Visit</option>
+                        <option value={2}>Call</option>
+                        <option value={3}>Self</option>
+                        <option value={4}>Other</option>
+                      </select>
+                    </label>
+
                     <label className="selectLabel">
                       Status
                       <select
@@ -1238,26 +1255,63 @@ function NewUserForm({
                     </label>
                   </div>
                   <div className="row">
-                    <label className="selectLabel">
-                      Outstanding Type
-                      <select
-                        className="numberInput"
-                        value={data.outstanding_type}
-                        onChange={(e) =>
-                          setdata((prev) => ({
-                            ...prev,
-                            outstanding_type: e.target.value,
-                          }))
-                        }
-                      >
-                        {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
-
-                        <option value={0}>None</option>
-                        <option value={1}>Visit</option>
-                        <option value={2}>Call</option>
-                        <option value={3}>Self</option>
-                        <option value={4}>Other</option>
-                      </select>
+                    <label className="selectLabel" style={{ width: "50%" }}>
+                      Payment Modes
+                      <table>
+                        {paymentModes?.map((occ) => (
+                          <tr
+                            value={occ.mode_uuid}
+                            style={{ marginBottom: "5px", textAlign: "center" }}
+                            onClick={() => {
+                              setdata((prev) => ({
+                                ...prev,
+                                payment_modes: prev?.payment_modes?.filter(
+                                  (a) => a === occ.mode_uuid
+                                ).length
+                                  ? prev?.payment_modes?.filter(
+                                      (a) => a !== occ.mode_uuid
+                                    )
+                                  : [
+                                      ...(prev.payment_modes || []),
+                                      occ.mode_uuid,
+                                    ],
+                              }));
+                            }}
+                          >
+                            <td>
+                              <input
+                                type="checkbox"
+                                checked={
+                                  data?.payment_modes?.filter(
+                                    (a) => a === occ.mode_uuid
+                                  ).length
+                                }
+                              />
+                            </td>
+                            <td>{occ.mode_title}</td>
+                          </tr>
+                        ))}
+                        <tr
+                          onClick={() =>
+                            setdata((prev) => ({
+                              ...prev,
+                              credit_allowed:
+                                prev?.credit_allowed === "Y" ? "N" : "Y",
+                            }))
+                          }
+                          style={{ marginBottom: "5px", textAlign: "center" }}
+                          value="unpaid"
+                        >
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={data?.credit_allowed === "Y"}
+                            />
+                          </td>
+                          <td> Unpaid</td>
+                        </tr>
+                      </table>
+                      {/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
                     </label>
                     <label className="selectLabel" style={{ width: "50%" }}>
                       Counter Group
@@ -1300,6 +1354,263 @@ function NewUserForm({
                         <option value={a.form_uuid}>{a.form_title}</option>
                       ))}
                     </select>
+                  </label>
+                </div>
+                <div className="row">
+                  <label className="selectLabel" style={{ width: "50%" }}>
+                    Mobile
+                    <div>
+                      {data?.mobile?.slice(0, 2).map((a) => (
+                        <div
+                          key={a.uuid}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            margin: "5px 0",
+                          }}
+                        >
+                          <input
+                            type="number"
+                            name="route_title"
+                            className="numberInput"
+                            value={a?.mobile}
+                            style={{ width: "15ch" }}
+                            disabled={a.lable?.find(
+                              (c) =>
+                                (c.type === "cal" || c.type === "wa") &&
+                                +c.varification
+                            )}
+                            onChange={(e) => {
+                              if (
+                                e.target.value.length > 10 ||
+                                a.lable?.find(
+                                  (c) =>
+                                    (c.type === "cal" || c.type === "wa") &&
+                                    +c.varification
+                                )
+                              ) {
+                                return;
+                              }
+                              setdata((prev) => ({
+                                ...prev,
+                                mobile: prev.mobile.map((b) =>
+                                  b.uuid === a.uuid
+                                    ? { ...b, mobile: e.target.value }
+                                    : b
+                                ),
+                              }));
+                            }}
+                            maxLength={10}
+                          />
+                          <span
+                            style={{
+                              color: a.lable?.find(
+                                (c) => c.type === "wa" && !+c.varification
+                              )
+                                ? "red"
+                                : a.lable?.find(
+                                    (c) => c.type === "wa" && +c.varification
+                                  )
+                                ? "green"
+                                : "gray",
+                              cursor: "pointer",
+                            }}
+                            onClick={(e) => {
+                              if (a.mobile) sendOtp({ ...a, lable: "wa" });
+                              //   setdata((prev) => ({
+                              //     ...prev,
+                              //     mobile: prev.mobile.map((b) =>
+                              //       b.uuid === a.uuid
+                              //         ? {
+                              //             ...b,
+                              //             lable: b.lable?.find(
+                              //               (c) => c.type === "wa"
+                              //             )
+                              //               ? b.lable.filter(
+                              //                   (c) => c.type !== "wa"
+                              //                 )
+                              //               : [
+                              //                   ...(b?.lable || []),
+                              //                   { type: "wa", varification: 0 },
+                              //                 ],
+                              //           }
+                              //         : b
+                              //     ),
+                              //   }));
+                            }}
+                          >
+                            <WhatsApp />
+                          </span>
+                          <span
+                            style={{
+                              color: a.lable?.find(
+                                (c) => c.type === "cal" && !+c.varification
+                              )
+                                ? "red"
+                                : a.lable?.find(
+                                    (c) => c.type === "cal" && +c.varification
+                                  )
+                                ? "green"
+                                : "gray",
+                              cursor: "pointer",
+                            }}
+                            onClick={(e) => {
+                              if (a.mobile) sendCallOtp({ ...a, lable: "cal" });
+                              //   setdata((prev) => ({
+                              //     ...prev,
+                              //     mobile: prev.mobile.map((b) =>
+                              //       b.uuid === a.uuid
+                              //         ? {
+                              //             ...b,
+                              //             lable: b.lable?.find(
+                              //               (c) => c.type === "cal"
+                              //             )
+                              //               ? b.lable.filter(
+                              //                   (c) => c.type !== "cal"
+                              //                 )
+                              //               : [
+                              //                   ...(b?.lable || []),
+                              //                   { type: "cal", varification: 0 },
+                              //                 ],
+                              //           }
+                              //         : b
+                              //     ),
+                              //   }));
+                            }}
+                          >
+                            <Phone />
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </label>
+                  <label className="selectLabel" style={{ width: "50%" }}>
+                    <div>
+                      {data?.mobile?.slice(2, 4).map((a) => (
+                        <div
+                          key={a.uuid}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            margin: "5px 0",
+                          }}
+                        >
+                          <input
+                            type="number"
+                            name="route_title"
+                            className="numberInput"
+                            value={a?.mobile}
+                            style={{ width: "15ch" }}
+                            disabled={a.lable?.find(
+                              (c) =>
+                                (c.type === "cal" || c.type === "wa") &&
+                                +c.varification
+                            )}
+                            onChange={(e) => {
+                              if (
+                                e.target.value.length > 10 ||
+                                a.lable?.find(
+                                  (c) =>
+                                    (c.type === "cal" || c.type === "wa") &&
+                                    +c.varification
+                                )
+                              ) {
+                                return;
+                              }
+                              setdata((prev) => ({
+                                ...prev,
+                                mobile: prev.mobile.map((b) =>
+                                  b.uuid === a.uuid
+                                    ? { ...b, mobile: e.target.value }
+                                    : b
+                                ),
+                              }));
+                            }}
+                            maxLength={10}
+                          />
+                          <span
+                            style={{
+                              color: a.lable?.find(
+                                (c) => c.type === "wa" && !+c.varification
+                              )
+                                ? "red"
+                                : a.lable?.find(
+                                    (c) => c.type === "wa" && +c.varification
+                                  )
+                                ? "green"
+                                : "gray",
+                              cursor: "pointer",
+                            }}
+                            onClick={(e) => {
+                              if (a.mobile) sendOtp({ ...a, lable: "wa" });
+                              //   setdata((prev) => ({
+                              //     ...prev,
+                              //     mobile: prev.mobile.map((b) =>
+                              //       b.uuid === a.uuid
+                              //         ? {
+                              //             ...b,
+                              //             lable: b.lable?.find(
+                              //               (c) => c.type === "wa"
+                              //             )
+                              //               ? b.lable.filter(
+                              //                   (c) => c.type !== "wa"
+                              //                 )
+                              //               : [
+                              //                   ...(b?.lable || []),
+                              //                   { type: "wa", varification: 0 },
+                              //                 ],
+                              //           }
+                              //         : b
+                              //     ),
+                              //   }));
+                            }}
+                          >
+                            <WhatsApp />
+                          </span>
+                          <span
+                            style={{
+                              color: a.lable?.find(
+                                (c) => c.type === "cal" && !+c.varification
+                              )
+                                ? "red"
+                                : a.lable?.find(
+                                    (c) => c.type === "cal" && +c.varification
+                                  )
+                                ? "green"
+                                : "gray",
+                              cursor: "pointer",
+                            }}
+                            onClick={(e) => {
+                              if (a.mobile) sendCallOtp({ ...a, lable: "cal" });
+                              //   setdata((prev) => ({
+                              //     ...prev,
+                              //     mobile: prev.mobile.map((b) =>
+                              //       b.uuid === a.uuid
+                              //         ? {
+                              //             ...b,
+                              //             lable: b.lable?.find(
+                              //               (c) => c.type === "cal"
+                              //             )
+                              //               ? b.lable.filter(
+                              //                   (c) => c.type !== "cal"
+                              //                 )
+                              //               : [
+                              //                   ...(b?.lable || []),
+                              //                   { type: "cal", varification: 0 },
+                              //                 ],
+                              //           }
+                              //         : b
+                              //     ),
+                              //   }));
+                            }}
+                          >
+                            <Phone />
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </label>
                 </div>
                 <i style={{ color: "red" }}>

@@ -403,7 +403,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
             width: "fit-content",
           }}
         >
-          <div >
+          <div>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
                 <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Form</h1>
@@ -434,7 +434,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                   style={{
                     padding: "0px 12px",
                     height: "fit-content",
-                    maxHeight:"350px"
+                    maxHeight: "350px",
                   }}
                 >
                   <h1>Items</h1>
@@ -488,9 +488,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                       <tbody className="tbody">
                         {filterCompany.map((company) => (
                           <>
-                            <tr
-                              style={{ pageBreakAfter: "auto"}}
-                            >
+                            <tr style={{ pageBreakAfter: "auto" }}>
                               <td colSpan={3} className="flex">
                                 <span
                                   style={{
@@ -514,8 +512,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                                 a.category_uuid ===
                                                   b.category_uuid &&
                                                 data?.items?.find(
-                                                  (d) =>
-                                                    d.item_uuid === b.item_uuid
+                                                  (d) => d === b.item_uuid
                                                 )
                                             )?.length ===
                                             filteredItems?.filter(
@@ -538,8 +535,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                               (b) =>
                                                 !filteredItems?.find(
                                                   (c) =>
-                                                    c.item_uuid ===
-                                                      b.item_uuid &&
+                                                    c.item_uuid === b &&
                                                     filterCategory.find(
                                                       (d) =>
                                                         d.category_uuid ===
@@ -554,8 +550,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                                 (b) =>
                                                   !filteredItems?.find(
                                                     (c) =>
-                                                      c.item_uuid ===
-                                                        b.item_uuid &&
+                                                      c.item_uuid === b &&
                                                       filterCategory.find(
                                                         (d) =>
                                                           d.category_uuid ===
@@ -565,15 +560,17 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                                       )
                                                   )
                                               ) || []),
-                                              ...filteredItems?.filter((c) =>
-                                                filterCategory.find(
-                                                  (d) =>
-                                                    d.category_uuid ===
-                                                      c.category_uuid &&
-                                                    d.company_uuid ===
-                                                      company.company_uuid
+                                              ...filteredItems
+                                                ?.filter((c) =>
+                                                  filterCategory.find(
+                                                    (d) =>
+                                                      d.category_uuid ===
+                                                        c.category_uuid &&
+                                                      d.company_uuid ===
+                                                        company.company_uuid
+                                                  )
                                                 )
-                                              ),
+                                                ?.map((d) => d.item_uuid),
                                             ],
                                       };
                                     });
@@ -590,8 +587,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                               a.category_uuid ===
                                                 b.category_uuid &&
                                               data?.items?.find(
-                                                (d) =>
-                                                  d.item_uuid === b.item_uuid
+                                                (d) => d === b.item_uuid
                                               )
                                           )?.length ===
                                           filteredItems?.filter(
@@ -636,9 +632,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                                   a.category_uuid ===
                                                     b.category_uuid &&
                                                   data?.items?.find(
-                                                    (d) =>
-                                                      d.item_uuid ===
-                                                      b.item_uuid
+                                                    (d) => d === b.item_uuid
                                                   )
                                               )?.length ===
                                               filteredItems?.filter(
@@ -655,8 +649,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                                     (b) =>
                                                       !filteredItems?.find(
                                                         (c) =>
-                                                          c.item_uuid ===
-                                                            b.item_uuid &&
+                                                          c.item_uuid === b &&
                                                           c.category_uuid ===
                                                             a.category_uuid
                                                       )
@@ -666,17 +659,18 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                                       (b) =>
                                                         !filteredItems?.find(
                                                           (c) =>
-                                                            c.item_uuid ===
-                                                              b.item_uuid &&
+                                                            c.item_uuid === b &&
                                                             c.category_uuid ===
                                                               a.category_uuid
                                                         )
                                                     ) || []),
-                                                    ...filteredItems?.filter(
-                                                      (c) =>
-                                                        c.category_uuid ===
-                                                        a.category_uuid
-                                                    ),
+                                                    ...filteredItems
+                                                      ?.filter(
+                                                        (c) =>
+                                                          c.category_uuid ===
+                                                          a.category_uuid
+                                                      )
+                                                      ?.map((c) => c.item_uuid),
                                                   ],
                                             };
                                           });
@@ -691,8 +685,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                                 a.category_uuid ===
                                                   b.category_uuid &&
                                                 data?.items?.find(
-                                                  (d) =>
-                                                    d.item_uuid === b.item_uuid
+                                                  (d) => d === b.item_uuid
                                                 )
                                             )?.length ===
                                             filteredItems?.filter(
@@ -737,11 +730,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                                       )
                                                     : [
                                                         ...(prev.items || []),
-                                                        filteredItems?.find(
-                                                          (c) =>
-                                                            c.item_uuid ===
-                                                            item.item_uuid
-                                                        ),
+                                                        item.item_uuid,
                                                       ],
                                                 };
                                               });
@@ -754,8 +743,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies }) {
                                             <input
                                               type="checkbox"
                                               checked={data?.items?.find(
-                                                (c) =>
-                                                  c.item_uuid === item.item_uuid
+                                                (c) => c === item.item_uuid
                                               )}
                                               style={{
                                                 transform: "scale(1.3)",

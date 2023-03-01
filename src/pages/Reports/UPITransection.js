@@ -128,7 +128,7 @@ const UPITransection = () => {
             setPopupOrder(null);
             getActivityData();
           }}
-          order={popupOrder}
+          order_uuid={popupOrder.order_uuid}
           orderStatus="edit"
         />
       ) : (

@@ -78,7 +78,7 @@ const CancelOrders = () => {
             setPopupOrder(null);
             getCompleteOrders();
           }}
-          order={popupOrder}
+          order_uuid={popupOrder.order_uuid}
           orderStatus="edit"
         />
       ) : (

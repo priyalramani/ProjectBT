@@ -61,7 +61,7 @@ import TestCounter from "./pages/Master/TestCounter";
 import OrderForms from "./pages/Reports/OrderForms";
 import LinkedCounter from "./users/LinkedCounter";
 import OrderPdf from "./components/OrderPdf";
-export let Version = 73;
+export let Version = 81;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 function App() {

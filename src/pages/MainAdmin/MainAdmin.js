@@ -17,7 +17,7 @@ import { AiOutlineReload } from "react-icons/ai";
 import VerticalTabs from "../../components/VerticalTabs";
 import ItemAvilibility from "../QuikAccess/ItemAvilibility";
 import { OrderDetails } from "../../components/OrderDetails";
-import { ArrowDropDown } from "@mui/icons-material";
+import { ArrowDropDown, Print } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import Select from "react-select";
 import { Billing } from "../../Apis/functions";
@@ -47,6 +47,7 @@ const MainAdmin = () => {
   const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState([]);
+
   const [selectedRouteOrder, setSelectedRouteOrder] = useState({});
   const [selectedTrip, setSelectedTrip] = useState("");
   const [searchItems, setSearhItems] = useState("");
@@ -67,7 +68,7 @@ const MainAdmin = () => {
   const [reminderDate, setReminderDate] = useState();
   const [selectedtasks, setSelectedTasks] = useState(false);
   const location = useLocation();
-  const {updateServerPdf}=useContext(context)
+  const { updateServerPdf } = useContext(context);
   let user_uuid = localStorage.getItem("user_uuid");
   const selectedOrderGrandTotal = useMemo(
     () =>
@@ -78,6 +79,11 @@ const MainAdmin = () => {
         : "",
     [selectedOrder]
   );
+  const selectedPrintOrder = useMemo(
+    () => ordersData?.filter((a) => +a.to_print) || [],
+    [ordersData]
+  );
+  console.log("selectedPrintOrder", selectedPrintOrder);
   const getItemsDataReminder = async () => {
     const response = await axios({
       method: "get",
@@ -200,7 +206,7 @@ const MainAdmin = () => {
 
     for (let orderData of selectedOrder) {
       let warehouse_uuid = localStorage.getItem("warehouse");
-      warehouse_uuid = warehouse_uuid ? JSON.parse(warehouse_uuid)[0] : 0;
+      warehouse_uuid = JSON.parse(warehouse_uuid);
 
       if (
         warehouse_uuid &&
@@ -288,7 +294,7 @@ const MainAdmin = () => {
 
       controller.abort();
     };
-  }, [holdOrders, location,popupForm]);
+  }, [holdOrders, location, popupForm, btn]);
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -339,7 +345,8 @@ const MainAdmin = () => {
         prev.map((a) => data.find((b) => b.order_uuid === a.order_uuid) || a)
       );
       setOrdersData(response.data.result);
-      if (response.data.pdforders?.length) updateServerPdf(response.data.pdforders);
+      if (response.data.pdforders?.length)
+        updateServerPdf(response.data.pdforders);
       if (response.data.result?.length === 0) setNoOrder(true);
       else setNoOrder(false);
     } else {
@@ -625,6 +632,54 @@ const MainAdmin = () => {
           }}
           onClick={() => setBtn((prev) => !prev)}
         />
+        {selectedPrintOrder.length ? (
+          <div
+            style={{
+              position: "fixed",
+
+              zIndex: "99999",
+              top: "10px",
+              right: "320px",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              handlePrint();
+              axios({
+                method: "put",
+                url: "/orders/putOrders",
+                data: selectedPrintOrder.map((a) => ({ ...a, to_print: 0 })),
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }).then((response) => {
+                if (response.data.success) {
+                  setBtn((prev) => !prev);
+                }
+              });
+            }}
+          >
+            <div style={{ position: "relative" }}>
+              <span
+                className="flex"
+                style={{
+                  position: "absolute",
+                  color: "#fff",
+                  backgroundColor: "red",
+                  borderRadius: "50%",
+                  width: "10px",
+                  height: "10px",
+                  fontSize: "10px",
+                  right: "1px",
+                }}
+              >
+                {selectedPrintOrder?.length}
+              </span>
+              <Print />
+            </div>
+          </div>
+        ) : (
+          ""
+        )}
         <div
           style={
             holdOrders
@@ -1692,7 +1747,7 @@ const MainAdmin = () => {
             }
           }
         >
-          {selectedOrder
+          {(selectOrder ? selectedOrder : selectedPrintOrder)
             .map((a) => ({
               ...a,
               sort_order: +counter.find(
@@ -1820,7 +1875,7 @@ const MainAdmin = () => {
             if (holdOrders) getRunningHoldOrders();
             else getRunningOrders();
           }}
-          order={popupOrder}
+          order_uuid={popupOrder.order_uuid}
         />
       ) : (
         ""
@@ -1960,9 +2015,7 @@ function NewUserForm({
     if (popupInfo?.type === "edit")
       setSelectedTrip({ trip_uuid: "0", warehouse_uuid: "" });
     else {
-      let warehouse_uuid = localStorage.getItem("warehouse") || 0;
-      warehouse_uuid = warehouse_uuid ? JSON.parse(warehouse_uuid)[0] : 0;
-      console.log(warehouse_uuid);
+      let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"));
       setdata({
         warehouse_uuid,
       });
@@ -2037,15 +2090,18 @@ function NewUserForm({
                         style={{ width: "200px" }}
                       >
                         <option value="0">None</option>
-                  
+
                         {trips
                           .filter(
                             (a) =>
                               a.trip_uuid &&
                               a.status &&
-                              (+JSON.parse(localStorage.getItem("warehouse")) === 1 ||
-                              JSON.parse(localStorage.getItem("warehouse")) ===
-                                  a.warehouse_uuid)
+                              (+JSON.parse(
+                                localStorage.getItem("warehouse")
+                              ) === 1 ||
+                                JSON.parse(
+                                  localStorage.getItem("warehouse")
+                                ) === a.warehouse_uuid)
                           )
                           .map((a) => (
                             <option value={a.trip_uuid}>{a.trip_title}</option>

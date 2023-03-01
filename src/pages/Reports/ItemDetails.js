@@ -18,9 +18,9 @@ const ItemDetails = () => {
 
   const getCounter = async () => {
     const response = await axios({
-      method: "get",
-      url: "/counters/GetCounterList",
-
+      method: "post",
+      url: "/counters/GetCounterData",
+      data: ["counter_title", "counter_uuid"],
       headers: {
         "Content-Type": "application/json",
       },
@@ -283,7 +283,10 @@ function Table({ itemsDetails }) {
           <th>S.N</th>
           <th colSpan={3}>
             <div className="t-head-element">
-              <span>Item<br/> Name</span>
+              <span>
+                Item
+                <br /> Name
+              </span>
               <div className="sort-buttons-container">
                 <button
                   onClick={() => {
@@ -375,7 +378,10 @@ function Table({ itemsDetails }) {
           </th>
           <th colSpan={2}>
             <div className="t-head-element">
-              <span>Delivery <br/>Return</span>
+              <span>
+                Delivery <br />
+                Return
+              </span>
               <div className="sort-buttons-container">
                 <button
                   onClick={() => {
@@ -444,7 +450,10 @@ function Table({ itemsDetails }) {
           </th>
           <th colSpan={2}>
             <div className="t-head-element">
-              <span >Processing<br/> Canceled</span>
+              <span>
+                Processing
+                <br /> Canceled
+              </span>
               <div className="sort-buttons-container">
                 <button
                   onClick={() => {
@@ -513,7 +522,10 @@ function Table({ itemsDetails }) {
           </th>
           <th colSpan={2}>
             <div className="t-head-element">
-              <span>Auto<br/> Add</span>
+              <span>
+                Auto
+                <br /> Add
+              </span>
               <div className="sort-buttons-container">
                 <button
                   onClick={() => {

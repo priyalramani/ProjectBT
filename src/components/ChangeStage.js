@@ -151,7 +151,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
     let data = [];
 
     for (let orderData of orders) {
-      let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"))[0];
+      let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"));
 
       if (
         warehouse_uuid &&
@@ -479,6 +479,30 @@ function DiliveryPopup({
     setError("");
     if (outstanding.amount && !outstanding.remarks) {
       setError("Remarks is mandatory");
+      setWaiting(false);
+      return;
+    }
+    if (
+      modes.find(
+        (a) =>
+          a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" &&
+          a.amt &&
+          !a.remarks
+      )
+    ) {
+      setError("Cheque number is mandatory");
+      setWaiting(false);
+      return;
+    }
+    if (
+      modes.find(
+        (a) =>
+          a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002" &&
+          a.amt &&
+          !a.remarks
+      )
+    ) {
+      setError("UPI transaction I'd is mandatory");
       setWaiting(false);
       return;
     }

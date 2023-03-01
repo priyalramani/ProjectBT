@@ -1,9 +1,24 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  useContext,
+} from "react";
 import axios from "axios";
 import Select from "react-select";
 import { v4 as uuid } from "uuid";
 import { Billing, jumpToNextIndex } from "../Apis/functions";
-import { Add, CheckCircle, ContentCopy } from "@mui/icons-material";
+import {
+  Add,
+  CheckCircle,
+  ContentCopy,
+  NotAccessible,
+  Note,
+  NoteAdd,
+  WhatsApp,
+} from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material";
 import OrderPrint from "./OrderPrint";
@@ -13,15 +28,19 @@ import FreeItems from "./FreeItems";
 import DiliveryReplaceMent from "./DiliveryReplaceMent";
 import TaskPopupMenu from "./TaskPopupMenu";
 import MessagePopup from "./MessagePopup";
+import context from "../context/context";
 const default_status = [
   { value: 0, label: "Preparing" },
   { value: 1, label: "Ready" },
   { value: 2, label: "Hold" },
   { value: 3, label: "Canceled" },
 ];
-export function OrderDetails({ order, onSave, orderStatus }) {
+export function OrderDetails({ order_uuid, onSave, orderStatus }) {
+  const { setNotification } = useContext(context);
   const [counters, setCounters] = useState([]);
   const [waiting, setWaiting] = useState(false);
+  const [caption, setCaption] = useState("");
+  const [captionPopup, setCaptionPopup] = useState("");
   const [reminderDate, setReminderDate] = useState();
   const [category, setCategory] = useState([]);
   const [itemsData, setItemsData] = useState([]);
@@ -36,6 +55,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [paymentModes, setPaymentModes] = useState([]);
   const [complete, setComplete] = useState(false);
   const [completeOrder, setCompleteOrder] = useState(false);
+  const [order, setOrder] = useState({});
 
   const [taskPopup, setTaskPopup] = useState(false);
   const [warehousePopup, setWarhousePopup] = useState(false);
@@ -46,17 +66,32 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const [popupDiscount, setPopupDiscount] = useState();
   const [copymsg, setCopymsg] = useState();
   const [notesPopup, setNotesPoup] = useState();
+  const [counterNotesPopup, setCounterNotesPoup] = useState();
   const [popupForm, setPopupForm] = useState();
   const [focusedInputId, setFocusedInputId] = useState(0);
   const reactInputsRef = useRef({});
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
+  const getOrder = async (order_uuid) => {
+    const response = await axios({
+      method: "get",
+      url: "/orders/GetOrder/" + order_uuid,
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setOrder(response.data.result);
+  };
   useEffect(() => {
     if (order?.receipt_number) {
       setDeliveryPopup("edit");
     }
   }, [order?.receipt_number]);
+  useEffect(() => {
+    getOrder(order_uuid);
+  }, [order_uuid]);
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -105,8 +140,8 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     getTripData();
   }, [popupForm]);
   useEffect(() => {
-    if (order.order_status === "A") setEditOrder(true);
-  }, [order.order_status]);
+    if (order?.order_status === "A") setEditOrder(true);
+  }, [order?.order_status]);
 
   const appendNewRow = () => {
     let item_uuid = uuid();
@@ -218,7 +253,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   useEffect(() => {
     setOrderData({
       ...order,
-      item_details: order.item_details?.map((a, i) => ({
+      item_details: order?.item_details?.map((a, i) => ({
         ...itemsData.find((b) => b.item_uuid === a.item_uuid),
         ...a,
         uuid: uuid(),
@@ -228,10 +263,21 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       fulfillment: [],
     });
 
-    if (order.notes?.length) {
+    if (order?.notes?.filter((a) => a)?.length) {
       setNotesPoup(true);
     }
   }, [itemsData]);
+  useEffect(() => {
+    if (
+      counters
+        ?.find((a) => a.counter_uuid === order?.counter_uuid)
+        ?.notes?.filter((a) => a)?.length
+    ) {
+      setCounterNotesPoup(
+        counters?.find((a) => a.counter_uuid === order?.counter_uuid)
+      );
+    }
+  }, [counters, order?.counter_uuid]);
 
   useEffect(() => {
     setPrintData((prev) => ({
@@ -291,10 +337,34 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     });
     if (response.data.success) setCounters(response.data.result);
   };
+  const sendMsg = async () => {
+    if (waiting) {
+      return;
+    }
+    setWaiting(true);
+    const response = await axios({
+      method: "post",
+      url: "/orders/sendPdf",
+      data: {
+        caption,
+        counter_uuid: orderData.counter_uuid,
+        order_uuid: orderData.order_uuid,
+        invoice_number: orderData.invoice_number,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data) {
+      setNotification(response.data);
+      setTimeout(() => setNotification(null), 5000);
+      setCaptionPopup(null);
+      setCaption("");
+      setWaiting(false);
+    }
+  };
 
   useEffect(() => {
-    getCounters([order.counter_uuid]);
-    getItemsData(order?.item_details?.map((a) => a.item_uuid));
     getAutoBill();
     getUsers();
     getWarehouseData();
@@ -302,14 +372,19 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     getItemsDataReminder();
     GetPaymentModes();
   }, []);
-
+  useEffect(() => {
+    if (order) {
+      getCounters([order?.counter_uuid]);
+      getItemsData(order?.item_details?.map((a) => a.item_uuid));
+    }
+  }, [order]);
   const onSubmit = async (type = { stage: 0 }) => {
     let counter = counters.find(
       (a) => orderData?.counter_uuid === a.counter_uuid
     );
     let fulfillment = orderData.fulfillment;
     for (let item of orderData.item_details) {
-      let itemData = order.item_details.find(
+      let itemData = order?.item_details.find(
         (a) => a.item_uuid === item.item_uuid
       );
       let aQty = +(item?.b || 0) * (+item?.conversion || 0) + (+item?.p || 0);
@@ -335,7 +410,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     let data = {
       ...orderData,
 
-      item_details: orderData?.item_details.filter((a) => a.item_uuid) || [],
+      item_details: orderData?.item_details?.filter((a) => a.item_uuid) || [],
     };
 
     let autoBilling = await Billing({
@@ -362,7 +437,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         status: a.status || 0,
         price: a?.price || a.item_price || 0,
       })),
-      order_status: data?.item_details.filter((a) => a.price_approval === "N")
+      order_status: data?.item_details?.filter((a) => a.price_approval === "N")
         ?.length
         ? "A"
         : "R",
@@ -412,7 +487,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             ...data,
             fulfillment: [
               ...(fulfillment || []),
-              ...(order.fulfillment.filter(
+              ...(order?.fulfillment?.filter(
                 (a) => !fulfillment.find((b) => b.item_uuid === a.item_uuid)
               ) || []),
             ],
@@ -454,7 +529,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
     );
     let fulfillment = orderData.fulfillment;
     for (let item of orderData.item_details) {
-      let itemData = order.item_details.find(
+      let itemData = order?.item_details.find(
         (a) => a.item_uuid === item.item_uuid
       );
       let aQty = +(item?.b || 0) * (+item?.conversion || 0) + (+item?.p || 0);
@@ -481,15 +556,17 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       ...orderData,
 
       item_details:
-        orderData?.item_details.filter((a) => a.item_uuid && +a.status !== 2) ||
-        [],
+        orderData?.item_details?.filter(
+          (a) => a.item_uuid && +a.status !== 2
+        ) || [],
     };
     let data2 = {
       ...orderData,
 
       item_details:
-        orderData?.item_details.filter((a) => a.item_uuid && +a.status === 2) ||
-        [],
+        orderData?.item_details?.filter(
+          (a) => a.item_uuid && +a.status === 2
+        ) || [],
     };
 
     let autoBilling = await Billing({
@@ -529,7 +606,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         status: a.status || 0,
         price: a?.price || a.item_price || 0,
       })),
-      order_status: data?.item_details.filter((a) => a.price_approval === "N")
+      order_status: data?.item_details?.filter((a) => a.price_approval === "N")
         ?.length
         ? "A"
         : "R",
@@ -579,7 +656,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             ...data,
             fulfillment: [
               ...(fulfillment || []),
-              ...(order.fulfillment.filter(
+              ...(order?.fulfillment?.filter(
                 (a) => !fulfillment.find((b) => b.item_uuid === a.item_uuid)
               ) || []),
             ],
@@ -619,7 +696,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
   const handleWarehouseChacking = async (complete, methodType) => {
     let warehouse_uuid =
       users.find((a) => a.user_uuid === localStorage.getItem("user_uuid"))
-        ?.warehouse[0] || JSON.parse(localStorage.getItem("warehouse"))[0];
+        ?.warehouse[0] || JSON.parse(localStorage.getItem("warehouse"));
     if (methodType === "complete") {
       setComplete(true);
     }
@@ -693,7 +770,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
       hold,
     };
     data = Object.keys(data)
-      .filter((key) => key !== "notes")
+      ?.filter((key) => key !== "notes")
       .reduce((obj, key) => {
         obj[key] = data[key];
         return obj;
@@ -843,11 +920,28 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     </div>
                   </div>
                 ) : (
-                  <h2>
-                    {counters.find(
-                      (a) => a.counter_uuid === orderData?.counter_uuid
-                    )?.counter_title || ""}{" "}
-                    : {orderData?.invoice_number || ""}
+                  <h2 className="flex">
+                    <span
+                      className="flex"
+                      style={{
+                        cursor: "pointer",
+                        // backgroundColor: "#000",
+                        width: "fit-content",
+                      }}
+                      onClick={() =>
+                        setCounterNotesPoup(
+                          counters.find(
+                            (a) => a.counter_uuid === orderData.counter_uuid
+                          )
+                        )
+                      }
+                    >
+                      <NoteAdd />
+                      {counters.find(
+                        (a) => a.counter_uuid === orderData?.counter_uuid
+                      )?.counter_title || ""}{" "}
+                      : {orderData?.invoice_number || ""}
+                    </span>
                   </h2>
                 )}
               </div>
@@ -872,7 +966,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                     Cancel Order
                   </button>
 
-                  {order.hold !== "Y" ? (
+                  {order?.hold !== "Y" ? (
                     <button
                       style={{ width: "fit-Content", backgroundColor: "blue" }}
                       className="item-sales-search"
@@ -1315,7 +1409,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
 
                                       return {
                                         ...prev,
-                                        item_details: prev.item_details.filter(
+                                        item_details: prev.item_details?.filter(
                                           (a) => !(a.uuid === item.uuid)
                                         ),
                                         fulfillment,
@@ -1370,9 +1464,9 @@ export function OrderDetails({ order, onSave, orderStatus }) {
                                   }}
                                   id={"1_item_uuid" + item.uuid}
                                   options={itemsData
-                                    .filter(
+                                    ?.filter(
                                       (a) =>
-                                        !order.item_details.filter(
+                                        !order?.item_details?.filter(
                                           (b) => a.item_uuid === b.item_uuid
                                         )?.length && a.status !== 0
                                     )
@@ -1819,6 +1913,23 @@ export function OrderDetails({ order, onSave, orderStatus }) {
             ) : (
               ""
             )}
+
+            <button
+              type="button"
+              onClick={() => {
+                setCaptionPopup(true);
+              }}
+              style={{
+                width: "max-content",
+                padding: "10px 20px",
+                position: "absolute",
+                right: "300px",
+                backgroundColor: "#fff",
+                color: "var(--main)",
+              }}
+            >
+              <WhatsApp />
+            </button>
             <button
               type="button"
               onClick={() => {}}
@@ -1956,7 +2067,7 @@ export function OrderDetails({ order, onSave, orderStatus }) {
           order={order}
           counters={counters}
           items={itemsData}
-          item_details={order.item_details}
+          item_details={order?.item_details}
           HoldOrder={HoldOrder}
         />
       ) : (
@@ -1967,6 +2078,112 @@ export function OrderDetails({ order, onSave, orderStatus }) {
         <NotesPopup
           onSave={() => setNotesPoup(false)}
           notesPopup={notesPopup}
+          HoldOrder={HoldOrder}
+          // postOrderData={() => onSubmit({ stage: 5 })}
+          setSelectedOrder={setOrderData}
+          order={orderData}
+        />
+      ) : (
+        ""
+      )}
+      {captionPopup ? (
+        <>
+          <div className="overlay" style={{ zIndex: 999999999 }}>
+            <div
+              className="modal"
+              style={{ height: "fit-content", width: "max-content" }}
+            >
+              <div
+                className="content"
+                style={{
+                  height: "fit-content",
+                  padding: "10px",
+                  width: "fit-content",
+                }}
+              >
+                <div style={{ overflowY: "scroll" }}>
+                  <form className="form">
+                    <div className="formGroup">
+                      <div
+                        className="row"
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <div style={{ width: "50px" }}>Caption</div>
+                        <label
+                          className="selectLabel flex"
+                          style={{ width: "200px" }}
+                        >
+                          <input
+                            type="text"
+                            name="route_title"
+                            className="numberInput"
+                            style={{ width: "200px" }}
+                            value={caption}
+                            onChange={(e) => {
+                              setCaption(e.target.value);
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    <div
+                      className="flex"
+                      style={{ justifyContent: "space-between" }}
+                    >
+                      <button
+                        onClick={() => setCaptionPopup(null)}
+                        className="closeButton"
+                      >
+                        x
+                      </button>
+
+                      {!waiting ? (
+                        <button
+                          type="button"
+                          className="submit"
+                          onClick={sendMsg}
+                        >
+                          Send
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="submit"
+                          style={{ width: "80px" }}
+                        >
+                          <svg viewBox="0 0 100 100" style={{ width: "20px" }}>
+                            <path
+                              d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                              fill="#ffffff"
+                              stroke="none"
+                            >
+                              <animateTransform
+                                attributeName="transform"
+                                type="rotate"
+                                dur="1s"
+                                repeatCount="indefinite"
+                                keyTimes="0;1"
+                                values="0 50 51;360 50 51"
+                              ></animateTransform>
+                            </path>
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        ""
+      )}
+      {counterNotesPopup ? (
+        <CounterNotesPopup
+          onSave={() => setCounterNotesPoup(false)}
+          notesPopup={counterNotesPopup}
           HoldOrder={HoldOrder}
           // postOrderData={() => onSubmit({ stage: 5 })}
           setSelectedOrder={setOrderData}
@@ -2062,17 +2279,17 @@ const DeleteOrderPopup = ({
     let data = {
       ...order,
       status: [
-        ...order.status,
+        ...order?.status,
         {
           stage: 5,
           user_uuid: localStorage.getItem("user_uuid"),
           time: time.getTime(),
         },
       ],
-      fulfillment: order.fulfillment?.length
-        ? [...order.fulfillment, ...order.item_details]
-        : order.item_details,
-      item_details: order.item_details?.map((a) => ({ ...a, b: 0, p: 0 })),
+      fulfillment: order?.fulfillment?.length
+        ? [...order?.fulfillment, ...order?.item_details]
+        : order?.item_details,
+      item_details: order?.item_details?.map((a) => ({ ...a, b: 0, p: 0 })),
     };
 
     let billingData = await Billing({
@@ -2094,6 +2311,7 @@ const DeleteOrderPopup = ({
       ...data,
       ...billingData,
       item_details: billingData.items,
+      edit: true,
     };
     const response = await axios({
       method: "put",
@@ -2374,7 +2592,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
   const [edit, setEdit] = useState("");
   useEffect(() => {
     setData(
-      popupDetails.charges_discount.map((a) => ({
+      popupDetails.charges_discount?.map((a) => ({
         ...a,
         uuid: a._id || a._id || uuid(),
       }))
@@ -2420,7 +2638,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
                 </thead>
                 <tbody className="tbody">
                   {data.length
-                    ? data.map((item, i) => (
+                    ? data?.map((item, i) => (
                         <tr
                           key={item?.uuid || Math.random()}
                           style={{
@@ -2549,17 +2767,17 @@ function DiliveryPopup({
     return new Date(
       time2.setDate(
         time2.getDate() +
-          (counters.find((a) => a.counter_uuid === order.counter_uuid)
+          (counters.find((a) => a.counter_uuid === order?.counter_uuid)
             ?.payment_reminder_days || 0)
       )
     ).getTime();
-  }, [counters, order.counter_uuid]);
+  }, [counters, order?.counter_uuid]);
   let type = useMemo(() => {
     return (
-      counters.find((a) => a.counter_uuid === order.counter_uuid)
+      counters.find((a) => a.counter_uuid === order?.counter_uuid)
         ?.outstanding_type || 0
     );
-  }, [counters, order.counter_uuid]);
+  }, [counters, order?.counter_uuid]);
   console.log(outstanding);
   const GetPaymentModes = async () => {
     const response = await axios({
@@ -2579,7 +2797,10 @@ function DiliveryPopup({
     const response = await axios({
       method: "post",
       url: "/receipts/getRecipt",
-      data: { order_uuid: order.order_uuid, counter_uuid: order.counter_uuid },
+      data: {
+        order_uuid: order?.order_uuid,
+        counter_uuid: order?.counter_uuid,
+      },
       headers: {
         "Content-Type": "application/json",
       },
@@ -2590,7 +2811,10 @@ function DiliveryPopup({
     const response = await axios({
       method: "post",
       url: "/Outstanding/getOutstanding",
-      data: { order_uuid: order.order_uuid, counter_uuid: order.counter_uuid },
+      data: {
+        order_uuid: order?.order_uuid,
+        counter_uuid: order?.counter_uuid,
+      },
 
       headers: {
         "Content-Type": "application/json",
@@ -2601,13 +2825,13 @@ function DiliveryPopup({
       let time = new Date();
 
       setOutstanding({
-        order_uuid: order.order_uuid,
+        order_uuid: order?.order_uuid,
         amount: "",
         user_uuid: localStorage.getItem("user_uuid"),
         time: time.getTime(),
-        invoice_number: order.invoice_number,
-        trip_uuid: order.trip_uuid,
-        counter_uuid: order.counter_uuid,
+        invoice_number: order?.invoice_number,
+        trip_uuid: order?.trip_uuid,
+        counter_uuid: order?.counter_uuid,
         reminder,
         type,
       });
@@ -2619,13 +2843,13 @@ function DiliveryPopup({
     } else {
       let time = new Date();
       setOutstanding({
-        order_uuid: order.order_uuid,
+        order_uuid: order?.order_uuid,
         amount: "",
         user_uuid: localStorage.getItem("user_uuid"),
         time: time.getTime(),
-        invoice_number: order.invoice_number,
-        trip_uuid: order.trip_uuid,
-        counter_uuid: order.counter_uuid,
+        invoice_number: order?.invoice_number,
+        trip_uuid: order?.trip_uuid,
+        counter_uuid: order?.counter_uuid,
         reminder,
         type,
       });
@@ -2633,10 +2857,10 @@ function DiliveryPopup({
     GetPaymentModes();
   }, [
     deliveryPopup,
-    order.counter_uuid,
-    order.invoice_number,
-    order.order_uuid,
-    order.trip_uuid,
+    order?.counter_uuid,
+    order?.invoice_number,
+    order?.order_uuid,
+    order?.trip_uuid,
     reminder,
     type,
   ]);
@@ -2655,6 +2879,7 @@ function DiliveryPopup({
         }))
       );
   }, [PaymentModes]);
+  console.log(modes);
   const submitHandler = async () => {
     if (waiting) {
       return;
@@ -2662,6 +2887,30 @@ function DiliveryPopup({
     setWaiting(true);
     if (outstanding.amount && !outstanding.remarks) {
       setError("Remarks is mandatory");
+      setWaiting(false);
+      return;
+    }
+    if (
+      modes.find(
+        (a) =>
+          a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" &&
+          a.amt &&
+          !a.remarks
+      )
+    ) {
+      setError("Cheque number is mandatory");
+      setWaiting(false);
+      return;
+    }
+    if (
+      modes.find(
+        (a) =>
+          a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002" &&
+          a.amt &&
+          !a.remarks
+      )
+    ) {
+      setError("UPI transaction I'd is mandatory");
       setWaiting(false);
       return;
     }
@@ -2698,8 +2947,8 @@ function DiliveryPopup({
           url: "/receipts/putReceipt",
           data: {
             modes,
-            order_uuid: order.order_uuid,
-            counter_uuid: order.counter_uuid,
+            order_uuid: order?.order_uuid,
+            counter_uuid: order?.counter_uuid,
           },
           headers: {
             "Content-Type": "application/json",
@@ -2712,8 +2961,8 @@ function DiliveryPopup({
           url: "/Outstanding/putOutstanding",
           data: {
             ...outstanding,
-            order_uuid: order.order_uuid,
-            counter_uuid: order.counter_uuid,
+            order_uuid: order?.order_uuid,
+            counter_uuid: order?.counter_uuid,
           },
           headers: {
             "Content-Type": "application/json",
@@ -2734,10 +2983,10 @@ function DiliveryPopup({
       let obj = {
         user_uuid: localStorage.getItem("user_uuid"),
         time: time.getTime(),
-        order_uuid: order.order_uuid,
-        counter_uuid: order.counter_uuid,
-        trip_uuid: order.trip_uuid,
-        invoice_number: order.invoice_number,
+        order_uuid: order?.order_uuid,
+        counter_uuid: order?.counter_uuid,
+        trip_uuid: order?.trip_uuid,
+        invoice_number: order?.invoice_number,
         modes: modes?.map((a) =>
           a.mode_title === "Cash" ? { ...a, coin: 0 } : a
         ),
@@ -2779,7 +3028,7 @@ function DiliveryPopup({
         >
           <div className="flex" style={{ justifyContent: "space-between" }}>
             <h3>Payments</h3>
-            <h3>Rs. {order.order_grandtotal}</h3>
+            <h3>Rs. {order?.order_grandtotal}</h3>
           </div>
           <div
             className="content"
@@ -2812,6 +3061,20 @@ function DiliveryPopup({
                               ?.amt
                           }
                           style={{ width: "80px" }}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setModes((prev) =>
+                              prev?.map((a) =>
+                                a.mode_uuid === item.mode_uuid
+                                  ? {
+                                      ...a,
+                                      amt: order.order_grandtotal || 0,
+                                    }
+                                  : a
+                              )
+                            );
+                          }}
                           onChange={(e) =>
                             setModes((prev) =>
                               prev?.map((a) =>
@@ -2843,7 +3106,7 @@ function DiliveryPopup({
                             type="text"
                             name="route_title"
                             className="numberInput"
-                            value={outstanding?.remarks}
+                            value={item?.remarks}
                             placeholder={
                               item.mode_uuid ===
                               "c67b5794-d2b6-11ec-9d64-0242ac120002"
@@ -2902,6 +3165,14 @@ function DiliveryPopup({
                               }
                             : { width: "80px" }
                         }
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setOutstanding((prev) => ({
+                            ...prev,
+                            amount: order.order_grandtotal || 0,
+                          }));
+                        }}
                         onChange={(e) =>
                           setOutstanding((prev) => ({
                             ...prev,
@@ -3054,7 +3325,7 @@ function NotesPopup({
     const response = await axios({
       method: "put",
       url: "/orders/putOrderNotes",
-      data: { notes, invoice_number: order.invoice_number },
+      data: { notes, invoice_number: order?.invoice_number },
       headers: {
         "Content-Type": "application/json",
       },
@@ -3090,6 +3361,115 @@ function NotesPopup({
             <div style={{ overflowY: "scroll" }}>
               <form className="form">
                 <div className="formGroup">
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "start" }}
+                  >
+                    <div style={{ width: "50px" }}>Notes</div>
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "200px" }}
+                    >
+                      <textarea
+                        name="route_title"
+                        className="numberInput"
+                        style={{ width: "200px", height: "200px" }}
+                        value={notes?.toString()?.replace(/,/g, "\n")}
+                        onChange={(e) => {
+                          setNotes(e.target.value.split("\n"));
+                          setEdit(true);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <button onClick={onSave} className="closeButton">
+                    x
+                  </button>
+                  {edit ? (
+                    <button
+                      type="button"
+                      className="submit"
+                      onClick={submitHandler}
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+function CounterNotesPopup({
+  onSave,
+
+  order,
+  setSelectedOrder,
+  notesPopup,
+  HoldOrder,
+}) {
+  const [notes, setNotes] = useState([]);
+  const [edit, setEdit] = useState(false);
+  useEffect(() => {
+    // console.log(order?.notes);
+    setNotes(notesPopup?.notes || []);
+  }, [notesPopup?.notes]);
+  console.log(notesPopup);
+  const submitHandler = async () => {
+    const response = await axios({
+      method: "put",
+      url: "/counters/putCounter",
+      data: [
+        {
+          counter_uuid: notesPopup.counter_uuid,
+          notes,
+        },
+      ],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+    }
+  };
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: 9999999999 }}>
+        <div
+          className="modal"
+          style={{
+            height: "fit-content",
+            width: "max-content",
+            backgroundColor: "cyan",
+          }}
+        >
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <h3>Counter Notes</h3>
+            {/* <h3>Please Enter Notes</h3> */}
+          </div>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "10px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form">
+                <div className="formGroup" style={{ backgroundColor: "#fff" }}>
                   <div
                     className="row"
                     style={{ flexDirection: "row", alignItems: "start" }}
@@ -3292,7 +3672,7 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
                       <option value="0">None</option>
                       {trips
 
-                        .filter(
+                        ?.filter(
                           (a) =>
                             a.trip_uuid &&
                             a.status &&

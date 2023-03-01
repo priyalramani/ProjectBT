@@ -239,7 +239,7 @@ const PendingReciptsEntry = () => {
             setPopupOrder(null);
             getOrders();
           }}
-          order={popupOrder}
+          order_uuid={popupOrder.order_uuid}
           orderStatus="edit"
         />
       ) : (

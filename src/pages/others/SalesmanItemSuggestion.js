@@ -717,7 +717,7 @@ function UserPayouts({ onSave, popupInfo, getUsers }) {
   const getItemsData = async (companyData, ItemCategoryData) => {
     const response = await axios({
       method: "get",
-      url: "/items/GetItemList",
+      url: "/items/GetActiveItemList",
 
       headers: {
         "Content-Type": "application/json",

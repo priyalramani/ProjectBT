@@ -48,6 +48,7 @@ const ProcessingOrders = () => {
   const [orderCreated, setOrderCreated] = useState(false);
   const [oneTimeState, setOneTimeState] = useState(false);
   const [barcodeFilter, setBarcodeFilter] = useState("");
+  const [printInvicePopup, setprintInvicePopup] = useState("");
   const [barcodeFilterState, setBarcodeFilterState] = useState("");
   const [tempQuantity, setTempQuantity] = useState([]);
   const [users, setUsers] = useState([]);
@@ -277,6 +278,7 @@ const ProcessingOrders = () => {
     dataArray = selectedOrder ? [selectedOrder] : orders,
     hold = false
   ) => {
+    setprintInvicePopup(null);
     setLoading(true);
     console.log(dataArray);
     setPopupBarcode(false);
@@ -937,6 +939,69 @@ const ProcessingOrders = () => {
       ) : (
         ""
       )}
+      {printInvicePopup ? (
+        <>
+          <div className="overlay" style={{ zIndex: 9999999999 }}>
+            <div
+              className="modal"
+              style={{ height: "fit-content", width: "max-content" }}
+            >
+              <div
+                className="content"
+                style={{
+                  height: "fit-content",
+                  padding: "10px",
+                  width: "fit-content",
+                }}
+              >
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <h3>Print Invoice</h3>
+                </div>
+                <div style={{ overflowY: "scroll" }}>
+                  <form className="form">
+                    <div
+                      className="flex"
+                      style={{ justifyContent: "space-between" }}
+                    >
+                      <button
+                        onClick={() => setprintInvicePopup(null)}
+                        className="closeButton"
+                      >
+                        x
+                      </button>
+
+                      <button
+                        type="button"
+                        className="submit"
+                        style={{ backgroundColor: "red" }}
+                        onClick={() =>
+                          postOrderData([{ ...selectedOrder, to_print: 0 }])
+                        }
+                      >
+                        No
+                      </button>
+                      <button
+                        type="button"
+                        className="submit"
+                        onClick={() =>
+                          postOrderData([{ ...selectedOrder, to_print: 1 }])
+                        }
+                      >
+                        Yes
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        ""
+      )}
       <div
         className="item-sales-container orders-report-container"
         style={{
@@ -1016,6 +1081,8 @@ const ProcessingOrders = () => {
                     ? checkingQuantity()
                     : Location.pathname.includes("delivery")
                     ? setPopupDelivery(true)
+                    : Location.pathname.includes("processing")
+                    ? setprintInvicePopup(true)
                     : postOrderData();
                 }}
               >
@@ -1491,7 +1558,9 @@ const ProcessingOrders = () => {
                       </tr>
                     ))}
               <tr>
-                <td style={{ height: "80px" }}></td>
+                <td
+                  style={{ height: "150px", backgroundColor: "transparent" }}
+                ></td>
               </tr>
             </tbody>
           </table>
@@ -1752,6 +1821,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
       ...data,
       ...billingData,
       item_details: billingData.items,
+      edit: window.location.pathname.includes("processing"),
     };
     const response = await axios({
       method: "put",
@@ -2050,22 +2120,22 @@ function HoldPopup({
           free,
           item_title: item.item_title,
         });
-        b = parseInt(
-          +b +
-            (+p + free) /
-              +itemsData?.find((b) => b.item_uuid === item.item_uuid)
-                ?.conversion
-        );
-        p = parseInt(
-          (+p + free) %
-            +itemsData?.find((b) => b.item_uuid === item.item_uuid)?.conversion
-        );
-        console.log({
-          b,
-          p,
-          free,
-          item_title: item.item_title,
-        });
+        // b = parseInt(
+        //   +b +
+        //     (+p + free) /
+        //       +itemsData?.find((b) => b.item_uuid === item.item_uuid)
+        //         ?.conversion
+        // );
+        // p = parseInt(
+        //   (+p + free) %
+        //     +itemsData?.find((b) => b.item_uuid === item.item_uuid)?.conversion
+        // );
+        // console.log({
+        //   b,
+        //   p,
+        //   free,
+        //   item_title: item.item_title,
+        // });
         let obj = {
           ...item,
           b,

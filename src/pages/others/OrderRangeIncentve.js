@@ -716,7 +716,7 @@ function IncentivePopup({ onSave, popupForm }) {
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
-      url: "/items/GetItemList",
+      url: "/items/GetActiveItemList",
 
       headers: {
         "Content-Type": "application/json",
