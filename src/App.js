@@ -61,7 +61,8 @@ import TestCounter from "./pages/Master/TestCounter";
 import OrderForms from "./pages/Reports/OrderForms";
 import LinkedCounter from "./users/LinkedCounter";
 import OrderPdf from "./components/OrderPdf";
-export let Version = 81;
+import MobileLayout from "./components/MobileLayout";
+export let Version = 82;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 function App() {
@@ -119,9 +120,15 @@ function App() {
     <div className="App">
       <Router>
         <Routes>
-    
           <Route path="/" element={<Navigate replace to={"/users"} />} />
-          <Route path="/counter/:short_link" element={<LinkedCounter />} />
+          <Route
+            path="/counter/:short_link"
+            element={
+              <MobileLayout>
+                <LinkedCounter />
+              </MobileLayout>
+            }
+          />
           <Route path="/pdf/:order_uuid" element={<OrderPdf />} />
           <Route
             path="/counter/:short_link/:campaign_short_link"
@@ -130,15 +137,54 @@ function App() {
           {userType === "1" ? (
             <>
               {/* users routes */}
-              <Route path="/users" element={<Main />} />
+              <Route
+                path="/users"
+                element={
+                  <MobileLayout>
+                    <Main />
+                  </MobileLayout>
+                }
+              />
               <Route
                 path="/users/orders"
-                element={<Orders refreshDb={refreshDb} />}
+                element={
+                  <MobileLayout>
+                    <Orders refreshDb={refreshDb} />
+                  </MobileLayout>
+                }
               />
-              <Route path="/users/route/:route_uuid" element={<Orders />} />
-              <Route path="/users/processing" element={<Processing />} />
-              <Route path="/users/checking" element={<Processing />} />
-              <Route path="/users/delivery" element={<Processing />} />
+              <Route
+                path="/users/route/:route_uuid"
+                element={
+                  <MobileLayout>
+                    <Orders />
+                  </MobileLayout>
+                }
+              />
+              <Route
+                path="/users/processing"
+                element={
+                  <MobileLayout>
+                    <Processing />
+                  </MobileLayout>
+                }
+              />
+              <Route
+                path="/users/checking"
+                element={
+                  <MobileLayout>
+                    <Processing />
+                  </MobileLayout>
+                }
+              />
+              <Route
+                path="/users/delivery"
+                element={
+                  <MobileLayout>
+                    <Processing />
+                  </MobileLayout>
+                }
+              />
               <Route path="/users/stock-transfer" element={<StockTransfer />} />
               <Route
                 path="/users/outstandingCollection"
@@ -146,32 +192,60 @@ function App() {
               />
               <Route
                 path="/users/processing/:trip_uuid"
-                element={<ProcessingOrders />}
+                element={
+                  <MobileLayout>
+                    <ProcessingOrders />
+                  </MobileLayout>
+                }
               />
               <Route
                 path="/users/orders/:counter_uuid"
-                element={<SelectedCounterOrder />}
+                element={
+                  <MobileLayout>
+                    <SelectedCounterOrder />
+                  </MobileLayout>
+                }
               />
 
               <Route
                 path="/users/checking/:trip_uuid"
-                element={<ProcessingOrders />}
+                element={
+                  <MobileLayout>
+                    <ProcessingOrders />
+                  </MobileLayout>
+                }
               />
               <Route
                 path="/users/delivery/:trip_uuid"
-                element={<ProcessingOrders />}
+                element={
+                  <MobileLayout>
+                    <ProcessingOrders />
+                  </MobileLayout>
+                }
               />
               <Route
                 path="/users/processing/:trip_uuid/:order_uuid"
-                element={<ProcessingOrders />}
+                element={
+                  <MobileLayout>
+                    <ProcessingOrders />
+                  </MobileLayout>
+                }
               />
               <Route
                 path="/users/checking/:trip_uuid/:order_uuid"
-                element={<ProcessingOrders />}
+                element={
+                  <MobileLayout>
+                    <ProcessingOrders />
+                  </MobileLayout>
+                }
               />
               <Route
                 path="/users/delivery/:trip_uuid/:order_uuid"
-                element={<ProcessingOrders />}
+                element={
+                  <MobileLayout>
+                    <ProcessingOrders />
+                  </MobileLayout>
+                }
               />
 
               <Route path="*" element={<Navigate replace to={"/users"} />} />

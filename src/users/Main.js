@@ -102,7 +102,7 @@ const Main = () => {
               <Link
                 key={i}
                 to={pathname + rolesArray.find((a) => +a.type === +data)?.link}
-                onClick={() => { }}
+                onClick={() => {}}
                 className="linkDecoration"
                 style={{ textDecoration: "none", height: "fit-content" }}
               >
@@ -137,8 +137,16 @@ const Main = () => {
       ) : (
         ""
       )}
-      <div className={`sidebar ${isSideMenuOpen ? "sideopen" : ""}`}>
-        <div className="sidebarContainer">
+      <div
+        className="overlay"
+        style={
+          isSideMenuOpen
+            ? { justifyContent: "center" }
+            : { justifyContent: "flex-start", left: "-9999", display: "none" }
+        }
+        //  className={`sidebar ${isSideMenuOpen ? "sideopen" : ""}`}
+      >
+        <div className="sidebarContainer" style={{ height: "100vh",width:"100vw",maxWidth:"500px" }}>
           <button
             className="time-icon"
             type="button"
@@ -184,8 +192,11 @@ function Logout({ onSave, popupForm }) {
     } else {
       deleteDB("BT", {
         blocked(currentVersion, blockedVersion, event) {
-          console.log('IDB DELETE REQUEST BLOCKED.', { currentVersion, blockedVersion })
-          window.location.reload()
+          console.log("IDB DELETE REQUEST BLOCKED.", {
+            currentVersion,
+            blockedVersion,
+          });
+          window.location.reload();
         },
       });
       localStorage.clear();

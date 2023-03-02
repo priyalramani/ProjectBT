@@ -99,28 +99,30 @@ const Counter = () => {
   }, []);
   const filterCounter = useMemo(
     () =>
-      counter
-        .map((b) => ({
-          ...b,
-          route_title:
-            routesData.find((a) => a.route_uuid === b.route_uuid)
-              ?.route_title || "-",
-          route_sort_order:
-            routesData.find((a) => a.route_uuid === b.route_uuid)?.sort_order ||
-            0,
-        }))
-        .filter(
-          (a) =>
-            a.counter_title &&
-            (!filterCounterTitle ||
-              a.counter_title
-                ?.toLocaleLowerCase()
-                ?.includes(filterCounterTitle?.toLocaleLowerCase())) &&
-            (!filterRoute ||
-              a.route_title
-                ?.toLocaleLowerCase()
-                ?.includes(filterRoute?.toLocaleLowerCase()))
-        ) || [],
+      filterCounterTitle?.length >= 3
+        ? counter
+            .map((b) => ({
+              ...b,
+              route_title:
+                routesData.find((a) => a.route_uuid === b.route_uuid)
+                  ?.route_title || "-",
+              route_sort_order:
+                routesData.find((a) => a.route_uuid === b.route_uuid)
+                  ?.sort_order || 0,
+            }))
+            .filter(
+              (a) =>
+                a.counter_title &&
+                (!filterCounterTitle ||
+                  a.counter_title
+                    ?.toLocaleLowerCase()
+                    ?.includes(filterCounterTitle?.toLocaleLowerCase())) &&
+                (!filterRoute ||
+                  a.route_title
+                    ?.toLocaleLowerCase()
+                    ?.includes(filterRoute?.toLocaleLowerCase()))
+            )
+        : [],
     [counter, filterCounterTitle, filterRoute, routesData]
   );
 
@@ -247,7 +249,7 @@ const Counter = () => {
       {counterNotesPopup ? (
         <CounterNotesPopup
           onSave={() => {
-            getCounter()
+            getCounter();
             setCounterNotesPoup(false);
           }}
           notesPopup={counterNotesPopup}

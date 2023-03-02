@@ -378,7 +378,7 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
       getItemsData(order?.item_details?.map((a) => a.item_uuid));
     }
   }, [order]);
-  const onSubmit = async (type = { stage: 0 }) => {
+  const onSubmit = async (type = { stage: 0, diliveredUser: "" }) => {
     let counter = counters.find(
       (a) => orderData?.counter_uuid === a.counter_uuid
     );
@@ -480,6 +480,11 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
                 stage: 4,
                 time: time.getTime(),
                 user_uuid,
+              },
+              {
+                stage: 3.5,
+                time: time.getTime(),
+                user_uuid: type.diliveredUser,
               },
             ],
           }
@@ -841,12 +846,13 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
         setDeliveryPopup(false);
       }}
       deliveryPopup={deliveryPopup}
-      postOrderData={() => onSubmit({ stage: 5 })}
+      postOrderData={(diliveredUser) => onSubmit({ stage: 5, diliveredUser })}
       setSelectedOrder={setOrderData}
       order={orderData}
       counters={counters}
       items={itemsData}
       updateBilling={callBilling}
+      users={users}
     />
   ) : (
     <>
@@ -2425,8 +2431,10 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
                               ? "Order Processed By"
                               : +item.stage === 3
                               ? "Order Checked By"
-                              : +item.stage === 4
+                              : +item.stage === 3.5
                               ? "Order Delivered By"
+                              : +item.stage === 4
+                              ? "Order Completed By"
                               : ""}
                           </td>
                           <td colSpan={2}>
@@ -2751,12 +2759,14 @@ function DiliveryPopup({
   order,
   updateBilling,
   deliveryPopup,
+  users,
 }) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
   const [error, setError] = useState("");
   const [popup, setPopup] = useState(false);
   const [waiting, setWaiting] = useState(false);
+  const [diliveredUser, setDiliveredUser] = useState("");
 
   // const [coinPopup, setCoinPopup] = useState(false);
   const [data, setData] = useState({});
@@ -2791,6 +2801,21 @@ function DiliveryPopup({
     if (response.data.success) {
       setPaymentModes(response.data.result);
       GetReciptsModes();
+    }
+  };
+  const getTripData = async (trip_uuid) => {
+    const response = await axios({
+      method: "post",
+      url: "/trips/GetTrip",
+      data: { params: ["users"], trips: [trip_uuid].filter((a) => a) },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      console.log("dilivereduser", response.data.result[0]?.users[0]);
+      if (response.data.result[0]?.users[0])
+        setDiliveredUser(response.data.result[0]?.users[0]);
     }
   };
   const GetReciptsModes = async () => {
@@ -2855,6 +2880,7 @@ function DiliveryPopup({
       });
     }
     GetPaymentModes();
+    if (order.trip_uuid) getTripData(order.trip_uuid);
   }, [
     deliveryPopup,
     order?.counter_uuid,
@@ -2863,6 +2889,7 @@ function DiliveryPopup({
     order?.trip_uuid,
     reminder,
     type,
+    order.trip_uuid,
   ]);
   useEffect(() => {
     if (PaymentModes?.length)
@@ -3012,7 +3039,7 @@ function DiliveryPopup({
           },
         });
       if (response.data.success) {
-        postOrderData();
+        postOrderData(diliveredUser);
         onSave();
       }
     }
@@ -3231,6 +3258,33 @@ function DiliveryPopup({
                         Deductions
                       </button>
                     )}
+                  </div>
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <div style={{ width: "100px" }}>Delivered By</div>
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "120px" }}
+                    >
+                      <select
+                        className="numberInput"
+                        style={{
+                          width: "100%",
+                          backgroundColor: "light",
+                          fontSize: "12px",
+                        }}
+                        value={diliveredUser}
+                        onChange={(e) => setDiliveredUser(e.target.value)}
+                      >
+                        <option value="">None</option>
+                        {users.map((a) => (
+                          <option value={a.user_uuid}>{a.user_title}</option>
+                        ))}
+                      </select>
+                      {/* {popupInfo.conversion || 0} */}
+                    </label>
                   </div>
                   <i style={{ color: "red" }}>{error}</i>
                 </div>

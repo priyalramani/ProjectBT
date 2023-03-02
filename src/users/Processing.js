@@ -35,7 +35,7 @@ const Processing = () => {
 
   return (
     <div className="servicePage">
-      <nav className="user_nav nav_styling" style={{ top: "0" }}>
+      <nav className="user_nav nav_styling" style={{ top: "0",maxWidth:"500px" }}>
         <div
           className="user_menubar flex"
           style={{

@@ -68,7 +68,8 @@ const SelectedCounterOrder = () => {
           a?.lable?.find((b) => b.type === "wa" && +b.varification)
         )?.length &&
         counter?.mobile.filter(
-          (a) => a?.lable?.find((b) => b.type === "cal" && +b.varification)?.length
+          (a) =>
+            a?.lable?.find((b) => b.type === "cal" && +b.varification)?.length
         )
       ) {
         setNumber(false);
@@ -307,478 +308,103 @@ const SelectedCounterOrder = () => {
       ) : (
         ""
       )}
-      <div>
-        <nav
-          className="user_nav nav_styling"
-          style={cartPage ? { backgroundColor: "#000" } : {}}
-        >
-          <div className="user_menubar">
-            <IoArrowBackOutline
-              className="user_Back_icon"
-              onClick={() => (!cartPage ? Navigate(-1) : setCartPage(false))}
-            />
-          </div>
-          {cartPage ? (
-            <>
-              <h1 style={{ width: "100%", textAlign: "center" }}>Cart</h1>
-              <button
-                className="item-sales-search"
-                style={{
-                  width: "max-content",
-                  backgroundColor: "#4ac959",
-                }}
-                onClick={() => setDiscountPopup("Summary")}
+
+      <nav
+        className="user_nav nav_styling"
+        style={
+          cartPage
+            ? { backgroundColor: "#000", maxWidth: "500px" }
+            : { maxWidth: "500px" }
+        }
+      >
+        <div className="user_menubar">
+          <IoArrowBackOutline
+            className="user_Back_icon"
+            onClick={() => (!cartPage ? Navigate(-1) : setCartPage(false))}
+          />
+        </div>
+        {cartPage ? (
+          <>
+            <h1 style={{ width: "100%", textAlign: "center" }}>Cart</h1>
+            <button
+              className="item-sales-search"
+              style={{
+                width: "max-content",
+                backgroundColor: "#4ac959",
+              }}
+              onClick={() => setDiscountPopup("Summary")}
+            >
+              Discount
+            </button>
+            <button
+              className="item-sales-search"
+              style={{
+                width: "max-content",
+                backgroundColor: "#4ac959",
+              }}
+              onClick={() => setHoldPopup("Summary")}
+            >
+              Free
+            </button>
+          </>
+        ) : (
+          ""
+        )}
+        {!cartPage ? (
+          <>
+            <div className="user_searchbar flex">
+              <AiOutlineSearch className="user_search_icon" />
+              <input
+                style={{ width: "200px" }}
+                className="searchInput"
+                type="text"
+                placeholder="search"
+                value={filterItemTitle}
+                onChange={(e) => setFilterItemTile(e.target.value)}
+              />
+              <CloseIcon
+                className="user_cross_icon"
+                onClick={() => setFilterItemTile("")}
+              />
+            </div>
+
+            <div>
+              <select
+                className="searchInput selectInput"
+                value={filterCompany}
+                onChange={(e) => setFilterCompany(e.target.value)}
               >
-                Discount
-              </button>
-              <button
-                className="item-sales-search"
-                style={{
-                  width: "max-content",
-                  backgroundColor: "#4ac959",
-                }}
-                onClick={() => setHoldPopup("Summary")}
-              >
-                Free
-              </button>
-            </>
-          ) : (
-            ""
-          )}
-          {!cartPage ? (
-            <>
-              <div className="user_searchbar flex">
-                <AiOutlineSearch className="user_search_icon" />
-                <input
-                  style={{ width: "200px" }}
-                  className="searchInput"
-                  type="text"
-                  placeholder="search"
-                  value={filterItemTitle}
-                  onChange={(e) => setFilterItemTile(e.target.value)}
-                />
-                <CloseIcon
-                  className="user_cross_icon"
-                  onClick={() => setFilterItemTile("")}
-                />
-              </div>
-
-              <div>
-                <select
-                  className="searchInput selectInput"
-                  value={filterCompany}
-                  onChange={(e) => setFilterCompany(e.target.value)}
-                >
-                  {companies?.map((a) => (
-                    <option value={a.company_uuid}>{a.company_title}</option>
-                  ))}
-                </select>
-              </div>
-            </>
-          ) : (
-            ""
-          )}
-        </nav>
-        <div className="home">
-          <div className="container">
-            <div className="menucontainer">
-              <div className="menus">
-                {!cartPage
-                  ? itemsCategory
-                      ?.filter((a) => a.company_uuid === filterCompany)
-                      ?.sort((a, b) => a.sort_order - b.sort_order)
-                      ?.map(
-                        (category) =>
-                          items
-                            .filter(
-                              (a) => a.category_uuid === category.category_uuid
-                            )
-                            ?.filter(
-                              (a) =>
-                                !filterItemTitle ||
-                                a.item_title
-                                  ?.toLocaleLowerCase()
-                                  .includes(filterItemTitle.toLocaleLowerCase())
-                            )?.length > 0 && (
-                            <div
-                              id={!cartPage ? category?.category_uuid : ""}
-                              key={category?.category_uuid}
-                              name={category?.category_uuid}
-                              className="categoryItemMap"
-                            >
-                              <h1 className="categoryHeadline">
-                                {category?.category_title}
-                              </h1>
-
-                              {items
-                                ?.filter(
-                                  (a) =>
-                                    !filterItemTitle ||
-                                    a.item_title
-                                      ?.toLocaleLowerCase()
-                                      .includes(
-                                        filterItemTitle.toLocaleLowerCase()
-                                      )
-                                )
-                                ?.sort((a, b) => a.sort_order - b.sort_order)
-
-                                .filter(
-                                  (a) =>
-                                    a.category_uuid === category.category_uuid
-                                )
-                                ?.map((item) => {
-                                  return (
-                                    <div
-                                      key={item?.item_uuid}
-                                      className="menu"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOrder((prev) => ({
-                                          ...prev,
-                                          items: prev?.items?.filter(
-                                            (a) =>
-                                              a.item_uuid === item.item_uuid
-                                          )?.length
-                                            ? prev?.items?.map((a) =>
-                                                a.item_uuid === item.item_uuid
-                                                  ? {
-                                                      ...a,
-                                                      b:
-                                                        +(a.b || 0) +
-                                                        parseInt(
-                                                          ((a?.p || 0) +
-                                                            (+item?.one_pack ||
-                                                              1)) /
-                                                            +item.conversion
-                                                        ),
-
-                                                      p:
-                                                        ((a?.p || 0) +
-                                                          (+item?.one_pack ||
-                                                            1)) %
-                                                        +item.conversion,
-                                                    }
-                                                  : a
-                                              )
-                                            : prev?.items?.length
-                                            ? [
-                                                ...prev.items,
-                                                ...items
-                                                  ?.filter(
-                                                    (a) =>
-                                                      a.item_uuid ===
-                                                      item.item_uuid
-                                                  )
-                                                  .map((a) => ({
-                                                    ...a,
-                                                    b:
-                                                      +(a.b || 0) +
-                                                      parseInt(
-                                                        ((a?.p || 0) +
-                                                          (+item?.one_pack ||
-                                                            1)) /
-                                                          +item.conversion
-                                                      ),
-
-                                                    p:
-                                                      ((a?.p || 0) +
-                                                        (+item?.one_pack ||
-                                                          1)) %
-                                                      +item.conversion,
-                                                  })),
-                                              ]
-                                            : items
-                                                ?.filter(
-                                                  (a) =>
-                                                    a.item_uuid ===
-                                                    item.item_uuid
-                                                )
-                                                .map((a) => ({
-                                                  ...a,
-                                                  b:
-                                                    +(a.b || 0) +
-                                                    parseInt(
-                                                      ((a?.p || 0) +
-                                                        (+item?.one_pack ||
-                                                          1)) /
-                                                        +item.conversion
-                                                    ),
-
-                                                  p:
-                                                    ((a?.p || 0) +
-                                                      (+item?.one_pack || 1)) %
-                                                    +item.conversion,
-                                                })),
-                                        }));
-                                      }}
-                                    >
-                                      <div className="menuItemDetails">
-                                        <h1 className="item-name">
-                                          {item?.item_title}
-                                        </h1>
-
-                                        <div
-                                          className="item-mode flex"
-                                          style={{
-                                            justifyContent: "space-between",
-                                          }}
-                                        >
-                                          <h3
-                                            className={`item-price`}
-                                            style={{ cursor: "pointer" }}
-                                          >
-                                            {+item?.item_discount ? (
-                                              <>
-                                                <span
-                                                  style={{
-                                                    color: "red",
-                                                    textDecoration:
-                                                      "line-through",
-                                                  }}
-                                                >
-                                                  Price: {item?.item_price}
-                                                </span>
-                                                <br />
-                                                <span
-                                                  style={{
-                                                    color: "red",
-                                                    paddingLeft: "10px",
-                                                    marginLeft: "10px",
-                                                    fontWeight: "500",
-                                                    borderLeft: "2px solid red",
-                                                  }}
-                                                >
-                                                  {item?.item_discount} % OFF
-                                                </span>
-                                              </>
-                                            ) : (
-                                              <>Price: {item?.item_price}</>
-                                            )}
-                                          </h3>
-                                          <h3 className={`item-price`}>
-                                            MRP: {item?.mrp || ""}
-                                          </h3>
-                                        </div>
-                                      </div>
-                                      <div className="menuleft">
-                                        <input
-                                          value={`${
-                                            order?.items?.find(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            )?.b || 0
-                                          } : ${
-                                            order?.items?.find(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            )?.p || 0
-                                          }`}
-                                          className="boxPcsInput"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setPopupForm(item);
-                                          }}
-                                        />
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              <div className="menu">
-                                <div className="menuItemDetails">
-                                  <h1 className="item-name"></h1>
-
-                                  <div className="item-mode">
-                                    <h3 className={`item-price`}></h3>
-                                  </div>
-                                </div>
-                                <div className="menuleft"></div>
-                              </div>
-                            </div>
-                          )
-                      )
-                  : itemsCategory
-                      ?.sort((a, b) => a.sort_order - b.sort_order)
-                      ?.map(
-                        (category) =>
-                          order?.items.filter(
+                {companies?.map((a) => (
+                  <option value={a.company_uuid}>{a.company_title}</option>
+                ))}
+              </select>
+            </div>
+          </>
+        ) : (
+          ""
+        )}
+      </nav>
+      <div className="home">
+        <div className="container" style={{ maxWidth: "500px" }}>
+          <div className="menucontainer">
+            <div className="menus">
+              {!cartPage
+                ? itemsCategory
+                    ?.filter((a) => a.company_uuid === filterCompany)
+                    ?.sort((a, b) => a.sort_order - b.sort_order)
+                    ?.map(
+                      (category) =>
+                        items
+                          .filter(
                             (a) => a.category_uuid === category.category_uuid
-                          )?.length > 0 && (
-                            <div
-                              id={cartPage ? category?.category_uuid : ""}
-                              name={category?.category_uuid}
-                              key={category?.category_uuid}
-                              className="categoryItemMap"
-                            >
-                              <h1 className="categoryHeadline">
-                                {category?.category_title}
-                              </h1>
-
-                              {order?.items
-                                ?.filter(
-                                  (a) =>
-                                    !filterItemTitle ||
-                                    a.item_title
-                                      ?.toLocaleLowerCase()
-                                      .includes(
-                                        filterItemTitle.toLocaleLowerCase()
-                                      )
-                                )
-                                ?.sort((a, b) => a.sort_order - b.sort_order)
-                                .filter(
-                                  (a) =>
-                                    a.category_uuid === category.category_uuid
-                                )
-                                ?.map((item) => {
-                                  return (
-                                    <div
-                                      key={item?.item_uuid}
-                                      className="menu"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setOrder((prev) => ({
-                                          ...prev,
-                                          items:
-                                            prev?.items?.map((a) =>
-                                              a.item_uuid === item.item_uuid
-                                                ? {
-                                                    ...a,
-                                                    b:
-                                                      +(a.b || 0) +
-                                                      parseInt(
-                                                        ((a?.p || 0) +
-                                                          (+item?.one_pack ||
-                                                            1)) /
-                                                          +item.conversion
-                                                      ),
-
-                                                    p:
-                                                      ((a?.p || 0) +
-                                                        (+item?.one_pack ||
-                                                          1)) %
-                                                      +item.conversion,
-                                                  }
-                                                : a
-                                            ) ||
-                                            items
-                                              ?.filter(
-                                                (a) =>
-                                                  a.item_uuid === item.item_uuid
-                                              )
-                                              .map((a) => ({
-                                                ...a,
-                                                b:
-                                                  +(a.b || 0) +
-                                                  parseInt(
-                                                    ((a?.p || 0) +
-                                                      (+item?.one_pack || 1)) /
-                                                      +item.conversion
-                                                  ),
-
-                                                p:
-                                                  ((a?.p || 0) +
-                                                    (+item?.one_pack || 1)) %
-                                                  +item.conversion,
-                                              })),
-                                        }));
-                                      }}
-                                    >
-                                      <div className="menuItemDetails">
-                                        <h1 className="item-name">
-                                          {item?.item_title}
-                                        </h1>
-
-                                        <div
-                                          className="item-mode flex"
-                                          style={{
-                                            justifyContent: "space-between",
-                                            cursor: "pointer",
-                                          }}
-                                        >
-                                          <h3
-                                            className={`item-price`}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setPricePopup(item);
-                                            }}
-                                          >
-                                            Price:
-                                            {order?.items?.find(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            )?.item_price || item?.item_price}
-                                          </h3>
-                                          <h3 className={`item-price`}>
-                                            MRP: {item?.mrp || ""}
-                                          </h3>
-                                        </div>
-                                      </div>
-                                      <div className="menuleft">
-                                        <input
-                                          value={`${item?.b || 0} : ${
-                                            item?.p || 0
-                                          }`}
-                                          className="boxPcsInput"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            setPopupForm(item);
-                                          }}
-                                        />
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              <div className="menu">
-                                <div className="menuItemDetails">
-                                  <h1 className="item-name"></h1>
-
-                                  <div className="item-mode">
-                                    <h3 className={`item-price`}></h3>
-                                  </div>
-                                </div>
-                                <div className="menuleft"></div>
-                              </div>
-                            </div>
                           )
-                      )}
-              </div>
-              {confirmItemsPopup ? (
-                <div
-                  style={{
-                    backgroundColor: "rgba(128, 128, 128,0.8)",
-                    zIndex: 9999999,
-                    top: "0",
-                    position: "fixed",
-                    width: "100vw",
-                    height: "100vh",
-                  }}
-                >
-                  <button
-                    onClick={() => setConfirmItemPopup(false)}
-                    className="closeButton"
-                    style={{ top: "20vh", left: "40%" }}
-                  >
-                    x
-                  </button>
-                  <div
-                    className="menus"
-                    style={{
-                      position: "fixed",
-                      boxShadow: "0 -10px 50px #4ac959",
-                      width: "100vw",
-                      maxHeight: "70vh",
-                      bottom: "0px",
-                      backgroundColor: "#fff",
-                      overflow: "scroll",
-                      paddingTop: "10px",
-                    }}
-                  >
-                    {itemsCategory
-
-                      ?.sort((a, b) => a.sort_order - b.sort_order)
-                      ?.map((category) =>
-                        salesman_suggestion.filter(
-                          (a) => a.category_uuid === category.category_uuid
-                        )?.length > 0 ? (
+                          ?.filter(
+                            (a) =>
+                              !filterItemTitle ||
+                              a.item_title
+                                ?.toLocaleLowerCase()
+                                .includes(filterItemTitle.toLocaleLowerCase())
+                          )?.length > 0 && (
                           <div
                             id={!cartPage ? category?.category_uuid : ""}
                             key={category?.category_uuid}
@@ -789,7 +415,7 @@ const SelectedCounterOrder = () => {
                               {category?.category_title}
                             </h1>
 
-                            {salesman_suggestion
+                            {items
                               ?.filter(
                                 (a) =>
                                   !filterItemTitle ||
@@ -958,129 +584,499 @@ const SelectedCounterOrder = () => {
                                   </div>
                                 );
                               })}
+                            <div className="menu">
+                              <div className="menuItemDetails">
+                                <h1 className="item-name"></h1>
+
+                                <div className="item-mode">
+                                  <h3 className={`item-price`}></h3>
+                                </div>
+                              </div>
+                              <div className="menuleft"></div>
+                            </div>
                           </div>
-                        ) : (
-                          ""
                         )
-                      )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFilterItemTile("");
-
-                      setCartPage(true);
-                      setConfirmItemPopup(false);
-                      setEnable(false);
-                    }}
-                    className="cartBtn"
-                    style={{ padding: "3px", opacity: enable ? 1 : 0.5 }}
-                    disabled={!enable}
-                  >
-                    Done
-                  </button>
-                </div>
-              ) : (
-                ""
-              )}
-            </div>
-          </div>
-        </div>
-        <div
-          className="allcategoryList"
-          style={{
-            bottom: itemsCategory?.length > 0 ? "3.5rem" : "1rem",
-          }}
-        >
-          <div className={`menulist`}>
-            <div
-              className={`${isCategoryOpen ? "showCategory" : ""} categoryList`}
-              style={{ overflow: "scroll" }}
-            >
-              {itemsCategory
-                .filter((a) => a.company_uuid === filterCompany)
-                ?.sort((a, b) => a.sort_order - b.sort_order)
-                ?.map((category, i) => {
-                  return (
-                    (cartPage
-                      ? order?.items?.filter(
+                    )
+                : itemsCategory
+                    ?.sort((a, b) => a.sort_order - b.sort_order)
+                    ?.map(
+                      (category) =>
+                        order?.items.filter(
                           (a) => a.category_uuid === category.category_uuid
-                        )?.length > 0
-                      : items.filter(
-                          (a) => a.category_uuid === category.category_uuid
-                        )?.length > 0) && (
-                      <ScrollLink
-                        id={`${i}`}
-                        onClick={() => {
-                          var element = document.getElementById(
-                            category.category_uuid
-                          );
+                        )?.length > 0 && (
+                          <div
+                            id={cartPage ? category?.category_uuid : ""}
+                            name={category?.category_uuid}
+                            key={category?.category_uuid}
+                            className="categoryItemMap"
+                          >
+                            <h1 className="categoryHeadline">
+                              {category?.category_title}
+                            </h1>
 
-                          element.scrollIntoView();
-                          element.scrollIntoView(false);
-                          element.scrollIntoView({ block: "start" });
-                          element.scrollIntoView({
-                            behavior: "smooth",
-                            block: "end",
-                            inline: "nearest",
-                          });
-                          setIsCategoryOpen(!isCategoryOpen);
-                          setClickedId(i?.toString());
-                        }}
-                        smooth={true}
-                        duration={1000}
-                        to={category?.category_uuid}
-                        className={`${
-                          clickedId === i?.toString() ? "activeMenuList" : ""
-                        } categorybtn`}
-                        key={i}
-                      >
-                        {category?.category_title}
-                        <span className="categoryLength">
-                          {cartPage
-                            ? order?.items?.filter(
+                            {order?.items
+                              ?.filter(
+                                (a) =>
+                                  !filterItemTitle ||
+                                  a.item_title
+                                    ?.toLocaleLowerCase()
+                                    .includes(
+                                      filterItemTitle.toLocaleLowerCase()
+                                    )
+                              )
+                              ?.sort((a, b) => a.sort_order - b.sort_order)
+                              .filter(
                                 (a) =>
                                   a.category_uuid === category.category_uuid
-                              )?.length
-                            : items
-                                .filter(
-                                  (a) =>
-                                    a.category_uuid === category.category_uuid
-                                )
-                                ?.filter(
-                                  (a) =>
-                                    !filterItemTitle ||
-                                    a.item_title
-                                      ?.toLocaleLowerCase()
-                                      .includes(
-                                        filterItemTitle.toLocaleLowerCase()
-                                      )
-                                )?.length}
-                        </span>
-                      </ScrollLink>
-                    )
-                  );
-                })}
+                              )
+                              ?.map((item) => {
+                                return (
+                                  <div
+                                    key={item?.item_uuid}
+                                    className="menu"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setOrder((prev) => ({
+                                        ...prev,
+                                        items:
+                                          prev?.items?.map((a) =>
+                                            a.item_uuid === item.item_uuid
+                                              ? {
+                                                  ...a,
+                                                  b:
+                                                    +(a.b || 0) +
+                                                    parseInt(
+                                                      ((a?.p || 0) +
+                                                        (+item?.one_pack ||
+                                                          1)) /
+                                                        +item.conversion
+                                                    ),
+
+                                                  p:
+                                                    ((a?.p || 0) +
+                                                      (+item?.one_pack || 1)) %
+                                                    +item.conversion,
+                                                }
+                                              : a
+                                          ) ||
+                                          items
+                                            ?.filter(
+                                              (a) =>
+                                                a.item_uuid === item.item_uuid
+                                            )
+                                            .map((a) => ({
+                                              ...a,
+                                              b:
+                                                +(a.b || 0) +
+                                                parseInt(
+                                                  ((a?.p || 0) +
+                                                    (+item?.one_pack || 1)) /
+                                                    +item.conversion
+                                                ),
+
+                                              p:
+                                                ((a?.p || 0) +
+                                                  (+item?.one_pack || 1)) %
+                                                +item.conversion,
+                                            })),
+                                      }));
+                                    }}
+                                  >
+                                    <div className="menuItemDetails">
+                                      <h1 className="item-name">
+                                        {item?.item_title}
+                                      </h1>
+
+                                      <div
+                                        className="item-mode flex"
+                                        style={{
+                                          justifyContent: "space-between",
+                                          cursor: "pointer",
+                                        }}
+                                      >
+                                        <h3
+                                          className={`item-price`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setPricePopup(item);
+                                          }}
+                                        >
+                                          Price:
+                                          {order?.items?.find(
+                                            (a) =>
+                                              a.item_uuid === item.item_uuid
+                                          )?.item_price || item?.item_price}
+                                        </h3>
+                                        <h3 className={`item-price`}>
+                                          MRP: {item?.mrp || ""}
+                                        </h3>
+                                      </div>
+                                    </div>
+                                    <div className="menuleft">
+                                      <input
+                                        value={`${item?.b || 0} : ${
+                                          item?.p || 0
+                                        }`}
+                                        className="boxPcsInput"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setPopupForm(item);
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            <div className="menu">
+                              <div className="menuItemDetails">
+                                <h1 className="item-name"></h1>
+
+                                <div className="item-mode">
+                                  <h3 className={`item-price`}></h3>
+                                </div>
+                              </div>
+                              <div className="menuleft"></div>
+                            </div>
+                          </div>
+                        )
+                    )}
             </div>
-            {isCategoryOpen && <div id="black-bg" />}
-            {!isCategoryOpen ? (
-              <button
-                className="showMenuListBtn"
-                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+            {confirmItemsPopup ? (
+              <div
+                style={{
+                  backgroundColor: "rgba(128, 128, 128,0.8)",
+                  zIndex: 9999999,
+                  top: "0",
+                  position: "fixed",
+                  width: "100vw",
+                  height: "100vh",
+                  maxWidth: "500px",
+                }}
               >
-                Categories
-              </button>
+                <button
+                  onClick={() => setConfirmItemPopup(false)}
+                  className="closeButton"
+                  style={{ top: "20vh", left: "40%" }}
+                >
+                  x
+                </button>
+                <div
+                  className="menus"
+                  style={{
+                    position: "fixed",
+                    boxShadow: "0 -10px 50px #4ac959",
+                    width: "100vw",
+                    maxWidth: "500px",
+                    maxHeight: "70vh",
+                    bottom: "0px",
+                    backgroundColor: "#fff",
+                    overflow: "scroll",
+                    paddingTop: "10px",
+                  }}
+                >
+                  {itemsCategory
+
+                    ?.sort((a, b) => a.sort_order - b.sort_order)
+                    ?.map((category) =>
+                      salesman_suggestion.filter(
+                        (a) => a.category_uuid === category.category_uuid
+                      )?.length > 0 ? (
+                        <div
+                          id={!cartPage ? category?.category_uuid : ""}
+                          key={category?.category_uuid}
+                          name={category?.category_uuid}
+                          className="categoryItemMap"
+                        >
+                          <h1 className="categoryHeadline">
+                            {category?.category_title}
+                          </h1>
+
+                          {salesman_suggestion
+                            ?.filter(
+                              (a) =>
+                                !filterItemTitle ||
+                                a.item_title
+                                  ?.toLocaleLowerCase()
+                                  .includes(filterItemTitle.toLocaleLowerCase())
+                            )
+                            ?.sort((a, b) => a.sort_order - b.sort_order)
+
+                            .filter(
+                              (a) => a.category_uuid === category.category_uuid
+                            )
+                            ?.map((item) => {
+                              return (
+                                <div
+                                  key={item?.item_uuid}
+                                  className="menu"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOrder((prev) => ({
+                                      ...prev,
+                                      items: prev?.items?.filter(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      )?.length
+                                        ? prev?.items?.map((a) =>
+                                            a.item_uuid === item.item_uuid
+                                              ? {
+                                                  ...a,
+                                                  b:
+                                                    +(a.b || 0) +
+                                                    parseInt(
+                                                      ((a?.p || 0) +
+                                                        (+item?.one_pack ||
+                                                          1)) /
+                                                        +item.conversion
+                                                    ),
+
+                                                  p:
+                                                    ((a?.p || 0) +
+                                                      (+item?.one_pack || 1)) %
+                                                    +item.conversion,
+                                                }
+                                              : a
+                                          )
+                                        : prev?.items?.length
+                                        ? [
+                                            ...prev.items,
+                                            ...items
+                                              ?.filter(
+                                                (a) =>
+                                                  a.item_uuid === item.item_uuid
+                                              )
+                                              .map((a) => ({
+                                                ...a,
+                                                b:
+                                                  +(a.b || 0) +
+                                                  parseInt(
+                                                    ((a?.p || 0) +
+                                                      (+item?.one_pack || 1)) /
+                                                      +item.conversion
+                                                  ),
+
+                                                p:
+                                                  ((a?.p || 0) +
+                                                    (+item?.one_pack || 1)) %
+                                                  +item.conversion,
+                                              })),
+                                          ]
+                                        : items
+                                            ?.filter(
+                                              (a) =>
+                                                a.item_uuid === item.item_uuid
+                                            )
+                                            .map((a) => ({
+                                              ...a,
+                                              b:
+                                                +(a.b || 0) +
+                                                parseInt(
+                                                  ((a?.p || 0) +
+                                                    (+item?.one_pack || 1)) /
+                                                    +item.conversion
+                                                ),
+
+                                              p:
+                                                ((a?.p || 0) +
+                                                  (+item?.one_pack || 1)) %
+                                                +item.conversion,
+                                            })),
+                                    }));
+                                  }}
+                                >
+                                  <div className="menuItemDetails">
+                                    <h1 className="item-name">
+                                      {item?.item_title}
+                                    </h1>
+
+                                    <div
+                                      className="item-mode flex"
+                                      style={{
+                                        justifyContent: "space-between",
+                                      }}
+                                    >
+                                      <h3
+                                        className={`item-price`}
+                                        style={{ cursor: "pointer" }}
+                                      >
+                                        {+item?.item_discount ? (
+                                          <>
+                                            <span
+                                              style={{
+                                                color: "red",
+                                                textDecoration: "line-through",
+                                              }}
+                                            >
+                                              Price: {item?.item_price}
+                                            </span>
+                                            <br />
+                                            <span
+                                              style={{
+                                                color: "red",
+                                                paddingLeft: "10px",
+                                                marginLeft: "10px",
+                                                fontWeight: "500",
+                                                borderLeft: "2px solid red",
+                                              }}
+                                            >
+                                              {item?.item_discount} % OFF
+                                            </span>
+                                          </>
+                                        ) : (
+                                          <>Price: {item?.item_price}</>
+                                        )}
+                                      </h3>
+                                      <h3 className={`item-price`}>
+                                        MRP: {item?.mrp || ""}
+                                      </h3>
+                                    </div>
+                                  </div>
+                                  <div className="menuleft">
+                                    <input
+                                      value={`${
+                                        order?.items?.find(
+                                          (a) => a.item_uuid === item.item_uuid
+                                        )?.b || 0
+                                      } : ${
+                                        order?.items?.find(
+                                          (a) => a.item_uuid === item.item_uuid
+                                        )?.p || 0
+                                      }`}
+                                      className="boxPcsInput"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setPopupForm(item);
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      ) : (
+                        ""
+                      )
+                    )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilterItemTile("");
+
+                    setCartPage(true);
+                    setConfirmItemPopup(false);
+                    setEnable(false);
+                  }}
+                  className="cartBtn"
+                  style={{
+                    padding: "3px",
+                    opacity: enable ? 1 : 0.5,
+                    position: "absolute",
+                  }}
+                  disabled={!enable}
+                >
+                  Done
+                </button>
+              </div>
             ) : (
-              <button
-                className="showMenuListBtn"
-                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-              >
-                <i className="fas fa-times"></i> Close
-              </button>
+              ""
             )}
           </div>
         </div>
       </div>
+      <div
+        className="allcategoryList"
+        style={{
+          bottom: itemsCategory?.length > 0 ? "3.5rem" : "1rem",
+        }}
+      >
+        <div className={`menulist`} style={{maxWidth:"500px"}}>
+          <div
+            className={`${isCategoryOpen ? "showCategory" : ""} categoryList`}
+            style={{ overflow: "scroll" }}
+          >
+            {itemsCategory
+              .filter((a) => a.company_uuid === filterCompany)
+              ?.sort((a, b) => a.sort_order - b.sort_order)
+              ?.map((category, i) => {
+                return (
+                  (cartPage
+                    ? order?.items?.filter(
+                        (a) => a.category_uuid === category.category_uuid
+                      )?.length > 0
+                    : items.filter(
+                        (a) => a.category_uuid === category.category_uuid
+                      )?.length > 0) && (
+                    <ScrollLink
+                      id={`${i}`}
+                      onClick={() => {
+                        var element = document.getElementById(
+                          category.category_uuid
+                        );
+
+                        element.scrollIntoView();
+                        element.scrollIntoView(false);
+                        element.scrollIntoView({ block: "start" });
+                        element.scrollIntoView({
+                          behavior: "smooth",
+                          block: "end",
+                          inline: "nearest",
+                        });
+                        setIsCategoryOpen(!isCategoryOpen);
+                        setClickedId(i?.toString());
+                      }}
+                      smooth={true}
+                      duration={1000}
+                      to={category?.category_uuid}
+                      className={`${
+                        clickedId === i?.toString() ? "activeMenuList" : ""
+                      } categorybtn`}
+                      key={i}
+                    >
+                      {category?.category_title}
+                      <span className="categoryLength">
+                        {cartPage
+                          ? order?.items?.filter(
+                              (a) => a.category_uuid === category.category_uuid
+                            )?.length
+                          : items
+                              .filter(
+                                (a) =>
+                                  a.category_uuid === category.category_uuid
+                              )
+                              ?.filter(
+                                (a) =>
+                                  !filterItemTitle ||
+                                  a.item_title
+                                    ?.toLocaleLowerCase()
+                                    .includes(
+                                      filterItemTitle.toLocaleLowerCase()
+                                    )
+                              )?.length}
+                      </span>
+                    </ScrollLink>
+                  )
+                );
+              })}
+          </div>
+          {isCategoryOpen && <div id="black-bg" />}
+          {!isCategoryOpen ? (
+            <button
+              className="showMenuListBtn"
+              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+            >
+              Categories
+            </button>
+          ) : (
+            <button
+              className="showMenuListBtn"
+              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+            >
+              <i className="fas fa-times"></i> Close
+            </button>
+          )}
+        </div>
+      </div>
+
       {popupForm ? (
         <NewUserForm
           onSave={() => setPopupForm(false)}
@@ -1129,6 +1125,7 @@ const SelectedCounterOrder = () => {
           <button
             type="button"
             className="cartBtn"
+            style={{position:"absolute"}}
             onClick={async () => {
               setLoading(true);
               const db = await openDB(
@@ -1197,7 +1194,7 @@ const SelectedCounterOrder = () => {
             setCartPage(true);
           }}
           className="cartBtn"
-          style={{ padding: "3px" }}
+          style={{ padding: "3px",position:"absolute" }}
         >
           Cart
         </button>

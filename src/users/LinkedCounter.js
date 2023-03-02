@@ -343,36 +343,38 @@ const LinkedCounter = () => {
       ) : (
         ""
       )}
-      <div>
-        <nav
-          className="user_nav nav_styling"
-          style={cartPage ? { backgroundColor: "#000" } : {}}
-        >
-          {cartPage ? (
-            <div className="user_menubar">
-              <IoArrowBackOutline
-                className="user_Back_icon"
-                onClick={() => setCartPage(false)}
-              />
-            </div>
-          ) : (
-            <div className="user_menubar">
-              <input
-                style={{ width: "200px" }}
-                className="searchInput"
-                type="text"
-                placeholder="search"
-                value={filterItemTitle}
-                onChange={(e) => setFilterItemTile(e.target.value)}
-              />
-            </div>
-          )}
-          <div
-            style={{ width: "100%", textAlign: "center", fontWeight: "900" }}
-          >
-            {counter?.counter_title || ""}
+
+      <nav
+        className="user_nav nav_styling"
+        style={
+          cartPage
+            ? { backgroundColor: "#000", maxWidth: "500px" }
+            : { maxWidth: "500px" }
+        }
+      >
+        {cartPage ? (
+          <div className="user_menubar">
+            <IoArrowBackOutline
+              className="user_Back_icon"
+              onClick={() => setCartPage(false)}
+            />
           </div>
-          {/* {cartPage ? (
+        ) : (
+          <div className="user_menubar">
+            <input
+              style={{ width: "200px" }}
+              className="searchInput"
+              type="text"
+              placeholder="search"
+              value={filterItemTitle}
+              onChange={(e) => setFilterItemTile(e.target.value)}
+            />
+          </div>
+        )}
+        <div style={{ width: "100%", textAlign: "center", fontWeight: "900" }}>
+          {counter?.counter_title || ""}
+        </div>
+        {/* {cartPage ? (
             <>
               <h1 style={{ width: "100%", textAlign: "center" }}>Cart</h1>
               <button
@@ -399,7 +401,7 @@ const LinkedCounter = () => {
           ) : (
             ""
           )} */}
-          {/* {!cartPage ? (
+        {/* {!cartPage ? (
             <>
               <div className="user_searchbar flex">
                 <AiOutlineSearch className="user_search_icon" />
@@ -432,100 +434,72 @@ const LinkedCounter = () => {
           ) : (
             ""
           )} */}
-        </nav>
-        <div className="home">
-          <div className="container">
-            <div className="menucontainer">
-              <div className="menus">
-                {filteredCompany.map((comapany) => (
-                  <div
-                    id={!cartPage ? comapany?.company_uuid : ""}
-                    key={comapany?.company_uuid}
-                    name={comapany?.company_uuid}
-                    className="categoryItemMap"
+      </nav>
+      <div className="home">
+        <div className="container" style={{ maxWidth: "500px" }}>
+          <div className="menucontainer">
+            <div className="menus">
+              {filteredCompany.map((comapany) => (
+                <div
+                  id={!cartPage ? comapany?.company_uuid : ""}
+                  key={comapany?.company_uuid}
+                  name={comapany?.company_uuid}
+                  className="categoryItemMap"
+                >
+                  <h1
+                    className="categoryHeadline"
+                    style={{
+                      textAlign: "center",
+                      fontSize: "40px",
+                      textDecoration: "underline",
+                      color: "#5BC0F8",
+                    }}
                   >
-                    <h1
-                      className="categoryHeadline"
-                      style={{
-                        textAlign: "center",
-                        fontSize: "40px",
-                        textDecoration: "underline",
-                        color: "#5BC0F8",
-                      }}
-                    >
-                      {comapany?.company_title}
-                    </h1>
-                    {filteredCategory
-                      ?.filter((a) => a.company_uuid === comapany.company_uuid)
-                      ?.sort((a, b) => a.sort_order - b.sort_order)
-                      ?.map((category) => (
-                        <div
-                          id={!cartPage ? category?.category_uuid : ""}
-                          key={category?.category_uuid}
-                          name={category?.category_uuid}
-                          className="categoryItemMap"
-                        >
-                          <h2 className="categoryHeadline small">
-                            {category?.category_title}
-                          </h2>
+                    {comapany?.company_title}
+                  </h1>
+                  {filteredCategory
+                    ?.filter((a) => a.company_uuid === comapany.company_uuid)
+                    ?.sort((a, b) => a.sort_order - b.sort_order)
+                    ?.map((category) => (
+                      <div
+                        id={!cartPage ? category?.category_uuid : ""}
+                        key={category?.category_uuid}
+                        name={category?.category_uuid}
+                        className="categoryItemMap"
+                      >
+                        <h2 className="categoryHeadline small">
+                          {category?.category_title}
+                        </h2>
 
-                          {filterItems
-                            ?.filter(
-                              (a) =>
-                                !filterItemTitle ||
-                                a.item_title
-                                  ?.toLocaleLowerCase()
-                                  .includes(filterItemTitle.toLocaleLowerCase())
-                            )
-                            ?.sort((a, b) => a.sort_order - b.sort_order)
+                        {filterItems
+                          ?.filter(
+                            (a) =>
+                              !filterItemTitle ||
+                              a.item_title
+                                ?.toLocaleLowerCase()
+                                .includes(filterItemTitle.toLocaleLowerCase())
+                          )
+                          ?.sort((a, b) => a.sort_order - b.sort_order)
 
-                            .filter(
-                              (a) => a.category_uuid === category.category_uuid
-                            )
-                            ?.map((item) => {
-                              return (
-                                <div
-                                  key={item?.item_uuid}
-                                  className="menu"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (orderStatus)
-                                      setOrder((prev) => ({
-                                        ...prev,
-                                        items: prev?.items?.filter(
-                                          (a) => a.item_uuid === item.item_uuid
-                                        )?.length
-                                          ? prev?.items?.map((a) =>
-                                              a.item_uuid === item.item_uuid
-                                                ? {
-                                                    ...a,
-                                                    b:
-                                                      +(a.b || 0) +
-                                                      parseInt(
-                                                        ((a?.p || 0) +
-                                                          (+item?.one_pack ||
-                                                            1)) /
-                                                          +item.conversion
-                                                      ),
-
-                                                    p:
-                                                      ((a?.p || 0) +
-                                                        (+item?.one_pack ||
-                                                          1)) %
-                                                      +item.conversion,
-                                                  }
-                                                : a
-                                            )
-                                          : prev?.items?.length
-                                          ? [
-                                              ...prev.items,
-                                              ...filterItems
-                                                ?.filter(
-                                                  (a) =>
-                                                    a.item_uuid ===
-                                                    item.item_uuid
-                                                )
-                                                .map((a) => ({
+                          .filter(
+                            (a) => a.category_uuid === category.category_uuid
+                          )
+                          ?.map((item) => {
+                            return (
+                              <div
+                                key={item?.item_uuid}
+                                className="menu"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (orderStatus)
+                                    setOrder((prev) => ({
+                                      ...prev,
+                                      items: prev?.items?.filter(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      )?.length
+                                        ? prev?.items?.map((a) =>
+                                            a.item_uuid === item.item_uuid
+                                              ? {
                                                   ...a,
                                                   b:
                                                     +(a.b || 0) +
@@ -540,9 +514,13 @@ const LinkedCounter = () => {
                                                     ((a?.p || 0) +
                                                       (+item?.one_pack || 1)) %
                                                     +item.conversion,
-                                                })),
-                                            ]
-                                          : filterItems
+                                                }
+                                              : a
+                                          )
+                                        : prev?.items?.length
+                                        ? [
+                                            ...prev.items,
+                                            ...filterItems
                                               ?.filter(
                                                 (a) =>
                                                   a.item_uuid === item.item_uuid
@@ -562,7 +540,288 @@ const LinkedCounter = () => {
                                                     (+item?.one_pack || 1)) %
                                                   +item.conversion,
                                               })),
-                                      }));
+                                          ]
+                                        : filterItems
+                                            ?.filter(
+                                              (a) =>
+                                                a.item_uuid === item.item_uuid
+                                            )
+                                            .map((a) => ({
+                                              ...a,
+                                              b:
+                                                +(a.b || 0) +
+                                                parseInt(
+                                                  ((a?.p || 0) +
+                                                    (+item?.one_pack || 1)) /
+                                                    +item.conversion
+                                                ),
+
+                                              p:
+                                                ((a?.p || 0) +
+                                                  (+item?.one_pack || 1)) %
+                                                +item.conversion,
+                                            })),
+                                    }));
+                                }}
+                              >
+                                <div className="menuItemDetails">
+                                  <h1 className="item-name">
+                                    {item?.item_title}
+                                  </h1>
+
+                                  <div
+                                    className="item-mode flex"
+                                    style={{
+                                      justifyContent: "space-between",
+                                    }}
+                                  >
+                                    <h3
+                                      className={`item-price`}
+                                      style={{ cursor: "pointer" }}
+                                    >
+                                      {+item?.item_discount ? (
+                                        <>
+                                          <span
+                                            style={{
+                                              color: "red",
+                                              textDecoration: "line-through",
+                                            }}
+                                          >
+                                            Price: {item?.item_price}
+                                          </span>
+                                          <br />
+                                          <span
+                                            style={{
+                                              color: "red",
+                                              paddingLeft: "10px",
+                                              marginLeft: "10px",
+                                              fontWeight: "500",
+                                              borderLeft: "2px solid red",
+                                            }}
+                                          >
+                                            {item?.item_discount} % OFF
+                                          </span>
+                                        </>
+                                      ) : (
+                                        <>Price: {item?.item_price}</>
+                                      )}
+                                    </h3>
+                                    <h3 className={`item-price`}>
+                                      MRP: {item?.mrp || ""}
+                                    </h3>
+                                  </div>
+                                </div>
+                                <div className="menuleft">
+                                  {item?.img_status ? (
+                                    <div
+                                      className="item-image-container"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setImgPopup(item?.item_uuid + ".png");
+                                      }}
+                                    >
+                                      <img
+                                        src={`${server}/${item?.item_uuid}thumbnail.png`}
+                                        alt="Food-Item"
+                                      />
+                                    </div>
+                                  ) : (
+                                    ""
+                                  )}
+                                  <input
+                                    value={`${
+                                      order?.items?.find(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      )?.b || 0
+                                    } : ${
+                                      order?.items?.find(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      )?.p || 0
+                                    }`}
+                                    disabled={!orderStatus}
+                                    className="boxPcsInput"
+                                    style={
+                                      !orderStatus
+                                        ? {
+                                            border: "2px solid gray",
+                                            boxShadow: "0 2px 8px gray",
+                                          }
+                                        : {}
+                                    }
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (orderStatus) setPopupForm(item);
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        <div className="menu">
+                          <div className="menuItemDetails">
+                            <h1 className="item-name"></h1>
+
+                            <div className="item-mode">
+                              <h3 className={`item-price`}></h3>
+                            </div>
+                          </div>
+                          <div className="menuleft"></div>
+                        </div>
+                      </div>
+                    ))}
+                  <div className="menu">
+                    <div className="menuItemDetails">
+                      <h1 className="item-name"></h1>
+
+                      <div className="item-mode">
+                        <h3 className={`item-price`}></h3>
+                      </div>
+                    </div>
+                    <div className="menuleft"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {confirmItemsPopup ? (
+              <div
+                style={{
+                  backgroundColor: "rgba(128, 128, 128,0.8)",
+                  zIndex: 9999999,
+                  top: "0",
+                  position: "fixed",
+                  width: "100vw",
+                  height: "100vh",
+                  maxWidth:"500px"
+                }}
+              >
+                <button
+                  onClick={() => setConfirmItemPopup(false)}
+                  className="closeButton"
+                  style={{ top: "20vh", left: "40%" }}
+                >
+                  x
+                </button>
+                <div
+                  className="menus"
+                  style={{
+                    position: "fixed",
+                    boxShadow: "0 -10px 50px #4ac959",
+                    width: "100vw",
+                    maxHeight: "70vh",
+                    bottom: "0px",
+                    backgroundColor: "#fff",
+                    overflow: "scroll",
+                    paddingTop: "10px",
+                    maxWidth:"500px"
+                  }}
+                >
+                  {itemsCategory
+
+                    ?.sort((a, b) => a.sort_order - b.sort_order)
+                    ?.map((category) =>
+                      salesman_suggestion.filter(
+                        (a) => a.category_uuid === category.category_uuid
+                      )?.length > 0 ? (
+                        <div
+                          id={!cartPage ? category?.category_uuid : ""}
+                          key={category?.category_uuid}
+                          name={category?.category_uuid}
+                          className="categoryItemMap"
+                        >
+                          <h1 className="categoryHeadline">
+                            {category?.category_title}
+                          </h1>
+
+                          {salesman_suggestion
+                            ?.filter(
+                              (a) =>
+                                !filterItemTitle ||
+                                a.item_title
+                                  ?.toLocaleLowerCase()
+                                  .includes(filterItemTitle.toLocaleLowerCase())
+                            )
+                            ?.sort((a, b) => a.sort_order - b.sort_order)
+
+                            .filter(
+                              (a) => a.category_uuid === category.category_uuid
+                            )
+                            ?.map((item) => {
+                              return (
+                                <div
+                                  key={item?.item_uuid}
+                                  className="menu"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOrder((prev) => ({
+                                      ...prev,
+                                      items: prev?.items?.filter(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      )?.length
+                                        ? prev?.items?.map((a) =>
+                                            a.item_uuid === item.item_uuid
+                                              ? {
+                                                  ...a,
+                                                  b:
+                                                    +(a.b || 0) +
+                                                    parseInt(
+                                                      ((a?.p || 0) +
+                                                        (+item?.one_pack ||
+                                                          1)) /
+                                                        +item.conversion
+                                                    ),
+
+                                                  p:
+                                                    ((a?.p || 0) +
+                                                      (+item?.one_pack || 1)) %
+                                                    +item.conversion,
+                                                }
+                                              : a
+                                          )
+                                        : prev?.items?.length
+                                        ? [
+                                            ...prev.items,
+                                            ...filterItems
+                                              ?.filter(
+                                                (a) =>
+                                                  a.item_uuid === item.item_uuid
+                                              )
+                                              .map((a) => ({
+                                                ...a,
+                                                b:
+                                                  +(a.b || 0) +
+                                                  parseInt(
+                                                    ((a?.p || 0) +
+                                                      (+item?.one_pack || 1)) /
+                                                      +item.conversion
+                                                  ),
+
+                                                p:
+                                                  ((a?.p || 0) +
+                                                    (+item?.one_pack || 1)) %
+                                                  +item.conversion,
+                                              })),
+                                          ]
+                                        : filterItems
+                                            ?.filter(
+                                              (a) =>
+                                                a.item_uuid === item.item_uuid
+                                            )
+                                            .map((a) => ({
+                                              ...a,
+                                              b:
+                                                +(a.b || 0) +
+                                                parseInt(
+                                                  ((a?.p || 0) +
+                                                    (+item?.one_pack || 1)) /
+                                                    +item.conversion
+                                                ),
+
+                                              p:
+                                                ((a?.p || 0) +
+                                                  (+item?.one_pack || 1)) %
+                                                +item.conversion,
+                                            })),
+                                    }));
                                   }}
                                 >
                                   <div className="menuItemDetails">
@@ -613,22 +872,6 @@ const LinkedCounter = () => {
                                     </div>
                                   </div>
                                   <div className="menuleft">
-                                    {item?.img_status ? (
-                                      <div
-                                        className="item-image-container"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setImgPopup(item?.item_uuid + ".png");
-                                        }}
-                                      >
-                                        <img
-                                          src={`${server}/${item?.item_uuid}thumbnail.png`}
-                                          alt="Food-Item"
-                                        />
-                                      </div>
-                                    ) : (
-                                      ""
-                                    )}
                                     <input
                                       value={`${
                                         order?.items?.find(
@@ -639,376 +882,129 @@ const LinkedCounter = () => {
                                           (a) => a.item_uuid === item.item_uuid
                                         )?.p || 0
                                       }`}
-                                      disabled={!orderStatus}
                                       className="boxPcsInput"
-                                      style={
-                                        !orderStatus
-                                          ? {
-                                              border: "2px solid gray",
-                                              boxShadow: "0 2px 8px gray",
-                                            }
-                                          : {}
-                                      }
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        if (orderStatus) setPopupForm(item);
+                                        setPopupForm(item);
                                       }}
                                     />
                                   </div>
                                 </div>
                               );
                             })}
-                          <div className="menu">
-                            <div className="menuItemDetails">
-                              <h1 className="item-name"></h1>
-
-                              <div className="item-mode">
-                                <h3 className={`item-price`}></h3>
-                              </div>
-                            </div>
-                            <div className="menuleft"></div>
-                          </div>
                         </div>
-                      ))}
-                    <div className="menu">
-                      <div className="menuItemDetails">
-                        <h1 className="item-name"></h1>
-
-                        <div className="item-mode">
-                          <h3 className={`item-price`}></h3>
-                        </div>
-                      </div>
-                      <div className="menuleft"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {confirmItemsPopup ? (
-                <div
-                  style={{
-                    backgroundColor: "rgba(128, 128, 128,0.8)",
-                    zIndex: 9999999,
-                    top: "0",
-                    position: "fixed",
-                    width: "100vw",
-                    height: "100vh",
-                  }}
-                >
-                  <button
-                    onClick={() => setConfirmItemPopup(false)}
-                    className="closeButton"
-                    style={{ top: "20vh", left: "40%" }}
-                  >
-                    x
-                  </button>
-                  <div
-                    className="menus"
-                    style={{
-                      position: "fixed",
-                      boxShadow: "0 -10px 50px #4ac959",
-                      width: "100vw",
-                      maxHeight: "70vh",
-                      bottom: "0px",
-                      backgroundColor: "#fff",
-                      overflow: "scroll",
-                      paddingTop: "10px",
-                    }}
-                  >
-                    {itemsCategory
-
-                      ?.sort((a, b) => a.sort_order - b.sort_order)
-                      ?.map((category) =>
-                        salesman_suggestion.filter(
-                          (a) => a.category_uuid === category.category_uuid
-                        )?.length > 0 ? (
-                          <div
-                            id={!cartPage ? category?.category_uuid : ""}
-                            key={category?.category_uuid}
-                            name={category?.category_uuid}
-                            className="categoryItemMap"
-                          >
-                            <h1 className="categoryHeadline">
-                              {category?.category_title}
-                            </h1>
-
-                            {salesman_suggestion
-                              ?.filter(
-                                (a) =>
-                                  !filterItemTitle ||
-                                  a.item_title
-                                    ?.toLocaleLowerCase()
-                                    .includes(
-                                      filterItemTitle.toLocaleLowerCase()
-                                    )
-                              )
-                              ?.sort((a, b) => a.sort_order - b.sort_order)
-
-                              .filter(
-                                (a) =>
-                                  a.category_uuid === category.category_uuid
-                              )
-                              ?.map((item) => {
-                                return (
-                                  <div
-                                    key={item?.item_uuid}
-                                    className="menu"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setOrder((prev) => ({
-                                        ...prev,
-                                        items: prev?.items?.filter(
-                                          (a) => a.item_uuid === item.item_uuid
-                                        )?.length
-                                          ? prev?.items?.map((a) =>
-                                              a.item_uuid === item.item_uuid
-                                                ? {
-                                                    ...a,
-                                                    b:
-                                                      +(a.b || 0) +
-                                                      parseInt(
-                                                        ((a?.p || 0) +
-                                                          (+item?.one_pack ||
-                                                            1)) /
-                                                          +item.conversion
-                                                      ),
-
-                                                    p:
-                                                      ((a?.p || 0) +
-                                                        (+item?.one_pack ||
-                                                          1)) %
-                                                      +item.conversion,
-                                                  }
-                                                : a
-                                            )
-                                          : prev?.items?.length
-                                          ? [
-                                              ...prev.items,
-                                              ...filterItems
-                                                ?.filter(
-                                                  (a) =>
-                                                    a.item_uuid ===
-                                                    item.item_uuid
-                                                )
-                                                .map((a) => ({
-                                                  ...a,
-                                                  b:
-                                                    +(a.b || 0) +
-                                                    parseInt(
-                                                      ((a?.p || 0) +
-                                                        (+item?.one_pack ||
-                                                          1)) /
-                                                        +item.conversion
-                                                    ),
-
-                                                  p:
-                                                    ((a?.p || 0) +
-                                                      (+item?.one_pack || 1)) %
-                                                    +item.conversion,
-                                                })),
-                                            ]
-                                          : filterItems
-                                              ?.filter(
-                                                (a) =>
-                                                  a.item_uuid === item.item_uuid
-                                              )
-                                              .map((a) => ({
-                                                ...a,
-                                                b:
-                                                  +(a.b || 0) +
-                                                  parseInt(
-                                                    ((a?.p || 0) +
-                                                      (+item?.one_pack || 1)) /
-                                                      +item.conversion
-                                                  ),
-
-                                                p:
-                                                  ((a?.p || 0) +
-                                                    (+item?.one_pack || 1)) %
-                                                  +item.conversion,
-                                              })),
-                                      }));
-                                    }}
-                                  >
-                                    <div className="menuItemDetails">
-                                      <h1 className="item-name">
-                                        {item?.item_title}
-                                      </h1>
-
-                                      <div
-                                        className="item-mode flex"
-                                        style={{
-                                          justifyContent: "space-between",
-                                        }}
-                                      >
-                                        <h3
-                                          className={`item-price`}
-                                          style={{ cursor: "pointer" }}
-                                        >
-                                          {+item?.item_discount ? (
-                                            <>
-                                              <span
-                                                style={{
-                                                  color: "red",
-                                                  textDecoration:
-                                                    "line-through",
-                                                }}
-                                              >
-                                                Price: {item?.item_price}
-                                              </span>
-                                              <br />
-                                              <span
-                                                style={{
-                                                  color: "red",
-                                                  paddingLeft: "10px",
-                                                  marginLeft: "10px",
-                                                  fontWeight: "500",
-                                                  borderLeft: "2px solid red",
-                                                }}
-                                              >
-                                                {item?.item_discount} % OFF
-                                              </span>
-                                            </>
-                                          ) : (
-                                            <>Price: {item?.item_price}</>
-                                          )}
-                                        </h3>
-                                        <h3 className={`item-price`}>
-                                          MRP: {item?.mrp || ""}
-                                        </h3>
-                                      </div>
-                                    </div>
-                                    <div className="menuleft">
-                                      <input
-                                        value={`${
-                                          order?.items?.find(
-                                            (a) =>
-                                              a.item_uuid === item.item_uuid
-                                          )?.b || 0
-                                        } : ${
-                                          order?.items?.find(
-                                            (a) =>
-                                              a.item_uuid === item.item_uuid
-                                          )?.p || 0
-                                        }`}
-                                        className="boxPcsInput"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setPopupForm(item);
-                                        }}
-                                      />
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                          </div>
-                        ) : (
-                          ""
-                        )
-                      )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFilterItemTile("");
-
-                      setCartPage(true);
-                      setConfirmItemPopup(false);
-                      setEnable(false);
-                    }}
-                    className="cartBtn"
-                    style={{ padding: "3px", opacity: enable ? 1 : 0.5 }}
-                    disabled={!enable}
-                  >
-                    Done
-                  </button>
+                      ) : (
+                        ""
+                      )
+                    )}
                 </div>
-              ) : (
-                ""
-              )}
-            </div>
-          </div>
-        </div>
-        <div
-          className="allcategoryList"
-          style={{
-            bottom: itemsCategory?.length > 0 ? "3.5rem" : "1rem",
-          }}
-        >
-          <div className={`menulist`}>
-            <div
-              className={`${isCategoryOpen ? "showCategory" : ""} categoryList`}
-              style={{ overflow: "scroll" }}
-            >
-              {filteredCategory
-                ?.sort((a, b) => a.sort_order - b.sort_order)
-                ?.map((category, i) => {
-                  return (
-                    <ScrollLink
-                      id={`${i}`}
-                      onClick={() => {
-                        var element = document.getElementById(
-                          category.category_uuid
-                        );
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilterItemTile("");
 
-                        element.scrollIntoView();
-                        element.scrollIntoView(false);
-                        element.scrollIntoView({ block: "start" });
-                        element.scrollIntoView({
-                          behavior: "smooth",
-                          block: "end",
-                          inline: "nearest",
-                        });
-                        setIsCategoryOpen(!isCategoryOpen);
-                        setClickedId(i?.toString());
-                      }}
-                      smooth={true}
-                      duration={1000}
-                      to={category?.category_uuid}
-                      className={`${
-                        clickedId === i?.toString() ? "activeMenuList" : ""
-                      } categorybtn`}
-                      key={i}
-                    >
-                      <span style={{ width: "50%" }}>
-                        {category?.category_title}
-                      </span>
-
-                      <i
-                        className="categoryLength"
-                        style={{ color: "var(--main)", fontSize: "15px" }}
-                      >
-                        {companies.find(
-                          (a) => a.company_uuid === category.company_uuid
-                        )?.company_title || ""}
-                      </i>
-                      <span className="categoryLength">
-                        {filterItems.filter(
-                          (a) => a.category_uuid === category.category_uuid
-                        )?.length || 0}
-                      </span>
-                    </ScrollLink>
-                  );
-                })}
-            </div>
-            {isCategoryOpen && <div id="black-bg" />}
-            {!isCategoryOpen ? (
-              <button
-                className="showMenuListBtn"
-                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-              >
-                Categories
-              </button>
+                    setCartPage(true);
+                    setConfirmItemPopup(false);
+                    setEnable(false);
+                  }}
+                  className="cartBtn"
+                  style={{
+                    padding: "3px",
+                    opacity: enable ? 1 : 0.5,
+                    position: "absolute",
+                  }}
+                  disabled={!enable}
+                >
+                  Done
+                </button>
+              </div>
             ) : (
-              <button
-                className="showMenuListBtn"
-                onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-              >
-                <i className="fas fa-times"></i> Close
-              </button>
+              ""
             )}
           </div>
         </div>
       </div>
+      <div
+        className="allcategoryList"
+        style={{
+          bottom: itemsCategory?.length > 0 ? "3.5rem" : "1rem",
+        }}
+      >
+        <div className={`menulist`} style={{ maxWidth: "500px" }}>
+          <div
+            className={`${isCategoryOpen ? "showCategory" : ""} categoryList`}
+            style={{ overflow: "scroll" }}
+          >
+            {filteredCategory
+              ?.sort((a, b) => a.sort_order - b.sort_order)
+              ?.map((category, i) => {
+                return (
+                  <ScrollLink
+                    id={`${i}`}
+                    onClick={() => {
+                      var element = document.getElementById(
+                        category.category_uuid
+                      );
+
+                      element.scrollIntoView();
+                      element.scrollIntoView(false);
+                      element.scrollIntoView({ block: "start" });
+                      element.scrollIntoView({
+                        behavior: "smooth",
+                        block: "end",
+                        inline: "nearest",
+                      });
+                      setIsCategoryOpen(!isCategoryOpen);
+                      setClickedId(i?.toString());
+                    }}
+                    smooth={true}
+                    duration={1000}
+                    to={category?.category_uuid}
+                    className={`${
+                      clickedId === i?.toString() ? "activeMenuList" : ""
+                    } categorybtn`}
+                    key={i}
+                  >
+                    <span style={{ width: "50%" }}>
+                      {category?.category_title}
+                    </span>
+
+                    <i
+                      className="categoryLength"
+                      style={{ color: "var(--main)", fontSize: "15px" }}
+                    >
+                      {companies.find(
+                        (a) => a.company_uuid === category.company_uuid
+                      )?.company_title || ""}
+                    </i>
+                    <span className="categoryLength">
+                      {filterItems.filter(
+                        (a) => a.category_uuid === category.category_uuid
+                      )?.length || 0}
+                    </span>
+                  </ScrollLink>
+                );
+              })}
+          </div>
+          {isCategoryOpen && <div id="black-bg" />}
+          {!isCategoryOpen ? (
+            <button
+              className="showMenuListBtn"
+              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+            >
+              Categories
+            </button>
+          ) : (
+            <button
+              className="showMenuListBtn"
+              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+            >
+              <i className="fas fa-times"></i> Close
+            </button>
+          )}
+        </div>
+      </div>
+
       {popupForm ? (
         <NewUserForm
           onSave={() => setPopupForm(false)}
@@ -1057,6 +1053,7 @@ const LinkedCounter = () => {
           <button
             type="button"
             className="cartBtn"
+            style={{ position: "absolute" }}
             onClick={async () => {
               setLoading(true);
               //   const db = await openDB(
@@ -1126,7 +1123,7 @@ const LinkedCounter = () => {
             setCartPage(true);
           }}
           className="cartBtn"
-          style={{ padding: "3px" }}
+          style={{ padding: "3px", position: "absolute" }}
         >
           Cart
         </button>

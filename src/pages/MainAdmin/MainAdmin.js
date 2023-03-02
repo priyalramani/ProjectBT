@@ -1979,6 +1979,7 @@ const MainAdmin = () => {
           stage={changesStatePopup}
           counters={counter}
           items={items}
+          users={users}
         />
       ) : (
         ""

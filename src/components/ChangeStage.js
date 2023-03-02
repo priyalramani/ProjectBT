@@ -4,12 +4,13 @@ import { Billing } from "../Apis/functions";
 import DiliveryReplaceMent from "./DiliveryReplaceMent";
 import Select from "react-select";
 
-const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
+const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
   const [data, setData] = useState({ stage: stage + 1 });
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
   const [waiting, setWaiting] = useState(false);
+
   useEffect(() => {
     console.log(selectedWarehouseOrders);
     if (selectedWarehouseOrders?.length) {
@@ -18,7 +19,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
       setSelectedWarehouseOrder(false);
     }
   }, [selectedWarehouseOrders]);
-  const onSubmit = async (selectedData = orders) => {
+  const onSubmit = async (selectedData = orders, diliveredUser = "") => {
     setWaiting(true);
     console.log(selectedData);
     let user_uuid = localStorage.getItem("user_uuid");
@@ -39,11 +40,13 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
           ? [
               { stage: 2, time: time.getTime(), user_uuid },
               { stage: 3, time: time.getTime(), user_uuid },
+              { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
               { stage: 4, time: time.getTime(), user_uuid },
             ]
           : [
               { stage: 2, time: time.getTime(), user_uuid },
               { stage: 3, time: time.getTime(), user_uuid },
+              { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
               { stage: 4, time: time.getTime(), user_uuid },
               { stage: 5, time: time.getTime(), user_uuid },
             ]
@@ -53,17 +56,23 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
           : +data.stage === 4
           ? [
               { stage: 3, time: time.getTime(), user_uuid },
+              { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
               { stage: 4, time: time.getTime(), user_uuid },
             ]
           : [
               { stage: 3, time: time.getTime(), user_uuid },
               { stage: 4, time: time.getTime(), user_uuid },
+              { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
               { stage: 5, time: time.getTime(), user_uuid },
             ]
         : stage === 3
         ? +data.stage === 4
-          ? [{ stage: 4, time: time.getTime(), user_uuid }]
+          ? [
+              { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+              { stage: 4, time: time.getTime(), user_uuid },
+            ]
           : [
+              { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
               { stage: 4, time: time.getTime(), user_uuid },
               { stage: 5, time: time.getTime(), user_uuid },
             ]
@@ -343,6 +352,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items }) => {
           orders={orders}
           counters={counters}
           items={items}
+          users={users}
         />
       ) : (
         ""
@@ -364,7 +374,7 @@ export default ChangeStage;
 function DiliveryPopup({
   onSave,
   postOrderData,
-
+  users,
   counters,
   items,
   orders,
@@ -380,6 +390,7 @@ function DiliveryPopup({
   const [count, setCount] = useState(0);
   const [order, setOrder] = useState({});
   const [editedOrders, setEditedOrders] = useState([]);
+  const [diliveredUser, setDiliveredUser] = useState("");
   const time2 = new Date();
   time2.setHours(12);
   useEffect(() => {
@@ -571,7 +582,7 @@ function DiliveryPopup({
       });
     if (response.data.success) {
       if (count + 1 === orders?.length) {
-        postOrderData([...editedOrders, order]);
+        postOrderData([...editedOrders, order], diliveredUser);
         onSave();
       } else {
         setEditedOrders((prev) => [...prev, order]);
@@ -592,6 +603,24 @@ function DiliveryPopup({
       adjustment_remarks: data?.adjustment_remarks || "",
     });
   }, [data]);
+  const getTripData = async (trip_uuid) => {
+    const response = await axios({
+      method: "post",
+      url: "/trips/GetTrip",
+      data: { params: ["users"], trips: [trip_uuid].filter((a) => a) },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      console.log("dilivereduser", response.data.result[0]?.users[0]);
+      if (response.data.result[0]?.users[0])
+        setDiliveredUser(response.data.result[0]?.users[0]);
+    }
+  };
+  useEffect(() => {
+    if (order.trip_uuid) getTripData(order.trip_uuid);
+  }, [order.trip_uuid]);
   return (
     <>
       <div className="overlay">
@@ -638,6 +667,20 @@ function DiliveryPopup({
                             modes.find((a) => a.mode_uuid === item.mode_uuid)
                               ?.amt
                           }
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setModes((prev) =>
+                              prev?.map((a) =>
+                                a.mode_uuid === item.mode_uuid
+                                  ? {
+                                      ...a,
+                                      amt: order.order_grandtotal || 0,
+                                    }
+                                  : a
+                              )
+                            );
+                          }}
                           style={{ width: "80px" }}
                           onChange={(e) =>
                             setModes((prev) =>
@@ -721,6 +764,14 @@ function DiliveryPopup({
                         // placeholder={
                         //   !order.credit_allowed === "Y" ? "Not Allowed" : ""
                         // }
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setOutstanding((prev) => ({
+                            ...prev,
+                            amount: order.order_grandtotal || 0,
+                          }));
+                        }}
                         style={{ width: "80px" }}
                         onChange={(e) =>
                           setOutstanding((prev) => ({
@@ -778,6 +829,33 @@ function DiliveryPopup({
                     >
                       Deductions
                     </button>
+                  </div>
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <div style={{ width: "100px" }}>Delivered By</div>
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "120px" }}
+                    >
+                      <select
+                        className="numberInput"
+                        style={{
+                          width: "100%",
+                          backgroundColor: "light",
+                          fontSize: "12px",
+                        }}
+                        value={diliveredUser}
+                        onChange={(e) => setDiliveredUser(e.target.value)}
+                      >
+                        <option value="">None</option>
+                        {users.map((a) => (
+                          <option value={a.user_uuid}>{a.user_title}</option>
+                        ))}
+                      </select>
+                      {/* {popupInfo.conversion || 0} */}
+                    </label>
                   </div>
                   <i style={{ color: "red" }}>{error}</i>
                 </div>

@@ -747,7 +747,7 @@ const ProcessingOrders = () => {
     <div>
       <nav
         className="user_nav nav_styling"
-        style={{ top: "0", padding: "10px" }}
+        style={{ top: "0", padding: "10px", maxWidth: "500px" }}
       >
         <div
           className="user_menubar flex"
@@ -1006,6 +1006,7 @@ const ProcessingOrders = () => {
         className="item-sales-container orders-report-container"
         style={{
           width: "100vw",
+          maxWidth: "500px",
           left: "0",
           top: "50px",
           textAlign: "center",
@@ -1102,6 +1103,7 @@ const ProcessingOrders = () => {
             top: "0",
             display: "flex",
             minHeight: "93vh",
+            maxWidth: "500px",
           }}
         >
           <table

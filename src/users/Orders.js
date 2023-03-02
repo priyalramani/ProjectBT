@@ -62,7 +62,7 @@ const Orders = ({ refreshDb }) => {
         className="item-sales-container orders-report-container"
         style={{ overflow: "visible", left: "0" }}
       >
-        <nav className="user_nav nav_styling" style={{ top: "0" }}>
+        <nav className="user_nav nav_styling" style={{ top: "0",maxWidth:"500px" }}>
           <div className="user_menubar">
             <IoArrowBackOutline
               className="user_Back_icon"
@@ -111,6 +111,7 @@ const Orders = ({ refreshDb }) => {
             alignItems: "center",
             flexDirection: "column",
             width: "100vw",
+            maxWidth: "500px",
             paddingTop: "5px",
             backgroundColor: "rgb(242, 242, 242)",
           }}
@@ -131,7 +132,10 @@ const Orders = ({ refreshDb }) => {
                 marginTop: params.route_uuid ? "10px" : "10px",
               }}
             >
-              <table className="table" style={{ width: "100vw" }}>
+              <table
+                className="table"
+                style={{ width: "100vw", maxWidth: "500px" }}
+              >
                 <tbody style={{ width: "100%" }}>
                   {counters
                     ?.filter((a) => a.counter_title)
@@ -396,8 +400,6 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
     setdata((prev) => ({ ...prev, payment_modes: temp }));
   };
 
- 
-  
   return (
     <div className="overlay">
       <div
@@ -495,57 +497,56 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
                   </label>
                 </div>
                 <div className="row">
-                <label className="selectLabel" style={{ width: "100%"}}>
-                      Mobile
-                      <div>
-                        {data?.mobile?.map((a) => (
-                          <div
-                            key={a.uuid}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between",
-                              margin: "5px 0",
+                  <label className="selectLabel" style={{ width: "100%" }}>
+                    Mobile
+                    <div>
+                      {data?.mobile?.map((a) => (
+                        <div
+                          key={a.uuid}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            margin: "5px 0",
+                          }}
+                        >
+                          <input
+                            type="number"
+                            name="route_title"
+                            className="numberInput"
+                            value={a?.mobile}
+                            style={{ width: "15ch" }}
+                            disabled={a.lable?.find(
+                              (c) =>
+                                (c.type === "cal" || c.type === "wa") &&
+                                +c.varification
+                            )}
+                            onChange={(e) => {
+                              if (
+                                e.target.value.length > 10 ||
+                                a.lable?.find(
+                                  (c) =>
+                                    (c.type === "cal" || c.type === "wa") &&
+                                    +c.varification
+                                )
+                              ) {
+                                return;
+                              }
+                              setdata((prev) => ({
+                                ...prev,
+                                mobile: prev.mobile.map((b) =>
+                                  b.uuid === a.uuid
+                                    ? { ...b, mobile: e.target.value }
+                                    : b
+                                ),
+                              }));
                             }}
-                          >
-                            <input
-                              type="number"
-                              name="route_title"
-                              className="numberInput"
-                              value={a?.mobile}
-                              style={{ width: "15ch" }}
-                              disabled={a.lable?.find(
-                                (c) =>
-                                  (c.type === "cal" || c.type === "wa") &&
-                                  +c.varification
-                              )}
-                              onChange={(e) => {
-                                if (
-                                  e.target.value.length > 10 ||
-                                  a.lable?.find(
-                                    (c) =>
-                                      (c.type === "cal" || c.type === "wa") &&
-                                      +c.varification
-                                  )
-                                ) {
-                                  return;
-                                }
-                                setdata((prev) => ({
-                                  ...prev,
-                                  mobile: prev.mobile.map((b) =>
-                                    b.uuid === a.uuid
-                                      ? { ...b, mobile: e.target.value }
-                                      : b
-                                  ),
-                                }));
-                              }}
-                              maxLength={10}
-                            />
-                           
-                          </div>
-                        ))}
-                      </div>
-                    </label>
+                            maxLength={10}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </label>
                   <label className="selectLabel" style={{ width: "100%" }}>
                     Payment Modes
                     <select

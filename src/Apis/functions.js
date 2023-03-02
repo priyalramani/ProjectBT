@@ -148,19 +148,19 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           base_qty_arr?.add_items.filter((b) => b.item_uuid === a.item_uuid)
             .length
       );
-      dataItems = dataItems.map((a) => {
-        if (base_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)) {
-          let data = base_qty_arr?.add_items.find(
-            (b) => b.item_uuid === a.item_uuid
-          );
-          auto_added.push({ ...data, p: data.add_qty || 0 });
-        }
-        return {
-          ...a,
-          p: base_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)
-            .add_qty,
-        };
-      });
+      // dataItems = dataItems.map((a) => {
+      //   if (base_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)) {
+      //     let data = base_qty_arr?.add_items.find(
+      //       (b) => b.item_uuid === a.item_uuid
+      //     );
+      //     auto_added.push({ ...data, p: data.add_qty || 0 });
+      //   }
+      //   return {
+      //     ...a,
+      //     p: base_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)
+      //       .add_qty,
+      //   };
+      // });
       console.log("datapiceItems", dataItems);
 
       let nonFiltered = eligibleItems.filter(
@@ -168,14 +168,14 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
       );
 
       // eslint-disable-next-line no-loop-func
-      dataItems = dataItems.map((a) => {
-        let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
-        return {
-          ...a,
-          p: (data ? +a.p + data.p : a.p) || 0,
-          b: (data ? +a.b + data.b : a.b) || 0,
-        };
-      });
+      // dataItems = dataItems.map((a) => {
+      //   let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
+      //   return {
+      //     ...a,
+      //     p: (data ? +a.p + data.p : a.p) || 0,
+      //     b: (data ? +a.b + data.b : a.b) || 0,
+      //   };
+      // });
       console.log(nonFiltered, dataItems);
       eligibleItems = nonFiltered.length
         ? dataItems.length
@@ -191,19 +191,19 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           pice_qty_arr?.add_items.filter((b) => b.item_uuid === a.item_uuid)
             .length
       );
-      dataItems = dataItems.map((a) => {
-        if (pice_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)) {
-          let data = pice_qty_arr?.add_items.find(
-            (b) => b.item_uuid === a.item_uuid
-          );
-          auto_added.push({ ...data, p: data.add_qty || 0 });
-        }
-        return {
-          ...a,
-          p: pice_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)
-            .add_qty,
-        };
-      });
+      // dataItems = dataItems.map((a) => {
+      //   if (pice_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)) {
+      //     let data = pice_qty_arr?.add_items.find(
+      //       (b) => b.item_uuid === a.item_uuid
+      //     );
+      //     auto_added.push({ ...data, p: data.add_qty || 0 });
+      //   }
+      //   return {
+      //     ...a,
+      //     p: pice_qty_arr?.add_items.find((b) => b.item_uuid === a.item_uuid)
+      //       .add_qty,
+      //   };
+      // });
       // console.log("datapiceItems", dataItems);
 
       let nonFiltered = eligibleItems.filter(
@@ -211,14 +211,14 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
       );
 
       // eslint-disable-next-line no-loop-func
-      dataItems = dataItems.map((a) => {
-        let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
-        return {
-          ...a,
-          p: (data ? +a.p + data.p : a.p) || 0,
-          b: (data ? +a.b + data.b : a.b) || 0,
-        };
-      });
+      // dataItems = dataItems.map((a) => {
+      //   let data = eligibleItems.find((b) => a.item_uuid === b.item_uuid);
+      //   return {
+      //     ...a,
+      //     p: (data ? +a.p + data.p : a.p) || 0,
+      //     b: (data ? +a.b + data.b : a.b) || 0,
+      //   };
+      // });
       console.log(nonFiltered, dataItems);
       eligibleItems = nonFiltered.length
         ? dataItems.length
