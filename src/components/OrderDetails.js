@@ -35,7 +35,20 @@ const default_status = [
   { value: 2, label: "Hold" },
   { value: 3, label: "Canceled" },
 ];
-export function OrderDetails({ order_uuid, onSave, orderStatus }) {
+export function OrderDetails({
+  orderJson,
+  order_uuid,
+  onSave,
+  orderStatus,
+  items = [],
+  counter = [],
+  paymentModeData = [],
+  itemCategories = [],
+  trips = [],
+  userData = [],
+  warehouseData = [],
+  reminder = null,
+}) {
   const { setNotification } = useContext(context);
   const [counters, setCounters] = useState([]);
   const [waiting, setWaiting] = useState(false);
@@ -90,9 +103,17 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
     }
   }, [order?.receipt_number]);
   useEffect(() => {
-    getOrder(order_uuid);
-  }, [order_uuid]);
+    if (orderJson) {
+      setOrder(orderJson);
+    } else {
+      getOrder(order_uuid);
+    }
+  }, [orderJson, order_uuid]);
   const GetPaymentModes = async () => {
+    if (paymentModeData.length) {
+      setPaymentModes(paymentModeData);
+      return;
+    }
     const response = await axios({
       method: "get",
       url: "/paymentModes/GetPaymentModesList",
@@ -104,6 +125,10 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
     if (response.data.success) setPaymentModes(response.data.result);
   };
   const getItemCategories = async () => {
+    if (itemCategories.length) {
+      setCategory(itemCategories);
+      return;
+    }
     const response = await axios({
       method: "get",
       url: "/itemCategories/GetItemCategoryList",
@@ -115,6 +140,10 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
     if (response.data.success) setCategory(response.data.result);
   };
   const getWarehouseData = async () => {
+    if (warehouseData.length) {
+      setWarehouse(warehouseData);
+      return;
+    }
     const response = await axios({
       method: "get",
       url: "/warehouse/GetWarehouseList",
@@ -126,6 +155,10 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
     if (response.data.success) setWarehouse(response.data.result);
   };
   const getTripData = async () => {
+    if (trips.length) {
+      setTripData(trips);
+      return;
+    }
     const response = await axios({
       method: "get",
       url: "/trips/GetTripList/" + localStorage.getItem("user_uuid"),
@@ -214,6 +247,10 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
     removeAfterPrint: true,
   });
   const getUsers = async () => {
+    if (userData.length) {
+      setUsers(userData);
+      return;
+    }
     const response = await axios({
       method: "get",
       url: "/users/GetUserList",
@@ -226,29 +263,29 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
     if (response.data.success) setUsers(response.data.result);
   };
 
-  const getAutoBill = async () => {
-    let data = [];
-    const response = await axios({
-      method: "get",
-      url: "/autoBill/autoBillItem",
+  // const getAutoBill = async () => {
+  //   let data = [];
+  //   const response = await axios({
+  //     method: "get",
+  //     url: "/autoBill/autoBillItem",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) data = response;
-    const response1 = await axios({
-      method: "get",
-      url: "/autoBill/autoBillQty",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
+  //   if (response.data.success) data = response;
+  //   const response1 = await axios({
+  //     method: "get",
+  //     url: "/autoBill/autoBillQty",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response1.data.success)
-      data = data ? response1.data.result : [...data, ...response1.data.result];
-    // console.log(data);
-  };
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
+  //   if (response1.data.success)
+  //     data = data ? response1.data.result : [...data, ...response1.data.result];
+  //   // console.log(data);
+  // };
 
   useEffect(() => {
     setOrderData({
@@ -266,7 +303,7 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
     if (order?.notes?.filter((a) => a)?.length) {
       setNotesPoup(true);
     }
-  }, [itemsData]);
+  }, [itemsData, order]);
   useEffect(() => {
     if (
       counters
@@ -303,11 +340,16 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
           })) || [],
     }));
   }, [category, orderData]);
-  const getItemsData = async (items) => {
+  const getItemsData = async (item) => {
+    if (items.length) {
+      console.log(items);
+      setItemsData(items);
+      return;
+    }
     const response = await axios({
       method: "post",
       url: "/items/GetItemList",
-      data: { items },
+      data: { items: item },
       headers: {
         "Content-Type": "application/json",
       },
@@ -315,6 +357,10 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
     if (response.data.success) setItemsData(response.data.result);
   };
   const getItemsDataReminder = async () => {
+    if (reminder) {
+      setReminderDate(reminder);
+      return;
+    }
     const response = await axios({
       method: "get",
       url: "/items/getNewItemReminder",
@@ -327,15 +373,19 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
   };
 
   const getCounters = async (counters) => {
-    const response = await axios({
-      method: "post",
-      url: "/counters/GetCounterList",
-      data: { counters },
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setCounters(response.data.result);
+    if (counter.length) {
+      setCounters(counter);
+    } else {
+      const response = await axios({
+        method: "post",
+        url: "/counters/GetCounterList",
+        data: { counters },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) setCounters(response.data.result);
+    }
   };
   const sendMsg = async () => {
     if (waiting) {
@@ -365,7 +415,7 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
   };
 
   useEffect(() => {
-    getAutoBill();
+    // getAutoBill();
     getUsers();
     getWarehouseData();
     getItemCategories();
@@ -516,10 +566,8 @@ export function OrderDetails({ order_uuid, onSave, orderStatus }) {
       },
     });
     if (response.data.success) {
-      setOrderData((prev) => ({
-        ...prev,
-        ...data,
-      }));
+      
+      getOrder(order_uuid,true);
       setEditOrder(false);
     }
     setWaiting(false);
@@ -2806,7 +2854,7 @@ function DiliveryPopup({
   const getTripData = async (trip_uuid) => {
     const response = await axios({
       method: "post",
-      url: "/trips/GetTrip",
+      url: "/trips/GetTripData",
       data: { params: ["users"], trips: [trip_uuid].filter((a) => a) },
       headers: {
         "Content-Type": "application/json",
@@ -3279,9 +3327,11 @@ function DiliveryPopup({
                         onChange={(e) => setDiliveredUser(e.target.value)}
                       >
                         <option value="">None</option>
-                        {users.map((a) => (
-                          <option value={a.user_uuid}>{a.user_title}</option>
-                        ))}
+                        {users
+                          .filter((a) => a.status)
+                          .map((a) => (
+                            <option value={a.user_uuid}>{a.user_title}</option>
+                          ))}
                       </select>
                       {/* {popupInfo.conversion || 0} */}
                     </label>

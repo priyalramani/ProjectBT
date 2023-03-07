@@ -691,7 +691,8 @@ const LinkedCounter = () => {
                   position: "fixed",
                   width: "100vw",
                   height: "100vh",
-                  maxWidth:"500px"
+                  maxWidth: "500px",
+                  minHeight: "-webkit-fill-available",
                 }}
               >
                 <button
@@ -712,7 +713,7 @@ const LinkedCounter = () => {
                     backgroundColor: "#fff",
                     overflow: "scroll",
                     paddingTop: "10px",
-                    maxWidth:"500px"
+                    maxWidth: "500px",
                   }}
                 >
                   {itemsCategory
@@ -898,25 +899,6 @@ const LinkedCounter = () => {
                       )
                     )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFilterItemTile("");
-
-                    setCartPage(true);
-                    setConfirmItemPopup(false);
-                    setEnable(false);
-                  }}
-                  className="cartBtn"
-                  style={{
-                    padding: "3px",
-                    opacity: enable ? 1 : 0.5,
-                    position: "absolute",
-                  }}
-                  disabled={!enable}
-                >
-                  Done
-                </button>
               </div>
             ) : (
               ""
@@ -1109,6 +1091,27 @@ const LinkedCounter = () => {
             {total ? "Rs: " + total : ""} Submit
           </button>
         </>
+      ) : confirmItemsPopup ? (
+        <button
+          type="button"
+          onClick={() => {
+            setFilterItemTile("");
+
+            setCartPage(true);
+            setConfirmItemPopup(false);
+            setEnable(false);
+          }}
+          className="cartBtn"
+          style={{
+            padding: "3px",
+            opacity: enable ? 1 : 0.5,
+            position: "absolute",
+            zIndex:9999
+          }}
+          disabled={!enable}
+        >
+          Done
+        </button>
       ) : order?.items?.length ? (
         <button
           type="button"

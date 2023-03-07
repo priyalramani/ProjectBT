@@ -385,7 +385,10 @@ const SelectedCounterOrder = () => {
         )}
       </nav>
       <div className="home">
-        <div className="container" style={{ maxWidth: "500px" }}>
+        <div
+          className="container"
+          style={{ maxWidth: "500px" }}
+        >
           <div className="menucontainer">
             <div className="menus">
               {!cartPage
@@ -751,12 +754,13 @@ const SelectedCounterOrder = () => {
                   width: "100vw",
                   height: "100vh",
                   maxWidth: "500px",
+                  minHeight: "-webkit-fill-available",
                 }}
               >
                 <button
                   onClick={() => setConfirmItemPopup(false)}
                   className="closeButton"
-                  style={{ top: "20vh", left: "40%" }}
+                  style={{ top: "10vh", left: "40%", zIndex: "999999" }}
                 >
                   x
                 </button>
@@ -970,7 +974,9 @@ const SelectedCounterOrder = () => {
                   style={{
                     padding: "3px",
                     opacity: enable ? 1 : 0.5,
-                    position: "absolute",
+                    position: "fixed",
+                    zIndex: "9999999",
+                    bottom: "1rem",
                   }}
                   disabled={!enable}
                 >
@@ -986,10 +992,10 @@ const SelectedCounterOrder = () => {
       <div
         className="allcategoryList"
         style={{
-          bottom: itemsCategory?.length > 0 ? "3.5rem" : "1rem",
+          bottom: itemsCategory?.length > 0 ? "0.5rem" : "1rem",
         }}
       >
-        <div className={`menulist`} style={{maxWidth:"500px"}}>
+        <div className={`menulist`} style={{ maxWidth: "500px" }}>
           <div
             className={`${isCategoryOpen ? "showCategory" : ""} categoryList`}
             style={{ overflow: "scroll" }}
@@ -1074,58 +1080,12 @@ const SelectedCounterOrder = () => {
               <i className="fas fa-times"></i> Close
             </button>
           )}
-        </div>
-      </div>
-
-      {popupForm ? (
-        <NewUserForm
-          onSave={() => setPopupForm(false)}
-          setOrder={setOrder}
-          popupInfo={popupForm}
-          order={order}
-        />
-      ) : (
-        ""
-      )}
-      {discountPopup ? (
-        <DiscountPopup
-          onSave={() => setDiscountPopup(false)}
-          setOrder={setOrder}
-          order={order}
-        />
-      ) : (
-        ""
-      )}
-      {loading ? (
-        <div className="overlay" style={{ zIndex: 9999999 }}>
-          <div className="flex" style={{ width: "40px", height: "40px" }}>
-            <svg viewBox="0 0 100 100">
-              <path
-                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-                fill="#ffffff"
-                stroke="none"
-              >
-                <animateTransform
-                  attributeName="transform"
-                  type="rotate"
-                  dur="1s"
-                  repeatCount="indefinite"
-                  keyTimes="0;1"
-                  values="0 50 51;360 50 51"
-                ></animateTransform>
-              </path>
-            </svg>
-          </div>
-        </div>
-      ) : (
-        ""
-      )}
-      {cartPage ? (
+             {cartPage ? (
         <>
           <button
             type="button"
             className="cartBtn"
-            style={{position:"absolute"}}
+            // style={{position:"absolute"}}
             onClick={async () => {
               setLoading(true);
               const db = await openDB(
@@ -1176,6 +1136,7 @@ const SelectedCounterOrder = () => {
                 });
               }, 2000);
             }}
+            style={{ padding: "3px", position: "relative",marginTop:"20px" }}
           >
             {total ? "Rs: " + total : ""} Submit
           </button>
@@ -1194,13 +1155,61 @@ const SelectedCounterOrder = () => {
             setCartPage(true);
           }}
           className="cartBtn"
-          style={{ padding: "3px",position:"absolute" }}
+          style={{ padding: "3px", position: "relative",marginTop:"20px" }}
+
         >
           Cart
         </button>
       ) : (
         ""
       )}
+        </div>
+      </div>
+
+      {popupForm ? (
+        <NewUserForm
+          onSave={() => setPopupForm(false)}
+          setOrder={setOrder}
+          popupInfo={popupForm}
+          order={order}
+        />
+      ) : (
+        ""
+      )}
+      {discountPopup ? (
+        <DiscountPopup
+          onSave={() => setDiscountPopup(false)}
+          setOrder={setOrder}
+          order={order}
+        />
+      ) : (
+        ""
+      )}
+      {loading ? (
+        <div className="overlay" style={{ zIndex: 9999999 }}>
+          <div className="flex" style={{ width: "40px", height: "40px" }}>
+            <svg viewBox="0 0 100 100">
+              <path
+                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                fill="#ffffff"
+                stroke="none"
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="rotate"
+                  dur="1s"
+                  repeatCount="indefinite"
+                  keyTimes="0;1"
+                  values="0 50 51;360 50 51"
+                ></animateTransform>
+              </path>
+            </svg>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+   
       {holdPopup ? (
         <HoldPopup
           onSave={() => setHoldPopup(false)}

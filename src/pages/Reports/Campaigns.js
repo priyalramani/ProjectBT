@@ -1,13 +1,7 @@
 import React, { useState, useEffect, useMemo, useContext } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
-import {
-  ChevronUpIcon,
-  ChevronDownIcon,
-  MenuAlt2Icon,
-  ArrowDownIcon,
-  ArrowUpIcon,
-} from "@heroicons/react/solid";
+import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
 import {
@@ -15,26 +9,13 @@ import {
   ArrowDropDown,
   ArrowDropUp,
   CopyAll,
-  Delete,
   DeleteOutline,
 } from "@mui/icons-material";
-import { Switch } from "@mui/material";
-import { green } from "@mui/material/colors";
-import { alpha, styled } from "@mui/material/styles";
+
 import Context from "../../context/context";
 import { server } from "../../App";
 import noimg from "../../assets/noimg.jpg";
-const GreenSwitch = styled(Switch)(({ theme }) => ({
-  "& .MuiSwitch-switchBase.Mui-checked": {
-    color: green[500],
-    "&:hover": {
-      backgroundColor: alpha(green[500], theme.palette.action.hoverOpacity),
-    },
-  },
-  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-    backgroundColor: green[500],
-  },
-}));
+
 const Campaigns = () => {
   return (
     <>
@@ -1220,7 +1201,7 @@ function IncentivePopup({ onSave, popupForm }) {
     </div>
   );
 }
-function IncentiveOrderPopup({ onSave, popupForm,sendMsg }) {
+function IncentiveOrderPopup({ onSave, popupForm, sendMsg }) {
   const [type, setType] = useState("all");
   const [message, setMessage] = useState([]);
   const [counters, setCounter] = useState([]);
@@ -1289,8 +1270,8 @@ function IncentiveOrderPopup({ onSave, popupForm,sendMsg }) {
         },
       });
     }
-    sendMsg({...popupForm,message,all:type});
-    onSave()
+    sendMsg({ ...popupForm, message, all: type });
+    onSave();
   };
   const filteredCounter = useMemo(
     () =>
@@ -1389,7 +1370,7 @@ function IncentiveOrderPopup({ onSave, popupForm,sendMsg }) {
                         checked={type}
                         onChange={(e) => setType(e.target.checked)}
                       />
-                      <b style={{ width: "100px" }}>All  </b>
+                      <b style={{ width: "100px" }}>All </b>
                       <input
                         onWheel={(e) => e.target.blur()}
                         type="checkbox"
@@ -1403,7 +1384,7 @@ function IncentiveOrderPopup({ onSave, popupForm,sendMsg }) {
                         checked={!type}
                         onChange={(e) => setType(!e.target.checked)}
                       />
-                      <b style={{ width: "100px" }}>Not Ordered  </b>
+                      <b style={{ width: "100px" }}>Not Ordered </b>
                     </td>
                   </tr>
 
@@ -1527,7 +1508,11 @@ function IncentiveOrderPopup({ onSave, popupForm,sendMsg }) {
                                       height: "100px",
                                       objectFit: "contain",
                                     }}
-                                    src={item.img?URL.createObjectURL(item.img):noimg}
+                                    src={
+                                      item.img
+                                        ? URL.createObjectURL(item.img)
+                                        : noimg
+                                    }
                                     onError={({ currentTarget }) => {
                                       currentTarget.onerror = null; // prevents looping
                                       currentTarget.src = noimg;

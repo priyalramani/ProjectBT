@@ -1,9 +1,15 @@
 import axios from "axios";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { useReactToPrint } from "react-to-print";
 import PopupTripOrderTable from "../../components/PopupTripOrderTable";
 import TripPage from "../../components/TripPage";
-import { ArrowDropDown } from "@mui/icons-material";
+import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import Select from "react-select";
 export default function ItemAvilibility({ setIsItemAvilableOpen }) {
   const [itemsData, setItemsData] = useState([]);
@@ -16,7 +22,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
   const [detailsPopup, setDetailsPopup] = useState(false);
   const [warehousePopup, setWarehousePopup] = useState(false);
   const componentRef = useRef(null);
-
+  const [counterPopup, setCounterPopup] = useState(false);
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, []);
@@ -51,7 +57,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
     if (response.data.success)
       setUsers(
         response.data.result
-          .filter((a) => a.status&&+a.user_type)
+          .filter((a) => a.status && +a.user_type)
           .sort((a, b) => a.user_title?.localeCompare(b.user_title))
       );
   };
@@ -74,7 +80,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
             users_name:
               b?.users?.map((a) => {
                 let data = users.find((c) => a === c.user_uuid)?.user_title;
-                console.log(a)
+                console.log(a);
                 return data;
               }) || [],
           }))
@@ -104,7 +110,7 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
   }, [statementTrip_uuid]);
   useEffect(() => {
     getTripData();
-  }, [btn, warehousePopup,users]);
+  }, [btn, warehousePopup, users]);
   useEffect(() => {
     getUsers();
   }, []);
@@ -369,6 +375,19 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
                                 >
                                   Details
                                 </button>
+                                <button
+                                  className="item-sales-search"
+                                  style={{
+                                    display: "inline",
+                                    width: "100%",
+                                  }}
+                                  type="button"
+                                  onClick={() => {
+                                    setCounterPopup(item.trip_uuid);
+                                  }}
+                                >
+                                  Counters
+                                </button>
                               </div>
                             ) : (
                               ""
@@ -461,6 +480,14 @@ export default function ItemAvilibility({ setIsItemAvilableOpen }) {
             />
           </div>
         </div>
+      ) : (
+        ""
+      )}
+      {counterPopup ? (
+        <CounterTable
+          onSave={() => setCounterPopup(false)}
+          trip_uuid={counterPopup}
+        />
       ) : (
         ""
       )}
@@ -645,6 +672,389 @@ function WarehousePopup({ onSave, tripData }) {
               </button>
             </form>
           </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function CounterTable({ trip_uuid, onSave }) {
+  const [counter, setCounter] = useState([]);
+  const [filterCounterTitle, setFilterCounterTitle] = useState("");
+  const [routesData, setRoutesData] = useState([]);
+  const [filterRouteTitle, setFilterRouteTitle] = useState("");
+
+  const getCounter = async (controller = new AbortController()) => {
+    const response = await axios({
+      method: "post",
+      url: "/counters/GetCounterData",
+      signal: controller.signal,
+      data: ["counter_uuid", "counter_title", "trip_uuid", "route_uuid"],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setCounter(
+        response.data.result.sort((a, b) =>
+          (a.trip_uuid === b.trip_uuid) === trip_uuid
+            ? 0
+            : a.trip_uuid === trip_uuid
+            ? -1
+            : 1
+        )
+      );
+    }
+  };
+  const getRoutesData = async (controller = new AbortController()) => {
+    const response = await axios({
+      method: "get",
+      url: "/routes/GetRouteList",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setRoutesData(response.data.result);
+  };
+  useEffect(() => {
+    let controller = new AbortController();
+    getCounter(controller);
+    getRoutesData(controller);
+    return () => {
+      controller.abort();
+    };
+  }, []);
+  const submitHandler = async (e) => {
+    e.preventDefault()
+    const response = await axios({
+      method: "put",
+      url: "/counters/putCounter",
+      data: counter.filter((a) => a.edit),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+    }
+  };
+  const filterCounter = useMemo(
+    () =>
+      counter?.filter(
+        (a) =>
+          a.counter_uuid &&
+          (!filterCounterTitle ||
+            a.counter_title
+              ?.toLocaleLowerCase()
+              ?.includes(filterCounterTitle?.toLocaleLowerCase()))
+      ),
+    [counter, filterCounterTitle]
+  );
+
+  const filterRoute = useMemo(
+    () =>
+      routesData
+        .filter(
+          (a) =>
+            (!filterRouteTitle ||
+              a.route_title
+                ?.toLocaleLowerCase()
+                ?.includes(filterRouteTitle?.toLocaleLowerCase())) &&
+            a.route_uuid &&
+            filterCounter?.filter((b) => a.route_uuid === b.route_uuid)?.length
+        )
+
+        .sort((a, b) => a?.route_title?.localeCompare(b?.route_title)),
+    [filterRouteTitle, filterCounter, routesData]
+  );
+
+  return (
+    <div className="overlay" style={{ zIndex: 9999999 }}>
+      <div
+        className="modal"
+        style={{
+          height: "max-content",
+          width: "fit-content",
+          maxHeight: "90vh",
+        }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="row">
+                <h1>Counters</h1>
+              </div>
+              <div className="formGroup">
+                <div className="flex">
+                  <input
+                    type="text"
+                    onChange={(e) => setFilterCounterTitle(e.target.value)}
+                    value={filterCounterTitle}
+                    placeholder="Search Counter Title..."
+                    className="searchInput"
+                  />
+                  <input
+                    type="text"
+                    onChange={(e) => setFilterRouteTitle(e.target.value)}
+                    value={filterRouteTitle}
+                    placeholder="Search route Title..."
+                    className="searchInput"
+                  />
+                </div>
+
+                <div className="row">
+                  <div
+                    style={{
+                      overflowY: "scroll",
+                      height: "45vh",
+                      minWidth: "600px",
+                    }}
+                  >
+                    <table
+                      className="user-table"
+                      style={{
+                        maxWidth: "500px",
+                        height: "fit-content",
+                        overflowX: "scroll",
+                      }}
+                    >
+                      <thead>
+                        <tr>
+                          <th>S.N</th>
+                          <th colSpan={2}>Counter Title</th>
+                        </tr>
+                      </thead>
+                      <tbody className="tbody">
+                        {filterRoute.map((a) => (
+                          <>
+                            <tr
+                              style={{ pageBreakAfter: "auto", width: "100%" }}
+                            >
+                              <td colSpan={2}>
+                                {a.route_title}
+                                <span
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+
+                                    setCounter((prev) => {
+                                      let counter_trip_uuid =
+                                        filterCounter?.filter(
+                                          (b) =>
+                                            a.route_uuid === b.route_uuid &&
+                                            trip_uuid === b.trip_uuid
+                                        )?.length ===
+                                        filterCounter?.filter(
+                                          (b) => a.route_uuid === b.route_uuid
+                                        )?.length
+                                          ? ""
+                                          : trip_uuid;
+                                      return prev.map((count) =>
+                                        count.route_uuid === a.route_uuid
+                                          ? {
+                                              ...count,
+                                              trip_uuid: counter_trip_uuid,
+                                              edit: true,
+                                            }
+                                          : count
+                                      );
+                                    });
+                                  }}
+                                  style={{ marginLeft: "10px" }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={
+                                      filterCounter?.filter(
+                                        (b) =>
+                                          a.route_uuid === b.route_uuid &&
+                                          trip_uuid === b.trip_uuid
+                                      )?.length ===
+                                      filterCounter?.filter(
+                                        (b) => a.route_uuid === b.route_uuid
+                                      )?.length
+                                    }
+                                    style={{ transform: "scale(1.3)" }}
+                                  />
+                                </span>
+                              </td>
+                              <td
+                                onClick={() =>
+                                  setRoutesData((prev) =>
+                                    prev.map((b) =>
+                                      b.route_uuid === a.route_uuid
+                                        ? { ...b, expand: !b.expand }
+                                        : b
+                                    )
+                                  )
+                                }
+                                style={{
+                                  // fontSize: "20px",
+                                  // width: "20px",
+                                  transition: "all ease 1s",
+                                }}
+                              >
+                                {filterCounter?.filter(
+                                  (c) =>
+                                    a.route_uuid === c.route_uuid &&
+                                    c.trip_uuid === trip_uuid
+                                ).length +
+                                  "/" +
+                                  filterCounter?.filter(
+                                    (c) => a.route_uuid === c.route_uuid
+                                  ).length}
+                                {a.expand ? (
+                                  <ArrowDropUp
+                                    style={{ fontSize: "20px", width: "20px" }}
+                                  />
+                                ) : (
+                                  <ArrowDropDown
+                                    style={{ fontSize: "20px", width: "20px" }}
+                                  />
+                                )}
+                              </td>
+                            </tr>
+                            {a.expand
+                              ? filterCounter
+                                  ?.filter((b) => a.route_uuid === b.route_uuid)
+                                  ?.sort((a, b) =>
+                                    a.counter_title?.localeCompare(
+                                      b.counter_title
+                                    )
+                                  )
+                                  ?.map((item, i, array) => {
+                                    return (
+                                      <tr
+                                        key={Math.random()}
+                                        style={{ height: "30px" }}
+                                      >
+                                        <td
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setCounter((prev) =>
+                                              prev.map((a) =>
+                                                a.counter_uuid ===
+                                                item.counter_uuid
+                                                  ? {
+                                                      ...a,
+                                                      trip_uuid:
+                                                        a.trip_uuid ===
+                                                        trip_uuid
+                                                          ? ""
+                                                          : trip_uuid,
+                                                      edit: true,
+                                                    }
+                                                  : a
+                                              )
+                                            );
+                                          }}
+                                          className="flex"
+                                          style={{
+                                            justifyContent: "space-between",
+                                          }}
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            checked={
+                                              item.trip_uuid === trip_uuid
+                                            }
+                                            style={{ transform: "scale(1.3)" }}
+                                          />
+                                          {i + 1}
+                                        </td>
+
+                                        <td colSpan={2}>
+                                          {item.counter_title || ""}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })
+                              : ""}
+                          </>
+                        ))}
+                      </tbody>
+                    </table>
+                    {/* <table className="table">
+                      <thead>
+                        <tr>
+                          <th className="description" style={{ width: "10%" }}>
+                            S.r
+                          </th>
+
+                          <th className="description" style={{ width: "25%" }}>
+                            Counter
+                          </th>
+
+                          <th style={{ width: "25%" }}>Action</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {filterCounter.map((item, index) => {
+                          return (
+                            <tr key={item.counter_uuid}>
+                              <td>{index + 1}</td>
+
+                              <td>{item?.counter_title}</td>
+
+                              <td>
+                                <button
+                                  type="button"
+                                  className="noBgActionButton"
+                                  style={{
+                                    backgroundColor:
+                                      item.trip_uuid === trip_uuid
+                                        ? "red"
+                                        : "var(--mainColor)",
+                                    width: "150px",
+                                    fontSize: "large",
+                                  }}
+                                  onClick={(event) =>
+                                    setCounter((prev) =>
+                                      prev.map((a) =>
+                                        a.counter_uuid === item.counter_uuid
+                                          ? {
+                                              ...a,
+                                              trip_uuid:
+                                                a.trip_uuid === trip_uuid
+                                                  ? ""
+                                                  : trip_uuid,
+                                              edit: true,
+                                            }
+                                          : a
+                                      )
+                                    )
+                                  }
+                                >
+                                  {item.trip_uuid === trip_uuid
+                                    ? "Remove"
+                                    : "Add"}
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table> */}
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+
           <button onClick={onSave} className="closeButton">
             x
           </button>

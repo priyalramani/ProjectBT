@@ -778,8 +778,28 @@ function NewUserForm({
   const [otppoup, setOtpPopup] = useState(false);
   const [otp, setOtp] = useState("");
   const [counterGroup, setCounterGroup] = useState([]);
+  const [TripsData, setTripData] = useState([]);
   const [orderFrom, setOrderFrom] = useState([]);
   const [errMassage, setErrorMassage] = useState("");
+  const getTripData = async (controller = new AbortController()) => {
+    const response = await axios({
+      method: "post",
+      url: "/trips/GetTripData",
+      data: {
+        params: ["trip_uuid", "trip_title"],
+        trips: [],
+        conditions: [{ status: 1 }],
+      },
+      signal: controller.signal,
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setTripData(response.data.result);
+    }
+  };
   const getItemsData = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
@@ -794,6 +814,7 @@ function NewUserForm({
   useEffect(() => {
     const controller = new AbortController();
     getItemsData(controller);
+    getTripData(controller);
     return () => {
       controller.abort();
     };
@@ -854,13 +875,14 @@ function NewUserForm({
   console.log(data);
   const submitHandler = async (e) => {
     e?.preventDefault();
-    if (!data.counter_title) {
+    let json = { ...data, counter_title: data.counter_title.trim() };
+    if (!json.counter_title) {
       setErrorMassage("Please insert  Title");
       return;
     }
-    for (let item of data.mobile) {
+    for (let item of json.mobile) {
       if (
-        data?.mobile?.filter((a) => a.mobile && a.mobile === item.mobile)
+        json?.mobile?.filter((a) => a.mobile && a.mobile === item.mobile)
           .length > 1
       ) {
         setNotification({ success: false, message: "Dublicat Number Present" });
@@ -872,8 +894,8 @@ function NewUserForm({
     //   setErrorMassage("Please enter 10 Numbers in Mobile");
     //   return;
     // }
-    if (!data.route_uuid) {
-      setdata({ ...data, route_uuid: "0" });
+    if (!json.route_uuid) {
+      json = { ...json, route_uuid: "0" };
     }
     if (popupInfo?.type === "edit") {
       const response = await axios({
@@ -881,8 +903,8 @@ function NewUserForm({
         url: "/counters/putCounter",
         data: [
           {
-            ...data,
-            payment_modes: data.payment_modes.filter((a) => a !== "unpaid"),
+            ...json,
+            payment_modes: json.payment_modes.filter((a) => a !== "unpaid"),
           },
         ],
         headers: {
@@ -903,7 +925,7 @@ function NewUserForm({
       const response = await axios({
         method: "post",
         url: "/counters/postCounter",
-        data,
+        data: json,
         headers: {
           "Content-Type": "application/json",
         },
@@ -1059,7 +1081,7 @@ function NewUserForm({
                         onChange={(e) =>
                           setdata({
                             ...data,
-                            counter_title: e.target.value.trim(),
+                            counter_title: e.target.value,
                           })
                         }
                         maxLength={42}
@@ -1354,6 +1376,25 @@ function NewUserForm({
                       <option value="">None</option>
                       {orderFrom?.map((a) => (
                         <option value={a.form_uuid}>{a.form_title}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="selectLabel">
+                    Trips
+                    <select
+                      name="user_type"
+                      className="select"
+                      value={data?.trip_uuid}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          trip_uuid: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="">None</option>
+                      {TripsData?.map((a) => (
+                        <option value={a.trip_uuid}>{a.trip_title}</option>
                       ))}
                     </select>
                   </label>

@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Header from "../../components/Header";
 import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
@@ -25,54 +25,50 @@ const PendingsEntry = () => {
       setTimeout(() => setDoneDisabled(false), 5000);
     }
   }, [allDoneConfimation]);
-  const getOrders = async () => {
+  const getOrders = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
       url: "/orders/getPendingEntry",
-
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
     });
     console.log("users", response);
-    if (response.data.success)
-      setOrders(
-        response.data.result.map((a) => ({
-          ...a,
-          ...counters.find((b) => b.counter_uuid === a.counter_uuid),
-          status: a.status,
-        }))
-      );
+    if (response.data.success) setOrders(response.data.result);
   };
-  const getCounter = async () => {
+  const getCounter = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
       url: "/counters/GetCounterList",
-
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.success) setCounters(response.data.result);
   };
-  const getItemsData = async () => {
+  const getItemsData = async (controller = new AbortController()) => {
     const response = await axios({
       method: "get",
       url: "/items/GetItemList",
-
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.success) setItemsData(response.data.result);
   };
+  useEffect(() => {}, []);
   useEffect(() => {
-    getItemsData();
-    getCounter();
+    let controller = new AbortController();
+    getOrders(controller);
+    getItemsData(controller);
+    getCounter(controller);
+    return () => {
+      controller.abort();
+    };
   }, []);
-  useEffect(() => {
-    getOrders();
-  }, [counters]);
   const putOrder = async (invoice_number) => {
     const response = await axios({
       method: "put",
@@ -83,7 +79,7 @@ const PendingsEntry = () => {
       },
     });
     if (response.data.success) {
-      setOrders(prev=>prev.filter(a=>a.invoice_number!==invoice_number))
+      getOrders();
       return;
     }
   };
@@ -93,13 +89,16 @@ const PendingsEntry = () => {
     for (let order of selectedOrders?.sort(
       (a, b) => +a.invoice_number - +b.invoice_number
     )) {
-      for (let item of order.item_details.filter(
+      console.log(order);
+      for (let item of order?.item_details?.filter(
         (a) => a.status !== 3 && (a.b || a.p || a.free)
       )) {
         let date = new Date(+order.status[0]?.time);
         let itemData = itemsData.find((a) => a.item_uuid === item.item_uuid);
         sheetData.push({
-          "Party Code": order.counter_code || "",
+          "Party Code":
+            counters.find((b) => b.counter_uuid === order.counter_uuid)
+              ?.counter_code || "",
           "Invoice Number": "N" + order.invoice_number,
           "Invoice Date": "dd/mm/yy"
             .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
@@ -125,7 +124,8 @@ const PendingsEntry = () => {
           "Discount 2": item.charges_discount?.length
             ? item.charges_discount[1]?.value
             : 0,
-          Deductions: -(+order.replacement+order.shortage+order.adjustment) || 0,
+          Deductions:
+            -(+order.replacement + order.shortage + order.adjustment) || 0,
         });
       }
     }
@@ -137,6 +137,15 @@ const PendingsEntry = () => {
     FileSaver.saveAs(data, "Book" + fileExtension);
     // setSelectedOrders([]);
   };
+  const recipts = useMemo(
+    () =>
+      orders.map((a) => ({
+        ...a,
+        ...counters.find((b) => b.counter_uuid === a.counter_uuid),
+        status: a.status,
+      })),
+    [counters, orders]
+  );
   return (
     <>
       <Sidebar />
@@ -170,7 +179,7 @@ const PendingsEntry = () => {
 
         <div className="table-container-user item-sales-container">
           <Table
-            itemsDetails={orders}
+            itemsDetails={recipts}
             setPopupOrder={setPopupOrder}
             putOrder={putOrder}
             selectedOrders={selectedOrders}
@@ -201,7 +210,11 @@ const PendingsEntry = () => {
               onClick={(e) => {
                 e.stopPropagation();
                 let countersCodes = selectedOrders
-                  .filter((a) => !a.counter_code)
+                  .filter(
+                    (a) =>
+                      !counters.find((b) => b.counter_uuid === a.counter_uuid)
+                        ?.counter_code && a.counter_uuid
+                  )
                   .filter(
                     (value, index, self) =>
                       index ===
@@ -212,7 +225,7 @@ const PendingsEntry = () => {
                 let itemCodes = [].concat
                   .apply(
                     [],
-                    selectedOrders.map((a) => a.item_details)
+                    selectedOrders?.map((a) => a?.item_details || [])
                   )
                   .filter(
                     (value, index, self) =>
@@ -254,7 +267,7 @@ const PendingsEntry = () => {
         <div className="overlay">
           <div
             className="modal"
-            style={{ height: "70vh", width: "fit-content" }}
+            style={{ maxHeight: "70vh", width: "fit-content" }}
           >
             <div
               className="content"
@@ -265,13 +278,20 @@ const PendingsEntry = () => {
               }}
             >
               <div style={{ overflowY: "scroll" }}>
-                <form className="form" onSubmit={downloadHandler}>
+                <form
+                  className="form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    downloadHandler();
+                  }}
+                >
                   <div className="row">
                     <h1> Code missing</h1>
                   </div>
 
                   <div className="formGroup">
-                    {warningCodes.countersCodes.length ? (
+                    {warningCodes.countersCodes.filter((a) => a.counter_uuid)
+                      .length ? (
                       <div
                         className="row"
                         style={{
@@ -280,9 +300,15 @@ const PendingsEntry = () => {
                         }}
                       >
                         <h2>Counters:</h2>
-                        {warningCodes.countersCodes.map((a) => (
-                          <div>{a.counter_title}</div>
-                        ))}
+                        {warningCodes?.countersCodes
+                          ?.filter((a) => a.counter_uuid)
+                          .map((a) => (
+                            <div>
+                              {counters.find(
+                                (b) => b.counter_uuid === a.counter_uuid
+                              )?.counter_title || ""}
+                            </div>
+                          ))}
                       </div>
                     ) : (
                       ""
@@ -339,13 +365,12 @@ const PendingsEntry = () => {
               <div style={{ overflowY: "scroll" }}>
                 <form
                   className="form"
-                  onSubmit={async(e) => {
-                    e.preventDefault();
+                  onSubmit={async (e) => {
+                    e?.preventDefault();
                     for (let a of selectedOrders) {
                       await putOrder(a.invoice_number);
                     }
                     setAllDoneConfimation(false);
-            
                   }}
                 >
                   <div className="row">
@@ -476,7 +501,6 @@ function Table({
                   onClick={async (e) => {
                     e.stopPropagation();
                     await putOrder(item.invoice_number);
-                
                   }}
                 >
                   Done

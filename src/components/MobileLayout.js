@@ -9,6 +9,8 @@ const MobileLayout = ({ children }) => {
           maxWidth: "500px",
           position: "relative",
           height: "100vh",
+          // height:"calc(100vh-300px)",
+          minHeight: '-webkit-fill-available'
         }}
       >
         {children}

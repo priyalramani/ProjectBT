@@ -882,76 +882,7 @@ function DeleteItemPopup({ onSave, popupInfo, setItemsData }) {
   );
 }
 
-function ItemsTable({ items, includesArray, onItemIncludeToggle }) {
-  return (
-    <div
-      style={{
-        overflowY: "scroll",
-        height: "45vh",
-      }}
-    >
-      <table className="table">
-        <thead>
-          <tr>
-            <th className="description" style={{ width: "10%" }}>
-              S.r
-            </th>
 
-            <th className="description" style={{ width: "25%" }}>
-              Company
-            </th>
-
-            <th style={{ width: "25%" }}>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {items
-            ?.filter((a) => a.company_uuid)
-            .map((item, index) => {
-              return (
-                <tr key={item.company_uuid}>
-                  <td>{index + 1}</td>
-
-                  <td>{item?.company_title}</td>
-
-                  <td>
-                    <button
-                      type="button"
-                      className="noBgActionButton"
-                      style={{
-                        backgroundColor: includesArray?.filter(
-                          (a) => a === item?.company_uuid
-                        )?.length
-                          ? "red"
-                          : "var(--mainColor)",
-                        width: "150px",
-                        fontSize: "large",
-                      }}
-                      onClick={(event) =>
-                        onItemIncludeToggle(
-                          item.company_uuid,
-                          includesArray?.filter((a) => a === item?.company_uuid)
-                            ?.length
-                            ? "remove"
-                            : "add"
-                        )
-                      }
-                    >
-                      {includesArray?.filter((a) => a === item?.company_uuid)
-                        ?.length
-                        ? "Remove"
-                        : "Add"}
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-        </tbody>
-      </table>
-    </div>
-  );
-}
 function CounterTable({ form_uuid, onSave }) {
   const [counter, setCounter] = useState([]);
   const [filterCounterTitle, setFilterCounterTitle] = useState("");

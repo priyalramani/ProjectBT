@@ -46,6 +46,7 @@ const MainAdmin = () => {
   const [btn, setBtn] = useState(false);
   const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
+
   const [selectedOrder, setSelectedOrder] = useState([]);
 
   const [selectedRouteOrder, setSelectedRouteOrder] = useState({});
@@ -63,12 +64,13 @@ const MainAdmin = () => {
   const [holdOrders, setHoldOrders] = useState(false);
   const componentRef = useRef(null);
   const [messagePopup, setMessagePopup] = useState("");
+
   const [company, setCompanies] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [reminderDate, setReminderDate] = useState();
   const [selectedtasks, setSelectedTasks] = useState(false);
   const location = useLocation();
-  const { updateServerPdf } = useContext(context);
+  const { updateServerPdf, setLoading } = useContext(context);
   let user_uuid = localStorage.getItem("user_uuid");
   const selectedOrderGrandTotal = useMemo(
     () =>
@@ -117,6 +119,18 @@ const MainAdmin = () => {
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, [selectedOrder]);
+  const [warehouse, setWarehouse] = useState([]);
+  const getWarehouseDAta = async (controller = new AbortController()) => {
+    const response = await axios({
+      method: "get",
+      url: "/warehouse/GetWarehouseList",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setWarehouse(response.data.result);
+  };
   const getItemCategories = async () => {
     const response = await axios({
       method: "get",
@@ -273,21 +287,10 @@ const MainAdmin = () => {
     const controller = new AbortController();
     if (holdOrders) getRunningHoldOrders();
     else getRunningOrders(controller);
-    if (location.pathname.includes("admin")) {
-      getRoutesData();
-      getTripData(controller);
-    } else if (location.pathname.includes("trip")) {
-      getTripData(controller);
-    }
+
     let intervalOrder = setInterval(() => {
       if (holdOrders) getRunningHoldOrders();
       else getRunningOrders(controller);
-      if (location.pathname.includes("admin")) {
-        getRoutesData();
-        getTripData(controller);
-      } else if (location.pathname.includes("trip")) {
-        getTripData(controller);
-      }
     }, 180000);
     return () => {
       clearInterval(intervalOrder);
@@ -295,6 +298,18 @@ const MainAdmin = () => {
       controller.abort();
     };
   }, [holdOrders, location, popupForm, btn]);
+  useEffect(() => {
+    let controller = new AbortController();
+    if (location.pathname.includes("admin")) {
+      getRoutesData();
+      getTripData(controller);
+    } else if (location.pathname.includes("trip")) {
+      getTripData(controller);
+    }
+    return () => {
+      controller.abort();
+    };
+  }, [location.pathname]);
   const GetPaymentModes = async () => {
     const response = await axios({
       method: "get",
@@ -306,6 +321,7 @@ const MainAdmin = () => {
     });
     if (response.data.success) setPaymentModes(response.data.result);
   };
+
   useEffect(() => {
     const controller = new AbortController();
     getCounter();
@@ -317,6 +333,7 @@ const MainAdmin = () => {
     getCompanies();
     getItemsDataReminder();
     GetPaymentModes();
+    getWarehouseDAta(controller);
     return () => {
       controller.abort();
     };
@@ -333,6 +350,7 @@ const MainAdmin = () => {
     [ordersData, salesPersoneList]
   );
   const getRunningOrders = async (controller = new AbortController()) => {
+    setLoading(true);
     const response = await axios({
       method: "get",
       signal: controller.signal,
@@ -353,6 +371,7 @@ const MainAdmin = () => {
       setNoOrder(true);
       setOrdersData([]);
     }
+    setLoading(false);
   };
   const getRunningHoldOrders = async () => {
     const response = await axios({
@@ -1819,6 +1838,7 @@ const MainAdmin = () => {
           }
           updateChanges={updateWarehouse}
           popupInfo={selectedWarehouseOrder}
+          warehouse={warehouse}
         />
       ) : (
         ""
@@ -1842,6 +1862,7 @@ const MainAdmin = () => {
             setSelectedOrder([]);
             setSelectedTrip(null);
           }}
+          warehouse={warehouse}
         />
       ) : (
         ""
@@ -1876,6 +1897,31 @@ const MainAdmin = () => {
             else getRunningOrders();
           }}
           order_uuid={popupOrder.order_uuid}
+          items={items}
+          counter={counter}
+          paymentModeData={paymentModes}
+          itemCategories={category}
+          trips={tripData}
+          userData={users}
+          orderJson={{
+            ...popupOrder,
+            item_details: popupOrder?.item_details
+              ?.map((a) => ({
+                ...a,
+                category_title: category.find(
+                  (b) =>
+                    b.category_uuid ===
+                    items.find((b) => b.item_uuid === a.item_uuid).category_uuid
+                )?.category_title,
+              }))
+              .sort(
+                (a, b) =>
+                  a?.category_title?.localeCompare(b.category_title) ||
+                  a?.item_title?.localeCompare(b.item_title)
+              ),
+          }}
+          warehouseData={warehouse}
+          reminder={reminderDate}
         />
       ) : (
         ""
@@ -1996,22 +2042,13 @@ function NewUserForm({
   selectedTrip,
   trips,
   onClose,
+  warehouse,
 }) {
   const [data, setdata] = useState("");
   const [errMassage, setErrorMassage] = useState("");
-  const [warehouse, setWarehouse] = useState([]);
-  const [edit, setEdit] = useState(true);
-  const getItemsData = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/warehouse/GetWarehouseList",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setWarehouse(response.data.result);
-  };
+  const [edit, setEdit] = useState(true);
+
   useEffect(() => {
     if (popupInfo?.type === "edit")
       setSelectedTrip({ trip_uuid: "0", warehouse_uuid: "" });
@@ -2022,7 +2059,6 @@ function NewUserForm({
       });
       setEdit(warehouse_uuid ? false : true);
     }
-    getItemsData();
   }, [popupInfo?.type]);
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -3798,24 +3834,16 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
     </div>
   );
 }
-function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
+function WarehouseUpdatePopup({
+  popupInfo,
+  updateChanges,
+  onClose,
+  warehouse,
+}) {
   const [data, setdata] = useState("");
 
-  const [warehouse, setWarehouse] = useState([]);
-  const getItemsData = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/warehouse/GetWarehouseList",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setWarehouse(response.data.result);
-  };
   useEffect(() => {
     setdata(popupInfo.warehouse_uuid);
-    getItemsData();
   }, [popupInfo]);
   const submitHandler = async (e) => {
     e.preventDefault();

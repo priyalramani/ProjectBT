@@ -606,7 +606,7 @@ function DiliveryPopup({
   const getTripData = async (trip_uuid) => {
     const response = await axios({
       method: "post",
-      url: "/trips/GetTrip",
+      url: "/trips/GetTripData",
       data: { params: ["users"], trips: [trip_uuid].filter((a) => a) },
       headers: {
         "Content-Type": "application/json",
@@ -850,9 +850,11 @@ function DiliveryPopup({
                         onChange={(e) => setDiliveredUser(e.target.value)}
                       >
                         <option value="">None</option>
-                        {users.map((a) => (
-                          <option value={a.user_uuid}>{a.user_title}</option>
-                        ))}
+                        {users
+                          .filter((a) => a.status)
+                          .map((a) => (
+                            <option value={a.user_uuid}>{a.user_title}</option>
+                          ))}
                       </select>
                       {/* {popupInfo.conversion || 0} */}
                     </label>

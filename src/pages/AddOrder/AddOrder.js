@@ -27,16 +27,19 @@ let inititals = {
   counter_uuid: "",
 
   item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
+  warehouse_uuid: localStorage.getItem("warehouse")
+    ? JSON.parse(localStorage.getItem("warehouse"))
+    : "",
 };
 export default function AddOrder() {
   const [order, setOrder] = useState(inititals);
   const [deliveryPopup, setDeliveryPopup] = useState(false);
+  const [disable, setDisabled] = useState(false);
   const [counters, setCounters] = useState([]);
   const [counterFilter] = useState("");
   const [holdPopup, setHoldPopup] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
   const [user_warehouse, setUser_warehouse] = useState([]);
-
   // const selectRef = useRef();
   const [itemsData, setItemsData] = useState([]);
   const [qty_details, setQtyDetails] = useState(false);
@@ -320,7 +323,7 @@ export default function AddOrder() {
   //console.log(order)
   const { getRemainingTime, getLastActiveTime } = useIdleTimer({
     timeout: 1000 * 5,
-    onIdle: callBilling,
+    onIdle:!disable? callBilling:()=>{},
     debounce: 500,
   });
 
@@ -368,7 +371,7 @@ export default function AddOrder() {
       );
     }
   };
-
+console.log(disable)
   let listItemIndexCount = 0;
 
   return (
@@ -482,7 +485,10 @@ export default function AddOrder() {
               </div>
             </div>
 
-            <div className="items_table" style={{ flex: "1", height: "auto" }}>
+            <div
+              className="items_table"
+              style={{ flex: "1", height: "75vh", overflow: "scroll" }}
+            >
               <table className="f6 w-100 center" cellSpacing="0">
                 <thead className="lh-copy" style={{ position: "static" }}>
                   <tr className="white">
@@ -512,11 +518,13 @@ export default function AddOrder() {
                               ref={(ref) =>
                                 (reactInputsRef.current[item.uuid] = ref)
                               }
+                              onFocus={()=>setDisabled(true)}
+                              onBlur={()=>setDisabled(false)}
                               id={"item_uuid" + item.uuid}
                               options={itemsData
                                 .filter(
                                   (a) =>
-                                    !order.item_details.filter(
+                                    !order?.item_details.filter(
                                       (b) => a.item_uuid === b.item_uuid
                                     ).length && a.status !== 0
                                 )
@@ -539,7 +547,7 @@ export default function AddOrder() {
                                 }))}
                               styles={{
                                 option: (a, b) => {
-                                  console.log(a, b);
+                      
                                   return {
                                     ...a,
                                     color:

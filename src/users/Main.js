@@ -88,7 +88,7 @@ const Main = () => {
   return (
     <>
       <PullToRefresh onRefresh={() => window.location.reload(true)}>
-        <div className="servicePage" style={{ maxHeight: "100vh" }}>
+        <div className="servicePage" style={{ maxHeight: "100vh",minHeight: "-webkit-fill-available", }}>
           <button
             className="time-icon"
             type="button"
@@ -146,7 +146,15 @@ const Main = () => {
         }
         //  className={`sidebar ${isSideMenuOpen ? "sideopen" : ""}`}
       >
-        <div className="sidebarContainer" style={{ height: "100vh",width:"100vw",maxWidth:"500px" }}>
+        <div
+          className="sidebarContainer"
+          style={{
+            height: "100vh",
+            width: "100vw",
+            maxWidth: "500px",
+            minHeight: "-webkit-fill-available",
+          }}
+        >
           <button
             className="time-icon"
             type="button"

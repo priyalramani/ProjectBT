@@ -62,7 +62,7 @@ import OrderForms from "./pages/Reports/OrderForms";
 import LinkedCounter from "./users/LinkedCounter";
 import OrderPdf from "./components/OrderPdf";
 import MobileLayout from "./components/MobileLayout";
-export let Version = 82;
+export let Version = 94;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 function App() {
@@ -364,7 +364,7 @@ function App() {
             width: "30px",
             height: "30px",
             position: "fixed",
-            bottom: "10px",
+            bottom: "30px",
             left: "10px",
             zIndex: "999999999",
           }}
@@ -386,9 +386,9 @@ function App() {
             </path>
           </svg>
         </div>
-      ) : (
+       ) : (
         ""
-      )}
+      )} 
       {notification ? (
         <div
           className={`notification-container ${
