@@ -1023,7 +1023,7 @@ function FlushPopup({ onSave, warehouseData }) {
     setdata(duplicateRemoved);
   };
   return (
-    <div className="overlay">
+    <div className="overlay" style={{zIndex:"9"}}>
       <div
         className="modal"
         style={{
