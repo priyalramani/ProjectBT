@@ -33,7 +33,10 @@ const LoginPage = ({ setUserType }) => {
         localStorage.setItem("user_title", data.user_title);
         localStorage.setItem("user_role", JSON.stringify(data.user_role || []));
         localStorage.setItem("user_mobile", data.user_mobile);
-        localStorage.setItem("warehouse", JSON.stringify(data.warehouse[0]));
+        localStorage.setItem(
+          "warehouse",
+          data.warehouse?.length ? JSON.stringify(data.warehouse[0]) : ""
+        );
 
         sessionStorage.setItem("userType", response.data.result.user_type);
         if (+data.user_type === 0) {
@@ -107,7 +110,6 @@ const LoginPage = ({ setUserType }) => {
           }
         }
       } else {
-
         setNotification(response.data);
         setTimeout(() => {
           setNotification(null);

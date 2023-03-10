@@ -23,12 +23,13 @@ const CovertedQty = (qty, conversion) => {
   return b + ":" + p;
 };
 
+
 let inititals = {
   counter_uuid: "",
 
   item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
   warehouse_uuid: localStorage.getItem("warehouse")
-    ? JSON.parse(localStorage.getItem("warehouse"))
+    ? JSON.parse(localStorage.getItem("warehouse"))||""
     : "",
 };
 export default function AddOrder() {

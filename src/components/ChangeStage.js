@@ -160,7 +160,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
     let data = [];
 
     for (let orderData of orders) {
-      let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"));
+      let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse")||"");
 
       if (
         warehouse_uuid &&

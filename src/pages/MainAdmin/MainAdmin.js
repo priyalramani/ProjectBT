@@ -219,7 +219,7 @@ const MainAdmin = () => {
     let data = [];
 
     for (let orderData of selectedOrder) {
-      let warehouse_uuid = localStorage.getItem("warehouse");
+      let warehouse_uuid = localStorage.getItem("warehouse")||"";
       warehouse_uuid = JSON.parse(warehouse_uuid);
 
       if (
@@ -2053,7 +2053,7 @@ function NewUserForm({
     if (popupInfo?.type === "edit")
       setSelectedTrip({ trip_uuid: "0", warehouse_uuid: "" });
     else {
-      let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse"));
+      let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse")||"");
       setdata({
         warehouse_uuid,
       });
@@ -2137,7 +2137,7 @@ function NewUserForm({
                                 localStorage.getItem("warehouse")
                               ) === 1 ||
                                 JSON.parse(
-                                  localStorage.getItem("warehouse")
+                                  localStorage.getItem("warehouse")||""
                                 ) === a.warehouse_uuid)
                           )
                           .map((a) => (

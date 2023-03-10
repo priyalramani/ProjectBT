@@ -749,7 +749,7 @@ export function OrderDetails({
   const handleWarehouseChacking = async (complete, methodType) => {
     let warehouse_uuid =
       users.find((a) => a.user_uuid === localStorage.getItem("user_uuid"))
-        ?.warehouse[0] || JSON.parse(localStorage.getItem("warehouse"));
+        ?.warehouse[0] || JSON.parse(localStorage.getItem("warehouse")||"");
     if (methodType === "complete") {
       setComplete(true);
     }
@@ -3780,9 +3780,9 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
                           (a) =>
                             a.trip_uuid &&
                             a.status &&
-                            (+JSON.parse(localStorage.getItem("warehouse")) ===
+                            (+JSON.parse(localStorage.getItem("warehouse")||"") ===
                               1 ||
-                              JSON.parse(localStorage.getItem("warehouse")) ===
+                              JSON.parse(localStorage.getItem("warehouse")||"") ===
                                 a.warehouse_uuid)
                         )
                         ?.map((a) => (
