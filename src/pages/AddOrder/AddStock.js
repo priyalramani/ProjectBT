@@ -375,7 +375,10 @@ export default function AddStock() {
               )}
             </div>
 
-            <div className="items_table" style={{ flex: "1", height: "auto" }}>
+            <div
+              className="items_table"
+              style={{ flex: "1", height: "75vh", overflow: "scroll" }}
+            >
               <table className="f6 w-100 center" cellSpacing="0">
                 <thead className="lh-copy" style={{ position: "static" }}>
                   <tr className="white">

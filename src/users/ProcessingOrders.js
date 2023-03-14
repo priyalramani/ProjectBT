@@ -1219,73 +1219,6 @@ const ProcessingOrders = () => {
                               : "#000"
                             : "#000",
                         }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (Location.pathname.includes("checking")) {
-                            setTempQuantity(
-                              tempQuantity?.filter(
-                                (a) => a.item_uuid === item.item_uuid
-                              )?.length
-                                ? tempQuantity?.map((a) =>
-                                    a.item_uuid === item.item_uuid
-                                      ? {
-                                          ...a,
-                                          b:
-                                            +(a.b || 0) +
-                                            parseInt(
-                                              (+a?.one_pack || 1) /
-                                                +a.conversion
-                                            ),
-
-                                          p:
-                                            ((a?.p || 0) +
-                                              (+a?.one_pack || 1)) %
-                                            +a.conversion,
-                                        }
-                                      : a
-                                  )
-                                : tempQuantity?.length
-                                ? [
-                                    ...tempQuantity,
-                                    ...items
-                                      ?.filter(
-                                        (a) => a.item_uuid === item.item_uuid
-                                      )
-                                      .map((a) => ({
-                                        ...a,
-                                        b:
-                                          +(a.b || 0) +
-                                          parseInt(
-                                            ((a?.p || 0) +
-                                              (+a?.one_pack || 1)) /
-                                              +a.conversion
-                                          ),
-
-                                        p:
-                                          ((a?.p || 0) + (+a?.one_pack || 1)) %
-                                          +a.conversion,
-                                      })),
-                                  ]
-                                : items
-                                    ?.filter(
-                                      (a) => a.item_uuid === item.item_uuid
-                                    )
-                                    .map((a) => ({
-                                      ...a,
-                                      b: Math.floor(
-                                        (+a.b || 0) +
-                                          +(
-                                            (+a?.p || 0) + (+a?.one_pack || 1)
-                                          ) /
-                                            +a.conversion
-                                      ),
-                                      p:
-                                        ((+a?.p || 0) + (+a?.one_pack || 1)) %
-                                        +a.conversion,
-                                    }))
-                            );
-                          }
-                        }}
                       >
                         {selectedOrder &&
                         !(
@@ -1348,8 +1281,81 @@ const ProcessingOrders = () => {
                           colSpan={2}
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (Location.pathname.includes("processing"))
+                            if (Location.pathname.includes("processing")) {
                               setMinMaxPopup(item);
+                            } else if (Location.pathname.includes("checking")) {
+                              setTempQuantity(
+                                tempQuantity?.filter(
+                                  (a) => a.item_uuid === item.item_uuid
+                                )?.length
+                                  ? tempQuantity?.map((a) => {
+                                      if (a.item_uuid === item.item_uuid) {
+                                        return {
+                                          ...a,
+                                          b:
+                                            +(item.b || 0) +
+                                            parseInt(
+                                              (+a?.one_pack || 1) /
+                                                +a.conversion
+                                            ),
+
+                                          p:
+                                            ((item?.p || 0) +
+                                              (+a?.one_pack || 1)) %
+                                            +a.conversion,
+                                        };
+                                      } else {
+                                        return a;
+                                      }
+                                    })
+                                  : tempQuantity?.length
+                                  ? [
+                                      ...tempQuantity,
+                                      ...items
+                                        ?.filter(
+                                          (a) => a.item_uuid === item.item_uuid
+                                        )
+                                        .map((a) => {
+                                          return {
+                                            ...a,
+                                            b:
+                                              +(a.b || 0) +
+                                              parseInt(
+                                                ((item?.p || 0) +
+                                                  (+a?.one_pack || 1)) /
+                                                  +a.conversion
+                                              ),
+
+                                            p:
+                                              ((item?.p || 0) +
+                                                (+a?.one_pack || 1)) %
+                                              +a.conversion,
+                                          };
+                                        }),
+                                    ]
+                                  : items
+                                      ?.filter(
+                                        (a) => a.item_uuid === item.item_uuid
+                                      )
+                                      .map((a) => {
+                                        return {
+                                          ...a,
+                                          b: Math.floor(
+                                            (+item.b || 0) +
+                                              +(
+                                                (+item?.p || 0) +
+                                                (+a?.one_pack || 1)
+                                              ) /
+                                                +a.conversion
+                                          ),
+                                          p:
+                                            ((+item?.p || 0) +
+                                              (+a?.one_pack || 1)) %
+                                            +a.conversion,
+                                        };
+                                      })
+                              );
+                            }
                           }}
                         >
                           {
@@ -2947,10 +2953,7 @@ function DiliveryPopup({
       replacement_mrp: data.mrp,
     };
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
-    console.log(
-      Tempdata?.order_grandtotal,
-      +(+modeTotal + (+outstanding?.amount || 0))
-    );
+
     if (
       +Tempdata?.order_grandtotal !==
       +(+modeTotal + (+outstanding?.amount || 0))

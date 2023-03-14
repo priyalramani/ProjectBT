@@ -371,7 +371,7 @@ export const Billing = async ({
     newPriceItems.push(item);
   }
   //console.log("newItemPrice", newPriceItems);
-  let order_grandtotal = Math.floor(
+  let order_grandtotal = Math.round(
     newPriceItems.length > 1
       ? newPriceItems.map((a) => +a.item_total || 0).reduce((a, b) => a + b) -
           replacement -
