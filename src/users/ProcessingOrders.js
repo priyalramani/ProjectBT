@@ -1293,14 +1293,14 @@ const ProcessingOrders = () => {
                                         return {
                                           ...a,
                                           b:
-                                            +(item.b || 0) +
+                                            +(a.b || 0) +
                                             parseInt(
                                               (+a?.one_pack || 1) /
                                                 +a.conversion
                                             ),
 
                                           p:
-                                            ((item?.p || 0) +
+                                            ((a?.p || 0) +
                                               (+a?.one_pack || 1)) %
                                             +a.conversion,
                                         };
@@ -1321,13 +1321,13 @@ const ProcessingOrders = () => {
                                             b:
                                               +(a.b || 0) +
                                               parseInt(
-                                                ((item?.p || 0) +
+                                                ((a?.p || 0) +
                                                   (+a?.one_pack || 1)) /
                                                   +a.conversion
                                               ),
 
                                             p:
-                                              ((item?.p || 0) +
+                                              ((a?.p || 0) +
                                                 (+a?.one_pack || 1)) %
                                               +a.conversion,
                                           };
@@ -1341,15 +1341,15 @@ const ProcessingOrders = () => {
                                         return {
                                           ...a,
                                           b: Math.floor(
-                                            (+item.b || 0) +
+                                            (+a.b || 0) +
                                               +(
-                                                (+item?.p || 0) +
+                                                (+a?.p || 0) +
                                                 (+a?.one_pack || 1)
                                               ) /
                                                 +a.conversion
                                           ),
                                           p:
-                                            ((+item?.p || 0) +
+                                            ((+a?.p || 0) +
                                               (+a?.one_pack || 1)) %
                                             +a.conversion,
                                         };
