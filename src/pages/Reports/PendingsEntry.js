@@ -89,7 +89,7 @@ const PendingsEntry = () => {
     for (let order of selectedOrders?.sort(
       (a, b) => +a.invoice_number - +b.invoice_number
     )) {
-      console.log(order);
+      // console.log(order);
       for (let item of order?.item_details?.filter(
         (a) => a.status !== 3 && (a.b || a.p || a.free)
       )) {
@@ -135,7 +135,7 @@ const PendingsEntry = () => {
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const data = new Blob([excelBuffer], { type: fileType });
     FileSaver.saveAs(data, "Book" + fileExtension);
-    // setSelectedOrders([]);
+    setSelectedOrders([]);
   };
   const recipts = useMemo(
     () =>
