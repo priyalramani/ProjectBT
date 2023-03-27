@@ -2506,12 +2506,12 @@ tr:nth-child(4) {
   align-items: center;
   justify-content: center;
   position: absolute;
-  left: -100px;
+  /* left: -100px; */
   top: 0;
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.301);
-  z-index: 90;
+  z-index: 9999999;
 }
 
 .itemavilabelitycontainer {
@@ -2628,6 +2628,7 @@ tr:nth-child(4) {
   flex-direction: column;
   height: 55vh;
   /* overflow: auto; */
+  overflow-y: scroll;
   padding-right: 4px;
   width: 100%;
   background: #fff;

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { ViewGridIcon } from "@heroicons/react/solid";
+import context from "../context/context";
 
 const NavLink = ({
   title,
@@ -8,13 +9,13 @@ const NavLink = ({
   menuList,
   draggable,
   href,
-  setIsItemAvilableOpen,
+  
   setCollectionTags,
   setcalculationPopup
 }) => {
   // console.log(title)
   const [menuVisible, setMenuVisible] = useState(false);
-
+const {setCashRegisterPopup,setIsItemAvilableOpen}=useContext(context)
   return (
     <Link
       to={{ pathname: href }}
@@ -69,7 +70,11 @@ const NavLink = ({
                   className="item"
                   key={Math.random()}
                   onClick={() => {
-                    if (menu.name === "Trips") {
+                    if (menu.name === "Cash Register") {
+                      
+                      setCashRegisterPopup(true);
+                    }
+                    else if (menu.name === "Trips") {
                       setIsItemAvilableOpen((prev) => !prev);
                     }else if (menu.name === "Calculate Lines") {
                       setcalculationPopup((prev) => !prev);

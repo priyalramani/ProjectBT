@@ -25,12 +25,12 @@ const Campaigns = () => {
         <div id="heading">
           <h2 style={{ width: "100%" }}>Campaigns</h2>
         </div>
-        <Incetives />
+        <CampaignBody />
       </div>
     </>
   );
 };
-const Incetives = () => {
+const CampaignBody = () => {
   const [popupForm, setPopupForm] = useState(false);
   const [popupOrderForm, setPopupOrderForm] = useState(false);
   const [itemsData, setItemsData] = useState([]);
@@ -115,7 +115,7 @@ const Incetives = () => {
       </div>
 
       {popupForm ? (
-        <IncentivePopup
+        <AddIncentives
           onSave={() => setPopupForm(false)}
           popupForm={popupForm}
         />
@@ -312,7 +312,7 @@ function Table({
   );
 }
 
-function IncentivePopup({ onSave, popupForm }) {
+function AddIncentives({ onSave, popupForm }) {
   const [objData, setObgData] = useState({
     type: "general",
     message: [],

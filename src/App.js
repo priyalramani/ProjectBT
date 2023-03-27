@@ -62,7 +62,9 @@ import OrderForms from "./pages/Reports/OrderForms";
 import LinkedCounter from "./users/LinkedCounter";
 import OrderPdf from "./components/OrderPdf";
 import MobileLayout from "./components/MobileLayout";
-export let Version = 98;
+import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility";
+import CashRegister from "./pages/QuikAccess/CashRegister";
+export let Version = 99;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 function App() {
@@ -74,6 +76,8 @@ function App() {
     loading,
     notification,
     setNotification,
+    isItemAvilableOpen,
+    cashRegisterPopup
   } = context;
 
   axios.defaults.baseURL = server;
@@ -116,6 +120,7 @@ function App() {
 
   document.title = "BT";
   console.log(notification);
+  
   return (
     <div className="App">
       <Router>
@@ -400,6 +405,16 @@ function App() {
       ) : (
         ""
       )}
+      {isItemAvilableOpen && (
+            <ItemAvilibility
+           
+            />
+          )}
+      {cashRegisterPopup && (
+            <CashRegister
+           
+            />
+          )}
       {/* {window.location.pathname.split('/').at(-2) === 'processing' && <div id="console">
         <h3>CONSOLE <button onClick={e => window.location.reload()}>Reload</button></h3>
       </div>} */}

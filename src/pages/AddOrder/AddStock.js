@@ -45,11 +45,11 @@ export default function AddStock() {
   const [focusedInputId, setFocusedInputId] = useState(0);
   const [suggestionPopup, setSuggestionPopup] = useState(false);
   const componentRef = useRef(null);
-  const getItemCategories = async () => {
+  const getItemCategories = async (controller= new AbortController()) => {
     const response = await axios({
       method: "get",
       url: "/itemCategories/GetItemCategoryList",
-
+signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
@@ -126,11 +126,11 @@ export default function AddStock() {
     removeAfterPrint: true,
     onAfterPrint: () => setOrder(initials),
   });
-  const getItemsData = async () => {
+  const getItemsData = async (controller= new AbortController()) => {
     const response = await axios({
       method: "get",
       url: "/items/GetItemStockList/" + order.from_warehouse,
-
+signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
@@ -147,11 +147,11 @@ export default function AddStock() {
     var strTime = hours + ":" + minutes + " " + ampm;
     return strTime;
   }
-  const GetWarehouseList = async () => {
+  const GetWarehouseList = async (controller=new AbortController()) => {
     const response = await axios({
       method: "get",
       url: "/warehouse/GetWarehouseList",
-
+signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
@@ -161,13 +161,21 @@ export default function AddStock() {
   };
 
   useEffect(() => {
-    GetWarehouseList();
-    getItemsData();
-    getItemCategories();
+    const controller = new AbortController();
+    GetWarehouseList(controller);
+   
+    getItemCategories(controller);
     // escFunction({ key: "Enter" });
+    return () => {
+      controller.abort();
+    };
   }, []);
   useEffect(() => {
-    getItemsData();
+    const controller = new AbortController();
+    getItemsData(controller);
+    return () => {
+      controller.abort();
+    };
   }, [order.from_warehouse]);
 
   useEffect(() => {

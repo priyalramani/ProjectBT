@@ -13,9 +13,10 @@ import TripPage from "../../components/TripPage";
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import Select from "react-select";
 import context from "../../context/context";
-import { useLocation } from "react-router-dom";
-export default function ItemAvilibility() {
+
+export default function CashRegister() {
   const [itemsData, setItemsData] = useState([]);
+  const [popupForm, setPopupForm] = useState(false);
   const [popup, setPopup] = useState(null);
   const [users, setUsers] = useState([]);
   const [btn, setBtn] = useState(false);
@@ -30,8 +31,8 @@ export default function ItemAvilibility() {
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, []);
-  const { setIsItemAvilableOpen, isItemAvilableOpen } = useContext(context);
-  
+  const { setCashRegisterPopup, setNotification } = useContext(context);
+
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
     documentTitle: "Statement",
@@ -62,36 +63,36 @@ export default function ItemAvilibility() {
     if (response.data.success)
       setUsers(
         response.data.result
-          .filter((a) => a.status && +a.user_type)
+          .filter((a) => a.status)
           .sort((a, b) => a.user_title?.localeCompare(b.user_title))
       );
   };
   const getTripData = async () => {
     const response = await axios({
       method: "get",
-      url: "/trips/GetTripListSummary/" + localStorage.getItem("user_uuid"),
+      url: "/cashRegistrations/GetAllActiveCashRegistrations",
 
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.success) {
-      setItemsData(
-        response.data.result
-          .filter((a) => a.status)
-          .map((b) => ({
-            ...b,
-
-            users_name:
-              b?.users?.map((a) => {
-                let data = users.find((c) => a === c.user_uuid)?.user_title;
-                console.log(a);
-                return data;
-              }) || [],
-          }))
-      );
+      setItemsData(response.data.result);
+    } else {
+      setItemsData([]);
     }
   };
+  const filterCashRegister = useMemo(() => {
+    return itemsData
+      .map((b) => ({
+        ...b,
+
+        user_title: users.find((c) => b.created_by === c.user_uuid)?.user_title,
+      }))
+      .filter((a) =>
+        a.user_title?.toLowerCase().includes(itemFilter.toLowerCase())
+      );
+  }, [itemFilter, itemsData, users]);
   const getTripDetails = async () => {
     const response = await axios({
       method: "get",
@@ -119,44 +120,43 @@ export default function ItemAvilibility() {
   useEffect(() => {
     getUsers();
   }, []);
-  const completeFunction = async (data) => {
-    const response = await axios({
-      method: "put",
-      url: "/trips/putTrip",
-      data,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) {
-      setBtn((prev) => !prev);
-    }
-  };
-  console.log(statementTrip);
+
   return (
     <>
-      <div className="itemavilablelity" >
+      <div className="itemavilablelity">
         <div
           className="itemavilabelitycontainer"
           style={{ position: "relative" }}
         >
           <div className="itemavilablelity_header">
-            <h2>Trips</h2>
+            <h2>Cash Registrations</h2>
           </div>
 
           <div className="availablecontainer">
             <div className="itemavilablelitybox">
-              <input
-                className="numberInput"
-                type="text"
-                name="item_filter"
-                value={itemFilter}
-                onChange={(e) => {
-                  setItemFilter(e.target.value);
-                }}
-                placeholder="Items Filter"
-                style={{ width: "200px", margin: "10px 0" }}
-              />
+              <div
+                className="flex"
+                style={{ justifyContent: "space-between", width: "50%" }}
+              >
+                <input
+                  className="numberInput"
+                  type="text"
+                  name="item_filter"
+                  value={itemFilter}
+                  onChange={(e) => {
+                    setItemFilter(e.target.value);
+                  }}
+                  placeholder="Items Register"
+                  style={{ width: "300px", margin: "10px 0" }}
+                />
+                <button
+                  className="item-sales-search"
+                  onClick={() => setPopupForm(true)}
+                >
+                  Add Register
+                </button>
+              </div>
+
               <div className="items_table">
                 <table className="f6 w-100 center" cellSpacing="0">
                   <thead className="lh-copy">
@@ -167,12 +167,7 @@ export default function ItemAvilibility() {
                       >
                         Created At
                       </th>
-                      <th
-                        className="pa3 bb b--black-20 "
-                        style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
-                      >
-                        Title
-                      </th>
+
                       <th
                         className="pa3 bb b--black-20 "
                         style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
@@ -183,14 +178,9 @@ export default function ItemAvilibility() {
                         className="pa3 bb b--black-20 "
                         style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
                       >
-                        Warehouse
+                        Balance
                       </th>
-                      <th
-                        className="pa3 bb b--black-20 "
-                        style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
-                      >
-                        Order
-                      </th>
+
                       <th
                         className="pa3 bb b--black-20 "
                         style={{ borderBottom: "2px solid rgb(189, 189, 189)" }}
@@ -200,16 +190,8 @@ export default function ItemAvilibility() {
                     </tr>
                   </thead>
                   <tbody className="lh-copy">
-                    {itemsData
+                    {filterCashRegister
                       .sort((a, b) => a.created_at - b.created_at)
-                      .filter(
-                        (a) =>
-                          (itemFilter !== ""
-                            ? a.trip_title
-                                .toLowerCase()
-                                .includes(itemFilter.toLowerCase())
-                            : true) && a.trip_title
-                      )
                       .map((item, index) => (
                         <tr
                           key={index}
@@ -224,34 +206,20 @@ export default function ItemAvilibility() {
                           >
                             {new Date(item.created_at).toDateString()}
                           </td>
+
                           <td
                             className="ph3 bb b--black-20 tc bg-white"
                             style={{ textAlign: "center" }}
                           >
-                            {item.trip_title}
+                            {item?.user_title || ""}
                           </td>
                           <td
                             className="ph3 bb b--black-20 tc bg-white"
                             style={{ textAlign: "center" }}
                           >
-                            {item?.users_name?.length
-                              ? item.users_name.map((a, i) =>
-                                  i === 0 ? a : ", " + a
-                                )
-                              : ""}
+                            {item?.balance || ""}
                           </td>
-                          <td
-                            className="ph3 bb b--black-20 tc bg-white"
-                            style={{ textAlign: "center" }}
-                          >
-                            {item?.warehouse_title || ""}
-                          </td>
-                          <td
-                            className="ph3 bb b--black-20 tc bg-white"
-                            style={{ textAlign: "center" }}
-                          >
-                            {item.orderLength}
-                          </td>
+
                           <td
                             className="ph3 bb b--black-20 tc bg-white"
                             style={{
@@ -288,12 +256,12 @@ export default function ItemAvilibility() {
                                 id="customer-details-dropdown"
                                 className={"page1 flex"}
                                 style={{
-                                  top: "-70px",
+                                  top: "-20px",
                                   flexDirection: "column",
                                   left: "-200px",
                                   zIndex: "200",
                                   width: "200px",
-                                  height: "300px",
+                                  height: "100px",
                                   justifyContent: "space-between",
                                 }}
                                 onMouseLeave={() =>
@@ -310,15 +278,18 @@ export default function ItemAvilibility() {
                                   className="item-sales-search"
                                   style={{
                                     display: "inline",
-                                    cursor: "pointer",
+                                    cursor: item?.orderLength
+                                      ? "not-allowed"
+                                      : "pointer",
                                     width: "100%",
                                   }}
                                   type="button"
                                   onClick={() => {
-                                    setWarehousePopup(item);
+                                    setPopupForm({ ...item, status: 0 });
                                   }}
+                                  disabled={item?.orderLength}
                                 >
-                                  Warehouse
+                                  Complete
                                 </button>
                                 <button
                                   className="item-sales-search"
@@ -331,14 +302,14 @@ export default function ItemAvilibility() {
                                   }}
                                   type="button"
                                   onClick={() => {
-                                    completeFunction({ ...item, status: 0 });
+                                    setPopupForm({ ...item, expense: true });
                                   }}
                                   disabled={item?.orderLength}
                                 >
-                                  Complete
+                                  Expense
                                 </button>
 
-                                <button
+                                {/* <button
                                   className="item-sales-search"
                                   style={{
                                     display: "inline",
@@ -351,48 +322,7 @@ export default function ItemAvilibility() {
                                   }}
                                 >
                                   Statement
-                                </button>
-
-                                <button
-                                  className="item-sales-search"
-                                  style={{
-                                    display: "inline",
-                                    width: "100%",
-                                  }}
-                                  type="button"
-                                  onClick={() => {
-                                    setPopup(item);
-                                  }}
-                                >
-                                  Users
-                                </button>
-
-                                <button
-                                  className="item-sales-search"
-                                  style={{
-                                    display: "inline",
-                                    width: "100%",
-                                  }}
-                                  type="button"
-                                  onClick={() => {
-                                    setDetailsPopup(item.trip_uuid);
-                                  }}
-                                >
-                                  Details
-                                </button>
-                                <button
-                                  className="item-sales-search"
-                                  style={{
-                                    display: "inline",
-                                    width: "100%",
-                                  }}
-                                  type="button"
-                                  onClick={() => {
-                                    setCounterPopup(item.trip_uuid);
-                                  }}
-                                >
-                                  Counters
-                                </button>
+                                </button> */}
                               </div>
                             ) : (
                               ""
@@ -407,7 +337,7 @@ export default function ItemAvilibility() {
           </div>
           <button
             onClick={() => {
-              setIsItemAvilableOpen(false);
+              setCashRegisterPopup(false);
             }}
             className="closeButton"
           >
@@ -416,7 +346,7 @@ export default function ItemAvilibility() {
 
           <div
             onClick={() => {
-              setIsItemAvilableOpen(false);
+              setCashRegisterPopup(false);
             }}
           >
             <button className="savebtn">Done</button>
@@ -428,7 +358,6 @@ export default function ItemAvilibility() {
           onSave={() => setPopup(false)}
           popupInfo={popup}
           users={users}
-          completeFunction={completeFunction}
         />
       ) : (
         ""
@@ -492,6 +421,20 @@ export default function ItemAvilibility() {
         <CounterTable
           onSave={() => setCounterPopup(false)}
           trip_uuid={counterPopup}
+        />
+      ) : (
+        ""
+      )}
+      {popupForm ? (
+        <NewRegisterForm
+          onSave={() => {
+            setPopupForm(false);
+            getTripData();
+          }}
+          setItemsData={setItemsData}
+          popupInfo={popupForm}
+          items={itemsData}
+          setNotification={setNotification}
         />
       ) : (
         ""
@@ -1056,6 +999,138 @@ function CounterTable({ trip_uuid, onSave }) {
 
               <button type="submit" className="submit">
                 Save changes
+              </button>
+            </form>
+          </div>
+
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function NewRegisterForm({
+  onSave,
+  popupInfo,
+
+  setNotification,
+}) {
+  const [data, setData] = useState({ amt: 0, title: "" });
+
+  const submitHandler = async (e) => {
+    let obj = { created_by: localStorage.getItem("user_uuid") };
+    e.preventDefault();
+
+    if (popupInfo?.expense) {
+      obj = { register_uuid: popupInfo.register_uuid, ...data };
+      const response = await axios({
+        method: "put",
+        url: "/cashRegistrations/PutExpenseCashRegister",
+        data: obj,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        onSave();
+      }
+    } else if (popupInfo?.register_uuid) {
+      obj = { register_uuid: popupInfo.register_uuid, status: 0 };
+      const response = await axios({
+        method: "put",
+        url: "/cashRegistrations/PutCashRegister",
+        data: obj,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        onSave();
+      }
+    } else {
+      const response = await axios({
+        method: "post",
+        url: "/cashRegistrations/PostCashRegister",
+        data: obj,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        onSave();
+      } else {
+        setNotification(response.data);
+        setTimeout(() => setNotification(null), 3000);
+      }
+    }
+  };
+  console.log(popupInfo);
+  return (
+    <div className="overlay" style={{ zIndex: 9999999 }}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="row">
+                <h1>
+                  {popupInfo.expense
+                    ? "Expense"
+                    : popupInfo.register_uuid
+                    ? "Complete"
+                    : "Add"}{" "}
+                  Register
+                </h1>
+              </div>
+
+              {popupInfo.expense ? (
+                <div className="row">
+                  <label className="selectLabel">
+                    Title
+                    <input
+                      type="text"
+                      name="one_pack"
+                      className="numberInput"
+                      value={data.title}
+                      onChange={(e) =>
+                        setData((prev) => ({ ...prev, title: e.target.value }))
+                      }
+                    />
+                  </label>
+                  <label className="selectLabel">
+                    Amount
+                    <input
+                      type="number"
+                      name="one_pack"
+                      className="numberInput"
+                      value={data.amt}
+                      onChange={(e) =>
+                        setData((prev) => ({ ...prev, amt: e.target.value }))
+                      }
+                    />
+                  </label>
+                </div>
+              ) : (
+                ""
+              )}
+
+              <button type="submit" className="submit">
+                {popupInfo.expense
+                  ? "Save"
+                  : popupInfo.register_uuid
+                  ? "Complete"
+                  : " Save"}
               </button>
             </form>
           </div>

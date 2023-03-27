@@ -52,7 +52,7 @@ let titleData = [
   { value: "items", name: "Items" },
   { value: "admin", name: "DASHBOARD - Route" },
 ];
-const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
+const Sidebar = ({ setCollectionTags }) => {
   const [loading, setLoading] = useState(false);
   const {  setcalculationPopup } = useContext(context);
 
@@ -151,12 +151,16 @@ const Sidebar = ({ setIsItemAvilableOpen,setCollectionTags }) => {
         />
 
         <NavLink
-          setIsItemAvilableOpen={setIsItemAvilableOpen}
+       
           title={"Quick Access"}
           setCollectionTags={setCollectionTags}
           icon={<QuickAccessIcon sx={{ fontSize: 50 }} />}
           isActive={false}
           menuList={[
+            {
+              name: "Cash Register",
+              link: "#",
+            },
             {
               name: "Trips",
               link: "#",

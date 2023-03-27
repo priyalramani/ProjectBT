@@ -2738,6 +2738,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
       p: popupInfo?.checkP || 0,
     });
   }, []);
+
   const submitHandler = async (e) => {
     e.preventDefault();
     setTempQuantity((prev) =>
@@ -3688,8 +3689,8 @@ function NewUserForm({
                     ...a,
                     b:
                       +(+data.b || 0) +
-                      parseInt((+data.p || 1) / +a.conversion),
-                    p: parseInt((+data.p || 1) % +a.conversion),
+                      parseInt((+data.p || 0) / +a.conversion),
+                    p: parseInt((+data.p || 0) % +a.conversion),
                   }
                 : a
             )
@@ -3700,8 +3701,8 @@ function NewUserForm({
                 ?.filter((a) => a.item_uuid === popupInfo.item_uuid)
                 .map((a) => ({
                   ...a,
-                  b: +(+data.b || 0) + parseInt((+data.p || 1) / +a.conversion),
-                  p: parseInt((+data.p || 1) % +a.conversion),
+                  b: +(+data.b || 0) + parseInt((+data.p || 0) / +a.conversion),
+                  p: parseInt((+data.p || 0) % +a.conversion),
                 })),
             ]
           : items
@@ -3710,8 +3711,8 @@ function NewUserForm({
                 ...a,
                 b:
                   +(+data.b || 0) +
-                  +Math.floor(parseInt((+data.p || 1) / +a.conversion)),
-                p: parseInt((+data.p || 1) % +a.conversion),
+                  +Math.floor(parseInt((+data.p || 0) / +a.conversion)),
+                p: parseInt((+data.p || 0) % +a.conversion),
               }))
       );
       onClose();
@@ -3849,7 +3850,7 @@ function NewUserForm({
       onSave(orderData);
     }
   };
-
+  console.log(data)
   return (
     <div className="overlay">
       <div

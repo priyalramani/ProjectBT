@@ -6,6 +6,8 @@ import axios from "axios";
 
 const State = (props) => {
   const [calculationPopup, setcalculationPopup] = useState(null);
+  const [cashRegisterPopup, setCashRegisterPopup] = useState(null);
+  const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(null);
   const CalculateLines = async (days, type) => {
@@ -36,7 +38,12 @@ const State = (props) => {
         notification,
         setNotification,
         updateServerPdf,
+        cashRegisterPopup,
+        setCashRegisterPopup,
+        isItemAvilableOpen,
+        setIsItemAvilableOpen
       }}
+
     >
       {props.children}
     </Context.Provider>

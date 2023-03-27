@@ -31,7 +31,7 @@ import CollectionTag from "../QuikAccess/CollectionTag";
 import { useLocation } from "react-router-dom";
 import context from "../../context/context";
 const MainAdmin = () => {
-  const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
+
   const [isCollectionTags, setCollectionTags] = useState(false);
   const [popupForm, setPopupForm] = useState(false);
   const [noOrder, setNoOrder] = useState(false);
@@ -627,7 +627,7 @@ const MainAdmin = () => {
         {selectedOrderGrandTotal}
       </div>
       <Sidebar
-        setIsItemAvilableOpen={setIsItemAvilableOpen}
+  
         setCollectionTags={setCollectionTags}
       />
       <div
@@ -1736,12 +1736,7 @@ const MainAdmin = () => {
               />
             </div>
           </div>
-          {isItemAvilableOpen && (
-            <ItemAvilibility
-              isItemAvilableOpen={isItemAvilableOpen}
-              setIsItemAvilableOpen={setIsItemAvilableOpen}
-            />
-          )}
+          
           {isCollectionTags && (
             <CollectionTag
               isItemAvilableOpen={isCollectionTags}
