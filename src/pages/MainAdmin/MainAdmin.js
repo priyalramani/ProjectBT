@@ -272,7 +272,7 @@ const MainAdmin = () => {
 		else getRunningOrders(controller)
 
 		let intervalOrder = setInterval(() => {
-			if (+sessionStorage.getItem("PREVENT_AUTO_REFRESH") === 1) return alert("REFRESH PREVENTED")
+			if (+sessionStorage.getItem("PREVENT_AUTO_REFRESH") === 1) return
 			if (holdOrders) getRunningHoldOrders()
 			else getRunningOrders(controller)
 		}, 180000)
