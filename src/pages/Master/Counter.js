@@ -736,25 +736,45 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 			controller.abort()
 		}
 	}, [])
+
+	const sortCounterGroups = (i, _data) =>
+		i
+			.filter(_i => !_i?.counter_group_title)
+			.concat(
+				i
+					.filter(
+						_i =>
+							_i?.counter_group_title &&
+							(_data?.counter_group_uuid || [])?.indexOf(_i?.counter_group_uuid) !== -1
+					)
+					.sort((a, b) => a?.counter_group_title?.localeCompare(b?.counter_group_title))
+					.concat(
+						i
+							.filter(
+								_i =>
+									_i?.counter_group_title &&
+									(_data?.counter_group_uuid || [])?.indexOf(_i?.counter_group_uuid) === -1
+							)
+							.sort((a, b) => a?.counter_group_title?.localeCompare(b?.counter_group_title))
+					)
+			)
+
 	const getCounterGroup = async () => {
 		const response = await axios({
 			method: "get",
 			url: "/counterGroup/GetCounterGroupList",
-
 			headers: {
 				"Content-Type": "application/json",
 			},
 		})
 		if (response.data.success)
-			setCounterGroup(response.data.result.filter(a => a.counter_group_uuid && a.counter_group_title))
+			return response.data.result.filter(a => a.counter_group_uuid && a.counter_group_title)
 	}
 
 	useEffect(() => {
-		getCounterGroup()
-	}, [])
-	useEffect(() => {
+		let _data
 		if (popupInfo?.type === "edit") {
-			setdata({
+			_data = {
 				...popupInfo.data,
 				mobile: [
 					...(popupInfo?.data?.mobile
@@ -765,9 +785,9 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 						.filter(a => a.mobile) || []),
 					...[1, 2, 3, 4].map(a => ({ uuid: uuid(), mobile: "", type: "" })),
 				].slice(0, 4),
-			})
+			}
 		} else {
-			setdata({
+			_data = {
 				payment_modes: paymentModes
 					.filter(
 						a =>
@@ -782,10 +802,13 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 					mobile: "",
 					type: "",
 				})),
-			})
+			}
 		}
+		const _counters = getCounterGroup()
+		setCounterGroup(sortCounterGroups(_counters, _data))
+		setdata(_data)
 	}, [paymentModes, popupInfo.data, popupInfo?.type])
-	console.log(data)
+
 	const submitHandler = async e => {
 		e?.preventDefault()
 		let json = { ...data, counter_title: data?.counter_title?.trim() }
@@ -849,18 +872,13 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 		}
 	}
 
-	const onChangeGroupHandler = e => {
-		let temp = data.counter_group_uuid || []
-		let options = Array.from(e.target.selectedOptions, option => option.value)
-		for (let i of options) {
-			if (data.counter_group_uuid.filter(a => a === i).length) temp = temp.filter(a => a !== i)
-			else temp = [...temp, i]
-		}
-		// temp = data.filter(a => options.filter(b => b === a.user_uuid).length)
-		console.log(options, temp)
-
-		setdata(prev => ({ ...prev, counter_group_uuid: temp }))
+	const onChangeGroupHandler = id => {
+		let counter_group_uuid = data.counter_group_uuid || []
+		if (counter_group_uuid?.includes(id)) counter_group_uuid = counter_group_uuid.filter(i => i !== id)
+		else counter_group_uuid = counter_group_uuid.concat([id])
+		setdata(prev => ({ ...prev, counter_group_uuid }))
 	}
+
 	const sendOtp = async mobile => {
 		if (!mobile.mobile) {
 			return
@@ -1213,21 +1231,26 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 										</label>
 										<label className="selectLabel" style={{ width: "50%" }}>
 											Counter Group
-											<select
+											{/* <select
 												className="numberInput"
 												style={{ width: "200px", height: "100px" }}
 												value={data?.counter_group_uuid}
 												onChange={onChangeGroupHandler}
 												multiple>
 												{/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
-												{counterGroup?.map(occ => (
+											{/* {counterGroup?.map(occ => (
 													<option
 														value={occ.counter_group_uuid}
 														style={{ marginBottom: "5px", textAlign: "center" }}>
 														{occ.counter_group_title}
 													</option>
-												))}
-											</select>
+												))} */}
+											{/* </select> */}
+											<MultiSelectElem
+												counterGroup={counterGroup}
+												selected={data?.counter_group_uuid}
+												onSelect={onChangeGroupHandler}
+											/>
 										</label>
 									</div>
 								</div>
@@ -2095,6 +2118,28 @@ function DeleteCounterPopup({ onSave, popupInfo, setItemsData }) {
 						</form>
 					</div>
 				</div>
+			</div>
+		</div>
+	)
+}
+
+const MultiSelectElem = ({ counterGroup, selected = [], onSelect }) => {
+	return (
+		<div className="multiselect-elem-wrapper">
+			<div className="selection-content">
+				{counterGroup?.map(occ => (
+					<div>
+						<input
+							type="checkbox"
+							id={occ.counter_group_uuid + "multiselect"}
+							checked={selected?.includes(occ.counter_group_uuid)}
+							onChange={() => onSelect(occ.counter_group_uuid)}
+						/>
+						<label htmlFor={occ.counter_group_uuid + "multiselect"}>
+							{occ.counter_group_title}
+						</label>
+					</div>
+				))}
 			</div>
 		</div>
 	)

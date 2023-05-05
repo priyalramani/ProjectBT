@@ -39,11 +39,11 @@ input::-webkit-inner-spin-button {
 }
 
 #loading-screen {
-	padding: 7px;
+	padding: 4px;
 }
 
 #loading-screen svg {
-	height: 30px;
+	height: 26px;
 }
 
 #kitchen-ico {
@@ -133,26 +133,34 @@ input[type="number"] {
 	display: flex;
 }
 
+#login-container h3 {
+	color: #fff;
+	font-weight: 500;
+	text-align: center;
+	font-size: 0.95rem;
+}
+
 #login-container h1 {
 	color: #fff;
-	font-size: 3.8rem;
+	font-size: 1.6rem;
 	margin: 0;
 	white-space: nowrap;
+	font-weight: 500;
+	margin-bottom: 16px;
 }
 
 #login-container > .form {
 	background: #000;
-	width: fit-content;
 	height: fit-content;
 	display: flex;
-	gap: 2rem;
+	gap: 1.2rem;
 	flex-direction: column;
 	align-items: center;
-	padding: 3.8rem 5rem;
-	border-radius: 2rem;
+	padding: 2.65rem 1.5rem;
+	border-radius: 10px;
 	margin: auto;
-	width: 30rem;
-	max-width: 90vw;
+	width: 27rem;
+	max-width: 92vw;
 }
 
 .input-container {
@@ -170,20 +178,30 @@ input[type="number"] {
 	border: none;
 	border-bottom: 2px solid #fff;
 	color: #fff;
-	font-size: 1rem;
+	font-size: 0.9rem;
+	padding: 10px;
 }
 
-/* #login-container .input-container input:-internal-autofill-selected {
-	background: black;
+#login-container .input-container input:-webkit-autofill {
+	background: transparent;
 	border: none;
 	border-bottom: 2px solid #fff;
 	color: #fff;
-	font-size: 1rem;
-	border-radius: 6px;
-} */
+	font-size: 0.9rem;
+	padding: 10px;
+}
 
-.input-container > label {
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
 	font-size: 1rem;
+	border: 1px solid green;
+	-webkit-text-fill-color: #fff;
+	-webkit-box-shadow: 0 0 0px 1000px #000 inset;
+	transition: background-color 5000s ease-in-out 0s;
+}
+.input-container > label {
+	font-size: 0.9rem;
 	text-transform: capitalize;
 }
 
@@ -191,22 +209,15 @@ input[type="number"] {
 	padding: 10px 3rem;
 	background: #44cd4a;
 	border: 2px solid #44cd4a;
-	border-radius: 6px;
+	border-radius: 5px;
 	width: -moz-fit-content;
-	width: 12rem;
-	font-size: 1.1rem;
-	font-weight: 600;
+	font-size: 1rem;
 	color: white;
-	letter-spacing: 1.25px;
+	letter-spacing: 1px;
 	cursor: pointer;
 	margin-top: 15px;
-	transition: all 200ms ease;
-}
-
-.submit-btn:hover {
-	background: #fff;
-	color: #44cd4a;
-	border-color: white;
+	width: 100%;
+	color: #fff;
 }
 
 .input-container > input {

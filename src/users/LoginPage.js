@@ -17,7 +17,6 @@ const LoginPage = ({ setUserType }) => {
 	const loginHandler = async () => {
 		try {
 			setIsLoading(true)
-
 			const response = await axios({
 				method: "post",
 				url: "/users/login",
@@ -26,7 +25,6 @@ const LoginPage = ({ setUserType }) => {
 					"Content-Type": "application/json",
 				},
 			})
-
 			if (response.data.success) {
 				let data = response.data.result
 				localStorage.setItem("user_uuid", data.user_uuid)
@@ -113,19 +111,22 @@ const LoginPage = ({ setUserType }) => {
 					setNotification(null)
 					setIsLoading(false)
 				}, 5000)
-
-				return
+				setIsLoading(false)
 			}
 		} catch (error) {
 			setIsLoading(false)
 		}
 	}
+
 	return (
 		<div id="login-container" onKeyDown={e => (e.key === "Enter" ? loginHandler() : "")}>
 			{/* <div className="foodDoAdmin"><img src={foodDoAdmin} alt="" /></div> */}
 
 			<div className="form">
-				<h1>Log In</h1>
+				<div>
+					<h3>Welcome back</h3>
+					<h1>Log into your account</h1>
+				</div>
 				<div className="input-container">
 					<label htmlFor="username" className="form-label">
 						Username
@@ -171,7 +172,7 @@ const LoginPage = ({ setUserType }) => {
 
 				{!isLoading ? (
 					<button className="submit-btn" onClick={loginHandler}>
-						Log In
+						Login now
 					</button>
 				) : (
 					<button className="submit-btn" id="loading-screen">

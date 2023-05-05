@@ -838,7 +838,7 @@ export function OrderDetails({
 						maxHeight: "100vh",
 						height: "max-content",
 						width: "90vw",
-						padding: "10px 50px",
+						padding: "0",
 						zIndex: "999999999",
 						border: "2px solid #000",
 						fontSize: "12px",
@@ -858,7 +858,19 @@ export function OrderDetails({
 								className="inventory_header"
 								style={{ backgroundColor: "#fff", color: "#000" }}>
 								{editOrder ? (
-									<div className="inputGroup">
+									<div
+										className="inputGroup"
+										style={{
+											backgroundColor: "rgb(255, 255, 255)",
+											color: "rgb(0, 0, 0)",
+											width: "100%",
+											display: "flex",
+											alignItems: "center",
+											justifyContent: "center",
+											padding: "10px",
+											flexDirection: "row",
+											gap: "15px",
+										}}>
 										<label htmlFor="Warehouse">Counter</label>
 										<div
 											className="inputGroup"
@@ -1771,7 +1783,7 @@ export function OrderDetails({
 																disabled={!item.item_uuid}
 															/>
 														) : (
-															"Rs:" + (item?.price || 0)
+															"Rs:" + (item.price * item.conversion || 0)
 														)}
 													</td>
 													{editOrder ? (
