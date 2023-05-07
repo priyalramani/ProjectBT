@@ -173,31 +173,25 @@ input[type="number"] {
 	width: 100%;
 }
 
-#login-container .input-container input {
-	background: transparent;
-	border: none;
-	border-bottom: 2px solid #fff;
-	color: #fff;
-	font-size: 0.9rem;
-	padding: 10px;
-}
-
+#login-container .input-container input,
 #login-container .input-container input:-webkit-autofill {
-	background: transparent;
 	border: none;
-	border-bottom: 2px solid #fff;
 	color: #fff;
 	font-size: 0.9rem;
-	padding: 10px;
+	padding: 12px;
+	background: #ffffff2e;
+	border-radius: 5px;
+	font-style: italic;
 }
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
 	font-size: 1rem;
+	font-style: italic;
 	border: 1px solid green;
 	-webkit-text-fill-color: #fff;
-	-webkit-box-shadow: 0 0 0px 1000px #000 inset;
+	-webkit-box-shadow: 0 0 0 0 #ffffff2e inset;
 	transition: background-color 5000s ease-in-out 0s;
 }
 .input-container > label {
@@ -213,11 +207,10 @@ input:-webkit-autofill:focus {
 	width: -moz-fit-content;
 	font-size: 1rem;
 	color: white;
-	letter-spacing: 1px;
 	cursor: pointer;
 	margin-top: 15px;
 	width: 100%;
-	color: #fff;
+	color: black;
 }
 
 .input-container > input {
@@ -640,14 +633,16 @@ div.unsync-count-container {
 	width: 50%;
 	position: fixed;
 	bottom: 0px;
+	left: 220px;
 }
 
 .searchBar > input {
 	flex: 1;
-	padding: 10px;
-	border-top-left-radius: 1.5rem;
-	border-top-right-radius: 1.5rem;
-	border: 1px solid green;
+	padding: 12px 20px;
+	border-top-left-radius: 2rem;
+	border-top-right-radius: 2rem;
+	border: 1.5px solid #44cd4a;
+	border-bottom: 0;
 	outline: none;
 }
 
@@ -663,9 +658,8 @@ div.unsync-count-container {
 	flex-direction: column;
 	padding: 0px 10px;
 	overflow-y: auto;
-	/* overflow-x: hidden; */
-	padding-bottom: 40px;
-	height: calc(100vh - 120px);
+	padding-bottom: 50px;
+	height: calc(100vh - 50px);
 }
 
 #req-decline-warning-popup {
@@ -1336,12 +1330,7 @@ ul#addresses-list > *:hover {
 	inset: inherit !important;
 }
 
-.edit-order.date-picker-container
-	> .react-datepicker__tab-loop
-	> .react-datepicker-popper
-	> div
-	> .react-datepicker
-	> .react-datepicker__triangle {
+.edit-order.date-picker-container > .react-datepicker__tab-loop > .react-datepicker-popper > div > .react-datepicker > .react-datepicker__triangle {
 	left: -46% !important;
 }
 

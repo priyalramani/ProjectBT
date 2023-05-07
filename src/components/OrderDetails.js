@@ -20,6 +20,11 @@ const default_status = [
 	{ value: 2, label: "Hold" },
 	{ value: 3, label: "Canceled" },
 ]
+const priorityOptions = [
+	{ value: 0, label: "Normal" },
+	{ value: 1, label: "High" },
+]
+
 export function OrderDetails({
 	orderJson,
 	order_uuid,
@@ -276,6 +281,7 @@ export function OrderDetails({
 	useEffect(() => {
 		setOrderData({
 			...order,
+			priority: order?.priority || 0,
 			item_details: order?.item_details?.map((a, i) => ({
 				...itemsData.find(b => b.item_uuid === a.item_uuid),
 				...a,
@@ -426,7 +432,6 @@ export function OrderDetails({
 		// console.log(fulfillment);
 		let data = {
 			...orderData,
-
 			item_details: orderData?.item_details?.filter(a => a.item_uuid) || [],
 		}
 
@@ -837,48 +842,52 @@ export function OrderDetails({
 							}}>
 							<div className="inventory_header" style={{ backgroundColor: "#fff", color: "#000" }}>
 								{editOrder ? (
-									<div
-										className="inputGroup"
-										style={{
-											backgroundColor: "rgb(255, 255, 255)",
-											color: "rgb(0, 0, 0)",
-											width: "100%",
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "center",
-											padding: "10px",
-											flexDirection: "row",
-											gap: "15px",
-										}}>
-										<label htmlFor="Warehouse">Counter</label>
-										<div className="inputGroup" style={{ width: "400px", zIndex: "999999999" }}>
-											<Select
-												options={counters?.map(a => ({
-													value: a.counter_uuid,
-													label: a.counter_title,
-												}))}
-												onChange={doc => {
-													setOrderData(prev => ({
-														...prev,
-														counter_uuid: doc.value,
-													}))
-												}}
-												value={
-													orderData?.counter_uuid
-														? {
-																value: orderData?.counter_uuid,
-																label: counters?.find(j => j.counter_uuid === orderData.counter_uuid)?.counter_title,
-														  }
-														: { value: 0, label: "None" }
-												}
-												// autoFocus={!order?.warehouse_uuid}
-												openMenuOnFocus={true}
-												menuPosition="fixed"
-												menuPlacement="auto"
-												placeholder="Select"
-											/>
+									<>
+										<div className="inputGroup order-edit-select">
+											<label htmlFor="Warehouse">Counter</label>
+											<div className="inputGroup">
+												<Select
+													options={counters?.map(a => ({
+														value: a.counter_uuid,
+														label: a.counter_title,
+													}))}
+													onChange={doc => {
+														setOrderData(prev => ({
+															...prev,
+															counter_uuid: doc.value,
+														}))
+													}}
+													value={
+														orderData?.counter_uuid
+															? {
+																	value: orderData?.counter_uuid,
+																	label: counters?.find(j => j.counter_uuid === orderData.counter_uuid)?.counter_title,
+															  }
+															: { value: 0, label: "None" }
+													}
+													// autoFocus={!order?.warehouse_uuid}
+													openMenuOnFocus={true}
+													menuPosition="fixed"
+													menuPlacement="auto"
+													placeholder="Select"
+												/>
+											</div>
 										</div>
-									</div>
+										<div className="inputGroup order-edit-select">
+											<label htmlFor="Warehouse">Priority</label>
+											<div className="inputGroup">
+												<Select
+													options={priorityOptions}
+													onChange={doc => setOrderData(x => ({ ...x, priority: doc?.value }))}
+													value={priorityOptions?.find(j => j.value === orderData.priority)}
+													openMenuOnFocus={true}
+													menuPosition="fixed"
+													menuPlacement="auto"
+													placeholder="Select Priority"
+												/>
+											</div>
+										</div>
+									</>
 								) : (
 									<h2 className="flex">
 										<span

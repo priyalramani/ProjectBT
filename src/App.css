@@ -83,3 +83,21 @@ div#selection-area-switch > button.selected {
 		transform: translateY(0);
 	}
 }
+
+div.order-edit-select {
+	background-color: rgb(255, 255, 255);
+	color: rgb(0, 0, 0);
+	width: fit-content;
+	display: flex;
+	padding: 10px;
+	gap: 15px;
+	align-items: center;
+	justify-content: flex-start;
+	flex-direction: row;
+}
+
+.order-edit-select .inputGroup {
+	max-width: 400px;
+	width: 32vw;
+	z-index: 999999999;
+}

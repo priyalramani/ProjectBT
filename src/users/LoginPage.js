@@ -31,10 +31,7 @@ const LoginPage = ({ setUserType }) => {
 				localStorage.setItem("user_title", data.user_title)
 				localStorage.setItem("user_role", JSON.stringify(data.user_role || []))
 				localStorage.setItem("user_mobile", data.user_mobile)
-				localStorage.setItem(
-					"warehouse",
-					data.warehouse?.length ? JSON.stringify(data.warehouse[0]) : ""
-				)
+				localStorage.setItem("warehouse", data.warehouse?.length ? JSON.stringify(data.warehouse[0]) : "")
 
 				sessionStorage.setItem("userType", response.data.result.user_type)
 				if (+data.user_type === 0) {
@@ -177,17 +174,8 @@ const LoginPage = ({ setUserType }) => {
 				) : (
 					<button className="submit-btn" id="loading-screen">
 						<svg viewBox="0 0 100 100">
-							<path
-								d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-								fill="#ffffff"
-								stroke="none">
-								<animateTransform
-									attributeName="transform"
-									type="rotate"
-									dur="1s"
-									repeatCount="indefinite"
-									keyTimes="0;1"
-									values="0 50 51;360 50 51"></animateTransform>
+							<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#000" stroke="none">
+								<animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
 							</path>
 						</svg>
 					</button>
