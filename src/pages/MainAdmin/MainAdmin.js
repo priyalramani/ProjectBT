@@ -1063,7 +1063,16 @@ const MainAdmin = () => {
 																.map(item => {
 																	return (
 																		<div
-																			className={`seatSearchTarget`}
+																			className={`
+																				seatSearchTarget ${
+																					!selectOrder &&
+																					+item?.priority === 1 &&
+																					+item?.status?.at(-1)
+																						?.stage === 1
+																						? "shaking-cards"
+																						: ""
+																				}
+																			`}
 																			style={{ height: "fit-content" }}
 																			key={Math.random()}
 																			seat-name={item.seat_name}

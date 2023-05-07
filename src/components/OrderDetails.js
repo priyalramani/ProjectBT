@@ -304,14 +304,9 @@ export function OrderDetails({
 				orderData?.item_details
 					?.map(a => ({
 						...a,
-						category_title: category.find(b => b.category_uuid === a.category_uuid)
-							?.category_title,
+						category_title: category.find(b => b.category_uuid === a.category_uuid)?.category_title,
 					}))
-					.sort(
-						(a, b) =>
-							a?.category_title?.localeCompare(b.category_title) ||
-							a?.item_title?.localeCompare(b.item_title)
-					)
+					.sort((a, b) => a?.category_title?.localeCompare(b.category_title) || a?.item_title?.localeCompare(b.item_title))
 					?.filter(a => +a.status !== 3)
 					?.map((a, i) => ({
 						...a,
@@ -418,8 +413,7 @@ export function OrderDetails({
 			if (bQty > aQty) {
 				let exicting = fulfillment?.find(a => a.item_uuid === item.item_uuid)
 				if (exicting) {
-					difference =
-						difference + (+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0))
+					difference = difference + (+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0))
 				}
 
 				fulfillment.push({
@@ -498,12 +492,7 @@ export function OrderDetails({
 				  }
 				: {
 						...data,
-						fulfillment: [
-							...(fulfillment || []),
-							...(order?.fulfillment?.filter(
-								a => !fulfillment.find(b => b.item_uuid === a.item_uuid)
-							) || []),
-						],
+						fulfillment: [...(fulfillment || []), ...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) || [])],
 				  }
 		// console.log("data", data);
 		if (completeOrder) {
@@ -544,8 +533,7 @@ export function OrderDetails({
 			if (bQty > aQty) {
 				let exicting = fulfillment?.find(a => a.item_uuid === item.item_uuid)
 				if (exicting) {
-					difference =
-						difference + (+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0))
+					difference = difference + (+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0))
 				}
 
 				fulfillment.push({
@@ -637,12 +625,7 @@ export function OrderDetails({
 				  }
 				: {
 						...data,
-						fulfillment: [
-							...(fulfillment || []),
-							...(order?.fulfillment?.filter(
-								a => !fulfillment.find(b => b.item_uuid === a.item_uuid)
-							) || []),
-						],
+						fulfillment: [...(fulfillment || []), ...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) || [])],
 				  }
 		// console.log("data", data);
 
@@ -677,9 +660,7 @@ export function OrderDetails({
 	}
 
 	const handleWarehouseChacking = async (complete, methodType) => {
-		let warehouse_uuid =
-			users.find(a => a.user_uuid === localStorage.getItem("user_uuid"))?.warehouse[0] ||
-			JSON.parse(localStorage.getItem("warehouse") || "")
+		let warehouse_uuid = users.find(a => a.user_uuid === localStorage.getItem("user_uuid"))?.warehouse[0] || JSON.parse(localStorage.getItem("warehouse") || "")
 		if (methodType === "complete") {
 			setComplete(true)
 		}
@@ -854,9 +835,7 @@ export function OrderDetails({
 								maxHeight: "75vh",
 								overflow: "scroll",
 							}}>
-							<div
-								className="inventory_header"
-								style={{ backgroundColor: "#fff", color: "#000" }}>
+							<div className="inventory_header" style={{ backgroundColor: "#fff", color: "#000" }}>
 								{editOrder ? (
 									<div
 										className="inputGroup"
@@ -872,9 +851,7 @@ export function OrderDetails({
 											gap: "15px",
 										}}>
 										<label htmlFor="Warehouse">Counter</label>
-										<div
-											className="inputGroup"
-											style={{ width: "400px", zIndex: "999999999" }}>
+										<div className="inputGroup" style={{ width: "400px", zIndex: "999999999" }}>
 											<Select
 												options={counters?.map(a => ({
 													value: a.counter_uuid,
@@ -890,11 +867,7 @@ export function OrderDetails({
 													orderData?.counter_uuid
 														? {
 																value: orderData?.counter_uuid,
-																label: counters?.find(
-																	j =>
-																		j.counter_uuid ===
-																		orderData.counter_uuid
-																)?.counter_title,
+																label: counters?.find(j => j.counter_uuid === orderData.counter_uuid)?.counter_title,
 														  }
 														: { value: 0, label: "None" }
 												}
@@ -915,17 +888,9 @@ export function OrderDetails({
 												// backgroundColor: "#000",
 												width: "fit-content",
 											}}
-											onClick={() =>
-												setCounterNotesPoup(
-													counters.find(
-														a => a.counter_uuid === orderData.counter_uuid
-													)
-												)
-											}>
+											onClick={() => setCounterNotesPoup(counters.find(a => a.counter_uuid === orderData.counter_uuid))}>
 											<NoteAdd />
-											{counters.find(a => a.counter_uuid === orderData?.counter_uuid)
-												?.counter_title || ""}{" "}
-											: {orderData?.invoice_number || ""}
+											{counters.find(a => a.counter_uuid === orderData?.counter_uuid)?.counter_title || ""} : {orderData?.invoice_number || ""}
 										</span>
 									</h2>
 								)}
@@ -942,10 +907,7 @@ export function OrderDetails({
 										flexDirection: "row",
 										justifyContent: "space-between",
 									}}>
-									<button
-										style={{ width: "fit-Content", backgroundColor: "red" }}
-										className="item-sales-search"
-										onClick={() => setDeletePopup("Delete")}>
+									<button style={{ width: "fit-Content", backgroundColor: "red" }} className="item-sales-search" onClick={() => setDeletePopup("Delete")}>
 										Cancel Order
 									</button>
 
@@ -983,11 +945,7 @@ export function OrderDetails({
 										style={{ width: "fit-Content", backgroundColor: "black" }}
 										className="item-sales-search"
 										onClick={() => {
-											if (
-												!window.location.pathname.includes("completeOrderReport") &&
-												(window.location.pathname.includes("admin") ||
-													window.location.pathname.includes("trip"))
-											)
+											if (!window.location.pathname.includes("completeOrderReport") && (window.location.pathname.includes("admin") || window.location.pathname.includes("trip")))
 												handleWarehouseChacking()
 											else handlePrint()
 										}}>
@@ -1051,9 +1009,7 @@ export function OrderDetails({
 
 							<div className="items_table" style={{ flex: "1", paddingLeft: "10px" }}>
 								<table>
-									<thead
-										className="bb b--green"
-										style={{ position: "sticky", top: 0, zIndex: "100" }}>
+									<thead className="bb b--green" style={{ position: "sticky", top: 0, zIndex: "100" }}>
 										<>
 											<tr>
 												<th>Warehouse</th>
@@ -1075,12 +1031,7 @@ export function OrderDetails({
 															}}
 															value={{
 																value: orderData.warehouse_uuid || "",
-																label:
-																	warehouse.find(
-																		a =>
-																			orderData?.warehouse_uuid ===
-																			a.warehouse_uuid
-																	)?.warehouse_title || "None",
+																label: warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)?.warehouse_title || "None",
 															}}
 															openMenuOnFocus={true}
 															menuPosition="fixed"
@@ -1088,36 +1039,25 @@ export function OrderDetails({
 															placeholder="Item"
 														/>
 													) : (
-														warehouse.find(
-															a =>
-																orderData?.warehouse_uuid === a.warehouse_uuid
-														)?.warehouse_title || "None"
+														warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)?.warehouse_title || "None"
 													)}
 												</th>
 												<th>Grand Total</th>
 												<th>{orderData?.order_grandtotal || 0}</th>
 												<th
 													className={
-														window.location.pathname.includes(
-															"completeOrderReport"
-														) ||
+														window.location.pathname.includes("completeOrderReport") ||
 														window.location.pathname.includes("signedBills") ||
 														window.location.pathname.includes("pendingEntry") ||
-														window.location.pathname.includes(
-															"upiTransactionReport"
-														)
+														window.location.pathname.includes("upiTransactionReport")
 															? "hover_class"
 															: ""
 													}
 													onClick={() =>
-														window.location.pathname.includes(
-															"completeOrderReport"
-														) ||
+														window.location.pathname.includes("completeOrderReport") ||
 														window.location.pathname.includes("signedBills") ||
 														window.location.pathname.includes("pendingEntry") ||
-														window.location.pathname.includes(
-															"upiTransactionReport"
-														)
+														window.location.pathname.includes("upiTransactionReport")
 															? setDeliveryPopup("put")
 															: {}
 													}>
@@ -1160,9 +1100,7 @@ export function OrderDetails({
 														}
 														onClick={() => {
 															setCopymsg(true)
-															navigator.clipboard.writeText(
-																orderData?.order_uuid
-															)
+															navigator.clipboard.writeText(orderData?.order_uuid)
 															setTimeout(() => setCopymsg(false), 1000)
 														}}
 													/>
@@ -1248,11 +1186,7 @@ export function OrderDetails({
 											<th className="pa2 tl bb b--black-20 w-30">Sr.</th>
 											<th className="pa2 tl bb b--black-20 w-30">Item Name</th>
 											<th className="pa2 tl bb b--black-20 w-30">MRP</th>
-											{editOrder ? (
-												<th className="pa2 tl bb b--black-20 w-30">Status</th>
-											) : (
-												""
-											)}
+											{editOrder ? <th className="pa2 tl bb b--black-20 w-30">Status</th> : ""}
 											<th className="pa2 tc bb b--black-20">Quantity(b)</th>
 											<th className="pa2 tc bb b--black-20">Quantity(p)</th>
 											<th className="pa2 tc bb b--black-20 ">Price(p)</th>
@@ -1287,12 +1221,7 @@ export function OrderDetails({
 																: +item.status === 3
 																? "red"
 																: "#fff",
-														color:
-															item.price_approval === "N"
-																? "#000"
-																: +item.status === 1 || +item.status === 3
-																? "#fff"
-																: "#000",
+														color: item.price_approval === "N" ? "#000" : +item.status === 1 || +item.status === 3 ? "#fff" : "#000",
 														borderBottom: "2px solid #fff",
 													}}>
 													{editOrder ? (
@@ -1303,18 +1232,14 @@ export function OrderDetails({
 																		onClick={() =>
 																			setOrderData(prev => ({
 																				...prev,
-																				item_details:
-																					prev.item_details?.map(
-																						a =>
-																							a.uuid ===
-																							item.uuid
-																								? {
-																										...a,
-																										price_approval:
-																											"Y",
-																								  }
-																								: a
-																					),
+																				item_details: prev.item_details?.map(a =>
+																					a.uuid === item.uuid
+																						? {
+																								...a,
+																								price_approval: "Y",
+																						  }
+																						: a
+																				),
 																			}))
 																		}>
 																		<CheckCircle
@@ -1331,50 +1256,28 @@ export function OrderDetails({
 																<span
 																	onClick={() =>
 																		setOrderData(prev => {
-																			let exicting =
-																				order?.fulfillment?.find(
-																					a =>
-																						a.item_uuid ===
-																						item.item_uuid
-																				)
+																			let exicting = order?.fulfillment?.find(a => a.item_uuid === item.item_uuid)
 																			let difference = 0
 																			if (exicting) {
 																				difference =
-																					+(item.b || 0) *
-																						(+item.conversion ||
-																							0) +
+																					+(item.b || 0) * (+item.conversion || 0) +
 																					(+item.p || 0) +
-																					(+(exicting.b || 0) *
-																						(+item.conversion ||
-																							0) +
-																						(+exicting.p || 0))
+																					(+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0))
 																			}
 																			let fulfillment = exicting
 																				? [
-																						...(prev.fulfillment ||
-																							[]),
+																						...(prev.fulfillment || []),
 
 																						{
-																							item_uuid:
-																								item.item_uuid,
-																							b: Math.floor(
-																								difference /
-																									(+item.conversion ||
-																										1)
-																							),
-																							p: Math.floor(
-																								difference %
-																									(+item.conversion ||
-																										1)
-																							),
+																							item_uuid: item.item_uuid,
+																							b: Math.floor(difference / (+item.conversion || 1)),
+																							p: Math.floor(difference % (+item.conversion || 1)),
 																						},
 																				  ]
 																				: [
-																						...(prev.fulfillment ||
-																							[]),
+																						...(prev.fulfillment || []),
 																						{
-																							item_uuid:
-																								item.item_uuid,
+																							item_uuid: item.item_uuid,
 																							b: item.b,
 																							p: item.p,
 																						},
@@ -1382,24 +1285,14 @@ export function OrderDetails({
 
 																			return {
 																				...prev,
-																				item_details:
-																					prev.item_details?.filter(
-																						a =>
-																							!(
-																								a.uuid ===
-																								item.uuid
-																							)
-																					),
+																				item_details: prev.item_details?.filter(a => !(a.uuid === item.uuid)),
 																				fulfillment,
 																			}
 																		})
 																	}>
 																	<RemoveCircle
 																		sx={{
-																			fontSize:
-																				item.price_approval === "N"
-																					? 15
-																					: 20,
+																			fontSize: item.price_approval === "N" ? 15 : 20,
 																		}}
 																		style={{
 																			cursor: "pointer",
@@ -1412,9 +1305,7 @@ export function OrderDetails({
 													) : (
 														""
 													)}
-													<td
-														className="ph2 pv1 tl bb b--black-20 bg-white"
-														style={{ textAlign: "center", width: "3ch" }}>
+													<td className="ph2 pv1 tl bb b--black-20 bg-white" style={{ textAlign: "center", width: "3ch" }}>
 														{item.sr}
 													</td>
 													<td className="ph2 pv1 tl bb b--black-20 bg-white">
@@ -1425,11 +1316,7 @@ export function OrderDetails({
 															style={{ height: "20px" }}>
 															{editOrder && !item.default ? (
 																<Select
-																	ref={ref =>
-																		(reactInputsRef.current[
-																			item_title_component_id
-																		] = ref)
-																	}
+																	ref={ref => (reactInputsRef.current[item_title_component_id] = ref)}
 																	styles={{
 																		control: styles => ({
 																			...styles,
@@ -1441,80 +1328,45 @@ export function OrderDetails({
 																	}}
 																	id={"1_item_uuid" + item.uuid}
 																	options={itemsData
-																		?.filter(
-																			a =>
-																				!order?.item_details?.filter(
-																					b =>
-																						a.item_uuid ===
-																						b.item_uuid
-																				)?.length && a.status !== 0
-																		)
-																		.sort((a, b) =>
-																			a?.item_title?.localeCompare(
-																				b.item_title
-																			)
-																		)
+																		?.filter(a => !order?.item_details?.filter(b => a.item_uuid === b.item_uuid)?.length && a.status !== 0)
+																		.sort((a, b) => a?.item_title?.localeCompare(b.item_title))
 																		?.map((a, j) => ({
 																			value: a.item_uuid,
-																			label:
-																				a.item_title +
-																				"______" +
-																				a.mrp,
+																			label: a.item_title + "______" + a.mrp,
 																			key: a.item_uuid,
 																		}))}
 																	onChange={e => {
 																		setOrderData(prev => ({
 																			...prev,
-																			item_details:
-																				prev.item_details?.map(a =>
-																					a.uuid === item.uuid
-																						? {
-																								...a,
-																								...itemsData.find(
-																									b =>
-																										b.item_uuid ===
-																										e.value
-																								),
-																								price: itemsData.find(
-																									b =>
-																										b.item_uuid ===
-																										e.value
-																								)?.item_price,
-																						  }
-																						: a
-																				),
+																			item_details: prev.item_details?.map(a =>
+																				a.uuid === item.uuid
+																					? {
+																							...a,
+																							...itemsData.find(b => b.item_uuid === e.value),
+																							price: itemsData.find(b => b.item_uuid === e.value)?.item_price,
+																					  }
+																					: a
+																			),
 																		}))
 																		shiftFocus(item_title_component_id)
 																	}}
 																	value={{
 																		value: item.item_uuid || "",
-																		label: item.item_title
-																			? item.item_title +
-																			  "______" +
-																			  item.mrp
-																			: "",
+																		label: item.item_title ? item.item_title + "______" + item.mrp : "",
 																		key: item.item_uuid || item.uuid,
 																	}}
 																	openMenuOnFocus={true}
-																	autoFocus={
-																		focusedInputId ===
-																			item_title_component_id ||
-																		(i === 0 && focusedInputId === 0)
-																	}
+																	autoFocus={focusedInputId === item_title_component_id || (i === 0 && focusedInputId === 0)}
 																	menuPosition="fixed"
 																	menuPlacement="auto"
 																	placeholder="Item"
 																/>
 															) : (
-																itemsData.find(
-																	a => a.item_uuid === item.item_uuid
-																)?.item_title || ""
+																itemsData.find(a => a.item_uuid === item.item_uuid)?.item_title || ""
 															)}
 														</div>
 													</td>
-													<td
-														className="ph2 pv1 tc bb b--black-20 bg-white"
-														style={{ textAlign: "center" }}>
+													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 														{item.mrp || ""}
 													</td>
 													{editOrder ? (
@@ -1528,11 +1380,7 @@ export function OrderDetails({
 															index={listItemIndexCount++}
 															id={item_status_component_id}>
 															<Select
-																ref={ref =>
-																	(reactInputsRef.current[
-																		item_status_component_id
-																	] = ref)
-																}
+																ref={ref => (reactInputsRef.current[item_status_component_id] = ref)}
 																styles={{
 																	control: styles => {
 																		// console.log(styles);
@@ -1552,32 +1400,19 @@ export function OrderDetails({
 																onChange={e => {
 																	setOrderData(prev => ({
 																		...prev,
-																		item_details: prev.item_details?.map(
-																			a =>
-																				a.uuid === item.uuid
-																					? {
-																							...a,
-																							status: e.value,
-																					  }
-																					: a
+																		item_details: prev.item_details?.map(a =>
+																			a.uuid === item.uuid
+																				? {
+																						...a,
+																						status: e.value,
+																				  }
+																				: a
 																		),
 																	}))
 																	shiftFocus(item_status_component_id)
 																}}
-																value={
-																	item.status || +item.status === 0
-																		? default_status.find(
-																				a => +a.value === +item.status
-																		  )
-																		: ""
-																}
-																autoFocus={
-																	focusedInputId ===
-																		item_status_component_id ||
-																	(i === 0 &&
-																		item.default &&
-																		focusedInputId === 0)
-																}
+																value={item.status || +item.status === 0 ? default_status.find(a => +a.value === +item.status) : ""}
+																autoFocus={focusedInputId === item_status_component_id || (i === 0 && item.default && focusedInputId === 0)}
 																openMenuOnFocus={true}
 																menuPosition="fixed"
 																menuPlacement="auto"
@@ -1587,9 +1422,7 @@ export function OrderDetails({
 													) : (
 														""
 													)}
-													<td
-														className="ph2 pv1 tc bb b--black-20 bg-white"
-														style={{ textAlign: "center", height: "20px" }}>
+													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center", height: "20px" }}>
 														{editOrder ? (
 															<input
 																id={"q" + item.uuid}
@@ -1607,16 +1440,14 @@ export function OrderDetails({
 																	setOrderData(prev => {
 																		return {
 																			...prev,
-																			item_details:
-																				prev.item_details?.map(a =>
-																					a.uuid === item.uuid
-																						? {
-																								...a,
-																								b: e.target
-																									.value,
-																						  }
-																						: a
-																				),
+																			item_details: prev.item_details?.map(a =>
+																				a.uuid === item.uuid
+																					? {
+																							...a,
+																							b: e.target.value,
+																					  }
+																					: a
+																			),
 																		}
 																	})
 																}}
@@ -1624,11 +1455,7 @@ export function OrderDetails({
 																	e.target.onwheel = () => false
 																	e.target.select()
 																}}
-																onKeyDown={e =>
-																	e.key === "Enter"
-																		? shiftFocus(e.target.id)
-																		: ""
-																}
+																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
 																disabled={!item.item_uuid}
 																onWheel={e => e.preventDefault()}
 															/>
@@ -1636,9 +1463,7 @@ export function OrderDetails({
 															item.b || 0
 														)}
 													</td>
-													<td
-														className="ph2 pv1 tc bb b--black-20 bg-white"
-														style={{ textAlign: "center" }}>
+													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 														{editOrder ? (
 															<input
 																id={"p" + item.uuid}
@@ -1657,16 +1482,14 @@ export function OrderDetails({
 																	setOrderData(prev => {
 																		return {
 																			...prev,
-																			item_details:
-																				prev.item_details?.map(a =>
-																					a.uuid === item.uuid
-																						? {
-																								...a,
-																								p: e.target
-																									.value,
-																						  }
-																						: a
-																				),
+																			item_details: prev.item_details?.map(a =>
+																				a.uuid === item.uuid
+																					? {
+																							...a,
+																							p: e.target.value,
+																					  }
+																					: a
+																			),
 																		}
 																	})
 																}}
@@ -1674,20 +1497,14 @@ export function OrderDetails({
 																	e.target.onwheel = () => false
 																	e.target.select()
 																}}
-																onKeyDown={e =>
-																	e.key === "Enter"
-																		? shiftFocus(e.target.id)
-																		: ""
-																}
+																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
 																disabled={!item.item_uuid}
 															/>
 														) : (
 															item.p || 0
 														)}
 													</td>
-													<td
-														className="ph2 pv1 tc bb b--black-20 bg-white"
-														style={{ textAlign: "center" }}>
+													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 														{editOrder ? (
 															<input
 																type="number"
@@ -1705,17 +1522,14 @@ export function OrderDetails({
 																	setOrderData(prev => {
 																		return {
 																			...prev,
-																			item_details:
-																				prev.item_details?.map(a =>
-																					a.uuid === item.uuid
-																						? {
-																								...a,
-																								price: e
-																									.target
-																									.value,
-																						  }
-																						: a
-																				),
+																			item_details: prev.item_details?.map(a =>
+																				a.uuid === item.uuid
+																					? {
+																							...a,
+																							price: e.target.value,
+																					  }
+																					: a
+																			),
 																		}
 																	})
 																}}
@@ -1723,20 +1537,14 @@ export function OrderDetails({
 																	e.target.onwheel = () => false
 																	e.target.select()
 																}}
-																onKeyDown={e =>
-																	e.key === "Enter"
-																		? shiftFocus(e.target.id)
-																		: ""
-																}
+																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
 																disabled={!item.item_uuid}
 															/>
 														) : (
 															"Rs:" + (item?.price || 0)
 														)}
 													</td>
-													<td
-														className="ph2 pv1 tc bb b--black-20 bg-white"
-														style={{ textAlign: "center" }}>
+													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 														{editOrder ? (
 															<input
 																type="number"
@@ -1749,25 +1557,19 @@ export function OrderDetails({
 																className="numberInput"
 																onWheel={e => e.preventDefault()}
 																index={listItemIndexCount++}
-																value={Math.floor(
-																	item.price * item.conversion || 0
-																)}
+																value={Math.floor(item.price * item.conversion || 0)}
 																onChange={e => {
 																	setOrderData(prev => {
 																		return {
 																			...prev,
-																			item_details:
-																				prev.item_details?.map(a =>
-																					a.uuid === item.uuid
-																						? {
-																								...a,
-																								price:
-																									e.target
-																										.value /
-																									item.conversion,
-																						  }
-																						: a
-																				),
+																			item_details: prev.item_details?.map(a =>
+																				a.uuid === item.uuid
+																					? {
+																							...a,
+																							price: +(e.target.value / item.conversion).toFixed(3),
+																					  }
+																					: a
+																			),
 																		}
 																	})
 																}}
@@ -1775,11 +1577,7 @@ export function OrderDetails({
 																	e.target.onwheel = () => false
 																	e.target.select()
 																}}
-																onKeyDown={e =>
-																	e.key === "Enter"
-																		? shiftFocus(e.target.id)
-																		: ""
-																}
+																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
 																disabled={!item.item_uuid}
 															/>
 														) : (
@@ -1814,16 +1612,10 @@ export function OrderDetails({
 													onClick={() =>
 														setOrderData(prev => ({
 															...prev,
-															item_details: [
-																...prev.item_details,
-																{ uuid: uuid(), b: 0, p: 0, edit: true },
-															],
+															item_details: [...prev.item_details, { uuid: uuid(), b: 0, p: 0, edit: true }],
 														}))
 													}>
-													<AddIcon
-														sx={{ fontSize: 40 }}
-														style={{ color: "#4AC959", cursor: "pointer" }}
-													/>
+													<AddIcon sx={{ fontSize: 40 }} style={{ color: "#4AC959", cursor: "pointer" }} />
 												</td>
 											</tr>
 										) : (
@@ -1837,43 +1629,25 @@ export function OrderDetails({
 											}}>
 											<td></td>
 											<td></td>
-											<td
-												className="ph2 pv1 tc bb b--black-20 bg-white"
-												style={{ textAlign: "center" }}>
+											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 												<div className="inputGroup">Total</div>
 											</td>
-											{editOrder ? (
-												<td
-													className="ph2 pv1 tc bb b--black-20 bg-white"
-													style={{ textAlign: "center" }}></td>
-											) : (
-												""
-											)}
-											<td
-												className="ph2 pv1 tc bb b--black-20 bg-white"
-												style={{ textAlign: "center" }}>
+											{editOrder ? <td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}></td> : ""}
+											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 												{(orderData?.item_details?.length > 1
-													? orderData?.item_details
-															?.map(a => +a?.b || 0)
-															.reduce((a, b) => a + b)
+													? orderData?.item_details?.map(a => +a?.b || 0).reduce((a, b) => a + b)
 													: orderData?.item_details?.length
 													? orderData?.item_details[0]?.b
 													: 0) || 0}
 											</td>
-											<td
-												className="ph2 pv1 tc bb b--black-20 bg-white"
-												style={{ textAlign: "center" }}>
+											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 												{(orderData?.item_details?.length > 1
-													? orderData?.item_details
-															?.map(a => +a?.p || 0)
-															.reduce((a, b) => a + b)
+													? orderData?.item_details?.map(a => +a?.p || 0).reduce((a, b) => a + b)
 													: orderData?.item_details?.length
 													? orderData?.item_details[0]?.p
 													: 0) || 0}
 											</td>
-											<td
-												className="ph2 pv1 tc bb b--black-20 bg-white"
-												style={{ textAlign: "center" }}></td>
+											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}></td>
 											{editOrder ? <td></td> : ""}
 										</tr>
 									</tbody>
@@ -1894,13 +1668,7 @@ export function OrderDetails({
 						}}>
 						<div style={{ width: "20%", color: "#fff" }}>-</div>
 						{editOrder ? (
-							<button
-								type="button"
-								onClick={
-									window.location.pathname.includes("completeOrderReport")
-										? () => setDeliveryPopup("edit")
-										: onSubmit
-								}>
+							<button type="button" onClick={window.location.pathname.includes("completeOrderReport") ? () => setDeliveryPopup("edit") : onSubmit}>
 								Save
 							</button>
 						) : (
@@ -1922,10 +1690,7 @@ export function OrderDetails({
 							}}>
 							<WhatsApp />
 						</button>
-						<button
-							type="button"
-							onClick={() => {}}
-							style={{ width: "max-content", padding: "10px 20px" }}>
+						<button type="button" onClick={() => {}} style={{ width: "max-content", padding: "10px 20px" }}>
 							OrderTotal : {orderData?.order_grandtotal || 0}
 						</button>
 					</div>
@@ -1936,17 +1701,8 @@ export function OrderDetails({
 				<div className="overlay" style={{ zIndex: "99999999999999999" }}>
 					<div className="flex" style={{ width: "40px", height: "40px" }}>
 						<svg viewBox="0 0 100 100">
-							<path
-								d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-								fill="#ffffff"
-								stroke="none">
-								<animateTransform
-									attributeName="transform"
-									type="rotate"
-									dur="1s"
-									repeatCount="indefinite"
-									keyTimes="0;1"
-									values="0 50 51;360 50 51"></animateTransform>
+							<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
+								<animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -1954,60 +1710,15 @@ export function OrderDetails({
 			) : (
 				""
 			)}
-			{holdPopup ? (
-				<FreeItems
-					onSave={() => setHoldPopup(false)}
-					orders={orderData}
-					holdPopup={holdPopup}
-					itemsData={itemsData}
-					setOrder={setOrderData}
-				/>
-			) : (
-				""
-			)}
+			{holdPopup ? <FreeItems onSave={() => setHoldPopup(false)} orders={orderData} holdPopup={holdPopup} itemsData={itemsData} setOrder={setOrderData} /> : ""}
 			{messagePopup ? (
-				<MessagePopup
-					onClose={updateOrder}
-					message="Update Amount"
-					message2={"Rs. " + messagePopup?.order_grandtotal}
-					button1="Save"
-					button2="Cancel"
-					onSave={() => setMessagePopup(false)}
-				/>
+				<MessagePopup onClose={updateOrder} message="Update Amount" message2={"Rs. " + messagePopup?.order_grandtotal} button1="Save" button2="Cancel" onSave={() => setMessagePopup(false)} />
 			) : (
 				""
 			)}
-			{splitHoldPopup ? (
-				<MessagePopup
-					onClose={splitOrder}
-					message="Create Separate Order for Hold ?"
-					message2=""
-					button1="Save"
-					button2="Cancel"
-					onSave={() => setSplitHold(false)}
-				/>
-			) : (
-				""
-			)}
-			{warehousePopup ? (
-				<NewUserForm
-					onClose={() => setWarhousePopup(false)}
-					updateChanges={updateWarehouse}
-					popupInfo={warehousePopup}
-				/>
-			) : (
-				""
-			)}
-			{popupDetails ? (
-				<CheckingValues
-					onSave={() => setPopupDetails(false)}
-					popupDetails={popupDetails}
-					users={users}
-					items={itemsData}
-				/>
-			) : (
-				""
-			)}
+			{splitHoldPopup ? <MessagePopup onClose={splitOrder} message="Create Separate Order for Hold ?" message2="" button1="Save" button2="Cancel" onSave={() => setSplitHold(false)} /> : ""}
+			{warehousePopup ? <NewUserForm onClose={() => setWarhousePopup(false)} updateChanges={updateWarehouse} popupInfo={warehousePopup} /> : ""}
+			{popupDetails ? <CheckingValues onSave={() => setPopupDetails(false)} popupDetails={popupDetails} users={users} items={itemsData} /> : ""}
 			{popupDiscount ? (
 				<DiscountPopup
 					onSave={() => setPopupDiscount(false)}
@@ -2016,11 +1727,7 @@ export function OrderDetails({
 					onUpdate={data => {
 						setOrderData({
 							...orderData,
-							item_details: orderData?.item_details?.map(a =>
-								a.item_uuid === data.item_uuid
-									? { ...a, charges_discount: data.charges_discount }
-									: a
-							),
+							item_details: orderData?.item_details?.map(a => (a.item_uuid === data.item_uuid ? { ...a, charges_discount: data.charges_discount } : a)),
 						})
 						setPopupDiscount(false)
 					}}
@@ -2087,13 +1794,9 @@ export function OrderDetails({
 								<div style={{ overflowY: "scroll" }}>
 									<form className="form">
 										<div className="formGroup">
-											<div
-												className="row"
-												style={{ flexDirection: "row", alignItems: "center" }}>
+											<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 												<div style={{ width: "50px" }}>Caption</div>
-												<label
-													className="selectLabel flex"
-													style={{ width: "200px" }}>
+												<label className="selectLabel flex" style={{ width: "200px" }}>
 													<input
 														type="text"
 														name="route_title"
@@ -2109,9 +1812,7 @@ export function OrderDetails({
 										</div>
 
 										<div className="flex" style={{ justifyContent: "space-between" }}>
-											<button
-												onClick={() => setCaptionPopup(null)}
-												className="closeButton">
+											<button onClick={() => setCaptionPopup(null)} className="closeButton">
 												x
 											</button>
 
@@ -2120,15 +1821,9 @@ export function OrderDetails({
 													Send
 												</button>
 											) : (
-												<button
-													type="button"
-													className="submit"
-													style={{ width: "80px" }}>
+												<button type="button" className="submit" style={{ width: "80px" }}>
 													<svg viewBox="0 0 100 100" style={{ width: "20px" }}>
-														<path
-															d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-															fill="#ffffff"
-															stroke="none">
+														<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
 															<animateTransform
 																attributeName="transform"
 																type="rotate"
@@ -2190,25 +1885,20 @@ export function OrderDetails({
 					zIndex: "-1000",
 				}}>
 				<div ref={componentRef} id="item-container">
-					{Array.from(Array(Math.ceil(printData?.item_details?.length / 12)).keys())?.map(
-						(a, i) => (
-							<OrderPrint
-								counter={counters.find(a => a.counter_uuid === printData?.counter_uuid)}
-								reminderDate={reminderDate}
-								order={printData}
-								date={new Date(printData?.status[0]?.time)}
-								user={
-									users.find(a => a.user_uuid === printData?.status[0]?.user_uuid)
-										?.user_title || ""
-								}
-								itemData={itemsData}
-								item_details={printData?.item_details?.slice(a * 12, 12 * (a + 1))}
-								footer={!(printData?.item_details?.length > 12 * (a + 1))}
-								paymentModes={paymentModes}
-								counters={counters}
-							/>
-						)
-					)}
+					{Array.from(Array(Math.ceil(printData?.item_details?.length / 12)).keys())?.map((a, i) => (
+						<OrderPrint
+							counter={counters.find(a => a.counter_uuid === printData?.counter_uuid)}
+							reminderDate={reminderDate}
+							order={printData}
+							date={new Date(printData?.status[0]?.time)}
+							user={users.find(a => a.user_uuid === printData?.status[0]?.user_uuid)?.user_title || ""}
+							itemData={itemsData}
+							item_details={printData?.item_details?.slice(a * 12, 12 * (a + 1))}
+							footer={!(printData?.item_details?.length > 12 * (a + 1))}
+							paymentModes={paymentModes}
+							counters={counters}
+						/>
+					))}
 				</div>
 			</div>
 		</>
@@ -2226,9 +1916,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 			return
 		}
 		let time = new Date()
-		let stage = order?.status?.length
-			? order?.status?.map(a => +a.stage || 0)?.reduce((a, b) => Math.max(a, b))
-			: order?.status[0]?.stage || 0
+		let stage = order?.status?.length ? order?.status?.map(a => +a.stage || 0)?.reduce((a, b) => Math.max(a, b)) : order?.status[0]?.stage || 0
 		let data = {
 			...order,
 			status: [
@@ -2239,9 +1927,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 					time: time.getTime(),
 				},
 			],
-			fulfillment: order?.fulfillment?.length
-				? [...order?.fulfillment, ...order?.item_details]
-				: order?.item_details,
+			fulfillment: order?.fulfillment?.length ? [...order?.fulfillment, ...order?.item_details] : order?.item_details,
 			item_details: order?.item_details?.map(a => ({ ...a, b: 0, p: 0 })),
 		}
 
@@ -2290,12 +1976,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 				<h3>Order will be {deletePopup}</h3>
 
 				<div className="flex">
-					<button
-						type="button"
-						className="submit"
-						onClick={() => PutOrder()}
-						disabled={disable}
-						style={{ opacity: disable ? "0.5" : "1" }}>
+					<button type="button" className="submit" onClick={() => PutOrder()} disabled={disable} style={{ opacity: disable ? "0.5" : "1" }}>
 						Confirm
 					</button>
 				</div>
@@ -2373,17 +2054,8 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 															? "Order Completed By"
 															: ""}
 													</td>
-													<td colSpan={2}>
-														{new Date(+item.time).toDateString() +
-															" " +
-															formatAMPM(new Date(item.time)) || ""}
-													</td>
-													<td>
-														{item.user_uuid === "240522"
-															? "Admin"
-															: users.find(a => a.user_uuid === item?.user_uuid)
-																	?.user_title || ""}
-													</td>
+													<td colSpan={2}>{new Date(+item.time).toDateString() + " " + formatAMPM(new Date(item.time)) || ""}</td>
+													<td>{item.user_uuid === "240522" ? "Admin" : users.find(a => a.user_uuid === item?.user_uuid)?.user_title || ""}</td>
 												</tr>
 											))}
 									</tbody>
@@ -2414,10 +2086,7 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 												style={{
 													height: "30px",
 												}}>
-												<td colSpan={2}>
-													{items.find(a => a.item_uuid === item.item_uuid)
-														?.item_title || ""}
-												</td>
+												<td colSpan={2}>{items.find(a => a.item_uuid === item.item_uuid)?.item_title || ""}</td>
 												<td>
 													{item?.b || 0}:{item.p || 0}
 												</td>
@@ -2451,10 +2120,7 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 												style={{
 													height: "30px",
 												}}>
-												<td colSpan={2}>
-													{items.find(a => a.item_uuid === item.item_uuid)
-														?.item_title || ""}
-												</td>
+												<td colSpan={2}>{items.find(a => a.item_uuid === item.item_uuid)?.item_title || ""}</td>
 												<td>
 													{item?.b || 0}:{item.p || 0}
 												</td>
@@ -2488,10 +2154,7 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 												style={{
 													height: "30px",
 												}}>
-												<td colSpan={2}>
-													{items.find(a => a.item_uuid === item.item_uuid)
-														?.item_title || ""}
-												</td>
+												<td colSpan={2}>{items.find(a => a.item_uuid === item.item_uuid)?.item_title || ""}</td>
 												<td>
 													{item?.b || 0}:{item.p || 0}
 												</td>
@@ -2611,13 +2274,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 															}}
 															value={item.value || 0}
 															onChange={e => {
-																setData(prev =>
-																	prev?.map(a =>
-																		a.uuid === item.uuid
-																			? { ...a, value: e.target.value }
-																			: a
-																	)
-																)
+																setData(prev => prev?.map(a => (a.uuid === item.uuid ? { ...a, value: e.target.value } : a)))
 																setEdit(true)
 															}}
 															onFocus={e => {
@@ -2632,20 +2289,14 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 										: ""}
 								</tbody>
 							</table>
-							<button
-								type="button"
-								className="submit"
-								onClick={() => setData(prev => [...prev, { uuid: uuid() }])}>
+							<button type="button" className="submit" onClick={() => setData(prev => [...prev, { uuid: uuid() }])}>
 								<Add />
 							</button>
 						</div>
 
 						<div className="flex" style={{ justifyContent: "space-between" }}>
 							{edit ? (
-								<button
-									type="button"
-									className="submit"
-									onClick={() => onUpdate({ ...popupDetails, charges_discount: data })}>
+								<button type="button" className="submit" onClick={() => onUpdate({ ...popupDetails, charges_discount: data })}>
 									Save
 								</button>
 							) : (
@@ -2661,16 +2312,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 		</div>
 	)
 }
-function DiliveryPopup({
-	onSave,
-	postOrderData,
-	credit_allowed,
-	counters,
-	order,
-	updateBilling,
-	deliveryPopup,
-	users,
-}) {
+function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order, updateBilling, deliveryPopup, users }) {
 	const [PaymentModes, setPaymentModes] = useState([])
 	const [modes, setModes] = useState([])
 	const [error, setError] = useState("")
@@ -2684,12 +2326,7 @@ function DiliveryPopup({
 	const time2 = new Date()
 	time2.setHours(12)
 	let reminder = useMemo(() => {
-		return new Date(
-			time2.setDate(
-				time2.getDate() +
-					(counters.find(a => a.counter_uuid === order?.counter_uuid)?.payment_reminder_days || 0)
-			)
-		).getTime()
+		return new Date(time2.setDate(time2.getDate() + (counters.find(a => a.counter_uuid === order?.counter_uuid)?.payment_reminder_days || 0))).getTime()
 	}, [counters, order?.counter_uuid])
 	let type = useMemo(() => {
 		return counters.find(a => a.counter_uuid === order?.counter_uuid)?.outstanding_type || 0
@@ -2786,16 +2423,7 @@ function DiliveryPopup({
 		}
 		GetPaymentModes()
 		if (order.trip_uuid) getTripData(order.trip_uuid)
-	}, [
-		deliveryPopup,
-		order?.counter_uuid,
-		order?.invoice_number,
-		order?.order_uuid,
-		order?.trip_uuid,
-		reminder,
-		type,
-		order.trip_uuid,
-	])
+	}, [deliveryPopup, order?.counter_uuid, order?.invoice_number, order?.order_uuid, order?.trip_uuid, reminder, type, order.trip_uuid])
 	useEffect(() => {
 		if (PaymentModes?.length)
 			setModes(
@@ -2803,11 +2431,7 @@ function DiliveryPopup({
 					...a,
 					amt: "",
 					coin: "",
-					status:
-						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
-						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
-							? "0"
-							: 1,
+					status: a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002" ? "0" : 1,
 				}))
 			)
 	}, [PaymentModes])
@@ -2952,19 +2576,14 @@ function DiliveryPopup({
 							<form className="form">
 								<div className="formGroup">
 									{PaymentModes?.map(item => (
-										<div
-											className="row"
-											style={{ flexDirection: "row", alignItems: "center" }}
-											key={item.mode_uuid}>
+										<div className="row" style={{ flexDirection: "row", alignItems: "center" }} key={item.mode_uuid}>
 											<div style={{ width: "50px" }}>{item.mode_title}</div>
 											<label className="selectLabel flex" style={{ width: "80px" }}>
 												<input
 													type="number"
 													name="route_title"
 													className="numberInput"
-													value={
-														modes.find(a => a.mode_uuid === item.mode_uuid)?.amt
-													}
+													value={modes.find(a => a.mode_uuid === item.mode_uuid)?.amt}
 													style={{ width: "80px" }}
 													onContextMenu={e => {
 														e.preventDefault()
@@ -2997,25 +2616,14 @@ function DiliveryPopup({
 												/>
 												{/* {popupInfo.conversion || 0} */}
 											</label>
-											{modes.find(
-												a =>
-													a.mode_uuid === item.mode_uuid &&
-													item.mode_uuid !== "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-											)?.amt ? (
-												<label
-													className="selectLabel flex"
-													style={{ width: "200px" }}>
+											{modes.find(a => a.mode_uuid === item.mode_uuid && item.mode_uuid !== "c67b54ba-d2b6-11ec-9d64-0242ac120002")?.amt ? (
+												<label className="selectLabel flex" style={{ width: "200px" }}>
 													<input
 														type="text"
 														name="route_title"
 														className="numberInput"
 														value={item?.remarks}
-														placeholder={
-															item.mode_uuid ===
-															"c67b5794-d2b6-11ec-9d64-0242ac120002"
-																? "Cheque number"
-																: "UPI transaction I'd"
-														}
+														placeholder={item.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ? "Cheque number" : "UPI transaction I'd"}
 														style={{
 															width: "100%",
 															backgroundColor: "light",
@@ -3043,9 +2651,7 @@ function DiliveryPopup({
 											)}
 										</div>
 									))}
-									<div
-										className="row"
-										style={{ flexDirection: "row", alignItems: "center" }}>
+									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 										<div style={{ width: "50px" }}>UnPaid</div>
 										<label className="selectLabel flex" style={{ width: "80px" }}>
 											<input
@@ -3111,24 +2717,16 @@ function DiliveryPopup({
 											""
 										)}
 									</div>
-									<div
-										className="row"
-										style={{ flexDirection: "row", alignItems: "center" }}>
+									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 										{deliveryPopup === "put" ? (
 											""
 										) : (
-											<button
-												type="button"
-												className="submit"
-												style={{ color: "#fff", backgroundColor: "#7990dd" }}
-												onClick={() => setPopup(true)}>
+											<button type="button" className="submit" style={{ color: "#fff", backgroundColor: "#7990dd" }} onClick={() => setPopup(true)}>
 												Deductions
 											</button>
 										)}
 									</div>
-									<div
-										className="row"
-										style={{ flexDirection: "row", alignItems: "center" }}>
+									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 										<div style={{ width: "100px" }}>Delivered By</div>
 										<label className="selectLabel flex" style={{ width: "120px" }}>
 											<select
@@ -3154,11 +2752,7 @@ function DiliveryPopup({
 								</div>
 
 								<div className="flex" style={{ justifyContent: "space-between" }}>
-									<button
-										type="button"
-										style={{ backgroundColor: "red" }}
-										className="submit"
-										onClick={onSave}>
+									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
 										Cancel
 									</button>
 									<button type="button" className="submit" onClick={submitHandler}>
@@ -3174,17 +2768,8 @@ function DiliveryPopup({
 				<div className="overlay" style={{ zIndex: "999999999999999999" }}>
 					<div className="flex" style={{ width: "40px", height: "40px" }}>
 						<svg viewBox="0 0 100 100">
-							<path
-								d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-								fill="#ffffff"
-								stroke="none">
-								<animateTransform
-									attributeName="transform"
-									type="rotate"
-									dur="1s"
-									repeatCount="indefinite"
-									keyTimes="0;1"
-									values="0 50 51;360 50 51"></animateTransform>
+							<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
+								<animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -3265,9 +2850,7 @@ function NotesPopup({
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup">
-									<div
-										className="row"
-										style={{ flexDirection: "row", alignItems: "start" }}>
+									<div className="row" style={{ flexDirection: "row", alignItems: "start" }}>
 										<div style={{ width: "50px" }}>Notes</div>
 										<label className="selectLabel flex" style={{ width: "200px" }}>
 											<textarea
@@ -3361,9 +2944,7 @@ function CounterNotesPopup({
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup" style={{ backgroundColor: "#fff" }}>
-									<div
-										className="row"
-										style={{ flexDirection: "row", alignItems: "start" }}>
+									<div className="row" style={{ flexDirection: "row", alignItems: "start" }}>
 										<div style={{ width: "50px" }}>Notes</div>
 										<label className="selectLabel flex" style={{ width: "200px" }}>
 											<textarea
@@ -3461,9 +3042,7 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
 													data
 														? {
 																value: data,
-																label: warehouse?.find(
-																	j => j.warehouse_uuid === data
-																)?.warehouse_title,
+																label: warehouse?.find(j => j.warehouse_uuid === data)?.warehouse_title,
 														  }
 														: { value: 0, label: "None" }
 												}
@@ -3529,26 +3108,18 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
 											onChange={e =>
 												setSelectedTrip({
 													trip_uuid: e.target.value,
-													warehouse_uuid:
-														trips?.find(a => a.trip_uuid === e.target.value)
-															?.warehouse_uuid || "",
+													warehouse_uuid: trips?.find(a => a.trip_uuid === e.target.value)?.warehouse_uuid || "",
 												})
 											}
 											maxLength={42}
 											style={{ width: "200px" }}>
 											<option value="0">None</option>
 											{trips
-
 												?.filter(
 													a =>
 														a.trip_uuid &&
 														a.status &&
-														(+JSON.parse(
-															localStorage.getItem("warehouse") || ""
-														) === 1 ||
-															JSON.parse(
-																localStorage.getItem("warehouse") || ""
-															) === a.warehouse_uuid)
+														(+JSON.parse(localStorage.getItem("warehouse") || "") === 1 || JSON.parse(localStorage.getItem("warehouse") || "") === a.warehouse_uuid)
 												)
 												?.map(a => (
 													<option value={a.trip_uuid}>{a.trip_title}</option>

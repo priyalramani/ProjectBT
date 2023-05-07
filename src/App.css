@@ -61,3 +61,25 @@ div#selection-area-switch > button.selected {
 	width: 150px;
 	display: inline-block;
 }
+
+.shaking-cards {
+	animation: vertical-shaking 0.7s infinite;
+}
+
+@keyframes vertical-shaking {
+	0% {
+		transform: translateY(0);
+	}
+	25% {
+		transform: translateY(5px);
+	}
+	50% {
+		transform: translateY(-5px);
+	}
+	75% {
+		transform: translateY(5px);
+	}
+	100% {
+		transform: translateY(0);
+	}
+}

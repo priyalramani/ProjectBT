@@ -13,6 +13,11 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
 import FreeItems from "../../components/FreeItems"
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent"
 
+const priorityOptions = [
+	{ value: 0, label: "Normal" },
+	{ value: 1, label: "High" },
+]
+
 const CovertedQty = (qty, conversion) => {
 	let b = qty / +conversion
 	b = Math.sign(b) * Math.floor(Math.sign(b) * b)
@@ -366,7 +371,7 @@ export default function AddOrder() {
 						<div className="topInputs">
 							<div className="inputGroup">
 								<label htmlFor="Warehouse">Counter</label>
-								<div className="inputGroup" style={{ width: "500px" }}>
+								<div className="inputGroup" style={{ width: "380px" }}>
 									<Select
 										ref={ref => (reactInputsRef.current["0"] = ref)}
 										options={counters
@@ -419,7 +424,7 @@ export default function AddOrder() {
 							</div>
 							<div className="inputGroup">
 								<label htmlFor="Warehouse">From Warehouse</label>
-								<div className="inputGroup" style={{ width: "400px" }}>
+								<div className="inputGroup" style={{ width: "300px" }}>
 									<Select
 										options={[
 											{ value: 0, label: "None" },
@@ -451,11 +456,25 @@ export default function AddOrder() {
 												  }
 												: { value: 0, label: "None" }
 										}
-										// autoFocus={!order?.warehouse_uuid}
 										openMenuOnFocus={true}
 										menuPosition="fixed"
 										menuPlacement="auto"
 										placeholder="Select"
+									/>
+								</div>
+							</div>
+							<div className="inputGroup">
+								<label htmlFor="Warehouse">Priority</label>
+								<div className="inputGroup">
+									<Select
+										options={priorityOptions}
+										onChange={doc => setOrder(x => ({ ...x, priority: doc?.value }))}
+										value={priorityOptions?.find(j => j.value === order.priority)}
+										autoFocus={!order?.counter_uuid}
+										openMenuOnFocus={true}
+										menuPosition="fixed"
+										menuPlacement="auto"
+										placeholder="Select Priority"
 									/>
 								</div>
 							</div>

@@ -772,41 +772,45 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 	}
 
 	useEffect(() => {
-		let _data
-		if (popupInfo?.type === "edit") {
-			_data = {
-				...popupInfo.data,
-				mobile: [
-					...(popupInfo?.data?.mobile
-						?.map(a => ({
-							...a,
-							uuid: a?.uuid || uuid(),
-						}))
-						.filter(a => a.mobile) || []),
-					...[1, 2, 3, 4].map(a => ({ uuid: uuid(), mobile: "", type: "" })),
-				].slice(0, 4),
+		const asyncCall = async () => {
+			let _data
+			if (popupInfo?.type === "edit") {
+				_data = await {
+					...popupInfo.data,
+					mobile: [
+						...(popupInfo?.data?.mobile
+							?.map(a => ({
+								...a,
+								uuid: a?.uuid || uuid(),
+							}))
+							.filter(a => a.mobile) || []),
+						...[1, 2, 3, 4].map(a => ({ uuid: uuid(), mobile: "", type: "" })),
+					].slice(0, 4),
+				}
+			} else {
+				_data = await {
+					payment_modes: paymentModes
+						.filter(
+							a =>
+								a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" ||
+								a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+						)
+						.map(a => a.mode_uuid),
+					credit_allowed: "N",
+					status: 1,
+					mobile: [1, 2, 3, 4].map(a => ({
+						uuid: uuid(),
+						mobile: "",
+						type: "",
+					})),
+				}
 			}
-		} else {
-			_data = {
-				payment_modes: paymentModes
-					.filter(
-						a =>
-							a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" ||
-							a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
-					)
-					.map(a => a.mode_uuid),
-				credit_allowed: "N",
-				status: 1,
-				mobile: [1, 2, 3, 4].map(a => ({
-					uuid: uuid(),
-					mobile: "",
-					type: "",
-				})),
-			}
+			const _counters = await getCounterGroup()
+			setCounterGroup(sortCounterGroups(_counters, _data))
+			setdata(_data)
 		}
-		const _counters = getCounterGroup()
-		setCounterGroup(sortCounterGroups(_counters, _data))
-		setdata(_data)
+
+		asyncCall()
 	}, [paymentModes, popupInfo.data, popupInfo?.type])
 
 	const submitHandler = async e => {

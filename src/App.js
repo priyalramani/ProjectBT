@@ -59,21 +59,14 @@ import OrderPdf from "./components/OrderPdf"
 import MobileLayout from "./components/MobileLayout"
 import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
 import CashRegister from "./pages/QuikAccess/CashRegister"
-export let Version = 103
+export let Version = 104
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))
 	const context = useContext(Context)
 
-	const {
-		calculationPopup = "",
-		loading,
-		notification,
-		setNotification,
-		isItemAvilableOpen,
-		cashRegisterPopup,
-	} = context
+	const { calculationPopup = "", loading, notification, setNotification, isItemAvilableOpen, cashRegisterPopup } = context
 
 	axios.defaults.baseURL = server
 
@@ -248,15 +241,9 @@ function App() {
 							{/* admin Routes */}
 							<Route path="/admin" element={<MainAdmin />} />
 							<Route path="/trip" element={<MainAdmin />} />
-							<Route
-								path="/admin/SalesmanItemSuggestion"
-								element={<SalesmanItemSuggestion />}
-							/>
+							<Route path="/admin/SalesmanItemSuggestion" element={<SalesmanItemSuggestion />} />
 							<Route path="/admin/routes" element={<RoutesPage />} />
-							<Route
-								path="/admin/InvoiceNumberWiseOrder"
-								element={<InvoiceNumberWiseOrder />}
-							/>
+							<Route path="/admin/InvoiceNumberWiseOrder" element={<InvoiceNumberWiseOrder />} />
 							<Route path="/admin/itemCategories" element={<ItemCategories />} />
 							<Route path="/admin/counterGroup" element={<CounterGroup />} />
 							<Route path="/admin/itemGroup" element={<ItemGroup />} />
@@ -291,10 +278,7 @@ function App() {
 							<Route path="/admin/pendingReciptsEntry" element={<PendingReciptsEntry />} />
 							<Route path="/admin/stockTransferVochers" element={<StockTransferVouchers />} />
 							<Route path="/admin/currentStock" element={<CurrentStock />} />
-							<Route
-								path="/admin/PartyWiseCompanyDiscount"
-								element={<PartyWiseCompanyDiscount />}
-							/>
+							<Route path="/admin/PartyWiseCompanyDiscount" element={<PartyWiseCompanyDiscount />} />
 							<Route path="/admin/signedBills" element={<SignedBills />} />
 							<Route path="/admin/tasks" element={<TasksPage />} />
 							<Route path="*" element={<Navigate replace to={"/admin"} />} />
@@ -321,13 +305,7 @@ function App() {
 					}}>
 					<svg viewBox="0 0 100 100">
 						<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#000" stroke="none">
-							<animateTransform
-								attributeName="transform"
-								type="rotate"
-								dur="1s"
-								repeatCount="indefinite"
-								keyTimes="0;1"
-								values="0 50 51;360 50 51"></animateTransform>
+							<animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
 						</path>
 					</svg>
 				</div>
@@ -335,10 +313,7 @@ function App() {
 				""
 			)}
 			{notification ? (
-				<div
-					className={`notification-container ${
-						notification.success ? "active-green" : "active-red"
-					}`}>
+				<div className={`notification-container ${notification.success ? "active-green" : "active-red"}`}>
 					<p className="notification-message">{notification.message}</p>
 				</div>
 			) : (
