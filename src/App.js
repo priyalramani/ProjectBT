@@ -59,7 +59,7 @@ import OrderPdf from "./components/OrderPdf"
 import MobileLayout from "./components/MobileLayout"
 import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
 import CashRegister from "./pages/QuikAccess/CashRegister"
-export let Version = 104
+export let Version = 105
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
 function App() {
