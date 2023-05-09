@@ -3,7 +3,7 @@ import axios from "axios"
 import Select from "react-select"
 import { v4 as uuid } from "uuid"
 import { Billing, CONTROL_AUTO_REFRESH, jumpToNextIndex } from "../Apis/functions"
-import { Add, CheckCircle, ContentCopy, NotAccessible, Note, NoteAdd, WhatsApp } from "@mui/icons-material"
+import { Add, CheckCircle, ContentCopy, NoteAdd, WhatsApp } from "@mui/icons-material"
 import { useReactToPrint } from "react-to-print"
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material"
 import OrderPrint from "./OrderPrint"
@@ -223,11 +223,6 @@ export function OrderDetails({
 			})),
 		}))
 	}
-	const { getRemainingTime, getLastActiveTime } = useIdleTimer({
-		timeout: 1000 * 5,
-		onIdle: callBilling,
-		debounce: 500,
-	})
 	const reactToPrintContent = useCallback(() => {
 		return componentRef.current
 	}, [printData])
@@ -312,7 +307,11 @@ export function OrderDetails({
 						...a,
 						category_title: category.find(b => b.category_uuid === a.category_uuid)?.category_title,
 					}))
-					.sort((a, b) => a?.category_title?.localeCompare(b.category_title) || a?.item_title?.localeCompare(b.item_title))
+					.sort(
+						(a, b) =>
+							a?.category_title?.localeCompare(b.category_title) ||
+							a?.item_title?.localeCompare(b.item_title)
+					)
 					?.filter(a => +a.status !== 3)
 					?.map((a, i) => ({
 						...a,
@@ -497,7 +496,11 @@ export function OrderDetails({
 				  }
 				: {
 						...data,
-						fulfillment: [...(fulfillment || []), ...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) || [])],
+						fulfillment: [
+							...(fulfillment || []),
+							...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) ||
+								[]),
+						],
 				  }
 		// console.log("data", data);
 		if (completeOrder) {
@@ -630,7 +633,11 @@ export function OrderDetails({
 				  }
 				: {
 						...data,
-						fulfillment: [...(fulfillment || []), ...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) || [])],
+						fulfillment: [
+							...(fulfillment || []),
+							...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) ||
+								[]),
+						],
 				  }
 		// console.log("data", data);
 
@@ -665,7 +672,9 @@ export function OrderDetails({
 	}
 
 	const handleWarehouseChacking = async (complete, methodType) => {
-		let warehouse_uuid = users.find(a => a.user_uuid === localStorage.getItem("user_uuid"))?.warehouse[0] || JSON.parse(localStorage.getItem("warehouse") || "")
+		let warehouse_uuid =
+			users.find(a => a.user_uuid === localStorage.getItem("user_uuid"))?.warehouse[0] ||
+			JSON.parse(localStorage.getItem("warehouse") || "")
 		if (methodType === "complete") {
 			setComplete(true)
 		}
@@ -796,7 +805,29 @@ export function OrderDetails({
 			setSelectedTrip({ trip_uuid: 0, warehouse_uuid: "" })
 		}
 	}
-	console.log(order?.counter_uuid)
+
+	const [dateTimeUpdating, setDateTimeUpdating] = useState(0)
+	const handleDateTimeUpdate = async e => {
+		try {
+			setDateTimeUpdating(1)
+			const time = {
+				time_1: new Date(e.target.value).getTime(),
+				time_2:
+					(orderData?.time_2 - orderData?.time_1 || 48 * 60 * 60 * 1000) + new Date(e.target.value).getTime(),
+			}
+
+			setOrderData(data => ({ ...data, ...time }))
+			const response = await axios.put("/orders/order_datetime", {
+				order_uuid: orderData?.order_uuid,
+				...time,
+			})
+
+			if (response?.success) setDateTimeUpdating(2)
+		} catch (error) {
+			setDateTimeUpdating(0)
+		}
+	}
+
 	return deliveryPopup ? (
 		<DiliveryPopup
 			onSave={() => {
@@ -861,7 +892,9 @@ export function OrderDetails({
 														orderData?.counter_uuid
 															? {
 																	value: orderData?.counter_uuid,
-																	label: counters?.find(j => j.counter_uuid === orderData.counter_uuid)?.counter_title,
+																	label: counters?.find(
+																		j => j.counter_uuid === orderData.counter_uuid
+																	)?.counter_title,
 															  }
 															: { value: 0, label: "None" }
 													}
@@ -878,7 +911,9 @@ export function OrderDetails({
 											<div className="inputGroup">
 												<Select
 													options={priorityOptions}
-													onChange={doc => setOrderData(x => ({ ...x, priority: doc?.value }))}
+													onChange={doc =>
+														setOrderData(x => ({ ...x, priority: doc?.value }))
+													}
 													value={priorityOptions?.find(j => j.value === orderData.priority)}
 													openMenuOnFocus={true}
 													menuPosition="fixed"
@@ -886,6 +921,49 @@ export function OrderDetails({
 													placeholder="Select Priority"
 												/>
 											</div>
+										</div>
+
+										<div className="inputGroup order-edit-select">
+											<label htmlFor="Warehouse">Time</label>
+											<div className="inputGroup" style={{ width: "fit-content" }}>
+												{/* <label
+													htmlFor="order-datetime"
+													style={{ margin: "auto", width: "fit-content" }}>
+													{new Date(+orderData?.time_1).toDateString()}
+												</label> */}
+												<input
+													type="datetime-local"
+													id="order-datetime"
+													onChange={handleDateTimeUpdate}
+													disabled={dateTimeUpdating === 1}
+													value={
+														orderData?.time_1
+															? new Date(+orderData?.time_1).toJSON().split(".")[0]
+															: ""
+													}
+												/>
+											</div>
+
+											{dateTimeUpdating === 2 ? (
+												<span style={{ fontSize: "1.1rem" }}>✓</span>
+											) : (
+												<svg
+													viewBox="0 0 100 100"
+													style={{ width: "20px", opacity: dateTimeUpdating }}>
+													<path
+														d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+														fill="#000"
+														stroke="none">
+														<animateTransform
+															attributeName="transform"
+															type="rotate"
+															dur="1s"
+															repeatCount="indefinite"
+															keyTimes="0;1"
+															values="0 50 51;360 50 51"></animateTransform>
+													</path>
+												</svg>
+											)}
 										</div>
 									</>
 								) : (
@@ -897,9 +975,15 @@ export function OrderDetails({
 												// backgroundColor: "#000",
 												width: "fit-content",
 											}}
-											onClick={() => setCounterNotesPoup(counters.find(a => a.counter_uuid === orderData.counter_uuid))}>
+											onClick={() =>
+												setCounterNotesPoup(
+													counters.find(a => a.counter_uuid === orderData.counter_uuid)
+												)
+											}>
 											<NoteAdd />
-											{counters.find(a => a.counter_uuid === orderData?.counter_uuid)?.counter_title || ""} : {orderData?.invoice_number || ""}
+											{counters.find(a => a.counter_uuid === orderData?.counter_uuid)
+												?.counter_title || ""}{" "}
+											: {orderData?.invoice_number || ""}
 										</span>
 									</h2>
 								)}
@@ -916,7 +1000,10 @@ export function OrderDetails({
 										flexDirection: "row",
 										justifyContent: "space-between",
 									}}>
-									<button style={{ width: "fit-Content", backgroundColor: "red" }} className="item-sales-search" onClick={() => setDeletePopup("Delete")}>
+									<button
+										style={{ width: "fit-Content", backgroundColor: "red" }}
+										className="item-sales-search"
+										onClick={() => setDeletePopup("Delete")}>
 										Cancel Order
 									</button>
 
@@ -954,7 +1041,11 @@ export function OrderDetails({
 										style={{ width: "fit-Content", backgroundColor: "black" }}
 										className="item-sales-search"
 										onClick={() => {
-											if (!window.location.pathname.includes("completeOrderReport") && (window.location.pathname.includes("admin") || window.location.pathname.includes("trip")))
+											if (
+												!window.location.pathname.includes("completeOrderReport") &&
+												(window.location.pathname.includes("admin") ||
+													window.location.pathname.includes("trip"))
+											)
 												handleWarehouseChacking()
 											else handlePrint()
 										}}>
@@ -1018,7 +1109,9 @@ export function OrderDetails({
 
 							<div className="items_table" style={{ flex: "1", paddingLeft: "10px" }}>
 								<table>
-									<thead className="bb b--green" style={{ position: "sticky", top: 0, zIndex: "100" }}>
+									<thead
+										className="bb b--green"
+										style={{ position: "sticky", top: 0, zIndex: "100" }}>
 										<>
 											<tr>
 												<th>Warehouse</th>
@@ -1040,7 +1133,12 @@ export function OrderDetails({
 															}}
 															value={{
 																value: orderData.warehouse_uuid || "",
-																label: warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)?.warehouse_title || "None",
+																label:
+																	warehouse.find(
+																		a =>
+																			orderData?.warehouse_uuid ===
+																			a.warehouse_uuid
+																	)?.warehouse_title || "None",
 															}}
 															openMenuOnFocus={true}
 															menuPosition="fixed"
@@ -1048,7 +1146,9 @@ export function OrderDetails({
 															placeholder="Item"
 														/>
 													) : (
-														warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)?.warehouse_title || "None"
+														warehouse.find(
+															a => orderData?.warehouse_uuid === a.warehouse_uuid
+														)?.warehouse_title || "None"
 													)}
 												</th>
 												<th>Grand Total</th>
@@ -1230,7 +1330,12 @@ export function OrderDetails({
 																: +item.status === 3
 																? "red"
 																: "#fff",
-														color: item.price_approval === "N" ? "#000" : +item.status === 1 || +item.status === 3 ? "#fff" : "#000",
+														color:
+															item.price_approval === "N"
+																? "#000"
+																: +item.status === 1 || +item.status === 3
+																? "#fff"
+																: "#000",
 														borderBottom: "2px solid #fff",
 													}}>
 													{editOrder ? (
@@ -1241,13 +1346,14 @@ export function OrderDetails({
 																		onClick={() =>
 																			setOrderData(prev => ({
 																				...prev,
-																				item_details: prev.item_details?.map(a =>
-																					a.uuid === item.uuid
-																						? {
-																								...a,
-																								price_approval: "Y",
-																						  }
-																						: a
+																				item_details: prev.item_details?.map(
+																					a =>
+																						a.uuid === item.uuid
+																							? {
+																									...a,
+																									price_approval: "Y",
+																							  }
+																							: a
 																				),
 																			}))
 																		}>
@@ -1265,13 +1371,18 @@ export function OrderDetails({
 																<span
 																	onClick={() =>
 																		setOrderData(prev => {
-																			let exicting = order?.fulfillment?.find(a => a.item_uuid === item.item_uuid)
+																			let exicting = order?.fulfillment?.find(
+																				a => a.item_uuid === item.item_uuid
+																			)
 																			let difference = 0
 																			if (exicting) {
 																				difference =
-																					+(item.b || 0) * (+item.conversion || 0) +
+																					+(item.b || 0) *
+																						(+item.conversion || 0) +
 																					(+item.p || 0) +
-																					(+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0))
+																					(+(exicting.b || 0) *
+																						(+item.conversion || 0) +
+																						(+exicting.p || 0))
 																			}
 																			let fulfillment = exicting
 																				? [
@@ -1279,8 +1390,16 @@ export function OrderDetails({
 
 																						{
 																							item_uuid: item.item_uuid,
-																							b: Math.floor(difference / (+item.conversion || 1)),
-																							p: Math.floor(difference % (+item.conversion || 1)),
+																							b: Math.floor(
+																								difference /
+																									(+item.conversion ||
+																										1)
+																							),
+																							p: Math.floor(
+																								difference %
+																									(+item.conversion ||
+																										1)
+																							),
 																						},
 																				  ]
 																				: [
@@ -1294,14 +1413,17 @@ export function OrderDetails({
 
 																			return {
 																				...prev,
-																				item_details: prev.item_details?.filter(a => !(a.uuid === item.uuid)),
+																				item_details: prev.item_details?.filter(
+																					a => !(a.uuid === item.uuid)
+																				),
 																				fulfillment,
 																			}
 																		})
 																	}>
 																	<RemoveCircle
 																		sx={{
-																			fontSize: item.price_approval === "N" ? 15 : 20,
+																			fontSize:
+																				item.price_approval === "N" ? 15 : 20,
 																		}}
 																		style={{
 																			cursor: "pointer",
@@ -1314,7 +1436,9 @@ export function OrderDetails({
 													) : (
 														""
 													)}
-													<td className="ph2 pv1 tl bb b--black-20 bg-white" style={{ textAlign: "center", width: "3ch" }}>
+													<td
+														className="ph2 pv1 tl bb b--black-20 bg-white"
+														style={{ textAlign: "center", width: "3ch" }}>
 														{item.sr}
 													</td>
 													<td className="ph2 pv1 tl bb b--black-20 bg-white">
@@ -1325,7 +1449,11 @@ export function OrderDetails({
 															style={{ height: "20px" }}>
 															{editOrder && !item.default ? (
 																<Select
-																	ref={ref => (reactInputsRef.current[item_title_component_id] = ref)}
+																	ref={ref =>
+																		(reactInputsRef.current[
+																			item_title_component_id
+																		] = ref)
+																	}
 																	styles={{
 																		control: styles => ({
 																			...styles,
@@ -1337,8 +1465,15 @@ export function OrderDetails({
 																	}}
 																	id={"1_item_uuid" + item.uuid}
 																	options={itemsData
-																		?.filter(a => !order?.item_details?.filter(b => a.item_uuid === b.item_uuid)?.length && a.status !== 0)
-																		.sort((a, b) => a?.item_title?.localeCompare(b.item_title))
+																		?.filter(
+																			a =>
+																				!order?.item_details?.filter(
+																					b => a.item_uuid === b.item_uuid
+																				)?.length && a.status !== 0
+																		)
+																		.sort((a, b) =>
+																			a?.item_title?.localeCompare(b.item_title)
+																		)
 																		?.map((a, j) => ({
 																			value: a.item_uuid,
 																			label: a.item_title + "______" + a.mrp,
@@ -1351,8 +1486,16 @@ export function OrderDetails({
 																				a.uuid === item.uuid
 																					? {
 																							...a,
-																							...itemsData.find(b => b.item_uuid === e.value),
-																							price: itemsData.find(b => b.item_uuid === e.value)?.item_price,
+																							...itemsData.find(
+																								b =>
+																									b.item_uuid ===
+																									e.value
+																							),
+																							price: itemsData.find(
+																								b =>
+																									b.item_uuid ===
+																									e.value
+																							)?.item_price,
 																					  }
 																					: a
 																			),
@@ -1361,21 +1504,29 @@ export function OrderDetails({
 																	}}
 																	value={{
 																		value: item.item_uuid || "",
-																		label: item.item_title ? item.item_title + "______" + item.mrp : "",
+																		label: item.item_title
+																			? item.item_title + "______" + item.mrp
+																			: "",
 																		key: item.item_uuid || item.uuid,
 																	}}
 																	openMenuOnFocus={true}
-																	autoFocus={focusedInputId === item_title_component_id || (i === 0 && focusedInputId === 0)}
+																	autoFocus={
+																		focusedInputId === item_title_component_id ||
+																		(i === 0 && focusedInputId === 0)
+																	}
 																	menuPosition="fixed"
 																	menuPlacement="auto"
 																	placeholder="Item"
 																/>
 															) : (
-																itemsData.find(a => a.item_uuid === item.item_uuid)?.item_title || ""
+																itemsData.find(a => a.item_uuid === item.item_uuid)
+																	?.item_title || ""
 															)}
 														</div>
 													</td>
-													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+													<td
+														className="ph2 pv1 tc bb b--black-20 bg-white"
+														style={{ textAlign: "center" }}>
 														{item.mrp || ""}
 													</td>
 													{editOrder ? (
@@ -1389,7 +1540,10 @@ export function OrderDetails({
 															index={listItemIndexCount++}
 															id={item_status_component_id}>
 															<Select
-																ref={ref => (reactInputsRef.current[item_status_component_id] = ref)}
+																ref={ref =>
+																	(reactInputsRef.current[item_status_component_id] =
+																		ref)
+																}
 																styles={{
 																	control: styles => {
 																		// console.log(styles);
@@ -1420,8 +1574,17 @@ export function OrderDetails({
 																	}))
 																	shiftFocus(item_status_component_id)
 																}}
-																value={item.status || +item.status === 0 ? default_status.find(a => +a.value === +item.status) : ""}
-																autoFocus={focusedInputId === item_status_component_id || (i === 0 && item.default && focusedInputId === 0)}
+																value={
+																	item.status || +item.status === 0
+																		? default_status.find(
+																				a => +a.value === +item.status
+																		  )
+																		: ""
+																}
+																autoFocus={
+																	focusedInputId === item_status_component_id ||
+																	(i === 0 && item.default && focusedInputId === 0)
+																}
 																openMenuOnFocus={true}
 																menuPosition="fixed"
 																menuPlacement="auto"
@@ -1431,7 +1594,9 @@ export function OrderDetails({
 													) : (
 														""
 													)}
-													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center", height: "20px" }}>
+													<td
+														className="ph2 pv1 tc bb b--black-20 bg-white"
+														style={{ textAlign: "center", height: "20px" }}>
 														{editOrder ? (
 															<input
 																id={"q" + item.uuid}
@@ -1464,7 +1629,9 @@ export function OrderDetails({
 																	e.target.onwheel = () => false
 																	e.target.select()
 																}}
-																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
+																onKeyDown={e =>
+																	e.key === "Enter" ? shiftFocus(e.target.id) : ""
+																}
 																disabled={!item.item_uuid}
 																onWheel={e => e.preventDefault()}
 															/>
@@ -1472,7 +1639,9 @@ export function OrderDetails({
 															item.b || 0
 														)}
 													</td>
-													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+													<td
+														className="ph2 pv1 tc bb b--black-20 bg-white"
+														style={{ textAlign: "center" }}>
 														{editOrder ? (
 															<input
 																id={"p" + item.uuid}
@@ -1506,14 +1675,18 @@ export function OrderDetails({
 																	e.target.onwheel = () => false
 																	e.target.select()
 																}}
-																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
+																onKeyDown={e =>
+																	e.key === "Enter" ? shiftFocus(e.target.id) : ""
+																}
 																disabled={!item.item_uuid}
 															/>
 														) : (
 															item.p || 0
 														)}
 													</td>
-													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+													<td
+														className="ph2 pv1 tc bb b--black-20 bg-white"
+														style={{ textAlign: "center" }}>
 														{editOrder ? (
 															<input
 																type="number"
@@ -1546,14 +1719,18 @@ export function OrderDetails({
 																	e.target.onwheel = () => false
 																	e.target.select()
 																}}
-																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
+																onKeyDown={e =>
+																	e.key === "Enter" ? shiftFocus(e.target.id) : ""
+																}
 																disabled={!item.item_uuid}
 															/>
 														) : (
 															"Rs:" + (item?.price || 0)
 														)}
 													</td>
-													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+													<td
+														className="ph2 pv1 tc bb b--black-20 bg-white"
+														style={{ textAlign: "center" }}>
 														{editOrder ? (
 															<input
 																type="number"
@@ -1575,7 +1752,10 @@ export function OrderDetails({
 																				a.uuid === item.uuid
 																					? {
 																							...a,
-																							price: +(e.target.value / item.conversion).toFixed(3),
+																							price: +(
+																								e.target.value /
+																								item.conversion
+																							).toFixed(3),
 																					  }
 																					: a
 																			),
@@ -1586,7 +1766,9 @@ export function OrderDetails({
 																	e.target.onwheel = () => false
 																	e.target.select()
 																}}
-																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
+																onKeyDown={e =>
+																	e.key === "Enter" ? shiftFocus(e.target.id) : ""
+																}
 																disabled={!item.item_uuid}
 															/>
 														) : (
@@ -1621,10 +1803,16 @@ export function OrderDetails({
 													onClick={() =>
 														setOrderData(prev => ({
 															...prev,
-															item_details: [...prev.item_details, { uuid: uuid(), b: 0, p: 0, edit: true }],
+															item_details: [
+																...prev.item_details,
+																{ uuid: uuid(), b: 0, p: 0, edit: true },
+															],
 														}))
 													}>
-													<AddIcon sx={{ fontSize: 40 }} style={{ color: "#4AC959", cursor: "pointer" }} />
+													<AddIcon
+														sx={{ fontSize: 40 }}
+														style={{ color: "#4AC959", cursor: "pointer" }}
+													/>
 												</td>
 											</tr>
 										) : (
@@ -1638,25 +1826,43 @@ export function OrderDetails({
 											}}>
 											<td></td>
 											<td></td>
-											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+											<td
+												className="ph2 pv1 tc bb b--black-20 bg-white"
+												style={{ textAlign: "center" }}>
 												<div className="inputGroup">Total</div>
 											</td>
-											{editOrder ? <td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}></td> : ""}
-											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+											{editOrder ? (
+												<td
+													className="ph2 pv1 tc bb b--black-20 bg-white"
+													style={{ textAlign: "center" }}></td>
+											) : (
+												""
+											)}
+											<td
+												className="ph2 pv1 tc bb b--black-20 bg-white"
+												style={{ textAlign: "center" }}>
 												{(orderData?.item_details?.length > 1
-													? orderData?.item_details?.map(a => +a?.b || 0).reduce((a, b) => a + b)
+													? orderData?.item_details
+															?.map(a => +a?.b || 0)
+															.reduce((a, b) => a + b)
 													: orderData?.item_details?.length
 													? orderData?.item_details[0]?.b
 													: 0) || 0}
 											</td>
-											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+											<td
+												className="ph2 pv1 tc bb b--black-20 bg-white"
+												style={{ textAlign: "center" }}>
 												{(orderData?.item_details?.length > 1
-													? orderData?.item_details?.map(a => +a?.p || 0).reduce((a, b) => a + b)
+													? orderData?.item_details
+															?.map(a => +a?.p || 0)
+															.reduce((a, b) => a + b)
 													: orderData?.item_details?.length
 													? orderData?.item_details[0]?.p
 													: 0) || 0}
 											</td>
-											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}></td>
+											<td
+												className="ph2 pv1 tc bb b--black-20 bg-white"
+												style={{ textAlign: "center" }}></td>
 											{editOrder ? <td></td> : ""}
 										</tr>
 									</tbody>
@@ -1675,9 +1881,33 @@ export function OrderDetails({
 							justifyContent: "space-between",
 							paddingTop: "20px",
 						}}>
-						<div style={{ width: "20%", color: "#fff" }}>-</div>
+						<div id="payment-pending-wrapper">
+							{editOrder ? (
+								<>
+									<input
+										type="checkbox"
+										name="payment-pending-status"
+										id="payment-pending-status"
+										checked={Boolean(orderData?.payment_pending)}
+										onChange={e =>
+											setOrderData(x => ({ ...x, payment_pending: +e.target.checked }))
+										}
+									/>
+									<label htmlFor="payment-pending-status">Payment pending</label>
+								</>
+							) : (
+								<span>Payment pending: {orderData?.payment_pending ? "Yes" : "No"}</span>
+							)}
+						</div>
+
 						{editOrder ? (
-							<button type="button" onClick={window.location.pathname.includes("completeOrderReport") ? () => setDeliveryPopup("edit") : onSubmit}>
+							<button
+								type="button"
+								onClick={
+									window.location.pathname.includes("completeOrderReport")
+										? () => setDeliveryPopup("edit")
+										: onSubmit
+								}>
 								Save
 							</button>
 						) : (
@@ -1711,7 +1941,13 @@ export function OrderDetails({
 					<div className="flex" style={{ width: "40px", height: "40px" }}>
 						<svg viewBox="0 0 100 100">
 							<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
-								<animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
+								<animateTransform
+									attributeName="transform"
+									type="rotate"
+									dur="1s"
+									repeatCount="indefinite"
+									keyTimes="0;1"
+									values="0 50 51;360 50 51"></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -1719,15 +1955,60 @@ export function OrderDetails({
 			) : (
 				""
 			)}
-			{holdPopup ? <FreeItems onSave={() => setHoldPopup(false)} orders={orderData} holdPopup={holdPopup} itemsData={itemsData} setOrder={setOrderData} /> : ""}
-			{messagePopup ? (
-				<MessagePopup onClose={updateOrder} message="Update Amount" message2={"Rs. " + messagePopup?.order_grandtotal} button1="Save" button2="Cancel" onSave={() => setMessagePopup(false)} />
+			{holdPopup ? (
+				<FreeItems
+					onSave={() => setHoldPopup(false)}
+					orders={orderData}
+					holdPopup={holdPopup}
+					itemsData={itemsData}
+					setOrder={setOrderData}
+				/>
 			) : (
 				""
 			)}
-			{splitHoldPopup ? <MessagePopup onClose={splitOrder} message="Create Separate Order for Hold ?" message2="" button1="Save" button2="Cancel" onSave={() => setSplitHold(false)} /> : ""}
-			{warehousePopup ? <NewUserForm onClose={() => setWarhousePopup(false)} updateChanges={updateWarehouse} popupInfo={warehousePopup} /> : ""}
-			{popupDetails ? <CheckingValues onSave={() => setPopupDetails(false)} popupDetails={popupDetails} users={users} items={itemsData} /> : ""}
+			{messagePopup ? (
+				<MessagePopup
+					onClose={updateOrder}
+					message="Update Amount"
+					message2={"Rs. " + messagePopup?.order_grandtotal}
+					button1="Save"
+					button2="Cancel"
+					onSave={() => setMessagePopup(false)}
+				/>
+			) : (
+				""
+			)}
+			{splitHoldPopup ? (
+				<MessagePopup
+					onClose={splitOrder}
+					message="Create Separate Order for Hold ?"
+					message2=""
+					button1="Save"
+					button2="Cancel"
+					onSave={() => setSplitHold(false)}
+				/>
+			) : (
+				""
+			)}
+			{warehousePopup ? (
+				<NewUserForm
+					onClose={() => setWarhousePopup(false)}
+					updateChanges={updateWarehouse}
+					popupInfo={warehousePopup}
+				/>
+			) : (
+				""
+			)}
+			{popupDetails ? (
+				<CheckingValues
+					onSave={() => setPopupDetails(false)}
+					popupDetails={popupDetails}
+					users={users}
+					items={itemsData}
+				/>
+			) : (
+				""
+			)}
 			{popupDiscount ? (
 				<DiscountPopup
 					onSave={() => setPopupDiscount(false)}
@@ -1736,7 +2017,9 @@ export function OrderDetails({
 					onUpdate={data => {
 						setOrderData({
 							...orderData,
-							item_details: orderData?.item_details?.map(a => (a.item_uuid === data.item_uuid ? { ...a, charges_discount: data.charges_discount } : a)),
+							item_details: orderData?.item_details?.map(a =>
+								a.item_uuid === data.item_uuid ? { ...a, charges_discount: data.charges_discount } : a
+							),
 						})
 						setPopupDiscount(false)
 					}}
@@ -1832,7 +2115,10 @@ export function OrderDetails({
 											) : (
 												<button type="button" className="submit" style={{ width: "80px" }}>
 													<svg viewBox="0 0 100 100" style={{ width: "20px" }}>
-														<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
+														<path
+															d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+															fill="#ffffff"
+															stroke="none">
 															<animateTransform
 																attributeName="transform"
 																type="rotate"
@@ -1925,7 +2211,9 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 			return
 		}
 		let time = new Date()
-		let stage = order?.status?.length ? order?.status?.map(a => +a.stage || 0)?.reduce((a, b) => Math.max(a, b)) : order?.status[0]?.stage || 0
+		let stage = order?.status?.length
+			? order?.status?.map(a => +a.stage || 0)?.reduce((a, b) => Math.max(a, b))
+			: order?.status[0]?.stage || 0
 		let data = {
 			...order,
 			status: [
@@ -1936,7 +2224,9 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 					time: time.getTime(),
 				},
 			],
-			fulfillment: order?.fulfillment?.length ? [...order?.fulfillment, ...order?.item_details] : order?.item_details,
+			fulfillment: order?.fulfillment?.length
+				? [...order?.fulfillment, ...order?.item_details]
+				: order?.item_details,
 			item_details: order?.item_details?.map(a => ({ ...a, b: 0, p: 0 })),
 		}
 
@@ -1985,7 +2275,12 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 				<h3>Order will be {deletePopup}</h3>
 
 				<div className="flex">
-					<button type="button" className="submit" onClick={() => PutOrder()} disabled={disable} style={{ opacity: disable ? "0.5" : "1" }}>
+					<button
+						type="button"
+						className="submit"
+						onClick={() => PutOrder()}
+						disabled={disable}
+						style={{ opacity: disable ? "0.5" : "1" }}>
 						Confirm
 					</button>
 				</div>
@@ -2063,8 +2358,17 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 															? "Order Completed By"
 															: ""}
 													</td>
-													<td colSpan={2}>{new Date(+item.time).toDateString() + " " + formatAMPM(new Date(item.time)) || ""}</td>
-													<td>{item.user_uuid === "240522" ? "Admin" : users.find(a => a.user_uuid === item?.user_uuid)?.user_title || ""}</td>
+													<td colSpan={2}>
+														{new Date(+item.time).toDateString() +
+															" " +
+															formatAMPM(new Date(item.time)) || ""}
+													</td>
+													<td>
+														{item.user_uuid === "240522"
+															? "Admin"
+															: users.find(a => a.user_uuid === item?.user_uuid)
+																	?.user_title || ""}
+													</td>
 												</tr>
 											))}
 									</tbody>
@@ -2095,7 +2399,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 												style={{
 													height: "30px",
 												}}>
-												<td colSpan={2}>{items.find(a => a.item_uuid === item.item_uuid)?.item_title || ""}</td>
+												<td colSpan={2}>
+													{items.find(a => a.item_uuid === item.item_uuid)?.item_title || ""}
+												</td>
 												<td>
 													{item?.b || 0}:{item.p || 0}
 												</td>
@@ -2129,7 +2435,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 												style={{
 													height: "30px",
 												}}>
-												<td colSpan={2}>{items.find(a => a.item_uuid === item.item_uuid)?.item_title || ""}</td>
+												<td colSpan={2}>
+													{items.find(a => a.item_uuid === item.item_uuid)?.item_title || ""}
+												</td>
 												<td>
 													{item?.b || 0}:{item.p || 0}
 												</td>
@@ -2163,7 +2471,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 												style={{
 													height: "30px",
 												}}>
-												<td colSpan={2}>{items.find(a => a.item_uuid === item.item_uuid)?.item_title || ""}</td>
+												<td colSpan={2}>
+													{items.find(a => a.item_uuid === item.item_uuid)?.item_title || ""}
+												</td>
 												<td>
 													{item?.b || 0}:{item.p || 0}
 												</td>
@@ -2283,7 +2593,13 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 															}}
 															value={item.value || 0}
 															onChange={e => {
-																setData(prev => prev?.map(a => (a.uuid === item.uuid ? { ...a, value: e.target.value } : a)))
+																setData(prev =>
+																	prev?.map(a =>
+																		a.uuid === item.uuid
+																			? { ...a, value: e.target.value }
+																			: a
+																	)
+																)
 																setEdit(true)
 															}}
 															onFocus={e => {
@@ -2298,14 +2614,20 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 										: ""}
 								</tbody>
 							</table>
-							<button type="button" className="submit" onClick={() => setData(prev => [...prev, { uuid: uuid() }])}>
+							<button
+								type="button"
+								className="submit"
+								onClick={() => setData(prev => [...prev, { uuid: uuid() }])}>
 								<Add />
 							</button>
 						</div>
 
 						<div className="flex" style={{ justifyContent: "space-between" }}>
 							{edit ? (
-								<button type="button" className="submit" onClick={() => onUpdate({ ...popupDetails, charges_discount: data })}>
+								<button
+									type="button"
+									className="submit"
+									onClick={() => onUpdate({ ...popupDetails, charges_discount: data })}>
 									Save
 								</button>
 							) : (
@@ -2321,7 +2643,16 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 		</div>
 	)
 }
-function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order, updateBilling, deliveryPopup, users }) {
+function DiliveryPopup({
+	onSave,
+	postOrderData,
+	credit_allowed,
+	counters,
+	order,
+	updateBilling,
+	deliveryPopup,
+	users,
+}) {
 	const [PaymentModes, setPaymentModes] = useState([])
 	const [modes, setModes] = useState([])
 	const [error, setError] = useState("")
@@ -2335,7 +2666,12 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 	const time2 = new Date()
 	time2.setHours(12)
 	let reminder = useMemo(() => {
-		return new Date(time2.setDate(time2.getDate() + (counters.find(a => a.counter_uuid === order?.counter_uuid)?.payment_reminder_days || 0))).getTime()
+		return new Date(
+			time2.setDate(
+				time2.getDate() +
+					(counters.find(a => a.counter_uuid === order?.counter_uuid)?.payment_reminder_days || 0)
+			)
+		).getTime()
 	}, [counters, order?.counter_uuid])
 	let type = useMemo(() => {
 		return counters.find(a => a.counter_uuid === order?.counter_uuid)?.outstanding_type || 0
@@ -2432,7 +2768,16 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 		}
 		GetPaymentModes()
 		if (order.trip_uuid) getTripData(order.trip_uuid)
-	}, [deliveryPopup, order?.counter_uuid, order?.invoice_number, order?.order_uuid, order?.trip_uuid, reminder, type, order.trip_uuid])
+	}, [
+		deliveryPopup,
+		order?.counter_uuid,
+		order?.invoice_number,
+		order?.order_uuid,
+		order?.trip_uuid,
+		reminder,
+		type,
+		order.trip_uuid,
+	])
 	useEffect(() => {
 		if (PaymentModes?.length)
 			setModes(
@@ -2440,7 +2785,11 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 					...a,
 					amt: "",
 					coin: "",
-					status: a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002" ? "0" : 1,
+					status:
+						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
+						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+							? "0"
+							: 1,
 				}))
 			)
 	}, [PaymentModes])
@@ -2457,11 +2806,6 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 		}
 		if (modes.find(a => a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" && a.amt && !a.remarks)) {
 			setError("Cheque number is mandatory")
-			setWaiting(false)
-			return
-		}
-		if (modes.find(a => a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002" && a.amt && !a.remarks)) {
-			setError("UPI transaction I'd is mandatory")
 			setWaiting(false)
 			return
 		}
@@ -2585,7 +2929,10 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 							<form className="form">
 								<div className="formGroup">
 									{PaymentModes?.map(item => (
-										<div className="row" style={{ flexDirection: "row", alignItems: "center" }} key={item.mode_uuid}>
+										<div
+											className="row"
+											style={{ flexDirection: "row", alignItems: "center" }}
+											key={item.mode_uuid}>
 											<div style={{ width: "50px" }}>{item.mode_title}</div>
 											<label className="selectLabel flex" style={{ width: "80px" }}>
 												<input
@@ -2623,16 +2970,16 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 													maxLength={42}
 													onWheel={e => e.preventDefault()}
 												/>
-												{/* {popupInfo.conversion || 0} */}
 											</label>
-											{modes.find(a => a.mode_uuid === item.mode_uuid && item.mode_uuid !== "c67b54ba-d2b6-11ec-9d64-0242ac120002")?.amt ? (
+											{item.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" &&
+											modes.find(a => a.mode_uuid === item.mode_uuid)?.amt ? (
 												<label className="selectLabel flex" style={{ width: "200px" }}>
 													<input
 														type="text"
 														name="route_title"
 														className="numberInput"
 														value={item?.remarks}
-														placeholder={item.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ? "Cheque number" : "UPI transaction I'd"}
+														placeholder={"Cheque Number"}
 														style={{
 															width: "100%",
 															backgroundColor: "light",
@@ -2642,10 +2989,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 															setModes(prev =>
 																prev?.map(a =>
 																	a.mode_uuid === item.mode_uuid
-																		? {
-																				...a,
-																				remarks: e.target.value,
-																		  }
+																		? { ...a, remarks: e.target.value }
 																		: a
 																)
 															)
@@ -2653,7 +2997,6 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 														maxLength={42}
 														onWheel={e => e.preventDefault()}
 													/>
-													{/* {popupInfo.conversion || 0} */}
 												</label>
 											) : (
 												""
@@ -2730,7 +3073,11 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 										{deliveryPopup === "put" ? (
 											""
 										) : (
-											<button type="button" className="submit" style={{ color: "#fff", backgroundColor: "#7990dd" }} onClick={() => setPopup(true)}>
+											<button
+												type="button"
+												className="submit"
+												style={{ color: "#fff", backgroundColor: "#7990dd" }}
+												onClick={() => setPopup(true)}>
 												Deductions
 											</button>
 										)}
@@ -2761,7 +3108,11 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 								</div>
 
 								<div className="flex" style={{ justifyContent: "space-between" }}>
-									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
+									<button
+										type="button"
+										style={{ backgroundColor: "red" }}
+										className="submit"
+										onClick={onSave}>
 										Cancel
 									</button>
 									<button type="button" className="submit" onClick={submitHandler}>
@@ -2778,7 +3129,13 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 					<div className="flex" style={{ width: "40px", height: "40px" }}>
 						<svg viewBox="0 0 100 100">
 							<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
-								<animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
+								<animateTransform
+									attributeName="transform"
+									type="rotate"
+									dur="1s"
+									repeatCount="indefinite"
+									keyTimes="0;1"
+									values="0 50 51;360 50 51"></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -3051,7 +3408,8 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
 													data
 														? {
 																value: data,
-																label: warehouse?.find(j => j.warehouse_uuid === data)?.warehouse_title,
+																label: warehouse?.find(j => j.warehouse_uuid === data)
+																	?.warehouse_title,
 														  }
 														: { value: 0, label: "None" }
 												}
@@ -3067,7 +3425,7 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
 							</div>
 
 							<button type="submit" className="submit">
-								Save changes
+								Save Changes
 							</button>
 						</form>
 					</div>
@@ -3117,7 +3475,9 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
 											onChange={e =>
 												setSelectedTrip({
 													trip_uuid: e.target.value,
-													warehouse_uuid: trips?.find(a => a.trip_uuid === e.target.value)?.warehouse_uuid || "",
+													warehouse_uuid:
+														trips?.find(a => a.trip_uuid === e.target.value)
+															?.warehouse_uuid || "",
 												})
 											}
 											maxLength={42}
@@ -3128,7 +3488,9 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
 													a =>
 														a.trip_uuid &&
 														a.status &&
-														(+JSON.parse(localStorage.getItem("warehouse") || "") === 1 || JSON.parse(localStorage.getItem("warehouse") || "") === a.warehouse_uuid)
+														(+JSON.parse(localStorage.getItem("warehouse") || "") === 1 ||
+															JSON.parse(localStorage.getItem("warehouse") || "") ===
+																a.warehouse_uuid)
 												)
 												?.map(a => (
 													<option value={a.trip_uuid}>{a.trip_title}</option>

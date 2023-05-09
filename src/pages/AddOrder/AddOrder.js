@@ -29,7 +29,7 @@ let getInititalValues = () => ({
 	item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
 	priority: 0,
 	time_1: 24 * 60 * 60 * 1000,
-	time_2: 48 * 60 * 60 * 1000,
+	time_2: (24 + 48) * 60 * 60 * 1000,
 	warehouse_uuid: localStorage.getItem("warehouse") ? JSON.parse(localStorage.getItem("warehouse")) || "" : "",
 })
 

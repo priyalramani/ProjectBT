@@ -96,8 +96,25 @@ div.order-edit-select {
 	flex-direction: row;
 }
 
+#payment-pending-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 0.9rem;
+	background: #f0f0f0;
+	padding: 10px 15px 10px 12px;
+	border-radius: 5px;
+	order: 1px solid lightgray;
+	text-transform: uppercase;
+}
+
+#payment-pending-wrapper label,
+#payment-pending-wrapper input {
+	cursor: pointer;
+}
+
 .order-edit-select .inputGroup {
-	max-width: 400px;
-	width: 32vw;
+	max-width: 250px;
+	width: 25vw;
 	z-index: 999999999;
 }

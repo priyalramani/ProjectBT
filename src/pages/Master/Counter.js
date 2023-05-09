@@ -59,9 +59,7 @@ const Counter = () => {
 			if (popupForm?.item?.counter_uuid) {
 				setPopupForm(prev => ({
 					...prev,
-					item:
-						response.data.result?.find(a => a.counter_uuid === prev?.item?.counter_uuid) ||
-						prev.item,
+					item: response.data.result?.find(a => a.counter_uuid === prev?.item?.counter_uuid) || prev.item,
 				}))
 			}
 		}
@@ -95,10 +93,8 @@ const Counter = () => {
 				? counter
 						.map(b => ({
 							...b,
-							route_title:
-								routesData.find(a => a.route_uuid === b.route_uuid)?.route_title || "-",
-							route_sort_order:
-								routesData.find(a => a.route_uuid === b.route_uuid)?.sort_order || 0,
+							route_title: routesData.find(a => a.route_uuid === b.route_uuid)?.route_title || "-",
+							route_sort_order: routesData.find(a => a.route_uuid === b.route_uuid)?.sort_order || 0,
 						}))
 						.filter(
 							a =>
@@ -108,9 +104,7 @@ const Counter = () => {
 										?.toLocaleLowerCase()
 										?.includes(filterCounterTitle?.toLocaleLowerCase())) &&
 								(!filterRoute ||
-									a.route_title
-										?.toLocaleLowerCase()
-										?.includes(filterRoute?.toLocaleLowerCase()))
+									a.route_title?.toLocaleLowerCase()?.includes(filterRoute?.toLocaleLowerCase()))
 						)
 				: [],
 		[counter, filterCounterTitle, filterRoute, routesData]
@@ -249,11 +243,7 @@ const Counter = () => {
 			)}
 			{itemPopup ? <ItemPopup onSave={() => setItemPopup(false)} itemPopup={itemPopup} /> : ""}
 			{sequencePopup ? (
-				<CounterSequence
-					onSave={() => setSequencePopup(false)}
-					counters={counter}
-					routesData={routesData}
-				/>
+				<CounterSequence onSave={() => setSequencePopup(false)} counters={counter} routesData={routesData} />
 			) : (
 				""
 			)}
@@ -517,9 +507,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 								colSpan={1}
 								onClick={e => {
 									e.stopPropagation()
-									navigator.clipboard.writeText(
-										"https://btgondia.com/counter/" + item.short_link
-									)
+									navigator.clipboard.writeText("https://btgondia.com/counter/" + item.short_link)
 									setCopied(item.counter_uuid)
 									setTimeout(() => setCopied(""), 3000)
 								}}>
@@ -651,9 +639,7 @@ function CounterNotesPopup({ onSave, notesPopup }) {
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup" style={{ backgroundColor: "#fff" }}>
-									<div
-										className="row"
-										style={{ flexDirection: "row", alignItems: "start" }}>
+									<div className="row" style={{ flexDirection: "row", alignItems: "start" }}>
 										<div style={{ width: "50px" }}>Notes</div>
 										<label className="selectLabel flex" style={{ width: "200px" }}>
 											<textarea
@@ -1193,10 +1179,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 																	? prev?.payment_modes?.filter(
 																			a => a !== occ.mode_uuid
 																	  )
-																	: [
-																			...(prev.payment_modes || []),
-																			occ.mode_uuid,
-																	  ],
+																	: [...(prev.payment_modes || []), occ.mode_uuid],
 															}))
 														}}>
 														<td>
@@ -1216,17 +1199,13 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 													onClick={() =>
 														setdata(prev => ({
 															...prev,
-															credit_allowed:
-																prev?.credit_allowed === "Y" ? "N" : "Y",
+															credit_allowed: prev?.credit_allowed === "Y" ? "N" : "Y",
 														}))
 													}
 													style={{ marginBottom: "5px", textAlign: "center" }}
 													value="unpaid">
 													<td>
-														<input
-															type="checkbox"
-															checked={data?.credit_allowed === "Y"}
-														/>
+														<input type="checkbox" checked={data?.credit_allowed === "Y"} />
 													</td>
 													<td> Unpaid</td>
 												</tr>
@@ -1317,16 +1296,14 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 														style={{ width: "15ch" }}
 														disabled={a.lable?.find(
 															c =>
-																(c.type === "cal" || c.type === "wa") &&
-																+c.varification
+																(c.type === "cal" || c.type === "wa") && +c.varification
 														)}
 														onChange={e => {
 															if (
 																e.target.value.length > 10 ||
 																a.lable?.find(
 																	c =>
-																		(c.type === "cal" ||
-																			c.type === "wa") &&
+																		(c.type === "cal" || c.type === "wa") &&
 																		+c.varification
 																)
 															) {
@@ -1349,10 +1326,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 																c => c.type === "wa" && !+c.varification
 															)
 																? "red"
-																: a.lable?.find(
-																		c =>
-																			c.type === "wa" && +c.varification
-																  )
+																: a.lable?.find(c => c.type === "wa" && +c.varification)
 																? "green"
 																: "gray",
 															cursor: "pointer",
@@ -1389,9 +1363,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 															)
 																? "red"
 																: a.lable?.find(
-																		c =>
-																			c.type === "cal" &&
-																			+c.varification
+																		c => c.type === "cal" && +c.varification
 																  )
 																? "green"
 																: "gray",
@@ -1445,16 +1417,14 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 														style={{ width: "15ch" }}
 														disabled={a.lable?.find(
 															c =>
-																(c.type === "cal" || c.type === "wa") &&
-																+c.varification
+																(c.type === "cal" || c.type === "wa") && +c.varification
 														)}
 														onChange={e => {
 															if (
 																e.target.value.length > 10 ||
 																a.lable?.find(
 																	c =>
-																		(c.type === "cal" ||
-																			c.type === "wa") &&
+																		(c.type === "cal" || c.type === "wa") &&
 																		+c.varification
 																)
 															) {
@@ -1477,10 +1447,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 																c => c.type === "wa" && !+c.varification
 															)
 																? "red"
-																: a.lable?.find(
-																		c =>
-																			c.type === "wa" && +c.varification
-																  )
+																: a.lable?.find(c => c.type === "wa" && +c.varification)
 																? "green"
 																: "gray",
 															cursor: "pointer",
@@ -1517,9 +1484,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 															)
 																? "red"
 																: a.lable?.find(
-																		c =>
-																			c.type === "cal" &&
-																			+c.varification
+																		c => c.type === "cal" && +c.varification
 																  )
 																? "green"
 																: "gray",
@@ -1555,9 +1520,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 										</div>
 									</label>
 								</div>
-								<i style={{ color: "red" }}>
-									{errMassage === "" ? "" : "Error: " + errMassage}
-								</i>
+								<i style={{ color: "red" }}>{errMassage === "" ? "" : "Error: " + errMassage}</i>
 
 								<button type="submit" className="submit">
 									Save changes
@@ -1584,9 +1547,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 							<div style={{ overflowY: "scroll" }}>
 								<form className="form" onSubmit={VerifyOtp}>
 									<div className="formGroup">
-										<div
-											className="row"
-											style={{ flexDirection: "row", alignItems: "flex-start" }}>
+										<div className="row" style={{ flexDirection: "row", alignItems: "flex-start" }}>
 											<label className="selectLabel flex">
 												OTP
 												<input
@@ -1657,8 +1618,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 			setItemsData(
 				response.data.result.map(b => ({
 					...b,
-					company_title:
-						companies.find(a => a.company_uuid === b.company_uuid)?.company_title || "-",
+					company_title: companies.find(a => a.company_uuid === b.company_uuid)?.company_title || "-",
 					category_title:
 						itemCategories.find(a => a.category_uuid === b.category_uuid)?.category_title || "-",
 				}))
@@ -1818,8 +1778,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																	className="noBgActionButton"
 																	style={{
 																		backgroundColor: value.filter(
-																			a =>
-																				a.item_uuid === item.item_uuid
+																			a => a.item_uuid === item.item_uuid
 																		)?.length
 																			? "red"
 																			: "var(--mainColor)",
@@ -1829,9 +1788,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																	onClick={event =>
 																		setValue(prev =>
 																			value.filter(
-																				a =>
-																					a.item_uuid ===
-																					item.item_uuid
+																				a => a.item_uuid === item.item_uuid
 																			)?.length
 																				? value.filter(
 																						a =>
@@ -1842,21 +1799,18 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																				? [
 																						...prev,
 																						{
-																							item_uuid:
-																								item.item_uuid,
+																							item_uuid: item.item_uuid,
 																						},
 																				  ]
 																				: [
 																						{
-																							item_uuid:
-																								item.item_uuid,
+																							item_uuid: item.item_uuid,
 																						},
 																				  ]
 																		)
 																	}>
-																	{value.filter(
-																		a => a.item_uuid === item.item_uuid
-																	)?.length
+																	{value.filter(a => a.item_uuid === item.item_uuid)
+																		?.length
 																		? "Remove"
 																		: "Add"}
 																</button>
@@ -1871,16 +1825,14 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																		onChange={e =>
 																			setValue(prev =>
 																				prev.map(a =>
-																					a.item_uuid ===
-																					item.item_uuid
+																					a.item_uuid === item.item_uuid
 																						? {
 																								...a,
 																								[itemPopup?.type ===
 																								"item_special_price"
 																									? "price"
 																									: "discount"]:
-																									e.target
-																										.value,
+																									e.target.value,
 																						  }
 																						: a
 																				)
@@ -1888,19 +1840,15 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																		}
 																		value={
 																			value.find(
-																				a =>
-																					a.item_uuid ===
-																					item.item_uuid
+																				a => a.item_uuid === item.item_uuid
 																			)[
-																				itemPopup?.type ===
-																				"item_special_price"
+																				itemPopup?.type === "item_special_price"
 																					? "price"
 																					: "discount"
 																			]
 																		}
 																		placeholder={
-																			itemPopup?.type ===
-																			"item_special_price"
+																			itemPopup?.type === "item_special_price"
 																				? "price..."
 																				: "discount..."
 																		}
@@ -1932,9 +1880,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																	className="noBgActionButton"
 																	style={{
 																		backgroundColor: value.filter(
-																			a =>
-																				a.company_uuid ===
-																				item.company_uuid
+																			a => a.company_uuid === item.company_uuid
 																		)?.length
 																			? "red"
 																			: "var(--mainColor)",
@@ -1945,8 +1891,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																		setValue(prev =>
 																			value.filter(
 																				a =>
-																					a.company_uuid ===
-																					item.company_uuid
+																					a.company_uuid === item.company_uuid
 																			)?.length
 																				? value.filter(
 																						a =>
@@ -1970,17 +1915,14 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																		)
 																	}>
 																	{value.filter(
-																		a =>
-																			a.company_uuid ===
-																			item.company_uuid
+																		a => a.company_uuid === item.company_uuid
 																	)?.length
 																		? "Remove"
 																		: "Add"}
 																</button>
 															</td>
-															{value.filter(
-																a => a.company_uuid === item.company_uuid
-															)?.length ? (
+															{value.filter(a => a.company_uuid === item.company_uuid)
+																?.length ? (
 																<td>
 																	<input
 																		type="number"
@@ -1989,13 +1931,11 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																		onChange={e =>
 																			setValue(prev =>
 																				prev.map(a =>
-																					a.company_uuid ===
-																					item.company_uuid
+																					a.company_uuid === item.company_uuid
 																						? {
 																								...a,
 																								discount:
-																									e.target
-																										.value,
+																									e.target.value,
 																						  }
 																						: a
 																				)
@@ -2004,8 +1944,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																		value={
 																			value.find(
 																				a =>
-																					a.company_uuid ===
-																					item.company_uuid
+																					a.company_uuid === item.company_uuid
 																			)?.discount
 																		}
 																		placeholder="Discount..."
@@ -2139,9 +2078,7 @@ const MultiSelectElem = ({ counterGroup, selected = [], onSelect }) => {
 							checked={selected?.includes(occ.counter_group_uuid)}
 							onChange={() => onSelect(occ.counter_group_uuid)}
 						/>
-						<label htmlFor={occ.counter_group_uuid + "multiselect"}>
-							{occ.counter_group_title}
-						</label>
+						<label htmlFor={occ.counter_group_uuid + "multiselect"}>{occ.counter_group_title}</label>
 					</div>
 				))}
 			</div>

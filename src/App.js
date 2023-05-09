@@ -59,14 +59,23 @@ import OrderPdf from "./components/OrderPdf"
 import MobileLayout from "./components/MobileLayout"
 import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
 import CashRegister from "./pages/QuikAccess/CashRegister"
-export let Version = 105
+
+export let Version = 106
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
+
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))
 	const context = useContext(Context)
 
-	const { calculationPopup = "", loading, notification, setNotification, isItemAvilableOpen, cashRegisterPopup } = context
+	const {
+		calculationPopup = "",
+		loading,
+		notification,
+		setNotification,
+		isItemAvilableOpen,
+		cashRegisterPopup,
+	} = context
 
 	axios.defaults.baseURL = server
 
@@ -305,7 +314,13 @@ function App() {
 					}}>
 					<svg viewBox="0 0 100 100">
 						<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#000" stroke="none">
-							<animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
+							<animateTransform
+								attributeName="transform"
+								type="rotate"
+								dur="1s"
+								repeatCount="indefinite"
+								keyTimes="0;1"
+								values="0 50 51;360 50 51"></animateTransform>
 						</path>
 					</svg>
 				</div>

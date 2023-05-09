@@ -1833,6 +1833,14 @@ input#item-sales-searchbar {
 
 .row > * {
 	width: 100%;
+	display: flex;
+	gap: 6px;
+}
+
+.row > button {
+	display: block;
+	text-align: center;
+	margin: 0;
 }
 
 .multiselect-elem-wrapper {

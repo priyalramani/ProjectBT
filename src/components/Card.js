@@ -1,6 +1,19 @@
 import axios from "axios"
 
-const Card = ({ title2, title1, selectedOrder, details, status, dateTime, rounded, onDoubleClick, selectedCounter, setSelectOrder, order, getOrders = () => {} }) => {
+const Card = ({
+	title2,
+	title1,
+	selectedOrder,
+	details,
+	status,
+	dateTime,
+	rounded,
+	onDoubleClick,
+	selectedCounter,
+	setSelectOrder,
+	order,
+	getOrders = () => {},
+}) => {
 	const PutOrder = async (deleteOrder = false) => {
 		let data = {
 			...order,
@@ -9,7 +22,9 @@ const Card = ({ title2, title1, selectedOrder, details, status, dateTime, rounde
 		}
 		if (deleteOrder) {
 			let time = new Date()
-			let stage = order?.status?.length ? order?.status?.map(a => +a.stage || 0)?.reduce((a, b) => Math.max(a, b)) : order?.status[0]?.stage || 0
+			let stage = order?.status?.length
+				? order?.status?.map(a => +a.stage || 0)?.reduce((a, b) => Math.max(a, b))
+				: order?.status[0]?.stage || 0
 			data = {
 				...data,
 				status: [
@@ -20,7 +35,9 @@ const Card = ({ title2, title1, selectedOrder, details, status, dateTime, rounde
 						time: time.getTime(),
 					},
 				],
-				fulfillment: order.fulfillment?.length ? [...order.fulfillment, ...order.item_details] : order.item_details,
+				fulfillment: order.fulfillment?.length
+					? [...order.fulfillment, ...order.item_details]
+					: order.item_details,
 				item_details: order.item_details?.map(a => ({ ...a, b: 0, p: 0 })),
 			}
 		}
@@ -40,7 +57,10 @@ const Card = ({ title2, title1, selectedOrder, details, status, dateTime, rounde
 
 	const getQty = () => {
 		let data = order.item_details
-		let result = (data.length > 1 ? data.map(a => +a.b || 0).reduce((a, b) => a + b) : data[0].b || 0) + ":" + (data.length > 1 ? data.map(a => +a.p || 0).reduce((a, b) => a + b) : data[0].p || 0)
+		let result =
+			(data.length > 1 ? data.map(a => +a.b || 0).reduce((a, b) => a + b) : data[0].b || 0) +
+			":" +
+			(data.length > 1 ? data.map(a => +a.p || 0).reduce((a, b) => a + b) : data[0].p || 0)
 		return result + " (" + order.order_grandtotal + ")"
 	}
 
@@ -60,7 +80,7 @@ const Card = ({ title2, title1, selectedOrder, details, status, dateTime, rounde
 
 	const curr = Date.now()
 	if (!order.time_1) order.time_1 = dateTime + 24 * 60 * 60 * 1000
-	if (!order.time_2) order.time_2 = dateTime + 48 * 60 * 60 * 1000
+	if (!order.time_2) order.time_2 = dateTime + (24 + 48) * 60 * 60 * 1000
 
 	let cardColor1Height
 	if (order.order_status === "A" || order.counter_order) cardColor1Height = 0
@@ -81,16 +101,20 @@ const Card = ({ title2, title1, selectedOrder, details, status, dateTime, rounde
 				}}>
 				<button
 					className={`card-focus 
-            ${rounded ? "rounded" : ""} 
-            ${selectedOrder ? "selected-seat" : selectedCounter ? "blinking-seat" : ""}
-            `}
+						${rounded ? "rounded" : ""} 
+						${selectedOrder ? "selected-seat" : selectedCounter ? "blinking-seat" : ""}
+					`}
 					style={{ margin: "5px" }}>
 					<div
-						className={`card ${rounded ? "rounded" : ""}`}
+						className={`card 
+							${rounded ? "rounded" : ""}
+							${order?.payment_pending ? "payment-pending" : ""}
+						`}
 						style={{
 							padding: "10px 15px",
 							gap: "2px",
-							backgroundColor: order.order_status === "A" ? "#00edff" : order.counter_order ? "#e28743" : "#fff",
+							backgroundColor:
+								order.order_status === "A" ? "#00edff" : order.counter_order ? "#e28743" : "#fff",
 						}}>
 						<p
 							className="title2"
@@ -138,11 +162,17 @@ const Card = ({ title2, title1, selectedOrder, details, status, dateTime, rounde
 							<div>{status}</div>
 						)}
 						<div style={{ fontSize: "10px" }}>
-							{`${days[new Date(dateTime).getDay()] || ""} ${new Date(dateTime).getDate() || ""} ${monthNames[new Date().getMonth()] || ""}`}
+							{`${days[new Date(dateTime).getDay()] || ""} ${new Date(dateTime).getDate() || ""} ${
+								monthNames[new Date().getMonth()] || ""
+							}`}
 							{formatAMPM(new Date(dateTime)) || ""}
 						</div>
 						<div style={{ fontSize: "10px" }}>{getQty()}</div>
-						<div className="card-color-sheet" id="sheet1" style={{ height: `calc(${cardColor1Height}% + 2px)` }} />
+						<div
+							className="card-color-sheet"
+							id="sheet1"
+							style={{ height: `calc(${cardColor1Height}% + 2px)` }}
+						/>
 						<div
 							className="card-color-sheet"
 							id="sheet2"
