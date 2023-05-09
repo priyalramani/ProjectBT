@@ -515,7 +515,7 @@ export function OrderDetails({
 		const response = await axios({
 			method: "put",
 			url: "/orders/putOrders",
-			data: [{ ...data, items: data.items?.map(i => +(+i.price).toFixed(3)) }],
+			data: [{ ...data, item_details: data.item_details?.map(i => ({ ...i, price: +(+i.price).toFixed(3) })) }],
 			headers: {
 				"Content-Type": "application/json",
 			},
