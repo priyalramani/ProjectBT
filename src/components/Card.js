@@ -82,13 +82,15 @@ const Card = ({
 	if (!order.time_1) order.time_1 = dateTime + 24 * 60 * 60 * 1000
 	if (!order.time_2) order.time_2 = dateTime + (24 + 48) * 60 * 60 * 1000
 
-	let cardColor1Height
-	if (order.order_status === "A" || order.counter_order) cardColor1Height = 0
-	else cardColor1Height = ((curr - dateTime) * 100) / (order?.time_1 - dateTime)
+	let cardColor1Height = 0
+	if (!order?.payment_pending)
+		if (order.order_status === "A" || order.counter_order) cardColor1Height = 0
+		else cardColor1Height = ((curr - dateTime) * 100) / (order?.time_1 - dateTime)
 
-	let cardColor2Height
-	if (order.order_status === "A" || order.counter_order) cardColor2Height = 0
-	else cardColor2Height = ((curr - dateTime) * 100) / (order?.time_2 - dateTime)
+	let cardColor2Height = 0
+	if (!order?.payment_pending)
+		if (order.order_status === "A" || order.counter_order) cardColor2Height = 0
+		else cardColor2Height = ((curr - dateTime) * 100) / (order?.time_2 - dateTime)
 
 	return (
 		<>

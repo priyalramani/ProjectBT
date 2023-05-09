@@ -515,7 +515,7 @@ export function OrderDetails({
 		const response = await axios({
 			method: "put",
 			url: "/orders/putOrders",
-			data: [data],
+			data: [{ ...data, items: data.items?.map(i => +(+i.price).toFixed(3)) }],
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -1699,7 +1699,7 @@ export function OrderDetails({
 																className="numberInput"
 																onWheel={e => e.preventDefault()}
 																index={listItemIndexCount++}
-																value={item.price || 0}
+																value={+(item.price || 0).toFixed(3)}
 																onChange={e => {
 																	setOrderData(prev => {
 																		return {
@@ -1755,7 +1755,7 @@ export function OrderDetails({
 																							price: +(
 																								e.target.value /
 																								item.conversion
-																							).toFixed(3),
+																							),
 																					  }
 																					: a
 																			),
