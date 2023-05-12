@@ -826,9 +826,9 @@ const MainAdmin = () => {
 																}>
 																{route.route_title}
 															</span>{" "}
-															({route.orderLength}) [ processing:{" "}
-															{route?.processingLength}, Checking: {route.checkingLength},
-															Delivery: {route?.deliveryLength}]
+															({route.orderLength}) [ Processing {route?.processingLength}
+															, Checking {route.checkingLength}, Delivery{" "}
+															{route?.deliveryLength} ]
 															{selectOrder ? (
 																<input
 																	type="checkbox"
@@ -1165,10 +1165,10 @@ const MainAdmin = () => {
 												onClick={() => setJoinSummary(orders.filter(a => !a?.trip_uuid))}>
 												UnKnown
 											</span>{" "}
-											({orders.filter(a => !a?.trip_uuid)?.length}) [ processing:{" "}
-											{TripsOrderLength.find(a => +a.trip_uuid === 0)?.processingLength},
-											Checking: {TripsOrderLength.find(a => +a.trip_uuid === 0)?.checkingLength},
-											Delivery: {TripsOrderLength.find(a => +a.trip_uuid === 0)?.deliveryLength}]
+											({orders.filter(a => !a?.trip_uuid)?.length}) [Processing{" "}
+											{TripsOrderLength.find(a => +a.trip_uuid === 0)?.processingLength}, Checking{" "}
+											{TripsOrderLength.find(a => +a.trip_uuid === 0)?.checkingLength}, Delivery{" "}
+											{TripsOrderLength.find(a => +a.trip_uuid === 0)?.deliveryLength}]
 											{selectOrder ? (
 												<input
 													type="checkbox"
@@ -1380,15 +1380,17 @@ const MainAdmin = () => {
 															</span>{" "}
 															(
 															{orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length}
-															) [ processing: {trip?.processingLength}, Checking:{" "}
-															{trip?.checkingLength}, Delivery: {trip?.deliveryLength}] [
-															{trip?.users?.map((a, i) =>
-																i === 0
-																	? users?.find(b => b.user_uuid === a)?.user_title
-																	: ", " +
-																	  users?.find(b => b.user_uuid === a)?.user_title
-															)}
-															]
+															) [Processing {trip?.processingLength}, Checking{" "}
+															{trip?.checkingLength}, Delivery {trip?.deliveryLength}]
+															{trip?.users?.[0]
+																? `[${trip?.users
+																		?.map(
+																			a =>
+																				users?.find(b => b.user_uuid === a)
+																					?.user_title
+																		)
+																		?.join(", ")}]`
+																: ""}
 															{selectOrder ? (
 																<input
 																	type="checkbox"

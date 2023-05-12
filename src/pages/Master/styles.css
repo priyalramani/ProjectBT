@@ -1825,10 +1825,12 @@ input#item-sales-searchbar {
 }
 
 .searchInput {
-	padding: 0.5rem 1rem;
-	border-radius: 0.5rem;
+	padding: 0.55rem 0.8rem;
+	border-radius: 4px;
 	font-size: medium;
 	max-width: 32rem;
+	outline: none;
+	border: 1px solid #cccccc;
 }
 
 .row > * {
