@@ -633,15 +633,14 @@ const MainAdmin = () => {
 								position: "fixed",
 								top: "70px",
 								right: "10px",
-								transform: dropdown ? "rotate(0deg)" : "rotate(180deg)",
-								width: "30px",
-								height: "30px",
 								backgroundColor: "#fff",
+								padding: "8px",
+								width: "fit-content",
 							}}
 							onClick={e => {
 								setDropDown(prev => !prev)
 							}}>
-							<ArrowDropDown />
+							<ArrowDropDown style={{ transform: !dropdown ? "rotate(360deg)" : "rotate(180deg)" }} />
 						</div>
 					</div>
 					{dropdown && (

@@ -407,7 +407,7 @@ export function OrderDetails({
 			getItemsData(order?.item_details?.map(a => a.item_uuid))
 		}
 	}, [order])
-	const onSubmit = async (type = { stage: 0, diliveredUser: "" }) => {
+	const onSubmit = async (type = { stage: 0, diliveredUser: "" }, completedOrderEdited) => {
 		let counter = counters.find(a => orderData?.counter_uuid === a.counter_uuid)
 		let fulfillment = orderData.fulfillment
 		for (let item of orderData.item_details) {
@@ -502,7 +502,12 @@ export function OrderDetails({
 								[]),
 						],
 				  }
-		// console.log("data", data);
+		if (completedOrderEdited) {
+			setOrderData(data)
+			setDeliveryPopup("edit")
+			return
+		}
+
 		if (completeOrder) {
 			updateOrder(data)
 		} else {
@@ -1905,8 +1910,10 @@ export function OrderDetails({
 								type="button"
 								onClick={
 									window.location.pathname.includes("completeOrderReport")
-										? () => setDeliveryPopup("edit")
-										: onSubmit
+										? () => onSubmit({ stage: 0, diliveredUser: "" }, 1)
+										: () => onSubmit()
+									// : () => setDeliveryPopup("edit")
+									// :
 								}>
 								Save
 							</button>
@@ -2727,7 +2734,6 @@ function DiliveryPopup({
 				order_uuid: order?.order_uuid,
 				counter_uuid: order?.counter_uuid,
 			},
-
 			headers: {
 				"Content-Type": "application/json",
 			},

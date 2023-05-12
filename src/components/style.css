@@ -285,7 +285,7 @@ div.unsync-count-container {
 	justify-content: flex-start;
 	align-items: center;
 	flex: 1;
-	padding: 10px 0;
+	padding-top: 50px;
 }
 
 .nav > div {
@@ -298,8 +298,8 @@ div.unsync-count-container {
 }
 
 .nav_title {
-	font-size: 15px;
-	font-weight: 500;
+	font-size: 13px;
+	font-weight: 600;
 	white-space: pre-wrap;
 	width: 100%;
 	text-align: center;
@@ -331,7 +331,7 @@ div.unsync-count-container {
 	align-items: center;
 	cursor: pointer;
 	position: relative;
-	padding: 20px 0;
+	padding: 15px 0;
 	border-left: 5px solid transparent;
 }
 
@@ -340,8 +340,12 @@ div.unsync-count-container {
 	border-left: 5px solid #44cd4a;
 }
 
+.nav-link svg {
+	width: 40px;
+}
+
 .nav-link > i {
-	font-size: 32px;
+	font-size: 55px;
 }
 
 .nav-link > p {
@@ -597,6 +601,12 @@ div.unsync-count-container {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	gap: 5px;
+	padding: 5px;
+}
+
+.vertical-tabs h2 {
+	font-weight: 500;
 }
 
 .vertical-tabs.touchTop {
@@ -612,7 +622,6 @@ div.unsync-count-container {
 	flex: 1;
 	background-color: black;
 	color: white;
-	margin: 10px;
 	border-radius: 5px;
 	padding: 20px;
 	display: flex;
@@ -818,7 +827,7 @@ div.unsync-count-container {
 }
 
 .card-color-sheet#sheet2 {
-	background-color: #9c1010;
+	background-color: #d30000;
 }
 
 .card > .seatTimer {

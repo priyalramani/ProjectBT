@@ -60,7 +60,7 @@ import MobileLayout from "./components/MobileLayout"
 import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
 import CashRegister from "./pages/QuikAccess/CashRegister"
 
-export let Version = 109
+export let Version = 110
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
 // export const server = "http://15.207.39.69:9000"
@@ -310,7 +310,7 @@ function App() {
 						height: "30px",
 						position: "fixed",
 						bottom: "30px",
-						left: "10px",
+						left: "38px",
 						zIndex: "999999999",
 					}}>
 					<svg viewBox="0 0 100 100">
