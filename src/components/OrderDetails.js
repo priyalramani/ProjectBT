@@ -1699,7 +1699,7 @@ export function OrderDetails({
 																className="numberInput"
 																onWheel={e => e.preventDefault()}
 																index={listItemIndexCount++}
-																value={+(item.price || 0).toFixed(3)}
+																value={+(+item.price || 0).toFixed(3)}
 																onChange={e => {
 																	setOrderData(prev => {
 																		return {
