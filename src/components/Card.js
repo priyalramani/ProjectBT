@@ -79,6 +79,7 @@ const Card = ({
 	}
 
 	const curr = Date.now()
+	const daysCount = +((curr - dateTime) / (24 * 60 * 60 * 60 * 1000)).toFixed(0)
 	if (!order.time_1) order.time_1 = dateTime + 24 * 60 * 60 * 1000
 	if (!order.time_2) order.time_2 = dateTime + (24 + 48) * 60 * 60 * 1000
 
@@ -113,7 +114,6 @@ const Card = ({
 							${order?.payment_pending ? "payment-pending" : ""}
 						`}
 						style={{
-							padding: "10px 15px",
 							gap: "2px",
 							backgroundColor:
 								order.order_status === "A" ? "#00edff" : order.counter_order ? "#e28743" : "#fff",
@@ -141,6 +141,7 @@ const Card = ({
 							}}>
 							{title1 ? title2 : ""}
 						</p>
+						<p className="title2">{daysCount} Days</p>
 						{order.counter_order ? (
 							<div className="flex" style={{ justifyContent: "space-between", width: "100px" }}>
 								<button
@@ -166,7 +167,7 @@ const Card = ({
 						<div style={{ fontSize: "10px" }}>
 							{`${days[new Date(dateTime).getDay()] || ""} ${new Date(dateTime).getDate() || ""} ${
 								monthNames[new Date().getMonth()] || ""
-							}`}
+							}`}{" "}
 							{formatAMPM(new Date(dateTime)) || ""}
 						</div>
 						<div style={{ fontSize: "10px" }}>{getQty()}</div>

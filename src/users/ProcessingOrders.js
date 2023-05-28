@@ -256,7 +256,11 @@ const ProcessingOrders = () => {
 		}
 	}
 	// console.log("orders", orders);
-	const postOrderData = async (dataArray = selectedOrder ? [selectedOrder] : orders, hold = false, preventPrintUpdate) => {
+	const postOrderData = async (
+		dataArray = selectedOrder ? [selectedOrder] : orders,
+		hold = false,
+		preventPrintUpdate
+	) => {
 		setprintInvicePopup(null)
 		setLoading(true)
 		console.log(dataArray)
@@ -265,10 +269,7 @@ const ProcessingOrders = () => {
 		let finalData = []
 		for (let orderObject of dataArray) {
 			let data = orderObject
-			if (
-				data?.item_details?.filter(a => +a.status === 3)?.length &&
-				Location.pathname.includes("processing")
-			)
+			if (data?.item_details?.filter(a => +a.status === 3)?.length && Location.pathname.includes("processing"))
 				data = {
 					...data,
 					item_details: data.item_details.map(a => (+a.status === 3 ? { ...a, b: 0, p: 0 } : a)),
@@ -278,8 +279,7 @@ const ProcessingOrders = () => {
 								...data.item_details.filter(
 									a =>
 										+a.status === 3 &&
-										!data.processing_canceled.filter(b => a.item_uuid === b.item_uuid)
-											.length
+										!data.processing_canceled.filter(b => a.item_uuid === b.item_uuid).length
 								),
 						  ]
 						: data?.item_details?.filter(a => +a.status === 3),
@@ -360,7 +360,7 @@ const ProcessingOrders = () => {
 				opened_by: 0,
 				replacement: orderObject.replacement,
 				replacement_mrp: orderObject.replacement_mrp,
-				preventPrintUpdate
+				preventPrintUpdate,
 			})
 		}
 
@@ -378,9 +378,7 @@ const ProcessingOrders = () => {
 			setLoading(false)
 			getTripOrders()
 			if (!hold) {
-				let dataItem = Location.pathname.includes("processing")
-					? itemChanged
-					: finalData[0]?.item_details
+				let dataItem = Location.pathname.includes("processing") ? itemChanged : finalData[0]?.item_details
 
 				let qty = `${
 					dataItem?.length > 1
@@ -500,6 +498,7 @@ const ProcessingOrders = () => {
 			if (itemData) {
 				itemData.b = (+itemData.b || 0) + (+curr.b || 0)
 				itemData.p = (+itemData.p || 0) + (+curr.p || 0)
+				itemData.free = (+itemData.free || 0) + (+curr.free || 0)
 			} else {
 				acc.push(curr)
 			}
@@ -524,11 +523,9 @@ const ProcessingOrders = () => {
 									...ItemData,
 									...orderItem,
 									...a,
-									barcodeQty:
-										(+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
+									barcodeQty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
 									case: 1,
-									qty:
-										(+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0),
+									qty: (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0),
 								},
 						  ]
 						: [
@@ -536,11 +533,9 @@ const ProcessingOrders = () => {
 									...ItemData,
 									...orderItem,
 									...a,
-									barcodeQty:
-										(+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
+									barcodeQty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
 									case: 1,
-									qty:
-										(+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0),
+									qty: (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0),
 								},
 						  ]
 				)
@@ -745,14 +740,10 @@ const ProcessingOrders = () => {
 						padding: "10px 0",
 						textTransform: "capitalize",
 					}}>
-					{selectedOrder
-						? selectedOrder.counter_title
-						: Location?.pathname?.split("/")?.filter(i => i)?.[1]}
+					{selectedOrder ? selectedOrder.counter_title : Location?.pathname?.split("/")?.filter(i => i)?.[1]}
 				</h1>
 				{!selectedOrder ? (
-					<div
-						className="user_menubar flex"
-						style={{ width: "160px", justifyContent: "space-between" }}>
+					<div className="user_menubar flex" style={{ width: "160px", justifyContent: "space-between" }}>
 						<AiOutlineReload
 							className="user_Back_icon"
 							onClick={() => {
@@ -785,9 +776,7 @@ const ProcessingOrders = () => {
 						</div>
 
 						{selectedOrder &&
-						!(
-							Location.pathname.includes("checking") || Location.pathname.includes("delivery")
-						) ? (
+						!(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
 							<>
 								<input
 									className="searchInput"
@@ -902,9 +891,7 @@ const ProcessingOrders = () => {
 								<div style={{ overflowY: "scroll" }}>
 									<form className="form">
 										<div className="flex" style={{ justifyContent: "space-between" }}>
-											<button
-												onClick={() => setprintInvicePopup(null)}
-												className="closeButton">
+											<button onClick={() => setprintInvicePopup(null)} className="closeButton">
 												x
 											</button>
 
@@ -912,17 +899,13 @@ const ProcessingOrders = () => {
 												type="button"
 												className="submit"
 												style={{ backgroundColor: "red" }}
-												onClick={() =>
-													postOrderData([{ ...selectedOrder, to_print: 0 }])
-												}>
+												onClick={() => postOrderData([{ ...selectedOrder, to_print: 0 }])}>
 												No
 											</button>
 											<button
 												type="button"
 												className="submit"
-												onClick={() =>
-													postOrderData([{ ...selectedOrder, to_print: 1 }])
-												}>
+												onClick={() => postOrderData([{ ...selectedOrder, to_print: 1 }])}>
 												Yes
 											</button>
 										</div>
@@ -947,9 +930,7 @@ const ProcessingOrders = () => {
 				{selectedOrder ? (
 					<>
 						<div className="flex" style={{ justifyContent: "space-between", margin: "10px 0" }}>
-							<h2 style={{ width: "20vw", textAlign: "start" }}>
-								{selectedOrder.invoice_number}
-							</h2>
+							<h2 style={{ width: "20vw", textAlign: "start" }}>{selectedOrder.invoice_number}</h2>
 							{Location.pathname.includes("delivery") ? (
 								<h2 style={{ width: "20vw", textAlign: "start" }}>
 									Rs: {selectedOrder.order_grandtotal}
@@ -978,10 +959,7 @@ const ProcessingOrders = () => {
 										value={filterItemTitle}
 										onChange={e => setFilterItemTile(e.target.value)}
 									/>
-									<CloseIcon
-										className="user_cross_icon"
-										onClick={() => setFilterItemTile("")}
-									/>
+									<CloseIcon className="user_cross_icon" onClick={() => setFilterItemTile("")} />
 								</div>
 							) : (
 								// ) : !Location.pathname.includes("delivery") ? (
@@ -1042,10 +1020,7 @@ const ProcessingOrders = () => {
 						<thead>
 							<tr>
 								{selectedOrder &&
-								!(
-									Location.pathname.includes("checking") ||
-									Location.pathname.includes("delivery")
-								) ? (
+								!(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
 									<th></th>
 								) : (
 									""
@@ -1105,9 +1080,7 @@ const ProcessingOrders = () => {
 						<tbody className="tbody">
 							{selectedOrder
 								? selectedOrder?.item_details
-										.filter(
-											a => !Location.pathname.includes("delivery") || +a.status !== 3
-										)
+										.filter(a => !Location.pathname.includes("delivery") || +a.status !== 3)
 										.filter(
 											a =>
 												!Location.pathname.includes("checking") ||
@@ -1124,9 +1097,7 @@ const ProcessingOrders = () => {
 												key={item.item_uuid}
 												style={{
 													height: "30px",
-													backgroundColor: window.location.pathname.includes(
-														"processing"
-													)
+													backgroundColor: window.location.pathname.includes("processing")
 														? +item.status === 1
 															? "green"
 															: +item.status === 2
@@ -1154,9 +1125,7 @@ const ProcessingOrders = () => {
 																	? [
 																			...prev,
 																			selectedOrder.item_details.find(
-																				a =>
-																					a.item_uuid ===
-																					item.item_uuid
+																				a => a.item_uuid === item.item_uuid
 																			),
 																	  ]
 																	: prev
@@ -1168,8 +1137,7 @@ const ProcessingOrders = () => {
 																	a.item_uuid === item.item_uuid
 																		? {
 																				...a,
-																				status:
-																					+a.status === 1 ? 0 : 1,
+																				status: +a.status === 1 ? 0 : 1,
 																		  }
 																		: a
 																),
@@ -1215,23 +1183,19 @@ const ProcessingOrders = () => {
 																	a => a.item_uuid === item.item_uuid
 																)?.length
 																	? tempQuantity?.map(a => {
-																			if (
-																				a.item_uuid === item.item_uuid
-																			) {
+																			if (a.item_uuid === item.item_uuid) {
 																				return {
 																					...a,
 																					b:
 																						+(a.b || 0) +
 																						parseInt(
-																							(+a?.one_pack ||
-																								1) /
+																							(+a?.one_pack || 1) /
 																								+a.conversion
 																						),
 
 																					p:
 																						((a?.p || 0) +
-																							(+a?.one_pack ||
-																								1)) %
+																							(+a?.one_pack || 1)) %
 																						+a.conversion,
 																				}
 																			} else {
@@ -1243,9 +1207,7 @@ const ProcessingOrders = () => {
 																			...tempQuantity,
 																			...items
 																				?.filter(
-																					a =>
-																						a.item_uuid ===
-																						item.item_uuid
+																					a => a.item_uuid === item.item_uuid
 																				)
 																				.map(a => {
 																					return {
@@ -1261,17 +1223,14 @@ const ProcessingOrders = () => {
 
 																						p:
 																							((a?.p || 0) +
-																								(+a?.one_pack ||
-																									1)) %
+																								(+a?.one_pack || 1)) %
 																							+a.conversion,
 																					}
 																				}),
 																	  ]
 																	: items
 																			?.filter(
-																				a =>
-																					a.item_uuid ===
-																					item.item_uuid
+																				a => a.item_uuid === item.item_uuid
 																			)
 																			.map(a => {
 																				return {
@@ -1280,37 +1239,28 @@ const ProcessingOrders = () => {
 																						(+a.b || 0) +
 																							+(
 																								(+a?.p || 0) +
-																								(+a?.one_pack ||
-																									1)
+																								(+a?.one_pack || 1)
 																							) /
 																								+a.conversion
 																					),
 																					p:
 																						((+a?.p || 0) +
-																							(+a?.one_pack ||
-																								1)) %
+																							(+a?.one_pack || 1)) %
 																						+a.conversion,
 																				}
 																			})
 															)
 														}
 													}}>
-													{
-														items.find(a => a.item_uuid === item.item_uuid)
-															?.item_title
-													}
+													{items.find(a => a.item_uuid === item.item_uuid)?.item_title}
 												</td>
-												<td>
-													{items.find(a => a.item_uuid === item.item_uuid)?.mrp}
-												</td>
+												<td>{items.find(a => a.item_uuid === item.item_uuid)?.mrp}</td>
 
 												<td
 													onClick={e => {
 														e.stopPropagation()
 														setOneTimeState()
-														setPopupForm(
-															items.find(a => a.item_uuid === item.item_uuid)
-														)
+														setPopupForm(items.find(a => a.item_uuid === item.item_uuid))
 													}}>
 													{Location.pathname.includes("delivery")
 														? item.b === 0 && item.p === 0 && item.free
@@ -1320,13 +1270,11 @@ const ProcessingOrders = () => {
 															  item.p +
 															  (item.free ? "  " + item.free + "(F)" : "")
 														: Location.pathname.includes("checking")
-														? (tempQuantity?.find(
-																a => a.item_uuid === item.item_uuid
-														  )?.b || 0) +
+														? (tempQuantity?.find(a => a.item_uuid === item.item_uuid)?.b ||
+																0) +
 														  ":" +
-														  (tempQuantity?.find(
-																a => a.item_uuid === item.item_uuid
-														  )?.p || 0)
+														  (tempQuantity?.find(a => a.item_uuid === item.item_uuid)?.p ||
+																0)
 														: item.b + ":" + ((+item.p || 0) + (+item.free || 0))}
 												</td>
 												{!(
@@ -1343,18 +1291,13 @@ const ProcessingOrders = () => {
 
 																	setSelectedOrder(prev => ({
 																		...prev,
-																		item_details: prev.item_details.map(
-																			a =>
-																				a.item_uuid === item.item_uuid
-																					? {
-																							...a,
-																							status:
-																								+a.status ===
-																								2
-																									? 0
-																									: 2,
-																					  }
-																					: a
+																		item_details: prev.item_details.map(a =>
+																			a.item_uuid === item.item_uuid
+																				? {
+																						...a,
+																						status: +a.status === 2 ? 0 : 2,
+																				  }
+																				: a
 																		),
 																	}))
 																}}>
@@ -1368,18 +1311,13 @@ const ProcessingOrders = () => {
 
 																	setSelectedOrder(prev => ({
 																		...prev,
-																		item_details: prev.item_details.map(
-																			a =>
-																				a.item_uuid === item.item_uuid
-																					? {
-																							...a,
-																							status:
-																								+a.status ===
-																								3
-																									? 0
-																									: 3,
-																					  }
-																					: a
+																		item_details: prev.item_details.map(a =>
+																			a.item_uuid === item.item_uuid
+																				? {
+																						...a,
+																						status: +a.status === 3 ? 0 : 3,
+																				  }
+																				: a
 																		),
 																	}))
 																}}
@@ -1399,9 +1337,7 @@ const ProcessingOrders = () => {
 												style={{
 													height: "30px",
 													backgroundColor:
-														+item.opened_by || item.opened_by !== "0"
-															? "yellow"
-															: "#fff",
+														+item.opened_by || item.opened_by !== "0" ? "yellow" : "#fff",
 												}}>
 												<td>{i + 1}</td>
 												<td
@@ -1420,8 +1356,7 @@ const ProcessingOrders = () => {
 														setChecking(false)
 														setWarningPopUp(item)
 													}}>
-													{item?.item_details?.filter(a => +a.status === 1)?.length}
-													/
+													{item?.item_details?.filter(a => +a.status === 1)?.length}/
 													{item?.item_details
 														.filter(
 															a =>
@@ -1461,8 +1396,7 @@ const ProcessingOrders = () => {
 															: item?.item_details[0]?.p || 0)}
 												</td>
 												<td>
-													{users.find(a => a.user_uuid === item.opened_by)
-														?.user_title || "-"}
+													{users.find(a => a.user_uuid === item.opened_by)?.user_title || "-"}
 												</td>
 												<td>
 													{item?.mobile ? (
@@ -1679,10 +1613,7 @@ const ProcessingOrders = () => {
 				<div className="overlay" style={{ zIndex: "99999999999999999" }}>
 					<div className="flex" style={{ width: "40px", height: "40px" }}>
 						<svg viewBox="0 0 100 100">
-							<path
-								d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-								fill="#ffffff"
-								stroke="none">
+							<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
 								<animateTransform
 									attributeName="transform"
 									type="rotate"
@@ -1852,14 +1783,11 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }
 													<td>{item?.mrp || 0}</td>
 													<td style={{ backgroundColor: "green" }}>
 														{parseInt(
-															+item.b +
-																(+item.p + (+item.free || 0)) /
-																	+item.conversion
+															+item.b + (+item.p + (+item.free || 0)) / +item.conversion
 														) || 0}
 														:
-														{parseInt(
-															(+item.p + (+item.free || 0)) % +item.conversion
-														) || 0}
+														{parseInt((+item.p + (+item.free || 0)) % +item.conversion) ||
+															0}
 													</td>
 													<td style={{ backgroundColor: "red" }}>
 														{parseInt(+item.barcodeQty / +item.conversion) || 0}:
@@ -2017,6 +1945,7 @@ function HoldPopup({
 				// });
 				let obj = {
 					...item,
+					free,
 					b,
 					p,
 				}
@@ -2057,6 +1986,8 @@ function HoldPopup({
 							}))
 			)
 		)
+
+		console.log({ result })
 		setItems(result)
 
 		const audioElements = []
@@ -2066,9 +1997,7 @@ function HoldPopup({
 			?.filter(
 				a =>
 					result?.filter(
-						b =>
-							a.category_uuid ===
-							itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid
+						b => a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid
 					).length
 			)
 			?.forEach(cat => {
@@ -2125,9 +2054,8 @@ function HoldPopup({
 				orders
 					.filter(
 						a =>
-							a.item_details.filter(
-								b => items.filter(c => c.edit && c.item_uuid === b.item_uuid).length
-							).length
+							a.item_details.filter(b => items.filter(c => c.edit && c.item_uuid === b.item_uuid).length)
+								.length
 					)
 					.map(a => ({
 						...a,
@@ -2182,9 +2110,7 @@ function HoldPopup({
 						}}>
 						<div style={{ overflowY: "scroll", width: "100%" }}>
 							{items.length ? (
-								<div
-									className="flex"
-									style={{ flexDirection: "column", width: "max-content" }}>
+								<div className="flex" style={{ flexDirection: "column", width: "max-content" }}>
 									<table
 										className="user-table"
 										style={{
@@ -2209,11 +2135,7 @@ function HoldPopup({
 												) : (
 													""
 												)}
-												{!window.location.pathname.includes("checking") ? (
-													<th></th>
-												) : (
-													""
-												)}
+												{!window.location.pathname.includes("checking") ? <th></th> : ""}
 											</tr>
 										</thead>
 										<tbody className="tbody">
@@ -2224,18 +2146,15 @@ function HoldPopup({
 															?.filter(
 																b =>
 																	a.category_uuid ===
-																	itemsData?.find(
-																		c => b.item_uuid === c.item_uuid
-																	)?.category_uuid
+																	itemsData?.find(c => b.item_uuid === c.item_uuid)
+																		?.category_uuid
 															)
 															?.filter(
 																a =>
 																	!filterItemTitle ||
 																	a.item_title
 																		.toLocaleLowerCase()
-																		.includes(
-																			filterItemTitle.toLocaleLowerCase()
-																		)
+																		.includes(filterItemTitle.toLocaleLowerCase())
 															).length
 												)
 
@@ -2246,9 +2165,7 @@ function HoldPopup({
 																audioLoopFunction({
 																	i: 0,
 																	src: audiosRef.current?.filter(
-																		i =>
-																			i.category_uuid ===
-																			a.category_uuid
+																		i => i.category_uuid === a.category_uuid
 																	),
 																	forcePlayCount: 1,
 																	callback: audioCallback,
@@ -2272,9 +2189,7 @@ function HoldPopup({
 																				filterItemTitle.toLocaleLowerCase()
 																			))
 															)
-															.sort((a, b) =>
-																a?.item_title?.localeCompare(b?.item_title)
-															)
+															.sort((a, b) => a?.item_title?.localeCompare(b?.item_title))
 															.map((item, i) => (
 																<tr
 																	key={item?.item_uuid || Math.random()}
@@ -2304,13 +2219,11 @@ function HoldPopup({
 																			e.stopPropagation()
 																			setItems(prev =>
 																				prev.map(a =>
-																					a.item_uuid ===
-																					item.item_uuid
+																					a.item_uuid === item.item_uuid
 																						? {
 																								...a,
 																								status:
-																									a.status !==
-																									1
+																									a.status !== 1
 																										? 1
 																										: holdPopup ===
 																										  "Hold"
@@ -2334,9 +2247,7 @@ function HoldPopup({
 																	<td colSpan={3}>{item.item_title}</td>
 																	<td colSpan={2}>{item.mrp}</td>
 
-																	{!window.location.pathname.includes(
-																		"checking"
-																	) ? (
+																	{!window.location.pathname.includes("checking") ? (
 																		<>
 																			<td
 																				colSpan={2}
@@ -2350,8 +2261,8 @@ function HoldPopup({
 																						setPopup(item)
 																				}}>
 																				{item?.b || 0} :{" "}
-																				{(item?.p || 0) +
-																					(item?.free || 0)}
+																				{(+item?.p || 0) + (+item?.free || 0)}
+																				{console.log({ items })}
 																			</td>
 																			{!window.location.pathname.includes(
 																				"delivery"
@@ -2531,9 +2442,7 @@ function HoldPopup({
 							}}>
 							<div style={{ overflowY: "scroll", width: "100%" }}>
 								<form className="form">
-									<div
-										className="flex"
-										style={{ justifyContent: "space-between", width: "100%" }}>
+									<div className="flex" style={{ justifyContent: "space-between", width: "100%" }}>
 										<button
 											type="submit"
 											style={{
@@ -2553,10 +2462,7 @@ function HoldPopup({
 											disabled={disabled}>
 											Continue
 										</button>
-										<button
-											type="submit"
-											className="submit"
-											onClick={() => setConfirmPopup(false)}>
+										<button type="submit" className="submit" onClick={() => setConfirmPopup(false)}>
 											Cancel
 										</button>
 									</div>
@@ -2645,9 +2551,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="formGroup">
-								<div
-									className="row"
-									style={{ flexDirection: "row", alignItems: "flex-start" }}>
+								<div className="row" style={{ flexDirection: "row", alignItems: "flex-start" }}>
 									<label className="selectLabel flex" style={{ width: "100px" }}>
 										Box
 										<input
@@ -2880,9 +2784,7 @@ function DiliveryPopup({
 													type="number"
 													name="route_title"
 													className="numberInput"
-													value={
-														modes.find(a => a.mode_uuid === item.mode_uuid)?.amt
-													}
+													value={modes.find(a => a.mode_uuid === item.mode_uuid)?.amt}
 													placeholder={
 														!allowed.find(a => a.mode_uuid === item.mode_uuid)
 															? "Not Allowed"
@@ -2911,18 +2813,14 @@ function DiliveryPopup({
 														)
 													}
 													maxLength={42}
-													disabled={
-														!allowed.find(a => a.mode_uuid === item.mode_uuid)
-													}
+													disabled={!allowed.find(a => a.mode_uuid === item.mode_uuid)}
 													onWheel={e => e.preventDefault()}
 												/>
 												{/* {popupInfo.conversion || 0} */}
 											</label>
 										</div>
 									))}
-									<div
-										className="row"
-										style={{ flexDirection: "row", alignItems: "center" }}>
+									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 										<div style={{ width: "50px" }}>UnPaid</div>
 										<label className="selectLabel flex" style={{ width: "80px" }}>
 											<input
@@ -2954,9 +2852,7 @@ function DiliveryPopup({
 											{/* {popupInfo.conversion || 0} */}
 										</label>
 									</div>
-									<div
-										className="row"
-										style={{ flexDirection: "row", alignItems: "center" }}>
+									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 										<button
 											type="button"
 											className="submit"
@@ -2985,11 +2881,7 @@ function DiliveryPopup({
 					</div>
 				</div>
 			</div>
-			{popup ? (
-				<DiliveryReplaceMent onSave={() => setPopup(false)} setData={setData} data={data} />
-			) : (
-				""
-			)}
+			{popup ? <DiliveryReplaceMent onSave={() => setPopup(false)} setData={setData} data={data} /> : ""}
 			{coinPopup ? (
 				<div className="overlay">
 					<div className="modal" style={{ height: "fit-content", width: "max-content" }}>
@@ -3004,9 +2896,7 @@ function DiliveryPopup({
 							<div style={{ overflowY: "scroll" }}>
 								<form className="form">
 									<div className="formGroup">
-										<div
-											className="row"
-											style={{ flexDirection: "row", alignItems: "center" }}>
+										<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 											<div style={{ width: "50px" }}>Cash</div>
 
 											<label className="selectLabel flex" style={{ width: "80px" }}>
@@ -3018,16 +2908,12 @@ function DiliveryPopup({
 													onWheel={e => e.preventDefault()}
 													value={
 														modes.find(
-															a =>
-																a.mode_uuid ===
-																"c67b54ba-d2b6-11ec-9d64-0242ac120002"
+															a => a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002"
 														)?.coin
 													}
 													style={
 														!allowed.find(
-															a =>
-																a.mode_uuid ===
-																"c67b54ba-d2b6-11ec-9d64-0242ac120002"
+															a => a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002"
 														)
 															? { width: "70px", backgroundColor: "gray" }
 															: { width: "70px" }
@@ -3035,8 +2921,7 @@ function DiliveryPopup({
 													onChange={e =>
 														setModes(prev =>
 															prev.map(a =>
-																a.mode_uuid ===
-																"c67b54ba-d2b6-11ec-9d64-0242ac120002"
+																a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002"
 																	? {
 																			...a,
 																			coin: e.target.value,
@@ -3052,10 +2937,7 @@ function DiliveryPopup({
 									</div>
 
 									<div className="flex" style={{ justifyContent: "space-between" }}>
-										<button
-											type="button"
-											className="submit"
-											onClick={() => submitHandler()}>
+										<button type="button" className="submit" onClick={() => submitHandler()}>
 											Save
 										</button>
 									</div>
@@ -3202,9 +3084,7 @@ function MinMaxPopup({
 							<div style={{ overflowY: "scroll" }}>
 								<form className="form">
 									<div className="formGroup">
-										<div
-											className="row"
-											style={{ flexDirection: "row", alignItems: "center" }}>
+										<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 											<label className="selectLabel flex">
 												Min
 												<input
@@ -3387,10 +3267,7 @@ function OpenWarningMessage({ onSave, data, users, onClose }) {
 					width: "max-content",
 					paddingTop: "50px",
 				}}>
-				<h2>
-					Order Already Opened By{" "}
-					{users.find((a, i) => a.user_uuid === orderData.opened_by)?.user_title}
-				</h2>
+				<h2>Order Already Opened By {users.find((a, i) => a.user_uuid === orderData.opened_by)?.user_title}</h2>
 
 				<div
 					className="content"
@@ -3508,24 +3385,22 @@ function NewUserForm({
 								{
 									item_uuid: popupInfo.item_uuid,
 									b:
-										(+orderData?.item_details?.find(
-											a => a.item_uuid === popupInfo.item_uuid
-										)?.b || 0) - data.b,
+										(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b ||
+											0) - data.b,
 									p:
-										(+orderData?.item_details?.find(
-											a => a.item_uuid === popupInfo.item_uuid
-										)?.p || 0) - data.p,
+										(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p ||
+											0) - data.p,
 								},
 						  ]
 					: [
 							{
 								item_uuid: popupInfo.item_uuid,
 								b:
-									(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)
-										?.b || 0) - data.b,
+									(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) -
+									data.b,
 								p:
-									(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)
-										?.p || 0) - data.p,
+									(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) -
+									data.p,
 							},
 					  ],
 				item_details: orderData.item_details.map(a =>
@@ -3568,24 +3443,22 @@ function NewUserForm({
 								{
 									item_uuid: popupInfo.item_uuid,
 									b:
-										(+orderData?.item_details?.find(
-											a => a.item_uuid === popupInfo.item_uuid
-										)?.b || 0) - data.b,
+										(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b ||
+											0) - data.b,
 									p:
-										(+orderData?.item_details?.find(
-											a => a.item_uuid === popupInfo.item_uuid
-										)?.p || 0) - data.p,
+										(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p ||
+											0) - data.p,
 								},
 						  ]
 					: [
 							{
 								item_uuid: popupInfo.item_uuid,
 								b:
-									(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)
-										?.b || 0) - data.b,
+									(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) -
+									data.b,
 								p:
-									(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)
-										?.p || 0) - data.p,
+									(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) -
+									data.p,
 							},
 					  ],
 				item_details: orderData.item_details.map(a =>
@@ -3615,9 +3488,7 @@ function NewUserForm({
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="formGroup">
-								<div
-									className="row"
-									style={{ flexDirection: "row", alignItems: "flex-start" }}>
+								<div className="row" style={{ flexDirection: "row", alignItems: "flex-start" }}>
 									<label className="selectLabel flex" style={{ width: "100px" }}>
 										Box
 										<input
@@ -3741,9 +3612,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 	const [updateOrders, setUpdateOrders] = useState([])
 	const [deleteItemsOrder, setDeleteItemOrders] = useState([])
 	useEffect(() => {
-		setUpdateOrders(
-			order.filter(item => item.item_details.filter(a => a.item_uuid === items.item_uuid)?.length)
-		)
+		setUpdateOrders(order.filter(item => item.item_details.filter(a => a.item_uuid === items.item_uuid)?.length))
 	}, [])
 	function formatAMPM(date) {
 		var hours = date.getHours()
@@ -3768,9 +3637,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 						deleteItemsOrder.filter(b => b === a.order_uuid).length
 							? {
 									...a,
-									item_details: a.item_details.filter(
-										b => !(b.item_uuid === items.item_uuid)
-									),
+									item_details: a.item_details.filter(b => !(b.item_uuid === items.item_uuid)),
 							  }
 							: a
 					)
@@ -3899,13 +3766,10 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 														{item.invoice_number}
 													</td>
 													<td colSpan={2} style={{ width: "50px" }}>
-														{counter?.find(
-															a => a.counter_uuid === item.counter_uuid
-														)?.counter_title || "-"}
+														{counter?.find(a => a.counter_uuid === item.counter_uuid)
+															?.counter_title || "-"}
 													</td>
-													<td
-														colSpan={2}
-														style={{ width: "50px", padding: "0 2px" }}>
+													<td colSpan={2} style={{ width: "50px", padding: "0 2px" }}>
 														<input
 															value={
 																(item.item_details.find(
@@ -3929,27 +3793,20 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 															}}
 														/>
 													</td>
-													<td
-														colSpan={2}
-														style={{ width: "50px", padding: "0 2px" }}>
-														{item.item_details.find(
-															a => a.item_uuid === items.item_uuid
-														)?.free || 0}
+													<td colSpan={2} style={{ width: "50px", padding: "0 2px" }}>
+														{item.item_details.find(a => a.item_uuid === items.item_uuid)
+															?.free || 0}
 													</td>
 													<td
 														style={{ width: "50px", padding: "0 2px" }}
 														onClick={() => {
 															setDeleteItemOrders(prev =>
-																prev?.filter(a => a === item.order_uuid)
-																	.length
-																	? prev.filter(
-																			a => !(a === item.order_uuid)
-																	  )
+																prev?.filter(a => a === item.order_uuid).length
+																	? prev.filter(a => !(a === item.order_uuid))
 																	: [...(prev || []), item.order_uuid]
 															)
 														}}>
-														{!deleteItemsOrder.filter(a => a === item.order_uuid)
-															.length ? (
+														{!deleteItemsOrder.filter(a => a === item.order_uuid).length ? (
 															<DeleteOutlineIcon />
 														) : (
 															""
@@ -4056,9 +3913,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="formGroup">
-								<div
-									className="row"
-									style={{ flexDirection: "row", alignItems: "flex-start" }}>
+								<div className="row" style={{ flexDirection: "row", alignItems: "flex-start" }}>
 									<label className="selectLabel flex" style={{ width: "100px" }}>
 										Box
 										<input

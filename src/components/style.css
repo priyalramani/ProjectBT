@@ -789,7 +789,7 @@ div.unsync-count-container {
 }
 
 .card-focus.rounded {
-	border-radius: 25px;
+	border-radius: 30px;
 	cursor: pointer;
 }
 
@@ -800,10 +800,10 @@ div.unsync-count-container {
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
-	height: 120px;
-	width: 120px;
-	min-width: 120px;
-	padding: 10px 20px;
+	height: 132px;
+	width: 132px;
+	min-width: 132px;
+	padding: 10px 8px;
 	position: relative;
 	transition: 0.3s all ease;
 	overflow: hidden;
@@ -854,7 +854,7 @@ div.unsync-count-container {
 }
 
 .card.rounded {
-	border-radius: 25px;
+	border-radius: 30px;
 }
 
 .card > .title1 {
@@ -871,7 +871,6 @@ div.unsync-count-container {
 
 .card > .caption {
 	color: grey;
-	height: 30px;
 }
 
 .card > .horizontal-line {

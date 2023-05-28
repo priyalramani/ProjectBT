@@ -118,3 +118,19 @@ div.order-edit-select {
 	width: 25vw;
 	z-index: 999999999;
 }
+
+.table-icon {
+	font-size: 24px;
+	color: black;
+	cursor: pointer;
+	display: block;
+	margin: auto;
+	background: none;
+}
+
+.table-icon.checkmark {
+	margin: auto;
+	background: none;
+	color: #4ac959;
+	cursor: auto;
+}

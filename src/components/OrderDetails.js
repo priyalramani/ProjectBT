@@ -7,7 +7,6 @@ import { Add, CheckCircle, ContentCopy, NoteAdd, WhatsApp } from "@mui/icons-mat
 import { useReactToPrint } from "react-to-print"
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material"
 import OrderPrint from "./OrderPrint"
-import { useIdleTimer } from "react-idle-timer"
 
 import FreeItems from "./FreeItems"
 import DiliveryReplaceMent from "./DiliveryReplaceMent"
@@ -831,6 +830,26 @@ export function OrderDetails({
 		} catch (error) {
 			setDateTimeUpdating(0)
 		}
+	}
+
+	const print_items_length = orderData?.order_type !== "E" ? 16 : 19
+	const getPrintData = () => {
+		const sourceArray = printData?.item_details
+		const arrayOfArrays = []
+		const l = print_items_length
+
+		for (let i = 0; i < sourceArray.length; i += l) {
+			if (l - 4 < sourceArray.length - i && sourceArray.length - i < l) {
+				arrayOfArrays.push(sourceArray.slice(i, i + (l - 4)))
+				arrayOfArrays.push(sourceArray.slice(i + (l - 4)), i + l)
+			} else {
+				arrayOfArrays.push(sourceArray.slice(i, i + l))
+			}
+		}
+
+		const result = arrayOfArrays?.map(_i => ({ ...printData, item_details: _i }))
+		console.log({ arrayOfArrays, result })
+		return result
 	}
 
 	return deliveryPopup ? (
@@ -2182,25 +2201,36 @@ export function OrderDetails({
 			<div
 				style={{
 					position: "fixed",
+					// top: 10,
+					// left: 10,
+					// zIndex: 100000000000000000,
+					// background: "#fff",
 					top: -100,
 					left: -180,
 					zIndex: "-1000",
 				}}>
 				<div ref={componentRef} id="item-container">
-					{Array.from(Array(Math.ceil(printData?.item_details?.length / 12)).keys())?.map((a, i) => (
-						<OrderPrint
-							counter={counters.find(a => a.counter_uuid === printData?.counter_uuid)}
-							reminderDate={reminderDate}
-							order={printData}
-							date={new Date(printData?.status[0]?.time)}
-							user={users.find(a => a.user_uuid === printData?.status[0]?.user_uuid)?.user_title || ""}
-							itemData={itemsData}
-							item_details={printData?.item_details?.slice(a * 12, 12 * (a + 1))}
-							footer={!(printData?.item_details?.length > 12 * (a + 1))}
-							paymentModes={paymentModes}
-							counters={counters}
-						/>
-					))}
+					{getPrintData()?.map((_printData, _i, array) =>
+						_printData?.item_details?.[0] ? (
+							<OrderPrint
+								print_items_length={print_items_length}
+								counter={counters.find(a => a.counter_uuid === _printData?.counter_uuid)}
+								reminderDate={reminderDate}
+								order={_printData}
+								date={new Date(_printData?.status[0]?.time)}
+								user={
+									users.find(a => a.user_uuid === _printData?.status[0]?.user_uuid)?.user_title || ""
+								}
+								itemData={itemsData}
+								item_details={_printData?.item_details}
+								footer={_i + 1 === array.length}
+								paymentModes={paymentModes}
+								counters={counters}
+							/>
+						) : (
+							""
+						)
+					)}
 				</div>
 			</div>
 		</>

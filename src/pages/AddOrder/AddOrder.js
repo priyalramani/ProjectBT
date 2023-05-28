@@ -9,13 +9,21 @@ import { AddCircle as AddIcon } from "@mui/icons-material"
 import { v4 as uuid } from "uuid"
 import Select from "react-select"
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
+import { FaSave } from "react-icons/fa"
 import FreeItems from "../../components/FreeItems"
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent"
+import { IoCheckmarkDoneOutline } from "react-icons/io5"
 
-const priorityOptions = [
-	{ value: 0, label: "Normal" },
-	{ value: 1, label: "High" },
-]
+const options = {
+	priorityOptions: [
+		{ value: 0, label: "Normal" },
+		{ value: 1, label: "High" },
+	],
+	orderTypeOptions: [
+		{ value: "I", label: "Invoice" },
+		{ value: "E", label: "Estimate" },
+	],
+}
 
 const CovertedQty = (qty, conversion) => {
 	let b = qty / +conversion
@@ -28,6 +36,7 @@ let getInititalValues = () => ({
 	counter_uuid: "",
 	item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
 	priority: 0,
+	order_type: "I",
 	time_1: 24 * 60 * 60 * 1000,
 	time_2: (24 + 48) * 60 * 60 * 1000,
 	warehouse_uuid: localStorage.getItem("warehouse") ? JSON.parse(localStorage.getItem("warehouse")) || "" : "",
@@ -93,7 +102,14 @@ export default function AddOrder() {
 				"Content-Type": "application/json",
 			},
 		})
-		if (response1.data.success) data = data.length ? (response1.data.result.length ? [...data, ...response1.data.result] : data) : response1.data.result.length ? response1.data.result : []
+		if (response1.data.success)
+			data = data.length
+				? response1.data.result.length
+					? [...data, ...response1.data.result]
+					: data
+				: response1.data.result.length
+				? response1.data.result
+				: []
 		setAutoBills(data.filter(a => a.status))
 	}
 
@@ -125,7 +141,6 @@ export default function AddOrder() {
 		getCounter()
 		getAutoBill()
 		GetUserWarehouse()
-
 		GetWarehouseList()
 	}, [])
 
@@ -352,6 +367,94 @@ export default function AddOrder() {
 
 	let listItemIndexCount = 0
 
+	const getSpecialPrice = item =>
+		counters
+			?.find(i => i.counter_uuid === order?.counter_uuid)
+			?.item_special_price?.find(i => i.item_uuid === item.item_uuid)
+
+	const saveSpecialPrice = async item => {
+		try {
+			const response = await axios({
+				method: "patch",
+				url: "/counters/item_special_price/" + order?.counter_uuid,
+				data: [{ item_uuid: item.item_uuid, price: item.p_price }],
+				headers: { "Content-Type": "application/json" },
+			})
+			if (!response.data.success) return
+			setCounters(list => list.map(i => (i.counter_uuid === order?.counter_uuid ? response.data.counter : i)))
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	const deleteSpecialPrice = async item => {
+		try {
+			const response = await axios({
+				method: "patch",
+				url: "/counters/delete_special_price",
+				data: { item_uuid: item.item_uuid, counter_uuid: order?.counter_uuid },
+				headers: { "Content-Type": "application/json" },
+			})
+			if (!response.data.success) return
+			setCounters(list => list.map(i => (i.counter_uuid === order?.counter_uuid ? response.data.counter : i)))
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	const onItemPriceChange = async (e, item) => {
+		if (e.target.value.toString().toLowerCase().includes("(no special)")) {
+			await deleteSpecialPrice(item)
+			e.target.value = +e.target.value
+				.split("")
+				.filter(i => i)
+				.filter(i => +i || +i === 0)
+				.join("")
+		}
+		setOrder(prev => {
+			return {
+				...prev,
+				item_details: prev.item_details.map(a =>
+					a.uuid === item.uuid
+						? {
+								...a,
+								p_price: e.target.value,
+								b_price: (e.target.value * item.conversion || 0).toFixed(2),
+						  }
+						: a
+				),
+			}
+		})
+		setEditPrices(prev =>
+			prev.filter(a => a.item_uuid === item.item_uuid).length
+				? prev.map(a =>
+						a.item_uuid === item.item_uuid
+							? {
+									...a,
+									p_price: e.target.value,
+									b_price: (e.target.value * item.conversion || 0).toFixed(2),
+							  }
+							: a
+				  )
+				: prev.length
+				? [
+						...prev,
+						{
+							...item,
+							p_price: e.target.value,
+							b_price: (e.target.value * item.conversion || 0).toFixed(2),
+						},
+				  ]
+				: [
+						{
+							...item,
+							p_price: e.target.value,
+							b_price: (e.target.value * item.conversion || 0).toFixed(2),
+						},
+				  ]
+		)
+	}
+
 	return (
 		<>
 			<Sidebar />
@@ -371,7 +474,13 @@ export default function AddOrder() {
 									<Select
 										ref={ref => (reactInputsRef.current["0"] = ref)}
 										options={counters
-											?.filter(a => !counterFilter || a.counter_title?.toLocaleLowerCase()?.includes(counterFilter.toLocaleLowerCase()))
+											?.filter(
+												a =>
+													!counterFilter ||
+													a.counter_title
+														?.toLocaleLowerCase()
+														?.includes(counterFilter.toLocaleLowerCase())
+											)
 											.map(a => ({
 												value: a.counter_uuid,
 												label: a.counter_title + " , " + a.route_title,
@@ -383,7 +492,9 @@ export default function AddOrder() {
 											order?.counter_uuid
 												? {
 														value: order?.counter_uuid,
-														label: counters?.find(j => j.counter_uuid === order.counter_uuid)?.counter_title,
+														label: counters?.find(
+															j => j.counter_uuid === order.counter_uuid
+														)?.counter_title,
 												  }
 												: ""
 										}
@@ -411,13 +522,18 @@ export default function AddOrder() {
 								)}
 							</div>
 							<div className="inputGroup">
-								<label htmlFor="Warehouse">From Warehouse</label>
+								<label htmlFor="Warehouse">Warehouse</label>
 								<div className="inputGroup" style={{ width: "300px" }}>
 									<Select
 										options={[
 											{ value: 0, label: "None" },
 											...warehouse
-												.filter(a => !user_warehouse.length || +user_warehouse[0] === 1 || user_warehouse.find(b => b === a.warehouse_uuid))
+												.filter(
+													a =>
+														!user_warehouse.length ||
+														+user_warehouse[0] === 1 ||
+														user_warehouse.find(b => b === a.warehouse_uuid)
+												)
 												.map(a => ({
 													value: a.warehouse_uuid,
 													label: a.warehouse_title,
@@ -433,7 +549,9 @@ export default function AddOrder() {
 											order?.warehouse_uuid
 												? {
 														value: order?.warehouse_uuid,
-														label: warehouse?.find(j => j.warehouse_uuid === order.warehouse_uuid)?.warehouse_title,
+														label: warehouse?.find(
+															j => j.warehouse_uuid === order.warehouse_uuid
+														)?.warehouse_title,
 												  }
 												: { value: 0, label: "None" }
 										}
@@ -448,13 +566,27 @@ export default function AddOrder() {
 								<label htmlFor="Warehouse">Priority</label>
 								<div className="inputGroup">
 									<Select
-										options={priorityOptions}
+										options={options.priorityOptions}
 										onChange={doc => setOrder(x => ({ ...x, priority: doc?.value }))}
-										value={priorityOptions?.find(j => j.value === order.priority)}
+										value={options.priorityOptions?.find(j => j.value === order.priority)}
 										openMenuOnFocus={true}
 										menuPosition="fixed"
 										menuPlacement="auto"
 										placeholder="Select Priority"
+									/>
+								</div>
+							</div>
+							<div className="inputGroup">
+								<label htmlFor="Warehouse">Type</label>
+								<div className="inputGroup">
+									<Select
+										options={options.orderTypeOptions}
+										onChange={doc => setOrder(x => ({ ...x, order_type: doc?.value }))}
+										value={options.orderTypeOptions?.find(j => j.value === order.order_type)}
+										openMenuOnFocus={true}
+										menuPosition="fixed"
+										menuPlacement="auto"
+										placeholder="Select Order Type"
 									/>
 								</div>
 							</div>
@@ -469,6 +601,7 @@ export default function AddOrder() {
 										<th className="pa2 tc bb b--black-20">Pcs</th>
 										<th className="pa2 tc bb b--black-20 ">Price (pcs)</th>
 										<th className="pa2 tc bb b--black-20 ">Price (box)</th>
+										<th className="pa2 tc bb b--black-20 ">Special Price</th>
 										<th className="pa2 tc bb b--black-20 "></th>
 									</tr>
 								</thead>
@@ -476,17 +609,38 @@ export default function AddOrder() {
 									<tbody className="lh-copy">
 										{order?.item_details?.map((item, i) => (
 											<tr key={item.uuid}>
-												<td className="ph2 pv1 tl bb b--black-20 bg-white" style={{ width: "300px" }}>
-													<div className="inputGroup" id={`selectContainer-${item.uuid}`} index={listItemIndexCount++} style={{ width: "300px" }}>
+												<td
+													className="ph2 pv1 tl bb b--black-20 bg-white"
+													style={{ width: "300px" }}>
+													<div
+														className="inputGroup"
+														id={`selectContainer-${item.uuid}`}
+														index={listItemIndexCount++}
+														style={{ width: "300px" }}>
 														<Select
 															ref={ref => (reactInputsRef.current[item.uuid] = ref)}
 															id={"item_uuid" + item.uuid}
 															options={itemsData
-																.filter(a => !order?.item_details.filter(b => a.item_uuid === b.item_uuid).length && a.status !== 0)
-																.sort((a, b) => a?.item_title?.localeCompare(b.item_title))
+																.filter(
+																	a =>
+																		!order?.item_details.filter(
+																			b => a.item_uuid === b.item_uuid
+																		).length && a.status !== 0
+																)
+																.sort((a, b) =>
+																	a?.item_title?.localeCompare(b.item_title)
+																)
 																.map((a, j) => ({
 																	value: a.item_uuid,
-																	label: a.item_title + "______" + a.mrp + (a.qty > 0 ? " _______[" + CovertedQty(a.qty || 0, a.conversion) + "]" : ""),
+																	label:
+																		a.item_title +
+																		"______" +
+																		a.mrp +
+																		(a.qty > 0
+																			? " _______[" +
+																			  CovertedQty(a.qty || 0, a.conversion) +
+																			  "]"
+																			: ""),
 																	key: a.item_uuid,
 																	qty: a.qty,
 																}))}
@@ -494,7 +648,12 @@ export default function AddOrder() {
 																option: (a, b) => {
 																	return {
 																		...a,
-																		color: b.data.qty === 0 ? "" : b.data.qty > 0 ? "#4ac959" : "red",
+																		color:
+																			b.data.qty === 0
+																				? ""
+																				: b.data.qty > 0
+																				? "#4ac959"
+																				: "red",
 																	}
 																},
 															}}
@@ -507,12 +666,19 @@ export default function AddOrder() {
 																	...prev,
 																	item_details: prev.item_details.map(a => {
 																		if (a.uuid === item.uuid) {
-																			let item = itemsData.find(b => b.item_uuid === e.value)
+																			let item = itemsData.find(
+																				b => b.item_uuid === e.value
+																			)
+																			const p_price =
+																				+getSpecialPrice(item)?.price ||
+																				item.item_price
 																			return {
 																				...a,
 																				...item,
-																				p_price: item.item_price,
-																				b_price: Math.floor(item.item_price * item.conversion || 0),
+																				p_price,
+																				b_price: Math.floor(
+																					p_price * item.conversion || 0
+																				),
 																			}
 																		} else return a
 																	}),
@@ -525,19 +691,35 @@ export default function AddOrder() {
 																	.filter(a => a.item_uuid === item.uuid)
 																	.map((a, j) => ({
 																		value: a.item_uuid,
-																		label: a.item_title + "______" + a.mrp + (a.qty > 0 ? "[" + CovertedQty(a.qty || 0, a.conversion) + "]" : ""),
+																		label:
+																			a.item_title +
+																			"______" +
+																			a.mrp +
+																			(a.qty > 0
+																				? "[" +
+																				  CovertedQty(
+																						a.qty || 0,
+																						a.conversion
+																				  ) +
+																				  "]"
+																				: ""),
 																		key: a.item_uuid,
 																	}))[0]
 															}
 															openMenuOnFocus={true}
-															autoFocus={focusedInputId === `selectContainer-${item.uuid}` || (i === 0 && focusedInputId === 0)}
+															autoFocus={
+																focusedInputId === `selectContainer-${item.uuid}` ||
+																(i === 0 && focusedInputId === 0)
+															}
 															menuPosition="fixed"
 															menuPlacement="auto"
 															placeholder="Item"
 														/>
 													</div>
 												</td>
-												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+												<td
+													className="ph2 pv1 tc bb b--black-20 bg-white"
+													style={{ textAlign: "center" }}>
 													<input
 														id={"q" + item.uuid}
 														style={{ width: "100px" }}
@@ -551,16 +733,24 @@ export default function AddOrder() {
 																setTimeout(() => setQtyDetails(prev => !prev), 2000)
 																return {
 																	...prev,
-																	item_details: prev.item_details.map(a => (a.uuid === item.uuid ? { ...a, b: e.target.value } : a)),
+																	item_details: prev.item_details.map(a =>
+																		a.uuid === item.uuid
+																			? { ...a, b: e.target.value }
+																			: a
+																	),
 																}
 															})
 														}}
 														onFocus={e => e.target.select()}
-														onKeyDown={e => (e.key === "Enter" ? jumpToNextIndex("q" + item.uuid) : "")}
+														onKeyDown={e =>
+															e.key === "Enter" ? jumpToNextIndex("q" + item.uuid) : ""
+														}
 														disabled={!item.item_uuid}
 													/>
 												</td>
-												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+												<td
+													className="ph2 pv1 tc bb b--black-20 bg-white"
+													style={{ textAlign: "center" }}>
 													<input
 														id={"p" + item.uuid}
 														style={{ width: "100px" }}
@@ -574,16 +764,24 @@ export default function AddOrder() {
 																setTimeout(() => setQtyDetails(prev => !prev), 2000)
 																return {
 																	...prev,
-																	item_details: prev.item_details.map(a => (a.uuid === item.uuid ? { ...a, p: e.target.value } : a)),
+																	item_details: prev.item_details.map(a =>
+																		a.uuid === item.uuid
+																			? { ...a, p: e.target.value }
+																			: a
+																	),
 																}
 															})
 														}}
 														onFocus={e => e.target.select()}
-														onKeyDown={e => (e.key === "Enter" ? jumpToNextIndex("p" + item.uuid) : "")}
+														onKeyDown={e =>
+															e.key === "Enter" ? jumpToNextIndex("p" + item.uuid) : ""
+														}
 														disabled={!item.item_uuid}
 													/>
 												</td>
-												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+												<td
+													className="ph2 pv1 tc bb b--black-20 bg-white"
+													style={{ textAlign: "center" }}>
 													Rs:
 													<input
 														id="Quantity"
@@ -593,53 +791,12 @@ export default function AddOrder() {
 														min={1}
 														onWheel={e => e.preventDefault()}
 														value={item?.p_price || 0}
-														onChange={e => {
-															setOrder(prev => {
-																return {
-																	...prev,
-																	item_details: prev.item_details.map(a =>
-																		a.uuid === item.uuid
-																			? {
-																					...a,
-																					p_price: e.target.value,
-																					b_price: (e.target.value * item.conversion || 0).toFixed(2),
-																			  }
-																			: a
-																	),
-																}
-															})
-															setEditPrices(prev =>
-																prev.filter(a => a.item_uuid === item.item_uuid).length
-																	? prev.map(a =>
-																			a.item_uuid === item.item_uuid
-																				? {
-																						...a,
-																						p_price: e.target.value,
-																						b_price: (e.target.value * item.conversion || 0).toFixed(2),
-																				  }
-																				: a
-																	  )
-																	: prev.length
-																	? [
-																			...prev,
-																			{
-																				...item,
-																				p_price: e.target.value,
-																				b_price: (e.target.value * item.conversion || 0).toFixed(2),
-																			},
-																	  ]
-																	: [
-																			{
-																				...item,
-																				p_price: e.target.value,
-																				b_price: (e.target.value * item.conversion || 0).toFixed(2),
-																			},
-																	  ]
-															)
-														}}
+														onChange={e => onItemPriceChange(e, item)}
 													/>
 												</td>
-												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+												<td
+													className="ph2 pv1 tc bb b--black-20 bg-white"
+													style={{ textAlign: "center" }}>
 													Rs:
 													<input
 														id="Quantity"
@@ -657,7 +814,10 @@ export default function AddOrder() {
 																			? {
 																					...a,
 																					b_price: e.target.value,
-																					p_price: (e.target.value / item.conversion || 0).toFixed(2),
+																					p_price: (
+																						e.target.value /
+																							item.conversion || 0
+																					).toFixed(2),
 																			  }
 																			: a
 																	),
@@ -670,7 +830,10 @@ export default function AddOrder() {
 																				? {
 																						...a,
 																						b_price: e.target.value,
-																						p_price: (e.target.value / item.conversion || 0).toFixed(2),
+																						p_price: (
+																							e.target.value /
+																								item.conversion || 0
+																						).toFixed(2),
 																				  }
 																				: a
 																	  )
@@ -680,7 +843,10 @@ export default function AddOrder() {
 																			{
 																				...item,
 																				b_price: e.target.value,
-																				p_price: (e.target.value / item.conversion || 0).toFixed(2),
+																				p_price: (
+																					e.target.value / item.conversion ||
+																					0
+																				).toFixed(2),
 																			},
 																	  ]
 																	: [
@@ -688,20 +854,41 @@ export default function AddOrder() {
 																				...item,
 
 																				b_price: e.target.value,
-																				p_price: (e.target.value / item.conversion || 0).toFixed(2),
+																				p_price: (
+																					e.target.value / item.conversion ||
+																					0
+																				).toFixed(2),
 																			},
 																	  ]
 															)
 														}}
 													/>
 												</td>
-												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
+												<td className="ph2 pv1 tc bb b--black-20 bg-white">
+													{+item?.item_price !== +item?.p_price &&
+														(+getSpecialPrice(item)?.price === +item?.p_price ? (
+															<IoCheckmarkDoneOutline className="table-icon checkmark" />
+														) : (
+															<FaSave
+																className="table-icon"
+																title="Save current price as special item price"
+																onClick={() => saveSpecialPrice(item)}
+															/>
+														))}
+													{}
+												</td>
+												<td
+													className="ph2 pv1 tc bb b--black-20 bg-white"
+													style={{ textAlign: "center" }}>
 													<DeleteOutlineIcon
-														style={{ color: "red", cursor: "pointer" }}
+														style={{ color: "red" }}
+														className="table-icon"
 														onClick={() => {
 															setOrder({
 																...order,
-																item_details: order.item_details.filter(a => a.uuid !== item.uuid),
+																item_details: order.item_details.filter(
+																	a => a.uuid !== item.uuid
+																),
 															})
 															//console.log(item);
 														}}
@@ -714,10 +901,16 @@ export default function AddOrder() {
 												onClick={() =>
 													setOrder(prev => ({
 														...prev,
-														item_details: [...prev.item_details, { uuid: uuid(), b: 0, p: 0 }],
+														item_details: [
+															...prev.item_details,
+															{ uuid: uuid(), b: 0, p: 0 },
+														],
 													}))
 												}>
-												<AddIcon sx={{ fontSize: 40 }} style={{ color: "#4AC959", cursor: "pointer" }} />
+												<AddIcon
+													sx={{ fontSize: 40 }}
+													style={{ color: "#4AC959", cursor: "pointer" }}
+												/>
 											</td>
 										</tr>
 									</tbody>
@@ -760,7 +953,17 @@ export default function AddOrder() {
 					</div>
 				</div>
 			</div>
-			{holdPopup ? <FreeItems onSave={() => setHoldPopup(false)} orders={order} holdPopup={holdPopup} itemsData={itemsData} setOrder={setOrder} /> : ""}
+			{holdPopup ? (
+				<FreeItems
+					onSave={() => setHoldPopup(false)}
+					orders={order}
+					holdPopup={holdPopup}
+					itemsData={itemsData}
+					setOrder={setOrder}
+				/>
+			) : (
+				""
+			)}
 			{popup ? (
 				<NewUserForm
 					onClose={() => setPopup(false)}
@@ -908,7 +1111,11 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 					...a,
 					amt: "",
 					coin: "",
-					status: a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002" ? "0" : 1,
+					status:
+						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
+						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+							? "0"
+							: 1,
 				}))
 			)
 	}, [PaymentModes])
@@ -980,7 +1187,10 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 							<form className="form">
 								<div className="formGroup">
 									{PaymentModes.map(item => (
-										<div className="row" style={{ flexDirection: "row", alignItems: "center" }} key={item.mode_uuid}>
+										<div
+											className="row"
+											style={{ flexDirection: "row", alignItems: "center" }}
+											key={item.mode_uuid}>
 											<div style={{ width: "50px" }}>{item.mode_title}</div>
 											<label className="selectLabel flex" style={{ width: "80px" }}>
 												<input
@@ -1040,7 +1250,11 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 										</label>
 									</div>
 									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
-										<button type="button" className="submit" style={{ color: "#fff", backgroundColor: "#7990dd" }} onClick={() => setPopup(true)}>
+										<button
+											type="button"
+											className="submit"
+											style={{ color: "#fff", backgroundColor: "#7990dd" }}
+											onClick={() => setPopup(true)}>
 											Deductions
 										</button>
 									</div>
@@ -1048,7 +1262,11 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 								</div>
 
 								<div className="flex" style={{ justifyContent: "space-between" }}>
-									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
+									<button
+										type="button"
+										style={{ backgroundColor: "red" }}
+										className="submit"
+										onClick={onSave}>
 										Cancel
 									</button>
 									<button type="button" className="submit" onClick={submitHandler}>
