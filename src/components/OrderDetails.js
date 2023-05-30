@@ -841,10 +841,11 @@ export function OrderDetails({
 		for (let i = 0; i < sourceArray.length; i += l) {
 			if (l - 4 < sourceArray.length - i && sourceArray.length - i < l) {
 				arrayOfArrays.push(sourceArray.slice(i, i + (l - 4)))
-				arrayOfArrays.push(sourceArray.slice(i + (l - 4)), i + l)
+				arrayOfArrays.push(sourceArray.slice(i + (l - 4), i + l))
 			} else {
 				arrayOfArrays.push(sourceArray.slice(i, i + l))
 			}
+			console.log(i, sourceArray.length, arrayOfArrays)
 		}
 
 		const result = arrayOfArrays?.map(_i => ({ ...printData, item_details: _i }))
@@ -1796,7 +1797,7 @@ export function OrderDetails({
 																disabled={!item.item_uuid}
 															/>
 														) : (
-															"Rs:" + (item.price * item.conversion || 0)
+															"Rs:" + (item.price * item.conversion || 0).toFixed(2)
 														)}
 													</td>
 													{editOrder ? (

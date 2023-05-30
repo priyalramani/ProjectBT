@@ -79,7 +79,7 @@ const Card = ({
 	}
 
 	const curr = Date.now()
-	const daysCount = +((curr - dateTime) / (24 * 60 * 60 * 60 * 1000)).toFixed(0)
+	const daysCount = +((curr - dateTime) / (24 * 60 * 60 * 1000)).toFixed(0)
 	if (!order.time_1) order.time_1 = dateTime + 24 * 60 * 60 * 1000
 	if (!order.time_2) order.time_2 = dateTime + (24 + 48) * 60 * 60 * 1000
 
