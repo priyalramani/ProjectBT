@@ -15,6 +15,8 @@ const Counter = () => {
 	const [counterNotesPopup, setCounterNotesPoup] = useState()
 	const [filterCounterTitle, setFilterCounterTitle] = useState("")
 	const [filterRoute, setFilterRoute] = useState("")
+	const [filterMobile, setFilterMobile] = useState("")
+
 	const [popupForm, setPopupForm] = useState(false)
 	const [routesData, setRoutesData] = useState([])
 	const [selectedRoutes, setSelectedRoutes] = useState([])
@@ -104,10 +106,11 @@ const Counter = () => {
 										?.toLocaleLowerCase()
 										?.includes(filterCounterTitle?.toLocaleLowerCase())) &&
 								(!filterRoute ||
-									a.route_title?.toLocaleLowerCase()?.includes(filterRoute?.toLocaleLowerCase()))
+									a.route_title?.toLocaleLowerCase()?.includes(filterRoute?.toLocaleLowerCase())) &&
+								(!filterMobile || a.mobile?.find(_i => _i.mobile?.includes(filterMobile)))
 						)
 				: [],
-		[counter, filterCounterTitle, filterRoute, routesData]
+		[counter, filterCounterTitle, filterRoute, filterMobile, routesData]
 	)
 
 	const fileExtension = ".xlsx"
@@ -123,7 +126,9 @@ const Counter = () => {
 			)
 			?.map((item, i) => ({
 				...item,
-				mobile: item?.mobile?.map((a, i) => (i === 0 ? a.mobile : ", " + a.mobile)),
+				mobile: item?.mobile
+					?.filter(i => i.mobile?.length)
+					?.map((a, i) => (i === 0 ? a.mobile : ", " + a.mobile)),
 			}))
 
 		sheetData = sheetData.map(a => {
@@ -189,6 +194,13 @@ const Counter = () => {
 							onChange={e => setFilterRoute(e.target.value)}
 							value={filterRoute}
 							placeholder="Search Route Title..."
+							className="searchInput"
+						/>
+						<input
+							type="text"
+							onChange={e => setFilterMobile(e.target.value)}
+							value={filterMobile}
+							placeholder="Search Mobile..."
 							className="searchInput"
 						/>
 						<button className="item-sales-search" onClick={() => seXlSelection(true)}>

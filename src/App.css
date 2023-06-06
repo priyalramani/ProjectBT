@@ -119,18 +119,77 @@ div.order-edit-select {
 	z-index: 999999999;
 }
 
-.table-icon {
+svg.table-icon {
 	font-size: 24px;
 	color: black;
 	cursor: pointer;
 	display: block;
-	margin: auto;
+	margin: 10px auto;
 	background: none;
 }
 
 .table-icon.checkmark {
-	margin: auto;
+	padding: 8px;
 	background: none;
+	border-radius: 50%;
+	display: block;
+	width: 36px;
+	height: 36px;
 	color: #4ac959;
-	cursor: auto;
+	cursor: pointer;
+	transition: all 0.5s ease;
+}
+
+.table-icon.checkmark:hover {
+	background: #4ac95921;
+	border: 1px solid #4ac95912;
+	scale: 1.2;
+}
+
+.overlay-wrapper {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+	background: #000000a8;
+	z-index: 1000000000;
+}
+
+.prompt {
+	width: 50vw;
+	translate: calc(50vw - 50%) calc(50vh - 50%);
+	background: white;
+	padding: 20px;
+	border-radius: 5px;
+}
+
+.prompt p {
+	font-size: 1.1rem;
+}
+
+.prompt-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+}
+
+.prompt-actions button {
+	border: none;
+	background: none;
+	margin-top: 20px;
+	padding: 8px 14px;
+	border-radius: 5px;
+	font-size: 0.8rem;
+}
+
+.prompt-actions button.cancel {
+	border: 1px solid red;
+	color: red;
+}
+
+.prompt-actions button.confirm {
+	background: #44cd4a;
+	color: white;
 }

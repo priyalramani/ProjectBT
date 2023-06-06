@@ -1,53 +1,118 @@
-import React, { useState } from "react";
-import Context from "./context";
+import React, { useState } from "react"
+import Context from "./context"
+import axios from "axios"
 
-import { v4 as uuidv4 } from "uuid";
-import axios from "axios";
+const State = props => {
+	const [calculationPopup, setcalculationPopup] = useState(null)
+	const [cashRegisterPopup, setCashRegisterPopup] = useState(null)
+	const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false)
+	const [notification, setNotification] = useState(null)
+	const [loading, setLoading] = useState(null)
+	const CalculateLines = async (days, type) => {
+		setLoading(true)
+		const response = await axios({
+			method: "put",
+			url: "/counters/CalculateLines",
+			data: { days, type },
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+		if (response.data.success) {
+			setLoading(false)
+		}
+	}
+	const updateServerPdf = async data => {
+		console.log(data)
+	}
 
-const State = (props) => {
-  const [calculationPopup, setcalculationPopup] = useState(null);
-  const [cashRegisterPopup, setCashRegisterPopup] = useState(null);
-  const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
-  const [notification, setNotification] = useState(null);
-  const [loading, setLoading] = useState(null);
-  const CalculateLines = async (days, type) => {
-    setLoading(true);
-    const response = await axios({
-      method: "put",
-      url: "/counters/CalculateLines",
-      data: { days, type },
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) {
-      setLoading(false);
-    }
-  };
-  const updateServerPdf = async (data) => {
-    console.log(data);
-  };
-  return (
-    <Context.Provider
-      value={{
-        calculationPopup,
-        setcalculationPopup,
-        CalculateLines,
-        loading,
-        setLoading,
-        notification,
-        setNotification,
-        updateServerPdf,
-        cashRegisterPopup,
-        setCashRegisterPopup,
-        isItemAvilableOpen,
-        setIsItemAvilableOpen
-      }}
+	const [promptState, setPromptState] = useState()
 
-    >
-      {props.children}
-    </Context.Provider>
-  );
-};
+	const getSpecialPrice = (counters, item, counter_uuid) => {
+		const data = counters
+			?.find(i => i.counter_uuid === counter_uuid)
+			?.item_special_price?.find(i => i.item_uuid === item.item_uuid)
+		console.log({
+			data,
+			counters,
+			item,
+			counter_uuid,
+			counter: counters?.find(i => i.counter_uuid === counter_uuid),
+		})
+		return data
+	}
 
-export default State;
+	const saveSpecialPrice = async (item, counter_uuid, setCounters, price) => {
+		try {
+			console.log({ item, counter_uuid, setCounters })
+			const response = await axios({
+				method: "patch",
+				url: "/counters/item_special_price/" + counter_uuid,
+				data: [{ item_uuid: item.item_uuid, price: price || item.p_price }],
+				headers: { "Content-Type": "application/json" },
+			})
+			if (!response.data.success) return
+			setCounters(list => list.map(i => (i.counter_uuid === counter_uuid ? response.data.counter : i)))
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	const deleteSpecialPrice = async (item, counter_uuid, setCounters) => {
+		try {
+			console.log({ item, counter_uuid, setCounters })
+			setPromptState(null)
+			const response = await axios({
+				method: "patch",
+				url: "/counters/delete_special_price",
+				data: { item_uuid: item.item_uuid, counter_uuid: counter_uuid },
+				headers: { "Content-Type": "application/json" },
+			})
+			if (!response.data.success) return
+			setCounters(list => list.map(i => (i.counter_uuid === counter_uuid ? response.data.counter : i)))
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
+	const spcPricePrompt = (...params) => {
+		console.log({ params })
+		setPromptState({
+			active: true,
+			message: "Item special price will be deleted. Do you wish to continue?",
+			actions: [
+				{ label: "Cancel", classname: "cancel", action: () => setPromptState(null) },
+				{ label: "Confirm", classname: "confirm", action: () => deleteSpecialPrice(...params) },
+			],
+		})
+	}
+
+	return (
+		<Context.Provider
+			value={{
+				calculationPopup,
+				setcalculationPopup,
+				CalculateLines,
+				loading,
+				setLoading,
+				notification,
+				setNotification,
+				updateServerPdf,
+				cashRegisterPopup,
+				setCashRegisterPopup,
+				isItemAvilableOpen,
+				setIsItemAvilableOpen,
+
+				promptState,
+				setPromptState,
+				getSpecialPrice,
+				saveSpecialPrice,
+				deleteSpecialPrice,
+				spcPricePrompt,
+			}}>
+			{props.children}
+		</Context.Provider>
+	)
+}
+
+export default State

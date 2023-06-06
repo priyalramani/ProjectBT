@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import axios from "axios"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useContext } from "react"
 import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import "./index.css"
@@ -13,6 +13,8 @@ import { FaSave } from "react-icons/fa"
 import FreeItems from "../../components/FreeItems"
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent"
 import { IoCheckmarkDoneOutline } from "react-icons/io5"
+import Context from "../../context/context"
+import Prompt from "../../components/Prompt"
 
 const options = {
 	priorityOptions: [
@@ -43,6 +45,7 @@ let getInititalValues = () => ({
 })
 
 export default function AddOrder() {
+	const { promptState, getSpecialPrice, saveSpecialPrice, deleteSpecialPrice, spcPricePrompt } = useContext(Context)
 	const [order, setOrder] = useState(getInititalValues())
 	const [deliveryPopup, setDeliveryPopup] = useState(false)
 	const [counters, setCounters] = useState([])
@@ -367,44 +370,9 @@ export default function AddOrder() {
 
 	let listItemIndexCount = 0
 
-	const getSpecialPrice = item =>
-		counters
-			?.find(i => i.counter_uuid === order?.counter_uuid)
-			?.item_special_price?.find(i => i.item_uuid === item.item_uuid)
-
-	const saveSpecialPrice = async item => {
-		try {
-			const response = await axios({
-				method: "patch",
-				url: "/counters/item_special_price/" + order?.counter_uuid,
-				data: [{ item_uuid: item.item_uuid, price: item.p_price }],
-				headers: { "Content-Type": "application/json" },
-			})
-			if (!response.data.success) return
-			setCounters(list => list.map(i => (i.counter_uuid === order?.counter_uuid ? response.data.counter : i)))
-		} catch (error) {
-			console.log(error)
-		}
-	}
-
-	const deleteSpecialPrice = async item => {
-		try {
-			const response = await axios({
-				method: "patch",
-				url: "/counters/delete_special_price",
-				data: { item_uuid: item.item_uuid, counter_uuid: order?.counter_uuid },
-				headers: { "Content-Type": "application/json" },
-			})
-			if (!response.data.success) return
-			setCounters(list => list.map(i => (i.counter_uuid === order?.counter_uuid ? response.data.counter : i)))
-		} catch (error) {
-			console.log(error)
-		}
-	}
-
 	const onItemPriceChange = async (e, item) => {
-		if (e.target.value.toString().toLowerCase().includes("(no special)")) {
-			await deleteSpecialPrice(item)
+		if (e.target.value.toString().toLowerCase().includes("no special")) {
+			await deleteSpecialPrice(item, order?.counter_uuid, setCounters)
 			e.target.value = +e.target.value
 				.split("")
 				.filter(i => i)
@@ -670,8 +638,11 @@ export default function AddOrder() {
 																				b => b.item_uuid === e.value
 																			)
 																			const p_price =
-																				+getSpecialPrice(item)?.price ||
-																				item.item_price
+																				+getSpecialPrice(
+																					counters,
+																					item,
+																					order?.counter_uuid
+																				)?.price || item.item_price
 																			return {
 																				...a,
 																				...item,
@@ -866,16 +837,31 @@ export default function AddOrder() {
 												</td>
 												<td className="ph2 pv1 tc bb b--black-20 bg-white">
 													{+item?.item_price !== +item?.p_price &&
-														(+getSpecialPrice(item)?.price === +item?.p_price ? (
-															<IoCheckmarkDoneOutline className="table-icon checkmark" />
+														(+getSpecialPrice(counters, item, order?.counter_uuid)
+															?.price === +item?.p_price ? (
+															<IoCheckmarkDoneOutline
+																className="table-icon checkmark"
+																onClick={() =>
+																	spcPricePrompt(
+																		item,
+																		order?.counter_uuid,
+																		setCounters
+																	)
+																}
+															/>
 														) : (
 															<FaSave
 																className="table-icon"
 																title="Save current price as special item price"
-																onClick={() => saveSpecialPrice(item)}
+																onClick={() =>
+																	saveSpecialPrice(
+																		item,
+																		order?.counter_uuid,
+																		setCounters
+																	)
+																}
 															/>
 														))}
-													{}
 												</td>
 												<td
 													className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -953,6 +939,7 @@ export default function AddOrder() {
 					</div>
 				</div>
 			</div>
+			{promptState ? <Prompt {...promptState} /> : ""}
 			{holdPopup ? (
 				<FreeItems
 					onSave={() => setHoldPopup(false)}

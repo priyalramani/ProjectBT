@@ -60,7 +60,7 @@ import MobileLayout from "./components/MobileLayout"
 import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
 import CashRegister from "./pages/QuikAccess/CashRegister"
 
-export let Version = 111
+export let Version = 112
 export const server = "https://api.btgondia.com"
 // export const server = "http://localhost:9000"
 // export const server = "http://15.207.39.69:9000"

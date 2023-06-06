@@ -13,6 +13,9 @@ import DiliveryReplaceMent from "./DiliveryReplaceMent"
 import TaskPopupMenu from "./TaskPopupMenu"
 import MessagePopup from "./MessagePopup"
 import context from "../context/context"
+import { IoCheckmarkDoneOutline } from "react-icons/io5"
+import { FaSave } from "react-icons/fa"
+import Prompt from "./Prompt"
 const default_status = [
 	{ value: 0, label: "Preparing" },
 	{ value: 1, label: "Ready" },
@@ -38,7 +41,7 @@ export function OrderDetails({
 	warehouseData = [],
 	reminder = null,
 }) {
-	const { setNotification } = useContext(context)
+	const { setNotification, promptState, getSpecialPrice, saveSpecialPrice, spcPricePrompt } = useContext(context)
 	const [counters, setCounters] = useState([])
 	const [waiting, setWaiting] = useState(false)
 	const [caption, setCaption] = useState("")
@@ -450,7 +453,6 @@ export function OrderDetails({
 		let user_uuid = localStorage.getItem("user_uuid")
 		data = {
 			...data,
-
 			item_details: data.item_details?.map(a => ({
 				...a,
 				gst_percentage: a.item_gst,
@@ -1329,6 +1331,7 @@ export function OrderDetails({
 												<>
 													<th className="pa2 tc bb b--black-20 ">Old Price</th>
 													<th className="pa2 tc bb b--black-20 "></th>
+													<th className="pa2 tc bb b--black-20 "></th>
 												</>
 											) : (
 												""
@@ -1464,14 +1467,15 @@ export function OrderDetails({
 													<td
 														className="ph2 pv1 tl bb b--black-20 bg-white"
 														style={{ textAlign: "center", width: "3ch" }}>
-														{item.sr}
+														{item.sr || i + 1}
 													</td>
 													<td className="ph2 pv1 tl bb b--black-20 bg-white">
 														<div
 															className="inputGroup"
 															index={!item.default ? listItemIndexCount++ : ""}
 															id={!item.default ? item_title_component_id : ""}
-															style={{ height: "20px" }}>
+															// style={{ height: "20px" }}
+														>
 															{editOrder && !item.default ? (
 																<Select
 																	ref={ref =>
@@ -1482,8 +1486,8 @@ export function OrderDetails({
 																	styles={{
 																		control: styles => ({
 																			...styles,
-																			minHeight: 20,
-																			maxHeight: 20,
+																			// minHeight: 20,
+																			// maxHeight: 20,
 																			borderRadius: 2,
 																			padding: 0,
 																		}),
@@ -1802,7 +1806,49 @@ export function OrderDetails({
 													</td>
 													{editOrder ? (
 														<>
+															{console.log(
+																"---------------------------------------------",
+																getSpecialPrice(
+																	counters,
+																	item,
+																	orderData?.counter_uuid
+																),
+																item?.item_price,
+																item?.price
+															)}
 															<td>Rs.{item.old_price || item.item_price}</td>
+															<td>
+																{+item?.item_price !== +item?.price &&
+																	(+getSpecialPrice(
+																		counters,
+																		item,
+																		orderData?.counter_uuid
+																	)?.price === +item?.price ? (
+																		<IoCheckmarkDoneOutline
+																			className="table-icon checkmark"
+																			onClick={() =>
+																				spcPricePrompt(
+																					item,
+																					orderData?.counter_uuid,
+																					setCounters
+																				)
+																			}
+																		/>
+																	) : (
+																		<FaSave
+																			className="table-icon"
+																			title="Save current price as special item price"
+																			onClick={() =>
+																				saveSpecialPrice(
+																					item,
+																					orderData?.counter_uuid,
+																					setCounters,
+																					+item?.price
+																				)
+																			}
+																		/>
+																	))}
+															</td>
 															<td>
 																<button
 																	style={{
@@ -1957,11 +2003,13 @@ export function OrderDetails({
 							<WhatsApp />
 						</button>
 						<button type="button" onClick={() => {}} style={{ width: "max-content", padding: "10px 20px" }}>
-							OrderTotal : {orderData?.order_grandtotal || 0}
+							Order Total : {orderData?.order_grandtotal || 0}
 						</button>
 					</div>
 				</div>
 			</div>
+
+			{promptState?.active && <Prompt {...promptState} />}
 
 			{waiting ? (
 				<div className="overlay" style={{ zIndex: "99999999999999999" }}>

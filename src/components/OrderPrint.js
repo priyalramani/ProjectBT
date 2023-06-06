@@ -13,6 +13,7 @@ const OrderPrint = ({
 	paymentModes = [],
 	print_items_length = 12,
 }) => {
+	console.log({ print_items_length })
 	const [gstValues, setGstVAlues] = useState([])
 	let deliveryMessage = useMemo(
 		() =>
@@ -59,6 +60,12 @@ const OrderPrint = ({
 			let dsc_amt = (+(item?.price || item.price) - (+unit_price || 0)) * itemQty || 0
 			return { dsc_amt, tex_amt }
 		}) || []
+
+	const isBorderItem = item => {
+		let time = new Date().getTime()
+		return time - item?.created_at < reminderDate * 86400000
+	}
+
 	return (
 		<div
 			style={{
@@ -307,8 +314,7 @@ const OrderPrint = ({
 					let unit_price = (+item.item_total || 0) / (+itemQty || 1)
 					let tex_amt = (+unit_price || 0) - ((+unit_price || 0) * 100) / (100 + (+item.gst_percentage || 0))
 					let dsc_amt = (+(item.price || item.item_price || 0) - (+unit_price || 0)) * itemQty
-					let time = new Date().getTime()
-					let boldedItem = time - item?.created_at < reminderDate * 86400000
+					let boldedItem = isBorderItem(item)
 
 					return (
 						<tr style={{ borderBottom: "1px solid #000" }} className="order_item">
@@ -442,7 +448,13 @@ const OrderPrint = ({
 				<tr
 					style={{
 						height:
-							((footer ? print_items_length - 4 : print_items_length) - item_details?.length) * 10 + "px",
+							order?.order_type !== "E"
+								? ((footer ? print_items_length - 4 : print_items_length) - item_details?.length) * 10 +
+								  "px"
+								: `calc(483px - 202.44px - ${
+										item_details?.filter(isBorderItem)?.length * 14.44 +
+										item_details?.filter(_i => !isBorderItem(_i))?.length * 17
+								  }px)`,
 					}}>
 					<td colspan="28"></td>
 				</tr>
