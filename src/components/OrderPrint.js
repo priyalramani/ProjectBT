@@ -13,7 +13,7 @@ const OrderPrint = ({
 	paymentModes = [],
 	print_items_length = 12,
 }) => {
-	console.log({ print_items_length })
+	const isEstimate = order?.order_type === "E"
 	const [gstValues, setGstVAlues] = useState([])
 	let deliveryMessage = useMemo(
 		() =>
@@ -84,11 +84,11 @@ const OrderPrint = ({
 							fontSize: "small",
 							width: "100%",
 						}}>
-						{order?.order_type !== "E" ? <b>GST INVOICE</b> : <b>ESTIMATE</b>}
+						{!isEstimate ? <b>GST INVOICE</b> : <b>ESTIMATE</b>}
 					</td>
 				</tr>
 				<tr>
-					{order?.order_type !== "E" ? (
+					{!isEstimate ? (
 						<>
 							<td style={{ width: "50%" }} colSpan={14}>
 								<table>
@@ -224,7 +224,7 @@ const OrderPrint = ({
 				</tr>
 				<tr>
 					<td style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={7}>
-						Invoice: N{order?.invoice_number}
+						{isEstimate ? `Estimate: E${order?.invoice_number}` : `Invoice: N${order?.invoice_number}`}
 					</td>
 					<td style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={7}>
 						Date:{" "}
@@ -447,14 +447,13 @@ const OrderPrint = ({
 
 				<tr
 					style={{
-						height:
-							order?.order_type !== "E"
-								? ((footer ? print_items_length - 4 : print_items_length) - item_details?.length) * 10 +
-								  "px"
-								: `calc(483px - 202.44px - ${
-										item_details?.filter(isBorderItem)?.length * 14.44 +
-										item_details?.filter(_i => !isBorderItem(_i))?.length * 17
-								  }px)`,
+						height: !isEstimate
+							? ((footer ? print_items_length - 4 : print_items_length) - item_details?.length) * 10 +
+							  "px"
+							: `calc(483px - 192.11px - ${
+									item_details?.filter(isBorderItem)?.length * 14.44 +
+									item_details?.filter(_i => !isBorderItem(_i))?.length * 17
+							  }px)`,
 					}}>
 					<td colspan="28"></td>
 				</tr>
@@ -608,89 +607,120 @@ const OrderPrint = ({
 
 				{footer ? (
 					<>
-						{order?.order_type !== "E" ? (
-							<tr>
-								<td colSpan={14}>
-									<table style={{ borderRight: "1px solid black", width: "100%" }}>
-										<tr>
-											<td style={{ fontWeight: "600", fontSize: "x-small" }}>
-												<b> Bank:</b> Punjab National Bank, Gondia
-											</td>
-										</tr>
-										<tr>
-											<td style={{ fontWeight: "600", fontSize: "x-small" }}>
-												<b>Ac. No:</b> 0182008700014607
-											</td>
-										</tr>
-										<tr>
-											<td style={{ fontWeight: "600", fontSize: "x-small" }}>
-												<b>IFSC:</b> PUNB0018200
-											</td>
-										</tr>
+						{!isEstimate ? (
+							<>
+								<tr>
+									<td colSpan={14}>
+										<table style={{ borderRight: "1px solid black", width: "100%" }}>
+											<tr>
+												<td style={{ fontWeight: "600", fontSize: "x-small" }}>
+													<b> Bank:</b> Punjab National Bank, Gondia
+												</td>
+											</tr>
+											<tr>
+												<td style={{ fontWeight: "600", fontSize: "x-small" }}>
+													<b>Ac. No:</b> 0182008700014607
+												</td>
+											</tr>
+											<tr>
+												<td style={{ fontWeight: "600", fontSize: "x-small" }}>
+													<b>IFSC:</b> PUNB0018200
+												</td>
+											</tr>
 
-										<tr>
-											<td
-												style={{
-													textAlign: "center",
-													fontWeight: "600",
-													fontSize: "small",
-													width: "100%",
-												}}>
-												<b>Or</b>
-											</td>
-										</tr>
+											<tr>
+												<td
+													style={{
+														textAlign: "center",
+														fontWeight: "600",
+														fontSize: "small",
+														width: "100%",
+													}}>
+													<b>Or</b>
+												</td>
+											</tr>
 
-										<tr>
-											<td style={{ fontWeight: "600", fontSize: "x-small" }}>
-												<b>GPay / PhonePe:</b> 9422551074
-											</td>
-										</tr>
-										<tr>
-											<td style={{ fontWeight: "600", fontSize: "x-small" }}>
-												<b>UPI / VPA:</b> 9422551074@upi / 9422551074@ybl
-											</td>
-										</tr>
-									</table>
-								</td>
-								<td colSpan={14}>
-									<table style={{ width: "100%" }}>
-										<tr>
-											<td
-												style={{
-													fontWeight: "600",
-													fontSize: "xx-small",
-													textAlign: "left",
-												}}>
-												GST:
-											</td>
-										</tr>
-										{gstValues.length
-											? gstValues.map(a => (
-													<tr>
-														<td
-															style={{
-																fontWeight: "600",
-																fontSize: "xx-small",
-																textAlign: "left",
-															}}>
-															{a.tex_amt}*{a.value}%={a.amount}
-														</td>
-													</tr>
-											  ))
-											: ""}
-										<tr>
-											<td
-												style={{
-													fontSize: "x-large",
-													fontWeight: "600",
-													textAlign: "right",
-												}}>
-												Order Total: {order?.order_grandtotal || 0}
-											</td>
-										</tr>
-									</table>
-								</td>
-							</tr>
+											<tr>
+												<td style={{ fontWeight: "600", fontSize: "x-small" }}>
+													<b>GPay / PhonePe:</b> 9422551074
+												</td>
+											</tr>
+											<tr>
+												<td style={{ fontWeight: "600", fontSize: "x-small" }}>
+													<b>UPI / VPA:</b> 9422551074@upi / 9422551074@ybl
+												</td>
+											</tr>
+										</table>
+									</td>
+									<td colSpan={14}>
+										<table style={{ width: "100%" }}>
+											<tr>
+												<td
+													style={{
+														fontWeight: "600",
+														fontSize: "xx-small",
+														textAlign: "left",
+													}}>
+													GST:
+												</td>
+											</tr>
+											{gstValues.length
+												? gstValues.map(a => (
+														<tr>
+															<td
+																style={{
+																	fontWeight: "600",
+																	fontSize: "xx-small",
+																	textAlign: "left",
+																}}>
+																{a.tex_amt}*{a.value}%={a.amount}
+															</td>
+														</tr>
+												  ))
+												: ""}
+											<tr>
+												<td
+													style={{
+														fontSize: "x-large",
+														fontWeight: "600",
+														textAlign: "right",
+													}}>
+													Order Total: {order?.order_grandtotal || 0}
+												</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+								<tr>
+									<th colSpan={28}>
+										<hr
+											style={{
+												height: "3px",
+												backgroundColor: "#000",
+												width: "100%",
+											}}
+										/>
+									</th>
+								</tr>
+								<tr>
+									{deliveryMessage?.length ? (
+										<td
+											colSpan={28}
+											style={{
+												fontWeight: "600",
+												fontSize: "xx-small",
+												textAlign: "left",
+											}}>
+											{deliveryMessage.map((a, i) =>
+												i === 0 ? a.mode_title : ", " + a.mode_title
+											)}{" "}
+											Allowed
+										</td>
+									) : (
+										""
+									)}
+								</tr>
+							</>
 						) : (
 							<tr>
 								<td
@@ -705,44 +735,6 @@ const OrderPrint = ({
 								</td>
 							</tr>
 						)}
-						<tr>
-							<th colSpan={28}>
-								<hr
-									style={{
-										height: "3px",
-										backgroundColor: "#000",
-										width: "100%",
-									}}
-								/>
-							</th>
-						</tr>
-						<tr>
-							{deliveryMessage?.length ? (
-								<>
-									<td
-										colSpan={28}
-										style={{
-											fontWeight: "600",
-											fontSize: "xx-small",
-											textAlign: "left",
-										}}>
-										{deliveryMessage.map((a, i) => (i === 0 ? a.mode_title : ", " + a.mode_title))}{" "}
-										Allowed
-									</td>
-									{/* <td colSpan={28}>
-										<hr
-											style={{
-												height: "3px",
-												backgroundColor: "#fff",
-												width: "100%",
-											}}
-										/>
-									</td> */}
-								</>
-							) : (
-								""
-							)}
-						</tr>
 					</>
 				) : (
 					<tr>
