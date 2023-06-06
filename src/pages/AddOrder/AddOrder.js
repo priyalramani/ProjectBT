@@ -5,7 +5,7 @@ import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import "./index.css"
 import { Billing, AutoAdd } from "../../Apis/functions"
-import { AddCircle as AddIcon } from "@mui/icons-material"
+import { AddCircle as AddIcon, AirlineSeatLegroomNormalTwoTone } from "@mui/icons-material"
 import { v4 as uuid } from "uuid"
 import Select from "react-select"
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
@@ -45,7 +45,8 @@ let getInititalValues = () => ({
 })
 
 export default function AddOrder() {
-	const { promptState, getSpecialPrice, saveSpecialPrice, deleteSpecialPrice, spcPricePrompt } = useContext(Context)
+	const { promptState, setPromptState, getSpecialPrice, saveSpecialPrice, deleteSpecialPrice, spcPricePrompt } =
+		useContext(Context)
 	const [order, setOrder] = useState(getInititalValues())
 	const [deliveryPopup, setDeliveryPopup] = useState(false)
 	const [counters, setCounters] = useState([])
@@ -304,6 +305,18 @@ export default function AddOrder() {
 	}
 
 	const callBilling = async (type = {}) => {
+		const getType = (code, match = true) => ["Estimate", "Invoice"]?.find(i => (i[0] === code) === match)
+
+		if (!order.item_details.filter(a => a.item_uuid).length) return
+		else if (order?.item_details?.some(i => i.billing_type !== order?.order_type))
+			return setPromptState({
+				message: `${getType(order?.order_type, false)} items are not allowed in ${getType(
+					order?.order_type
+				)} order type.`,
+				actions: [{ label: "Ok", classname: "text-btns", action: () => setPromptState(null) }],
+			})
+
+		setPopup(true)
 		let counter = counters.find(a => order.counter_uuid === a.counter_uuid)
 		let time = new Date()
 		let autoBilling = await Billing({
@@ -576,7 +589,7 @@ export default function AddOrder() {
 								{order.counter_uuid ? (
 									<tbody className="lh-copy">
 										{order?.item_details?.map((item, i) => (
-											<tr key={item.uuid}>
+											<tr key={item.uuid} item-billing-type={item?.billing_type}>
 												<td
 													className="ph2 pv1 tl bb b--black-20 bg-white"
 													style={{ width: "300px" }}>
@@ -588,6 +601,7 @@ export default function AddOrder() {
 														<Select
 															ref={ref => (reactInputsRef.current[item.uuid] = ref)}
 															id={"item_uuid" + item.uuid}
+															className="order-item-select"
 															options={itemsData
 																.filter(
 																	a =>
@@ -907,13 +921,7 @@ export default function AddOrder() {
 						</div>
 
 						<div className="bottomContent" style={{ background: "white" }}>
-							<button
-								type="button"
-								onClick={() => {
-									if (!order.item_details.filter(a => a.item_uuid).length) return
-									setPopup(true)
-									callBilling()
-								}}>
+							<button type="button" onClick={callBilling}>
 								Bill
 							</button>
 							{order?.order_grandtotal ? (

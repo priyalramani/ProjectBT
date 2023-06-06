@@ -208,3 +208,18 @@
 .redFont {
 	color: red;
 }
+
+tr[item-billing-type="E"] input,
+tr[item-billing-type="E"] .order-item-select,
+tr[item-billing-type="E"] .select {
+	border: 1.5px solid purple;
+	border-radius: 6px;
+	outline: none;
+}
+
+button.text-btns {
+	color: #44cd4b;
+	font-size: 1rem;
+	text-transform: uppercase;
+	font-weight: 600;
+}
