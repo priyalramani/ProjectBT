@@ -133,6 +133,14 @@ input[type="number"] {
 	display: flex;
 }
 
+/* #login-container button.submit-btn {
+	color: #2e2e2e;
+	font-weight: 700;
+	font-family: system-ui;
+	font-size: 0.9rem;
+	line-height: 1.15rem;
+} */
+
 #login-container h3 {
 	color: #fff;
 	font-weight: 500;

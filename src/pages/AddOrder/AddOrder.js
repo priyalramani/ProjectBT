@@ -921,7 +921,7 @@ export default function AddOrder() {
 						</div>
 
 						<div className="bottomContent" style={{ background: "white" }}>
-							<button type="button" onClick={callBilling}>
+							<button type="button" onClick={() => callBilling()}>
 								Bill
 							</button>
 							{order?.order_grandtotal ? (
