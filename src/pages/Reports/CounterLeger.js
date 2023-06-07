@@ -119,7 +119,8 @@ const CounterLeger = () => {
 									searchData?.counter_uuid
 										? {
 												value: searchData?.counter_uuid,
-												label: counter?.find(j => j.counter_uuid === searchData.counter_uuid)?.counter_title,
+												label: counter?.find(j => j.counter_uuid === searchData.counter_uuid)
+													?.counter_title,
 										  }
 										: ""
 								}
@@ -129,13 +130,18 @@ const CounterLeger = () => {
 								placeholder="Select"
 							/>
 						</div>
-						<button className="item-sales-search" onClick={() => getCompleteOrders()}>
+						<button className="theme-btn" onClick={() => getCompleteOrders()}>
 							Search
 						</button>
 					</div>
 				</div>
 				<div className="table-container-user item-sales-container">
-					<Table itemsDetails={items} setPopupOrder={setPopupOrder} counter={counter} setPopupRecipt={setPopupRecipt} />
+					<Table
+						itemsDetails={items}
+						setPopupOrder={setPopupOrder}
+						counter={counter}
+						setPopupRecipt={setPopupRecipt}
+					/>
 				</div>
 			</div>
 			{popupOrder ? (
@@ -195,7 +201,10 @@ function Table({ itemsDetails, setPopupOrder, setPopupRecipt }) {
 				{itemsDetails
 					?.sort((a, b) => a.order_date - b.order_date)
 					?.map((item, i, array) => (
-						<tr key={Math.random()} style={{ height: "30px" }} onClick={() => (item.receipt_number ? setPopupRecipt(item) : setPopupOrder(item))}>
+						<tr
+							key={Math.random()}
+							style={{ height: "30px" }}
+							onClick={() => (item.receipt_number ? setPopupRecipt(item) : setPopupOrder(item))}>
 							<td>{i + 1}</td>
 							<td colSpan={3}>
 								{new Date(item.order_date).toDateString()} - {formatAMPM(new Date(item.order_date))}
@@ -223,7 +232,12 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 	const time2 = new Date()
 	time2.setHours(12)
 	let reminder = useMemo(() => {
-		return new Date(time2.setDate(time2.getDate() + (counters.find(a => a.counter_uuid === order.counter_uuid)?.payment_reminder_days || 0))).getTime()
+		return new Date(
+			time2.setDate(
+				time2.getDate() +
+					(counters.find(a => a.counter_uuid === order.counter_uuid)?.payment_reminder_days || 0)
+			)
+		).getTime()
 	}, [counters, order.counter_uuid])
 	let type = useMemo(() => {
 		return counters.find(a => a.counter_uuid === order.counter_uuid)?.outstanding_type || 0
@@ -322,7 +336,11 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 					...a,
 					amt: "",
 					coin: "",
-					status: a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002" ? "0" : 1,
+					status:
+						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
+						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+							? "0"
+							: 1,
 				}))
 			)
 	}, [PaymentModes])
@@ -454,7 +472,10 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 							<form className="form">
 								<div className="formGroup">
 									{PaymentModes?.map(item => (
-										<div className="row" style={{ flexDirection: "row", alignItems: "center" }} key={item.mode_uuid}>
+										<div
+											className="row"
+											style={{ flexDirection: "row", alignItems: "center" }}
+											key={item.mode_uuid}>
 											<div style={{ width: "50px" }}>{item.mode_title}</div>
 											<label className="selectLabel flex" style={{ width: "80px" }}>
 												<input
@@ -480,7 +501,8 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 												/>
 												{/* {popupInfo.conversion || 0} */}
 											</label>
-											{item.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" && modes.find(a => a.mode_uuid === item.mode_uuid)?.amt ? (
+											{item.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" &&
+											modes.find(a => a.mode_uuid === item.mode_uuid)?.amt ? (
 												<label className="selectLabel flex" style={{ width: "200px" }}>
 													<input
 														type="text"
@@ -488,8 +510,20 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 														className="numberInput"
 														value={item?.remarks}
 														placeholder={"Cheque Number"}
-														style={{ width: "100%", backgroundColor: "light", fontSize: "12px" }}
-														onChange={e => setModes(prev => prev?.map(a => (a.mode_uuid === item.mode_uuid ? { ...a, remarks: e.target.value } : a)))}
+														style={{
+															width: "100%",
+															backgroundColor: "light",
+															fontSize: "12px",
+														}}
+														onChange={e =>
+															setModes(prev =>
+																prev?.map(a =>
+																	a.mode_uuid === item.mode_uuid
+																		? { ...a, remarks: e.target.value }
+																		: a
+																)
+															)
+														}
 														maxLength={42}
 														onWheel={e => e.preventDefault()}
 													/>
@@ -570,7 +604,11 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 										{deliveryPopup === "put" ? (
 											""
 										) : (
-											<button type="button" className="submit" style={{ color: "#fff", backgroundColor: "#7990dd" }} onClick={() => setPopup(true)}>
+											<button
+												type="button"
+												className="submit"
+												style={{ color: "#fff", backgroundColor: "#7990dd" }}
+												onClick={() => setPopup(true)}>
 												Deductions
 											</button>
 										)}
@@ -579,7 +617,11 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 								</div>
 
 								<div className="flex" style={{ justifyContent: "space-between" }}>
-									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
+									<button
+										type="button"
+										style={{ backgroundColor: "red" }}
+										className="submit"
+										onClick={onSave}>
 										Cancel
 									</button>
 									<button type="button" className="submit" onClick={submitHandler}>
@@ -596,7 +638,13 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 					<div className="flex" style={{ width: "40px", height: "40px" }}>
 						<svg viewBox="0 0 100 100">
 							<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
-								<animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
+								<animateTransform
+									attributeName="transform"
+									type="rotate"
+									dur="1s"
+									repeatCount="indefinite"
+									keyTimes="0;1"
+									values="0 50 51;360 50 51"></animateTransform>
 							</path>
 						</svg>
 					</div>

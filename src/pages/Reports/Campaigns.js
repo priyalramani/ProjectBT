@@ -88,7 +88,7 @@ const CampaignBody = () => {
 						justifyContent: "flex-end",
 						width: "100%",
 					}}>
-					<button className="item-sales-search" onClick={() => setPopupForm(true)}>
+					<button className="theme-btn" onClick={() => setPopupForm(true)}>
 						Add
 					</button>
 				</div>
@@ -133,9 +133,7 @@ const CampaignBody = () => {
 									alignItems: "center",
 									justifyContent: "center",
 								}}>
-								<button
-									className="fieldEditButton"
-									onClick={() => DeleteAutoAdd(deletePopup)}>
+								<button className="fieldEditButton" onClick={() => DeleteAutoAdd(deletePopup)}>
 									Confirm
 								</button>
 							</div>
@@ -159,9 +157,7 @@ function Table({ itemsDetails = [], setPopupForm, sendMsg, setDeletePopup, setPo
 	const [order, setOrder] = useState("asc")
 
 	return (
-		<table
-			className="user-table"
-			style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
+		<table className="user-table" style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
 			<thead>
 				<tr>
 					<th>S.N</th>
@@ -247,7 +243,7 @@ function Table({ itemsDetails = [], setPopupForm, sendMsg, setDeletePopup, setPo
 							<td>{item?.counter_groups?.length || 0}</td>
 							<td>
 								<button
-									className="item-sales-search"
+									className="theme-btn"
 									onClick={e => {
 										e.stopPropagation()
 										if (item.type === "order") {
@@ -397,9 +393,7 @@ function AddIncentives({ onSave, popupForm }) {
 				.filter(
 					a =>
 						(!filterRouteTitle ||
-							a.route_title
-								?.toLocaleLowerCase()
-								?.includes(filterRouteTitle?.toLocaleLowerCase())) &&
+							a.route_title?.toLocaleLowerCase()?.includes(filterRouteTitle?.toLocaleLowerCase())) &&
 						a.route_uuid &&
 						filteredCounter?.filter(b => a.route_uuid === b.route_uuid).length
 				)
@@ -463,9 +457,7 @@ function AddIncentives({ onSave, popupForm }) {
 			.concat(
 				i
 					.filter(
-						_i =>
-							_i?.counter_group_title &&
-							selectedCounterGroups.indexOf(_i?.counter_group_uuid) !== -1
+						_i => _i?.counter_group_title && selectedCounterGroups.indexOf(_i?.counter_group_uuid) !== -1
 					)
 					.sort((a, b) => a?.counter_group_title?.localeCompare(b?.counter_group_title))
 					.concat(
@@ -643,8 +635,7 @@ function AddIncentives({ onSave, popupForm }) {
 																				a.uuid === item.uuid
 																					? {
 																							...a,
-																							type: e.target
-																								.value,
+																							type: e.target.value,
 																					  }
 																					: a
 																			),
@@ -676,8 +667,7 @@ function AddIncentives({ onSave, popupForm }) {
 																					a.uuid === item.uuid
 																						? {
 																								...a,
-																								text: e.target
-																									.value,
+																								text: e.target.value,
 																						  }
 																						: a
 																				),
@@ -686,9 +676,7 @@ function AddIncentives({ onSave, popupForm }) {
 																	/>
 																) : (
 																	<div>
-																		<label
-																			htmlFor={item.uuid}
-																			className="flex">
+																		<label htmlFor={item.uuid} className="flex">
 																			Upload Image
 																			<input
 																				className="searchInput"
@@ -698,19 +686,15 @@ function AddIncentives({ onSave, popupForm }) {
 																				onChange={e =>
 																					setObgData(prev => ({
 																						...prev,
-																						message:
-																							prev.message.map(
-																								a =>
-																									a.uuid ===
-																									item.uuid
-																										? {
-																												...a,
-																												img: e
-																													.target
-																													.files[0],
-																										  }
-																										: a
-																							),
+																						message: prev.message.map(a =>
+																							a.uuid === item.uuid
+																								? {
+																										...a,
+																										img: e.target
+																											.files[0],
+																								  }
+																								: a
+																						),
 																					}))
 																				}
 																			/>
@@ -720,17 +704,9 @@ function AddIncentives({ onSave, popupForm }) {
 																					height: "100px",
 																					objectFit: "contain",
 																				}}
-																				src={
-																					server +
-																					"/" +
-																					item.uuid +
-																					".png"
-																				}
-																				onError={({
-																					currentTarget,
-																				}) => {
-																					currentTarget.onerror =
-																						null // prevents looping
+																				src={server + "/" + item.uuid + ".png"}
+																				onError={({ currentTarget }) => {
+																					currentTarget.onerror = null // prevents looping
 																					currentTarget.src = noimg
 																				}}
 																				alt=""
@@ -742,8 +718,7 @@ function AddIncentives({ onSave, popupForm }) {
 																			className="searchInput"
 																			style={{
 																				border: "none",
-																				borderBottom:
-																					"2px solid black",
+																				borderBottom: "2px solid black",
 																				borderRadius: "0px",
 																			}}
 																			placeholder="caption"
@@ -751,18 +726,14 @@ function AddIncentives({ onSave, popupForm }) {
 																			onChange={e => {
 																				setObgData(prev => ({
 																					...prev,
-																					message: prev.message.map(
-																						a =>
-																							a.uuid ===
-																							item.uuid
-																								? {
-																										...a,
-																										caption:
-																											e
-																												.target
-																												.value,
-																								  }
-																								: a
+																					message: prev.message.map(a =>
+																						a.uuid === item.uuid
+																							? {
+																									...a,
+																									caption:
+																										e.target.value,
+																							  }
+																							: a
 																					),
 																				}))
 																			}}
@@ -782,12 +753,12 @@ function AddIncentives({ onSave, popupForm }) {
 														justifyContent: "flex-start",
 													}}>
 													<button
-														className="item-sales-search"
+														className="theme-btn"
 														onClick={e => addVariable("counter_title")}>
 														Counter Title
 													</button>
 													<button
-														className="item-sales-search"
+														className="theme-btn"
 														onClick={e => addVariable("short_link")}>
 														Counter Link
 													</button>
@@ -802,13 +773,11 @@ function AddIncentives({ onSave, popupForm }) {
 														justifyContent: "flex-start",
 													}}>
 													<button
-														className="item-sales-search"
+														className="theme-btn"
 														onClick={e => addVariable("invoice_number")}>
 														Invoice Number
 													</button>
-													<button
-														className="item-sales-search"
-														onClick={e => addVariable("amount")}>
+													<button className="theme-btn" onClick={e => addVariable("amount")}>
 														Amount
 													</button>
 												</td>
@@ -832,9 +801,7 @@ function AddIncentives({ onSave, popupForm }) {
 															height: "100px",
 														}}
 														placeholder=""
-														value={objData?.mobile
-															?.toString()
-															?.replace(/,/g, "\n")}
+														value={objData?.mobile?.toString()?.replace(/,/g, "\n")}
 														onChange={e =>
 															setObgData(prev => ({
 																...prev,
@@ -877,9 +844,7 @@ function AddIncentives({ onSave, popupForm }) {
 														}>
 														<option value="d">Default</option>
 														{orderForm.map(a => (
-															<option value={a.form_uuid}>
-																{a.form_title}
-															</option>
+															<option value={a.form_uuid}>{a.form_title}</option>
 														))}
 													</select>
 												</td>
@@ -893,9 +858,7 @@ function AddIncentives({ onSave, popupForm }) {
 															alignItems: "center",
 															justifyContent: "flex-start",
 														}}>
-														<b style={{ width: "100px" }}>
-															Campaign Short Link :{" "}
-														</b>
+														<b style={{ width: "100px" }}>Campaign Short Link : </b>
 														<input
 															onWheel={e => e.target.blur()}
 															className="searchInput"
@@ -998,15 +961,12 @@ function AddIncentives({ onSave, popupForm }) {
 																	if (objData.type === "general") {
 																		setObgData(prev => ({
 																			...prev,
-																			counters: prev.counters.filter(
-																				c =>
-																					filteredCounter?.find(
-																						b =>
-																							a.route_uuid ===
-																								b.route_uuid &&
-																							c ===
-																								b.counter_uuid
-																					)
+																			counters: prev.counters.filter(c =>
+																				filteredCounter?.find(
+																					b =>
+																						a.route_uuid === b.route_uuid &&
+																						c === b.counter_uuid
+																				)
 																			).length
 																				? prev.counters.filter(
 																						c =>
@@ -1014,58 +974,51 @@ function AddIncentives({ onSave, popupForm }) {
 																								b =>
 																									a.route_uuid ===
 																										b.route_uuid &&
-																									c ===
-																										b.counter_uuid
+																									c === b.counter_uuid
 																							)
 																				  )
 																				: [
-																						...(prev.counters ||
-																							[]),
+																						...(prev.counters || []),
 																						...filteredCounter
 																							?.filter(
 																								b =>
 																									a.route_uuid ===
 																									b.route_uuid
 																							)
-																							.map(
-																								c =>
-																									c.counter_uuid
-																							),
+																							.map(c => c.counter_uuid),
 																				  ],
 																		}))
 																	} else {
 																		setObgData(prev => ({
 																			...prev,
-																			counter_status:
-																				prev.counter_status.filter(
-																					c =>
-																						filteredCounter?.find(
-																							b =>
-																								a.route_uuid ===
-																									b.route_uuid &&
-																								c.counter_uuid ===
-																									b.counter_uuid
-																						)
-																				).length
-																					? prev.counter_status.filter(
-																							c =>
-																								!filteredCounter?.find(
-																									b =>
-																										a.route_uuid ===
-																											b.route_uuid &&
-																										c.counter_uuid ===
-																											b.counter_uuid
-																								)
-																					  )
-																					: [
-																							...(prev.counter_status ||
-																								[]),
-																							...filteredCounter?.filter(
+																			counter_status: prev.counter_status.filter(
+																				c =>
+																					filteredCounter?.find(
+																						b =>
+																							a.route_uuid ===
+																								b.route_uuid &&
+																							c.counter_uuid ===
+																								b.counter_uuid
+																					)
+																			).length
+																				? prev.counter_status.filter(
+																						c =>
+																							!filteredCounter?.find(
 																								b =>
 																									a.route_uuid ===
-																									b.route_uuid
-																							),
-																					  ],
+																										b.route_uuid &&
+																									c.counter_uuid ===
+																										b.counter_uuid
+																							)
+																				  )
+																				: [
+																						...(prev.counter_status || []),
+																						...filteredCounter?.filter(
+																							b =>
+																								a.route_uuid ===
+																								b.route_uuid
+																						),
+																				  ],
 																		}))
 																	}
 																}}
@@ -1079,14 +1032,11 @@ function AddIncentives({ onSave, popupForm }) {
 																						b =>
 																							a.route_uuid ===
 																								b.route_uuid &&
-																							c ===
-																								b.counter_uuid
+																							c === b.counter_uuid
 																					)
 																			  ).length ===
 																			  filteredCounter?.filter(
-																					b =>
-																						a.route_uuid ===
-																						b.route_uuid
+																					b => a.route_uuid === b.route_uuid
 																			  ).length
 																			: objcounter_status?.filter(c =>
 																					filteredCounter?.find(
@@ -1098,9 +1048,7 @@ function AddIncentives({ onSave, popupForm }) {
 																					)
 																			  ).length ===
 																			  filteredCounter?.filter(
-																					b =>
-																						a.route_uuid ===
-																						b.route_uuid
+																					b => a.route_uuid === b.route_uuid
 																			  ).length
 																	}
 																	onChange={() => {}}
@@ -1127,8 +1075,7 @@ function AddIncentives({ onSave, popupForm }) {
 																? objcounters?.filter(c =>
 																		filteredCounter?.find(
 																			b =>
-																				a.route_uuid ===
-																					b.route_uuid &&
+																				a.route_uuid === b.route_uuid &&
 																				c === b.counter_uuid
 																		)
 																  ).length +
@@ -1139,10 +1086,8 @@ function AddIncentives({ onSave, popupForm }) {
 																: objcounter_status?.filter(c =>
 																		filteredCounter?.find(
 																			b =>
-																				a.route_uuid ===
-																					b.route_uuid &&
-																				c.counter_uuid ===
-																					b.counter_uuid
+																				a.route_uuid === b.route_uuid &&
+																				c.counter_uuid === b.counter_uuid
 																		)
 																  ).length +
 																  "/" +
@@ -1170,9 +1115,7 @@ function AddIncentives({ onSave, popupForm }) {
 														? filteredCounter
 																?.filter(b => a.route_uuid === b.route_uuid)
 																?.sort((a, b) =>
-																	a.counter_title?.localeCompare(
-																		b.counter_title
-																	)
+																	a.counter_title?.localeCompare(b.counter_title)
 																)
 																?.map((item, i, array) => {
 																	return (
@@ -1182,10 +1125,7 @@ function AddIncentives({ onSave, popupForm }) {
 																			<td
 																				onClick={e => {
 																					e.stopPropagation()
-																					if (
-																						objData.type ===
-																						"general"
-																					) {
+																					if (objData.type === "general") {
 																						setObgData(prev => ({
 																							...prev,
 																							counters:
@@ -1229,14 +1169,12 @@ function AddIncentives({ onSave, popupForm }) {
 																				}}
 																				className="flex"
 																				style={{
-																					justifyContent:
-																						"space-between",
+																					justifyContent: "space-between",
 																				}}>
 																				<input
 																					type="checkbox"
 																					checked={
-																						objData.type ===
-																						"general"
+																						objData.type === "general"
 																							? objcounters.find(
 																									a =>
 																										a ===
@@ -1249,8 +1187,7 @@ function AddIncentives({ onSave, popupForm }) {
 																							  )
 																					}
 																					style={{
-																						transform:
-																							"scale(1.3)",
+																						transform: "scale(1.3)",
 																					}}
 																				/>
 																				{i + 1}
@@ -1292,9 +1229,7 @@ function AddIncentives({ onSave, popupForm }) {
 										<thead>
 											<tr style={{ width: "100%" }}>
 												<th style={{ borderRight: 0, width: "10%" }}></th>
-												<th style={{ borderRight: 0, width: "90%" }}>
-													Counter Group Title
-												</th>
+												<th style={{ borderRight: 0, width: "90%" }}>Counter Group Title</th>
 											</tr>
 										</thead>
 										<tbody className="tbody">
@@ -1436,9 +1371,7 @@ function IncentiveOrderPopup({ onSave, popupForm, sendMsg }) {
 				.filter(
 					a =>
 						(!filterRouteTitle ||
-							a.route_title
-								?.toLocaleLowerCase()
-								?.includes(filterRouteTitle?.toLocaleLowerCase())) &&
+							a.route_title?.toLocaleLowerCase()?.includes(filterRouteTitle?.toLocaleLowerCase())) &&
 						a.route_uuid &&
 						filteredCounter?.filter(b => a.route_uuid === b.route_uuid).length
 				)
@@ -1627,8 +1560,7 @@ function IncentiveOrderPopup({ onSave, popupForm, sendMsg }) {
 																					a.uuid === item.uuid
 																						? {
 																								...a,
-																								img: e.target
-																									.files[0],
+																								img: e.target.files[0],
 																						  }
 																						: a
 																				)
@@ -1643,9 +1575,7 @@ function IncentiveOrderPopup({ onSave, popupForm, sendMsg }) {
 																		}}
 																		src={
 																			item.img
-																				? URL.createObjectURL(
-																						item.img
-																				  )
+																				? URL.createObjectURL(item.img)
 																				: noimg
 																		}
 																		onError={({ currentTarget }) => {
@@ -1672,9 +1602,7 @@ function IncentiveOrderPopup({ onSave, popupForm, sendMsg }) {
 																				a.uuid === item.uuid
 																					? {
 																							...a,
-																							caption:
-																								e.target
-																									.value,
+																							caption: e.target.value,
 																					  }
 																					: a
 																			)
@@ -1695,14 +1623,10 @@ function IncentiveOrderPopup({ onSave, popupForm, sendMsg }) {
 												alignItems: "center",
 												justifyContent: "flex-start",
 											}}>
-											<button
-												className="item-sales-search"
-												onClick={e => addVariable("counter_title")}>
+											<button className="theme-btn" onClick={e => addVariable("counter_title")}>
 												Counter Title
 											</button>
-											<button
-												className="item-sales-search"
-												onClick={e => addVariable("short_link")}>
+											<button className="theme-btn" onClick={e => addVariable("short_link")}>
 												Counter Link
 											</button>
 										</td>
@@ -1715,14 +1639,10 @@ function IncentiveOrderPopup({ onSave, popupForm, sendMsg }) {
 												alignItems: "center",
 												justifyContent: "flex-start",
 											}}>
-											<button
-												className="item-sales-search"
-												onClick={e => addVariable("invoice_number")}>
+											<button className="theme-btn" onClick={e => addVariable("invoice_number")}>
 												Invoice Number
 											</button>
-											<button
-												className="item-sales-search"
-												onClick={e => addVariable("amount")}>
+											<button className="theme-btn" onClick={e => addVariable("amount")}>
 												Amount
 											</button>
 										</td>

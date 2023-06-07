@@ -2209,7 +2209,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 									}}>
 									<button
 										style={{ width: "fit-Content", backgroundColor: "black" }}
-										className="item-sales-search"
+										className="theme-btn"
 										onClick={() => {
 											handlePrint()
 										}}>
@@ -2240,7 +2240,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 												position: "absolute",
 												right: "-100px",
 											}}
-											className="item-sales-search"
+											className="theme-btn"
 											onClick={() => {
 												handleBoxPrint()
 											}}>

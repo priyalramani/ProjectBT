@@ -148,7 +148,7 @@ const ItemsPage = () => {
 							<div style={{ width: "100px" }}>Disabled Items</div>
 						</div>
 
-						<button className="item-sales-search" onClick={() => setPopupForm(true)}>
+						<button className="theme-btn" onClick={() => setPopupForm(true)}>
 							Add
 						</button>
 					</div>

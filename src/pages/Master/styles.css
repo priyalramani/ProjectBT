@@ -148,7 +148,8 @@
 	overflow: hidden;
 }
 
-.orders-report-container > #heading {
+.orders-report-container > #heading,
+.page-heading {
 	width: calc(100vw - 85px);
 	background-color: black;
 	color: white;
@@ -156,7 +157,8 @@
 	text-align: center;
 }
 
-.orders-report-container > #heading > h2 {
+.orders-report-container > #heading > h2,
+.page-heading > h2 {
 	margin-right: 212px;
 	padding: 7px;
 }
@@ -850,7 +852,7 @@ input#item-sales-searchbar {
 	border: 1px solid;
 }
 
-.item-sales-search {
+.theme-btn {
 	border: none;
 	padding: 10px 20px;
 	font-weight: bold;
@@ -864,6 +866,15 @@ input#item-sales-searchbar {
 	height: fit-content;
 
 	gap: 5px;
+}
+
+.theme-btn.round {
+	border-radius: 5rem;
+	font-size: 1rem;
+	padding: 15px;
+	padding-right: 18px;
+	font-weight: 100;
+	letter-spacing: 0.3px;
 }
 
 .pagination {
@@ -1892,4 +1903,191 @@ input#item-sales-searchbar {
 
 .selection-content input {
 	margin-right: 10px;
+}
+
+#companies-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 20px 10px 10px;
+}
+
+.theme-searchbar {
+	display: flex;
+	align-items: center;
+	padding: 5px 8px;
+	background: #ededed;
+	border-radius: 2rem;
+	border: 1px solid #c5c5c5;
+}
+.theme-searchbar:hover {
+	border-color: #aaaaaa;
+}
+
+.theme-searchbar span {
+	font-size: 1.2rem;
+	padding: 0 5px;
+	display: inherit;
+}
+
+.theme-searchbar input {
+	background: no-repeat;
+	border: none;
+	padding: 10px 5px;
+	outline: none;
+	font-size: 1.1rem;
+	width: 250px;
+}
+
+.theme-searchbar button {
+	display: inherit;
+	border: none;
+	border-radius: 3rem;
+	padding: 8px;
+	font-size: 22px;
+	border: 1px solid transparent;
+	transition: all 0.5s ease-out;
+}
+
+.theme-searchbar button:hover {
+	background: #dddddd;
+	scale: 1.1;
+	border-color: #b6b6b6;
+}
+
+.page-heading {
+	border-top-left-radius: 2.5rem;
+	padding: 6px 0 10px;
+	line-height: 1.5rem;
+}
+
+#companies-list {
+	padding: 10px;
+	height: calc(100vh - 50px - 73px);
+	overflow: auto;
+}
+
+#companies-list table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+#companies-list thead {
+	position: sticky;
+	top: 4px;
+	background: white;
+}
+
+#companies-list th,
+#companies-list td {
+	text-align: left;
+	padding: 10px;
+}
+
+#companies-list tbody > tr:hover {
+	background: #0000001e;
+}
+
+#companies-wrapper .page-heading {
+	background: white;
+	color: black;
+	font-size: 1.8rem;
+	text-align: left;
+	padding: 10px;
+}
+
+.table-row-actions {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 10px;
+}
+
+.theme-icon-btn {
+	border: none;
+	outline: none;
+	border-radius: 3rem;
+	padding: 8px;
+	display: block;
+	aspect-ratio: 1;
+	display: flex;
+	border: 1px solid #c0c0c0;
+	font-size: 1.3rem;
+}
+
+.table-row-icon > div {
+	width: fit-content;
+}
+
+.table-row-icon svg {
+	font-size: 1.65rem;
+	cursor: pointer;
+	display: block;
+}
+
+#company-form {
+	width: fit-content;
+	background: white;
+	padding: 30px;
+	border-radius: 1rem;
+	translate: calc(50vw - 50%) calc(50vh - 50%);
+	position: relative;
+}
+
+#company-form h2 {
+	padding-bottom: 30px;
+}
+
+#company-form form {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+#company-form form > div {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 30px;
+}
+
+#company-form form > div > *:nth-child(2) {
+	width: 200px;
+}
+
+#company-form .form-input {
+	background: #e9e9e9;
+	border: 1px solid darkgrey;
+	border-radius: 2rem;
+	padding: 12px;
+}
+
+#company-form .numbers-input {
+	display: flex;
+	align-items: center;
+}
+
+#company-form .numbers-input input {
+	background: none;
+	border: none;
+	width: 50px;
+	outline: none;
+	padding: 0 10px;
+	text-align: center;
+}
+
+#company-form button[type="submit"] {
+	text-align: center;
+	display: block;
+	margin-top: 10px;
+}
+
+#company-form button#close {
+	display: flex;
+	background: none;
+	border: none;
+	outline: none;
+	font-size: 1.5rem;
+	position: absolute;
+	right: 20px;
 }

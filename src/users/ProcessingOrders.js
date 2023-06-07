@@ -964,7 +964,7 @@ const ProcessingOrders = () => {
 							) : (
 								// ) : !Location.pathname.includes("delivery") ? (
 								// <button
-								//   className="item-sales-search"
+								//   className="theme-btn"
 								//   style={{ width: "max-content" }}
 								//   onClick={() =>
 								//     audioLoopFunction({
@@ -980,7 +980,7 @@ const ProcessingOrders = () => {
 								""
 							)}
 							<button
-								className="item-sales-search"
+								className="theme-btn"
 								style={{
 									width: "max-content",
 								}}
@@ -1284,7 +1284,7 @@ const ProcessingOrders = () => {
 													<>
 														<td className="flex">
 															<button
-																className="item-sales-search"
+																className="theme-btn"
 																style={{ width: "max-content" }}
 																onClick={() => {
 																	setOneTimeState()
@@ -2269,7 +2269,7 @@ function HoldPopup({
 																			) ? (
 																				<td colSpan={2}>
 																					<button
-																						className="item-sales-search"
+																						className="theme-btn"
 																						style={{
 																							width: "max-content",
 																						}}

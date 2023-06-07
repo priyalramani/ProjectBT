@@ -59,8 +59,9 @@ import OrderPdf from "./components/OrderPdf"
 import MobileLayout from "./components/MobileLayout"
 import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
 import CashRegister from "./pages/QuikAccess/CashRegister"
+import Companies from "./pages/Master/Companies"
 
-export let Version = 115
+export let Version = 116
 export const server = "https://api.btgondia.com"
 // export const server = "http://localhost:9000"
 // export const server = "http://15.207.39.69:9000"
@@ -263,6 +264,7 @@ function App() {
 							<Route path="/admin/adminUsers" element={<Users />} />
 							<Route path="/admin/items" element={<ItemsPage />} />
 							<Route path="/admin/warehouse" element={<Warehouse />} />
+							<Route path="/admin/companies" element={<Companies />} />
 							<Route path="/admin/WhatsAppNotifications" element={<WhatsAppNotifications />} />
 
 							<Route path="/admin/autoIncreaseQty" element={<AutoIncreaseQuantity />} />

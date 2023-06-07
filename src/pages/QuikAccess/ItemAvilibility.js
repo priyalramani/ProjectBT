@@ -188,9 +188,7 @@ export default function ItemAvilibility() {
 											.filter(
 												a =>
 													(itemFilter !== ""
-														? a.trip_title
-																.toLowerCase()
-																.includes(itemFilter.toLowerCase())
+														? a.trip_title.toLowerCase().includes(itemFilter.toLowerCase())
 														: true) && a.trip_title
 											)
 											.map((item, index) => (
@@ -214,9 +212,7 @@ export default function ItemAvilibility() {
 														className="ph3 bb b--black-20 tc bg-white"
 														style={{ textAlign: "center" }}>
 														{item?.users_name?.length
-															? item.users_name.map((a, i) =>
-																	i === 0 ? a : ", " + a
-															  )
+															? item.users_name.map((a, i) => (i === 0 ? a : ", " + a))
 															: ""}
 													</td>
 													<td
@@ -281,7 +277,7 @@ export default function ItemAvilibility() {
 																	)
 																}>
 																<button
-																	className="item-sales-search"
+																	className="theme-btn"
 																	style={{
 																		display: "inline",
 																		cursor: "pointer",
@@ -294,7 +290,7 @@ export default function ItemAvilibility() {
 																	Warehouse
 																</button>
 																<button
-																	className="item-sales-search"
+																	className="theme-btn"
 																	style={{
 																		display: "inline",
 																		cursor: item?.orderLength
@@ -314,7 +310,7 @@ export default function ItemAvilibility() {
 																</button>
 
 																<button
-																	className="item-sales-search"
+																	className="theme-btn"
 																	style={{
 																		display: "inline",
 																		cursor: "pointer",
@@ -328,7 +324,7 @@ export default function ItemAvilibility() {
 																</button>
 
 																<button
-																	className="item-sales-search"
+																	className="theme-btn"
 																	style={{
 																		display: "inline",
 																		width: "100%",
@@ -341,7 +337,7 @@ export default function ItemAvilibility() {
 																</button>
 
 																<button
-																	className="item-sales-search"
+																	className="theme-btn"
 																	style={{
 																		display: "inline",
 																		width: "100%",
@@ -353,7 +349,7 @@ export default function ItemAvilibility() {
 																	Details
 																</button>
 																<button
-																	className="item-sales-search"
+																	className="theme-btn"
 																	style={{
 																		display: "inline",
 																		width: "100%",
@@ -402,16 +398,8 @@ export default function ItemAvilibility() {
 			) : (
 				""
 			)}
-			{warehousePopup ? (
-				<WarehousePopup onSave={() => setWarehousePopup(false)} tripData={warehousePopup} />
-			) : (
-				""
-			)}
-			{detailsPopup ? (
-				<PopupTripOrderTable trip_uuid={detailsPopup} onSave={() => setDetailsPopup("")} />
-			) : (
-				""
-			)}
+			{warehousePopup ? <WarehousePopup onSave={() => setWarehousePopup(false)} tripData={warehousePopup} /> : ""}
+			{detailsPopup ? <PopupTripOrderTable trip_uuid={detailsPopup} onSave={() => setDetailsPopup("")} /> : ""}
 			{statementTrip?.trip_uuid ? (
 				<div style={{ position: "fixed", top: -100, left: -180, zIndex: "-1000" }}>
 					<div
@@ -444,11 +432,7 @@ export default function ItemAvilibility() {
 			) : (
 				""
 			)}
-			{counterPopup ? (
-				<CounterTable onSave={() => setCounterPopup(false)} trip_uuid={counterPopup} />
-			) : (
-				""
-			)}
+			{counterPopup ? <CounterTable onSave={() => setCounterPopup(false)} trip_uuid={counterPopup} /> : ""}
 		</>
 	)
 }
@@ -484,17 +468,13 @@ function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
 								<div className="row">
 									<label className="selectLabel">
 										Users
-										<div
-											className="formGroup"
-											style={{ height: "200px", overflow: "scroll" }}>
+										<div className="formGroup" style={{ height: "200px", overflow: "scroll" }}>
 											{users.map(occ => (
 												<div
 													style={{
 														marginBottom: "5px",
 														textAlign: "center",
-														backgroundColor: data?.filter(
-															a => a === occ.user_uuid
-														).length
+														backgroundColor: data?.filter(a => a === occ.user_uuid).length
 															? "#caf0f8"
 															: "#fff",
 													}}
@@ -598,9 +578,7 @@ function WarehousePopup({ onSave, tripData }) {
 														? {
 																value: data?.counter_uuid,
 																label: warehouse?.find(
-																	j =>
-																		j.warehouse_uuid ===
-																		data.warehouse_uuid
+																	j => j.warehouse_uuid === data.warehouse_uuid
 																)?.warehouse_title,
 														  }
 														: ""
@@ -692,9 +670,7 @@ function CounterTable({ trip_uuid, onSave }) {
 				a =>
 					a.counter_uuid &&
 					(!filterCounterTitle ||
-						a.counter_title
-							?.toLocaleLowerCase()
-							?.includes(filterCounterTitle?.toLocaleLowerCase()))
+						a.counter_title?.toLocaleLowerCase()?.includes(filterCounterTitle?.toLocaleLowerCase()))
 			),
 		[counter, filterCounterTitle]
 	)
@@ -705,9 +681,7 @@ function CounterTable({ trip_uuid, onSave }) {
 				.filter(
 					a =>
 						(!filterRouteTitle ||
-							a.route_title
-								?.toLocaleLowerCase()
-								?.includes(filterRouteTitle?.toLocaleLowerCase())) &&
+							a.route_title?.toLocaleLowerCase()?.includes(filterRouteTitle?.toLocaleLowerCase())) &&
 						a.route_uuid &&
 						filterCounter?.filter(b => a.route_uuid === b.route_uuid)?.length
 				)
@@ -789,21 +763,16 @@ function CounterTable({ trip_uuid, onSave }) {
 																			let counter_trip_uuid =
 																				filterCounter?.filter(
 																					b =>
-																						a.route_uuid ===
-																							b.route_uuid &&
-																						trip_uuid ===
-																							b.trip_uuid
+																						a.route_uuid === b.route_uuid &&
+																						trip_uuid === b.trip_uuid
 																				)?.length ===
 																				filterCounter?.filter(
-																					b =>
-																						a.route_uuid ===
-																						b.route_uuid
+																					b => a.route_uuid === b.route_uuid
 																				)?.length
 																					? ""
 																					: trip_uuid
 																			return prev.map(count =>
-																				count.route_uuid ===
-																				a.route_uuid
+																				count.route_uuid === a.route_uuid
 																					? {
 																							...count,
 																							trip_uuid:
@@ -820,14 +789,11 @@ function CounterTable({ trip_uuid, onSave }) {
 																		checked={
 																			filterCounter?.filter(
 																				b =>
-																					a.route_uuid ===
-																						b.route_uuid &&
+																					a.route_uuid === b.route_uuid &&
 																					trip_uuid === b.trip_uuid
 																			)?.length ===
 																			filterCounter?.filter(
-																				b =>
-																					a.route_uuid ===
-																					b.route_uuid
+																				b => a.route_uuid === b.route_uuid
 																			)?.length
 																		}
 																		style={{ transform: "scale(1.3)" }}
@@ -877,13 +843,9 @@ function CounterTable({ trip_uuid, onSave }) {
 														</tr>
 														{a.expand
 															? filterCounter
-																	?.filter(
-																		b => a.route_uuid === b.route_uuid
-																	)
+																	?.filter(b => a.route_uuid === b.route_uuid)
 																	?.sort((a, b) =>
-																		a.counter_title?.localeCompare(
-																			b.counter_title
-																		)
+																		a.counter_title?.localeCompare(b.counter_title)
 																	)
 																	?.map((item, i, array) => {
 																		return (
@@ -912,18 +874,15 @@ function CounterTable({ trip_uuid, onSave }) {
 																					}}
 																					className="flex"
 																					style={{
-																						justifyContent:
-																							"space-between",
+																						justifyContent: "space-between",
 																					}}>
 																					<input
 																						type="checkbox"
 																						checked={
-																							item.trip_uuid ===
-																							trip_uuid
+																							item.trip_uuid === trip_uuid
 																						}
 																						style={{
-																							transform:
-																								"scale(1.3)",
+																							transform: "scale(1.3)",
 																						}}
 																					/>
 																					{i + 1}

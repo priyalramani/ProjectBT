@@ -133,9 +133,8 @@ const CompleteOrder = () => {
 									searchData?.counter_uuid
 										? {
 												value: searchData?.counter_uuid,
-												label: counter?.find(
-													j => j.counter_uuid === searchData.counter_uuid
-												)?.counter_title,
+												label: counter?.find(j => j.counter_uuid === searchData.counter_uuid)
+													?.counter_title,
 										  }
 										: null
 								}
@@ -145,7 +144,7 @@ const CompleteOrder = () => {
 								placeholder="Select counter"
 							/>
 						</div>
-						<button className="item-sales-search" onClick={() => getCompleteOrders()}>
+						<button className="theme-btn" onClick={() => getCompleteOrders()}>
 							Search
 						</button>
 					</div>
@@ -196,9 +195,7 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
 	}
 
 	return (
-		<table
-			className="user-table"
-			style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
+		<table className="user-table" style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
 			<thead>
 				<tr>
 					<th>S.N</th>
@@ -214,14 +211,10 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
 				{itemsDetails
 					?.sort((a, b) => a.order_date - b.order_date)
 					?.map((item, i, array) => (
-						<tr
-							key={Math.random()}
-							style={{ height: "30px" }}
-							onClick={() => setPopupOrder(item)}>
+						<tr key={Math.random()} style={{ height: "30px" }} onClick={() => setPopupOrder(item)}>
 							<td>{i + 1}</td>
 							<td colSpan={2}>
-								{new Date(+item.order_date).toDateString()} -{" "}
-								{formatAMPM(new Date(+item.order_date))}
+								{new Date(+item.order_date).toDateString()} - {formatAMPM(new Date(+item.order_date))}
 							</td>
 							<td colSpan={2}>
 								{item.delivery_date

@@ -72,7 +72,7 @@ const InvoiceNumberWiseOrder = () => {
 							onWheel={e => e.preventDefault()}
 						/>
 
-						<button className="item-sales-search" onClick={() => getCompleteOrders()}>
+						<button className="theme-btn" onClick={() => getCompleteOrders()}>
 							Search
 						</button>
 					</div>
@@ -123,9 +123,7 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
 	}
 
 	return (
-		<table
-			className="user-table"
-			style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
+		<table className="user-table" style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
 			<thead>
 				<tr>
 					<th>S.N</th>
@@ -140,10 +138,7 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
 				{itemsDetails
 					?.sort((a, b) => a.order_date - b.order_date)
 					?.map((item, i, array) => (
-						<tr
-							key={Math.random()}
-							style={{ height: "30px" }}
-							onClick={() => setPopupOrder(item)}>
+						<tr key={Math.random()} style={{ height: "30px" }} onClick={() => setPopupOrder(item)}>
 							<td>{i + 1}</td>
 							<td colSpan={2}>
 								{new Date(+item.status[0].time).toDateString()} -{" "}

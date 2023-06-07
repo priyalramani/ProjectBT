@@ -1029,7 +1029,7 @@ export function OrderDetails({
 									}}>
 									<button
 										style={{ width: "fit-Content", backgroundColor: "red" }}
-										className="item-sales-search"
+										className="theme-btn"
 										onClick={() => setDeletePopup("Delete")}>
 										Cancel Order
 									</button>
@@ -1037,7 +1037,7 @@ export function OrderDetails({
 									{order?.hold !== "Y" ? (
 										<button
 											style={{ width: "fit-Content", backgroundColor: "blue" }}
-											className="item-sales-search"
+											className="theme-btn"
 											onClick={() => {
 												if (orderData.notes?.length) {
 													setDeletePopup("hold")
@@ -1048,7 +1048,7 @@ export function OrderDetails({
 									) : (
 										<button
 											style={{ width: "fit-Content", backgroundColor: "blue" }}
-											className="item-sales-search"
+											className="theme-btn"
 											onClick={() => {
 												HoldOrder("N")
 											}}>
@@ -1057,7 +1057,7 @@ export function OrderDetails({
 									)}
 									<button
 										style={{ width: "fit-Content", backgroundColor: "#44cd4a" }}
-										className="item-sales-search"
+										className="theme-btn"
 										onClick={() => {
 											handleWarehouseChacking(true, "complete")
 											setCompleteOrder(true)
@@ -1066,7 +1066,7 @@ export function OrderDetails({
 									</button>
 									<button
 										style={{ width: "fit-Content", backgroundColor: "black" }}
-										className="item-sales-search"
+										className="theme-btn"
 										onClick={() => {
 											if (
 												!window.location.pathname.includes("completeOrderReport") &&
@@ -1080,7 +1080,7 @@ export function OrderDetails({
 									</button>
 									{editOrder ? (
 										<button
-											className="item-sales-search"
+											className="theme-btn"
 											style={{
 												width: "max-content",
 											}}
@@ -1089,7 +1089,7 @@ export function OrderDetails({
 										</button>
 									) : (
 										<button
-											className="item-sales-search"
+											className="theme-btn"
 											style={{
 												width: "max-content",
 											}}
@@ -1099,7 +1099,7 @@ export function OrderDetails({
 									)}
 									<button
 										style={{ width: "fit-Content" }}
-										className="item-sales-search"
+										className="theme-btn"
 										onClick={e => {
 											reactInputsRef.current = {}
 											e.target.blur()
@@ -1113,7 +1113,7 @@ export function OrderDetails({
 									</button>
 									<button
 										style={{ width: "fit-Content" }}
-										className="item-sales-search"
+										className="theme-btn"
 										onClick={e => {
 											reactInputsRef.current = {}
 											e.target.blur()
@@ -1124,7 +1124,7 @@ export function OrderDetails({
 									</button>
 									<button
 										style={{ width: "fit-Content" }}
-										className="item-sales-search"
+										className="theme-btn"
 										onClick={e => {
 											e.target.blur()
 											setNotesPoup(prev => !prev)
@@ -1255,7 +1255,7 @@ export function OrderDetails({
 												<th colSpan={2} style={{ textAlign: "center" }}>
 													<button
 														style={{ width: "fit-Content" }}
-														className="item-sales-search"
+														className="theme-btn"
 														onClick={() =>
 															setPopupDetails({
 																type: "Status",
@@ -1268,7 +1268,7 @@ export function OrderDetails({
 												<th colSpan={2} style={{ textAlign: "center" }}>
 													<button
 														style={{ width: "fit-Content" }}
-														className="item-sales-search"
+														className="theme-btn"
 														onClick={() =>
 															setPopupDetails({
 																type: "Delivery Return",
@@ -1281,7 +1281,7 @@ export function OrderDetails({
 												<th colSpan={2} style={{ textAlign: "center" }}>
 													<button
 														style={{ width: "fit-Content" }}
-														className="item-sales-search"
+														className="theme-btn"
 														onClick={() =>
 															setPopupDetails({
 																type: "Fulfillment",
@@ -1294,7 +1294,7 @@ export function OrderDetails({
 												<th colSpan={2} style={{ textAlign: "center" }}>
 													<button
 														style={{ width: "fit-Content" }}
-														className="item-sales-search"
+														className="theme-btn"
 														onClick={() =>
 															setPopupDetails({
 																type: "Auto Added",
@@ -1856,7 +1856,7 @@ export function OrderDetails({
 																		fontSize: "12px",
 																		padding: "5px 10px",
 																	}}
-																	className="item-sales-search"
+																	className="theme-btn"
 																	onClick={() => setPopupDiscount(item)}>
 																	Discounts
 																</button>

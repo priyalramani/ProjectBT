@@ -52,9 +52,7 @@ const Orders = ({ refreshDb }) => {
 	}
 	return (
 		<>
-			<div
-				className="item-sales-container orders-report-container"
-				style={{ overflow: "visible", left: "0" }}>
+			<div className="item-sales-container orders-report-container" style={{ overflow: "visible", left: "0" }}>
 				<nav className="user_nav nav_styling" style={{ top: "0", maxWidth: "500px" }}>
 					<div className="user_menubar">
 						<IoArrowBackOutline className="user_Back_icon" onClick={() => Navigate(-1)} />
@@ -64,10 +62,7 @@ const Orders = ({ refreshDb }) => {
 					{refresh ? (
 						<button className="submit" id="loading-screen" style={{ padding: 0, margin: 0 }}>
 							<svg viewBox="0 0 100 100">
-								<path
-									d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-									fill="#ffffff"
-									stroke="none">
+								<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
 									<animateTransform
 										attributeName="transform"
 										type="rotate"
@@ -79,7 +74,7 @@ const Orders = ({ refreshDb }) => {
 							</svg>
 						</button>
 					) : (
-						<button className="item-sales-search" onClick={() => setPopupForm(true)}>
+						<button className="theme-btn" onClick={() => setPopupForm(true)}>
 							Add
 						</button>
 					)}
@@ -139,15 +134,12 @@ const Orders = ({ refreshDb }) => {
 															e.stopPropagation()
 															postActivity(
 																item,
-																routes.find(
-																	a => a?.route_uuid === item?.route_uuid
-																)
+																routes.find(a => a?.route_uuid === item?.route_uuid)
 															)
 															sessionStorage.setItem(
 																"route_title",
-																routes.find(
-																	a => a?.route_uuid === item?.route_uuid
-																)?.route_title
+																routes.find(a => a?.route_uuid === item?.route_uuid)
+																	?.route_title
 															)
 															Navigate("/users/orders/" + item.counter_uuid)
 														}
@@ -155,9 +147,8 @@ const Orders = ({ refreshDb }) => {
 													<td style={{ width: "50%" }}>{item.counter_title}</td>
 													<td style={{ width: "50%" }}>
 														{
-															routes.find(
-																a => a?.route_uuid === item?.route_uuid
-															)?.route_title
+															routes.find(a => a?.route_uuid === item?.route_uuid)
+																?.route_title
 														}
 													</td>
 													<td>
@@ -474,16 +465,14 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 														style={{ width: "15ch" }}
 														disabled={a.lable?.find(
 															c =>
-																(c.type === "cal" || c.type === "wa") &&
-																+c.varification
+																(c.type === "cal" || c.type === "wa") && +c.varification
 														)}
 														onChange={e => {
 															if (
 																e.target.value.length > 10 ||
 																a.lable?.find(
 																	c =>
-																		(c.type === "cal" ||
-																			c.type === "wa") &&
+																		(c.type === "cal" || c.type === "wa") &&
 																		+c.varification
 																)
 															) {
@@ -530,8 +519,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 												onClick={() =>
 													setdata(prev => ({
 														...prev,
-														credit_allowed:
-															prev.credit_allowed === "Y" ? "N" : "Y",
+														credit_allowed: prev.credit_allowed === "Y" ? "N" : "Y",
 													}))
 												}
 												style={{ marginBottom: "5px", textAlign: "center" }}
@@ -548,9 +536,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 										<select
 											className="numberInput"
 											value={data.status}
-											onChange={e =>
-												setdata(prev => ({ ...prev, status: e.target.value }))
-											}>
+											onChange={e => setdata(prev => ({ ...prev, status: e.target.value }))}>
 											{/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
 
 											<option value={1}>Active</option>

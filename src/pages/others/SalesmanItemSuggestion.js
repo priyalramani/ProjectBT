@@ -112,7 +112,7 @@ const Users = () => {
               <div style={{ width: "100px" }}>Disabled Users</div> 
             </div>
 */}
-						<button className="item-sales-search" onClick={() => setPopupForm(true)}>
+						<button className="theme-btn" onClick={() => setPopupForm(true)}>
 							Add
 						</button>
 					</div>
@@ -201,7 +201,7 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
 							<td colSpan={2}>
 								<button
 									type="button"
-									className="item-sales-search"
+									className="theme-btn"
 									onClick={e => {
 										e.stopPropagation()
 										setPayoutPopup(item)

@@ -120,6 +120,10 @@ const Sidebar = ({ setCollectionTags }) => {
 							name: "Counter",
 							link: "/admin/counter",
 						},
+						{
+							name: "Companies",
+							link: "/admin/companies",
+						},
 						// {
 						//   name: "Test Counter",
 						//   link: "/admin/TestCounter",

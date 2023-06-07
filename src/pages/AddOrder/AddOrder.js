@@ -489,7 +489,7 @@ export default function AddOrder() {
 
 								{order.counter_uuid ? (
 									<button
-										className="item-sales-search"
+										className="theme-btn"
 										style={{
 											width: "max-content",
 											position: "fixed",

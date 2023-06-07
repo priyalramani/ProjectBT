@@ -231,7 +231,7 @@ const ItemDetails = () => {
 								placeholder="Select"
 							/>
 						</div>
-						<button className="item-sales-search" onClick={() => getActivityData()}>
+						<button className="theme-btn" onClick={() => getActivityData()}>
 							Search
 						</button>
 					</div>

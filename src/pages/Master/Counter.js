@@ -203,14 +203,14 @@ const Counter = () => {
 							placeholder="Search Mobile..."
 							className="searchInput"
 						/>
-						<button className="item-sales-search" onClick={() => seXlSelection(true)}>
+						<button className="theme-btn" onClick={() => seXlSelection(true)}>
 							Xls
 						</button>
 						<div>Total Items: {filterCounter.length}</div>
-						<button className="item-sales-search" onClick={() => setSequencePopup(true)}>
+						<button className="theme-btn" onClick={() => setSequencePopup(true)}>
 							Sequence
 						</button>
-						<button className="item-sales-search" onClick={() => setPopupForm(true)}>
+						<button className="theme-btn" onClick={() => setPopupForm(true)}>
 							Add
 						</button>
 					</div>
