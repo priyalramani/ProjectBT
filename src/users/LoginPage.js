@@ -12,6 +12,7 @@ const LoginPage = ({ setUserType }) => {
 		login_password: "",
 	})
 
+	const onChange = e => setUserData(i => ({ ...i, [e.target.name]: e?.target?.value?.replaceAll(" ", "") }))
 	const { setNotification } = useContext(context)
 	const Navigate = useNavigate()
 	const loginHandler = async () => {
@@ -131,15 +132,10 @@ const LoginPage = ({ setUserType }) => {
 					<input
 						type="username"
 						className="form-input"
-						name="username"
+						name="login_username"
 						id="username"
 						value={userData.login_username}
-						onChange={e =>
-							setUserData(prev => ({
-								...prev,
-								login_username: e.target.value,
-							}))
-						}
+						onChange={onChange}
 						autoComplete="off"
 						required
 					/>
@@ -152,15 +148,10 @@ const LoginPage = ({ setUserType }) => {
 					<input
 						type="password"
 						className="form-input"
-						name="password"
+						name="login_password"
 						id="password"
 						value={userData.login_password}
-						onChange={e =>
-							setUserData(prev => ({
-								...prev,
-								login_password: e.target.value,
-							}))
-						}
+						onChange={onChange}
 						minLength="5"
 						autoComplete="off"
 						required
@@ -175,7 +166,13 @@ const LoginPage = ({ setUserType }) => {
 					<button className="submit-btn" id="loading-screen">
 						<svg viewBox="0 0 100 100">
 							<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#000" stroke="none">
-								<animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
+								<animateTransform
+									attributeName="transform"
+									type="rotate"
+									dur="1s"
+									repeatCount="indefinite"
+									keyTimes="0;1"
+									values="0 50 51;360 50 51"></animateTransform>
 							</path>
 						</svg>
 					</button>

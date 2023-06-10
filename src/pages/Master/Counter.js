@@ -20,6 +20,8 @@ const Counter = () => {
 	const [popupForm, setPopupForm] = useState(false)
 	const [routesData, setRoutesData] = useState([])
 	const [selectedRoutes, setSelectedRoutes] = useState([])
+	const [selectedCounters, setSelectedCounters] = useState([])
+
 	const [xlSelection, seXlSelection] = useState(false)
 	const [itemPopup, setItemPopup] = useState(false)
 	const [deletePopup, setDeletePopup] = useState(false)
@@ -91,7 +93,7 @@ const Counter = () => {
 	}, [])
 	const filterCounter = useMemo(
 		() =>
-			filterCounterTitle?.length >= 3
+			[filterCounterTitle, filterRoute, filterMobile]?.some(i => i?.length >= 3)
 				? counter
 						.map(b => ({
 							...b,
@@ -101,13 +103,13 @@ const Counter = () => {
 						.filter(
 							a =>
 								a.counter_title &&
-								(!filterCounterTitle ||
+								(filterCounterTitle?.length < 3 ||
 									a.counter_title
 										?.toLocaleLowerCase()
 										?.includes(filterCounterTitle?.toLocaleLowerCase())) &&
-								(!filterRoute ||
+								(filterRoute?.length < 3 ||
 									a.route_title?.toLocaleLowerCase()?.includes(filterRoute?.toLocaleLowerCase())) &&
-								(!filterMobile || a.mobile?.find(_i => _i.mobile?.includes(filterMobile)))
+								(filterMobile?.length < 3 || a.mobile?.find(_i => _i.mobile?.includes(filterMobile)))
 						)
 				: [],
 		[counter, filterCounterTitle, filterRoute, filterMobile, routesData]
@@ -118,7 +120,12 @@ const Counter = () => {
 		seXlSelection(false)
 
 		let sheetData = counter
-			.filter(a => selectedRoutes.filter(b => b === a.route_uuid)?.length)
+			.filter(
+				a =>
+					selectedRoutes.filter(b => b === a.route_uuid)?.length ||
+					!selectedCounters?.[0] ||
+					selectedCounters?.filter(b => b === a.counter_uuid)?.length
+			)
 			.sort((a, b) =>
 				a.route_sort_order - b.route_sort_order
 					? a.route_sort_order - b.route_sort_order
@@ -153,16 +160,22 @@ const Counter = () => {
 		setSelectedRoutes([])
 	}
 	const onChangeHandler = e => {
-		let temp = selectedRoutes || []
+		const params = {}
+		if (e.target.name === "routes") {
+			params.data = selectedRoutes
+			params.update = i => setSelectedRoutes(i)
+		} else {
+			params.data = selectedCounters
+			params.update = i => setSelectedCounters(i)
+		}
+
+		let temp = params?.data || []
 		let options = Array.from(e.target.selectedOptions, option => option.value)
 		for (let i of options) {
-			if (selectedRoutes.filter(a => a === i).length) temp = temp.filter(a => a !== i)
+			if (params?.data.filter(a => a === i).length) temp = temp.filter(a => a !== i)
 			else temp = [...temp, i]
 		}
-		// temp = data.filter(a => options.filter(b => b === a.user_uuid).length)
-		console.log(options, temp)
-
-		setSelectedRoutes(temp)
+		params?.update(temp)
 	}
 	return (
 		<>
@@ -280,32 +293,64 @@ const Counter = () => {
 							}}>
 							<div style={{ overflowY: "scroll" }}>
 								<form className="form" onSubmit={downloadHandler}>
-									<div className="row">
-										<h1>Select Routes</h1>
-									</div>
+									<div id="excel-filters">
+										<div>
+											<div className="row">
+												<h1>Select Routes</h1>
+											</div>
 
-									<div className="form">
-										<div className="row">
-											<label className="selectLabel" style={{ width: "50%" }}>
-												<select
-													className="numberInput"
-													style={{ width: "200px", height: "100px" }}
-													value={selectedRoutes}
-													onChange={onChangeHandler}
-													multiple>
-													{/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
-													{routesData?.map(occ => (
-														<option
-															value={occ.route_uuid}
-															style={{
-																marginBottom: "5px",
-																textAlign: "center",
-															}}>
-															{occ.route_title}
-														</option>
-													))}
-												</select>
-											</label>
+											<div className="form">
+												<div className="row">
+													<label className="selectLabel" style={{ width: "50%" }}>
+														<select
+															className="numberInput"
+															value={selectedRoutes}
+															name="routes"
+															onChange={onChangeHandler}
+															multiple>
+															{routesData?.map(occ => (
+																<option
+																	value={occ.route_uuid}
+																	style={{
+																		marginBottom: "5px",
+																		textAlign: "center",
+																	}}>
+																	{occ.route_title}
+																</option>
+															))}
+														</select>
+													</label>
+												</div>
+											</div>
+										</div>
+										<div>
+											<div className="row">
+												<h1>Select Counter</h1>
+											</div>
+
+											<div className="form">
+												<div className="row">
+													<label className="selectLabel" style={{ width: "50%" }}>
+														<select
+															className="numberInput"
+															value={selectedCounters}
+															name="counters"
+															onChange={onChangeHandler}
+															multiple>
+															{counter?.map(occ => (
+																<option
+																	value={occ.counter_uuid}
+																	style={{
+																		marginBottom: "5px",
+																		textAlign: "center",
+																	}}>
+																	{occ.counter_title}
+																</option>
+															))}
+														</select>
+													</label>
+												</div>
+											</div>
 										</div>
 									</div>
 
@@ -2077,7 +2122,6 @@ function DeleteCounterPopup({ onSave, popupInfo, setItemsData }) {
 		</div>
 	)
 }
-
 const MultiSelectElem = ({ counterGroup, selected = [], onSelect }) => {
 	return (
 		<div className="multiselect-elem-wrapper">

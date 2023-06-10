@@ -2265,7 +2265,7 @@ export function OrderDetails({
 								print_items_length={print_items_length}
 								counter={counters.find(a => a.counter_uuid === _printData?.counter_uuid)}
 								reminderDate={reminderDate}
-								order={_printData}
+								order={printData}
 								date={new Date(_printData?.status[0]?.time)}
 								user={
 									users.find(a => a.user_uuid === _printData?.status[0]?.user_uuid)?.user_title || ""
@@ -3026,6 +3026,7 @@ function DiliveryPopup({
 													className="numberInput"
 													value={modes.find(a => a.mode_uuid === item.mode_uuid)?.amt}
 													style={{ width: "80px" }}
+													disabled={order?.order_type === "E" && item?.mode_title !== "Cash"}
 													onContextMenu={e => {
 														e.preventDefault()
 														e.stopPropagation()
@@ -3097,6 +3098,7 @@ function DiliveryPopup({
 												className="numberInput"
 												value={outstanding?.amount}
 												placeholder={""}
+												disabled={order?.order_type === "E"}
 												style={
 													!credit_allowed === "Y"
 														? {

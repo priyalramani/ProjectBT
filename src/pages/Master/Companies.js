@@ -250,7 +250,7 @@ const CompanyForm = ({ close, onSubmit, data = { sort_order: 1, company_title: "
 							</span>
 						</div>
 					</div>
-					<button type="submit" className="theme-btn">
+					<button type="submit" className="theme-btn round">
 						Submit
 					</button>
 				</form>

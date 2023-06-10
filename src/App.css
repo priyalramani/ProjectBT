@@ -36,6 +36,10 @@
 	transform: scale(1.05);
 }
 
+#customer-details-dropdown .simple_Logout_button {
+	width: 100%;
+}
+
 div#selection-area-switch > button {
 	width: 50%;
 	padding: 12px 0;

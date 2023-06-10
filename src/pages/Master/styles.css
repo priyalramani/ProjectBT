@@ -2035,13 +2035,16 @@ input#item-sales-searchbar {
 }
 
 #company-form h2 {
-	padding-bottom: 30px;
+	padding-bottom: 25px;
 }
 
 #company-form form {
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
+	padding: 20px;
+	outline: 1px solid #a0a0a0;
+	border-radius: 1rem;
 }
 
 #company-form form > div {
@@ -2087,7 +2090,12 @@ input#item-sales-searchbar {
 	background: none;
 	border: none;
 	outline: none;
-	font-size: 1.5rem;
+	font-size: 2rem;
 	position: absolute;
 	right: 20px;
+}
+
+.form input:disabled {
+	cursor: not-allowed;
+	opacity: 0.4;
 }

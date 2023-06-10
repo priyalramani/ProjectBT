@@ -720,14 +720,15 @@ const SelectedCounterOrder = () => {
 									className="menus"
 									style={{
 										position: "fixed",
-										boxShadow: "0 -10px 50px #4ac959",
+										boxShadow: "#4ac959 0 0 50px -10px",
 										width: "100vw",
 										maxWidth: "500px",
-										maxHeight: "70vh",
-										bottom: "0px",
+										maxHeight: "80vh",
+										bottom: "0",
 										backgroundColor: "#fff",
-										overflow: "scroll",
-										paddingTop: "10px",
+										overflow: "auto",
+										padding: "30px 10px 60px",
+										borderRadius: "2rem 2rem 0 0",
 									}}>
 									{itemsCategory
 

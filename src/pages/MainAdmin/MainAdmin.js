@@ -63,6 +63,34 @@ const MainAdmin = () => {
 	const location = useLocation()
 	const { updateServerPdf, setLoading } = useContext(context)
 	let user_uuid = localStorage.getItem("user_uuid")
+
+	const paymentsSummaryRef = useRef(null)
+	const printPaymentSummary = useReactToPrint({
+		content: () => paymentsSummaryRef.current,
+		documentTitle: "Pending Payments Summary",
+		removeAfterPrint: true,
+	})
+
+	const pendingPaymentSummary = () => {
+		const counterOrders = selectedOrder
+			?.filter(i => i?.payment_pending)
+			?.reduce(
+				(data, i) => ({
+					...data,
+					[i.counter_uuid]: {
+						orders: (data?.[i.counter_uuid]?.orders || []).concat([i]),
+						numbers:
+							data?.[i.counter_uuid]?.numbers ||
+							counter?.find(c => c?.counter_uuid === i?.counter_uuid)?.mobile?.map(m => m?.mobile),
+					},
+				}),
+				{}
+			)
+
+		console.log({ counterOrders })
+		return counterOrders
+	}
+
 	const selectedOrderGrandTotal = useMemo(
 		() =>
 			selectedOrder?.length > 1
@@ -536,6 +564,17 @@ const MainAdmin = () => {
 		return data
 	}, [orders, tripData])
 
+	const updatePaymentsVisibility = async () => {
+		try {
+			const user = users?.find(_i => _i?.user_uuid === user_uuid)
+			user.hide_pending_payments = +!(user?.hide_pending_payments || 0)
+			setUsers(state => state?.map(_i => (_i?.user_uuid === user_uuid ? user : _i)))
+			await axios.put("/users/putUser", { user_uuid, hide_pending_payments: user.hide_pending_payments })
+		} catch (error) {
+			console.log(error)
+		}
+	}
+
 	return (
 		<>
 			<div
@@ -767,8 +806,21 @@ const MainAdmin = () => {
 										}}>
 										Item Summary
 									</button>
+									<button
+										type="button"
+										className="simple_Logout_button"
+										onClick={() =>
+											selectedOrder?.some(i => i.payment_pending) ? printPaymentSummary() : ""
+										}>
+										Pending Payments Summary
+									</button>
 								</>
 							)}
+							<button className="simple_Logout_button" onClick={updatePaymentsVisibility}>
+								{!users?.find(_i => _i?.user_uuid === user_uuid)?.hide_pending_payments
+									? "Hide Pending Payments"
+									: "Show Pending Payments"}
+							</button>
 						</div>
 					)}
 					<div className="content-container" id="content-file-container">
@@ -1001,6 +1053,12 @@ const MainAdmin = () => {
 															id="seats_container">
 															{orders
 																?.filter(
+																	_i =>
+																		!+users?.find(_u => _u?.user_uuid === user_uuid)
+																			?.hide_pending_payments ||
+																		!+_i?.payment_pending
+																)
+																?.filter(
 																	b =>
 																		counter.filter(
 																			c =>
@@ -1011,7 +1069,7 @@ const MainAdmin = () => {
 																						route.route_uuid === "none"))
 																		)?.length
 																)
-																.filter(
+																?.filter(
 																	a =>
 																		!searchItems ||
 																		a.invoice_number
@@ -1024,7 +1082,6 @@ const MainAdmin = () => {
 																			?.includes(searchItems?.toLocaleLowerCase())
 																)
 																.sort((a, b) => a.invoice_number - b.invoice_number)
-
 																.map(item => {
 																	return (
 																		<div
@@ -1234,6 +1291,11 @@ const MainAdmin = () => {
 											}}
 											id="seats_container">
 											{orders
+												?.filter(
+													_i =>
+														!+users?.find(_u => _u?.user_uuid === user_uuid)
+															?.hide_pending_payments || !+_i?.payment_pending
+												)
 												.filter(a => !a?.trip_uuid)
 												.sort((a, b) => a.invoice_number - b.invoice_number)
 												.filter(
@@ -1474,6 +1536,12 @@ const MainAdmin = () => {
 															}}
 															id="seats_container">
 															{orders
+																?.filter(
+																	_i =>
+																		!+users?.find(_u => _u?.user_uuid === user_uuid)
+																			?.hide_pending_payments ||
+																		!+_i?.payment_pending
+																)
 																.filter(a => a.trip_uuid === trip.trip_uuid)
 																.filter(
 																	a =>
@@ -1488,7 +1556,6 @@ const MainAdmin = () => {
 																			?.includes(searchItems?.toLocaleLowerCase())
 																)
 																.sort((a, b) => a.invoice_number - b.invoice_number)
-
 																.map(item => {
 																	return (
 																		<div
@@ -1881,6 +1948,13 @@ const MainAdmin = () => {
 				/>
 			) : (
 				""
+			)}
+
+			{selectedOrder?.some(i => i.payment_pending) && (
+				<PendingPaymentsSummary
+					counterOrders={pendingPaymentSummary()}
+					paymentsSummaryRef={paymentsSummaryRef}
+				/>
 			)}
 		</>
 	)
@@ -3535,6 +3609,51 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose, warehouse }) 
 					<button type="button" onClick={() => onClose()} className="closeButton">
 						x
 					</button>
+				</div>
+			</div>
+		</div>
+	)
+}
+
+const PendingPaymentsSummary = ({ counterOrders, paymentsSummaryRef }) => {
+	const itemsQuantity = items =>
+		Object.values(
+			items?.reduce(
+				(quantities, i) => ({
+					b: (quantities?.b || 0) + +i?.b,
+					p: (quantities?.p || 0) + +i?.p,
+				}),
+				{}
+			)
+		)?.join(":")
+
+	return (
+		<div className="overlay" style={{ opacity: 0, zIndex: "-1" }}>
+			<div id="pending-payments-summary" ref={paymentsSummaryRef}>
+				<h3>{new Date().toGMTString().slice(0, -4)}</h3>
+				<div>
+					{Object.keys(counterOrders)?.map(counter_uuid => (
+						<div key={counter_uuid} className="counter-wrapper">
+							<div>
+								<h3>{counterOrders[counter_uuid]?.orders?.[0]?.counter_title}</h3>
+								<span>{counterOrders[counter_uuid]?.numbers?.[0]}</span>
+							</div>
+							{/* <span className="numbers">9876543210, 9876543210, 9876543210</span> */}
+							<table>
+								<tbody>
+									{counterOrders[counter_uuid]?.orders?.map(order => (
+										<tr>
+											<td>{new Date(+order?.time_1)?.toDateString()}</td>
+											<td>{(order?.order_type === "I" ? "N" : "E") + order?.invoice_number}</td>
+											<td>Rs.{order?.order_grandtotal}</td>
+											<td>{itemsQuantity(order?.item_details)}</td>
+											<td>[ {order?.notes?.join(", ")} ]</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
+					))}
 				</div>
 			</div>
 		</div>
