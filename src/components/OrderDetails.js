@@ -1975,7 +1975,8 @@ export function OrderDetails({
 							<button
 								type="button"
 								onClick={
-									window.location.pathname.includes("completeOrderReport")
+									window.location.pathname.includes("completeOrderReport") ||
+									window.location.pathname.includes("pendingEntry")
 										? () => onSubmit({ stage: 0, diliveredUser: "" }, 1)
 										: () => onSubmit()
 									// : () => setDeliveryPopup("edit")
