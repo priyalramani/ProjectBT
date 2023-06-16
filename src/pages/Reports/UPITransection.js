@@ -153,7 +153,7 @@ function Table({ itemsDetails, putActivityData, getOrderData, setRemarksPoup, lo
 		let response = await axios({
 			method: "post",
 			url: "/orders/sendMsg",
-			data: { ...item, notification_uuid: "payment-reminder-manual" },
+			data: { ...item, notification_uuid: "payment-reminder-manual", consolidated_payment_reminder: true },
 		})
 
 		console.log(response.data)

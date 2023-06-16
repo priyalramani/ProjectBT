@@ -22,6 +22,8 @@ import SalesPersoneFilterPopup from "../../components/SalesPersoneFilterPopup"
 import CollectionTag from "../QuikAccess/CollectionTag"
 import { useLocation } from "react-router-dom"
 import context from "../../context/context"
+import { IoCloseCircle } from "react-icons/io5"
+
 const MainAdmin = () => {
 	const [isCollectionTags, setCollectionTags] = useState(false)
 	const [popupForm, setPopupForm] = useState(false)
@@ -65,30 +67,46 @@ const MainAdmin = () => {
 	let user_uuid = localStorage.getItem("user_uuid")
 
 	const paymentsSummaryRef = useRef(null)
+	const [showSelect, setShowSelect] = useState()
+	const [printDependencies, setPrintDependencies] = useState()
+
 	const printPaymentSummary = useReactToPrint({
 		content: () => paymentsSummaryRef.current,
 		documentTitle: "Pending Payments Summary",
 		removeAfterPrint: true,
+		onAfterPrint: () => setPrintDependencies(null),
+		onPrintError: () => setPrintDependencies(null),
 	})
 
-	const pendingPaymentSummary = () => {
-		const counterOrders = selectedOrder
-			?.filter(i => i?.payment_pending)
-			?.reduce(
-				(data, i) => ({
-					...data,
-					[i.counter_uuid]: {
-						orders: (data?.[i.counter_uuid]?.orders || []).concat([i]),
-						numbers:
-							data?.[i.counter_uuid]?.numbers ||
-							counter?.find(c => c?.counter_uuid === i?.counter_uuid)?.mobile?.map(m => m?.mobile),
-					},
-				}),
-				{}
-			)
+	const createPaymentSummary = condition => {
+		let data
+		if (condition === 0) data = selectedOrder?.filter(i => i.payment_pending)
+		else data = selectedOrder
+
+		const counterOrders = data?.reduce(
+			(data, i) => ({
+				...data,
+				[i.counter_uuid]: {
+					orders: (data?.[i.counter_uuid]?.orders || []).concat([i]),
+					numbers:
+						data?.[i.counter_uuid]?.numbers ||
+						counter?.find(c => c?.counter_uuid === i?.counter_uuid)?.mobile?.map(m => m?.mobile),
+				},
+			}),
+			{}
+		)
 
 		console.log({ counterOrders })
-		return counterOrders
+		setPrintDependencies(counterOrders)
+	}
+
+	const paymentSummaryInvokeHandler = () => {
+		if (!selectedOrder?.[0]) return
+		const pendingPayments = selectedOrder?.filter(i => i.payment_pending)
+		const nonPendingPayments = selectedOrder?.filter(i => !i.payment_pending)
+		if (pendingPayments?.[0] && nonPendingPayments?.[0]) setShowSelect(true)
+		else if (pendingPayments?.[0]) createPaymentSummary(0)
+		else createPaymentSummary(1)
 	}
 
 	const selectedOrderGrandTotal = useMemo(
@@ -100,6 +118,7 @@ const MainAdmin = () => {
 				: "",
 		[selectedOrder]
 	)
+
 	const selectedPrintOrder = useMemo(() => ordersData?.filter(a => +a.to_print) || [], [ordersData])
 	console.log("selectedPrintOrder", selectedPrintOrder)
 	const getItemsDataReminder = async () => {
@@ -809,9 +828,7 @@ const MainAdmin = () => {
 									<button
 										type="button"
 										className="simple_Logout_button"
-										onClick={() =>
-											selectedOrder?.some(i => i.payment_pending) ? printPaymentSummary() : ""
-										}>
+										onClick={paymentSummaryInvokeHandler}>
 										Pending Payments Summary
 									</button>
 								</>
@@ -1950,11 +1967,27 @@ const MainAdmin = () => {
 				""
 			)}
 
-			{selectedOrder?.some(i => i.payment_pending) && (
+			{printDependencies && (
 				<PendingPaymentsSummary
-					counterOrders={pendingPaymentSummary()}
+					print={printPaymentSummary}
+					counterOrders={printDependencies}
 					paymentsSummaryRef={paymentsSummaryRef}
 				/>
+			)}
+
+			{showSelect && (
+				<div className="overlay">
+					<div className="payment-summary-type">
+						<h3>Select payment summary type</h3>
+						<div>
+							<button onClick={() => createPaymentSummary(0)}>Pending payments only</button>
+							<button onClick={() => createPaymentSummary(1)}>All payments</button>
+						</div>
+						<button onClick={() => setShowSelect(false)} className="close-btn">
+							<IoCloseCircle />
+						</button>
+					</div>
+				</div>
 			)}
 		</>
 	)
@@ -3615,7 +3648,7 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose, warehouse }) 
 	)
 }
 
-const PendingPaymentsSummary = ({ counterOrders, paymentsSummaryRef }) => {
+const PendingPaymentsSummary = ({ print, counterOrders, paymentsSummaryRef }) => {
 	const itemsQuantity = items =>
 		Object.values(
 			items?.reduce(
@@ -3626,6 +3659,10 @@ const PendingPaymentsSummary = ({ counterOrders, paymentsSummaryRef }) => {
 				{}
 			)
 		)?.join(":")
+
+	useEffect(() => {
+		print()
+	}, [print])
 
 	return (
 		<div className="overlay" style={{ opacity: 0, zIndex: "-1" }}>

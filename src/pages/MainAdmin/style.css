@@ -68,3 +68,54 @@
 .numbers {
 	padding: 5px 0;
 }
+
+.payment-summary-type {
+	background: white;
+	padding: 20px 20px 30px;
+	border-radius: 20px;
+	position: relative;
+}
+
+.payment-summary-type > h3 {
+	text-transform: uppercase;
+	margin-bottom: 25px;
+	margin-right: 32px;
+}
+
+.payment-summary-type > div {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border-radius: 8px;
+	border: 1px solid #dbdbdb;
+}
+
+.payment-summary-type div > button {
+	padding: 15px 10px;
+	border: none;
+	font-size: 1rem;
+	background: #f0f0f0;
+	text-transform: capitalize;
+}
+
+/* .payment-summary-type button svg {
+	margin: 0 10px -3px 0;
+} */
+
+.payment-summary-type > div > button:first-child {
+	border-bottom: 1px solid #dbdbdb;
+}
+
+.payment-summary-type .close-btn {
+	position: absolute;
+	top: 22px;
+	right: 15px;
+	border: none;
+	background: none;
+	outline: none;
+	font-size: 1.5rem;
+}
+
+.whatsapp-notification-vars button {
+	margin: 0 3px;
+}

@@ -308,7 +308,7 @@ function IncentivePopup({ onSave, popupForm }) {
 					}}>
 					<div style={{ overflowY: "scroll", maxHeight: "500px" }}>
 						<table
-							className="user-table"
+							className="user-table whatsapp-notification-vars"
 							style={{
 								width: "fit-content",
 							}}>
@@ -561,6 +561,9 @@ function IncentivePopup({ onSave, popupForm }) {
 										</button>
 										<button className="theme-btn" onClick={e => addVariable("amount")}>
 											Amount
+										</button>
+										<button className="theme-btn" onClick={e => addVariable("details")}>
+											Details
 										</button>
 									</td>
 								</tr>
