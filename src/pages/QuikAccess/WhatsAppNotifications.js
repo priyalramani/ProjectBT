@@ -155,6 +155,7 @@ function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }
 
 	const PAYMENT_REMINDER_NOTIFICATION = "7e65e044-9953-433b-a9d7-cced4730b189"
 	const sendPaymentReminders = async counter_ids => {
+		if (!counter_ids?.length) return
 		const response = await axios.post("/whatsapp_notifications/send_payment_reminders", {
 			notification_uuid: PAYMENT_REMINDER_NOTIFICATION,
 			counter_ids,
@@ -265,8 +266,7 @@ function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }
 }
 
 const CounterSelection = ({ counters, onclick, close }) => {
-	// const [selection, setSelection] = useState(counters?.map(i => i.counter_uuid))
-	const [selection, setSelection] = useState([])
+	const [selection, setSelection] = useState(counters?.map(i => i.counter_uuid))
 	const [search, setSearch] = useState("")
 
 	return (
