@@ -11,6 +11,9 @@ import { alpha, styled } from "@mui/material/styles"
 import { server } from "../../App"
 import noimg from "../../assets/noimg.jpg"
 import { IoIosCloseCircle } from "react-icons/io"
+import { useContext } from "react"
+import Context from "../../context/context"
+
 const GreenSwitch = styled(Switch)(({ theme }) => ({
 	"& .MuiSwitch-switchBase.Mui-checked": {
 		color: green[500],
@@ -136,6 +139,9 @@ const Incetives = () => {
 export default WhatsAppNotifications
 
 function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }) {
+	const context = useContext(Context)
+	const { setNotification } = context
+
 	const [items, setItems] = useState("incentive_title")
 	const [order, setOrder] = useState("asc")
 	const updateStatus = async data => {
@@ -160,7 +166,18 @@ function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }
 			notification_uuid: PAYMENT_REMINDER_NOTIFICATION,
 			counter_ids,
 		})
-		console.log({ response: response.data })
+
+		if (response?.data?.success)
+			setNotification({
+				success: true,
+				message: "Messages sent successfully",
+			})
+		else
+			setNotification({
+				success: false,
+				message: "Failed to send messages",
+			})
+		setTimeout(() => setNotification(null), 3000)
 	}
 
 	const [counterListState, setCounterListState] = useState()
