@@ -90,8 +90,18 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 				obj = {
 					...obj,
 
-					processing_canceled: +stage === 2 ? (obj.processing_canceled?.length ? [...obj.processing_canceled, ...obj.item_details] : obj.item_details) : obj.processing_canceled || [],
-					delivery_return: +stage === 4 ? (obj.delivery_return?.length ? [...obj.delivery_return, ...obj.item_details] : obj.item_details) : obj.delivery_return || [],
+					processing_canceled:
+						+stage === 2
+							? obj.processing_canceled?.length
+								? [...obj.processing_canceled, ...obj.item_details]
+								: obj.item_details
+							: obj.processing_canceled || [],
+					delivery_return:
+						+stage === 4
+							? obj.delivery_return?.length
+								? [...obj.delivery_return, ...obj.item_details]
+								: obj.item_details
+							: obj.delivery_return || [],
 					item_details: obj.item_details.map(a => ({
 						...a,
 						b: 0,
@@ -299,7 +309,13 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 					<div className="flex" style={{ width: "40px", height: "40px" }}>
 						<svg viewBox="0 0 100 100">
 							<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
-								<animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
+								<animateTransform
+									attributeName="transform"
+									type="rotate"
+									dur="1s"
+									repeatCount="indefinite"
+									keyTimes="0;1"
+									values="0 50 51;360 50 51"></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -307,8 +323,27 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 			) : (
 				""
 			)}
-			{deliveryPopup ? <DiliveryPopup onSave={() => setDeliveryPopup(false)} postOrderData={onSubmit} orders={orders} counters={counters} items={items} users={users} /> : ""}
-			{selectedWarehouseOrder ? <WarehouseUpdatePopup onClose={() => {}} updateChanges={updateWarehouse} popupInfo={selectedWarehouseOrder} /> : ""}
+			{deliveryPopup ? (
+				<DiliveryPopup
+					onSave={() => setDeliveryPopup(false)}
+					postOrderData={onSubmit}
+					orders={orders}
+					counters={counters}
+					items={items}
+					users={users}
+				/>
+			) : (
+				""
+			)}
+			{selectedWarehouseOrder ? (
+				<WarehouseUpdatePopup
+					onClose={() => {}}
+					updateChanges={updateWarehouse}
+					popupInfo={selectedWarehouseOrder}
+				/>
+			) : (
+				""
+			)}
 		</>
 	)
 }
@@ -333,7 +368,12 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 		setOrder(orders[0])
 	}, [])
 	let reminder = useMemo(() => {
-		return new Date(time2.setDate(time2.getDate() + (counters.find(a => a.counter_uuid === order.counter_uuid)?.payment_reminder_days || 0))).getTime()
+		return new Date(
+			time2.setDate(
+				time2.getDate() +
+					(counters.find(a => a.counter_uuid === order.counter_uuid)?.payment_reminder_days || 0)
+			)
+		).getTime()
 	}, [counters, order.counter_uuid])
 	let type = useMemo(() => {
 		return counters.find(a => a.counter_uuid === order.counter_uuid)?.outstanding_type || 0
@@ -375,7 +415,11 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 					...a,
 					amt: "",
 					coin: "",
-					status: a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002" ? "0" : 1,
+					status:
+						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
+						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+							? "0"
+							: 1,
 				}))
 			)
 	}, [PaymentModes])
@@ -542,7 +586,10 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 							<form className="form">
 								<div className="formGroup">
 									{PaymentModes.map(item => (
-										<div className="row" style={{ flexDirection: "row", alignItems: "center" }} key={item.mode_uuid}>
+										<div
+											className="row"
+											style={{ flexDirection: "row", alignItems: "center" }}
+											key={item.mode_uuid}>
 											<div style={{ width: "50px" }}>{item.mode_title}</div>
 											<label className="selectLabel flex" style={{ width: "80px" }}>
 												<input
@@ -550,6 +597,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 													name="route_title"
 													className="numberInput"
 													value={modes.find(a => a.mode_uuid === item.mode_uuid)?.amt}
+													disabled={order?.order_type === "E" && item?.mode_title !== "Cash"}
 													onContextMenu={e => {
 														e.preventDefault()
 														e.stopPropagation()
@@ -582,7 +630,8 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 												/>
 												{/* {popupInfo.conversion || 0} */}
 											</label>
-											{item.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" && modes.find(a => a.mode_uuid === item.mode_uuid)?.amt ? (
+											{item.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" &&
+											modes.find(a => a.mode_uuid === item.mode_uuid)?.amt ? (
 												<label className="selectLabel flex" style={{ width: "200px" }}>
 													<input
 														type="text"
@@ -590,8 +639,20 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 														className="numberInput"
 														value={item?.remarks}
 														placeholder={"Cheque Number"}
-														style={{ width: "100%", backgroundColor: "light", fontSize: "12px" }}
-														onChange={e => setModes(prev => prev?.map(a => (a.mode_uuid === item.mode_uuid ? { ...a, remarks: e.target.value } : a)))}
+														style={{
+															width: "100%",
+															backgroundColor: "light",
+															fontSize: "12px",
+														}}
+														onChange={e =>
+															setModes(prev =>
+																prev?.map(a =>
+																	a.mode_uuid === item.mode_uuid
+																		? { ...a, remarks: e.target.value }
+																		: a
+																)
+															)
+														}
 														maxLength={42}
 														onWheel={e => e.preventDefault()}
 													/>
@@ -625,6 +686,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 													}))
 												}
 												// disabled={order.credit_allowed !== "Y"}
+												disabled={order?.order_type === "E"}
 												maxLength={42}
 												onWheel={e => e.preventDefault()}
 											/>
@@ -660,7 +722,11 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 										)}
 									</div>
 									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
-										<button type="button" className="submit" style={{ color: "#fff", backgroundColor: "#7990dd" }} onClick={() => setPopup(true)}>
+										<button
+											type="button"
+											className="submit"
+											style={{ color: "#fff", backgroundColor: "#7990dd" }}
+											onClick={() => setPopup(true)}>
 											Deductions
 										</button>
 									</div>
@@ -690,7 +756,11 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 								</div>
 
 								<div className="flex" style={{ justifyContent: "space-between" }}>
-									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
+									<button
+										type="button"
+										style={{ backgroundColor: "red" }}
+										className="submit"
+										onClick={onSave}>
 										Cancel
 									</button>
 									<button type="button" className="submit" onClick={submitHandler}>
@@ -707,7 +777,13 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 					<div className="flex" style={{ width: "40px", height: "40px" }}>
 						<svg viewBox="0 0 100 100">
 							<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
-								<animateTransform attributeName="transform" type="rotate" dur="1s" repeatCount="indefinite" keyTimes="0;1" values="0 50 51;360 50 51"></animateTransform>
+								<animateTransform
+									attributeName="transform"
+									type="rotate"
+									dur="1s"
+									repeatCount="indefinite"
+									keyTimes="0;1"
+									values="0 50 51;360 50 51"></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -879,7 +955,8 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
 													data
 														? {
 																value: data,
-																label: warehouse?.find(j => j.warehouse_uuid === data)?.warehouse_title,
+																label: warehouse?.find(j => j.warehouse_uuid === data)
+																	?.warehouse_title,
 														  }
 														: { value: 0, label: "None" }
 												}

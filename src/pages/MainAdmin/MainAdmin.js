@@ -83,18 +83,20 @@ const MainAdmin = () => {
 		if (condition === 0) data = selectedOrder?.filter(i => i.payment_pending)
 		else data = selectedOrder
 
-		const counterOrders = data?.reduce(
-			(data, i) => ({
-				...data,
-				[i.counter_uuid]: {
-					orders: (data?.[i.counter_uuid]?.orders || []).concat([i]),
-					numbers:
-						data?.[i.counter_uuid]?.numbers ||
-						counter?.find(c => c?.counter_uuid === i?.counter_uuid)?.mobile?.map(m => m?.mobile),
-				},
-			}),
-			{}
-		)
+		const counterOrders = data
+			?.sort((a, b) => +a.time_1 - +b.time_1)
+			?.reduce(
+				(data, i) => ({
+					...data,
+					[i.counter_uuid]: {
+						orders: (data?.[i.counter_uuid]?.orders || []).concat([i]),
+						numbers:
+							data?.[i.counter_uuid]?.numbers ||
+							counter?.find(c => c?.counter_uuid === i?.counter_uuid)?.mobile?.map(m => m?.mobile),
+					},
+				}),
+				{}
+			)
 
 		console.log({ counterOrders })
 		setPrintDependencies(counterOrders)
@@ -489,31 +491,26 @@ const MainAdmin = () => {
 			data.push({
 				...route,
 				orderLength: orders.filter(
-					b =>
-						counter.filter(c => c.counter_uuid === b.counter_uuid && route.route_uuid === c.route_uuid)
-							?.length
+					b => counter.filter(c => c.counter_uuid === b.counter_uuid && route.route_uuid === c.route_uuid)?.length
 				)?.length,
 
 				processingLength: orders.filter(
 					b =>
-						counter.filter(c => c.counter_uuid === b.counter_uuid && route.route_uuid === c.route_uuid)
-							?.length &&
+						counter.filter(c => c.counter_uuid === b.counter_uuid && route.route_uuid === c.route_uuid)?.length &&
 						(b.status?.length > 1
 							? +b.status.map(x => +x.stage || 0).reduce((c, d) => Math.max(c, d)) === 1
 							: +b?.status[0]?.stage === 1)
 				)?.length,
 				checkingLength: orders.filter(
 					b =>
-						counter.filter(c => c.counter_uuid === b.counter_uuid && route.route_uuid === c.route_uuid)
-							?.length &&
+						counter.filter(c => c.counter_uuid === b.counter_uuid && route.route_uuid === c.route_uuid)?.length &&
 						(b.status?.length > 1
 							? +b.status.map(x => +x.stage || 0).reduce((c, d) => Math.max(c, d)) === 2
 							: +b?.status[0]?.stage === 2)
 				)?.length,
 				deliveryLength: orders.filter(
 					b =>
-						counter.filter(c => c.counter_uuid === b.counter_uuid && route.route_uuid === c.route_uuid)
-							?.length &&
+						counter.filter(c => c.counter_uuid === b.counter_uuid && route.route_uuid === c.route_uuid)?.length &&
 						(b.status?.length > 1
 							? +b.status.map(x => +x.stage || 0).reduce((c, d) => Math.max(c, d)) === 3
 							: +b?.status[0]?.stage === 3)
@@ -803,9 +800,7 @@ const MainAdmin = () => {
 												className="simple_Logout_button"
 												type="button"
 												onClick={() => {
-													const stage = selectedOrder?.map(
-														a => +a.status[a.status?.length - 1]?.stage
-													)
+													const stage = selectedOrder?.map(a => +a.status[a.status?.length - 1]?.stage)
 													console.log({ stage })
 													setChangeStatePopup(stage?.sort((a, b) => a - b)?.at(-1))
 												}}>
@@ -825,10 +820,7 @@ const MainAdmin = () => {
 										}}>
 										Item Summary
 									</button>
-									<button
-										type="button"
-										className="simple_Logout_button"
-										onClick={paymentSummaryInvokeHandler}>
+									<button type="button" className="simple_Logout_button" onClick={paymentSummaryInvokeHandler}>
 										Pending Payments Summary
 									</button>
 								</>
@@ -853,20 +845,14 @@ const MainAdmin = () => {
 													.filter(
 														a =>
 															counter.filter(
-																c =>
-																	c.counter_uuid === a.counter_uuid &&
-																	route.route_uuid === c.route_uuid
+																c => c.counter_uuid === a.counter_uuid && route.route_uuid === c.route_uuid
 															)?.length
 													)
 													.filter(
 														a =>
 															!searchItems ||
-															a.invoice_number
-																?.toString()
-																?.includes(searchItems.toLocaleLowerCase()) ||
-															a.counter_title
-																?.toLocaleLowerCase()
-																?.includes(searchItems.toLocaleLowerCase())
+															a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
+															a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
 													)?.length
 											)
 												return (
@@ -880,24 +866,18 @@ const MainAdmin = () => {
 																			b =>
 																				counter.filter(
 																					c =>
-																						c.counter_uuid ===
-																							b.counter_uuid &&
-																						(route.route_uuid ===
-																							c.route_uuid ||
-																							((!c.route_uuid ||
-																								c.route_uuid ===
-																									"none") &&
-																								route.route_uuid ===
-																									"none"))
+																						c.counter_uuid === b.counter_uuid &&
+																						(route.route_uuid === c.route_uuid ||
+																							((!c.route_uuid || c.route_uuid === "none") &&
+																								route.route_uuid === "none"))
 																				)?.length
 																		)
 																	)
 																}>
 																{route.route_title}
 															</span>{" "}
-															({route.orderLength}) [ Processing {route?.processingLength}
-															, Checking {route.checkingLength}, Delivery{" "}
-															{route?.deliveryLength} ]
+															({route.orderLength}) [ Processing {route?.processingLength}, Checking{" "}
+															{route.checkingLength}, Delivery {route?.deliveryLength} ]
 															{selectOrder ? (
 																<input
 																	type="checkbox"
@@ -910,33 +890,20 @@ const MainAdmin = () => {
 																			a =>
 																				counter.filter(
 																					c =>
-																						c.counter_uuid ===
-																							a.counter_uuid &&
-																						(route.route_uuid ===
-																							c.route_uuid ||
-																							((!c.route_uuid ||
-																								c.route_uuid ===
-																									"none") &&
-																								route.route_uuid ===
-																									"none"))
-																				)?.length &&
-																				selectedOrder.filter(
-																					b => b.order_uuid === a.order_uuid
-																				)?.length
+																						c.counter_uuid === a.counter_uuid &&
+																						(route.route_uuid === c.route_uuid ||
+																							((!c.route_uuid || c.route_uuid === "none") &&
+																								route.route_uuid === "none"))
+																				)?.length && selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
 																		)?.length ===
 																		orders.filter(
 																			a =>
 																				counter.filter(
 																					c =>
-																						c.counter_uuid ===
-																							a.counter_uuid &&
-																						(route.route_uuid ===
-																							c.route_uuid ||
-																							((!c.route_uuid ||
-																								c.route_uuid ===
-																									"none") &&
-																								route.route_uuid ===
-																									"none"))
+																						c.counter_uuid === a.counter_uuid &&
+																						(route.route_uuid === c.route_uuid ||
+																							((!c.route_uuid || c.route_uuid === "none") &&
+																								route.route_uuid === "none"))
 																				)?.length
 																		)?.length
 																			? setSelectedOrder(
@@ -946,18 +913,11 @@ const MainAdmin = () => {
 																								a =>
 																									counter.filter(
 																										c =>
-																											c.counter_uuid ===
-																												a.counter_uuid &&
-																											(route.route_uuid ===
-																												c.route_uuid ||
-																												((!c.route_uuid ||
-																													+c.route_uuid ===
-																														0) &&
-																													+route.route_uuid ===
-																														0))
-																									)?.length &&
-																									b.order_uuid ===
-																										a.order_uuid
+																											c.counter_uuid === a.counter_uuid &&
+																											(route.route_uuid === c.route_uuid ||
+																												((!c.route_uuid || +c.route_uuid === 0) &&
+																													+route.route_uuid === 0))
+																									)?.length && b.order_uuid === a.order_uuid
 																							)?.length
 																					)
 																			  )
@@ -970,34 +930,21 @@ const MainAdmin = () => {
 																											a =>
 																												counter.filter(
 																													c =>
-																														c.counter_uuid ===
-																															a.counter_uuid &&
-																														(route.route_uuid ===
-																															c.route_uuid ||
-																															((!c.route_uuid ||
-																																+c.route_uuid ===
-																																	0) &&
-																																+route.route_uuid ===
-																																	0))
-																												)
-																													?.length &&
-																												b.order_uuid ===
-																													a.order_uuid
+																														c.counter_uuid === a.counter_uuid &&
+																														(route.route_uuid === c.route_uuid ||
+																															((!c.route_uuid || +c.route_uuid === 0) &&
+																																+route.route_uuid === 0))
+																												)?.length && b.order_uuid === a.order_uuid
 																										)?.length
 																								),
 																								...orders.filter(
 																									a =>
 																										counter.filter(
 																											c =>
-																												c.counter_uuid ===
-																													a.counter_uuid &&
-																												(route.route_uuid ===
-																													c.route_uuid ||
-																													((!c.route_uuid ||
-																														+c.route_uuid ===
-																															0) &&
-																														+route.route_uuid ===
-																															0))
+																												c.counter_uuid === a.counter_uuid &&
+																												(route.route_uuid === c.route_uuid ||
+																													((!c.route_uuid || +c.route_uuid === 0) &&
+																														+route.route_uuid === 0))
 																										)?.length
 																								),
 																						  ]
@@ -1005,15 +952,10 @@ const MainAdmin = () => {
 																								a =>
 																									counter.filter(
 																										c =>
-																											c.counter_uuid ===
-																												a.counter_uuid &&
-																											(route.route_uuid ===
-																												c.route_uuid ||
-																												((!c.route_uuid ||
-																													+c.route_uuid ===
-																														0) &&
-																													+route.route_uuid ===
-																														0))
+																											c.counter_uuid === a.counter_uuid &&
+																											(route.route_uuid === c.route_uuid ||
+																												((!c.route_uuid || +c.route_uuid === 0) &&
+																													+route.route_uuid === 0))
 																									)?.length
 																						  )
 																			  )
@@ -1023,33 +965,20 @@ const MainAdmin = () => {
 																			a =>
 																				counter.filter(
 																					c =>
-																						c.counter_uuid ===
-																							a.counter_uuid &&
-																						(route.route_uuid ===
-																							c.route_uuid ||
-																							((!c.route_uuid ||
-																								c.route_uuid ===
-																									"none") &&
-																								route.route_uuid ===
-																									"none"))
-																				)?.length &&
-																				selectedOrder.filter(
-																					b => b.order_uuid === a.order_uuid
-																				)?.length
+																						c.counter_uuid === a.counter_uuid &&
+																						(route.route_uuid === c.route_uuid ||
+																							((!c.route_uuid || c.route_uuid === "none") &&
+																								route.route_uuid === "none"))
+																				)?.length && selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
 																		)?.length ===
 																		orders.filter(
 																			a =>
 																				counter.filter(
 																					c =>
-																						c.counter_uuid ===
-																							a.counter_uuid &&
-																						(route.route_uuid ===
-																							c.route_uuid ||
-																							((!c.route_uuid ||
-																								c.route_uuid ===
-																									"none") &&
-																								route.route_uuid ===
-																									"none"))
+																						c.counter_uuid === a.counter_uuid &&
+																						(route.route_uuid === c.route_uuid ||
+																							((!c.route_uuid || c.route_uuid === "none") &&
+																								route.route_uuid === "none"))
 																				)?.length
 																		)?.length
 																	}
@@ -1071,8 +1000,7 @@ const MainAdmin = () => {
 															{orders
 																?.filter(
 																	_i =>
-																		!+users?.find(_u => _u?.user_uuid === user_uuid)
-																			?.hide_pending_payments ||
+																		!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
 																		!+_i?.payment_pending
 																)
 																?.filter(
@@ -1081,22 +1009,14 @@ const MainAdmin = () => {
 																			c =>
 																				c.counter_uuid === b.counter_uuid &&
 																				(route.route_uuid === c.route_uuid ||
-																					((!c.route_uuid ||
-																						c.route_uuid === "none") &&
-																						route.route_uuid === "none"))
+																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
 																		)?.length
 																)
 																?.filter(
 																	a =>
 																		!searchItems ||
-																		a.invoice_number
-																			?.toString()
-																			?.includes(
-																				searchItems?.toLocaleLowerCase()
-																			) ||
-																		a.counter_title
-																			?.toLocaleLowerCase()
-																			?.includes(searchItems?.toLocaleLowerCase())
+																		a.invoice_number?.toString()?.includes(searchItems?.toLocaleLowerCase()) ||
+																		a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
 																)
 																.sort((a, b) => a.invoice_number - b.invoice_number)
 																.map(item => {
@@ -1116,27 +1036,15 @@ const MainAdmin = () => {
 																			onClick={e =>
 																				selectOrder
 																					? setSelectedOrder(prev =>
-																							prev.filter(
-																								a =>
-																									a.order_uuid ===
-																									item.order_uuid
-																							)?.length
-																								? prev.filter(
-																										a =>
-																											a.order_uuid !==
-																											item.order_uuid
-																								  )
+																							prev.filter(a => a.order_uuid === item.order_uuid)?.length
+																								? prev.filter(a => a.order_uuid !== item.order_uuid)
 																								: prev?.length
 																								? [...prev, item]
 																								: [item]
 																					  )
-																					: setSelectedRouteOrder(
-																							item.order_uuid
-																					  )
+																					: setSelectedRouteOrder(item.order_uuid)
 																			}
-																			onDoubleClick={() =>
-																				setSelectedRouteOrder(item.order_uuid)
-																			}>
+																			onDoubleClick={() => setSelectedRouteOrder(item.order_uuid)}>
 																			<span
 																				className="dblClickTrigger"
 																				style={{ display: "none" }}
@@ -1147,12 +1055,9 @@ const MainAdmin = () => {
 																			<Card
 																				details={details}
 																				order={item}
-																				onDoubleClick={() =>
-																					setPopupOrder(item)
-																				}
+																				onDoubleClick={() => setPopupOrder(item)}
 																				getOrders={() => {
-																					if (holdOrders)
-																						getRunningHoldOrders()
+																					if (holdOrders) getRunningHoldOrders()
 																					else getRunningOrders()
 																				}}
 																				setSelectOrder={setSelectOrder}
@@ -1162,42 +1067,23 @@ const MainAdmin = () => {
 																				title1={item?.invoice_number || ""}
 																				selectedOrder={
 																					selectOrder
-																						? selectedOrder.filter(
-																								a =>
-																									a.order_uuid ===
-																									item.order_uuid
-																						  )?.length
-																						: selectedRouteOrder ===
-																						  item.order_uuid
+																						? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
+																						: selectedRouteOrder === item.order_uuid
 																				}
 																				selectedCounter={
-																					selectedOrder.filter(
-																						a =>
-																							a.counter_uuid ===
-																							item.counter_uuid
-																					)?.length
+																					selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length
 																				}
 																				title2={item?.counter_title || ""}
 																				status={
-																					+item.status[
-																						item.status?.length - 1
-																					]?.stage === 1
+																					+item.status[item.status?.length - 1]?.stage === 1
 																						? "Processing"
-																						: +item.status[
-																								item.status?.length - 1
-																						  ]?.stage === 2
+																						: +item.status[item.status?.length - 1]?.stage === 2
 																						? "Checking"
-																						: +item.status[
-																								item.status?.length - 1
-																						  ]?.stage === 3
+																						: +item.status[item.status?.length - 1]?.stage === 3
 																						? "Delivery"
-																						: +item.status[
-																								item.status?.length - 1
-																						  ]?.stage === 4
+																						: +item.status[item.status?.length - 1]?.stage === 4
 																						? "Complete"
-																						: +item.status[
-																								item.status?.length - 1
-																						  ]?.stage === 5
+																						: +item.status[item.status?.length - 1]?.stage === 5
 																						? "Cancelled"
 																						: ""
 																				}
@@ -1227,9 +1113,7 @@ const MainAdmin = () => {
 										a =>
 											!searchItems ||
 											a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
-											a.counter_title
-												?.toLocaleLowerCase()
-												?.includes(searchItems.toLocaleLowerCase())
+											a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
 									)
 									.filter(a => !a?.trip_uuid)?.length ? (
 									<div key={Math.random()} className="sectionDiv">
@@ -1252,28 +1136,16 @@ const MainAdmin = () => {
 													}}
 													defaultChecked={
 														orders.filter(
-															a =>
-																!a?.trip_uuid &&
-																selectedOrder.filter(b => b.order_uuid === a.order_uuid)
-																	?.length
+															a => !a?.trip_uuid && selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
 														)?.length === orders.filter(a => !a?.trip_uuid)?.length
 													}
 													onClick={() =>
 														orders?.filter(
-															a =>
-																!a?.trip_uuid &&
-																selectedOrder?.filter(
-																	b => b.order_uuid === a.order_uuid
-																)?.length
+															a => !a?.trip_uuid && selectedOrder?.filter(b => b.order_uuid === a.order_uuid)?.length
 														)?.length === orders?.filter(a => !a?.trip_uuid)?.length
 															? setSelectedOrder(
 																	selectedOrder.filter(
-																		b =>
-																			!orders.filter(
-																				a =>
-																					!a?.trip_uuid &&
-																					b.order_uuid === a.order_uuid
-																			)?.length
+																		b => !orders.filter(a => !a?.trip_uuid && b.order_uuid === a.order_uuid)?.length
 																	)
 															  )
 															: setSelectedOrder(
@@ -1281,12 +1153,7 @@ const MainAdmin = () => {
 																		? [
 																				...selectedOrder.filter(
 																					b =>
-																						!orders.filter(
-																							a =>
-																								!a?.trip_uuid &&
-																								b.order_uuid ===
-																									a.order_uuid
-																						)?.length
+																						!orders.filter(a => !a?.trip_uuid && b.order_uuid === a.order_uuid)?.length
 																				),
 																				...orders.filter(a => !a?.trip_uuid),
 																		  ]
@@ -1310,28 +1177,22 @@ const MainAdmin = () => {
 											{orders
 												?.filter(
 													_i =>
-														!+users?.find(_u => _u?.user_uuid === user_uuid)
-															?.hide_pending_payments || !+_i?.payment_pending
+														!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
+														!+_i?.payment_pending
 												)
 												.filter(a => !a?.trip_uuid)
 												.sort((a, b) => a.invoice_number - b.invoice_number)
 												.filter(
 													a =>
 														!searchItems ||
-														a.invoice_number
-															?.toString()
-															?.includes(searchItems.toLocaleLowerCase()) ||
-														a.counter_title
-															?.toLocaleLowerCase()
-															?.includes(searchItems.toLocaleLowerCase())
+														a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
+														a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
 												)
 												.map(item => {
 													return (
 														<div
 															className={`seatSearchTarget ${
-																!selectOrder &&
-																+item?.priority === 1 &&
-																+item?.status?.at(-1)?.stage === 1
+																!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1
 																	? "shaking-cards"
 																	: ""
 															}`}
@@ -1346,14 +1207,8 @@ const MainAdmin = () => {
 															onClick={e =>
 																selectOrder
 																	? setSelectedOrder(prev =>
-																			prev.filter(
-																				a => a.order_uuid === item.order_uuid
-																			)?.length
-																				? prev.filter(
-																						a =>
-																							a.order_uuid !==
-																							item.order_uuid
-																				  )
+																			prev.filter(a => a.order_uuid === item.order_uuid)?.length
+																				? prev.filter(a => a.order_uuid !== item.order_uuid)
 																				: prev?.length
 																				? [...prev, item]
 																				: [item]
@@ -1382,32 +1237,24 @@ const MainAdmin = () => {
 																// key={item.seat_uuid}
 																title1={item?.invoice_number || ""}
 																selectedCounter={
-																	selectedOrder.filter(
-																		a => a.counter_uuid === item.counter_uuid
-																	)?.length
+																	selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length
 																}
 																selectedOrder={
 																	selectOrder
-																		? selectedOrder.filter(
-																				a => a.order_uuid === item.order_uuid
-																		  )?.length
+																		? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
 																		: selectedRouteOrder === item.order_uuid
 																}
 																title2={item?.counter_title || ""}
 																status={
 																	+item.status[item.status?.length - 1]?.stage === 1
 																		? "Processing"
-																		: +item.status[item.status?.length - 1]
-																				?.stage === 2
+																		: +item.status[item.status?.length - 1]?.stage === 2
 																		? "Checking"
-																		: +item.status[item.status?.length - 1]
-																				?.stage === 3
+																		: +item.status[item.status?.length - 1]?.stage === 3
 																		? "Delivery"
-																		: +item.status[item.status?.length - 1]
-																				?.stage === 4
+																		: +item.status[item.status?.length - 1]?.stage === 4
 																		? "Complete"
-																		: +item.status[item.status?.length - 1]
-																				?.stage === 5
+																		: +item.status[item.status?.length - 1]?.stage === 5
 																		? "Cancelled"
 																		: ""
 																}
@@ -1438,9 +1285,7 @@ const MainAdmin = () => {
 																?.toString()
 
 																?.includes(searchItems.toLocaleLowerCase()) ||
-															a.counter_title
-																?.toLocaleLowerCase()
-																?.includes(searchItems.toLocaleLowerCase())
+															a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
 													)?.length
 											)
 												return (
@@ -1448,26 +1293,15 @@ const MainAdmin = () => {
 														<h1>
 															<span
 																style={{ cursor: "pointer" }}
-																onClick={() =>
-																	setJoinSummary(
-																		orders.filter(
-																			a => a.trip_uuid === trip.trip_uuid
-																		)
-																	)
-																}>
+																onClick={() => setJoinSummary(orders.filter(a => a.trip_uuid === trip.trip_uuid))}>
 																{trip.trip_title}
 															</span>{" "}
-															(
-															{orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length}
-															) [Processing {trip?.processingLength}, Checking{" "}
-															{trip?.checkingLength}, Delivery {trip?.deliveryLength}]
+															({orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length}) [Processing{" "}
+															{trip?.processingLength}, Checking {trip?.checkingLength}, Delivery {trip?.deliveryLength}
+															]
 															{trip?.users?.[0]
 																? `[${trip?.users
-																		?.map(
-																			a =>
-																				users?.find(b => b.user_uuid === a)
-																					?.user_title
-																		)
+																		?.map(a => users?.find(b => b.user_uuid === a)?.user_title)
 																		?.join(", ")}]`
 																: ""}
 															{selectOrder ? (
@@ -1481,34 +1315,20 @@ const MainAdmin = () => {
 																		orders.filter(
 																			a =>
 																				a.trip_uuid === trip.trip_uuid &&
-																				selectedOrder.filter(
-																					b => b.order_uuid === a.order_uuid
-																				)?.length
-																		)?.length ===
-																		orders.filter(
-																			a => a.trip_uuid === trip.trip_uuid
-																		)?.length
+																				selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
+																		)?.length === orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length
 																	}
 																	onClick={() =>
 																		orders?.filter(
 																			a =>
 																				a.trip_uuid === trip.trip_uuid &&
-																				selectedOrder?.filter(
-																					b => b.order_uuid === a.order_uuid
-																				)?.length
-																		)?.length ===
-																		orders?.filter(
-																			a => a.trip_uuid === trip.trip_uuid
-																		)?.length
+																				selectedOrder?.filter(b => b.order_uuid === a.order_uuid)?.length
+																		)?.length === orders?.filter(a => a.trip_uuid === trip.trip_uuid)?.length
 																			? setSelectedOrder(
 																					selectedOrder.filter(
 																						b =>
 																							!orders.filter(
-																								a =>
-																									a.trip_uuid ===
-																										trip.trip_uuid &&
-																									b.order_uuid ===
-																										a.order_uuid
+																								a => a.trip_uuid === trip.trip_uuid && b.order_uuid === a.order_uuid
 																							)?.length
 																					)
 																			  )
@@ -1519,23 +1339,12 @@ const MainAdmin = () => {
 																									b =>
 																										!orders.filter(
 																											a =>
-																												a.trip_uuid ===
-																													trip.trip_uuid &&
-																												b.order_uuid ===
-																													a.order_uuid
+																												a.trip_uuid === trip.trip_uuid && b.order_uuid === a.order_uuid
 																										)?.length
 																								),
-																								...orders.filter(
-																									a =>
-																										a.trip_uuid ===
-																										trip.trip_uuid
-																								),
+																								...orders.filter(a => a.trip_uuid === trip.trip_uuid),
 																						  ]
-																						: orders?.filter(
-																								a =>
-																									a.trip_uuid ===
-																									trip.trip_uuid
-																						  )
+																						: orders?.filter(a => a.trip_uuid === trip.trip_uuid)
 																			  )
 																	}
 																/>
@@ -1555,31 +1364,22 @@ const MainAdmin = () => {
 															{orders
 																?.filter(
 																	_i =>
-																		!+users?.find(_u => _u?.user_uuid === user_uuid)
-																			?.hide_pending_payments ||
+																		!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
 																		!+_i?.payment_pending
 																)
 																.filter(a => a.trip_uuid === trip.trip_uuid)
 																.filter(
 																	a =>
 																		!searchItems ||
-																		a.invoice_number
-																			?.toString()
-																			?.includes(
-																				searchItems.toLocaleLowerCase()
-																			) ||
-																		a.counter_title
-																			?.toLocaleLowerCase()
-																			?.includes(searchItems?.toLocaleLowerCase())
+																		a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
+																		a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
 																)
 																.sort((a, b) => a.invoice_number - b.invoice_number)
 																.map(item => {
 																	return (
 																		<div
 																			className={`seatSearchTarget ${
-																				!selectOrder &&
-																				+item?.priority === 1 &&
-																				+item?.status?.at(-1)?.stage === 1
+																				!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1
 																					? "shaking-cards"
 																					: ""
 																			}`}
@@ -1594,23 +1394,13 @@ const MainAdmin = () => {
 																			onClick={e =>
 																				selectOrder
 																					? setSelectedOrder(prev =>
-																							prev.filter(
-																								a =>
-																									a.order_uuid ===
-																									item.order_uuid
-																							)?.length
-																								? prev.filter(
-																										a =>
-																											a.order_uuid !==
-																											item.order_uuid
-																								  )
+																							prev.filter(a => a.order_uuid === item.order_uuid)?.length
+																								? prev.filter(a => a.order_uuid !== item.order_uuid)
 																								: prev?.length
 																								? [...prev, item]
 																								: [item]
 																					  )
-																					: setSelectedRouteOrder(
-																							item.order_uuid
-																					  )
+																					: setSelectedRouteOrder(item.order_uuid)
 																			}>
 																			<span
 																				className="dblClickTrigger"
@@ -1622,12 +1412,9 @@ const MainAdmin = () => {
 																			<Card
 																				details={details}
 																				order={item}
-																				onDoubleClick={() =>
-																					setPopupOrder(item)
-																				}
+																				onDoubleClick={() => setPopupOrder(item)}
 																				getOrders={() => {
-																					if (holdOrders)
-																						getRunningHoldOrders()
+																					if (holdOrders) getRunningHoldOrders()
 																					else getRunningOrders()
 																				}}
 																				setSelectOrder={setSelectOrder}
@@ -1637,42 +1424,23 @@ const MainAdmin = () => {
 																				title1={item?.invoice_number || ""}
 																				selectedOrder={
 																					selectOrder
-																						? selectedOrder.filter(
-																								a =>
-																									a.order_uuid ===
-																									item.order_uuid
-																						  )?.length
-																						: selectedRouteOrder ===
-																						  item.order_uuid
+																						? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
+																						: selectedRouteOrder === item.order_uuid
 																				}
 																				selectedCounter={
-																					selectedOrder.filter(
-																						a =>
-																							a.counter_uuid ===
-																							item.counter_uuid
-																					)?.length
+																					selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length
 																				}
 																				title2={item?.counter_title || ""}
 																				status={
-																					+item.status[
-																						item.status?.length - 1
-																					]?.stage === 1
+																					+item.status[item.status?.length - 1]?.stage === 1
 																						? "Processing"
-																						: +item.status[
-																								item.status?.length - 1
-																						  ]?.stage === 2
+																						: +item.status[item.status?.length - 1]?.stage === 2
 																						? "Checking"
-																						: +item.status[
-																								item.status?.length - 1
-																						  ]?.stage === 3
+																						: +item.status[item.status?.length - 1]?.stage === 3
 																						? "Delivery"
-																						: +item.status[
-																								item.status?.length - 1
-																						  ]?.stage === 4
+																						: +item.status[item.status?.length - 1]?.stage === 4
 																						? "Complete"
-																						: +item.status[
-																								item.status?.length - 1
-																						  ]?.stage === 5
+																						: +item.status[item.status?.length - 1]?.stage === 5
 																						? "Cancelled"
 																						: ""
 																				}
@@ -1708,10 +1476,7 @@ const MainAdmin = () => {
 					</div>
 
 					{isCollectionTags && (
-						<CollectionTag
-							isItemAvilableOpen={isCollectionTags}
-							setIsItemAvilableOpen={setCollectionTags}
-						/>
+						<CollectionTag isItemAvilableOpen={isCollectionTags} setIsItemAvilableOpen={setCollectionTags} />
 					)}
 				</div>
 			</div>
@@ -1736,39 +1501,31 @@ const MainAdmin = () => {
 						.sort((a, b) => a.sort_order - b.sort_order)
 						.map(a => ({
 							...a,
-							item_details: a.item_details
-								.filter(b => b.status !== 3)
-								.map((b, i) => ({ ...b, sr: i + 1 })),
+							item_details: a.item_details.filter(b => b.status !== 3).map((b, i) => ({ ...b, sr: i + 1 })),
 						}))
 						.map((orderData, index) => {
 							let item_details = orderData.item_details
 								.map(a => ({
 									...a,
 									sort_order: +category.find(
-										b =>
-											b.counter_uuid === items?.find(c => c.item_uuid - a.item_uuid)?.counter_uuid
+										b => b.counter_uuid === items?.find(c => c.item_uuid - a.item_uuid)?.counter_uuid
 									)?.sort_order,
 								}))
 								.sort((a, b) => a.sort_order - b.sort_order)
-							return Array.from(Array(Math.ceil(orderData?.item_details?.length / 12)).keys())?.map(
-								(a, i) => (
-									<OrderPrint
-										counter={counter.find(a => a.counter_uuid === orderData?.counter_uuid)}
-										reminderDate={reminderDate}
-										order={orderData}
-										date={new Date(orderData?.status[0]?.time)}
-										user={
-											users.find(a => a.user_uuid === orderData?.status[0]?.user_uuid)
-												?.user_title || ""
-										}
-										itemData={items}
-										item_details={orderData?.item_details?.slice(a * 12, 12 * (a + 1))}
-										footer={!(orderData?.item_details?.length > 12 * (a + 1))}
-										paymentModes={paymentModes}
-										counters={counter}
-									/>
-								)
-							)
+							return Array.from(Array(Math.ceil(orderData?.item_details?.length / 12)).keys())?.map((a, i) => (
+								<OrderPrint
+									counter={counter.find(a => a.counter_uuid === orderData?.counter_uuid)}
+									reminderDate={reminderDate}
+									order={orderData}
+									date={new Date(orderData?.status[0]?.time)}
+									user={users.find(a => a.user_uuid === orderData?.status[0]?.user_uuid)?.user_title || ""}
+									itemData={items}
+									item_details={orderData?.item_details?.slice(a * 12, 12 * (a + 1))}
+									footer={!(orderData?.item_details?.length > 12 * (a + 1))}
+									paymentModes={paymentModes}
+									counters={counter}
+								/>
+							))
 						})}
 				</div>
 			</div>
@@ -1858,8 +1615,7 @@ const MainAdmin = () => {
 							}))
 							.sort(
 								(a, b) =>
-									a?.category_title?.localeCompare(b.category_title) ||
-									a?.item_title?.localeCompare(b.item_title)
+									a?.category_title?.localeCompare(b.category_title) || a?.item_title?.localeCompare(b.item_title)
 							),
 					}}
 					warehouseData={warehouse}
@@ -2064,9 +1820,7 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 												onChange={e =>
 													setSelectedTrip({
 														trip_uuid: e.target.value,
-														warehouse_uuid:
-															trips?.find(a => a.trip_uuid === e.target.value)
-																?.warehouse_uuid || "",
+														warehouse_uuid: trips?.find(a => a.trip_uuid === e.target.value)?.warehouse_uuid || "",
 													})
 												}
 												maxLength={42}
@@ -2079,8 +1833,7 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 															a.trip_uuid &&
 															a.status &&
 															(+JSON.parse(localStorage.getItem("warehouse")) === 1 ||
-																JSON.parse(localStorage.getItem("warehouse") || "") ===
-																	a.warehouse_uuid)
+																JSON.parse(localStorage.getItem("warehouse") || "") === a.warehouse_uuid)
 													)
 													.map(a => (
 														<option value={a.trip_uuid}>{a.trip_title}</option>
@@ -2129,10 +1882,8 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 															data?.warehouse_uuid
 																? {
 																		value: data?.warehouse_uuid,
-																		label: warehouse?.find(
-																			j =>
-																				j.warehouse_uuid === data.warehouse_uuid
-																		)?.warehouse_title,
+																		label: warehouse?.find(j => j.warehouse_uuid === data.warehouse_uuid)
+																			?.warehouse_title,
 																  }
 																: { value: 0, label: "None" }
 														}
@@ -2208,9 +1959,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 		let orderStage = orders.map(a => ({
 			...a,
 			stage:
-				a.status?.length > 1
-					? a.status.map(b => +b.stage || 0).reduce((c, b) => Math.max(c, b))
-					: a.status[0].stage,
+				a.status?.length > 1 ? a.status.map(b => +b.stage || 0).reduce((c, b) => Math.max(c, b)) : a.status[0].stage,
 		}))
 		setFilteredOrder(orderStage)
 		console.log(
@@ -2260,8 +2009,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 						: +itemsFilteredData[0]?.free || 0
 				let obj = {
 					...item,
-					order_count: orders.filter(a => a.item_details.filter(b => b.item_uuid === item.item_uuid)?.length)
-						?.length,
+					order_count: orders.filter(a => a.item_details.filter(b => b.item_uuid === item.item_uuid)?.length)?.length,
 					b: parseInt(+b + (+p + free) / +itemsData?.find(b => b.item_uuid === item.item_uuid)?.conversion),
 					p: parseInt((+p + free) % +itemsData?.find(b => b.item_uuid === item.item_uuid)?.conversion),
 				}
@@ -2403,11 +2151,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 															items?.filter(
 																b =>
 																	(!filterItemTitle ||
-																		b.item_title
-																			.toLocaleLowerCase()
-																			.includes(
-																				filterItemTitle?.toLocaleLowerCase()
-																			)) &&
+																		b.item_title.toLocaleLowerCase().includes(filterItemTitle?.toLocaleLowerCase())) &&
 																	a.category_uuid === b.category_uuid
 															)?.length
 													)
@@ -2423,14 +2167,10 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 																		(!filterItemTitle ||
 																			b.item_title
 																				?.toLocaleLowerCase()
-																				?.includes(
-																					filterItemTitle?.toLocaleLowerCase()
-																				)) &&
+																				?.includes(filterItemTitle?.toLocaleLowerCase())) &&
 																		a.category_uuid === b.category_uuid
 																)
-																.sort((a, b) =>
-																	a?.item_title?.localeCompare(b?.item_title)
-																)
+																.sort((a, b) => a?.item_title?.localeCompare(b?.item_title))
 																?.map((item, i) => (
 																	<tr
 																		key={item?.item_uuid || Math.random()}
@@ -2475,14 +2215,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 													<td colSpan={2}></td>
 													<td colSpan={4}>
 														{Math.floor(
-															items?.length > 1
-																? items.map(a => +a.b || 0).reduce((a, b) => a + b)
-																: items[0].b || 0
+															items?.length > 1 ? items.map(a => +a.b || 0).reduce((a, b) => a + b) : items[0].b || 0
 														)}{" "}
-														:{" "}
-														{items?.length > 1
-															? items.map(a => +a.p || 0).reduce((a, b) => a + b)
-															: items[0].p || 0}
+														: {items?.length > 1 ? items.map(a => +a.p || 0).reduce((a, b) => a + b) : items[0].p || 0}
 													</td>
 												</tr>
 												<tr
@@ -2496,9 +2231,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 													<td colSpan={4}>
 														{Math.floor(
 															orders?.length > 1
-																? orders
-																		.map(a => a.item_details.length || 0)
-																		.reduce((a, b) => a + b)
+																? orders.map(a => a.item_details.length || 0).reduce((a, b) => a + b)
 																: orders[0]?.item_details.length || 0
 														)}
 													</td>
@@ -2521,8 +2254,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 											itemStatus
 												? {
 														value: itemStatus,
-														label: ItemsStatusData?.find(j => j.value === itemStatus)
-															?.label,
+														label: ItemsStatusData?.find(j => j.value === itemStatus)?.label,
 												  }
 												: ""
 										}
@@ -2682,14 +2414,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 									<td colSpan={3} style={{ padding: "5px" }}></td>
 									<td colSpan={3} style={{ padding: "5px" }}>
 										{Math.floor(
-											items?.length > 1
-												? items?.map(a => +a.b || 0).reduce((a, b) => a + b)
-												: items[0]?.b || 0
+											items?.length > 1 ? items?.map(a => +a.b || 0).reduce((a, b) => a + b) : items[0]?.b || 0
 										)}{" "}
-										:{" "}
-										{items?.length > 1
-											? items.map(a => +a.p || 0).reduce((a, b) => a + b)
-											: items[0].p || 0}
+										: {items?.length > 1 ? items.map(a => +a.p || 0).reduce((a, b) => a + b) : items[0].p || 0}
 									</td>
 								</tr>
 							</tbody>
@@ -2804,9 +2531,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 									<td colSpan={3} style={{ padding: "5px" }}></td>
 									<td colSpan={3} style={{ padding: "5px" }}>
 										{Math.floor(
-											items?.length > 1
-												? items?.map(a => +a.b || 0).reduce((a, b) => a + b)
-												: items[0]?.b || 0
+											items?.length > 1 ? items?.map(a => +a.b || 0).reduce((a, b) => a + b) : items[0]?.b || 0
 										)}{" "}
 										: {0}
 									</td>
@@ -2852,9 +2577,7 @@ function SummaryPopup({
 		let orderStage = orders.map(a => ({
 			...a,
 			stage:
-				a.status?.length > 1
-					? a.status.map(b => +b.stage || 0).reduce((c, b) => Math.max(c, b))
-					: a.status[0].stage,
+				a.status?.length > 1 ? a.status.map(b => +b.stage || 0).reduce((c, b) => Math.max(c, b)) : a.status[0].stage,
 		}))
 		setFilteredOrder(orderStage)
 
@@ -2942,8 +2665,7 @@ function SummaryPopup({
 
 		itemData = itemData
 			?.filter(
-				b =>
-					category.filter(a => a.company_uuid === company_uuid && a.category_uuid === b.category_uuid)?.length
+				b => category.filter(a => a.company_uuid === company_uuid && a.category_uuid === b.category_uuid)?.length
 			)
 			.map(a => {
 				return {
@@ -3023,8 +2745,8 @@ function SummaryPopup({
 													c =>
 														category.filter(
 															a =>
-																items?.filter(b => a.category_uuid === b.category_uuid)
-																	?.length && c.company_uuid === a.company_uuid
+																items?.filter(b => a.category_uuid === b.category_uuid)?.length &&
+																c.company_uuid === a.company_uuid
 														)?.length
 												)
 												.map(c => (
@@ -3032,9 +2754,8 @@ function SummaryPopup({
 														{category
 															.filter(
 																a =>
-																	items?.filter(
-																		b => a.category_uuid === b.category_uuid
-																	)?.length && c.company_uuid === a.company_uuid
+																	items?.filter(b => a.category_uuid === b.category_uuid)?.length &&
+																	c.company_uuid === a.company_uuid
 															)
 															.map((a, i) => (
 																<>
@@ -3045,9 +2766,7 @@ function SummaryPopup({
 																		<td>{i + 1}</td>
 																		<td colSpan={3}>{a.category_title}</td>
 
-																		<td colSpan={2}>
-																			{GetItemsQty(a.category_uuid)}
-																		</td>
+																		<td colSpan={2}>{GetItemsQty(a.category_uuid)}</td>
 																	</tr>
 																</>
 															))}
@@ -3198,14 +2917,9 @@ function SummaryPopup({
 									<td colSpan={3}></td>
 									<td colSpan={3}>
 										{Math.floor(
-											items?.length > 1
-												? items?.map(a => +a.b || 0).reduce((a, b) => a + b)
-												: items[0]?.b || 0
+											items?.length > 1 ? items?.map(a => +a.b || 0).reduce((a, b) => a + b) : items[0]?.b || 0
 										)}{" "}
-										:{" "}
-										{items?.length > 1
-											? items.map(a => +a.p || 0).reduce((a, b) => a + b)
-											: items[0].p || 0}
+										: {items?.length > 1 ? items.map(a => +a.p || 0).reduce((a, b) => a + b) : items[0].p || 0}
 									</td>
 								</tr>
 							</tbody>
@@ -3355,9 +3069,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 													style={{
 														height: "30px",
 														color: "#fff",
-														backgroundColor: +deleteItemsOrder.filter(
-															a => a === item.order_uuid
-														)?.length
+														backgroundColor: +deleteItemsOrder.filter(a => a === item.order_uuid)?.length
 															? "red"
 															: "#7990dd",
 													}}
@@ -3373,19 +3085,14 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 													</td>
 													<td colSpan={2}>{item.invoice_number}</td>
 													<td colSpan={2}>
-														{counter?.find(a => a.counter_uuid === item.counter_uuid)
-															?.counter_title || "-"}
+														{counter?.find(a => a.counter_uuid === item.counter_uuid)?.counter_title || "-"}
 													</td>
 													<td colSpan={2}>
 														<input
 															value={
-																(item.item_details.find(
-																	a => a.item_uuid === items.item_uuid
-																)?.b || 0) +
+																(item.item_details.find(a => a.item_uuid === items.item_uuid)?.b || 0) +
 																" : " +
-																(item.item_details.find(
-																	a => a.item_uuid === items.item_uuid
-																)?.p || 0)
+																(item.item_details.find(a => a.item_uuid === items.item_uuid)?.p || 0)
 															}
 															className="boxPcsInput"
 															onClick={e => {
@@ -3394,10 +3101,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 															}}
 														/>
 													</td>
-													<td colSpan={2}>
-														{item.item_details.find(a => a.item_uuid === items.item_uuid)
-															?.free || 0}
-													</td>
+													<td colSpan={2}>{item.item_details.find(a => a.item_uuid === items.item_uuid)?.free || 0}</td>
 													<td
 														onClick={e => {
 															e.stopPropagation()
@@ -3407,12 +3111,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 																	: [...(prev || []), item.order_uuid]
 															)
 														}}>
-														{!deleteItemsOrder.filter(a => a === item.order_uuid)
-															?.length ? (
-															<DeleteOutlineIcon />
-														) : (
-															""
-														)}
+														{!deleteItemsOrder.filter(a => a === item.order_uuid)?.length ? <DeleteOutlineIcon /> : ""}
 													</td>
 												</tr>
 											))}
@@ -3618,8 +3317,7 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose, warehouse }) 
 													data
 														? {
 																value: data,
-																label: warehouse?.find(j => j.warehouse_uuid === data)
-																	?.warehouse_title,
+																label: warehouse?.find(j => j.warehouse_uuid === data)?.warehouse_title,
 														  }
 														: { value: 0, label: "None" }
 												}

@@ -61,9 +61,9 @@ import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
 import CashRegister from "./pages/QuikAccess/CashRegister"
 import Companies from "./pages/Master/Companies"
 
-export let Version = 119
-// export const server = "http://localhost:9000"
+export let Version = 120
 export const server = "https://api.btgondia.com"
+// export const server = "http://localhost:9000"
 // export const server = "http://15.207.39.69:9000"
 
 function App() {
