@@ -41,7 +41,8 @@ export function OrderDetails({
 	warehouseData = [],
 	reminder = null,
 }) {
-	const { setNotification, promptState, getSpecialPrice, saveSpecialPrice, spcPricePrompt } = useContext(context)
+	const { setNotification, promptState, getSpecialPrice, saveSpecialPrice, spcPricePrompt } =
+		useContext(context)
 	const [counters, setCounters] = useState([])
 	const [waiting, setWaiting] = useState(false)
 	const [caption, setCaption] = useState("")
@@ -294,7 +295,9 @@ export function OrderDetails({
 		}
 	}, [itemsData, order])
 	useEffect(() => {
-		if (counters?.find(a => a.counter_uuid === order?.counter_uuid)?.notes?.filter(a => a)?.length) {
+		if (
+			counters?.find(a => a.counter_uuid === order?.counter_uuid)?.notes?.filter(a => a)?.length
+		) {
 			setCounterNotesPoup(counters?.find(a => a.counter_uuid === order?.counter_uuid))
 		}
 	}, [counters, order?.counter_uuid])
@@ -409,9 +412,12 @@ export function OrderDetails({
 			getItemsData(order?.item_details?.map(a => a.item_uuid))
 		}
 	}, [order])
+
 	const onSubmit = async (type = { stage: 0, diliveredUser: "" }, completedOrderEdited) => {
+		if (orderData?.payment_pending && !orderData.notes?.length) return setNotesPoup(true)
 		let counter = counters.find(a => orderData?.counter_uuid === a.counter_uuid)
 		let fulfillment = orderData.fulfillment
+
 		for (let item of orderData.item_details) {
 			let itemData = order?.item_details.find(a => a.item_uuid === item.item_uuid)
 			let aQty = +(item?.b || 0) * (+item?.conversion || 0) + (+item?.p || 0)
@@ -420,7 +426,8 @@ export function OrderDetails({
 			if (bQty > aQty) {
 				let exicting = fulfillment?.find(a => a.item_uuid === item.item_uuid)
 				if (exicting) {
-					difference = difference + (+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0))
+					difference =
+						difference + (+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0))
 				}
 
 				fulfillment.push({
@@ -499,8 +506,9 @@ export function OrderDetails({
 						...data,
 						fulfillment: [
 							...(fulfillment || []),
-							...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) ||
-								[]),
+							...(order?.fulfillment?.filter(
+								a => !fulfillment.find(b => b.item_uuid === a.item_uuid)
+							) || []),
 						],
 				  }
 		if (completedOrderEdited) {
@@ -521,7 +529,12 @@ export function OrderDetails({
 		const response = await axios({
 			method: "put",
 			url: "/orders/putOrders",
-			data: [{ ...data, item_details: data.item_details?.map(i => ({ ...i, price: +(+i.price).toFixed(3) })) }],
+			data: [
+				{
+					...data,
+					item_details: data.item_details?.map(i => ({ ...i, price: +(+i.price).toFixed(3) })),
+				},
+			],
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -547,7 +560,8 @@ export function OrderDetails({
 			if (bQty > aQty) {
 				let exicting = fulfillment?.find(a => a.item_uuid === item.item_uuid)
 				if (exicting) {
-					difference = difference + (+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0))
+					difference =
+						difference + (+(exicting.b || 0) * (+item.conversion || 0) + (+exicting.p || 0))
 				}
 
 				fulfillment.push({
@@ -641,8 +655,9 @@ export function OrderDetails({
 						...data,
 						fulfillment: [
 							...(fulfillment || []),
-							...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) ||
-								[]),
+							...(order?.fulfillment?.filter(
+								a => !fulfillment.find(b => b.item_uuid === a.item_uuid)
+							) || []),
 						],
 				  }
 		// console.log("data", data);
@@ -819,7 +834,8 @@ export function OrderDetails({
 			const time = {
 				time_1: new Date(e.target.value).getTime(),
 				time_2:
-					(orderData?.time_2 - orderData?.time_1 || 48 * 60 * 60 * 1000) + new Date(e.target.value).getTime(),
+					(orderData?.time_2 - orderData?.time_1 || 48 * 60 * 60 * 1000) +
+					new Date(e.target.value).getTime(),
 			}
 
 			setOrderData(data => ({ ...data, ...time }))
@@ -938,9 +954,7 @@ export function OrderDetails({
 											<div className="inputGroup">
 												<Select
 													options={priorityOptions}
-													onChange={doc =>
-														setOrderData(x => ({ ...x, priority: doc?.value }))
-													}
+													onChange={doc => setOrderData(x => ({ ...x, priority: doc?.value }))}
 													value={priorityOptions?.find(j => j.value === orderData.priority)}
 													openMenuOnFocus={true}
 													menuPosition="fixed"
@@ -1162,9 +1176,7 @@ export function OrderDetails({
 																value: orderData.warehouse_uuid || "",
 																label:
 																	warehouse.find(
-																		a =>
-																			orderData?.warehouse_uuid ===
-																			a.warehouse_uuid
+																		a => orderData?.warehouse_uuid === a.warehouse_uuid
 																	)?.warehouse_title || "None",
 															}}
 															openMenuOnFocus={true}
@@ -1173,9 +1185,8 @@ export function OrderDetails({
 															placeholder="Item"
 														/>
 													) : (
-														warehouse.find(
-															a => orderData?.warehouse_uuid === a.warehouse_uuid
-														)?.warehouse_title || "None"
+														warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)
+															?.warehouse_title || "None"
 													)}
 												</th>
 												<th>Grand Total</th>
@@ -1374,14 +1385,13 @@ export function OrderDetails({
 																		onClick={() =>
 																			setOrderData(prev => ({
 																				...prev,
-																				item_details: prev.item_details?.map(
-																					a =>
-																						a.uuid === item.uuid
-																							? {
-																									...a,
-																									price_approval: "Y",
-																							  }
-																							: a
+																				item_details: prev.item_details?.map(a =>
+																					a.uuid === item.uuid
+																						? {
+																								...a,
+																								price_approval: "Y",
+																						  }
+																						: a
 																				),
 																			}))
 																		}>
@@ -1405,11 +1415,9 @@ export function OrderDetails({
 																			let difference = 0
 																			if (exicting) {
 																				difference =
-																					+(item.b || 0) *
-																						(+item.conversion || 0) +
+																					+(item.b || 0) * (+item.conversion || 0) +
 																					(+item.p || 0) +
-																					(+(exicting.b || 0) *
-																						(+item.conversion || 0) +
+																					(+(exicting.b || 0) * (+item.conversion || 0) +
 																						(+exicting.p || 0))
 																			}
 																			let fulfillment = exicting
@@ -1418,16 +1426,8 @@ export function OrderDetails({
 
 																						{
 																							item_uuid: item.item_uuid,
-																							b: Math.floor(
-																								difference /
-																									(+item.conversion ||
-																										1)
-																							),
-																							p: Math.floor(
-																								difference %
-																									(+item.conversion ||
-																										1)
-																							),
+																							b: Math.floor(difference / (+item.conversion || 1)),
+																							p: Math.floor(difference % (+item.conversion || 1)),
 																						},
 																				  ]
 																				: [
@@ -1450,8 +1450,7 @@ export function OrderDetails({
 																	}>
 																	<RemoveCircle
 																		sx={{
-																			fontSize:
-																				item.price_approval === "N" ? 15 : 20,
+																			fontSize: item.price_approval === "N" ? 15 : 20,
 																		}}
 																		style={{
 																			cursor: "pointer",
@@ -1479,9 +1478,7 @@ export function OrderDetails({
 															{editOrder && !item.default ? (
 																<Select
 																	ref={ref =>
-																		(reactInputsRef.current[
-																			item_title_component_id
-																		] = ref)
+																		(reactInputsRef.current[item_title_component_id] = ref)
 																	}
 																	styles={{
 																		control: styles => ({
@@ -1500,9 +1497,7 @@ export function OrderDetails({
 																					b => a.item_uuid === b.item_uuid
 																				)?.length && a.status !== 0
 																		)
-																		.sort((a, b) =>
-																			a?.item_title?.localeCompare(b.item_title)
-																		)
+																		.sort((a, b) => a?.item_title?.localeCompare(b.item_title))
 																		?.map((a, j) => ({
 																			value: a.item_uuid,
 																			label: a.item_title + "______" + a.mrp,
@@ -1515,16 +1510,9 @@ export function OrderDetails({
 																				a.uuid === item.uuid
 																					? {
 																							...a,
-																							...itemsData.find(
-																								b =>
-																									b.item_uuid ===
-																									e.value
-																							),
-																							price: itemsData.find(
-																								b =>
-																									b.item_uuid ===
-																									e.value
-																							)?.item_price,
+																							...itemsData.find(b => b.item_uuid === e.value),
+																							price: itemsData.find(b => b.item_uuid === e.value)
+																								?.item_price,
 																					  }
 																					: a
 																			),
@@ -1548,8 +1536,8 @@ export function OrderDetails({
 																	placeholder="Item"
 																/>
 															) : (
-																itemsData.find(a => a.item_uuid === item.item_uuid)
-																	?.item_title || ""
+																itemsData.find(a => a.item_uuid === item.item_uuid)?.item_title ||
+																""
 															)}
 														</div>
 													</td>
@@ -1570,8 +1558,7 @@ export function OrderDetails({
 															id={item_status_component_id}>
 															<Select
 																ref={ref =>
-																	(reactInputsRef.current[item_status_component_id] =
-																		ref)
+																	(reactInputsRef.current[item_status_component_id] = ref)
 																}
 																styles={{
 																	control: styles => {
@@ -1605,9 +1592,7 @@ export function OrderDetails({
 																}}
 																value={
 																	item.status || +item.status === 0
-																		? default_status.find(
-																				a => +a.value === +item.status
-																		  )
+																		? default_status.find(a => +a.value === +item.status)
 																		: ""
 																}
 																autoFocus={
@@ -1658,9 +1643,7 @@ export function OrderDetails({
 																	e.target.onwheel = () => false
 																	e.target.select()
 																}}
-																onKeyDown={e =>
-																	e.key === "Enter" ? shiftFocus(e.target.id) : ""
-																}
+																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
 																disabled={!item.item_uuid}
 																onWheel={e => e.preventDefault()}
 															/>
@@ -1704,9 +1687,7 @@ export function OrderDetails({
 																	e.target.onwheel = () => false
 																	e.target.select()
 																}}
-																onKeyDown={e =>
-																	e.key === "Enter" ? shiftFocus(e.target.id) : ""
-																}
+																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
 																disabled={!item.item_uuid}
 															/>
 														) : (
@@ -1748,9 +1729,7 @@ export function OrderDetails({
 																	e.target.onwheel = () => false
 																	e.target.select()
 																}}
-																onKeyDown={e =>
-																	e.key === "Enter" ? shiftFocus(e.target.id) : ""
-																}
+																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
 																disabled={!item.item_uuid}
 															/>
 														) : (
@@ -1781,10 +1760,7 @@ export function OrderDetails({
 																				a.uuid === item.uuid
 																					? {
 																							...a,
-																							price: +(
-																								e.target.value /
-																								item.conversion
-																							),
+																							price: +(e.target.value / item.conversion),
 																					  }
 																					: a
 																			),
@@ -1795,9 +1771,7 @@ export function OrderDetails({
 																	e.target.onwheel = () => false
 																	e.target.select()
 																}}
-																onKeyDown={e =>
-																	e.key === "Enter" ? shiftFocus(e.target.id) : ""
-																}
+																onKeyDown={e => (e.key === "Enter" ? shiftFocus(e.target.id) : "")}
 																disabled={!item.item_uuid}
 															/>
 														) : (
@@ -1808,30 +1782,19 @@ export function OrderDetails({
 														<>
 															{console.log(
 																"---------------------------------------------",
-																getSpecialPrice(
-																	counters,
-																	item,
-																	orderData?.counter_uuid
-																),
+																getSpecialPrice(counters, item, orderData?.counter_uuid),
 																item?.item_price,
 																item?.price
 															)}
 															<td>Rs.{item.old_price || item.item_price}</td>
 															<td>
 																{+item?.item_price !== +item?.price &&
-																	(+getSpecialPrice(
-																		counters,
-																		item,
-																		orderData?.counter_uuid
-																	)?.price === +item?.price ? (
+																	(+getSpecialPrice(counters, item, orderData?.counter_uuid)
+																		?.price === +item?.price ? (
 																		<IoCheckmarkDoneOutline
 																			className="table-icon checkmark"
 																			onClick={() =>
-																				spcPricePrompt(
-																					item,
-																					orderData?.counter_uuid,
-																					setCounters
-																				)
+																				spcPricePrompt(item, orderData?.counter_uuid, setCounters)
 																			}
 																		/>
 																	) : (
@@ -1913,9 +1876,7 @@ export function OrderDetails({
 												className="ph2 pv1 tc bb b--black-20 bg-white"
 												style={{ textAlign: "center" }}>
 												{(orderData?.item_details?.length > 1
-													? orderData?.item_details
-															?.map(a => +a?.b || 0)
-															.reduce((a, b) => a + b)
+													? orderData?.item_details?.map(a => +a?.b || 0).reduce((a, b) => a + b)
 													: orderData?.item_details?.length
 													? orderData?.item_details[0]?.b
 													: 0) || 0}
@@ -1924,9 +1885,7 @@ export function OrderDetails({
 												className="ph2 pv1 tc bb b--black-20 bg-white"
 												style={{ textAlign: "center" }}>
 												{(orderData?.item_details?.length > 1
-													? orderData?.item_details
-															?.map(a => +a?.p || 0)
-															.reduce((a, b) => a + b)
+													? orderData?.item_details?.map(a => +a?.p || 0).reduce((a, b) => a + b)
 													: orderData?.item_details?.length
 													? orderData?.item_details[0]?.p
 													: 0) || 0}
@@ -2003,7 +1962,10 @@ export function OrderDetails({
 							}}>
 							<WhatsApp />
 						</button>
-						<button type="button" onClick={() => {}} style={{ width: "max-content", padding: "10px 20px" }}>
+						<button
+							type="button"
+							onClick={() => {}}
+							style={{ width: "max-content", padding: "10px 20px" }}>
 							Order Total : {orderData?.order_grandtotal || 0}
 						</button>
 					</div>
@@ -2094,7 +2056,9 @@ export function OrderDetails({
 						setOrderData({
 							...orderData,
 							item_details: orderData?.item_details?.map(a =>
-								a.item_uuid === data.item_uuid ? { ...a, charges_discount: data.charges_discount } : a
+								a.item_uuid === data.item_uuid
+									? { ...a, charges_discount: data.charges_discount }
+									: a
 							),
 						})
 						setPopupDiscount(false)
@@ -2269,7 +2233,8 @@ export function OrderDetails({
 								order={printData}
 								date={new Date(_printData?.status[0]?.time)}
 								user={
-									users.find(a => a.user_uuid === _printData?.status[0]?.user_uuid)?.user_title || ""
+									users.find(a => a.user_uuid === _printData?.status[0]?.user_uuid)?.user_title ||
+									""
 								}
 								itemData={itemsData}
 								item_details={_printData?.item_details}
@@ -2287,7 +2252,15 @@ export function OrderDetails({
 	)
 }
 
-const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePopup, HoldOrder }) => {
+const DeleteOrderPopup = ({
+	onSave,
+	order,
+	counters,
+	items,
+	onDeleted,
+	deletePopup,
+	HoldOrder,
+}) => {
 	const [disable, setDisabled] = useState(true)
 	useEffect(() => {
 		setTimeout(() => setDisabled(false), deletePopup === "hold" ? 100 : 0)
@@ -2453,8 +2426,7 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 													<td>
 														{item.user_uuid === "240522"
 															? "Admin"
-															: users.find(a => a.user_uuid === item?.user_uuid)
-																	?.user_title || ""}
+															: users.find(a => a.user_uuid === item?.user_uuid)?.user_title || ""}
 													</td>
 												</tr>
 											))}
@@ -2682,9 +2654,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 															onChange={e => {
 																setData(prev =>
 																	prev?.map(a =>
-																		a.uuid === item.uuid
-																			? { ...a, value: e.target.value }
-																			: a
+																		a.uuid === item.uuid ? { ...a, value: e.target.value } : a
 																	)
 																)
 																setEdit(true)
@@ -2890,7 +2860,9 @@ function DiliveryPopup({
 			setWaiting(false)
 			return
 		}
-		if (modes.find(a => a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" && a.amt && !a.remarks)) {
+		if (
+			modes.find(a => a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" && a.amt && !a.remarks)
+		) {
 			setError("Cheque number is mandatory")
 			setWaiting(false)
 			return
@@ -3564,8 +3536,7 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
 												setSelectedTrip({
 													trip_uuid: e.target.value,
 													warehouse_uuid:
-														trips?.find(a => a.trip_uuid === e.target.value)
-															?.warehouse_uuid || "",
+														trips?.find(a => a.trip_uuid === e.target.value)?.warehouse_uuid || "",
 												})
 											}
 											maxLength={42}

@@ -585,7 +585,10 @@ const MainAdmin = () => {
 			const user = users?.find(_i => _i?.user_uuid === user_uuid)
 			user.hide_pending_payments = +!(user?.hide_pending_payments || 0)
 			setUsers(state => state?.map(_i => (_i?.user_uuid === user_uuid ? user : _i)))
-			await axios.put("/users/putUser", { user_uuid, hide_pending_payments: user.hide_pending_payments })
+			await axios.put("/users/putUser", {
+				user_uuid,
+				hide_pending_payments: user.hide_pending_payments,
+			})
 		} catch (error) {
 			console.log(error)
 		}
@@ -695,7 +698,11 @@ const MainAdmin = () => {
 							onClick={e => {
 								setDropDown(prev => !prev)
 							}}>
-							<ArrowDropDown style={{ transform: !dropdown ? "rotate(360deg)" : "rotate(180deg)" }} />
+							<ArrowDropDown
+								style={{
+									transform: !dropdown ? "rotate(360deg)" : "rotate(180deg)",
+								}}
+							/>
 						</div>
 					</div>
 					{dropdown && (
@@ -1480,7 +1487,13 @@ const MainAdmin = () => {
 					)}
 				</div>
 			</div>
-			<div style={{ position: "fixed", top: -1000, right: -1000, zIndex: "-1000" }}>
+			<div
+				style={{
+					position: "fixed",
+					top: -1000,
+					right: -1000,
+					zIndex: "-1000",
+				}}>
 				<div
 					ref={componentRef}
 					style={
@@ -3362,6 +3375,11 @@ const PendingPaymentsSummary = ({ print, counterOrders, paymentsSummaryRef }) =>
 		print()
 	}, [print])
 
+	const getDate = i => {
+		const date = new Date(i)
+		return [date.getDate(), date.getMonth() + 1, date.getFullYear()].map(i => i.toString().padStart(2, "0")).join("/")
+	}
+
 	return (
 		<div className="overlay" style={{ opacity: 0, zIndex: "-1" }}>
 			<div id="pending-payments-summary" ref={paymentsSummaryRef}>
@@ -3378,13 +3396,18 @@ const PendingPaymentsSummary = ({ print, counterOrders, paymentsSummaryRef }) =>
 								<tbody>
 									{counterOrders[counter_uuid]?.orders?.map(order => (
 										<tr>
-											<td>{new Date(+order?.time_1)?.toDateString()}</td>
+											<td>{getDate(+order?.time_1)}</td>
 											<td>{(order?.order_type === "I" ? "N" : "E") + order?.invoice_number}</td>
 											<td>Rs.{order?.order_grandtotal}</td>
 											<td>{itemsQuantity(order?.item_details)}</td>
 											<td>[ {order?.notes?.join(", ")} ]</td>
 										</tr>
 									))}
+									<tr>
+										<td colSpan={5} style={{ textAlign: "right" }}>
+											TOTAL: Rs.{counterOrders[counter_uuid]?.orders?.reduce((sum, i) => sum + +i?.order_grandtotal, 0)}
+										</td>
+									</tr>
 								</tbody>
 							</table>
 						</div>
