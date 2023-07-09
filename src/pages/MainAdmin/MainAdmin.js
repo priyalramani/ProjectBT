@@ -1025,7 +1025,7 @@ const MainAdmin = () => {
 																		a.invoice_number?.toString()?.includes(searchItems?.toLocaleLowerCase()) ||
 																		a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
 																)
-																.sort((a, b) => a.invoice_number - b.invoice_number)
+																.sort((a, b) => +a.time_1 - +b.time_1)
 																.map(item => {
 																	return (
 																		<div
@@ -1188,7 +1188,7 @@ const MainAdmin = () => {
 														!+_i?.payment_pending
 												)
 												.filter(a => !a?.trip_uuid)
-												.sort((a, b) => a.invoice_number - b.invoice_number)
+												.sort((a, b) => +a.time_1 - +b.time_1)
 												.filter(
 													a =>
 														!searchItems ||
@@ -1381,7 +1381,7 @@ const MainAdmin = () => {
 																		a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
 																		a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
 																)
-																.sort((a, b) => a.invoice_number - b.invoice_number)
+																.sort((a, b) => +a.time_1 - +b.time_1)
 																.map(item => {
 																	return (
 																		<div

@@ -19,9 +19,8 @@ const OrderPrint = ({
 		() =>
 			paymentModes?.filter(
 				a =>
-					counters
-						?.find(a => order?.counter_uuid === a.counter_uuid)
-						?.payment_modes?.filter(b => b === a.mode_uuid)?.length
+					counters?.find(a => order?.counter_uuid === a.counter_uuid)?.payment_modes?.filter(b => b === a.mode_uuid)
+						?.length
 			),
 		[counters, order?.counter_uuid, paymentModes]
 	)
@@ -35,11 +34,7 @@ const OrderPrint = ({
 		for (let a of gst_value) {
 			let data = order.item_details.filter(b => +b.gst_percentage === a)
 			let amt =
-				data.length > 1
-					? data.map(b => +b?.item_total).reduce((a, b) => +a + b)
-					: data.length
-					? +data[0].item_total
-					: 0
+				data.length > 1 ? data.map(b => +b?.item_total).reduce((a, b) => +a + b) : data.length ? +data[0].item_total : 0
 			let value = +amt - (+amt * 100) / (100 + a)
 
 			if (value)
@@ -112,29 +107,21 @@ const OrderPrint = ({
 										<td style={{ fontWeight: "600", fontSize: "x-small" }}>Phone: 9422551074</td>
 									</tr>
 									<tr>
-										<td style={{ fontWeight: "600", fontSize: "x-small" }}>
-											Email: bharattradersgondia96@gmail.com
-										</td>
+										<td style={{ fontWeight: "600", fontSize: "x-small" }}>Email: bharattradersgondia96@gmail.com</td>
 									</tr>
 									<tr>
-										<td style={{ fontWeight: "600", fontSize: "x-small" }}>
-											GSTIN: 27ABIPR1186M1Z2
-										</td>
+										<td style={{ fontWeight: "600", fontSize: "x-small" }}>GSTIN: 27ABIPR1186M1Z2</td>
 									</tr>
 								</table>
 							</td>
 							<td colSpan={14}>
 								<table>
 									<tr>
-										<td style={{ fontWeight: "600", fontSize: "x-small" }}>
-											M/S {counter?.counter_title || ""}
-										</td>
+										<td style={{ fontWeight: "600", fontSize: "x-small" }}>M/S {counter?.counter_title || ""}</td>
 									</tr>
 									{counter?.address ? (
 										<tr>
-											<td style={{ fontWeight: "600", fontSize: "x-small" }}>
-												{counter?.address || ""}
-											</td>
+											<td style={{ fontWeight: "600", fontSize: "x-small" }}>{counter?.address || ""}</td>
 										</tr>
 									) : (
 										""
@@ -154,18 +141,14 @@ const OrderPrint = ({
 									)}
 									{counter?.food_license ? (
 										<tr>
-											<td style={{ fontWeight: "600", fontSize: "x-small" }}>
-												Food License: {counter?.food_license}
-											</td>
+											<td style={{ fontWeight: "600", fontSize: "x-small" }}>Food License: {counter?.food_license}</td>
 										</tr>
 									) : (
 										""
 									)}
 									{counter?.gst ? (
 										<tr>
-											<td style={{ fontWeight: "600", fontSize: "x-small" }}>
-												GSTIN: {counter?.gst}
-											</td>
+											<td style={{ fontWeight: "600", fontSize: "x-small" }}>GSTIN: {counter?.gst}</td>
 										</tr>
 									) : (
 										""
@@ -176,9 +159,7 @@ const OrderPrint = ({
 					) : (
 						<td colSpan={28}>
 							<div>
-								<p style={{ fontWeight: "600", fontSize: "small" }}>
-									M/S {counter?.counter_title || ""}
-								</p>
+								<p style={{ fontWeight: "600", fontSize: "small" }}>M/S {counter?.counter_title || ""}</p>
 								{counter?.address ? (
 									<p style={{ fontWeight: "600", fontSize: "small" }}>{counter?.address || ""}</p>
 								) : (
@@ -196,17 +177,11 @@ const OrderPrint = ({
 									""
 								)}
 								{counter?.food_license ? (
-									<p style={{ fontWeight: "600", fontSize: "small" }}>
-										Food License: {counter?.food_license}
-									</p>
+									<p style={{ fontWeight: "600", fontSize: "small" }}>Food License: {counter?.food_license}</p>
 								) : (
 									""
 								)}
-								{counter?.gst ? (
-									<p style={{ fontWeight: "600", fontSize: "small" }}>GSTIN: {counter?.gst}</p>
-								) : (
-									""
-								)}
+								{counter?.gst ? <p style={{ fontWeight: "600", fontSize: "small" }}>GSTIN: {counter?.gst}</p> : ""}
 							</div>
 						</td>
 					)}
@@ -448,8 +423,7 @@ const OrderPrint = ({
 				<tr
 					style={{
 						height: !isEstimate
-							? ((footer ? print_items_length - 4 : print_items_length) - item_details?.length) * 10 +
-							  "px"
+							? ((footer ? print_items_length - 4 : print_items_length) - item_details?.length) * 10 + "px"
 							: `calc(483px - 192.11px - ${
 									item_details?.filter(isBorderItem)?.length * 14.44 +
 									item_details?.filter(_i => !isBorderItem(_i))?.length * 17
@@ -711,10 +685,7 @@ const OrderPrint = ({
 												fontSize: "xx-small",
 												textAlign: "left",
 											}}>
-											{deliveryMessage.map((a, i) =>
-												i === 0 ? a.mode_title : ", " + a.mode_title
-											)}{" "}
-											Allowed
+											{deliveryMessage.map((a, i) => (i === 0 ? a.mode_title : ", " + a.mode_title))} Allowed
 										</td>
 									) : (
 										""

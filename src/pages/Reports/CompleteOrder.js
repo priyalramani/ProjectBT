@@ -133,8 +133,7 @@ const CompleteOrder = () => {
 									searchData?.counter_uuid
 										? {
 												value: searchData?.counter_uuid,
-												label: counter?.find(j => j.counter_uuid === searchData.counter_uuid)
-													?.counter_title,
+												label: counter?.find(j => j.counter_uuid === searchData.counter_uuid)?.counter_title,
 										  }
 										: null
 								}
@@ -154,10 +153,7 @@ const CompleteOrder = () => {
 						itemsDetails={items.filter(
 							a =>
 								!invoiceNumberFilter ||
-								a.invoice_number
-									?.toString()
-									.toLocaleLowerCase()
-									.includes(invoiceNumberFilter.toLocaleLowerCase())
+								a.invoice_number?.toString().toLocaleLowerCase().includes(invoiceNumberFilter.toLocaleLowerCase())
 						)}
 						setPopupOrder={setPopupOrder}
 						counter={counter}
@@ -211,21 +207,21 @@ function Table({ itemsDetails, setPopupOrder, counter }) {
 				{itemsDetails
 					?.sort((a, b) => a.order_date - b.order_date)
 					?.map((item, i, array) => (
-						<tr key={Math.random()} style={{ height: "30px" }} onClick={() => setPopupOrder(item)}>
+						<tr
+							key={Math.random()}
+							style={{ height: "30px" }}
+							onClick={() => setPopupOrder(item)}
+							className={item?.status?.find(_i => +_i.stage === 5) ? "cancelled-order-row" : ""}>
 							<td>{i + 1}</td>
 							<td colSpan={2}>
 								{new Date(+item.order_date).toDateString()} - {formatAMPM(new Date(+item.order_date))}
 							</td>
 							<td colSpan={2}>
 								{item.delivery_date
-									? new Date(item.delivery_date).toDateString() +
-									  " - " +
-									  formatAMPM(new Date(item.delivery_date))
+									? new Date(item.delivery_date).toDateString() + " - " + formatAMPM(new Date(item.delivery_date))
 									: ""}
 							</td>
-							<td colSpan={3}>
-								{counter.find(a => a.counter_uuid === item.counter_uuid)?.counter_title || ""}
-							</td>
+							<td colSpan={3}>{counter.find(a => a.counter_uuid === item.counter_uuid)?.counter_title || ""}</td>
 							<td colSpan={2}>{item.invoice_number || ""}</td>
 							<td colSpan={2}>{item.qty || ""}</td>
 							<td colSpan={2}>{item.amt || ""}</td>

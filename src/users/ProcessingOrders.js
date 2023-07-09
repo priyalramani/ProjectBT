@@ -277,9 +277,7 @@ const ProcessingOrders = () => {
 						? [
 								...data.processing_canceled,
 								...data.item_details.filter(
-									a =>
-										+a.status === 3 &&
-										!data.processing_canceled.filter(b => a.item_uuid === b.item_uuid).length
+									a => +a.status === 3 && !data.processing_canceled.filter(b => a.item_uuid === b.item_uuid).length
 								),
 						  ]
 						: data?.item_details?.filter(a => +a.status === 3),
@@ -308,8 +306,7 @@ const ProcessingOrders = () => {
 
 			let time = new Date()
 			if (
-				data?.item_details?.filter(a => +a.status === 1 || +a.status === 3)?.length ===
-					data?.item_details.length &&
+				data?.item_details?.filter(a => +a.status === 1 || +a.status === 3)?.length === data?.item_details.length &&
 				Location.pathname.includes("processing")
 			)
 				data = {
@@ -403,9 +400,7 @@ const ProcessingOrders = () => {
 							: Location.pathname.includes("delivery")
 							? "Delivery"
 							: "Processing") + " End",
-					range: Location.pathname.includes("processing")
-						? itemChanged.length
-						: finalData[0]?.item_details?.length,
+					range: Location.pathname.includes("processing") ? itemChanged.length : finalData[0]?.item_details?.length,
 					qty,
 					amt: finalData[0].order_grandtotal || 0,
 				})
@@ -510,9 +505,7 @@ const ProcessingOrders = () => {
 			let orderItem = tempQuantity.find(b => b.item_uuid === a.item_uuid)
 			let ItemData = items.find(b => b.item_uuid === a.item_uuid)
 			if (
-				(+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-					(+orderItem?.p || 0) +
-					(+orderItem?.free || 0) !==
+				(+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + (+orderItem?.p || 0) + (+orderItem?.free || 0) !==
 				(+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p
 			)
 				setBarcodeMessage(prev =>
@@ -775,8 +768,7 @@ const ProcessingOrders = () => {
 							</div>
 						</div>
 
-						{selectedOrder &&
-						!(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
+						{selectedOrder && !(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
 							<>
 								<input
 									className="searchInput"
@@ -823,9 +815,7 @@ const ProcessingOrders = () => {
 					""
 				)}
 				{selectedOrder ? (
-					<h1 style={{ width: "30%", textAlign: "left", marginLeft: "10px" }}>
-						Rs:{selectedOrder?.order_grandtotal}
-					</h1>
+					<h1 style={{ width: "30%", textAlign: "left", marginLeft: "10px" }}>Rs:{selectedOrder?.order_grandtotal}</h1>
 				) : (
 					""
 				)}
@@ -932,9 +922,7 @@ const ProcessingOrders = () => {
 						<div className="flex" style={{ justifyContent: "space-between", margin: "10px 0" }}>
 							<h2 style={{ width: "20vw", textAlign: "start" }}>{selectedOrder.invoice_number}</h2>
 							{Location.pathname.includes("delivery") ? (
-								<h2 style={{ width: "20vw", textAlign: "start" }}>
-									Rs: {selectedOrder.order_grandtotal}
-								</h2>
+								<h2 style={{ width: "20vw", textAlign: "start" }}>Rs: {selectedOrder.order_grandtotal}</h2>
 							) : (
 								""
 							)}
@@ -1113,21 +1101,13 @@ const ProcessingOrders = () => {
 														: "#000",
 												}}>
 												{selectedOrder &&
-												!(
-													Location.pathname.includes("checking") ||
-													Location.pathname.includes("delivery")
-												) ? (
+												!(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
 													<td
 														style={{ padding: "10px", height: "50px" }}
 														onClick={() => {
 															setItemChanged(prev =>
 																+item.status !== 1
-																	? [
-																			...prev,
-																			selectedOrder.item_details.find(
-																				a => a.item_uuid === item.item_uuid
-																			),
-																	  ]
+																	? [...prev, selectedOrder.item_details.find(a => a.item_uuid === item.item_uuid)]
 																	: prev
 															)
 															setOneTimeState()
@@ -1179,24 +1159,14 @@ const ProcessingOrders = () => {
 															setMinMaxPopup(item)
 														} else if (Location.pathname.includes("checking")) {
 															setTempQuantity(
-																tempQuantity?.filter(
-																	a => a.item_uuid === item.item_uuid
-																)?.length
+																tempQuantity?.filter(a => a.item_uuid === item.item_uuid)?.length
 																	? tempQuantity?.map(a => {
 																			if (a.item_uuid === item.item_uuid) {
 																				return {
 																					...a,
-																					b:
-																						+(a.b || 0) +
-																						parseInt(
-																							(+a?.one_pack || 1) /
-																								+a.conversion
-																						),
+																					b: +(a.b || 0) + parseInt((+a?.one_pack || 1) / +a.conversion),
 
-																					p:
-																						((a?.p || 0) +
-																							(+a?.one_pack || 1)) %
-																						+a.conversion,
+																					p: ((a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion,
 																				}
 																			} else {
 																				return a
@@ -1206,47 +1176,27 @@ const ProcessingOrders = () => {
 																	? [
 																			...tempQuantity,
 																			...items
-																				?.filter(
-																					a => a.item_uuid === item.item_uuid
-																				)
+																				?.filter(a => a.item_uuid === item.item_uuid)
 																				.map(a => {
 																					return {
 																						...a,
 																						b:
 																							+(a.b || 0) +
-																							parseInt(
-																								((a?.p || 0) +
-																									(+a?.one_pack ||
-																										1)) /
-																									+a.conversion
-																							),
+																							parseInt(((a?.p || 0) + (+a?.one_pack || 1)) / +a.conversion),
 
-																						p:
-																							((a?.p || 0) +
-																								(+a?.one_pack || 1)) %
-																							+a.conversion,
+																						p: ((a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion,
 																					}
 																				}),
 																	  ]
 																	: items
-																			?.filter(
-																				a => a.item_uuid === item.item_uuid
-																			)
+																			?.filter(a => a.item_uuid === item.item_uuid)
 																			.map(a => {
 																				return {
 																					...a,
 																					b: Math.floor(
-																						(+a.b || 0) +
-																							+(
-																								(+a?.p || 0) +
-																								(+a?.one_pack || 1)
-																							) /
-																								+a.conversion
+																						(+a.b || 0) + +((+a?.p || 0) + (+a?.one_pack || 1)) / +a.conversion
 																					),
-																					p:
-																						((+a?.p || 0) +
-																							(+a?.one_pack || 1)) %
-																						+a.conversion,
+																					p: ((+a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion,
 																				}
 																			})
 															)
@@ -1265,22 +1215,14 @@ const ProcessingOrders = () => {
 													{Location.pathname.includes("delivery")
 														? item.b === 0 && item.p === 0 && item.free
 															? item.free + "(F)"
-															: item.b +
-															  ":" +
-															  item.p +
-															  (item.free ? "  " + item.free + "(F)" : "")
+															: item.b + ":" + item.p + (item.free ? "  " + item.free + "(F)" : "")
 														: Location.pathname.includes("checking")
-														? (tempQuantity?.find(a => a.item_uuid === item.item_uuid)?.b ||
-																0) +
+														? (tempQuantity?.find(a => a.item_uuid === item.item_uuid)?.b || 0) +
 														  ":" +
-														  (tempQuantity?.find(a => a.item_uuid === item.item_uuid)?.p ||
-																0)
+														  (tempQuantity?.find(a => a.item_uuid === item.item_uuid)?.p || 0)
 														: item.b + ":" + ((+item.p || 0) + (+item.free || 0))}
 												</td>
-												{!(
-													Location.pathname.includes("delivery") ||
-													Location.pathname.includes("checking")
-												) ? (
+												{!(Location.pathname.includes("delivery") || Location.pathname.includes("checking")) ? (
 													<>
 														<td className="flex">
 															<button
@@ -1336,8 +1278,7 @@ const ProcessingOrders = () => {
 												key={Math.random()}
 												style={{
 													height: "30px",
-													backgroundColor:
-														+item.opened_by || item.opened_by !== "0" ? "yellow" : "#fff",
+													backgroundColor: +item.opened_by || item.opened_by !== "0" ? "yellow" : "#fff",
 												}}>
 												<td>{i + 1}</td>
 												<td
@@ -1358,16 +1299,8 @@ const ProcessingOrders = () => {
 													}}>
 													{item?.item_details?.filter(a => +a.status === 1)?.length}/
 													{item?.item_details
-														.filter(
-															a =>
-																!Location.pathname.includes("delivery") ||
-																+a.status !== 3
-														)
-														.filter(
-															a =>
-																!Location.pathname.includes("checking") ||
-																+a.status === 1
-														)?.length || 0}
+														.filter(a => !Location.pathname.includes("delivery") || +a.status !== 3)
+														.filter(a => !Location.pathname.includes("checking") || +a.status === 1)?.length || 0}
 												</td>
 												<td
 													onClick={e => {
@@ -1384,20 +1317,14 @@ const ProcessingOrders = () => {
 														setWarningPopUp(item)
 													}}>
 													{(item?.item_details?.length > 1
-														? item?.item_details
-																?.map(a => +a.b || 0)
-																?.reduce((a, b) => a + b)
+														? item?.item_details?.map(a => +a.b || 0)?.reduce((a, b) => a + b)
 														: item?.item_details[0]?.b || 0) +
 														":" +
 														(item?.item_details?.length > 1
-															? item?.item_details
-																	?.map(a => +a.p || 0)
-																	?.reduce((a, b) => a + b)
+															? item?.item_details?.map(a => +a.p || 0)?.reduce((a, b) => a + b)
 															: item?.item_details[0]?.p || 0)}
 												</td>
-												<td>
-													{users.find(a => a.user_uuid === item.opened_by)?.user_title || "-"}
-												</td>
+												<td>{users.find(a => a.user_uuid === item.opened_by)?.user_title || "-"}</td>
 												<td>
 													{item?.mobile ? (
 														<Phone
@@ -1406,9 +1333,7 @@ const ProcessingOrders = () => {
 															onClick={e => {
 																e.stopPropagation()
 																if (item.mobile.length === 1) {
-																	window.location.assign(
-																		"tel:" + item?.mobile[0]?.mobile
-																	)
+																	window.location.assign("tel:" + item?.mobile[0]?.mobile)
 																} else {
 																	setPhonePopup(item.mobile)
 																}
@@ -1782,12 +1707,8 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }
 													<td colSpan={2}>{item.item_title}</td>
 													<td>{item?.mrp || 0}</td>
 													<td style={{ backgroundColor: "green" }}>
-														{parseInt(
-															+item.b + (+item.p + (+item.free || 0)) / +item.conversion
-														) || 0}
-														:
-														{parseInt((+item.p + (+item.free || 0)) % +item.conversion) ||
-															0}
+														{parseInt(+item.b + (+item.p + (+item.free || 0)) / +item.conversion) || 0}:
+														{parseInt((+item.p + (+item.free || 0)) % +item.conversion) || 0}
 													</td>
 													<td style={{ backgroundColor: "red" }}>
 														{parseInt(+item.barcodeQty / +item.conversion) || 0}:
@@ -1803,11 +1724,7 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }
 							)}
 
 							<div className="flex" style={{ justifyContent: "space-between", width: "300px" }}>
-								<button
-									type="button"
-									style={{ backgroundColor: "red" }}
-									className="submit"
-									onClick={onSave}>
+								<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
 									Cancel
 								</button>
 								<button
@@ -1834,11 +1751,7 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }
 							}}>
 							<div style={{ overflowY: "scroll", width: "100%" }}>
 								<div className="flex" style={{ justifyContent: "space-between" }}>
-									<button
-										type="button"
-										style={{ backgroundColor: "red" }}
-										className="submit"
-										onClick={onSave}>
+									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
 										No
 									</button>
 									<button type="button" className="submit" onClick={postOrderData}>
@@ -1996,9 +1909,8 @@ function HoldPopup({
 		categories
 			?.filter(
 				a =>
-					result?.filter(
-						b => a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid
-					).length
+					result?.filter(b => a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid)
+						.length
 			)
 			?.forEach(cat => {
 				result
@@ -2006,13 +1918,12 @@ function HoldPopup({
 					?.forEach((item, index) => {
 						if (item) {
 							console.log(item.pronounce)
-							const handleQty = (value, label, sufix) =>
-								value ? `${value} ${label}${value > 1 ? sufix : ""}` : ""
-							const speechString = `${item.pronounce} ${item.mrp} MRP ${handleQty(
-								+item.b,
-								"Box",
-								"es"
-							)} ${handleQty(+item.p || 0, "Piece", "s")}`
+							const handleQty = (value, label, sufix) => (value ? `${value} ${label}${value > 1 ? sufix : ""}` : "")
+							const speechString = `${item.pronounce} ${item.mrp} MRP ${handleQty(+item.b, "Box", "es")} ${handleQty(
+								+item.p || 0,
+								"Piece",
+								"s"
+							)}`
 
 							const loopEndFunctioin = audio => {
 								audio.index = item.index
@@ -2053,9 +1964,7 @@ function HoldPopup({
 			postHoldOrders(
 				orders
 					.filter(
-						a =>
-							a.item_details.filter(b => items.filter(c => c.edit && c.item_uuid === b.item_uuid).length)
-								.length
+						a => a.item_details.filter(b => items.filter(c => c.edit && c.item_uuid === b.item_uuid).length).length
 					)
 					.map(a => ({
 						...a,
@@ -2145,16 +2054,12 @@ function HoldPopup({
 														items
 															?.filter(
 																b =>
-																	a.category_uuid ===
-																	itemsData?.find(c => b.item_uuid === c.item_uuid)
-																		?.category_uuid
+																	a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid
 															)
 															?.filter(
 																a =>
 																	!filterItemTitle ||
-																	a.item_title
-																		.toLocaleLowerCase()
-																		.includes(filterItemTitle.toLocaleLowerCase())
+																	a.item_title.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())
 															).length
 												)
 
@@ -2164,9 +2069,7 @@ function HoldPopup({
 															onClick={e =>
 																audioLoopFunction({
 																	i: 0,
-																	src: audiosRef.current?.filter(
-																		i => i.category_uuid === a.category_uuid
-																	),
+																	src: audiosRef.current?.filter(i => i.category_uuid === a.category_uuid),
 																	forcePlayCount: 1,
 																	callback: audioCallback,
 																})
@@ -2179,15 +2082,9 @@ function HoldPopup({
 															?.filter(
 																b =>
 																	a.category_uuid ===
-																		itemsData?.find(
-																			c => b.item_uuid === c.item_uuid
-																		)?.category_uuid &&
+																		itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid &&
 																	(!filterItemTitle ||
-																		b.item_title
-																			.toLocaleLowerCase()
-																			.includes(
-																				filterItemTitle.toLocaleLowerCase()
-																			))
+																		b.item_title.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase()))
 															)
 															.sort((a, b) => a?.item_title?.localeCompare(b?.item_title))
 															.map((item, i) => (
@@ -2222,26 +2119,14 @@ function HoldPopup({
 																					a.item_uuid === item.item_uuid
 																						? {
 																								...a,
-																								status:
-																									a.status !== 1
-																										? 1
-																										: holdPopup ===
-																										  "Hold"
-																										? 2
-																										: 0,
+																								status: a.status !== 1 ? 1 : holdPopup === "Hold" ? 2 : 0,
 																								edit: true,
 																						  }
 																						: a
 																				)
 																			)
 																		}}>
-																		{+item.status !== 1 ? (
-																			<CheckCircleOutlineIcon
-																				style={{ width: "15px" }}
-																			/>
-																		) : (
-																			""
-																		)}
+																		{+item.status !== 1 ? <CheckCircleOutlineIcon style={{ width: "15px" }} /> : ""}
 																	</td>
 
 																	<td colSpan={3}>{item.item_title}</td>
@@ -2253,20 +2138,12 @@ function HoldPopup({
 																				colSpan={2}
 																				onClick={e => {
 																					e.stopPropagation()
-																					if (
-																						window.location.pathname.includes(
-																							"processing"
-																						)
-																					)
-																						setPopup(item)
+																					if (window.location.pathname.includes("processing")) setPopup(item)
 																				}}>
-																				{item?.b || 0} :{" "}
-																				{(+item?.p || 0) + (+item?.free || 0)}
+																				{item?.b || 0} : {(+item?.p || 0) + (+item?.free || 0)}
 																				{console.log({ items })}
 																			</td>
-																			{!window.location.pathname.includes(
-																				"delivery"
-																			) ? (
+																			{!window.location.pathname.includes("delivery") ? (
 																				<td colSpan={2}>
 																					<button
 																						className="theme-btn"
@@ -2276,15 +2153,10 @@ function HoldPopup({
 																						onClick={() =>
 																							setItems(prev =>
 																								prev.map(a =>
-																									a.item_uuid ===
-																									item.item_uuid
+																									a.item_uuid === item.item_uuid
 																										? {
 																												...a,
-																												status:
-																													a.status !==
-																													2
-																														? 2
-																														: 0,
+																												status: a.status !== 2 ? 2 : 0,
 																												edit: true,
 																										  }
 																										: a
@@ -2302,18 +2174,10 @@ function HoldPopup({
 																				onClick={() =>
 																					setItems(prev =>
 																						prev.map(a =>
-																							a.item_uuid ===
-																							item.item_uuid
+																							a.item_uuid === item.item_uuid
 																								? {
 																										...a,
-																										status:
-																											a.status !==
-																											3
-																												? 3
-																												: holdPopup ===
-																												  "Hold"
-																												? 2
-																												: 0,
+																										status: a.status !== 3 ? 3 : holdPopup === "Hold" ? 2 : 0,
 																										edit: true,
 																								  }
 																								: a
@@ -2334,18 +2198,8 @@ function HoldPopup({
 																	) : (
 																		<td colSpan={2}>
 																			<input
-																				value={`${
-																					tempQuantity?.find(
-																						a =>
-																							a.item_uuid ===
-																							item.item_uuid
-																					)?.b || 0
-																				} : ${
-																					tempQuantity?.find(
-																						a =>
-																							a.item_uuid ===
-																							item.item_uuid
-																					)?.p || 0
+																				value={`${tempQuantity?.find(a => a.item_uuid === item.item_uuid)?.b || 0} : ${
+																					tempQuantity?.find(a => a.item_uuid === item.item_uuid)?.p || 0
 																				}`}
 																				style={{
 																					width: "60px",
@@ -2451,8 +2305,7 @@ function HoldPopup({
 											}}
 											className="submit"
 											onClick={() => {
-												audiosRef.current?.[0] &&
-													audiosRef.current?.forEach(audio => audio.pause())
+												audiosRef.current?.[0] && audiosRef.current?.forEach(audio => audio.pause())
 												audiosRef.current = null
 												navigator.mediaSession.playbackState = "none"
 												clearInterval(+sessionStorage.getItem("intervalId"))
@@ -2774,10 +2627,7 @@ function DiliveryPopup({
 							<form className="form">
 								<div className="formGroup">
 									{PaymentModes.map(item => (
-										<div
-											className="row"
-											style={{ flexDirection: "row", alignItems: "center" }}
-											key={item.mode_uuid}>
+										<div className="row" style={{ flexDirection: "row", alignItems: "center" }} key={item.mode_uuid}>
 											<div style={{ width: "50px" }}>{item.mode_title}</div>
 											<label className="selectLabel flex" style={{ width: "80px" }}>
 												<input
@@ -2785,11 +2635,7 @@ function DiliveryPopup({
 													name="route_title"
 													className="numberInput"
 													value={modes.find(a => a.mode_uuid === item.mode_uuid)?.amt}
-													placeholder={
-														!allowed.find(a => a.mode_uuid === item.mode_uuid)
-															? "Not Allowed"
-															: ""
-													}
+													placeholder={!allowed.find(a => a.mode_uuid === item.mode_uuid) ? "Not Allowed" : ""}
 													style={
 														!allowed.find(a => a.mode_uuid === item.mode_uuid)
 															? {
@@ -2865,11 +2711,7 @@ function DiliveryPopup({
 								</div>
 
 								<div className="flex" style={{ justifyContent: "space-between" }}>
-									<button
-										type="button"
-										style={{ backgroundColor: "red" }}
-										className="submit"
-										onClick={onSave}>
+									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
 										Cancel
 									</button>
 									<button type="button" className="submit" onClick={submitHandler}>
@@ -2906,15 +2748,9 @@ function DiliveryPopup({
 													className="numberInput"
 													placeholder="Coins"
 													onWheel={e => e.preventDefault()}
-													value={
-														modes.find(
-															a => a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-														)?.coin
-													}
+													value={modes.find(a => a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002")?.coin}
 													style={
-														!allowed.find(
-															a => a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-														)
+														!allowed.find(a => a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002")
 															? { width: "70px", backgroundColor: "gray" }
 															: { width: "70px" }
 													}
@@ -3040,9 +2876,7 @@ function MinMaxPopup({
 												warehouse_uuid
 													? {
 															value: order?.warehouse_uuid,
-															label: warehouse?.find(
-																j => j.warehouse_uuid === warehouse_uuid
-															)?.warehouse_title,
+															label: warehouse?.find(j => j.warehouse_uuid === warehouse_uuid)?.warehouse_title,
 													  }
 													: { value: 0, label: "None" }
 											}
@@ -3143,11 +2977,7 @@ function ConfirmPopup({ onSave, onClose, selectedOrder, Navigate }) {
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						<form className="form">
 							<div className="flex">
-								<button
-									type="submit"
-									style={{ backgroundColor: "red" }}
-									className="submit"
-									onClick={onSave}>
+								<button type="submit" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
 									Discard
 								</button>
 							</div>
@@ -3219,11 +3049,7 @@ function DeliveryMessagePopup({ onSave, data, credit_allowed }) {
 								<button
 									disabled={disabled}
 									type="button"
-									style={
-										disabled
-											? { opacity: "0.5", cursor: "not-allowed" }
-											: { opacity: "1", cursor: "pointer" }
-									}
+									style={disabled ? { opacity: "0.5", cursor: "not-allowed" } : { opacity: "1", cursor: "pointer" }}
 									className="submit"
 									onClick={onSave}>
 									Okay
@@ -3278,11 +3104,7 @@ function OpenWarningMessage({ onSave, data, users, onClose }) {
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						<form className="form">
 							<div className="flex" style={{ width: "100%" }}>
-								<button
-									type="button"
-									style={{ opacity: "1", cursor: "pointer" }}
-									className="submit"
-									onClick={onSave}>
+								<button type="button" style={{ opacity: "1", cursor: "pointer" }} className="submit" onClick={onSave}>
 									Still Open
 								</button>
 							</div>
@@ -3367,15 +3189,11 @@ function NewUserForm({
 											item_uuid: popupInfo.item_uuid,
 											b:
 												+a.b +
-												(+orderData?.item_details?.find(
-													a => a.item_uuid === popupInfo.item_uuid
-												)?.b || 0) -
+												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) -
 												data.b,
 											p:
 												+a.p +
-												(+orderData?.item_details?.find(
-													a => a.item_uuid === popupInfo.item_uuid
-												)?.p || 0) -
+												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) -
 												data.p,
 									  }
 									: a
@@ -3384,23 +3202,15 @@ function NewUserForm({
 								...orderData.delivery_return,
 								{
 									item_uuid: popupInfo.item_uuid,
-									b:
-										(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b ||
-											0) - data.b,
-									p:
-										(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p ||
-											0) - data.p,
+									b: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) - data.b,
+									p: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p,
 								},
 						  ]
 					: [
 							{
 								item_uuid: popupInfo.item_uuid,
-								b:
-									(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) -
-									data.b,
-								p:
-									(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) -
-									data.p,
+								b: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) - data.b,
+								p: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p,
 							},
 					  ],
 				item_details: orderData.item_details.map(a =>
@@ -3425,15 +3235,11 @@ function NewUserForm({
 											item_uuid: popupInfo.item_uuid,
 											b:
 												+a.b +
-												(+orderData?.item_details?.find(
-													a => a.item_uuid === popupInfo.item_uuid
-												)?.b || 0) -
+												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) -
 												data.b,
 											p:
 												+a.p +
-												(+orderData?.item_details?.find(
-													a => a.item_uuid === popupInfo.item_uuid
-												)?.p || 0) -
+												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) -
 												data.p,
 									  }
 									: a
@@ -3442,23 +3248,15 @@ function NewUserForm({
 								...orderData.processing_canceled,
 								{
 									item_uuid: popupInfo.item_uuid,
-									b:
-										(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b ||
-											0) - data.b,
-									p:
-										(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p ||
-											0) - data.p,
+									b: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) - data.b,
+									p: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p,
 								},
 						  ]
 					: [
 							{
 								item_uuid: popupInfo.item_uuid,
-								b:
-									(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) -
-									data.b,
-								p:
-									(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) -
-									data.p,
+								b: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) - data.b,
+								p: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p,
 							},
 					  ],
 				item_details: orderData.item_details.map(a =>
@@ -3750,9 +3548,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 													style={{
 														height: "30px",
 														color: "#fff",
-														backgroundColor: +deleteItemsOrder.filter(
-															a => a === item.order_uuid
-														).length
+														backgroundColor: +deleteItemsOrder.filter(a => a === item.order_uuid).length
 															? "red"
 															: "#7990dd",
 													}}>
@@ -3766,19 +3562,14 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 														{item.invoice_number}
 													</td>
 													<td colSpan={2} style={{ width: "50px" }}>
-														{counter?.find(a => a.counter_uuid === item.counter_uuid)
-															?.counter_title || "-"}
+														{counter?.find(a => a.counter_uuid === item.counter_uuid)?.counter_title || "-"}
 													</td>
 													<td colSpan={2} style={{ width: "50px", padding: "0 2px" }}>
 														<input
 															value={
-																(item.item_details.find(
-																	a => a.item_uuid === items.item_uuid
-																)?.b || 0) +
+																(item.item_details.find(a => a.item_uuid === items.item_uuid)?.b || 0) +
 																" : " +
-																(item.item_details.find(
-																	a => a.item_uuid === items.item_uuid
-																)?.p || 0)
+																(item.item_details.find(a => a.item_uuid === items.item_uuid)?.p || 0)
 															}
 															className="boxPcsInput"
 															style={{
@@ -3794,8 +3585,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 														/>
 													</td>
 													<td colSpan={2} style={{ width: "50px", padding: "0 2px" }}>
-														{item.item_details.find(a => a.item_uuid === items.item_uuid)
-															?.free || 0}
+														{item.item_details.find(a => a.item_uuid === items.item_uuid)?.free || 0}
 													</td>
 													<td
 														style={{ width: "50px", padding: "0 2px" }}
@@ -3806,11 +3596,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 																	: [...(prev || []), item.order_uuid]
 															)
 														}}>
-														{!deleteItemsOrder.filter(a => a === item.order_uuid).length ? (
-															<DeleteOutlineIcon />
-														) : (
-															""
-														)}
+														{!deleteItemsOrder.filter(a => a === item.order_uuid).length ? <DeleteOutlineIcon /> : ""}
 													</td>
 												</tr>
 											))}

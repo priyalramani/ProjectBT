@@ -10,6 +10,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 	const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([])
 	const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false)
 	const [waiting, setWaiting] = useState(false)
+	const [cancelPopup, setCancelPopup] = useState()
 
 	useEffect(() => {
 		console.log(selectedWarehouseOrders)
@@ -19,7 +20,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 			setSelectedWarehouseOrder(false)
 		}
 	}, [selectedWarehouseOrders])
-	const onSubmit = async (selectedData = orders, diliveredUser = "") => {
+
+	const onSubmit = async ({ selectedData = orders, diliveredUser = "", reasons = {} }) => {
 		setWaiting(true)
 		console.log(selectedData)
 		let user_uuid = localStorage.getItem("user_uuid")
@@ -77,6 +79,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 							{ stage: 5, time: time.getTime(), user_uuid },
 					  ]
 				: [{ stage: 5, time: time.getTime(), user_uuid }]
+
 		selectedData = selectedData?.map(a => ({
 			...a,
 			status: +data.stage === 0 ? a.status : [...a.status, ...status],
@@ -123,12 +126,19 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 						}
 					}),
 				})
+
+				const status = obj?.status?.map(_i =>
+					+_i?.stage === 5 ? { ..._i, cancellation_reason: reasons[obj?.order_uuid] } : _i
+				)
+
 				orderData.push({
 					...obj,
 					...billingData,
 					item_details: billingData.items,
+					status,
 				})
 			}
+
 			const response = await axios({
 				method: "put",
 				url: "/orders/putOrders",
@@ -221,6 +231,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 									e.preventDefault()
 									if (data.stage === 4) {
 										handleWarehouseChacking(true)
+									} else if (data.stage === 5) {
+										setCancelPopup(true)
 									} else onSubmit()
 								}}>
 								<div className="formGroup">
@@ -336,19 +348,17 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 				""
 			)}
 			{selectedWarehouseOrder ? (
-				<WarehouseUpdatePopup
-					onClose={() => {}}
-					updateChanges={updateWarehouse}
-					popupInfo={selectedWarehouseOrder}
-				/>
+				<WarehouseUpdatePopup onClose={() => {}} updateChanges={updateWarehouse} popupInfo={selectedWarehouseOrder} />
 			) : (
 				""
 			)}
+			{cancelPopup && <CancellationReasons close={() => setCancelPopup(false)} orders={orders} submit={onSubmit} />}
 		</>
 	)
 }
 
 export default ChangeStage
+
 function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }) {
 	const [PaymentModes, setPaymentModes] = useState([])
 	const [modes, setModes] = useState([])
@@ -370,8 +380,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 	let reminder = useMemo(() => {
 		return new Date(
 			time2.setDate(
-				time2.getDate() +
-					(counters.find(a => a.counter_uuid === order.counter_uuid)?.payment_reminder_days || 0)
+				time2.getDate() + (counters.find(a => a.counter_uuid === order.counter_uuid)?.payment_reminder_days || 0)
 			)
 		).getTime()
 	}, [counters, order.counter_uuid])
@@ -524,7 +533,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 			})
 		if (response.data.success) {
 			if (count + 1 === orders?.length) {
-				postOrderData([...editedOrders, order], diliveredUser)
+				postOrderData({ selectedData: [...editedOrders, order], diliveredUser })
 				onSave()
 			} else {
 				setEditedOrders(prev => [...prev, order])
@@ -586,10 +595,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 							<form className="form">
 								<div className="formGroup">
 									{PaymentModes.map(item => (
-										<div
-											className="row"
-											style={{ flexDirection: "row", alignItems: "center" }}
-											key={item.mode_uuid}>
+										<div className="row" style={{ flexDirection: "row", alignItems: "center" }} key={item.mode_uuid}>
 											<div style={{ width: "50px" }}>{item.mode_title}</div>
 											<label className="selectLabel flex" style={{ width: "80px" }}>
 												<input
@@ -646,11 +652,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 														}}
 														onChange={e =>
 															setModes(prev =>
-																prev?.map(a =>
-																	a.mode_uuid === item.mode_uuid
-																		? { ...a, remarks: e.target.value }
-																		: a
-																)
+																prev?.map(a => (a.mode_uuid === item.mode_uuid ? { ...a, remarks: e.target.value } : a))
 															)
 														}
 														maxLength={42}
@@ -756,11 +758,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 								</div>
 
 								<div className="flex" style={{ justifyContent: "space-between" }}>
-									<button
-										type="button"
-										style={{ backgroundColor: "red" }}
-										className="submit"
-										onClick={onSave}>
+									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
 										Cancel
 									</button>
 									<button type="button" className="submit" onClick={submitHandler}>
@@ -886,6 +884,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 		</>
 	)
 }
+
 function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
 	const [data, setdata] = useState("")
 
@@ -955,8 +954,7 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
 													data
 														? {
 																value: data,
-																label: warehouse?.find(j => j.warehouse_uuid === data)
-																	?.warehouse_title,
+																label: warehouse?.find(j => j.warehouse_uuid === data)?.warehouse_title,
 														  }
 														: { value: 0, label: "None" }
 												}
@@ -981,6 +979,50 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
 					</button>
 				</div>
 			</div>
+		</div>
+	)
+}
+
+function CancellationReasons({ close, orders, submit }) {
+	const [reasons, setReasons] = useState({})
+
+	return (
+		<div className="overlay" style={{ zIndex: 9999999999 }}>
+			<form
+				className="modal"
+				style={{
+					height: "fit-content",
+					width: "max-content",
+					paddingTop: "50px",
+				}}
+				onSubmit={e => {
+					e.preventDefault()
+					submit({ reasons })
+				}}>
+				<h3>Selected orders will be cancelled</h3>
+
+				<div id="cancellation-reasons-wrapper">
+					{orders?.map(i => (
+						<div key={i?.order_uuid}>
+							<label>Cancellation reason for order - {i?.invoice_number}</label>
+							<textarea
+								type="text"
+								className="cancellation-reason"
+								value={reasons[i?.order_uuid]}
+								onChange={e => setReasons(_i => ({ ..._i, [i?.order_uuid]: e.target.value }))}
+								required
+							/>
+						</div>
+					))}
+				</div>
+
+				<button type="submit" className="submit">
+					Confirm
+				</button>
+				<button onClick={close} className="closeButton">
+					x
+				</button>
+			</form>
 		</div>
 	)
 }

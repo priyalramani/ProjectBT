@@ -87,6 +87,27 @@ const State = props => {
 		})
 	}
 
+	const PAYMENT_REMINDER_NOTIFICATION = "7e65e044-9953-433b-a9d7-cced4730b189"
+	const sendPaymentReminders = async counter_ids => {
+		if (!counter_ids?.length) return
+		const response = await axios.post("/whatsapp_notifications/send_payment_reminders", {
+			notification_uuid: PAYMENT_REMINDER_NOTIFICATION,
+			counter_ids,
+		})
+
+		if (response?.data?.success)
+			setNotification({
+				success: true,
+				message: "Messages sent successfully",
+			})
+		else
+			setNotification({
+				success: false,
+				message: "Failed to send messages",
+			})
+		setTimeout(() => setNotification(null), 3000)
+	}
+
 	return (
 		<Context.Provider
 			value={{
@@ -102,13 +123,15 @@ const State = props => {
 				setCashRegisterPopup,
 				isItemAvilableOpen,
 				setIsItemAvilableOpen,
-
 				promptState,
 				setPromptState,
 				getSpecialPrice,
 				saveSpecialPrice,
 				deleteSpecialPrice,
 				spcPricePrompt,
+
+				PAYMENT_REMINDER_NOTIFICATION,
+				sendPaymentReminders,
 			}}>
 			{props.children}
 		</Context.Provider>

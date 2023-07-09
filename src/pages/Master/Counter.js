@@ -16,20 +16,20 @@ const Counter = () => {
 	const [filterCounterTitle, setFilterCounterTitle] = useState("")
 	const [filterRoute, setFilterRoute] = useState("")
 	const [filterMobile, setFilterMobile] = useState("")
-
 	const [popupForm, setPopupForm] = useState(false)
 	const [routesData, setRoutesData] = useState([])
 	const [selectedRoutes, setSelectedRoutes] = useState([])
-	const [selectedCounters, setSelectedCounters] = useState([])
-
+	const [selectedCounterGroups, selectCounterGroups] = useState([])
 	const [xlSelection, seXlSelection] = useState(false)
 	const [itemPopup, setItemPopup] = useState(false)
 	const [deletePopup, setDeletePopup] = useState(false)
-	const context = useContext(Context)
-
-	const { setNotification } = context
 	const [sequencePopup, setSequencePopup] = useState(false)
+	const [counterGroups, setCounterGroups] = useState([])
+
 	const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8"
+	const context = useContext(Context)
+	const { setNotification } = context
+
 	const getRoutesData = async (controller = new AbortController()) => {
 		const response = await axios({
 			method: "get",
@@ -49,6 +49,7 @@ const Counter = () => {
 			controller.abort()
 		}
 	}, [])
+
 	const getCounter = async (controller = new AbortController()) => {
 		const response = await axios({
 			method: "get",
@@ -68,6 +69,19 @@ const Counter = () => {
 			}
 		}
 	}
+
+	const getCounterGroups = async (controller = new AbortController()) => {
+		const response = await axios({
+			method: "get",
+			url: "/counterGroup/GetCounterGroupList",
+			signal: controller.signal,
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+		if (response.data.success) setCounterGroups(response.data.result)
+	}
+
 	const GetPaymentModes = async () => {
 		const response = await axios({
 			method: "get",
@@ -84,13 +98,16 @@ const Counter = () => {
 	useEffect(() => {
 		const controller = new AbortController()
 		getCounter(controller)
+		getCounterGroups(controller)
 		return () => {
 			controller.abort()
 		}
 	}, [popupForm])
+
 	useEffect(() => {
 		GetPaymentModes()
 	}, [])
+
 	const filterCounter = useMemo(
 		() =>
 			[filterCounterTitle, filterRoute, filterMobile]?.some(i => i?.length >= 3)
@@ -104,9 +121,7 @@ const Counter = () => {
 							a =>
 								a.counter_title &&
 								(filterCounterTitle?.length < 3 ||
-									a.counter_title
-										?.toLocaleLowerCase()
-										?.includes(filterCounterTitle?.toLocaleLowerCase())) &&
+									a.counter_title?.toLocaleLowerCase()?.includes(filterCounterTitle?.toLocaleLowerCase())) &&
 								(filterRoute?.length < 3 ||
 									a.route_title?.toLocaleLowerCase()?.includes(filterRoute?.toLocaleLowerCase())) &&
 								(filterMobile?.length < 3 || a.mobile?.find(_i => _i.mobile?.includes(filterMobile)))
@@ -115,31 +130,29 @@ const Counter = () => {
 		[counter, filterCounterTitle, filterRoute, filterMobile, routesData]
 	)
 
+	console.log({ selectedCounterGroups })
 	const fileExtension = ".xlsx"
+
 	const downloadHandler = async () => {
 		seXlSelection(false)
-
 		let sheetData = counter
-			.filter(
+			?.filter(
 				a =>
-					selectedRoutes.filter(b => b === a.route_uuid)?.length ||
-					!selectedCounters?.[0] ||
-					selectedCounters?.filter(b => b === a.counter_uuid)?.length
+					selectedRoutes?.filter(b => b === a?.route_uuid)?.length ||
+					!selectedCounterGroups?.[0] ||
+					a?.counter_group_uuid?.filter(b => selectedCounterGroups?.includes(b))?.length
 			)
-			.sort((a, b) =>
-				a.route_sort_order - b.route_sort_order
-					? a.route_sort_order - b.route_sort_order
-					: a.sort_order - b.sort_order
+			?.sort((a, b) =>
+				a?.route_sort_order - b?.route_sort_order
+					? a?.route_sort_order - b?.route_sort_order
+					: a?.sort_order - b?.sort_order
 			)
 			?.map((item, i) => ({
 				...item,
-				mobile: item?.mobile
-					?.filter(i => i.mobile?.length)
-					?.map((a, i) => (i === 0 ? a.mobile : ", " + a.mobile)),
+				mobile: item?.mobile?.filter(i => i.mobile?.length)?.map((a, i) => (i === 0 ? a.mobile : ", " + a.mobile)),
 			}))
 
 		sheetData = sheetData.map(a => {
-			// console.log(a)
 			return {
 				"Route Title": a.route_title,
 				"Counter Title": a.counter_title,
@@ -151,7 +164,7 @@ const Counter = () => {
 				GST: a.gst || "",
 			}
 		})
-		// console.log(sheetData)
+
 		const ws = XLSX.utils.json_to_sheet(sheetData)
 		const wb = { Sheets: { data: ws }, SheetNames: ["data"] }
 		const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" })
@@ -159,14 +172,15 @@ const Counter = () => {
 		FileSaver.saveAs(data, "counters" + fileExtension)
 		setSelectedRoutes([])
 	}
+
 	const onChangeHandler = e => {
 		const params = {}
 		if (e.target.name === "routes") {
 			params.data = selectedRoutes
 			params.update = i => setSelectedRoutes(i)
 		} else {
-			params.data = selectedCounters
-			params.update = i => setSelectedCounters(i)
+			params.data = selectedCounterGroups
+			params.update = i => selectCounterGroups(i)
 		}
 
 		let temp = params?.data || []
@@ -273,11 +287,7 @@ const Counter = () => {
 				""
 			)}
 			{deletePopup ? (
-				<DeleteCounterPopup
-					onSave={() => setDeletePopup(false)}
-					setItemsData={setCounter}
-					popupInfo={deletePopup}
-				/>
+				<DeleteCounterPopup onSave={() => setDeletePopup(false)} setItemsData={setCounter} popupInfo={deletePopup} />
 			) : (
 				""
 			)}
@@ -325,7 +335,7 @@ const Counter = () => {
 										</div>
 										<div>
 											<div className="row">
-												<h1>Select Counter</h1>
+												<h1>Select Counter Groups</h1>
 											</div>
 
 											<div className="form">
@@ -333,18 +343,18 @@ const Counter = () => {
 													<label className="selectLabel" style={{ width: "50%" }}>
 														<select
 															className="numberInput"
-															value={selectedCounters}
-															name="counters"
+															value={selectedCounterGroups}
+															name="counterGroups"
 															onChange={onChangeHandler}
 															multiple>
-															{counter?.map(occ => (
+															{counterGroups?.map(group => (
 																<option
-																	value={occ.counter_uuid}
+																	value={group.counter_group_uuid}
 																	style={{
 																		marginBottom: "5px",
 																		textAlign: "center",
 																	}}>
-																	{occ.counter_title}
+																	{group.counter_group_title}
 																</option>
 															))}
 														</select>
@@ -554,9 +564,7 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 							<td colSpan={3}>{item.counter_title}</td>
 							<td colSpan={2}>{item.counter_code}</td>
 							<td colSpan={2}>
-								{item?.mobile
-									?.filter(a => a.mobile)
-									.map((a, i) => (i === 0 ? a?.mobile || "" : ", " + a?.mobile))}
+								{item?.mobile?.filter(a => a.mobile).map((a, i) => (i === 0 ? a?.mobile || "" : ", " + a?.mobile))}
 							</td>
 							<td colSpan={2}>{item.food_license || ""}</td>
 							<td colSpan={2}>{item.gst || ""}</td>
@@ -786,17 +794,14 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 			.concat(
 				i
 					.filter(
-						_i =>
-							_i?.counter_group_title &&
-							(_data?.counter_group_uuid || [])?.indexOf(_i?.counter_group_uuid) !== -1
+						_i => _i?.counter_group_title && (_data?.counter_group_uuid || [])?.indexOf(_i?.counter_group_uuid) !== -1
 					)
 					.sort((a, b) => a?.counter_group_title?.localeCompare(b?.counter_group_title))
 					.concat(
 						i
 							.filter(
 								_i =>
-									_i?.counter_group_title &&
-									(_data?.counter_group_uuid || [])?.indexOf(_i?.counter_group_uuid) === -1
+									_i?.counter_group_title && (_data?.counter_group_uuid || [])?.indexOf(_i?.counter_group_uuid) === -1
 							)
 							.sort((a, b) => a?.counter_group_title?.localeCompare(b?.counter_group_title))
 					)
@@ -810,8 +815,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 				"Content-Type": "application/json",
 			},
 		})
-		if (response.data.success)
-			return response.data.result.filter(a => a.counter_group_uuid && a.counter_group_title)
+		if (response.data.success) return response.data.result.filter(a => a.counter_group_uuid && a.counter_group_title)
 	}
 
 	useEffect(() => {
@@ -1230,23 +1234,15 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 														onClick={() => {
 															setdata(prev => ({
 																...prev,
-																payment_modes: prev?.payment_modes?.filter(
-																	a => a === occ.mode_uuid
-																).length
-																	? prev?.payment_modes?.filter(
-																			a => a !== occ.mode_uuid
-																	  )
+																payment_modes: prev?.payment_modes?.filter(a => a === occ.mode_uuid).length
+																	? prev?.payment_modes?.filter(a => a !== occ.mode_uuid)
 																	: [...(prev.payment_modes || []), occ.mode_uuid],
 															}))
 														}}>
 														<td>
 															<input
 																type="checkbox"
-																checked={
-																	data?.payment_modes?.filter(
-																		a => a === occ.mode_uuid
-																	).length
-																}
+																checked={data?.payment_modes?.filter(a => a === occ.mode_uuid).length}
 															/>
 														</td>
 														<td>{occ.mode_title}</td>
@@ -1351,27 +1347,18 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 														className="numberInput"
 														value={a?.mobile}
 														style={{ width: "15ch" }}
-														disabled={a.lable?.find(
-															c =>
-																(c.type === "cal" || c.type === "wa") && +c.varification
-														)}
+														disabled={a.lable?.find(c => (c.type === "cal" || c.type === "wa") && +c.varification)}
 														onChange={e => {
 															if (
 																e.target.value.length > 10 ||
-																a.lable?.find(
-																	c =>
-																		(c.type === "cal" || c.type === "wa") &&
-																		+c.varification
-																)
+																a.lable?.find(c => (c.type === "cal" || c.type === "wa") && +c.varification)
 															) {
 																return
 															}
 															setdata(prev => ({
 																...prev,
 																mobile: prev.mobile.map(b =>
-																	b.uuid === a.uuid
-																		? { ...b, mobile: e.target.value }
-																		: b
+																	b.uuid === a.uuid ? { ...b, mobile: e.target.value } : b
 																),
 															}))
 														}}
@@ -1379,9 +1366,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 													/>
 													<span
 														style={{
-															color: a.lable?.find(
-																c => c.type === "wa" && !+c.varification
-															)
+															color: a.lable?.find(c => c.type === "wa" && !+c.varification)
 																? "red"
 																: a.lable?.find(c => c.type === "wa" && +c.varification)
 																? "green"
@@ -1415,13 +1400,9 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 													</span>
 													<span
 														style={{
-															color: a.lable?.find(
-																c => c.type === "cal" && !+c.varification
-															)
+															color: a.lable?.find(c => c.type === "cal" && !+c.varification)
 																? "red"
-																: a.lable?.find(
-																		c => c.type === "cal" && +c.varification
-																  )
+																: a.lable?.find(c => c.type === "cal" && +c.varification)
 																? "green"
 																: "gray",
 															cursor: "pointer",
@@ -1472,27 +1453,18 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 														className="numberInput"
 														value={a?.mobile}
 														style={{ width: "15ch" }}
-														disabled={a.lable?.find(
-															c =>
-																(c.type === "cal" || c.type === "wa") && +c.varification
-														)}
+														disabled={a.lable?.find(c => (c.type === "cal" || c.type === "wa") && +c.varification)}
 														onChange={e => {
 															if (
 																e.target.value.length > 10 ||
-																a.lable?.find(
-																	c =>
-																		(c.type === "cal" || c.type === "wa") &&
-																		+c.varification
-																)
+																a.lable?.find(c => (c.type === "cal" || c.type === "wa") && +c.varification)
 															) {
 																return
 															}
 															setdata(prev => ({
 																...prev,
 																mobile: prev.mobile.map(b =>
-																	b.uuid === a.uuid
-																		? { ...b, mobile: e.target.value }
-																		: b
+																	b.uuid === a.uuid ? { ...b, mobile: e.target.value } : b
 																),
 															}))
 														}}
@@ -1500,9 +1472,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 													/>
 													<span
 														style={{
-															color: a.lable?.find(
-																c => c.type === "wa" && !+c.varification
-															)
+															color: a.lable?.find(c => c.type === "wa" && !+c.varification)
 																? "red"
 																: a.lable?.find(c => c.type === "wa" && +c.varification)
 																? "green"
@@ -1536,13 +1506,9 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 													</span>
 													<span
 														style={{
-															color: a.lable?.find(
-																c => c.type === "cal" && !+c.varification
-															)
+															color: a.lable?.find(c => c.type === "cal" && !+c.varification)
 																? "red"
-																: a.lable?.find(
-																		c => c.type === "cal" && +c.varification
-																  )
+																: a.lable?.find(c => c.type === "cal" && +c.varification)
 																? "green"
 																: "gray",
 															cursor: "pointer",
@@ -1676,8 +1642,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 				response.data.result.map(b => ({
 					...b,
 					company_title: companies.find(a => a.company_uuid === b.company_uuid)?.company_title || "-",
-					category_title:
-						itemCategories.find(a => a.category_uuid === b.category_uuid)?.category_title || "-",
+					category_title: itemCategories.find(a => a.category_uuid === b.category_uuid)?.category_title || "-",
 				}))
 			)
 	}
@@ -1804,24 +1769,17 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 												?.filter(a => a.item_uuid)
 												.filter(
 													a =>
-														!filterTitle ||
-														a.item_title
-															.toLocaleLowerCase()
-															.includes(filterTitle.toLocaleLowerCase())
+														!filterTitle || a.item_title.toLocaleLowerCase().includes(filterTitle.toLocaleLowerCase())
 												)
 												.filter(
 													a =>
 														!filterCompany ||
-														a?.company_title
-															.toLocaleLowerCase()
-															.includes(filterCompany.toLocaleLowerCase())
+														a?.company_title.toLocaleLowerCase().includes(filterCompany.toLocaleLowerCase())
 												)
 												.filter(
 													a =>
 														!filterCategory ||
-														a?.category_title
-															.toLocaleLowerCase()
-															.includes(filterCategory.toLocaleLowerCase())
+														a?.category_title.toLocaleLowerCase().includes(filterCategory.toLocaleLowerCase())
 												)
 												.map((item, index) => {
 													return (
@@ -1834,9 +1792,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																	type="button"
 																	className="noBgActionButton"
 																	style={{
-																		backgroundColor: value.filter(
-																			a => a.item_uuid === item.item_uuid
-																		)?.length
+																		backgroundColor: value.filter(a => a.item_uuid === item.item_uuid)?.length
 																			? "red"
 																			: "var(--mainColor)",
 																		width: "150px",
@@ -1844,14 +1800,8 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																	}}
 																	onClick={event =>
 																		setValue(prev =>
-																			value.filter(
-																				a => a.item_uuid === item.item_uuid
-																			)?.length
-																				? value.filter(
-																						a =>
-																							a.item_uuid !==
-																							item.item_uuid
-																				  )
+																			value.filter(a => a.item_uuid === item.item_uuid)?.length
+																				? value.filter(a => a.item_uuid !== item.item_uuid)
 																				: prev.length
 																				? [
 																						...prev,
@@ -1866,14 +1816,10 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																				  ]
 																		)
 																	}>
-																	{value.filter(a => a.item_uuid === item.item_uuid)
-																		?.length
-																		? "Remove"
-																		: "Add"}
+																	{value.filter(a => a.item_uuid === item.item_uuid)?.length ? "Remove" : "Add"}
 																</button>
 															</td>
-															{value.filter(a => a.item_uuid === item.item_uuid)
-																?.length ? (
+															{value.filter(a => a.item_uuid === item.item_uuid)?.length ? (
 																<td>
 																	<input
 																		type="number"
@@ -1885,10 +1831,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																					a.item_uuid === item.item_uuid
 																						? {
 																								...a,
-																								[itemPopup?.type ===
-																								"item_special_price"
-																									? "price"
-																									: "discount"]:
+																								[itemPopup?.type === "item_special_price" ? "price" : "discount"]:
 																									e.target.value,
 																						  }
 																						: a
@@ -1896,19 +1839,11 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																			)
 																		}
 																		value={
-																			value.find(
-																				a => a.item_uuid === item.item_uuid
-																			)[
-																				itemPopup?.type === "item_special_price"
-																					? "price"
-																					: "discount"
+																			value.find(a => a.item_uuid === item.item_uuid)[
+																				itemPopup?.type === "item_special_price" ? "price" : "discount"
 																			]
 																		}
-																		placeholder={
-																			itemPopup?.type === "item_special_price"
-																				? "price..."
-																				: "discount..."
-																		}
+																		placeholder={itemPopup?.type === "item_special_price" ? "price..." : "discount..."}
 																		className="searchInput"
 																	/>
 																</td>
@@ -1922,9 +1857,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 												.filter(
 													a =>
 														!filterCompany ||
-														a?.company_title
-															.toLocaleLowerCase()
-															.includes(filterCompany.toLocaleLowerCase())
+														a?.company_title.toLocaleLowerCase().includes(filterCompany.toLocaleLowerCase())
 												)
 												.map((item, index) => {
 													return (
@@ -1936,9 +1869,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																	type="button"
 																	className="noBgActionButton"
 																	style={{
-																		backgroundColor: value.filter(
-																			a => a.company_uuid === item.company_uuid
-																		)?.length
+																		backgroundColor: value.filter(a => a.company_uuid === item.company_uuid)?.length
 																			? "red"
 																			: "var(--mainColor)",
 																		width: "150px",
@@ -1946,40 +1877,26 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																	}}
 																	onClick={event =>
 																		setValue(prev =>
-																			value.filter(
-																				a =>
-																					a.company_uuid === item.company_uuid
-																			)?.length
-																				? value.filter(
-																						a =>
-																							a.company_uuid !==
-																							item.company_uuid
-																				  )
+																			value.filter(a => a.company_uuid === item.company_uuid)?.length
+																				? value.filter(a => a.company_uuid !== item.company_uuid)
 																				: prev.length
 																				? [
 																						...prev,
 																						{
-																							company_uuid:
-																								item.company_uuid,
+																							company_uuid: item.company_uuid,
 																						},
 																				  ]
 																				: [
 																						{
-																							company_uuid:
-																								item.company_uuid,
+																							company_uuid: item.company_uuid,
 																						},
 																				  ]
 																		)
 																	}>
-																	{value.filter(
-																		a => a.company_uuid === item.company_uuid
-																	)?.length
-																		? "Remove"
-																		: "Add"}
+																	{value.filter(a => a.company_uuid === item.company_uuid)?.length ? "Remove" : "Add"}
 																</button>
 															</td>
-															{value.filter(a => a.company_uuid === item.company_uuid)
-																?.length ? (
+															{value.filter(a => a.company_uuid === item.company_uuid)?.length ? (
 																<td>
 																	<input
 																		type="number"
@@ -1991,19 +1908,13 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																					a.company_uuid === item.company_uuid
 																						? {
 																								...a,
-																								discount:
-																									e.target.value,
+																								discount: e.target.value,
 																						  }
 																						: a
 																				)
 																			)
 																		}
-																		value={
-																			value.find(
-																				a =>
-																					a.company_uuid === item.company_uuid
-																			)?.discount
-																		}
+																		value={value.find(a => a.company_uuid === item.company_uuid)?.discount}
 																		placeholder="Discount..."
 																		className="searchInput"
 																	/>
@@ -2087,15 +1998,9 @@ function DeleteCounterPopup({ onSave, popupInfo, setItemsData }) {
 							<i style={{ color: "red" }}>{errMassage === "" ? "" : "Error: " + errMassage}</i>
 							<div className="flex" style={{ justifyContent: "space-between" }}>
 								{loading ? (
-									<button
-										className="submit"
-										id="loading-screen"
-										style={{ background: "red", width: "120px" }}>
+									<button className="submit" id="loading-screen" style={{ background: "red", width: "120px" }}>
 										<svg viewBox="0 0 100 100">
-											<path
-												d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-												fill="#ffffff"
-												stroke="none">
+											<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
 												<animateTransform
 													attributeName="transform"
 													type="rotate"
