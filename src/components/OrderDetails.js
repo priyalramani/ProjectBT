@@ -2289,7 +2289,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 					paddingTop: "50px",
 				}}
 				onSubmit={e => {
-					e.defaultPrevented()
+					e.preventDefault()
 					PutOrder()
 				}}>
 				<h3>Order will be {deletePopup}</h3>
