@@ -21,7 +21,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 		}
 	}, [selectedWarehouseOrders])
 
-	const onSubmit = async ({ selectedData = orders, diliveredUser = "", reasons = {} }) => {
+	const onSubmit = async (params = {}) => {
+		let { selectedData = orders, diliveredUser = "", reasons = {} } = params
 		setWaiting(true)
 		console.log(selectedData)
 		let user_uuid = localStorage.getItem("user_uuid")
