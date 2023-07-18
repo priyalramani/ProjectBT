@@ -36,8 +36,8 @@ const Counter = () => {
 			url: "/routes/GetRouteList",
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setRoutesData(response.data.result)
 	}
@@ -56,15 +56,15 @@ const Counter = () => {
 			url: "/counters/GetCounterData",
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setCounter(response.data.result)
 			if (popupForm?.item?.counter_uuid) {
 				setPopupForm(prev => ({
 					...prev,
-					item: response.data.result?.find(a => a.counter_uuid === prev?.item?.counter_uuid) || prev.item,
+					item: response.data.result?.find(a => a.counter_uuid === prev?.item?.counter_uuid) || prev.item
 				}))
 			}
 		}
@@ -76,8 +76,8 @@ const Counter = () => {
 			url: "/counterGroup/GetCounterGroupList",
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setCounterGroups(response.data.result)
 	}
@@ -88,8 +88,8 @@ const Counter = () => {
 			url: "/paymentModes/GetPaymentModesList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log(response.data.result)
 		if (response.data.success) setPaymentModes(response.data.result)
@@ -115,7 +115,7 @@ const Counter = () => {
 						.map(b => ({
 							...b,
 							route_title: routesData.find(a => a.route_uuid === b.route_uuid)?.route_title || "-",
-							route_sort_order: routesData.find(a => a.route_uuid === b.route_uuid)?.sort_order || 0,
+							route_sort_order: routesData.find(a => a.route_uuid === b.route_uuid)?.sort_order || 0
 						}))
 						.filter(
 							a =>
@@ -138,9 +138,8 @@ const Counter = () => {
 		let sheetData = counter
 			?.filter(
 				a =>
-					selectedRoutes?.filter(b => b === a?.route_uuid)?.length ||
-					!selectedCounterGroups?.[0] ||
-					a?.counter_group_uuid?.filter(b => selectedCounterGroups?.includes(b))?.length
+					(!selectedRoutes?.[0] || selectedRoutes?.includes(a?.route_uuid)) &&
+					(!selectedCounterGroups?.[0] || a?.counter_group_uuid?.find(b => selectedCounterGroups?.includes(b)))
 			)
 			?.sort((a, b) =>
 				a?.route_sort_order - b?.route_sort_order
@@ -149,7 +148,8 @@ const Counter = () => {
 			)
 			?.map((item, i) => ({
 				...item,
-				mobile: item?.mobile?.filter(i => i.mobile?.length)?.map((a, i) => (i === 0 ? a.mobile : ", " + a.mobile)),
+				route_title: routesData?.find(x => x.route_uuid === item?.route_uuid)?.route_title,
+				mobile: item?.mobile?.filter(i => i.mobile?.length)?.map((a, i) => (i === 0 ? a.mobile : ", " + a.mobile))
 			}))
 
 		sheetData = sheetData.map(a => {
@@ -161,7 +161,7 @@ const Counter = () => {
 				"Mobile 2": a.mobile[1]?.replace(",", "") || "",
 				"Mobile 3": a.mobile[2]?.replace(",", "") || "",
 				"Food License": a.food_license,
-				GST: a.gst || "",
+				"GST": a.gst || ""
 			}
 		})
 
@@ -207,8 +207,9 @@ const Counter = () => {
 							display: "flex",
 							alignItems: "center",
 							justifyContent: "space-between",
-							width: "100%",
-						}}>
+							width: "100%"
+						}}
+					>
 						<input
 							type="text"
 							onChange={e => setFilterCounterTitle(e.target.value)}
@@ -299,8 +300,9 @@ const Counter = () => {
 							style={{
 								height: "fit-content",
 								padding: "20px",
-								width: "fit-content",
-							}}>
+								width: "fit-content"
+							}}
+						>
 							<div style={{ overflowY: "scroll" }}>
 								<form className="form" onSubmit={downloadHandler}>
 									<div id="excel-filters">
@@ -317,14 +319,16 @@ const Counter = () => {
 															value={selectedRoutes}
 															name="routes"
 															onChange={onChangeHandler}
-															multiple>
+															multiple
+														>
 															{routesData?.map(occ => (
 																<option
 																	value={occ.route_uuid}
 																	style={{
 																		marginBottom: "5px",
-																		textAlign: "center",
-																	}}>
+																		textAlign: "center"
+																	}}
+																>
 																	{occ.route_title}
 																</option>
 															))}
@@ -346,14 +350,16 @@ const Counter = () => {
 															value={selectedCounterGroups}
 															name="counterGroups"
 															onChange={onChangeHandler}
-															multiple>
+															multiple
+														>
 															{counterGroups?.map(group => (
 																<option
 																	value={group.counter_group_uuid}
 																	style={{
 																		marginBottom: "5px",
-																		textAlign: "center",
-																	}}>
+																		textAlign: "center"
+																	}}
+																>
 																	{group.counter_group_title}
 																</option>
 															))}
@@ -374,7 +380,8 @@ const Counter = () => {
 									seXlSelection(false)
 									setSelectedRoutes([])
 								}}
-								className="closeButton">
+								className="closeButton"
+							>
 								x
 							</button>
 						</div>
@@ -399,8 +406,9 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 				maxWidth: "100vw",
 				height: "fit-content",
 				overflowX: "scroll",
-				fontSize: "15px",
-			}}>
+				fontSize: "15px"
+			}}
+		>
 			<thead>
 				<tr>
 					<th>S.N</th>
@@ -412,14 +420,16 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 									onClick={() => {
 										setItems("route_title")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("route_title")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -433,14 +443,16 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 									onClick={() => {
 										setItems("counter_title")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("counter_title")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -457,14 +469,16 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 									onClick={() => {
 										setItems("counter_code")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("counter_code")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -478,14 +492,16 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 									onClick={() => {
 										setItems("mobile")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("mobile")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -558,7 +574,8 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 							onClick={e => {
 								e.stopPropagation()
 								setPopupForm({ type: "edit", data: item })
-							}}>
+							}}
+						>
 							<td>{i + 1}</td>
 							<td colSpan={3}>{item.route_title}</td>
 							<td colSpan={3}>{item.counter_title}</td>
@@ -575,7 +592,8 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 									navigator.clipboard.writeText("https://btgondia.com/counter/" + item.short_link)
 									setCopied(item.counter_uuid)
 									setTimeout(() => setCopied(""), 3000)
-								}}>
+								}}
+							>
 								{copied === item?.counter_uuid ? (
 									<div
 										style={{
@@ -587,8 +605,9 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 											color: "#fff",
 											padding: "3px",
 											borderRadius: "10px",
-											textAlign: "center",
-										}}>
+											textAlign: "center"
+										}}
+									>
 										Copied!
 									</div>
 								) : (
@@ -600,7 +619,8 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 								onClick={e => {
 									e.stopPropagation()
 									setCounterNotesPoup(item)
-								}}>
+								}}
+							>
 								<NoteAdd />
 							</td>
 							<td colSpan={2}>
@@ -611,7 +631,8 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 									onClick={e => {
 										e.stopPropagation()
 										setItemPopup({ item, type: "company_discount" })
-									}}>
+									}}
+								>
 									Company Discount
 								</button>
 							</td>
@@ -623,7 +644,8 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 									onClick={e => {
 										e.stopPropagation()
 										setItemPopup({ item, type: "item_special_price" })
-									}}>
+									}}
+								>
 									Item Special Prices
 								</button>
 							</td>
@@ -635,7 +657,8 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 									onClick={e => {
 										e.stopPropagation()
 										setItemPopup({ item, type: "item_special_discount" })
-									}}>
+									}}
+								>
 									Item Special Discounts
 								</button>
 							</td>
@@ -645,7 +668,8 @@ function Table({ itemsDetails, setPopupForm, setItemPopup, setDeletePopup, setCo
 									e.stopPropagation()
 
 									setDeletePopup(item)
-								}}>
+								}}
+							>
 								<DeleteOutline />
 							</td>
 						</tr>
@@ -669,12 +693,12 @@ function CounterNotesPopup({ onSave, notesPopup }) {
 			data: [
 				{
 					counter_uuid: notesPopup.counter_uuid,
-					notes,
-				},
+					notes
+				}
 			],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			onSave()
@@ -688,8 +712,9 @@ function CounterNotesPopup({ onSave, notesPopup }) {
 					style={{
 						height: "fit-content",
 						width: "max-content",
-						backgroundColor: "cyan",
-					}}>
+						backgroundColor: "cyan"
+					}}
+				>
 					<div className="flex" style={{ justifyContent: "space-between" }}>
 						<h3>Counter Notes</h3>
 						{/* <h3>Please Enter Notes</h3> */}
@@ -699,8 +724,9 @@ function CounterNotesPopup({ onSave, notesPopup }) {
 						style={{
 							height: "fit-content",
 							padding: "10px",
-							width: "fit-content",
-						}}>
+							width: "fit-content"
+						}}
+					>
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup" style={{ backgroundColor: "#fff" }}>
@@ -756,13 +782,13 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 			data: {
 				params: ["trip_uuid", "trip_title"],
 				trips: [],
-				conditions: [{ status: 1 }],
+				conditions: [{ status: 1 }]
 			},
 			signal: controller.signal,
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setTripData(response.data.result)
@@ -774,8 +800,8 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 			url: "/orderForm/GetFormList",
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setOrderFrom(response.data.result)
 	}
@@ -812,8 +838,8 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 			method: "get",
 			url: "/counterGroup/GetCounterGroupList",
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) return response.data.result.filter(a => a.counter_group_uuid && a.counter_group_title)
 	}
@@ -828,11 +854,11 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 						...(popupInfo?.data?.mobile
 							?.map(a => ({
 								...a,
-								uuid: a?.uuid || uuid(),
+								uuid: a?.uuid || uuid()
 							}))
 							.filter(a => a.mobile) || []),
-						...[1, 2, 3, 4].map(a => ({ uuid: uuid(), mobile: "", type: "" })),
-					].slice(0, 4),
+						...[1, 2, 3, 4].map(a => ({ uuid: uuid(), mobile: "", type: "" }))
+					].slice(0, 4)
 				}
 			} else {
 				_data = await {
@@ -848,8 +874,8 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 					mobile: [1, 2, 3, 4].map(a => ({
 						uuid: uuid(),
 						mobile: "",
-						type: "",
-					})),
+						type: ""
+					}))
 				}
 			}
 			const _counters = await getCounterGroup()
@@ -888,12 +914,12 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 				data: [
 					{
 						...json,
-						payment_modes: json.payment_modes.filter(a => a !== "unpaid"),
-					},
+						payment_modes: json.payment_modes.filter(a => a !== "unpaid")
+					}
 				],
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				getCounter()
@@ -911,8 +937,8 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 				url: "/counters/postCounter",
 				data: json,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				getCounter()
@@ -946,11 +972,11 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 			url: "/counters/sendWhatsappOtp",
 			data: {
 				...data,
-				...mobile,
+				...mobile
 			},
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 		}
@@ -971,11 +997,11 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 			url: "/counters/sendCallOtp",
 			data: {
 				...data,
-				...mobile,
+				...mobile
 			},
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 		}
@@ -988,11 +1014,11 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 			data: {
 				...data,
 				...otppoup,
-				otp,
+				otp
 			},
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			getCounter()
@@ -1011,8 +1037,9 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 						style={{
 							height: "fit-content",
 							padding: "20px",
-							width: "fit-content",
-						}}>
+							width: "fit-content"
+						}}
+					>
 						<div style={{ overflowY: "scroll", height: "fit-content" }}>
 							<form className="form" onSubmit={submitHandler}>
 								<div className="row">
@@ -1031,7 +1058,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 												onChange={e =>
 													setdata({
 														...data,
-														counter_title: e.target.value,
+														counter_title: e.target.value
 													})
 												}
 												maxLength={42}
@@ -1049,7 +1076,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 												onChange={e =>
 													setdata({
 														...data,
-														sort_order: e.target.value,
+														sort_order: e.target.value
 													})
 												}
 											/>
@@ -1066,7 +1093,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 												onChange={e =>
 													setdata({
 														...data,
-														address: e.target.value,
+														address: e.target.value
 													})
 												}
 												maxLength={42}
@@ -1082,9 +1109,10 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 												onChange={e =>
 													setdata({
 														...data,
-														route_uuid: e.target.value,
+														route_uuid: e.target.value
 													})
-												}>
+												}
+											>
 												<option value="">None</option>
 												{routesData
 													?.sort((a, b) => a.sort_order - b.sort_order)
@@ -1104,9 +1132,10 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 												onChange={e =>
 													setdata(prev => ({
 														...prev,
-														outstanding_type: e.target.value,
+														outstanding_type: e.target.value
 													}))
-												}>
+												}
+											>
 												{/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
 
 												<option value={0}>None</option>
@@ -1125,9 +1154,10 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 												onChange={e =>
 													setdata(prev => ({
 														...prev,
-														status: e.target.value,
+														status: e.target.value
 													}))
-												}>
+												}
+											>
 												{/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
 
 												<option value={1}>Active</option>
@@ -1146,7 +1176,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 													onChange={e =>
 														setdata({
 															...data,
-															remarks: e.target.value,
+															remarks: e.target.value
 														})
 													}
 													maxLength={42}
@@ -1167,7 +1197,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 												onChange={e =>
 													setdata({
 														...data,
-														gst: e.target.value,
+														gst: e.target.value
 													})
 												}
 												maxLength={42}
@@ -1183,7 +1213,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 												onChange={e =>
 													setdata({
 														...data,
-														food_license: e.target.value,
+														food_license: e.target.value
 													})
 												}
 												maxLength={42}
@@ -1201,7 +1231,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 												onChange={e =>
 													setdata({
 														...data,
-														counter_code: e.target.value,
+														counter_code: e.target.value
 													})
 												}
 											/>
@@ -1216,7 +1246,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 												onChange={e =>
 													setdata({
 														...data,
-														payment_reminder_days: e.target.value,
+														payment_reminder_days: e.target.value
 													})
 												}
 												maxLength={42}
@@ -1236,9 +1266,10 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 																...prev,
 																payment_modes: prev?.payment_modes?.filter(a => a === occ.mode_uuid).length
 																	? prev?.payment_modes?.filter(a => a !== occ.mode_uuid)
-																	: [...(prev.payment_modes || []), occ.mode_uuid],
+																	: [...(prev.payment_modes || []), occ.mode_uuid]
 															}))
-														}}>
+														}}
+													>
 														<td>
 															<input
 																type="checkbox"
@@ -1252,11 +1283,12 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 													onClick={() =>
 														setdata(prev => ({
 															...prev,
-															credit_allowed: prev?.credit_allowed === "Y" ? "N" : "Y",
+															credit_allowed: prev?.credit_allowed === "Y" ? "N" : "Y"
 														}))
 													}
 													style={{ marginBottom: "5px", textAlign: "center" }}
-													value="unpaid">
+													value="unpaid"
+												>
 													<td>
 														<input type="checkbox" checked={data?.credit_allowed === "Y"} />
 													</td>
@@ -1300,9 +1332,10 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 											onChange={e =>
 												setdata({
 													...data,
-													form_uuid: e.target.value,
+													form_uuid: e.target.value
 												})
-											}>
+											}
+										>
 											<option value="">None</option>
 											{orderFrom?.map(a => (
 												<option value={a.form_uuid}>{a.form_title}</option>
@@ -1318,9 +1351,10 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 											onChange={e =>
 												setdata({
 													...data,
-													trip_uuid: e.target.value,
+													trip_uuid: e.target.value
 												})
-											}>
+											}
+										>
 											<option value="">None</option>
 											{TripsData?.map(a => (
 												<option value={a.trip_uuid}>{a.trip_title}</option>
@@ -1339,8 +1373,9 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 														display: "flex",
 														alignItems: "center",
 														justifyContent: "space-between",
-														margin: "5px 0",
-													}}>
+														margin: "5px 0"
+													}}
+												>
 													<input
 														type="number"
 														name="route_title"
@@ -1357,9 +1392,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 															}
 															setdata(prev => ({
 																...prev,
-																mobile: prev.mobile.map(b =>
-																	b.uuid === a.uuid ? { ...b, mobile: e.target.value } : b
-																),
+																mobile: prev.mobile.map(b => (b.uuid === a.uuid ? { ...b, mobile: e.target.value } : b))
 															}))
 														}}
 														maxLength={10}
@@ -1371,7 +1404,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 																: a.lable?.find(c => c.type === "wa" && +c.varification)
 																? "green"
 																: "gray",
-															cursor: "pointer",
+															cursor: "pointer"
 														}}
 														onClick={e => {
 															if (a.mobile) sendOtp({ ...a, lable: "wa" })
@@ -1395,7 +1428,8 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 															//         : b
 															//     ),
 															//   }));
-														}}>
+														}}
+													>
 														<WhatsApp />
 													</span>
 													<span
@@ -1405,7 +1439,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 																: a.lable?.find(c => c.type === "cal" && +c.varification)
 																? "green"
 																: "gray",
-															cursor: "pointer",
+															cursor: "pointer"
 														}}
 														onClick={e => {
 															if (a.mobile) sendCallOtp({ ...a, lable: "cal" })
@@ -1429,7 +1463,8 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 															//         : b
 															//     ),
 															//   }));
-														}}>
+														}}
+													>
 														<Phone />
 													</span>
 												</div>
@@ -1445,8 +1480,9 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 														display: "flex",
 														alignItems: "center",
 														justifyContent: "space-between",
-														margin: "5px 0",
-													}}>
+														margin: "5px 0"
+													}}
+												>
 													<input
 														type="number"
 														name="route_title"
@@ -1463,9 +1499,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 															}
 															setdata(prev => ({
 																...prev,
-																mobile: prev.mobile.map(b =>
-																	b.uuid === a.uuid ? { ...b, mobile: e.target.value } : b
-																),
+																mobile: prev.mobile.map(b => (b.uuid === a.uuid ? { ...b, mobile: e.target.value } : b))
 															}))
 														}}
 														maxLength={10}
@@ -1477,7 +1511,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 																: a.lable?.find(c => c.type === "wa" && +c.varification)
 																? "green"
 																: "gray",
-															cursor: "pointer",
+															cursor: "pointer"
 														}}
 														onClick={e => {
 															if (a.mobile) sendOtp({ ...a, lable: "wa" })
@@ -1501,7 +1535,8 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 															//         : b
 															//     ),
 															//   }));
-														}}>
+														}}
+													>
 														<WhatsApp />
 													</span>
 													<span
@@ -1511,7 +1546,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 																: a.lable?.find(c => c.type === "cal" && +c.varification)
 																? "green"
 																: "gray",
-															cursor: "pointer",
+															cursor: "pointer"
 														}}
 														onClick={e => {
 															if (a.mobile) sendCallOtp({ ...a, lable: "cal" })
@@ -1535,7 +1570,8 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 															//         : b
 															//     ),
 															//   }));
-														}}>
+														}}
+													>
 														<Phone />
 													</span>
 												</div>
@@ -1565,8 +1601,9 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 							style={{
 								height: "fit-content",
 								padding: "20px",
-								width: "fit-content",
-							}}>
+								width: "fit-content"
+							}}
+						>
 							<div style={{ overflowY: "scroll" }}>
 								<form className="form" onSubmit={VerifyOtp}>
 									<div className="formGroup">
@@ -1623,8 +1660,8 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 			url: "/itemCategories/GetItemCategoryList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setItemCategories(response.data.result)
 	}
@@ -1634,15 +1671,15 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 			url: "/items/GetItemList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success)
 			setItemsData(
 				response.data.result.map(b => ({
 					...b,
 					company_title: companies.find(a => a.company_uuid === b.company_uuid)?.company_title || "-",
-					category_title: itemCategories.find(a => a.category_uuid === b.category_uuid)?.category_title || "-",
+					category_title: itemCategories.find(a => a.category_uuid === b.category_uuid)?.category_title || "-"
 				}))
 			)
 	}
@@ -1656,8 +1693,8 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 			url: "/companies/getCompanies",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setCompanies(response.data.result)
 	}
@@ -1672,12 +1709,12 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 			data: [
 				{
 					counter_uuid: itemPopup.item.counter_uuid,
-					[itemPopup.type]: value,
-				},
+					[itemPopup.type]: value
+				}
 			],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			onSave()
@@ -1692,19 +1729,22 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div
 						style={{
 							display: "flex",
 							alignItems: "center",
-							justifyContent: "center",
-						}}>
+							justifyContent: "center"
+						}}
+					>
 						<div
 							style={{
 								overflowY: "scroll",
-								height: "45vh",
-							}}>
+								height: "45vh"
+							}}
+						>
 							{itemPopup?.type !== "company_discount" ? (
 								<input
 									type="text"
@@ -1796,7 +1836,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																			? "red"
 																			: "var(--mainColor)",
 																		width: "150px",
-																		fontSize: "large",
+																		fontSize: "large"
 																	}}
 																	onClick={event =>
 																		setValue(prev =>
@@ -1806,16 +1846,17 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																				? [
 																						...prev,
 																						{
-																							item_uuid: item.item_uuid,
-																						},
+																							item_uuid: item.item_uuid
+																						}
 																				  ]
 																				: [
 																						{
-																							item_uuid: item.item_uuid,
-																						},
+																							item_uuid: item.item_uuid
+																						}
 																				  ]
 																		)
-																	}>
+																	}
+																>
 																	{value.filter(a => a.item_uuid === item.item_uuid)?.length ? "Remove" : "Add"}
 																</button>
 															</td>
@@ -1832,7 +1873,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																						? {
 																								...a,
 																								[itemPopup?.type === "item_special_price" ? "price" : "discount"]:
-																									e.target.value,
+																									e.target.value
 																						  }
 																						: a
 																				)
@@ -1873,7 +1914,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																			? "red"
 																			: "var(--mainColor)",
 																		width: "150px",
-																		fontSize: "large",
+																		fontSize: "large"
 																	}}
 																	onClick={event =>
 																		setValue(prev =>
@@ -1883,16 +1924,17 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																				? [
 																						...prev,
 																						{
-																							company_uuid: item.company_uuid,
-																						},
+																							company_uuid: item.company_uuid
+																						}
 																				  ]
 																				: [
 																						{
-																							company_uuid: item.company_uuid,
-																						},
+																							company_uuid: item.company_uuid
+																						}
 																				  ]
 																		)
-																	}>
+																	}
+																>
 																	{value.filter(a => a.company_uuid === item.company_uuid)?.length ? "Remove" : "Add"}
 																</button>
 															</td>
@@ -1908,7 +1950,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																					a.company_uuid === item.company_uuid
 																						? {
 																								...a,
-																								discount: e.target.value,
+																								discount: e.target.value
 																						  }
 																						: a
 																				)
@@ -1934,8 +1976,9 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 							width: "100%",
 							display: "flex",
 							alignItems: "center",
-							justifyContent: "center",
-						}}>
+							justifyContent: "center"
+						}}
+					>
 						<button className="fieldEditButton" onClick={submitHandler}>
 							Save
 						</button>
@@ -1962,8 +2005,8 @@ function DeleteCounterPopup({ onSave, popupInfo, setItemsData }) {
 				url: "/counters/deleteCounter",
 				data: { counter_uuid: popupInfo.counter_uuid },
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				setItemsData(prev => prev.filter(i => i.counter_uuid !== popupInfo.counter_uuid))
@@ -1984,8 +2027,9 @@ function DeleteCounterPopup({ onSave, popupInfo, setItemsData }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -2007,7 +2051,8 @@ function DeleteCounterPopup({ onSave, popupInfo, setItemsData }) {
 													dur="1s"
 													repeatCount="indefinite"
 													keyTimes="0;1"
-													values="0 50 51;360 50 51"></animateTransform>
+													values="0 50 51;360 50 51"
+												></animateTransform>
 											</path>
 										</svg>
 									</button>
