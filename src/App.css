@@ -341,3 +341,53 @@ svg.table-icon {
 	background: #ff00000a;
 	color: #d70000 !important;
 }
+
+.user-counter-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 15px;
+	margin-right: 10px;
+}
+
+.user-counter-actions button {
+	font-size: 1.5rem;
+	padding: 0;
+	margin: 0;
+}
+
+.location-marker {
+	color: #d70000;
+}
+.location-marker.green {
+	color: #44cd4a;
+}
+
+.closeButton.icon {
+	color: black;
+	background: transparent;
+	padding: 0;
+	width: fit-content;
+	height: fit-content;
+	font-size: 1.75rem;
+}
+
+.location-confirmation-popup {
+	max-width: 80vw;
+	width: 400px;
+	gap: 30px;
+	text-align: center;
+}
+
+.location-confirmation-popup button.update {
+	background: var(--main);
+	border: none;
+	width: 50%;
+	margin: auto;
+	padding: 10px;
+	border-radius: 6px;
+	color: whitesmoke;
+	font-size: 0.9rem;
+	font-weight: 550;
+	font-family: sans-serif;
+}

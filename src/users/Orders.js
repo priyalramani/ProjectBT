@@ -4,6 +4,9 @@ import { Link, useNavigate, useParams } from "react-router-dom"
 import { IoArrowBackOutline } from "react-icons/io5"
 import axios from "axios"
 import { Phone } from "@mui/icons-material"
+import { HiLocationMarker } from "react-icons/hi"
+import { IoIosCloseCircle } from "react-icons/io"
+
 import { v4 as uuid } from "uuid"
 const Orders = ({ refreshDb }) => {
 	const [counters, setCounters] = useState([])
@@ -13,6 +16,7 @@ const Orders = ({ refreshDb }) => {
 	const [remarks, setRemarks] = useState(false)
 	const [popupForm, setPopupForm] = useState(false)
 	const [refresh, setRefresh] = useState(false)
+	const [locationState, setLocationState] = useState()
 
 	const params = useParams()
 	const Navigate = useNavigate()
@@ -36,20 +40,51 @@ const Orders = ({ refreshDb }) => {
 			role: "Order",
 			narration: counter.counter_title + (route.route_title ? ", " + route.route_title : ""),
 			timestamp: time.getTime(),
-			activity: "Counter Open",
+			activity: "Counter Open"
 		}
 		const response = await axios({
 			method: "post",
 			url: "/userActivity/postUserActivity",
 			data,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			console.log(response)
 		}
 	}
+
+	const locationHandler = () => {
+		const counter_uuid = locationState?.counter_uuid
+		setLocationState(i => ({ ...i, active: false }))
+
+		if (navigator.geolocation)
+			navigator.geolocation.getCurrentPosition(async position => {
+				const location_coords = {
+					latitude: position.coords.latitude,
+					longitude: +position.coords.longitude
+				}
+				const response = await axios.patch("/counters/update_location_coords", {
+					counter_uuid,
+					location_coords
+				})
+				if (response.data.success)
+					setCounters(state =>
+						state.map(i => {
+							if (i.counter_uuid === counter_uuid) {
+								const counter = { ...i, location_coords }
+								openDB("BT", +localStorage.getItem("IDBVersion") || 1).then(db =>
+									db.transaction("counter", "readwrite").objectStore("counter").put(counter)
+								)
+								return counter
+							} else return i
+						})
+					)
+			})
+		else console.log("Geolocation is not supported by this browser.")
+	}
+
 	return (
 		<>
 			<div className="item-sales-container orders-report-container" style={{ overflow: "visible", left: "0" }}>
@@ -69,7 +104,8 @@ const Orders = ({ refreshDb }) => {
 										dur="1s"
 										repeatCount="indefinite"
 										keyTimes="0;1"
-										values="0 50 51;360 50 51"></animateTransform>
+										values="0 50 51;360 50 51"
+									></animateTransform>
 								</path>
 							</svg>
 						</button>
@@ -89,8 +125,9 @@ const Orders = ({ refreshDb }) => {
 						width: "100vw",
 						maxWidth: "500px",
 						paddingTop: "5px",
-						backgroundColor: "rgb(242, 242, 242)",
-					}}>
+						backgroundColor: "rgb(242, 242, 242)"
+					}}
+				>
 					<input
 						type="text"
 						onChange={e => setCounterFilter(e.target.value)}
@@ -104,8 +141,9 @@ const Orders = ({ refreshDb }) => {
 							style={{
 								overflowY: "scroll",
 								height: params.route_uuid ? "90vh" : "80vh",
-								marginTop: params.route_uuid ? "10px" : "10px",
-							}}>
+								marginTop: params.route_uuid ? "10px" : "10px"
+							}}
+						>
 							<table className="table" style={{ width: "100vw", maxWidth: "500px" }}>
 								<tbody style={{ width: "100%" }}>
 									{counters
@@ -114,12 +152,8 @@ const Orders = ({ refreshDb }) => {
 										?.filter(
 											a =>
 												(!counterFilter ||
-													a.counter_title
-														.toLocaleLowerCase()
-														.includes(counterFilter.toLocaleLowerCase())) &&
-												(window.location.pathname.includes("route")
-													? params.route_uuid === a.route_uuid
-													: true)
+													a.counter_title.toLocaleLowerCase().includes(counterFilter.toLocaleLowerCase())) &&
+												(window.location.pathname.includes("route") ? params.route_uuid === a.route_uuid : true)
 										)
 										?.map((item, index) => {
 											return (
@@ -138,38 +172,44 @@ const Orders = ({ refreshDb }) => {
 															)
 															sessionStorage.setItem(
 																"route_title",
-																routes.find(a => a?.route_uuid === item?.route_uuid)
-																	?.route_title
+																routes.find(a => a?.route_uuid === item?.route_uuid)?.route_title
 															)
 															Navigate("/users/orders/" + item.counter_uuid)
 														}
-													}}>
+													}}
+												>
 													<td style={{ width: "50%" }}>{item.counter_title}</td>
 													<td style={{ width: "50%" }}>
-														{
-															routes.find(a => a?.route_uuid === item?.route_uuid)
-																?.route_title
-														}
+														{routes.find(a => a?.route_uuid === item?.route_uuid)?.route_title}
 													</td>
 													<td>
-														{item?.mobile.length ? (
-															<Phone
+														<div className="user-counter-actions">
+															<button
 																onClick={e => {
 																	e.stopPropagation()
-																	if (item.mobile.length === 1) {
-																		window.location.assign(
-																			"tel:" + item?.mobile[0]?.mobile
-																		)
-																	} else {
-																		setPhonePopup(item.mobile)
-																	}
+																	if (!item?.location_coords)
+																		setLocationState({ active: true, counter_uuid: item.counter_uuid })
 																}}
-																className="user_Back_icon"
-																style={{ color: "#4ac959" }}
-															/>
-														) : (
-															""
-														)}
+															>
+																<HiLocationMarker className={`location-marker ${item?.location_coords && "green"}`} />
+															</button>
+															{item?.mobile.length ? (
+																<Phone
+																	onClick={e => {
+																		e.stopPropagation()
+																		if (item.mobile.length === 1) {
+																			window.location.assign("tel:" + item?.mobile[0]?.mobile)
+																		} else {
+																			setPhonePopup(item.mobile)
+																		}
+																	}}
+																	className="user_Back_icon"
+																	style={{ color: "#4ac959" }}
+																/>
+															) : (
+																""
+															)}
+														</div>
 													</td>
 												</tr>
 											)
@@ -189,8 +229,9 @@ const Orders = ({ refreshDb }) => {
 								marginTop: "20px",
 								backgroundColor: "#f2f2f2",
 								overflowY: "scroll",
-								paddingBottom: "100px",
-							}}>
+								paddingBottom: "100px"
+							}}
+						>
 							{routes.length
 								? routes
 										?.sort((a, b) => a.sort_order - b.sort_order)
@@ -205,7 +246,8 @@ const Orders = ({ refreshDb }) => {
 												onClick={() => {
 													setCounterFilter("")
 													window.location.assign(`/users/route/` + data.route_uuid)
-												}}>
+												}}
+											>
 												<div className="service">
 													<span>{data.route_title}</span>
 												</div>
@@ -224,8 +266,9 @@ const Orders = ({ refreshDb }) => {
 						style={{
 							height: "fit-content",
 							width: "max-content",
-							padding: "50px",
-						}}>
+							padding: "50px"
+						}}
+					>
 						<h3>{remarks}</h3>
 
 						<button onClick={() => setRemarks(false)} className="closeButton">
@@ -250,6 +293,19 @@ const Orders = ({ refreshDb }) => {
 			) : (
 				""
 			)}
+			{locationState?.active && (
+				<div className="overlay">
+					<div className="modal location-confirmation-popup">
+						<h3>You can easily update your counter location with your current location.</h3>
+						<button className="closeButton icon" onClick={() => setLocationState(null)}>
+							<IoIosCloseCircle />
+						</button>
+						<button className="update" onClick={locationHandler}>
+							Update Now
+						</button>
+					</div>
+				</div>
+			)}
 		</>
 	)
 }
@@ -269,8 +325,8 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 			url: "/routes/GetRouteList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setRoutesData(response.data.result)
 	}
@@ -281,8 +337,8 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 			url: "/paymentModes/GetPaymentModesList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log(response.data.result)
 		if (response.data.success) setPaymentModes(response.data.result)
@@ -305,8 +361,8 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 			mobile: [1, 2, 3, 4].map(a => ({
 				uuid: uuid(),
 				mobile: "",
-				type: "",
-			})),
+				type: ""
+			}))
 		})
 	}, [paymentModes])
 	console.log(data)
@@ -330,8 +386,8 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 			url: "/counters/postCounter",
 			data,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			refreshDbC()
@@ -361,8 +417,9 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -381,7 +438,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 											onChange={e =>
 												setdata({
 													...data,
-													counter_title: e.target.value,
+													counter_title: e.target.value
 												})
 											}
 											maxLength={42}
@@ -399,7 +456,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 											onChange={e =>
 												setdata({
 													...data,
-													sort_order: e.target.value,
+													sort_order: e.target.value
 												})
 											}
 										/>
@@ -416,7 +473,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 											onChange={e =>
 												setdata({
 													...data,
-													address: e.target.value,
+													address: e.target.value
 												})
 											}
 											maxLength={42}
@@ -432,9 +489,10 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 											onChange={e =>
 												setdata({
 													...data,
-													route_uuid: e.target.value,
+													route_uuid: e.target.value
 												})
-											}>
+											}
+										>
 											<option value="">None</option>
 											{routesData
 												?.sort((a, b) => a.sort_order - b.sort_order)
@@ -455,36 +513,26 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 														display: "flex",
 														alignItems: "center",
 														justifyContent: "space-between",
-														margin: "5px 0",
-													}}>
+														margin: "5px 0"
+													}}
+												>
 													<input
 														type="number"
 														name="route_title"
 														className="numberInput"
 														value={a?.mobile}
 														style={{ width: "15ch" }}
-														disabled={a.lable?.find(
-															c =>
-																(c.type === "cal" || c.type === "wa") && +c.varification
-														)}
+														disabled={a.lable?.find(c => (c.type === "cal" || c.type === "wa") && +c.varification)}
 														onChange={e => {
 															if (
 																e.target.value.length > 10 ||
-																a.lable?.find(
-																	c =>
-																		(c.type === "cal" || c.type === "wa") &&
-																		+c.varification
-																)
+																a.lable?.find(c => (c.type === "cal" || c.type === "wa") && +c.varification)
 															) {
 																return
 															}
 															setdata(prev => ({
 																...prev,
-																mobile: prev.mobile.map(b =>
-																	b.uuid === a.uuid
-																		? { ...b, mobile: e.target.value }
-																		: b
-																),
+																mobile: prev.mobile.map(b => (b.uuid === a.uuid ? { ...b, mobile: e.target.value } : b))
 															}))
 														}}
 														maxLength={10}
@@ -506,12 +554,11 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 													: data?.payment_modes
 											}
 											onChange={onChangeHandler}
-											multiple>
+											multiple
+										>
 											{/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
 											{paymentModes?.map(occ => (
-												<option
-													value={occ.mode_uuid}
-													style={{ marginBottom: "5px", textAlign: "center" }}>
+												<option value={occ.mode_uuid} style={{ marginBottom: "5px", textAlign: "center" }}>
 													{occ.mode_title}
 												</option>
 											))}
@@ -519,11 +566,12 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 												onClick={() =>
 													setdata(prev => ({
 														...prev,
-														credit_allowed: prev.credit_allowed === "Y" ? "N" : "Y",
+														credit_allowed: prev.credit_allowed === "Y" ? "N" : "Y"
 													}))
 												}
 												style={{ marginBottom: "5px", textAlign: "center" }}
-												value="unpaid">
+												value="unpaid"
+											>
 												Unpaid
 											</option>
 										</select>
@@ -536,7 +584,8 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 										<select
 											className="numberInput"
 											value={data.status}
-											onChange={e => setdata(prev => ({ ...prev, status: e.target.value }))}>
+											onChange={e => setdata(prev => ({ ...prev, status: e.target.value }))}
+										>
 											{/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
 
 											<option value={1}>Active</option>
@@ -555,7 +604,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 												onChange={e =>
 													setdata({
 														...data,
-														remarks: e.target.value,
+														remarks: e.target.value
 													})
 												}
 												maxLength={42}
@@ -576,7 +625,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 											onChange={e =>
 												setdata({
 													...data,
-													gst: e.target.value,
+													gst: e.target.value
 												})
 											}
 											maxLength={42}
@@ -592,7 +641,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 											onChange={e =>
 												setdata({
 													...data,
-													food_license: e.target.value,
+													food_license: e.target.value
 												})
 											}
 											maxLength={42}
@@ -610,7 +659,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 											onChange={e =>
 												setdata({
 													...data,
-													counter_code: e.target.value,
+													counter_code: e.target.value
 												})
 											}
 										/>
@@ -622,17 +671,15 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 							{loading ? (
 								<button className="submit" id="loading-screen">
 									<svg viewBox="0 0 100 100">
-										<path
-											d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-											fill="#ffffff"
-											stroke="none">
+										<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
 											<animateTransform
 												attributeName="transform"
 												type="rotate"
 												dur="1s"
 												repeatCount="indefinite"
 												keyTimes="0;1"
-												values="0 50 51;360 50 51"></animateTransform>
+												values="0 50 51;360 50 51"
+											></animateTransform>
 										</path>
 									</svg>
 								</button>
@@ -659,15 +706,17 @@ const PhoneList = ({ onSave, mobile }) => {
 				style={{
 					height: "fit-content",
 					width: "max-content",
-					minWidth: "250px",
-				}}>
+					minWidth: "250px"
+				}}
+			>
 				<div
 					className="content"
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						{mobile.length ? (
 							<div className="flex" style={{ flexDirection: "column", width: "100%" }}>
@@ -675,8 +724,9 @@ const PhoneList = ({ onSave, mobile }) => {
 									className="user-table"
 									style={{
 										width: "100%",
-										height: "fit-content",
-									}}>
+										height: "fit-content"
+									}}
+								>
 									<tbody className="tbody">
 										{mobile
 											?.filter(i => i?.mobile)
@@ -685,15 +735,17 @@ const PhoneList = ({ onSave, mobile }) => {
 													key={item?.item_uuid || Math.random()}
 													style={{
 														height: "30px",
-														width: "100%",
-													}}>
+														width: "100%"
+													}}
+												>
 													<td
 														colSpan={3}
 														className="flex"
 														onClick={() => {
 															window.location.assign("tel:" + item?.mobile)
 															onSave()
-														}}>
+														}}
+													>
 														<Phone style={{ marginRight: "10px" }} />
 														{item?.mobile}
 													</td>

@@ -61,7 +61,7 @@ import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
 import CashRegister from "./pages/QuikAccess/CashRegister"
 import Companies from "./pages/Master/Companies"
 
-export let Version = 124
+export let Version = 126
 export const server = "https://api.btgondia.com"
 // export const server = "http://localhost:9000"
 // export const server = "http://15.207.39.69:9000"
@@ -76,7 +76,7 @@ function App() {
 		notification,
 		setNotification,
 		isItemAvilableOpen,
-		cashRegisterPopup,
+		cashRegisterPopup
 	} = context
 
 	axios.defaults.baseURL = server
@@ -89,8 +89,8 @@ function App() {
 				url: "users/GetUser/" + user_uuid,
 				signal: controller.signal,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			console.log(response.data.result.user_type)
 			if (response.data.success) setUserType(response.data.result.user_type || false)
@@ -313,8 +313,9 @@ function App() {
 						position: "fixed",
 						bottom: "30px",
 						left: "38px",
-						zIndex: "999999999",
-					}}>
+						zIndex: "999999999"
+					}}
+				>
 					<svg viewBox="0 0 100 100">
 						<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#000" stroke="none">
 							<animateTransform
@@ -323,7 +324,8 @@ function App() {
 								dur="1s"
 								repeatCount="indefinite"
 								keyTimes="0;1"
-								values="0 50 51;360 50 51"></animateTransform>
+								values="0 50 51;360 50 51"
+							></animateTransform>
 						</path>
 					</svg>
 				</div>

@@ -183,13 +183,13 @@ input[type="number"] {
 
 #login-container .input-container input,
 #login-container .input-container input:-webkit-autofill {
-	border: none;
 	color: #fff;
 	font-size: 0.9rem;
 	padding: 12px;
-	background: #ffffff2e;
+	background: #0b0b0b;
 	border-radius: 5px;
 	font-style: italic;
+	border: 1.25px solid #1e1e1e;
 }
 
 input:-webkit-autofill,
