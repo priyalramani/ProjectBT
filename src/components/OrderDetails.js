@@ -20,11 +20,11 @@ const default_status = [
 	{ value: 0, label: "Preparing" },
 	{ value: 1, label: "Ready" },
 	{ value: 2, label: "Hold" },
-	{ value: 3, label: "Canceled" },
+	{ value: 3, label: "Canceled" }
 ]
 const priorityOptions = [
 	{ value: 0, label: "Normal" },
-	{ value: 1, label: "High" },
+	{ value: 1, label: "High" }
 ]
 
 export function OrderDetails({
@@ -39,7 +39,7 @@ export function OrderDetails({
 	trips = [],
 	userData = [],
 	warehouseData = [],
-	reminder = null,
+	reminder = null
 }) {
 	const { setNotification, promptState, getSpecialPrice, saveSpecialPrice, spcPricePrompt, sendPaymentReminders } =
 		useContext(context)
@@ -88,8 +88,8 @@ export function OrderDetails({
 			url: "/orders/GetOrder/" + order_uuid,
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setOrder(response.data.result)
 	}
@@ -115,8 +115,8 @@ export function OrderDetails({
 			url: "/paymentModes/GetPaymentModesList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setPaymentModes(response.data.result)
 	}
@@ -129,8 +129,8 @@ export function OrderDetails({
 			method: "get",
 			url: "/itemCategories/GetItemCategoryList",
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setCategory(response.data.result)
 	}
@@ -144,8 +144,8 @@ export function OrderDetails({
 			url: "/warehouse/GetWarehouseList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setWarehouse(response.data.result)
 	}
@@ -159,8 +159,8 @@ export function OrderDetails({
 			url: "/trips/GetTripList/" + localStorage.getItem("user_uuid"),
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setTripData(response.data.result)
 	}
@@ -184,9 +184,9 @@ export function OrderDetails({
 							uuid: item_uuid,
 							b: 0,
 							p: 0,
-							sr: prev.item_details?.length + 1,
-						},
-					],
+							sr: prev.item_details?.length + 1
+						}
+					]
 				})),
 			250
 		)
@@ -212,8 +212,8 @@ export function OrderDetails({
 				user_uuid: "240522",
 				time: time.getTime(),
 
-				type: "NEW",
-			},
+				type: "NEW"
+			}
 		})
 		setOrderData(prev => ({
 			...prev,
@@ -222,8 +222,8 @@ export function OrderDetails({
 
 			item_details: autoBilling.items?.map(a => ({
 				...(prev.item_details.find(b => b.item_uuid === a.item_uuid) || {}),
-				...a,
-			})),
+				...a
+			}))
 		}))
 	}
 	const reactToPrintContent = useCallback(() => {
@@ -233,7 +233,7 @@ export function OrderDetails({
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
 		documentTitle: "Statement",
-		removeAfterPrint: true,
+		removeAfterPrint: true
 	})
 	const getUsers = async () => {
 		if (userData.length) {
@@ -245,8 +245,8 @@ export function OrderDetails({
 			url: "/users/GetUserList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		// console.log("users", response);
 		if (response.data.success) setUsers(response.data.result)
@@ -285,9 +285,9 @@ export function OrderDetails({
 				...a,
 				uuid: uuid(),
 				default: true,
-				sr: i + 1,
+				sr: i + 1
 			})),
-			fulfillment: [],
+			fulfillment: []
 		})
 
 		if (order?.notes?.filter(a => a)?.length) {
@@ -308,7 +308,7 @@ export function OrderDetails({
 				orderData?.item_details
 					?.map(a => ({
 						...a,
-						category_title: category.find(b => b.category_uuid === a.category_uuid)?.category_title,
+						category_title: category.find(b => b.category_uuid === a.category_uuid)?.category_title
 					}))
 					.sort(
 						(a, b) => a?.category_title?.localeCompare(b.category_title) || a?.item_title?.localeCompare(b.item_title)
@@ -316,8 +316,8 @@ export function OrderDetails({
 					?.filter(a => +a.status !== 3)
 					?.map((a, i) => ({
 						...a,
-						sr: i + 1,
-					})) || [],
+						sr: i + 1
+					})) || []
 		}))
 	}, [category, orderData])
 	const getItemsData = async item => {
@@ -331,8 +331,8 @@ export function OrderDetails({
 			url: "/items/GetItemList",
 			data: { items: item },
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setItemsData(response.data.result)
 	}
@@ -346,8 +346,8 @@ export function OrderDetails({
 			url: "/items/getNewItemReminder",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setReminderDate(response.data.result)
 	}
@@ -361,8 +361,8 @@ export function OrderDetails({
 				url: "/counters/GetCounterList",
 				data: { counters },
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) setCounters(response.data.result)
 		}
@@ -381,11 +381,11 @@ export function OrderDetails({
 				order_uuid: orderData.order_uuid,
 				invoice_number: orderData.invoice_number,
 				additional_users: userSelection,
-				additional_numbers: Object.values(additionalNumbers?.values),
+				additional_numbers: Object.values(additionalNumbers?.values)
 			},
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data) {
 			setNotification(response.data)
@@ -430,14 +430,14 @@ export function OrderDetails({
 				fulfillment.push({
 					item_uuid: item.item_uuid,
 					b: Math.floor(difference / (+item.conversion || 1)),
-					p: Math.floor(difference % (+item.conversion || 1)),
+					p: Math.floor(difference % (+item.conversion || 1))
 				})
 			}
 		}
 		// console.log(fulfillment);
 		let data = {
 			...orderData,
-			item_details: orderData?.item_details?.filter(a => a.item_uuid) || [],
+			item_details: orderData?.item_details?.filter(a => a.item_uuid) || []
 		}
 
 		let autoBilling = await Billing({
@@ -446,12 +446,12 @@ export function OrderDetails({
 			replacement: data.replacement,
 			adjustment: data.adjustment,
 			shortage: data.shortage,
-			others: {},
+			others: {}
 		})
 		data = {
 			...data,
 			...autoBilling,
-			item_details: autoBilling.items,
+			item_details: autoBilling.items
 		}
 		let time = new Date()
 		let user_uuid = localStorage.getItem("user_uuid")
@@ -461,10 +461,10 @@ export function OrderDetails({
 				...a,
 				gst_percentage: a.item_gst,
 				status: a.status || 0,
-				price: a?.price || a.item_price || 0,
+				price: a?.price || a.item_price || 0
 			})),
 			order_status: data?.item_details?.filter(a => a.price_approval === "N")?.length ? "A" : "R",
-			orderStatus,
+			orderStatus
 		}
 
 		data =
@@ -475,36 +475,36 @@ export function OrderDetails({
 							{
 								stage: 1,
 								time: data?.status?.find(a => +a.stage === 1)?.time || time.getTime(),
-								user_uuid: data?.status?.find(a => +a.stage === 1)?.user_uuid || user_uuid,
+								user_uuid: data?.status?.find(a => +a.stage === 1)?.user_uuid || user_uuid
 							},
 							{
 								stage: 2,
 								time: data?.status?.find(a => +a.stage === 1)?.time || time.getTime(),
-								user_uuid: data?.status?.find(a => +a.stage === 1)?.user_uuid || user_uuid,
+								user_uuid: data?.status?.find(a => +a.stage === 1)?.user_uuid || user_uuid
 							},
 							{
 								stage: 3,
 								time: data?.status?.find(a => +a.stage === 1)?.time || time.getTime(),
-								user_uuid: data?.status?.find(a => +a.stage === 1)?.user_uuid || user_uuid,
+								user_uuid: data?.status?.find(a => +a.stage === 1)?.user_uuid || user_uuid
 							},
 							{
 								stage: 4,
 								time: time.getTime(),
-								user_uuid,
+								user_uuid
 							},
 							{
 								stage: 3.5,
 								time: time.getTime(),
-								user_uuid: type.diliveredUser,
-							},
-						],
+								user_uuid: type.diliveredUser
+							}
+						]
 				  }
 				: {
 						...data,
 						fulfillment: [
 							...(fulfillment || []),
-							...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) || []),
-						],
+							...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) || [])
+						]
 				  }
 		if (completedOrderEdited) {
 			setOrderData(data)
@@ -529,12 +529,12 @@ export function OrderDetails({
 			data: [
 				{
 					...data,
-					item_details: data.item_details?.map(i => ({ ...i, price: +(+i.price).toFixed(3) })),
-				},
+					item_details: data.item_details?.map(i => ({ ...i, price: +(+i.price).toFixed(3) }))
+				}
 			],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			getOrder(order_uuid, true)
@@ -564,7 +564,7 @@ export function OrderDetails({
 				fulfillment.push({
 					item_uuid: item.item_uuid,
 					b: Math.floor(difference / (+item.conversion || 1)),
-					p: Math.floor(difference % (+item.conversion || 1)),
+					p: Math.floor(difference % (+item.conversion || 1))
 				})
 			}
 		}
@@ -572,12 +572,12 @@ export function OrderDetails({
 		let data = {
 			...orderData,
 
-			item_details: orderData?.item_details?.filter(a => a.item_uuid && +a.status !== 2) || [],
+			item_details: orderData?.item_details?.filter(a => a.item_uuid && +a.status !== 2) || []
 		}
 		let data2 = {
 			...orderData,
 
-			item_details: orderData?.item_details?.filter(a => a.item_uuid && +a.status === 2) || [],
+			item_details: orderData?.item_details?.filter(a => a.item_uuid && +a.status === 2) || []
 		}
 
 		let autoBilling = await Billing({
@@ -586,12 +586,12 @@ export function OrderDetails({
 			replacement: data.replacement,
 			adjustment: data.adjustment,
 			shortage: data.shortage,
-			others: {},
+			others: {}
 		})
 		data = {
 			...data,
 			...autoBilling,
-			item_details: autoBilling.items,
+			item_details: autoBilling.items
 		}
 		let autoBilling2 = await Billing({
 			counter,
@@ -599,12 +599,12 @@ export function OrderDetails({
 			replacement: data2.replacement,
 			adjustment: data2.adjustment,
 			shortage: data2.shortage,
-			others: {},
+			others: {}
 		})
 		data2 = {
 			...data2,
 			...autoBilling2,
-			item_details: autoBilling2.items,
+			item_details: autoBilling2.items
 		}
 		let time = new Date()
 		let user_uuid = localStorage.getItem("user_uuid")
@@ -615,10 +615,10 @@ export function OrderDetails({
 				...a,
 				gst_percentage: a.item_gst,
 				status: a.status || 0,
-				price: a?.price || a.item_price || 0,
+				price: a?.price || a.item_price || 0
 			})),
 			order_status: data?.item_details?.filter(a => a.price_approval === "N")?.length ? "A" : "R",
-			orderStatus,
+			orderStatus
 		}
 
 		data =
@@ -629,31 +629,31 @@ export function OrderDetails({
 							{
 								stage: 1,
 								time: data?.status?.find(a => +a.stage === 1)?.time || time.getTime(),
-								user_uuid: data?.status?.find(a => +a.stage === 1)?.user_uuid || user_uuid,
+								user_uuid: data?.status?.find(a => +a.stage === 1)?.user_uuid || user_uuid
 							},
 							{
 								stage: 2,
 								time: data?.status?.find(a => +a.stage === 1)?.time || time.getTime(),
-								user_uuid: data?.status?.find(a => +a.stage === 1)?.user_uuid || user_uuid,
+								user_uuid: data?.status?.find(a => +a.stage === 1)?.user_uuid || user_uuid
 							},
 							{
 								stage: 3,
 								time: data?.status?.find(a => +a.stage === 1)?.time || time.getTime(),
-								user_uuid: data?.status?.find(a => +a.stage === 1)?.user_uuid || user_uuid,
+								user_uuid: data?.status?.find(a => +a.stage === 1)?.user_uuid || user_uuid
 							},
 							{
 								stage: 4,
 								time: time.getTime(),
-								user_uuid,
-							},
-						],
+								user_uuid
+							}
+						]
 				  }
 				: {
 						...data,
 						fulfillment: [
 							...(fulfillment || []),
-							...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) || []),
-						],
+							...(order?.fulfillment?.filter(a => !fulfillment.find(b => b.item_uuid === a.item_uuid)) || [])
+						]
 				  }
 		// console.log("data", data);
 
@@ -662,8 +662,8 @@ export function OrderDetails({
 			url: "/orders/putOrders",
 			data: [data],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		delete data2.order_uuid
 		delete data2.invoice_number
@@ -673,8 +673,8 @@ export function OrderDetails({
 			url: "/orders/postOrder",
 			data: data2,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 
 		if (response2.data.success) {
@@ -725,13 +725,13 @@ export function OrderDetails({
 			url: "/orders/putOrders",
 			data: [{ ...orderData, warehouse_uuid }],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setOrderData(prev => ({
 				...prev,
-				warehouse_uuid,
+				warehouse_uuid
 			}))
 			if (method === "complete" || complete) {
 				setDeliveryPopup(true)
@@ -761,7 +761,7 @@ export function OrderDetails({
 		// });
 		let data = {
 			...orderData,
-			hold,
+			hold
 		}
 		data = Object.keys(data)
 			?.filter(key => key !== "notes")
@@ -774,8 +774,8 @@ export function OrderDetails({
 			url: "/orders/putOrders",
 			data: [data],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			onSave()
@@ -787,8 +787,8 @@ export function OrderDetails({
 			method: "get",
 			url: "/tasks/getCounterTask/" + orderData.counter_uuid,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		// console.log(response);
 		if (response.data.success) {
@@ -804,19 +804,19 @@ export function OrderDetails({
 					order_uuid: orderData.order_uuid,
 					invoice_number: orderData.invoice_number,
 					trip_uuid: +selectedTrip.trip_uuid === 0 ? "" : selectedTrip?.trip_uuid,
-					warehouse_uuid: +selectedTrip?.trip_uuid === 0 ? "" : selectedTrip?.warehouse_uuid,
+					warehouse_uuid: +selectedTrip?.trip_uuid === 0 ? "" : selectedTrip?.warehouse_uuid
 					// warehouse_uuid: selectedTrip?.warehouse_uuid,
-				},
+				}
 			],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setOrderData(prev => ({
 				...prev,
 				trip_uuid: +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.trip_uuid,
-				warehouse_uuid: +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.warehouse_uuid,
+				warehouse_uuid: +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.warehouse_uuid
 			}))
 			setSelectedTrip({ trip_uuid: 0, warehouse_uuid: "" })
 		}
@@ -828,13 +828,13 @@ export function OrderDetails({
 			setDateTimeUpdating(1)
 			const time = {
 				time_1: new Date(e.target.value).getTime(),
-				time_2: (orderData?.time_2 - orderData?.time_1 || 48 * 60 * 60 * 1000) + new Date(e.target.value).getTime(),
+				time_2: (orderData?.time_2 - orderData?.time_1 || 48 * 60 * 60 * 1000) + new Date(e.target.value).getTime()
 			}
 
 			setOrderData(data => ({ ...data, ...time }))
 			const response = await axios.put("/orders/order_datetime", {
 				order_uuid: orderData?.order_uuid,
-				...time,
+				...time
 			})
 
 			if (response?.success) setDateTimeUpdating(2)
@@ -897,8 +897,9 @@ export function OrderDetails({
 						padding: "0",
 						zIndex: "999999999",
 						border: "2px solid #000",
-						fontSize: "12px",
-					}}>
+						fontSize: "12px"
+					}}
+				>
 					<div className="inventory" style={{ height: "max-content", maxHeight: "100vh" }}>
 						<div
 							className="accountGroup"
@@ -908,8 +909,9 @@ export function OrderDetails({
 								// height: "400px",
 								height: "max-content",
 								maxHeight: "75vh",
-								overflow: "scroll",
-							}}>
+								overflow: "scroll"
+							}}
+						>
 							<div className="inventory_header" style={{ backgroundColor: "#fff", color: "#000" }}>
 								{editOrder ? (
 									<>
@@ -919,19 +921,19 @@ export function OrderDetails({
 												<Select
 													options={counters?.map(a => ({
 														value: a.counter_uuid,
-														label: a.counter_title,
+														label: a.counter_title
 													}))}
 													onChange={doc => {
 														setOrderData(prev => ({
 															...prev,
-															counter_uuid: doc.value,
+															counter_uuid: doc.value
 														}))
 													}}
 													value={
 														orderData?.counter_uuid
 															? {
 																	value: orderData?.counter_uuid,
-																	label: counters?.find(j => j.counter_uuid === orderData.counter_uuid)?.counter_title,
+																	label: counters?.find(j => j.counter_uuid === orderData.counter_uuid)?.counter_title
 															  }
 															: { value: 0, label: "None" }
 													}
@@ -986,7 +988,8 @@ export function OrderDetails({
 															dur="1s"
 															repeatCount="indefinite"
 															keyTimes="0;1"
-															values="0 50 51;360 50 51"></animateTransform>
+															values="0 50 51;360 50 51"
+														></animateTransform>
 													</path>
 												</svg>
 											)}
@@ -999,11 +1002,10 @@ export function OrderDetails({
 											style={{
 												cursor: "pointer",
 												// backgroundColor: "#000",
-												width: "fit-content",
+												width: "fit-content"
 											}}
-											onClick={() =>
-												setCounterNotesPoup(counters.find(a => a.counter_uuid === orderData.counter_uuid))
-											}>
+											onClick={() => setCounterNotesPoup(counters.find(a => a.counter_uuid === orderData.counter_uuid))}
+										>
 											<NoteAdd />
 											{counters.find(a => a.counter_uuid === orderData?.counter_uuid)?.counter_title || ""} :{" "}
 											{orderData?.invoice_number || ""}
@@ -1021,12 +1023,14 @@ export function OrderDetails({
 									style={{
 										width: "100%",
 										flexDirection: "row",
-										justifyContent: "space-between",
-									}}>
+										justifyContent: "space-between"
+									}}
+								>
 									<button
 										style={{ width: "fit-Content", backgroundColor: "red" }}
 										className="theme-btn"
-										onClick={() => setDeletePopup("Delete")}>
+										onClick={() => setDeletePopup("Delete")}
+									>
 										Cancel Order
 									</button>
 
@@ -1038,7 +1042,8 @@ export function OrderDetails({
 												if (orderData.notes?.length) {
 													setDeletePopup("hold")
 												} else setNotesPoup("hold")
-											}}>
+											}}
+										>
 											Hold Order
 										</button>
 									) : (
@@ -1047,7 +1052,8 @@ export function OrderDetails({
 											className="theme-btn"
 											onClick={() => {
 												HoldOrder("N")
-											}}>
+											}}
+										>
 											Cancel Hold
 										</button>
 									)}
@@ -1057,7 +1063,8 @@ export function OrderDetails({
 										onClick={() => {
 											handleWarehouseChacking(true, "complete")
 											setCompleteOrder(true)
-										}}>
+										}}
+									>
 										Complete Order
 									</button>
 									<button
@@ -1070,25 +1077,28 @@ export function OrderDetails({
 											)
 												handleWarehouseChacking()
 											else handlePrint()
-										}}>
+										}}
+									>
 										Print
 									</button>
 									{editOrder ? (
 										<button
 											className="theme-btn"
 											style={{
-												width: "max-content",
+												width: "max-content"
 											}}
-											onClick={() => setHoldPopup("Summary")}>
+											onClick={() => setHoldPopup("Summary")}
+										>
 											Free
 										</button>
 									) : (
 										<button
 											className="theme-btn"
 											style={{
-												width: "max-content",
+												width: "max-content"
 											}}
-											onClick={() => setSplitHold(true)}>
+											onClick={() => setSplitHold(true)}
+										>
 											Split Hold Order
 										</button>
 									)}
@@ -1103,7 +1113,8 @@ export function OrderDetails({
 												getCounters([])
 											}
 											setEditOrder(prev => !prev)
-										}}>
+										}}
+									>
 										Edit
 									</button>
 									<button
@@ -1114,7 +1125,8 @@ export function OrderDetails({
 											e.target.blur()
 											setPopupForm(true)
 											setSelectedTrip(orderData?.trip_uuid || 0)
-										}}>
+										}}
+									>
 										Assign Trip
 									</button>
 									<button
@@ -1123,7 +1135,8 @@ export function OrderDetails({
 										onClick={e => {
 											e.target.blur()
 											setNotesPoup(prev => !prev)
-										}}>
+										}}
+									>
 										Notes
 									</button>
 								</div>
@@ -1142,20 +1155,20 @@ export function OrderDetails({
 																{ value: "", label: "None" },
 																...warehouse?.map((a, j) => ({
 																	value: a.warehouse_uuid,
-																	label: a.warehouse_title,
-																})),
+																	label: a.warehouse_title
+																}))
 															]}
 															onChange={e => {
 																setOrderData(prev => ({
 																	...prev,
-																	warehouse_uuid: e.value,
+																	warehouse_uuid: e.value
 																}))
 															}}
 															value={{
 																value: orderData.warehouse_uuid || "",
 																label:
 																	warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)
-																		?.warehouse_title || "None",
+																		?.warehouse_title || "None"
 															}}
 															openMenuOnFocus={true}
 															menuPosition="fixed"
@@ -1185,7 +1198,8 @@ export function OrderDetails({
 														window.location.pathname.includes("upiTransactionReport")
 															? setDeliveryPopup("put")
 															: {}
-													}>
+													}
+												>
 													Payment Total
 												</th>
 												<th>{orderData?.payment_total || 0}</th>
@@ -1199,17 +1213,19 @@ export function OrderDetails({
 													style={{
 														cursor: "pointer",
 														position: "relative",
-														width: "12%",
+														width: "12%"
 													}}
 													onMouseOver={() => setUuid(true)}
-													onMouseLeave={() => setUuid(false)}>
+													onMouseLeave={() => setUuid(false)}
+												>
 													{orderData?.order_uuid?.substring(0, 7) + "..."}
 													{copymsg && (
 														<div
 															style={{
 																position: "absolute",
-																top: "100%",
-															}}>
+																top: "100%"
+															}}
+														>
 															<div id="talkbubble">COPIED!</div>
 														</div>
 													)}
@@ -1219,7 +1235,7 @@ export function OrderDetails({
 															uuids
 																? {
 																		fontSize: "12px",
-																		transform: "scale(1.5)",
+																		transform: "scale(1.5)"
 																  }
 																: { fontSize: "12px" }
 														}
@@ -1233,8 +1249,9 @@ export function OrderDetails({
 														<div
 															style={{
 																position: "absolute",
-																top: "100%",
-															}}>
+																top: "100%"
+															}}
+														>
 															<div id="talkbubble">{orderData?.order_uuid}</div>
 														</div>
 													)}
@@ -1248,9 +1265,10 @@ export function OrderDetails({
 														onClick={() =>
 															setPopupDetails({
 																type: "Status",
-																data: orderData?.status,
+																data: orderData?.status
 															})
-														}>
+														}
+													>
 														Status
 													</button>
 												</th>
@@ -1261,9 +1279,10 @@ export function OrderDetails({
 														onClick={() =>
 															setPopupDetails({
 																type: "Delivery Return",
-																data: orderData?.delivery_return,
+																data: orderData?.delivery_return
 															})
-														}>
+														}
+													>
 														Delivery Return
 													</button>
 												</th>
@@ -1274,9 +1293,10 @@ export function OrderDetails({
 														onClick={() =>
 															setPopupDetails({
 																type: "Fulfillment",
-																data: orderData?.fulfillment,
+																data: orderData?.fulfillment
 															})
-														}>
+														}
+													>
 														Fulfillment
 													</button>
 												</th>
@@ -1287,9 +1307,10 @@ export function OrderDetails({
 														onClick={() =>
 															setPopupDetails({
 																type: "Auto Added",
-																data: orderData?.auto_Added,
+																data: orderData?.auto_Added
 															})
-														}>
+														}
+													>
 														Auto Added
 													</button>
 												</th>
@@ -1353,8 +1374,9 @@ export function OrderDetails({
 																: +item.status === 1 || +item.status === 3
 																? "#fff"
 																: "#000",
-														borderBottom: "2px solid #fff",
-													}}>
+														borderBottom: "2px solid #fff"
+													}}
+												>
 													{editOrder ? (
 														<>
 															<td style={{ width: "8px" }}>
@@ -1367,17 +1389,18 @@ export function OrderDetails({
 																					a.uuid === item.uuid
 																						? {
 																								...a,
-																								price_approval: "Y",
+																								price_approval: "Y"
 																						  }
 																						: a
-																				),
+																				)
 																			}))
-																		}>
+																		}
+																	>
 																		<CheckCircle
 																			sx={{ fontSize: 15 }}
 																			style={{
 																				cursor: "pointer",
-																				color: "blue",
+																				color: "blue"
 																			}}
 																		/>
 																	</span>
@@ -1402,32 +1425,33 @@ export function OrderDetails({
 																						{
 																							item_uuid: item.item_uuid,
 																							b: Math.floor(difference / (+item.conversion || 1)),
-																							p: Math.floor(difference % (+item.conversion || 1)),
-																						},
+																							p: Math.floor(difference % (+item.conversion || 1))
+																						}
 																				  ]
 																				: [
 																						...(prev.fulfillment || []),
 																						{
 																							item_uuid: item.item_uuid,
 																							b: item.b,
-																							p: item.p,
-																						},
+																							p: item.p
+																						}
 																				  ]
 
 																			return {
 																				...prev,
 																				item_details: prev.item_details?.filter(a => !(a.uuid === item.uuid)),
-																				fulfillment,
+																				fulfillment
 																			}
 																		})
-																	}>
+																	}
+																>
 																	<RemoveCircle
 																		sx={{
-																			fontSize: item.price_approval === "N" ? 15 : 20,
+																			fontSize: item.price_approval === "N" ? 15 : 20
 																		}}
 																		style={{
 																			cursor: "pointer",
-																			color: "red",
+																			color: "red"
 																		}}
 																	/>
 																</span>
@@ -1438,7 +1462,8 @@ export function OrderDetails({
 													)}
 													<td
 														className="ph2 pv1 tl bb b--black-20 bg-white"
-														style={{ textAlign: "center", width: "3ch" }}>
+														style={{ textAlign: "center", width: "3ch" }}
+													>
 														{item.sr || i + 1}
 													</td>
 													<td className="ph2 pv1 tl bb b--black-20 bg-white">
@@ -1457,8 +1482,8 @@ export function OrderDetails({
 																			// minHeight: 20,
 																			// maxHeight: 20,
 																			borderRadius: 2,
-																			padding: 0,
-																		}),
+																			padding: 0
+																		})
 																	}}
 																	id={"1_item_uuid" + item.uuid}
 																	options={itemsData
@@ -1471,7 +1496,7 @@ export function OrderDetails({
 																		?.map((a, j) => ({
 																			value: a.item_uuid,
 																			label: a.item_title + "______" + a.mrp,
-																			key: a.item_uuid,
+																			key: a.item_uuid
 																		}))}
 																	onChange={e => {
 																		setOrderData(prev => ({
@@ -1481,17 +1506,17 @@ export function OrderDetails({
 																					? {
 																							...a,
 																							...itemsData.find(b => b.item_uuid === e.value),
-																							price: itemsData.find(b => b.item_uuid === e.value)?.item_price,
+																							price: itemsData.find(b => b.item_uuid === e.value)?.item_price
 																					  }
 																					: a
-																			),
+																			)
 																		}))
 																		shiftFocus(item_title_component_id)
 																	}}
 																	value={{
 																		value: item.item_uuid || "",
 																		label: item.item_title ? item.item_title + "______" + item.mrp : "",
-																		key: item.item_uuid || item.uuid,
+																		key: item.item_uuid || item.uuid
 																	}}
 																	openMenuOnFocus={true}
 																	autoFocus={
@@ -1515,10 +1540,11 @@ export function OrderDetails({
 															style={{
 																textAlign: "center",
 																color: "#000",
-																height: "20px",
+																height: "20px"
 															}}
 															index={listItemIndexCount++}
-															id={item_status_component_id}>
+															id={item_status_component_id}
+														>
 															<Select
 																ref={ref => (reactInputsRef.current[item_status_component_id] = ref)}
 																styles={{
@@ -1531,9 +1557,9 @@ export function OrderDetails({
 																			borderRadius: 2,
 																			padding: 0,
 																			justifyContent: "flex-start",
-																			alignItems: "start",
+																			alignItems: "start"
 																		}
-																	},
+																	}
 																}}
 																id={"2_item_uuid" + item.uuid}
 																options={default_status}
@@ -1544,10 +1570,10 @@ export function OrderDetails({
 																			a.uuid === item.uuid
 																				? {
 																						...a,
-																						status: e.value,
+																						status: e.value
 																				  }
 																				: a
-																		),
+																		)
 																	}))
 																	shiftFocus(item_status_component_id)
 																}}
@@ -1571,7 +1597,8 @@ export function OrderDetails({
 													)}
 													<td
 														className="ph2 pv1 tc bb b--black-20 bg-white"
-														style={{ textAlign: "center", height: "20px" }}>
+														style={{ textAlign: "center", height: "20px" }}
+													>
 														{editOrder ? (
 															<input
 																id={"q" + item.uuid}
@@ -1582,7 +1609,7 @@ export function OrderDetails({
 																	width: "10ch",
 																	fontSize: "12px",
 																	padding: 0,
-																	height: "20px",
+																	height: "20px"
 																}}
 																value={item.b || 0}
 																onChange={e => {
@@ -1593,10 +1620,10 @@ export function OrderDetails({
 																				a.uuid === item.uuid
 																					? {
 																							...a,
-																							b: e.target.value,
+																							b: e.target.value
 																					  }
 																					: a
-																			),
+																			)
 																		}
 																	})
 																}}
@@ -1620,7 +1647,7 @@ export function OrderDetails({
 																	width: "10ch",
 																	fontSize: "12px",
 																	padding: 0,
-																	height: "20px",
+																	height: "20px"
 																}}
 																type="number"
 																className="numberInput"
@@ -1635,10 +1662,10 @@ export function OrderDetails({
 																				a.uuid === item.uuid
 																					? {
 																							...a,
-																							p: e.target.value,
+																							p: e.target.value
 																					  }
 																					: a
-																			),
+																			)
 																		}
 																	})
 																}}
@@ -1661,7 +1688,7 @@ export function OrderDetails({
 																	width: "15ch",
 																	fontSize: "12px",
 																	padding: 0,
-																	height: "20px",
+																	height: "20px"
 																}}
 																className="numberInput"
 																onWheel={e => e.preventDefault()}
@@ -1675,10 +1702,10 @@ export function OrderDetails({
 																				a.uuid === item.uuid
 																					? {
 																							...a,
-																							price: e.target.value,
+																							price: e.target.value
 																					  }
 																					: a
-																			),
+																			)
 																		}
 																	})
 																}}
@@ -1701,7 +1728,7 @@ export function OrderDetails({
 																	width: "15ch",
 																	fontSize: "12px",
 																	padding: 0,
-																	height: "20px",
+																	height: "20px"
 																}}
 																className="numberInput"
 																onWheel={e => e.preventDefault()}
@@ -1715,10 +1742,10 @@ export function OrderDetails({
 																				a.uuid === item.uuid
 																					? {
 																							...a,
-																							price: +(e.target.value / item.conversion),
+																							price: +(e.target.value / item.conversion)
 																					  }
 																					: a
-																			),
+																			)
 																		}
 																	})
 																}}
@@ -1730,7 +1757,7 @@ export function OrderDetails({
 																disabled={!item.item_uuid}
 															/>
 														) : (
-															"Rs:" + (item.price * item.conversion || 0).toFixed(2)
+															"Rs:" + (+item.price * +item.conversion || 0).toFixed(2)
 														)}
 													</td>
 													{editOrder ? (
@@ -1764,10 +1791,11 @@ export function OrderDetails({
 																	style={{
 																		width: "fit-Content",
 																		fontSize: "12px",
-																		padding: "5px 10px",
+																		padding: "5px 10px"
 																	}}
 																	className="theme-btn"
-																	onClick={() => setPopupDiscount(item)}>
+																	onClick={() => setPopupDiscount(item)}
+																>
 																	Discounts
 																</button>
 															</td>
@@ -1784,9 +1812,10 @@ export function OrderDetails({
 													onClick={() =>
 														setOrderData(prev => ({
 															...prev,
-															item_details: [...prev.item_details, { uuid: uuid(), b: 0, p: 0, edit: true }],
+															item_details: [...prev.item_details, { uuid: uuid(), b: 0, p: 0, edit: true }]
 														}))
-													}>
+													}
+												>
 													<AddIcon sx={{ fontSize: 40 }} style={{ color: "#4AC959", cursor: "pointer" }} />
 												</td>
 											</tr>
@@ -1797,8 +1826,9 @@ export function OrderDetails({
 											style={{
 												height: "50px",
 
-												borderBottom: "2px solid #fff",
-											}}>
+												borderBottom: "2px solid #fff"
+											}}
+										>
 											<td></td>
 											<td></td>
 											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
@@ -1840,8 +1870,9 @@ export function OrderDetails({
 						style={{
 							background: "white",
 							justifyContent: "space-between",
-							paddingTop: "20px",
-						}}>
+							paddingTop: "20px"
+						}}
+					>
 						<div id="payment-pending-wrapper">
 							{editOrder ? (
 								<>
@@ -1867,7 +1898,8 @@ export function OrderDetails({
 									window.location.pathname.includes("pendingEntry")
 										? () => onSubmit({ stage: 0, diliveredUser: "" }, 1)
 										: () => onSubmit()
-								}>
+								}
+							>
 								Save
 							</button>
 						) : (
@@ -1885,8 +1917,9 @@ export function OrderDetails({
 								position: "absolute",
 								right: "300px",
 								backgroundColor: "#fff",
-								color: "var(--main)",
-							}}>
+								color: "var(--main)"
+							}}
+						>
 							<WhatsApp />
 						</button>
 						<button type="button" onClick={() => {}} style={{ width: "max-content", padding: "10px 20px" }}>
@@ -1909,7 +1942,8 @@ export function OrderDetails({
 									dur="1s"
 									repeatCount="indefinite"
 									keyTimes="0;1"
-									values="0 50 51;360 50 51"></animateTransform>
+									values="0 50 51;360 50 51"
+								></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -1938,7 +1972,7 @@ export function OrderDetails({
 					button={{
 						label: "Save & Send WhatsApp Notification",
 						action: () => updateOrder({ sendPaymentReminder: true }),
-						visible: true,
+						visible: true
 					}}
 					onSave={() => setMessagePopup(false)}
 				/>
@@ -1986,7 +2020,7 @@ export function OrderDetails({
 							...orderData,
 							item_details: orderData?.item_details?.map(a =>
 								a.item_uuid === data.item_uuid ? { ...a, charges_discount: data.charges_discount } : a
-							),
+							)
 						})
 						setPopupDiscount(false)
 					}}
@@ -2048,14 +2082,16 @@ export function OrderDetails({
 								style={{
 									height: "fit-content",
 									padding: "10px",
-									width: "fit-content",
-								}}>
+									width: "fit-content"
+								}}
+							>
 								<div style={{ overflowY: "scroll" }}>
 									<form className="form">
 										<div className="formGroup" style={{ gap: "20px" }}>
 											<div
 												className="row"
-												style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+												style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
+											>
 												<div style={{ width: "50px" }}>Caption</div>
 												<label className="selectLabel flex" style={{ width: "200px" }}>
 													<input
@@ -2098,7 +2134,7 @@ export function OrderDetails({
 																	!e.target.value || +e.target.value
 																		? setAdditionalNumbers(_i => ({
 																				..._i,
-																				values: { ..._i.values, [idx]: e.target.value },
+																				values: { ..._i.values, [idx]: e.target.value }
 																		  }))
 																		: (e.target.value = additionalNumbers?.values?.[idx] || "")
 																}
@@ -2132,7 +2168,8 @@ export function OrderDetails({
 																dur="1s"
 																repeatCount="indefinite"
 																keyTimes="0;1"
-																values="0 50 51;360 50 51"></animateTransform>
+																values="0 50 51;360 50 51"
+															></animateTransform>
 														</path>
 													</svg>
 												</button>
@@ -2188,8 +2225,9 @@ export function OrderDetails({
 					// background: "#fff",
 					top: -100,
 					left: -180,
-					zIndex: "-1000",
-				}}>
+					zIndex: "-1000"
+				}}
+			>
 				<div ref={componentRef} id="item-container">
 					{getPrintData()?.map((_printData, _i, array) =>
 						_printData?.item_details?.[0] ? (
@@ -2238,11 +2276,11 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 					stage: 5,
 					user_uuid: localStorage.getItem("user_uuid"),
 					time: time.getTime(),
-					cancellation_reason: reason,
-				},
+					cancellation_reason: reason
+				}
 			],
 			fulfillment: order?.fulfillment?.length ? [...order?.fulfillment, ...order?.item_details] : order?.item_details,
-			item_details: order?.item_details?.map(a => ({ ...a, b: 0, p: 0 })),
+			item_details: order?.item_details?.map(a => ({ ...a, b: 0, p: 0 }))
 		}
 
 		let billingData = await Billing({
@@ -2256,23 +2294,23 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 				return {
 					...itemData,
 					...a,
-					price: itemData?.price || 0,
+					price: itemData?.price || 0
 				}
-			}),
+			})
 		})
 		data = {
 			...data,
 			...billingData,
 			item_details: billingData.items,
-			edit: true,
+			edit: true
 		}
 		const response = await axios({
 			method: "put",
 			url: "/orders/putOrders",
 			data: [data],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			onDeleted()
@@ -2286,13 +2324,14 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 				style={{
 					height: "fit-content",
 					width: "max-content",
-					paddingTop: "50px",
+					paddingTop: "50px"
 				}}
 				onSubmit={e => {
 					e.preventDefault()
 					PutOrder()
-				}}>
-				<h3>Order will be {deletePopup}</h3>
+				}}
+			>
+				<h3>Order will be {deletePopup?.toLowerCase() === "delete" ? "deleted" : deletePopup?.toLowerCase()}</h3>
 
 				<textarea
 					type="text"
@@ -2338,8 +2377,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						{popupDetails.type === "Status" ? (
 							<div className="flex" style={{ flexDirection: "column", width: "100%" }}>
@@ -2347,8 +2387,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 									className="user-table"
 									style={{
 										width: "max-content",
-										height: "fit-content",
-									}}>
+										height: "fit-content"
+									}}
+								>
 									<thead>
 										<tr>
 											<th colSpan={2}>
@@ -2368,8 +2409,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 												<tr
 													key={item?.item_uuid || Math.random()}
 													style={{
-														height: "30px",
-													}}>
+														height: "30px"
+													}}
+												>
 													<td colSpan={2}>
 														{+item.stage === 1
 															? "Order Placed By"
@@ -2402,8 +2444,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 									className="user-table"
 									style={{
 										width: "max-content",
-										height: "fit-content",
-									}}>
+										height: "fit-content"
+									}}
+								>
 									<thead>
 										<tr>
 											<th colSpan={2}>
@@ -2419,8 +2462,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 											<tr
 												key={item?.item_uuid || Math.random()}
 												style={{
-													height: "30px",
-												}}>
+													height: "30px"
+												}}
+											>
 												<td colSpan={2}>{items.find(a => a.item_uuid === item.item_uuid)?.item_title || ""}</td>
 												<td>
 													{item?.b || 0}:{item.p || 0}
@@ -2436,8 +2480,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 									className="user-table"
 									style={{
 										width: "max-content",
-										height: "fit-content",
-									}}>
+										height: "fit-content"
+									}}
+								>
 									<thead>
 										<tr>
 											<th colSpan={2}>
@@ -2453,8 +2498,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 											<tr
 												key={item?.item_uuid || Math.random()}
 												style={{
-													height: "30px",
-												}}>
+													height: "30px"
+												}}
+											>
 												<td colSpan={2}>{items.find(a => a.item_uuid === item.item_uuid)?.item_title || ""}</td>
 												<td>
 													{item?.b || 0}:{item.p || 0}
@@ -2470,8 +2516,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 									className="user-table"
 									style={{
 										width: "max-content",
-										height: "fit-content",
-									}}>
+										height: "fit-content"
+									}}
+								>
 									<thead>
 										<tr>
 											<th colSpan={2}>
@@ -2487,8 +2534,9 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 											<tr
 												key={item?.item_uuid || Math.random()}
 												style={{
-													height: "30px",
-												}}>
+													height: "30px"
+												}}
+											>
 												<td colSpan={2}>{items.find(a => a.item_uuid === item.item_uuid)?.item_title || ""}</td>
 												<td>
 													{item?.b || 0}:{item.p || 0}
@@ -2520,7 +2568,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 		setData(
 			popupDetails.charges_discount?.map(a => ({
 				...a,
-				uuid: a._id || a._id || uuid(),
+				uuid: a._id || a._id || uuid()
 			}))
 		)
 	}, [popupDetails.charges_discount])
@@ -2534,16 +2582,18 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						<div className="flex" style={{ flexDirection: "column", width: "100%" }}>
 							<table
 								className="user-table"
 								style={{
 									width: "max-content",
-									height: "fit-content",
-								}}>
+									height: "fit-content"
+								}}
+							>
 								<thead>
 									<tr>
 										<th colSpan={2}>
@@ -2560,8 +2610,9 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 												<tr
 													key={item?.uuid || Math.random()}
 													style={{
-														height: "30px",
-													}}>
+														height: "30px"
+													}}
+												>
 													<td colSpan={2}>
 														{item._id ? (
 															item.title
@@ -2573,7 +2624,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 																	width: "10ch",
 																	fontSize: "12px",
 																	padding: 0,
-																	height: "20px",
+																	height: "20px"
 																}}
 																value={item.title || 0}
 																onChange={e => {
@@ -2582,7 +2633,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 																			a.uuid === item.uuid
 																				? {
 																						...a,
-																						title: e.target.value,
+																						title: e.target.value
 																				  }
 																				: a
 																		)
@@ -2605,7 +2656,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 																width: "10ch",
 																fontSize: "12px",
 																padding: 0,
-																height: "20px",
+																height: "20px"
 															}}
 															value={item.value || 0}
 															onChange={e => {
@@ -2636,7 +2687,8 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 								<button
 									type="button"
 									className="submit"
-									onClick={() => onUpdate({ ...popupDetails, charges_discount: data })}>
+									onClick={() => onUpdate({ ...popupDetails, charges_discount: data })}
+								>
 									Save
 								</button>
 							) : (
@@ -2660,7 +2712,7 @@ function DiliveryPopup({
 	order,
 	updateBilling,
 	deliveryPopup,
-	users,
+	users
 }) {
 	const [PaymentModes, setPaymentModes] = useState([])
 	const [modes, setModes] = useState([])
@@ -2691,8 +2743,8 @@ function DiliveryPopup({
 			url: "/paymentModes/GetPaymentModesList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setPaymentModes(response.data.result)
@@ -2705,8 +2757,8 @@ function DiliveryPopup({
 			url: "/trips/GetTripData",
 			data: { params: ["users"], trips: [trip_uuid].filter(a => a) },
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			console.log("dilivereduser", response.data.result[0]?.users[0])
@@ -2719,11 +2771,11 @@ function DiliveryPopup({
 			url: "/receipts/getRecipt",
 			data: {
 				order_uuid: order?.order_uuid,
-				counter_uuid: order?.counter_uuid,
+				counter_uuid: order?.counter_uuid
 			},
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setModes(response.data.result.modes)
 	}
@@ -2733,11 +2785,11 @@ function DiliveryPopup({
 			url: "/Outstanding/getOutstanding",
 			data: {
 				order_uuid: order?.order_uuid,
-				counter_uuid: order?.counter_uuid,
+				counter_uuid: order?.counter_uuid
 			},
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setOutstanding(response.data.result)
 		else {
@@ -2752,7 +2804,7 @@ function DiliveryPopup({
 				trip_uuid: order?.trip_uuid,
 				counter_uuid: order?.counter_uuid,
 				reminder,
-				type,
+				type
 			})
 		}
 	}
@@ -2770,7 +2822,7 @@ function DiliveryPopup({
 				trip_uuid: order?.trip_uuid,
 				counter_uuid: order?.counter_uuid,
 				reminder,
-				type,
+				type
 			})
 		}
 		GetPaymentModes()
@@ -2783,8 +2835,9 @@ function DiliveryPopup({
 		order?.trip_uuid,
 		reminder,
 		type,
-		order.trip_uuid,
+		order.trip_uuid
 	])
+
 	useEffect(() => {
 		if (PaymentModes?.length)
 			setModes(
@@ -2796,7 +2849,7 @@ function DiliveryPopup({
 						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
 						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 							? "0"
-							: 1,
+							: 1
 				}))
 			)
 	}, [PaymentModes])
@@ -2821,7 +2874,7 @@ function DiliveryPopup({
 			replacement: data?.actual || 0,
 			shortage: data?.shortage || 0,
 			adjustment: data?.adjustment || 0,
-			adjustment_remarks: data?.adjustment_remarks || "",
+			adjustment_remarks: data?.adjustment_remarks || ""
 		})
 		setError("")
 		let modeTotal = modes?.map(a => +a.amt || 0)?.reduce((a, b) => a + b)
@@ -2848,11 +2901,11 @@ function DiliveryPopup({
 					data: {
 						modes,
 						order_uuid: order?.order_uuid,
-						counter_uuid: order?.counter_uuid,
+						counter_uuid: order?.counter_uuid
 					},
 					headers: {
-						"Content-Type": "application/json",
-					},
+						"Content-Type": "application/json"
+					}
 				})
 			}
 			if (outstanding?.amount) {
@@ -2862,11 +2915,11 @@ function DiliveryPopup({
 					data: {
 						...outstanding,
 						order_uuid: order?.order_uuid,
-						counter_uuid: order?.counter_uuid,
+						counter_uuid: order?.counter_uuid
 					},
 					headers: {
-						"Content-Type": "application/json",
-					},
+						"Content-Type": "application/json"
+					}
 				})
 			}
 
@@ -2887,7 +2940,7 @@ function DiliveryPopup({
 				counter_uuid: order?.counter_uuid,
 				trip_uuid: order?.trip_uuid,
 				invoice_number: order?.invoice_number,
-				modes: modes?.map(a => (a.mode_title === "Cash" ? { ...a, coin: 0 } : a)),
+				modes: modes?.map(a => (a.mode_title === "Cash" ? { ...a, coin: 0 } : a))
 			}
 			let response
 			if (modeTotal) {
@@ -2896,8 +2949,8 @@ function DiliveryPopup({
 					url: "/receipts/postReceipt",
 					data: obj,
 					headers: {
-						"Content-Type": "application/json",
-					},
+						"Content-Type": "application/json"
+					}
 				})
 			}
 			if (outstanding?.amount)
@@ -2906,8 +2959,8 @@ function DiliveryPopup({
 					url: "/Outstanding/postOutstanding",
 					data: outstanding,
 					headers: {
-						"Content-Type": "application/json",
-					},
+						"Content-Type": "application/json"
+					}
 				})
 			if (response.data.success) {
 				postOrderData(diliveredUser)
@@ -2930,8 +2983,9 @@ function DiliveryPopup({
 						style={{
 							height: "fit-content",
 							padding: "10px",
-							width: "fit-content",
-						}}>
+							width: "fit-content"
+						}}
+					>
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup">
@@ -2954,7 +3008,7 @@ function DiliveryPopup({
 																a.mode_uuid === item.mode_uuid
 																	? {
 																			...a,
-																			amt: order.order_grandtotal || 0,
+																			amt: order.order_grandtotal || 0
 																	  }
 																	: a
 															)
@@ -2966,7 +3020,7 @@ function DiliveryPopup({
 																a.mode_uuid === item.mode_uuid
 																	? {
 																			...a,
-																			amt: e.target.value,
+																			amt: e.target.value
 																	  }
 																	: a
 															)
@@ -2988,7 +3042,7 @@ function DiliveryPopup({
 														style={{
 															width: "100%",
 															backgroundColor: "light",
-															fontSize: "12px",
+															fontSize: "12px"
 														}}
 														onChange={e =>
 															setModes(prev =>
@@ -3020,7 +3074,7 @@ function DiliveryPopup({
 																width: "90px",
 																backgroundColor: "light",
 																fontSize: "12px",
-																color: "#fff",
+																color: "#fff"
 														  }
 														: { width: "80px" }
 												}
@@ -3029,13 +3083,13 @@ function DiliveryPopup({
 													e.stopPropagation()
 													setOutstanding(prev => ({
 														...prev,
-														amount: order.order_grandtotal || 0,
+														amount: order.order_grandtotal || 0
 													}))
 												}}
 												onChange={e =>
 													setOutstanding(prev => ({
 														...prev,
-														amount: e.target.value,
+														amount: e.target.value
 													}))
 												}
 												maxLength={42}
@@ -3054,12 +3108,12 @@ function DiliveryPopup({
 													style={{
 														width: "100%",
 														backgroundColor: "light",
-														fontSize: "12px",
+														fontSize: "12px"
 													}}
 													onChange={e =>
 														setOutstanding(prev => ({
 															...prev,
-															remarks: e.target.value,
+															remarks: e.target.value
 														}))
 													}
 													maxLength={42}
@@ -3079,7 +3133,8 @@ function DiliveryPopup({
 												type="button"
 												className="submit"
 												style={{ color: "#fff", backgroundColor: "#7990dd" }}
-												onClick={() => setPopup(true)}>
+												onClick={() => setPopup(true)}
+											>
 												Deductions
 											</button>
 										)}
@@ -3092,10 +3147,11 @@ function DiliveryPopup({
 												style={{
 													width: "100%",
 													backgroundColor: "light",
-													fontSize: "12px",
+													fontSize: "12px"
 												}}
 												value={diliveredUser}
-												onChange={e => setDiliveredUser(e.target.value)}>
+												onChange={e => setDiliveredUser(e.target.value)}
+											>
 												<option value="">None</option>
 												{users
 													.filter(a => a.status)
@@ -3133,7 +3189,8 @@ function DiliveryPopup({
 									dur="1s"
 									repeatCount="indefinite"
 									keyTimes="0;1"
-									values="0 50 51;360 50 51"></animateTransform>
+									values="0 50 51;360 50 51"
+								></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -3153,7 +3210,7 @@ function DiliveryPopup({
 							replacement: e?.actual || 0,
 							shortage: e?.shortage || 0,
 							adjustment: e?.adjustment || 0,
-							adjustment_remarks: e?.adjustment_remarks || "",
+							adjustment_remarks: e?.adjustment_remarks || ""
 						})
 					}
 					data={data}
@@ -3177,13 +3234,13 @@ function NotesPopup({ onSave, order, setSelectedOrder, notesPopup, HoldOrder }) 
 			url: "/orders/putOrderNotes",
 			data: { notes, invoice_number: order?.invoice_number },
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setSelectedOrder(prev => ({
 				...prev,
-				notes,
+				notes
 			}))
 			if (notesPopup === "hold") setTimeout(HoldOrder, 2000)
 			onSave()
@@ -3202,8 +3259,9 @@ function NotesPopup({ onSave, order, setSelectedOrder, notesPopup, HoldOrder }) 
 						style={{
 							height: "fit-content",
 							padding: "10px",
-							width: "fit-content",
-						}}>
+							width: "fit-content"
+						}}
+					>
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup">
@@ -3250,7 +3308,7 @@ function CounterNotesPopup({
 	order,
 	setSelectedOrder,
 	notesPopup,
-	HoldOrder,
+	HoldOrder
 }) {
 	const [notes, setNotes] = useState([])
 	const [edit, setEdit] = useState(false)
@@ -3266,12 +3324,12 @@ function CounterNotesPopup({
 			data: [
 				{
 					counter_uuid: notesPopup.counter_uuid,
-					notes,
-				},
+					notes
+				}
 			],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			onSave()
@@ -3285,8 +3343,9 @@ function CounterNotesPopup({
 					style={{
 						height: "fit-content",
 						width: "max-content",
-						backgroundColor: "cyan",
-					}}>
+						backgroundColor: "cyan"
+					}}
+				>
 					<div className="flex" style={{ justifyContent: "space-between" }}>
 						<h3>Counter Notes</h3>
 						{/* <h3>Please Enter Notes</h3> */}
@@ -3296,8 +3355,9 @@ function CounterNotesPopup({
 						style={{
 							height: "fit-content",
 							padding: "10px",
-							width: "fit-content",
-						}}>
+							width: "fit-content"
+						}}
+					>
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup" style={{ backgroundColor: "#fff" }}>
@@ -3348,8 +3408,8 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
 			url: "/warehouse/GetWarehouseList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setWarehouse(response.data.result)
 	}
@@ -3372,8 +3432,9 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
 						height: "fit-content",
 						padding: "20p0",
 						marginBottom: "10px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -3390,15 +3451,15 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
 													{ value: 0, label: "None" },
 													...warehouse?.map(a => ({
 														value: a.warehouse_uuid,
-														label: a.warehouse_title,
-													})),
+														label: a.warehouse_title
+													}))
 												]}
 												onChange={doc => setdata(doc.value)}
 												value={
 													data
 														? {
 																value: data,
-																label: warehouse?.find(j => j.warehouse_uuid === data)?.warehouse_title,
+																label: warehouse?.find(j => j.warehouse_uuid === data)?.warehouse_title
 														  }
 														: { value: 0, label: "None" }
 												}
@@ -3441,8 +3502,9 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
 						height: "fit-content",
 						padding: "20p0",
 						marginBottom: "10px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -3460,11 +3522,12 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
 											onChange={e =>
 												setSelectedTrip({
 													trip_uuid: e.target.value,
-													warehouse_uuid: trips?.find(a => a.trip_uuid === e.target.value)?.warehouse_uuid || "",
+													warehouse_uuid: trips?.find(a => a.trip_uuid === e.target.value)?.warehouse_uuid || ""
 												})
 											}
 											maxLength={42}
-											style={{ width: "200px" }}>
+											style={{ width: "200px" }}
+										>
 											<option value="0">None</option>
 											{trips
 												?.filter(

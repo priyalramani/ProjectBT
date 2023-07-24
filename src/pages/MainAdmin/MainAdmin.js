@@ -75,7 +75,7 @@ const MainAdmin = () => {
 		documentTitle: "Pending Payments Summary",
 		removeAfterPrint: true,
 		onAfterPrint: () => setPrintDependencies(null),
-		onPrintError: () => setPrintDependencies(null),
+		onPrintError: () => setPrintDependencies(null)
 	})
 
 	const createPaymentSummary = condition => {
@@ -92,8 +92,8 @@ const MainAdmin = () => {
 						orders: (data?.[i.counter_uuid]?.orders || []).concat([i]),
 						numbers:
 							data?.[i.counter_uuid]?.numbers ||
-							counter?.find(c => c?.counter_uuid === i?.counter_uuid)?.mobile?.map(m => m?.mobile),
-					},
+							counter?.find(c => c?.counter_uuid === i?.counter_uuid)?.mobile?.map(m => m?.mobile)
+					}
 				}),
 				{}
 			)
@@ -129,8 +129,8 @@ const MainAdmin = () => {
 			url: "/items/getNewItemReminder",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setReminderDate(response.data.result)
 	}
@@ -148,8 +148,8 @@ const MainAdmin = () => {
 			url: "/companies/getCompanies",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setCompanies(response.data.result)
 	}
@@ -163,8 +163,8 @@ const MainAdmin = () => {
 			url: "/warehouse/GetWarehouseList",
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setWarehouse(response.data.result)
 	}
@@ -174,15 +174,15 @@ const MainAdmin = () => {
 			url: "/itemCategories/GetItemCategoryList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setCategory(response.data.result)
 	}
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
 		documentTitle: "Statement",
-		removeAfterPrint: true,
+		removeAfterPrint: true
 	})
 	const getItemsData = async () => {
 		const response = await axios({
@@ -190,8 +190,8 @@ const MainAdmin = () => {
 			url: "/items/GetItemList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setItems(response.data.result)
 	}
@@ -201,8 +201,8 @@ const MainAdmin = () => {
 			url: "/users/GetUserList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setUsers(response.data.result)
 	}
@@ -213,15 +213,15 @@ const MainAdmin = () => {
 			url: "/counters/GetCounterData",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success)
 			setCounter(
 				response.data.result.map(b => ({
 					...b,
 					route_uuid: b.route_uuid || "none",
-					route_title: routesData.find(a => a.route_uuid === b.route_uuid)?.route_title || "-",
+					route_title: routesData.find(a => a.route_uuid === b.route_uuid)?.route_title || "-"
 				}))
 			)
 	}
@@ -231,8 +231,8 @@ const MainAdmin = () => {
 			url: "/details/GetDetails",
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setDetails(response.data.result)
 	}
@@ -245,8 +245,8 @@ const MainAdmin = () => {
 			url: "/routes/GetOrderRouteList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setRoutesData(response.data.result)
 	}
@@ -281,8 +281,8 @@ const MainAdmin = () => {
 			url: "/orders/putOrders",
 			data: [{ ...orderData, warehouse_uuid }],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			return true
@@ -294,8 +294,8 @@ const MainAdmin = () => {
 			url: "/tasks/getCounterList",
 			data: { counter_uuid: selectedOrder.map(a => a.counter_uuid) },
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log(response)
 		if (response.data.success) setTasks(response.data.result)
@@ -308,8 +308,8 @@ const MainAdmin = () => {
 			url: "/trips/GetTripList/" + localStorage.getItem("user_uuid"),
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setTripData(response.data.result)
 	}
@@ -348,8 +348,8 @@ const MainAdmin = () => {
 			url: "/paymentModes/GetPaymentModesList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setPaymentModes(response.data.result)
 	}
@@ -384,7 +384,7 @@ const MainAdmin = () => {
 		const response = await axios({
 			method: "get",
 			signal: controller.signal,
-			url: "/orders/GetOrderAllRunningList/" + user_uuid,
+			url: "/orders/GetOrderAllRunningList/" + user_uuid
 		})
 
 		if (response.data.success) {
@@ -404,7 +404,7 @@ const MainAdmin = () => {
 	const getRunningHoldOrders = async () => {
 		const response = await axios({
 			method: "get",
-			url: "/orders/GetOrderHoldRunningList/" + user_uuid,
+			url: "/orders/GetOrderHoldRunningList/" + user_uuid
 		})
 
 		if (response.data.success) {
@@ -443,11 +443,11 @@ const MainAdmin = () => {
 				.map(a => ({
 					order_uuid: a.order_uuid,
 					trip_uuid: +selectedTrip?.trip_uuid === 0 ? "" : selectedTrip?.trip_uuid,
-					warehouse_uuid: selectedTrip?.warehouse_uuid,
+					warehouse_uuid: selectedTrip?.warehouse_uuid
 				})),
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			setSelectedOrder([])
@@ -483,8 +483,8 @@ const MainAdmin = () => {
 						(b.status?.length > 1
 							? +b.status.map(x => +x.stage || 0).reduce((c, d) => Math.max(c, d)) === 3
 							: +b?.status[0]?.stage === 3)
-				)?.length,
-			},
+				)?.length
+			}
 		]
 
 		for (let route of routesData) {
@@ -514,7 +514,7 @@ const MainAdmin = () => {
 						(b.status?.length > 1
 							? +b.status.map(x => +x.stage || 0).reduce((c, d) => Math.max(c, d)) === 3
 							: +b?.status[0]?.stage === 3)
-				)?.length,
+				)?.length
 			})
 		}
 		return data
@@ -546,8 +546,8 @@ const MainAdmin = () => {
 						(b.status?.length > 1
 							? +b.status.map(x => +x.stage).reduce((c, d) => Math.max(c, d)) === 3
 							: +b?.status[0]?.stage === 3)
-				)?.length,
-			},
+				)?.length
+			}
 		]
 
 		for (let trip of tripData) {
@@ -574,7 +574,7 @@ const MainAdmin = () => {
 						(b.status?.length > 1
 							? +b.status.map(x => +x.stage).reduce((c, d) => Math.max(c, d)) === 3
 							: +b?.status[0]?.stage === 3)
-				)?.length,
+				)?.length
 			})
 		}
 		return data
@@ -587,7 +587,7 @@ const MainAdmin = () => {
 			setUsers(state => state?.map(_i => (_i?.user_uuid === user_uuid ? user : _i)))
 			await axios.put("/users/putUser", {
 				user_uuid,
-				hide_pending_payments: user.hide_pending_payments,
+				hide_pending_payments: user.hide_pending_payments
 			})
 		} catch (error) {
 			console.log(error)
@@ -605,8 +605,9 @@ const MainAdmin = () => {
 					zIndex: "9999999999999",
 					fontWeight: "bold",
 					width: "100px",
-					textAlign: "center",
-				}}>
+					textAlign: "center"
+				}}
+			>
 				{selectedOrderGrandTotal}
 			</div>
 			<Sidebar setCollectionTags={setCollectionTags} />
@@ -617,7 +618,8 @@ const MainAdmin = () => {
 					e.stopPropagation()
 					setSelectOrder(prev => !prev)
 					setSelectedOrder([])
-				}}>
+				}}
+			>
 				<Header />
 				<AiOutlineReload
 					style={{
@@ -626,7 +628,7 @@ const MainAdmin = () => {
 						zIndex: "99999",
 						top: "10px",
 						right: "280px",
-						cursor: "pointer",
+						cursor: "pointer"
 					}}
 					onClick={() => setBtn(prev => !prev)}
 				/>
@@ -638,7 +640,7 @@ const MainAdmin = () => {
 							zIndex: "99999",
 							top: "10px",
 							right: "320px",
-							cursor: "pointer",
+							cursor: "pointer"
 						}}
 						onClick={() => {
 							handlePrint()
@@ -647,14 +649,15 @@ const MainAdmin = () => {
 								url: "/orders/putOrders",
 								data: selectedPrintOrder.map(a => ({ ...a, to_print: 0 })),
 								headers: {
-									"Content-Type": "application/json",
-								},
+									"Content-Type": "application/json"
+								}
 							}).then(response => {
 								if (response.data.success) {
 									setBtn(prev => !prev)
 								}
 							})
-						}}>
+						}}
+					>
 						<div style={{ position: "relative" }}>
 							<span
 								className="flex"
@@ -666,8 +669,9 @@ const MainAdmin = () => {
 									width: "10px",
 									height: "10px",
 									fontSize: "10px",
-									right: "1px",
-								}}>
+									right: "1px"
+								}}
+							>
 								{selectedPrintOrder?.length}
 							</span>
 							<Print />
@@ -681,7 +685,8 @@ const MainAdmin = () => {
 						holdOrders
 							? { backgroundColor: "#f2e017", display: "flex", height: "100%" }
 							: { display: "flex", height: "100%" }
-					}>
+					}
+				>
 					<VerticalTabs />
 					<div className="inputs">
 						<div
@@ -693,14 +698,15 @@ const MainAdmin = () => {
 								right: "10px",
 								backgroundColor: "#fff",
 								padding: "8px",
-								width: "fit-content",
+								width: "fit-content"
 							}}
 							onClick={e => {
 								setDropDown(prev => !prev)
-							}}>
+							}}
+						>
 							<ArrowDropDown
 								style={{
-									transform: !dropdown ? "rotate(360deg)" : "rotate(180deg)",
+									transform: !dropdown ? "rotate(360deg)" : "rotate(180deg)"
 								}}
 							/>
 						</div>
@@ -710,7 +716,8 @@ const MainAdmin = () => {
 							id="customer-details-dropdown"
 							className={"page1 flex"}
 							style={{ top: "100px", flexDirection: "column", zIndex: "200" }}
-							onMouseLeave={() => setDropDown(false)}>
+							onMouseLeave={() => setDropDown(false)}
+						>
 							<button
 								className="simple_Logout_button"
 								onClick={() => {
@@ -741,7 +748,8 @@ const MainAdmin = () => {
 										onClick={() => {
 											setSelectOrder(true)
 											setDropDown(false)
-										}}>
+										}}
+									>
 										Select
 									</button>
 									{holdOrders ? (
@@ -752,7 +760,8 @@ const MainAdmin = () => {
 											onClick={() => {
 												setHoldOrders(false)
 												setOrdersData([])
-											}}>
+											}}
+										>
 											Show Running Orders
 										</button>
 									) : (
@@ -763,7 +772,8 @@ const MainAdmin = () => {
 											onClick={() => {
 												setHoldOrders(true)
 												setOrdersData([])
-											}}>
+											}}
+										>
 											Show hold Orders
 										</button>
 									)}
@@ -778,7 +788,8 @@ const MainAdmin = () => {
 											setSelectOrder(false)
 											setSelectedOrder([])
 											setDropDown(false)
-										}}>
+										}}
+									>
 										Cancel
 									</button>
 									{selectedOrder?.length ? (
@@ -790,7 +801,8 @@ const MainAdmin = () => {
 												onClick={() => {
 													setPopupForm({ type: "edit" })
 													setDropDown(false)
-												}}>
+												}}
+											>
 												Assign Trip
 											</button>
 											<button
@@ -799,7 +811,8 @@ const MainAdmin = () => {
 												type="button"
 												onClick={() => {
 													handleWarehouseChacking()
-												}}>
+												}}
+											>
 												Print Invoice
 											</button>
 											<button
@@ -810,7 +823,8 @@ const MainAdmin = () => {
 													const stage = selectedOrder?.map(a => +a.status[a.status?.length - 1]?.stage)
 													console.log({ stage })
 													setChangeStatePopup(stage?.sort((a, b) => a - b)?.at(-1))
-												}}>
+												}}
+											>
 												Change Stage
 											</button>
 										</>
@@ -824,7 +838,8 @@ const MainAdmin = () => {
 										onClick={() => {
 											setSumaryPopup(true)
 											setDropDown(false)
-										}}>
+										}}
+									>
 										Item Summary
 									</button>
 									<button type="button" className="simple_Logout_button" onClick={paymentSummaryInvokeHandler}>
@@ -880,7 +895,8 @@ const MainAdmin = () => {
 																				)?.length
 																		)
 																	)
-																}>
+																}
+															>
 																{route.route_title}
 															</span>{" "}
 															({route.orderLength}) [ Processing {route?.processingLength}, Checking{" "}
@@ -890,7 +906,7 @@ const MainAdmin = () => {
 																	type="checkbox"
 																	style={{
 																		marginLeft: "10px",
-																		transform: "scale(1.5)",
+																		transform: "scale(1.5)"
 																	}}
 																	onClick={() =>
 																		orders.filter(
@@ -953,7 +969,7 @@ const MainAdmin = () => {
 																													((!c.route_uuid || +c.route_uuid === 0) &&
 																														+route.route_uuid === 0))
 																										)?.length
-																								),
+																								)
 																						  ]
 																						: orders.filter(
 																								a =>
@@ -1001,9 +1017,10 @@ const MainAdmin = () => {
 																flexWrap: "wrap",
 																gap: "0px",
 																marginBottom: "10px",
-																paddingBottom: "20px",
+																paddingBottom: "20px"
 															}}
-															id="seats_container">
+															id="seats_container"
+														>
 															{orders
 																?.filter(
 																	_i =>
@@ -1051,7 +1068,8 @@ const MainAdmin = () => {
 																					  )
 																					: setSelectedRouteOrder(item.order_uuid)
 																			}
-																			onDoubleClick={() => setSelectedRouteOrder(item.order_uuid)}>
+																			onDoubleClick={() => setSelectedRouteOrder(item.order_uuid)}
+																		>
 																			<span
 																				className="dblClickTrigger"
 																				style={{ display: "none" }}
@@ -1127,7 +1145,8 @@ const MainAdmin = () => {
 										<h2>
 											<span
 												style={{ cursor: "pointer" }}
-												onClick={() => setJoinSummary(orders.filter(a => !a?.trip_uuid))}>
+												onClick={() => setJoinSummary(orders.filter(a => !a?.trip_uuid))}
+											>
 												UnKnown
 											</span>{" "}
 											({orders.filter(a => !a?.trip_uuid)?.length}) [Processing{" "}
@@ -1139,7 +1158,7 @@ const MainAdmin = () => {
 													type="checkbox"
 													style={{
 														marginLeft: "10px",
-														transform: "scale(1.5)",
+														transform: "scale(1.5)"
 													}}
 													defaultChecked={
 														orders.filter(
@@ -1162,7 +1181,7 @@ const MainAdmin = () => {
 																					b =>
 																						!orders.filter(a => !a?.trip_uuid && b.order_uuid === a.order_uuid)?.length
 																				),
-																				...orders.filter(a => !a?.trip_uuid),
+																				...orders.filter(a => !a?.trip_uuid)
 																		  ]
 																		: orders?.filter(a => !a?.trip_uuid)
 															  )
@@ -1178,9 +1197,10 @@ const MainAdmin = () => {
 												flexDirection: "row",
 												flexWrap: "wrap",
 												gap: "0",
-												marginBottom: "10px",
+												marginBottom: "10px"
 											}}
-											id="seats_container">
+											id="seats_container"
+										>
 											{orders
 												?.filter(
 													_i =>
@@ -1221,7 +1241,8 @@ const MainAdmin = () => {
 																				: [item]
 																	  )
 																	: setSelectedRouteOrder(item.order_uuid)
-															}>
+															}
+														>
 															<span
 																className="dblClickTrigger"
 																style={{ display: "none" }}
@@ -1300,7 +1321,8 @@ const MainAdmin = () => {
 														<h1>
 															<span
 																style={{ cursor: "pointer" }}
-																onClick={() => setJoinSummary(orders.filter(a => a.trip_uuid === trip.trip_uuid))}>
+																onClick={() => setJoinSummary(orders.filter(a => a.trip_uuid === trip.trip_uuid))}
+															>
 																{trip.trip_title}
 															</span>{" "}
 															({orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length}) [Processing{" "}
@@ -1316,7 +1338,7 @@ const MainAdmin = () => {
 																	type="checkbox"
 																	style={{
 																		marginLeft: "10px",
-																		transform: "scale(1.5)",
+																		transform: "scale(1.5)"
 																	}}
 																	defaultChecked={
 																		orders.filter(
@@ -1349,7 +1371,7 @@ const MainAdmin = () => {
 																												a.trip_uuid === trip.trip_uuid && b.order_uuid === a.order_uuid
 																										)?.length
 																								),
-																								...orders.filter(a => a.trip_uuid === trip.trip_uuid),
+																								...orders.filter(a => a.trip_uuid === trip.trip_uuid)
 																						  ]
 																						: orders?.filter(a => a.trip_uuid === trip.trip_uuid)
 																			  )
@@ -1365,9 +1387,10 @@ const MainAdmin = () => {
 																flexDirection: "row",
 																flexWrap: "wrap",
 																gap: "0",
-																marginBottom: "10px",
+																marginBottom: "10px"
 															}}
-															id="seats_container">
+															id="seats_container"
+														>
 															{orders
 																?.filter(
 																	_i =>
@@ -1408,7 +1431,8 @@ const MainAdmin = () => {
 																								: [item]
 																					  )
 																					: setSelectedRouteOrder(item.order_uuid)
-																			}>
+																			}
+																		>
 																			<span
 																				className="dblClickTrigger"
 																				style={{ display: "none" }}
@@ -1492,8 +1516,9 @@ const MainAdmin = () => {
 					position: "fixed",
 					top: -1000,
 					right: -1000,
-					zIndex: "-1000",
-				}}>
+					zIndex: "-1000"
+				}}
+			>
 				<div
 					ref={componentRef}
 					style={
@@ -1505,16 +1530,17 @@ const MainAdmin = () => {
 							// textAlign: "center",
 							// padding: "10px"
 						}
-					}>
+					}
+				>
 					{(selectOrder ? selectedOrder : selectedPrintOrder)
 						.map(a => ({
 							...a,
-							sort_order: +counter.find(b => b.counter_uuid === a.counter_uuid)?.sort_order,
+							sort_order: +counter.find(b => b.counter_uuid === a.counter_uuid)?.sort_order
 						}))
 						.sort((a, b) => a.sort_order - b.sort_order)
 						.map(a => ({
 							...a,
-							item_details: a.item_details.filter(b => b.status !== 3).map((b, i) => ({ ...b, sr: i + 1 })),
+							item_details: a.item_details.filter(b => b.status !== 3).map((b, i) => ({ ...b, sr: i + 1 }))
 						}))
 						.map((orderData, index) => {
 							let item_details = orderData.item_details
@@ -1522,7 +1548,7 @@ const MainAdmin = () => {
 									...a,
 									sort_order: +category.find(
 										b => b.counter_uuid === items?.find(c => c.item_uuid - a.item_uuid)?.counter_uuid
-									)?.sort_order,
+									)?.sort_order
 								}))
 								.sort((a, b) => a.sort_order - b.sort_order)
 							return Array.from(Array(Math.ceil(orderData?.item_details?.length / 12)).keys())?.map((a, i) => (
@@ -1624,12 +1650,12 @@ const MainAdmin = () => {
 								...a,
 								category_title: category.find(
 									b => b.category_uuid === items.find(b => b.item_uuid === a.item_uuid).category_uuid
-								)?.category_title,
+								)?.category_title
 							}))
 							.sort(
 								(a, b) =>
 									a?.category_title?.localeCompare(b.category_title) || a?.item_title?.localeCompare(b.item_title)
-							),
+							)
 					}}
 					warehouseData={warehouse}
 					reminder={reminderDate}
@@ -1774,7 +1800,7 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 		else {
 			let warehouse_uuid = JSON.parse(localStorage.getItem("warehouse") || "")
 			setdata({
-				warehouse_uuid,
+				warehouse_uuid
 			})
 			setEdit(warehouse_uuid ? false : true)
 		}
@@ -1795,8 +1821,8 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 				url: "/trips/postTrip",
 				data,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				onSave()
@@ -1813,8 +1839,9 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 						height: "fit-content",
 						padding: "20p0",
 						marginBottom: "10px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -1833,11 +1860,12 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 												onChange={e =>
 													setSelectedTrip({
 														trip_uuid: e.target.value,
-														warehouse_uuid: trips?.find(a => a.trip_uuid === e.target.value)?.warehouse_uuid || "",
+														warehouse_uuid: trips?.find(a => a.trip_uuid === e.target.value)?.warehouse_uuid || ""
 													})
 												}
 												maxLength={42}
-												style={{ width: "200px" }}>
+												style={{ width: "200px" }}
+											>
 												<option value="0">None</option>
 
 												{trips
@@ -1866,7 +1894,7 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 													onChange={e =>
 														setdata({
 															...data,
-															trip_title: e.target.value,
+															trip_title: e.target.value
 														})
 													}
 													maxLength={42}
@@ -1882,13 +1910,13 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 															{ value: 0, label: "None" },
 															...warehouse.map(a => ({
 																value: a.warehouse_uuid,
-																label: a.warehouse_title,
-															})),
+																label: a.warehouse_title
+															}))
 														]}
 														onChange={doc =>
 															setdata(prev => ({
 																...prev,
-																warehouse_uuid: doc.value,
+																warehouse_uuid: doc.value
 															}))
 														}
 														value={
@@ -1896,7 +1924,7 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 																? {
 																		value: data?.warehouse_uuid,
 																		label: warehouse?.find(j => j.warehouse_uuid === data.warehouse_uuid)
-																			?.warehouse_title,
+																			?.warehouse_title
 																  }
 																: { value: 0, label: "None" }
 														}
@@ -1928,6 +1956,7 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 		</div>
 	)
 }
+
 function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder, updateOrders }) {
 	const [items, setItems] = useState([])
 	const [stage, setStage] = useState("")
@@ -1938,6 +1967,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 	const componentRef = useRef(null)
 	const componentBoxRef = useRef(null)
 	const [filterItemTitle, setFilterItemTile] = useState("")
+
 	const reactToPrintContent = useCallback(() => {
 		return componentRef.current
 	}, [])
@@ -1948,40 +1978,34 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
 		documentTitle: "Statement",
-		removeAfterPrint: true,
+		removeAfterPrint: true
 	})
 	const handleBoxPrint = useReactToPrint({
 		content: reactToBoxPrintContent,
 		documentTitle: "BoxStatement",
-		removeAfterPrint: true,
+		removeAfterPrint: true
 	})
 	const stagesData = [
 		{ value: "all", label: "All" },
 		{ value: 1, label: "Processing" },
 		{ value: 2, label: "Checking" },
-		{ value: 3, label: "Delivery" },
+		{ value: 3, label: "Delivery" }
 	]
 	const ItemsStatusData = [
 		{ value: "all", label: "All" },
 		{ value: 0, label: "Placed" },
 		{ value: 1, label: "Complete" },
 		{ value: 2, label: "Hold" },
-		{ value: 3, label: "Canceld" },
+		{ value: 3, label: "Canceld" }
 	]
 	useEffect(() => {
 		let orderStage = orders.map(a => ({
 			...a,
 			stage:
-				a.status?.length > 1 ? a.status.map(b => +b.stage || 0).reduce((c, b) => Math.max(c, b)) : a.status[0].stage,
+				a.status?.length > 1 ? a.status.map(b => +b.stage || 0).reduce((c, b) => Math.max(c, b)) : a.status[0].stage
 		}))
+
 		setFilteredOrder(orderStage)
-		console.log(
-			"orders",
-			[].concat.apply(
-				[],
-				orderStage.map(a => a.item_details)
-			)
-		)
 		orderStage = orderStage.filter(a => stage === "all" || +a.stage === stage)
 
 		let data = [].concat
@@ -1991,15 +2015,18 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 			)
 			.filter(a => itemStatus === "all" || +a.status === itemStatus)
 			.map(a => {
+				console.log({ a })
 				let itemDetails = itemsData?.find(b => b.item_uuid === a.item_uuid)
-
 				return {
 					...a,
 					item_title: itemDetails?.item_title,
 					mrp: itemDetails?.mrp,
-					category_uuid: itemDetails?.category_uuid,
+					category_uuid: itemDetails?.category_uuid
 				}
 			})
+
+		console.log({ data })
+
 		let result = []
 		for (let item of data) {
 			var existing = result.filter(function (v, i) {
@@ -2024,27 +2051,12 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 					...item,
 					order_count: orders.filter(a => a.item_details.filter(b => b.item_uuid === item.item_uuid)?.length)?.length,
 					b: parseInt(+b + (+p + free) / +itemsData?.find(b => b.item_uuid === item.item_uuid)?.conversion),
-					p: parseInt((+p + free) % +itemsData?.find(b => b.item_uuid === item.item_uuid)?.conversion),
+					p: parseInt((+p + free) % +itemsData?.find(b => b.item_uuid === item.item_uuid)?.conversion)
 				}
 				result.push(obj)
 			}
 		}
 
-		// let result = data.reduce((acc, curr) => {
-		//   let item = acc.find((item) => item.item_uuid === curr.item_uuid);
-		//   if (item) {
-		//     let conversion = +itemsData?.find((b) => b.item_uuid === item.item_uuid)
-		//       ?.conversion;
-		//     item.b = +(
-		//       +item.b + curr.b + (+item.p + curr.p + (+curr.free || 0)) / conversion
-		//     );
-		//     item.p = +((+item.p + curr.p + (+curr.free || 0)) % conversion);
-		//   } else {
-		//     acc.push(curr);
-		//   }
-
-		//   return acc;
-		// }, []);
 		setOrderTotal(
 			orderStage?.length > 1
 				? orderStage.map(a => +a?.order_grandtotal || 0).reduce((a, b) => a + b)
@@ -2053,6 +2065,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 		console.log(result)
 		setItems(result)
 	}, [stage, itemStatus, orders, itemsData])
+
 	return (
 		<>
 			<div className="overlay">
@@ -2062,8 +2075,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 						height: "600px",
 						width: "max-content",
 						minWidth: "300px",
-						paddingTop: "50px",
-					}}>
+						paddingTop: "50px"
+					}}
+				>
 					<div className="flex" style={{ justifyContent: "space-between", alignItems: "start" }}>
 						<h1>Summary</h1>
 						{stage && itemStatus ? (
@@ -2073,14 +2087,16 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 									style={{
 										flexDirection: "column",
 										justifyContent: "space-between",
-										height: "80px",
-									}}>
+										height: "80px"
+									}}
+								>
 									<button
 										style={{ width: "fit-Content", backgroundColor: "black" }}
 										className="theme-btn"
 										onClick={() => {
 											handlePrint()
-										}}>
+										}}
+									>
 										Print
 									</button>
 									<div className="user_searchbar flex" style={{ width: "100%" }}>
@@ -2106,12 +2122,13 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 												width: "fit-Content",
 												backgroundColor: "black",
 												position: "absolute",
-												right: "-100px",
+												right: "-100px"
 											}}
 											className="theme-btn"
 											onClick={() => {
 												handleBoxPrint()
-											}}>
+											}}
+										>
 											Box
 										</button>
 									</div>
@@ -2128,8 +2145,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 						style={{
 							height: "fit-content",
 							padding: "20px",
-							width: "fit-content",
-						}}>
+							width: "fit-content"
+						}}
+					>
 						<div style={{ overflowY: "scroll", width: "100%" }}>
 							{stage && (itemStatus || itemStatus === 0) ? (
 								items?.length ? (
@@ -2138,8 +2156,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 											className="user-table"
 											style={{
 												width: "600px",
-												height: "fit-content",
-											}}>
+												height: "fit-content"
+											}}
+										>
 											<thead>
 												<tr>
 													<th>Sr.</th>
@@ -2204,9 +2223,10 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 																					? "yellow"
 																					: +item.status === 3
 																					? "red"
-																					: "#fff",
+																					: "#fff"
 																		}}
-																		onClick={() => setPopup(item)}>
+																		onClick={() => setPopup(item)}
+																	>
 																		<td>{i + 1}</td>
 																		<td colSpan={3}>{item.item_title}</td>
 																		<td colSpan={2}>{item.mrp}</td>
@@ -2221,8 +2241,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 												<tr
 													style={{
 														height: "30px",
-														fontWeight: "bold",
-													}}>
+														fontWeight: "bold"
+													}}
+												>
 													<td>Total</td>
 													<td colSpan={3}></td>
 													<td colSpan={2}></td>
@@ -2236,8 +2257,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 												<tr
 													style={{
 														height: "30px",
-														fontWeight: "bold",
-													}}>
+														fontWeight: "bold"
+													}}
+												>
 													<td colSpan={4}>Total Lines</td>
 
 													<td colSpan={2}></td>
@@ -2267,7 +2289,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 											itemStatus
 												? {
 														value: itemStatus,
-														label: ItemsStatusData?.find(j => j.value === itemStatus)?.label,
+														label: ItemsStatusData?.find(j => j.value === itemStatus)?.label
 												  }
 												: ""
 										}
@@ -2287,7 +2309,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 											stage
 												? {
 														value: stage,
-														label: stagesData?.find(j => j.value === stage)?.label,
+														label: stagesData?.find(j => j.value === stage)?.label
 												  }
 												: ""
 										}
@@ -2328,17 +2350,19 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 					position: "fixed",
 					top: -100,
 					left: -180,
-					zIndex: "-1000",
-				}}>
+					zIndex: "-1000"
+				}}
+			>
 				<div
 					ref={componentRef}
 					id="item-container"
 					style={{
 						// margin: "45mm 40mm 30mm 60mm",
 						// textAlign: "center",
-						height: "128mm",
+						height: "128mm"
 						// padding: "10px"
-					}}>
+					}}
+				>
 					{items?.length ? (
 						<table
 							className="user-table"
@@ -2349,14 +2373,16 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 								// marginRight: "20mm",
 								border: "1px solid black",
 								// pageBreakInside: "auto",
-								display: "block",
-							}}>
+								display: "block"
+							}}
+						>
 							<thead
 								style={{
 									width: "100%",
 									color: "#000",
-									backgroundColor: "#fff",
-								}}>
+									backgroundColor: "#fff"
+								}}
+							>
 								<tr style={{ width: "100%", fontSize: "12px" }}>
 									<th style={{ width: "10mm" }}>Sr.</th>
 									<th colSpan={5} style={{ width: "100mm" }}>
@@ -2381,8 +2407,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 													pageBreakAfter: "auto",
 													width: "100%",
 													height: "8px",
-													fontSize: "12px",
-												}}>
+													fontSize: "12px"
+												}}
+											>
 												<td colSpan={11} style={{ padding: "5px" }}>
 													{a.category_title}
 												</td>
@@ -2399,9 +2426,10 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 															pageBreakAfter: "auto",
 															color: "#000",
 															backgroundColor: "#fff",
-															fontSize: "12px",
+															fontSize: "12px"
 														}}
-														onClick={() => setPopup(item)}>
+														onClick={() => setPopup(item)}
+													>
 														<td style={{ padding: "0" }}>{i + 1}</td>
 														<td colSpan={5} style={{ padding: "0" }}>
 															{item.item_title}
@@ -2420,8 +2448,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 									style={{
 										height: "30px",
 										fontWeight: "bold",
-										fontSize: "12px",
-									}}>
+										fontSize: "12px"
+									}}
+								>
 									<td style={{ padding: "5px" }}>Total</td>
 									<td colSpan={5} style={{ padding: "5px" }}></td>
 									<td colSpan={3} style={{ padding: "5px" }}></td>
@@ -2444,17 +2473,19 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 					position: "fixed",
 					top: -100,
 					left: -180,
-					zIndex: "-1000",
-				}}>
+					zIndex: "-1000"
+				}}
+			>
 				<div
 					ref={componentBoxRef}
 					id="item-container"
 					style={{
 						// margin: "45mm 40mm 30mm 60mm",
 						// textAlign: "center",
-						height: "128mm",
+						height: "128mm"
 						// padding: "10px"
-					}}>
+					}}
+				>
 					{items?.length ? (
 						<table
 							className="user-table"
@@ -2465,14 +2496,16 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 								// marginRight: "20mm",
 								border: "1px solid black",
 								pageBreakInside: "auto",
-								display: "block",
-							}}>
+								display: "block"
+							}}
+						>
 							<thead
 								style={{
 									width: "100%",
 									color: "#000",
-									backgroundColor: "#fff",
-								}}>
+									backgroundColor: "#fff"
+								}}
+							>
 								<tr style={{ width: "100%", fontSize: "12px" }}>
 									<th style={{ width: "10mm" }}>Sr.</th>
 									<th colSpan={5} style={{ width: "100mm" }}>
@@ -2497,8 +2530,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 													pageBreakAfter: "always",
 													width: "100%",
 													height: "8px",
-													fontSize: "12px",
-												}}>
+													fontSize: "12px"
+												}}
+											>
 												<td colSpan={11} style={{ padding: "5px" }}>
 													{a.category_title}
 												</td>
@@ -2516,9 +2550,10 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 															pageBreakAfter: "always",
 															color: "#000",
 															backgroundColor: "#fff",
-															fontSize: "12px",
+															fontSize: "12px"
 														}}
-														onClick={() => setPopup(item)}>
+														onClick={() => setPopup(item)}
+													>
 														<td style={{ padding: "0" }}>{i + 1}</td>
 														<td colSpan={5} style={{ padding: "0" }}>
 															{item.item_title}
@@ -2537,8 +2572,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 									style={{
 										height: "30px",
 										fontWeight: "bold",
-										fontSize: "12px",
-									}}>
+										fontSize: "12px"
+									}}
+								>
 									<td style={{ padding: "5px" }}>Total</td>
 									<td colSpan={5} style={{ padding: "5px" }}></td>
 									<td colSpan={3} style={{ padding: "5px" }}></td>
@@ -2568,7 +2604,7 @@ function SummaryPopup({
 	company,
 	setPopupOrder,
 	updateOrders,
-	setOrdersData,
+	setOrdersData
 }) {
 	const [items, setItems] = useState([])
 
@@ -2583,14 +2619,14 @@ function SummaryPopup({
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
 		documentTitle: "Statement",
-		removeAfterPrint: true,
+		removeAfterPrint: true
 	})
 
 	useEffect(() => {
 		let orderStage = orders.map(a => ({
 			...a,
 			stage:
-				a.status?.length > 1 ? a.status.map(b => +b.stage || 0).reduce((c, b) => Math.max(c, b)) : a.status[0].stage,
+				a.status?.length > 1 ? a.status.map(b => +b.stage || 0).reduce((c, b) => Math.max(c, b)) : a.status[0].stage
 		}))
 		setFilteredOrder(orderStage)
 
@@ -2607,7 +2643,7 @@ function SummaryPopup({
 					...a,
 					item_title: itemDetails?.item_title,
 					mrp: itemDetails?.mrp,
-					category_uuid: itemDetails?.category_uuid,
+					category_uuid: itemDetails?.category_uuid
 				}
 			})
 		console.log(data)
@@ -2634,7 +2670,7 @@ function SummaryPopup({
 				let obj = {
 					...item,
 					b: parseInt(+b + (+p + free) / +itemsData?.find(b => b.item_uuid === item.item_uuid)?.conversion),
-					p: parseInt((+p + free) % +itemsData?.find(b => b.item_uuid === item.item_uuid)?.conversion),
+					p: parseInt((+p + free) % +itemsData?.find(b => b.item_uuid === item.item_uuid)?.conversion)
 				}
 				result.push(obj)
 			}
@@ -2673,7 +2709,7 @@ function SummaryPopup({
 			)
 			.map(a => ({
 				...itemsData?.find(b => b.item_uuid === a.item_uuid),
-				...a,
+				...a
 			}))
 
 		itemData = itemData
@@ -2683,7 +2719,7 @@ function SummaryPopup({
 			.map(a => {
 				return {
 					...a,
-					total: (+a.b * +a?.conversion + +a.p) * +a.item_price,
+					total: (+a.b * +a?.conversion + +a.p) * +a.item_price
 				}
 			})
 		let box =
@@ -2718,8 +2754,9 @@ function SummaryPopup({
 						height: "600px",
 						width: "max-content",
 						minWidth: "250px",
-						paddingTop: "50px",
-					}}>
+						paddingTop: "50px"
+					}}
+				>
 					<div className="flex" style={{ justifyContent: "space-between", alignItems: "center" }}>
 						<h1 style={{ textAlign: "center", width: "100%" }}>Rs. {orderTotal}</h1>
 					</div>
@@ -2729,8 +2766,9 @@ function SummaryPopup({
 						style={{
 							height: "fit-content",
 							padding: "20px",
-							width: "fit-content",
-						}}>
+							width: "fit-content"
+						}}
+					>
 						<div style={{ overflowY: "scroll", width: "100%" }}>
 							{items?.length ? (
 								<div className="flex" style={{ flexDirection: "column", width: "100%" }}>
@@ -2738,8 +2776,9 @@ function SummaryPopup({
 										className="user-table"
 										style={{
 											width: "500px",
-											height: "fit-content",
-										}}>
+											height: "fit-content"
+										}}
+									>
 										<thead>
 											<tr>
 												<th>Sr.</th>
@@ -2774,8 +2813,9 @@ function SummaryPopup({
 																<>
 																	<tr
 																		style={{
-																			height: "30px",
-																		}}>
+																			height: "30px"
+																		}}
+																	>
 																		<td>{i + 1}</td>
 																		<td colSpan={3}>{a.category_title}</td>
 
@@ -2786,8 +2826,9 @@ function SummaryPopup({
 														<tr
 															style={{
 																height: "30px",
-																fontWeight: "bold",
-															}}>
+																fontWeight: "bold"
+															}}
+														>
 															<td></td>
 															<td colSpan={3}>{c.company_title}</td>
 
@@ -2796,8 +2837,9 @@ function SummaryPopup({
 														<tr
 															style={{
 																height: "30px",
-																fontWeight: "bold",
-															}}>
+																fontWeight: "bold"
+															}}
+														>
 															<td></td>
 															<td colSpan={3}></td>
 
@@ -2841,17 +2883,19 @@ function SummaryPopup({
 					position: "fixed",
 					top: -100,
 					left: -180,
-					zIndex: "-1000",
-				}}>
+					zIndex: "-1000"
+				}}
+			>
 				<div
 					ref={componentRef}
 					id="item-container"
 					style={{
 						// margin: "45mm 40mm 30mm 60mm",
 						// textAlign: "center",
-						height: "128mm",
+						height: "128mm"
 						// padding: "10px"
-					}}>
+					}}
+				>
 					{items?.length ? (
 						<table
 							className="user-table"
@@ -2862,20 +2906,23 @@ function SummaryPopup({
 								// marginRight: "20mm",
 								border: "1px solid black",
 								pageBreakInside: "auto",
-								display: "block",
-							}}>
+								display: "block"
+							}}
+						>
 							<thead
 								style={{
 									width: "100%",
 									color: "#000",
-									backgroundColor: "#fff",
-								}}>
+									backgroundColor: "#fff"
+								}}
+							>
 								<tr
 									style={{
 										width: "100%",
 										color: "#000",
-										backgroundColor: "#fff",
-									}}>
+										backgroundColor: "#fff"
+									}}
+								>
 									<th style={{ width: "10mm" }}>Sr.</th>
 									<th colSpan={5} style={{ width: "100mm" }}>
 										<div className="t-head-element">Item</div>
@@ -2907,9 +2954,10 @@ function SummaryPopup({
 															height: "30px",
 															pageBreakAfter: "always",
 															color: "#000",
-															backgroundColor: "#fff",
+															backgroundColor: "#fff"
 														}}
-														onClick={() => setPopup(item)}>
+														onClick={() => setPopup(item)}
+													>
 														<td>{i + 1}</td>
 														<td colSpan={5}>{item.item_title}</td>
 														<td colSpan={3}>{item.mrp}</td>
@@ -2923,8 +2971,9 @@ function SummaryPopup({
 								<tr
 									style={{
 										height: "30px",
-										fontWeight: "bold",
-									}}>
+										fontWeight: "bold"
+									}}
+								>
 									<td>Total</td>
 									<td colSpan={5}></td>
 									<td colSpan={3}></td>
@@ -2968,7 +3017,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 		let dataArray = deleteItems
 			? updateOrders.map(a => ({
 					...a,
-					item_details: a.item_details.filter(b => !(b.item_uuid === items.item_uuid)),
+					item_details: a.item_details.filter(b => !(b.item_uuid === items.item_uuid))
 			  }))
 			: updateOrders
 					.filter(a => a.edit || deleteItemsOrder.filter(b => b === a.order_uuid)?.length)
@@ -2976,15 +3025,16 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 						deleteItemsOrder.filter(b => b === a.order_uuid)?.length
 							? {
 									...a,
-									item_details: a.item_details.filter(b => !(b.item_uuid === items.item_uuid)),
+									item_details: a.item_details.filter(b => !(b.item_uuid === items.item_uuid))
 							  }
 							: a
 					)
+
 		console.log("dataArray", dataArray)
+
 		let finalData = []
 		for (let orderObject of dataArray) {
 			let data = orderObject
-
 			let billingData = await Billing({
 				replacement: data.replacement,
 				adjustment: data.adjustment,
@@ -2993,17 +3043,18 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 				// add_discounts: true,
 				items: data.item_details.map(a => {
 					let itemData = itemsData.find(b => a.item_uuid === b.item_uuid)
+					console.log({ itemData })
 					return {
 						...itemData,
 						...a,
-						price: itemData?.price || 0,
+						price: +itemData?.item_price || 0
 					}
-				}),
+				})
 			})
 			data = {
 				...data,
 				...billingData,
-				item_details: billingData.items,
+				item_details: billingData.items
 			}
 			data = Object.keys(data)
 				.filter(key => key !== "others" || key !== "items")
@@ -3021,8 +3072,8 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 			url: "/orders/putOrders",
 			data: finalData,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			onSave()
@@ -3036,24 +3087,27 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 					style={{
 						height: "500px",
 						width: "max-content",
-						minWidth: "250px",
-					}}>
+						minWidth: "250px"
+					}}
+				>
 					<h1>Orders</h1>
 					<div
 						className="content"
 						style={{
 							height: "fit-content",
 							padding: "20px",
-							width: "700px",
-						}}>
+							width: "700px"
+						}}
+					>
 						<div style={{ overflowY: "scroll", width: "100%" }}>
 							{order?.length ? (
 								<div className="flex" style={{ flexDirection: "column", width: "100%" }}>
 									<table
 										className="user-table"
 										style={{
-											height: "fit-content",
-										}}>
+											height: "fit-content"
+										}}
+									>
 										<thead>
 											<tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
 												<th>Sr.</th>
@@ -3084,12 +3138,13 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 														color: "#fff",
 														backgroundColor: +deleteItemsOrder.filter(a => a === item.order_uuid)?.length
 															? "red"
-															: "#7990dd",
+															: "#7990dd"
 													}}
 													onClick={e => {
 														e.stopPropagation()
 														setPopupOrder(item)
-													}}>
+													}}
+												>
 													<td>{i + 1}</td>
 													<td colSpan={3}>
 														{new Date(item?.status[0]?.time).toDateString() +
@@ -3123,7 +3178,8 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 																	? prev.filter(a => !(a === item.order_uuid))
 																	: [...(prev || []), item.order_uuid]
 															)
-														}}>
+														}}
+													>
 														{!deleteItemsOrder.filter(a => a === item.order_uuid)?.length ? <DeleteOutlineIcon /> : ""}
 													</td>
 												</tr>
@@ -3143,9 +3199,10 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 								position: "absolute",
 								right: "50px",
 								top: "0px",
-								backgroundColor: "red",
+								backgroundColor: "red"
 							}}
-							onClick={() => postOrderData(true)}>
+							onClick={() => postOrderData(true)}
+						>
 							Delete All
 						</button>
 						<button onClick={onClose} className="closeButton">
@@ -3182,10 +3239,10 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
 		let data = order.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)
 		setdata({
 			b: data?.b || 0,
-			p: data?.p || 0,
+			p: data?.p || 0
 		})
 	}, [])
-	console.log(popupInfo)
+
 	const submitHandler = async e => {
 		e.preventDefault()
 		let item = itemsData.find(a => a.item_uuid === popupInfo.item_uuid)
@@ -3200,10 +3257,10 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
 									? {
 											...b,
 											b: Math.floor(+data.b + +data.p / +item.conversion || 0),
-											p: +data.p % +item.conversion,
+											p: +data.p % +item.conversion
 									  }
 									: b
-							),
+							)
 					  }
 					: a
 			)
@@ -3219,8 +3276,9 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="formGroup">
@@ -3236,7 +3294,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
 											onChange={e =>
 												setdata({
 													...data,
-													b: e.target.value,
+													b: e.target.value
 												})
 											}
 											maxLength={42}
@@ -3255,7 +3313,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
 											onChange={e =>
 												setdata({
 													...data,
-													p: e.target.value,
+													p: e.target.value
 												})
 											}
 											maxLength={42}
@@ -3301,8 +3359,9 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose, warehouse }) 
 						height: "fit-content",
 						padding: "20p0",
 						marginBottom: "10px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -3322,15 +3381,15 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose, warehouse }) 
 													{ value: 0, label: "None" },
 													...warehouse.map(a => ({
 														value: a.warehouse_uuid,
-														label: a.warehouse_title,
-													})),
+														label: a.warehouse_title
+													}))
 												]}
 												onChange={doc => setdata(doc.value)}
 												value={
 													data
 														? {
 																value: data,
-																label: warehouse?.find(j => j.warehouse_uuid === data)?.warehouse_title,
+																label: warehouse?.find(j => j.warehouse_uuid === data)?.warehouse_title
 														  }
 														: { value: 0, label: "None" }
 												}
@@ -3365,7 +3424,7 @@ const PendingPaymentsSummary = ({ print, counterOrders, paymentsSummaryRef }) =>
 			items?.reduce(
 				(quantities, i) => ({
 					b: (quantities?.b || 0) + +i?.b,
-					p: (quantities?.p || 0) + +i?.p,
+					p: (quantities?.p || 0) + +i?.p
 				}),
 				{}
 			)

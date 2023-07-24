@@ -9,8 +9,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
 		a =>
 			a.type === "auto-increase-qty" &&
 			(a?.counters?.filter(b => b === counter.counter_uuid)?.length ||
-				counter?.counter_group_uuid?.filter(b => a?.counter_groups.filter(c => c === b)?.length)
-					.length)
+				counter?.counter_group_uuid?.filter(b => a?.counter_groups.filter(c => c === b)?.length).length)
 	)
 
 	for (let autobill of data) {
@@ -45,14 +44,14 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
 					auto_added.push({
 						item_uuid: a.item_uuid,
 						b: base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0,
-						p: pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0,
+						p: pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0
 					})
 				}
 
 				return {
 					...a,
 					b: +a.b + (base_qty_arr?.add_qty ? +base_qty_arr?.add_qty : 0),
-					p: +a.p + (pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0),
+					p: +a.p + (pice_qty_arr?.add_qty ? +pice_qty_arr?.add_qty : 0)
 				}
 			} else return a
 		})
@@ -120,9 +119,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
 		// console.log("piceqtyobj", pice_qty_arr);
 
 		if (base_qty_arr?.add_items) {
-			let dataItems = dbItems.filter(
-				a => base_qty_arr?.add_items.filter(b => b.item_uuid === a.item_uuid).length
-			)
+			let dataItems = dbItems.filter(a => base_qty_arr?.add_items.filter(b => b.item_uuid === a.item_uuid).length)
 			dataItems = dataItems.map(a => {
 				if (base_qty_arr?.add_items.find(b => b.item_uuid === a.item_uuid)) {
 					let data = base_qty_arr?.add_items.find(b => b.item_uuid === a.item_uuid)
@@ -130,14 +127,12 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
 				}
 				return {
 					...a,
-					p: base_qty_arr?.add_items.find(b => b.item_uuid === a.item_uuid).add_qty,
+					p: base_qty_arr?.add_items.find(b => b.item_uuid === a.item_uuid).add_qty
 				}
 			})
 			console.log("datapiceItems", dataItems)
 
-			let nonFiltered = eligibleItems.filter(
-				a => !dataItems.filter(b => a.item_uuid === b.item_uuid).length
-			)
+			let nonFiltered = eligibleItems.filter(a => !dataItems.filter(b => a.item_uuid === b.item_uuid).length)
 
 			// eslint-disable-next-line no-loop-func
 			dataItems = dataItems.map(a => {
@@ -146,7 +141,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
 					...a,
 					p: (data ? data.p : a.p) || 0,
 					b: (data ? data.b : a.b) || 0,
-					free: (data ? data.free : a.free) || 0,
+					free: (data ? data.free : a.free) || 0
 				}
 			})
 			console.log(nonFiltered, dataItems)
@@ -159,9 +154,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
 				: []
 		}
 		if (pice_qty_arr?.add_items) {
-			let dataItems = dbItems.filter(
-				a => pice_qty_arr?.add_items.filter(b => b.item_uuid === a.item_uuid).length
-			)
+			let dataItems = dbItems.filter(a => pice_qty_arr?.add_items.filter(b => b.item_uuid === a.item_uuid).length)
 			dataItems = dataItems.map(a => {
 				if (pice_qty_arr?.add_items.find(b => b.item_uuid === a.item_uuid)) {
 					let data = pice_qty_arr?.add_items.find(b => b.item_uuid === a.item_uuid)
@@ -169,14 +162,12 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
 				}
 				return {
 					...a,
-					p: pice_qty_arr?.add_items.find(b => b.item_uuid === a.item_uuid).add_qty,
+					p: pice_qty_arr?.add_items.find(b => b.item_uuid === a.item_uuid).add_qty
 				}
 			})
 			// console.log("datapiceItems", dataItems);
 
-			let nonFiltered = eligibleItems.filter(
-				a => !dataItems.filter(b => a.item_uuid === b.item_uuid).length
-			)
+			let nonFiltered = eligibleItems.filter(a => !dataItems.filter(b => a.item_uuid === b.item_uuid).length)
 
 			// eslint-disable-next-line no-loop-func
 			dataItems = dataItems.map(a => {
@@ -185,7 +176,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
 					...a,
 					p: (data ? data.p : a.p) || 0,
 					b: (data ? data.b : a.b) || 0,
-					free: (data ? data.free : a.free) || 0,
+					free: (data ? data.free : a.free) || 0
 				}
 			})
 			console.log(nonFiltered, dataItems)
@@ -202,7 +193,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
 	return {
 		counter_uuid: counter.counter_uuid,
 		auto_added,
-		items: eligibleItems,
+		items: eligibleItems
 	}
 }
 
@@ -213,19 +204,16 @@ export const Billing = async ({
 	replacement = 0,
 	shortage = 0,
 	adjustment = 0,
-
 	add_discounts,
-	edit_prices = [],
+	edit_prices = []
 }) => {
 	let newPriceItems = []
 	console.log("itemsdata", items)
-	// let add_discounts = true;
 	for (let item of items) {
 		item = { ...item, item_total: 0 }
 		let edit_price = +edit_prices.find(a => a.item_uuid === item.item_uuid)?.item_price
 		let billDiscounts = item.charges_discount?.find(a => a.title === "Bill Discounting")
-		let charges_discount =
-			add_discounts || item.edit ? [] : item.charges_discount?.filter(a => a.value) || []
+		let charges_discount = add_discounts || item.edit ? [] : item.charges_discount?.filter(a => a.value) || []
 		let price = +(add_discounts || item.edit
 			? counter?.item_special_price?.find(a => a.item_uuid === item.item_uuid)?.price || 0
 			: 0)
@@ -240,50 +228,47 @@ export const Billing = async ({
 
 		item = {
 			...item,
-			qty: +item.conversion * +item.b + +item.p,
+			qty: +item.conversion * +item.b + +item.p
 		}
 		if (price) item = { ...item, item_price: price }
 
 		if (special_discount_percentage) {
 			charges_discount?.push({
 				title: "Special Discount",
-				value: special_discount_percentage,
+				value: special_discount_percentage
 			})
 			item = {
 				...item,
 				special_discount_percentage,
 				item_desc_total:
-					(+edit_price || +item?.price || +item?.item_price || 0) *
-						((100 - special_discount_percentage) / 100) || 0,
+					(+edit_price || +item?.price || +item?.item_price || 0) * ((100 - special_discount_percentage) / 100) || 0
 			}
 		}
 
 		if (item.edit || (add_discounts && item.item_discount)) {
 			charges_discount?.push({
 				title: "Item Discount",
-				value: item.item_discount,
+				value: item.item_discount
 			})
 			item = {
 				...item,
 				item_desc_total: item.item_desc_total
 					? item.item_desc_total * ((100 - item.item_discount) / 100) || 0
-					: (+edit_price || +item?.price || +item?.item_price || 0) *
-							((100 - item.item_discount) / 100) || 0,
+					: (+edit_price || +item?.price || +item?.item_price || 0) * ((100 - item.item_discount) / 100) || 0
 			}
 		}
 
 		if (company_discount_percentage) {
 			charges_discount?.push({
 				title: "Company Discount",
-				value: company_discount_percentage,
+				value: company_discount_percentage
 			})
 			item = {
 				...item,
 				company_discount_percentage,
 				item_desc_total: item.item_desc_total
 					? item.item_desc_total * ((100 - company_discount_percentage) / 100) || 0
-					: (+edit_price || +item?.price || +item.item_price || 0) *
-							((100 - company_discount_percentage) / 100) || 0,
+					: (+edit_price || +item?.price || +item.item_price || 0) * ((100 - company_discount_percentage) / 100) || 0
 			}
 		}
 
@@ -298,14 +283,12 @@ export const Billing = async ({
 							? charges_discount?.map(a => +((100 - +a.value) / 100))?.reduce((a, b) => a * b)
 							: item?.charges_discount?.length
 							? (100 - +charges_discount[0]?.value) / 100
-							: 1),
+							: 1)
 		}
 
 		let item_total =
 			item.status !== 3
-				? (
-						(+item.item_desc_total || +item?.price || +item.item_price || 0) * (+item.qty || 0)
-				  ).toFixed(2)
+				? ((+item.item_desc_total || +item?.price || +item.item_price || 0) * (+item.qty || 0)).toFixed(2)
 				: 0
 		if (billDiscounts && add_discounts) {
 			charges_discount.push(billDiscounts)
@@ -317,7 +300,7 @@ export const Billing = async ({
 			...item,
 			charges_discount,
 			item_total,
-			item_desc_total: 0,
+			item_desc_total: 0
 		}
 
 		//console.log("item", item);
@@ -326,10 +309,7 @@ export const Billing = async ({
 	//console.log("newItemPrice", newPriceItems);
 	let order_grandtotal = Math.round(
 		newPriceItems.length > 1
-			? newPriceItems.map(a => +a.item_total || 0).reduce((a, b) => a + b) -
-					replacement -
-					shortage -
-					adjustment
+			? newPriceItems.map(a => +a.item_total || 0).reduce((a, b) => a + b) - replacement - shortage - adjustment
 			: newPriceItems.length
 			? (newPriceItems.map(a => a.item_total)[0] || 0) - replacement - shortage - adjustment
 			: 0
@@ -340,7 +320,7 @@ export const Billing = async ({
 		counter_uuid: counter.counter_uuid,
 		order_grandtotal,
 		items: newPriceItems,
-		others,
+		others
 	}
 }
 
@@ -349,18 +329,18 @@ export const updateIndexedDb = async (setNotification = () => {}) => {
 		blocked(currentVersion, blockedVersion, event) {
 			console.log("IDB DELETE REQUEST BLOCKED.", {
 				currentVersion,
-				blockedVersion,
+				blockedVersion
 			})
 			window.location.reload()
-		},
+		}
 	})
 	let Version = +localStorage.getItem("IDBVersion") + 1
 	const response = await axios({
 		method: "get",
 		url: "/users/GetUser/" + localStorage.getItem("user_uuid"),
 		headers: {
-			"Content-Type": "application/json",
-		},
+			"Content-Type": "application/json"
+		}
 	})
 
 	console.log(response.data.success)
@@ -375,8 +355,8 @@ export const updateIndexedDb = async (setNotification = () => {}) => {
 		method: "get",
 		url: "/users/getDetails",
 		headers: {
-			"Content-Type": "application/json",
-		},
+			"Content-Type": "application/json"
+		}
 	})
 	let data = result.data.result
 	console.log(data)
@@ -384,10 +364,10 @@ export const updateIndexedDb = async (setNotification = () => {}) => {
 		upgrade(db) {
 			for (const property in data) {
 				db.createObjectStore(property, {
-					keyPath: "IDENTIFIER",
+					keyPath: "IDENTIFIER"
 				})
 			}
-		},
+		}
 	})
 	const exitFunction = () => {
 		let time = new Date()
@@ -495,7 +475,7 @@ export const audioLoopFunction = ({ i, recall, forcePlayCount, src, callback }) 
 							forcePlayCount: forcePlayCount ? forcePlayCount - 1 : 0,
 							recall,
 							src,
-							callback,
+							callback
 						})
 					}, 1000)
 				}, 100)
@@ -515,9 +495,7 @@ export const audioLoopFunction = ({ i, recall, forcePlayCount, src, callback }) 
 }
 
 export const audioAPIFunction = ({ speechString, elem_id, callback }) => {
-	let audioElement = new Audio(
-		`${axios.defaults.baseURL}/stream/${speechString.toLowerCase().replaceAll(" ", "_")}`
-	)
+	let audioElement = new Audio(`${axios.defaults.baseURL}/stream/${speechString.toLowerCase().replaceAll(" ", "_")}`)
 	audioElement.addEventListener(
 		"durationchange",
 		function (e) {
@@ -562,18 +540,18 @@ export const refreshDb = async () => {
 		blocked(currentVersion, blockedVersion, event) {
 			console.log("IDB DELETE REQUEST BLOCKED.", {
 				currentVersion,
-				blockedVersion,
+				blockedVersion
 			})
 			window.location.reload()
-		},
+		}
 	})
 	console.log(Version)
 	const result = await axios({
 		method: "get",
 		url: "/users/getDetails",
 		headers: {
-			"Content-Type": "application/json",
-		},
+			"Content-Type": "application/json"
+		}
 	})
 	let data = result.data.result
 	console.log(data)
@@ -581,10 +559,10 @@ export const refreshDb = async () => {
 		upgrade(db) {
 			for (const property in data) {
 				db.createObjectStore(property, {
-					keyPath: "IDENTIFIER",
+					keyPath: "IDENTIFIER"
 				})
 			}
-		},
+		}
 	})
 	localStorage.setItem("IDBVersion", Version)
 	let store

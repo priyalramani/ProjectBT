@@ -60,7 +60,7 @@ const ProcessingOrders = () => {
 		setItemChanged(prev => [...prev, selectedOrder.item_details.find(a => a.item_uuid === elem_id)])
 		setSelectedOrder(prev => ({
 			...prev,
-			item_details: prev.item_details.map(a => (a.item_uuid === elem_id ? { ...a, status: 1 } : a)),
+			item_details: prev.item_details.map(a => (a.item_uuid === elem_id ? { ...a, status: 1 } : a))
 		}))
 	}
 
@@ -83,8 +83,8 @@ const ProcessingOrders = () => {
 			url: "/users/GetUserList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		// console.log("users", response);
 		if (response.data.success) setUsers(response.data.result)
@@ -136,8 +136,8 @@ const ProcessingOrders = () => {
 			}`,
 			data: {
 				trip_uuid: params.trip_uuid,
-				user_uuid: localStorage.getItem("user_uuid"),
-			},
+				user_uuid: localStorage.getItem("user_uuid")
+			}
 		})
 		// console.log(response);
 		if (response.data.success) {
@@ -241,15 +241,15 @@ const ProcessingOrders = () => {
 				counters.find(a => a.counter_uuid === selectedOrder.counter_uuid)?.counter_title +
 				(sessionStorage.getItem("route_title") ? ", " + sessionStorage.getItem("route_title") : ""),
 			timestamp: time.getTime(),
-			...others,
+			...others
 		}
 		const response = await axios({
 			method: "post",
 			url: "/userActivity/postUserActivity",
 			data,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			console.log(response)
@@ -278,9 +278,9 @@ const ProcessingOrders = () => {
 								...data.processing_canceled,
 								...data.item_details.filter(
 									a => +a.status === 3 && !data.processing_canceled.filter(b => a.item_uuid === b.item_uuid).length
-								),
+								)
 						  ]
-						: data?.item_details?.filter(a => +a.status === 3),
+						: data?.item_details?.filter(a => +a.status === 3)
 				}
 
 			let billingData = await Billing({
@@ -293,15 +293,15 @@ const ProcessingOrders = () => {
 					let itemData = items.find(b => a.item_uuid === b.item_uuid)
 					return {
 						...itemData,
-						...a,
+						...a
 						// price: itemData?.price || 0,
 					}
-				}),
+				})
 			})
 			data = {
 				...data,
 				...billingData,
-				item_details: billingData.items,
+				item_details: billingData.items
 			}
 
 			let time = new Date()
@@ -316,9 +316,9 @@ const ProcessingOrders = () => {
 						{
 							stage: "2",
 							time: time.getTime(),
-							user_uuid: localStorage.getItem("user_uuid"),
-						},
-					],
+							user_uuid: localStorage.getItem("user_uuid")
+						}
+					]
 				}
 			if (Location.pathname.includes("checking"))
 				data = {
@@ -328,9 +328,9 @@ const ProcessingOrders = () => {
 						{
 							stage: "3",
 							time: time.getTime(),
-							user_uuid: localStorage.getItem("user_uuid"),
-						},
-					],
+							user_uuid: localStorage.getItem("user_uuid")
+						}
+					]
 				}
 			if (Location.pathname.includes("delivery"))
 				data = {
@@ -340,9 +340,9 @@ const ProcessingOrders = () => {
 						{
 							stage: "4",
 							time: time.getTime(),
-							user_uuid: localStorage.getItem("user_uuid"),
-						},
-					],
+							user_uuid: localStorage.getItem("user_uuid")
+						}
+					]
 				}
 
 			data = Object.keys(data)
@@ -357,7 +357,7 @@ const ProcessingOrders = () => {
 				opened_by: 0,
 				replacement: orderObject.replacement,
 				replacement_mrp: orderObject.replacement_mrp,
-				preventPrintUpdate,
+				preventPrintUpdate
 			})
 		}
 
@@ -366,8 +366,8 @@ const ProcessingOrders = () => {
 			url: "/orders/putOrders",
 			data: finalData,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			console.log(response)
@@ -402,7 +402,7 @@ const ProcessingOrders = () => {
 							: "Processing") + " End",
 					range: Location.pathname.includes("processing") ? itemChanged.length : finalData[0]?.item_details?.length,
 					qty,
-					amt: finalData[0].order_grandtotal || 0,
+					amt: finalData[0].order_grandtotal || 0
 				})
 			}
 		}
@@ -422,8 +422,8 @@ const ProcessingOrders = () => {
 			url: "/orders/putOrders",
 			data: [{ order_uuid: data.order_uuid, opened_by }],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			console.log(response)
@@ -444,7 +444,7 @@ const ProcessingOrders = () => {
 						? "Checking"
 						: Location.pathname.includes("delivery")
 						? "Delivery"
-						: "Processing") + " Start",
+						: "Processing") + " Start"
 			})
 			setOrderCreated(true)
 		}
@@ -471,7 +471,7 @@ const ProcessingOrders = () => {
 					item_uuid: a.item_uuid,
 					one_pack: a.one_pack,
 					qty: 0,
-					barcode: items.find(b => a.item_uuid === b.item_uuid)?.barcode,
+					barcode: items.find(b => a.item_uuid === b.item_uuid)?.barcode
 				}))
 			)
 	}, [selectedOrder])
@@ -518,8 +518,8 @@ const ProcessingOrders = () => {
 									...a,
 									barcodeQty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
 									case: 1,
-									qty: (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0),
-								},
+									qty: (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0)
+								}
 						  ]
 						: [
 								{
@@ -528,8 +528,8 @@ const ProcessingOrders = () => {
 									...a,
 									barcodeQty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
 									case: 1,
-									qty: (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0),
-								},
+									qty: (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0)
+								}
 						  ]
 				)
 			else data.push(a)
@@ -673,16 +673,16 @@ const ProcessingOrders = () => {
 				let itemData = items.find(b => a.item_uuid === b.item_uuid)
 				return {
 					...itemData,
-					...a,
+					...a
 					// price: itemData?.price || 0,
 				}
-			}),
+			})
 		})
 		setSelectedOrder(prev => ({
 			...prev,
 			...order,
 			...billingData,
-			item_details: billingData.items,
+			item_details: billingData.items
 		}))
 	}
 
@@ -699,8 +699,9 @@ const ProcessingOrders = () => {
 					className="user_menubar flex"
 					style={{
 						width: selectedOrder ? "fit-content" : "160px",
-						justifyContent: "space-between",
-					}}>
+						justifyContent: "space-between"
+					}}
+				>
 					<IoArrowBackOutline
 						className="user_Back_icon"
 						onClick={() => {
@@ -731,8 +732,9 @@ const ProcessingOrders = () => {
 						textAlign: "left",
 						marginLeft: "30px",
 						padding: "10px 0",
-						textTransform: "capitalize",
-					}}>
+						textTransform: "capitalize"
+					}}
+				>
 					{selectedOrder ? selectedOrder.counter_title : Location?.pathname?.split("/")?.filter(i => i)?.[1]}
 				</h1>
 				{!selectedOrder ? (
@@ -759,11 +761,12 @@ const ProcessingOrders = () => {
 									transform: dropdown ? "rotate(0deg)" : "rotate(180deg)",
 									width: "30px",
 									height: "30px",
-									backgroundColor: "#fff",
+									backgroundColor: "#fff"
 								}}
 								onClick={e => {
 									setDropDown(prev => !prev)
-								}}>
+								}}
+							>
 								<ArrowDropDown style={{ color: "green" }} />
 							</div>
 						</div>
@@ -780,7 +783,7 @@ const ProcessingOrders = () => {
 										padding: "0 5px",
 										backgroundColor: "transparent",
 										color: "#fff",
-										marginRight: "10px",
+										marginRight: "10px"
 									}}
 									value={playCount}
 									onChange={e => setPlayCount(e.target.value)}
@@ -794,14 +797,15 @@ const ProcessingOrders = () => {
 										width: "75px",
 										padding: "0 5px",
 										backgroundColor: "transparent",
-										color: "#fff",
+										color: "#fff"
 									}}
 									defaultValue={playerSpeed}
 									onChange={e => {
 										console.log(e.target.value)
 										setPlayerSpeed(e.target.value)
 										audiosRef.current.forEach(i => (i.playbackRate = +e.target.value))
-									}}>
+									}}
+								>
 									<option value="1">1x</option>
 									<option value="1.25">1.25x</option>
 									<option value="1.50">1.50x</option>
@@ -825,7 +829,8 @@ const ProcessingOrders = () => {
 					id="customer-details-dropdown"
 					className={"page1 flex"}
 					style={{ top: "40px", flexDirection: "column", zIndex: "200" }}
-					onMouseLeave={() => setDropDown(false)}>
+					onMouseLeave={() => setDropDown(false)}
+				>
 					{Location.pathname.includes("checking") ? (
 						<button
 							className="simple_Logout_button"
@@ -833,7 +838,8 @@ const ProcessingOrders = () => {
 								setHoldPopup("Checking Summary")
 								getTripOrders()
 								setDropDown(false)
-							}}>
+							}}
+						>
 							Summary
 						</button>
 					) : window.location.pathname.includes("processing") ? (
@@ -844,7 +850,8 @@ const ProcessingOrders = () => {
 									setHoldPopup("Summary")
 									getTripOrders()
 									setDropDown(false)
-								}}>
+								}}
+							>
 								Summary
 							</button>
 							<button
@@ -853,7 +860,8 @@ const ProcessingOrders = () => {
 									setHoldPopup("Hold")
 									getTripOrders()
 									setDropDown(false)
-								}}>
+								}}
+							>
 								Hold
 							</button>
 						</>
@@ -873,8 +881,9 @@ const ProcessingOrders = () => {
 								style={{
 									height: "fit-content",
 									padding: "10px",
-									width: "fit-content",
-								}}>
+									width: "fit-content"
+								}}
+							>
 								<div className="flex" style={{ justifyContent: "space-between" }}>
 									<h3>Print Invoice</h3>
 								</div>
@@ -889,13 +898,15 @@ const ProcessingOrders = () => {
 												type="button"
 												className="submit"
 												style={{ backgroundColor: "red" }}
-												onClick={() => postOrderData([{ ...selectedOrder, to_print: 0 }])}>
+												onClick={() => postOrderData([{ ...selectedOrder, to_print: 0 }])}
+											>
 												No
 											</button>
 											<button
 												type="button"
 												className="submit"
-												onClick={() => postOrderData([{ ...selectedOrder, to_print: 1 }])}>
+												onClick={() => postOrderData([{ ...selectedOrder, to_print: 1 }])}
+											>
 												Yes
 											</button>
 										</div>
@@ -915,8 +926,9 @@ const ProcessingOrders = () => {
 					maxWidth: "500px",
 					left: "0",
 					top: "50px",
-					textAlign: "center",
-				}}>
+					textAlign: "center"
+				}}
+			>
 				{selectedOrder ? (
 					<>
 						<div className="flex" style={{ justifyContent: "space-between", margin: "10px 0" }}>
@@ -970,7 +982,7 @@ const ProcessingOrders = () => {
 							<button
 								className="theme-btn"
 								style={{
-									width: "max-content",
+									width: "max-content"
 								}}
 								onClick={() => {
 									Location.pathname.includes("checking")
@@ -980,7 +992,8 @@ const ProcessingOrders = () => {
 										: Location.pathname.includes("processing")
 										? setprintInvicePopup(true)
 										: postOrderData()
-								}}>
+								}}
+							>
 								Save
 							</button>
 						</div>
@@ -997,14 +1010,16 @@ const ProcessingOrders = () => {
 						top: "0",
 						display: "flex",
 						minHeight: "93vh",
-						maxWidth: "500px",
-					}}>
+						maxWidth: "500px"
+					}}
+				>
 					<table
 						className="user-table"
 						style={{
 							width: Location.pathname.includes("delivery") ? "100%" : "max-content",
-							height: "fit-content",
-						}}>
+							height: "fit-content"
+						}}
+					>
 						<thead>
 							<tr>
 								{selectedOrder &&
@@ -1098,8 +1113,9 @@ const ProcessingOrders = () => {
 														? +item.status === 1 || +item.status === 3
 															? "#fff"
 															: "#000"
-														: "#000",
-												}}>
+														: "#000"
+												}}
+											>
 												{selectedOrder &&
 												!(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
 													<td
@@ -1117,10 +1133,10 @@ const ProcessingOrders = () => {
 																	a.item_uuid === item.item_uuid
 																		? {
 																				...a,
-																				status: +a.status === 1 ? 0 : 1,
+																				status: +a.status === 1 ? 0 : 1
 																		  }
 																		: a
-																),
+																)
 															}))
 
 															audiosRef.current?.forEach(audio => {
@@ -1131,14 +1147,15 @@ const ProcessingOrders = () => {
 															audioLoopFunction({
 																i: 0,
 																src: audiosRef.current,
-																callback: audioCallback,
+																callback: audioCallback
 															})
-														}}>
+														}}
+													>
 														{item.item_uuid === "" ? (
 															<AiFillPlayCircle
 																style={{
 																	fontSize: "25px",
-																	cursor: "pointer",
+																	cursor: "pointer"
 																}}
 															/>
 														) : +item.status !== 1 ? (
@@ -1166,7 +1183,7 @@ const ProcessingOrders = () => {
 																					...a,
 																					b: +(a.b || 0) + parseInt((+a?.one_pack || 1) / +a.conversion),
 
-																					p: ((a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion,
+																					p: ((a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion
 																				}
 																			} else {
 																				return a
@@ -1184,9 +1201,9 @@ const ProcessingOrders = () => {
 																							+(a.b || 0) +
 																							parseInt(((a?.p || 0) + (+a?.one_pack || 1)) / +a.conversion),
 
-																						p: ((a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion,
+																						p: ((a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion
 																					}
-																				}),
+																				})
 																	  ]
 																	: items
 																			?.filter(a => a.item_uuid === item.item_uuid)
@@ -1196,12 +1213,13 @@ const ProcessingOrders = () => {
 																					b: Math.floor(
 																						(+a.b || 0) + +((+a?.p || 0) + (+a?.one_pack || 1)) / +a.conversion
 																					),
-																					p: ((+a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion,
+																					p: ((+a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion
 																				}
 																			})
 															)
 														}
-													}}>
+													}}
+												>
 													{items.find(a => a.item_uuid === item.item_uuid)?.item_title}
 												</td>
 												<td>{items.find(a => a.item_uuid === item.item_uuid)?.mrp}</td>
@@ -1211,7 +1229,8 @@ const ProcessingOrders = () => {
 														e.stopPropagation()
 														setOneTimeState()
 														setPopupForm(items.find(a => a.item_uuid === item.item_uuid))
-													}}>
+													}}
+												>
 													{Location.pathname.includes("delivery")
 														? item.b === 0 && item.p === 0 && item.free
 															? item.free + "(F)"
@@ -1237,12 +1256,13 @@ const ProcessingOrders = () => {
 																			a.item_uuid === item.item_uuid
 																				? {
 																						...a,
-																						status: +a.status === 2 ? 0 : 2,
+																						status: +a.status === 2 ? 0 : 2
 																				  }
 																				: a
-																		),
+																		)
 																	}))
-																}}>
+																}}
+															>
 																Hold
 															</button>
 														</td>
@@ -1257,10 +1277,10 @@ const ProcessingOrders = () => {
 																			a.item_uuid === item.item_uuid
 																				? {
 																						...a,
-																						status: +a.status === 3 ? 0 : 3,
+																						status: +a.status === 3 ? 0 : 3
 																				  }
 																				: a
-																		),
+																		)
 																	}))
 																}}
 															/>
@@ -1278,8 +1298,9 @@ const ProcessingOrders = () => {
 												key={Math.random()}
 												style={{
 													height: "30px",
-													backgroundColor: +item.opened_by || item.opened_by !== "0" ? "yellow" : "#fff",
-												}}>
+													backgroundColor: +item.opened_by || item.opened_by !== "0" ? "yellow" : "#fff"
+												}}
+											>
 												<td>{i + 1}</td>
 												<td
 													colSpan={2}
@@ -1287,7 +1308,8 @@ const ProcessingOrders = () => {
 														e.stopPropagation()
 														setChecking(false)
 														setWarningPopUp(item)
-													}}>
+													}}
+												>
 													{item.counter_title}
 												</td>
 												<td
@@ -1296,7 +1318,8 @@ const ProcessingOrders = () => {
 														e.stopPropagation()
 														setChecking(false)
 														setWarningPopUp(item)
-													}}>
+													}}
+												>
 													{item?.item_details?.filter(a => +a.status === 1)?.length}/
 													{item?.item_details
 														.filter(a => !Location.pathname.includes("delivery") || +a.status !== 3)
@@ -1307,7 +1330,8 @@ const ProcessingOrders = () => {
 														e.stopPropagation()
 														setChecking(false)
 														setWarningPopUp(item)
-													}}>
+													}}
+												>
 													{item.order_grandtotal}
 												</td>
 												<td
@@ -1315,7 +1339,8 @@ const ProcessingOrders = () => {
 														e.stopPropagation()
 														setChecking(false)
 														setWarningPopUp(item)
-													}}>
+													}}
+												>
 													{(item?.item_details?.length > 1
 														? item?.item_details?.map(a => +a.b || 0)?.reduce((a, b) => a + b)
 														: item?.item_details[0]?.b || 0) +
@@ -1380,16 +1405,16 @@ const ProcessingOrders = () => {
 									let itemData = items.find(b => a.item_uuid === b.item_uuid)
 									return {
 										...itemData,
-										...a,
+										...a
 										// price: itemData?.price || 0,
 									}
-								}),
+								})
 							})
 							setSelectedOrder(prev => ({
 								...prev,
 								...data,
 								...billingData,
-								item_details: billingData.items,
+								item_details: billingData.items
 							}))
 						}
 					}}
@@ -1545,7 +1570,8 @@ const ProcessingOrders = () => {
 									dur="1s"
 									repeatCount="indefinite"
 									keyTimes="0;1"
-									values="0 50 51;360 50 51"></animateTransform>
+									values="0 50 51;360 50 51"
+								></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -1572,8 +1598,8 @@ const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
 				{
 					stage: 5,
 					user_uuid: localStorage.getItem("user_uuid"),
-					time: time.getTime(),
-				},
+					time: time.getTime()
+				}
 			],
 			processing_canceled: window.location.pathname.includes("processing")
 				? order.processing_canceled.length
@@ -1585,7 +1611,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
 					? [...order.delivery_return, ...order.item_details]
 					: order.item_details
 				: order.delivery_return || [],
-			item_details: order.item_details.map(a => ({ ...a, b: 0, p: 0 })),
+			item_details: order.item_details.map(a => ({ ...a, b: 0, p: 0 }))
 		}
 
 		let billingData = await Billing({
@@ -1598,24 +1624,24 @@ const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
 				let itemData = items.find(b => a.item_uuid === b.item_uuid)
 				return {
 					...itemData,
-					...a,
+					...a
 					// price: itemData?.price || 0,
 				}
-			}),
+			})
 		})
 		data = {
 			...data,
 			...billingData,
 			item_details: billingData.items,
-			edit: window.location.pathname.includes("processing"),
+			edit: window.location.pathname.includes("processing")
 		}
 		const response = await axios({
 			method: "put",
 			url: "/orders/putOrders",
 			data: [data],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			onSave()
@@ -1628,9 +1654,10 @@ const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
 				style={{
 					height: "fit-content",
 					width: "max-content",
-					paddingTop: "50px",
-				}}>
-				<h3>Complete Order will be CANCELED</h3>
+					paddingTop: "50px"
+				}}
+			>
+				<h3>Complete Order will be CANCELLED</h3>
 
 				<div className="flex">
 					<button
@@ -1638,7 +1665,8 @@ const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
 						className="submit"
 						onClick={() => PutOrder()}
 						disabled={disable}
-						style={{ opacity: disable ? "0.5" : "1" }}>
+						style={{ opacity: disable ? "0.5" : "1" }}
+					>
 						Confirm
 					</button>
 				</div>
@@ -1662,8 +1690,9 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }
 						style={{
 							height: "fit-content",
 							padding: "20px",
-							width: "500px",
-						}}>
+							width: "500px"
+						}}
+					>
 						<div style={{ overflowY: "scroll", width: "100%" }}>
 							{BarcodeMessage?.filter(a => +a.case === 1).length ? (
 								<div className="flex" style={{ flexDirection: "column", width: "300px" }}>
@@ -1672,15 +1701,17 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }
 										className="user-table"
 										style={{
 											width: "100%",
-											height: "fit-content",
-										}}>
+											height: "fit-content"
+										}}
+									>
 										<thead>
 											<tr
 												style={{
 													color: "#fff",
 													backgroundColor: "#7990dd",
-													fontSize: "15px",
-												}}>
+													fontSize: "15px"
+												}}
+											>
 												<th colSpan={2}>
 													<div className="t-head-element">Item</div>
 												</th>
@@ -1702,8 +1733,9 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }
 													style={{
 														height: "30px",
 														color: "#fff",
-														backgroundColor: "#7990dd",
-													}}>
+														backgroundColor: "#7990dd"
+													}}
+												>
 													<td colSpan={2}>{item.item_title}</td>
 													<td>{item?.mrp || 0}</td>
 													<td style={{ backgroundColor: "green" }}>
@@ -1730,7 +1762,8 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }
 								<button
 									type="button"
 									className="submit"
-									onClick={() => (selectedOrder ? postOrderData() : setConfirmPopup(true))}>
+									onClick={() => (selectedOrder ? postOrderData() : setConfirmPopup(true))}
+								>
 									Save
 								</button>
 							</div>
@@ -1747,8 +1780,9 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }
 							style={{
 								height: "fit-content",
 								padding: "20px",
-								width: "fit-content",
-							}}>
+								width: "fit-content"
+							}}
+						>
 							<div style={{ overflowY: "scroll", width: "100%" }}>
 								<div className="flex" style={{ justifyContent: "space-between" }}>
 									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
@@ -1780,7 +1814,7 @@ function HoldPopup({
 	tempQuantity,
 	categories,
 	getTripOrders,
-	counter,
+	counter
 }) {
 	const [items, setItems] = useState([])
 	const [popupForm, setPopupForm] = useState(false)
@@ -1810,7 +1844,7 @@ function HoldPopup({
 					category_uuid: itemDetails?.category_uuid,
 					item_title: itemDetails?.item_title,
 					pronounce: itemDetails?.pronounce,
-					mrp: itemDetails?.mrp,
+					mrp: itemDetails?.mrp
 				}
 			})
 
@@ -1838,7 +1872,7 @@ function HoldPopup({
 					b,
 					p,
 					free,
-					item_title: item.item_title,
+					item_title: item.item_title
 				})
 				// b = parseInt(
 				//   +b +
@@ -1860,7 +1894,7 @@ function HoldPopup({
 					...item,
 					free,
 					b,
-					p,
+					p
 				}
 				result.push(obj)
 			}
@@ -1875,7 +1909,7 @@ function HoldPopup({
 								? {
 										...a,
 										b: +(data.b || 0),
-										p: data?.p || 0,
+										p: data?.p || 0
 								  }
 								: a
 					  )
@@ -1887,15 +1921,15 @@ function HoldPopup({
 								.map(a => ({
 									...a,
 									b: +(data.b || 0),
-									p: data?.p || 0,
-								})),
+									p: data?.p || 0
+								}))
 					  ]
 					: itemsData
 							?.filter(a => a.item_uuid === item.item_uuid)
 							.map(a => ({
 								...a,
 								b: Math.floor(+data.b || 0 || 0),
-								p: +data?.p || 0,
+								p: +data?.p || 0
 							}))
 			)
 		)
@@ -1944,7 +1978,7 @@ function HoldPopup({
 										i: 0,
 										recall: true,
 										src: audiosRef.current,
-										callback: audioCallback,
+										callback: audioCallback
 									})
 								}
 							}
@@ -1952,7 +1986,7 @@ function HoldPopup({
 							audioAPIFunction({
 								speechString,
 								elem_id: item.item_uuid,
-								callback: loopEndFunctioin,
+								callback: loopEndFunctioin
 							})
 						} else progressCount++
 					})
@@ -1970,8 +2004,8 @@ function HoldPopup({
 						...a,
 						item_details: a.item_details.map(a => ({
 							...a,
-							status: items.find(b => b.item_uuid === a.item_uuid)?.status || a.status,
-						})),
+							status: items.find(b => b.item_uuid === a.item_uuid)?.status || a.status
+						}))
 					}))
 			)
 		onSave()
@@ -1988,8 +2022,9 @@ function HoldPopup({
 						width: "max-content",
 						minWidth: "206px",
 						padding: "10px",
-						paddingTop: "40px",
-					}}>
+						paddingTop: "40px"
+					}}
+				>
 					<h1>{holdPopup}</h1>
 					<div className="user_searchbar flex" style={{ width: "100%" }}>
 						<AiOutlineSearch className="user_search_icon" />
@@ -2015,8 +2050,9 @@ function HoldPopup({
 						style={{
 							height: "fit-content",
 							padding: "20px 0",
-							width: "100%",
-						}}>
+							width: "100%"
+						}}
+					>
 						<div style={{ overflowY: "scroll", width: "100%" }}>
 							{items.length ? (
 								<div className="flex" style={{ flexDirection: "column", width: "max-content" }}>
@@ -2024,8 +2060,9 @@ function HoldPopup({
 										className="user-table"
 										style={{
 											width: "max-content",
-											height: "fit-content",
-										}}>
+											height: "fit-content"
+										}}
+									>
 										<thead>
 											<tr>
 												<th></th>
@@ -2071,9 +2108,10 @@ function HoldPopup({
 																	i: 0,
 																	src: audiosRef.current?.filter(i => i.category_uuid === a.category_uuid),
 																	forcePlayCount: 1,
-																	callback: audioCallback,
+																	callback: audioCallback
 																})
-															}>
+															}
+														>
 															<td colSpan={8}>
 																{a.category_title} <AiFillPlayCircle />
 															</td>
@@ -2108,8 +2146,9 @@ function HoldPopup({
 																				? "yellow"
 																				: +item.status === 3
 																				? "red"
-																				: "#fff",
-																	}}>
+																				: "#fff"
+																	}}
+																>
 																	<td
 																		style={{ padding: "5px" }}
 																		onClick={e => {
@@ -2120,12 +2159,13 @@ function HoldPopup({
 																						? {
 																								...a,
 																								status: a.status !== 1 ? 1 : holdPopup === "Hold" ? 2 : 0,
-																								edit: true,
+																								edit: true
 																						  }
 																						: a
 																				)
 																			)
-																		}}>
+																		}}
+																	>
 																		{+item.status !== 1 ? <CheckCircleOutlineIcon style={{ width: "15px" }} /> : ""}
 																	</td>
 
@@ -2139,7 +2179,8 @@ function HoldPopup({
 																				onClick={e => {
 																					e.stopPropagation()
 																					if (window.location.pathname.includes("processing")) setPopup(item)
-																				}}>
+																				}}
+																			>
 																				{item?.b || 0} : {(+item?.p || 0) + (+item?.free || 0)}
 																				{console.log({ items })}
 																			</td>
@@ -2148,7 +2189,7 @@ function HoldPopup({
 																					<button
 																						className="theme-btn"
 																						style={{
-																							width: "max-content",
+																							width: "max-content"
 																						}}
 																						onClick={() =>
 																							setItems(prev =>
@@ -2157,12 +2198,13 @@ function HoldPopup({
 																										? {
 																												...a,
 																												status: a.status !== 2 ? 2 : 0,
-																												edit: true,
+																												edit: true
 																										  }
 																										: a
 																								)
 																							)
-																						}>
+																						}
+																					>
 																						Hold
 																					</button>
 																				</td>
@@ -2178,16 +2220,17 @@ function HoldPopup({
 																								? {
 																										...a,
 																										status: a.status !== 3 ? 3 : holdPopup === "Hold" ? 2 : 0,
-																										edit: true,
+																										edit: true
 																								  }
 																								: a
 																						)
 																					)
-																				}>
+																				}
+																			>
 																				{+item.status !== 3 ? (
 																					<DeleteOutlineIcon
 																						style={{
-																							width: "15px",
+																							width: "15px"
 																						}}
 																					/>
 																				) : (
@@ -2203,7 +2246,7 @@ function HoldPopup({
 																				}`}
 																				style={{
 																					width: "60px",
-																					padding: "10px 0",
+																					padding: "10px 0"
 																				}}
 																				className="boxPcsInput"
 																				onClick={e => {
@@ -2237,7 +2280,8 @@ function HoldPopup({
 										setTimeout(() => {
 											setDisabled(false)
 										}, 3000)
-									}}>
+									}}
+								>
 									Discard
 								</button>
 								{items.filter(a => a.edit).length ? (
@@ -2248,7 +2292,8 @@ function HoldPopup({
 											onClick={async () => {
 												await getTripOrders()
 												postOrderData()
-											}}>
+											}}
+										>
 											Save
 										</button>
 									</>
@@ -2284,16 +2329,18 @@ function HoldPopup({
 						style={{
 							height: "fit-content",
 							width: "max-content",
-							padding: "30px",
-						}}>
+							padding: "30px"
+						}}
+					>
 						<h2 style={{ textAlign: "center" }}>Are you sure?</h2>
 						<h2 style={{ textAlign: "center" }}>Changes will be discarded</h2>
 						<div
 							className="content"
 							style={{
 								height: "fit-content",
-								padding: "20px",
-							}}>
+								padding: "20px"
+							}}
+						>
 							<div style={{ overflowY: "scroll", width: "100%" }}>
 								<form className="form">
 									<div className="flex" style={{ justifyContent: "space-between", width: "100%" }}>
@@ -2301,7 +2348,7 @@ function HoldPopup({
 											type="submit"
 											style={{
 												opacity: disabled ? "0.5" : "1",
-												backgroundColor: "red",
+												backgroundColor: "red"
 											}}
 											className="submit"
 											onClick={() => {
@@ -2312,7 +2359,8 @@ function HoldPopup({
 												console.clear()
 												onSave()
 											}}
-											disabled={disabled}>
+											disabled={disabled}
+										>
 											Continue
 										</button>
 										<button type="submit" className="submit" onClick={() => setConfirmPopup(false)}>
@@ -2352,7 +2400,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
 	useEffect(() => {
 		setdata({
 			b: popupInfo?.checkB || 0,
-			p: popupInfo?.checkP || 0,
+			p: popupInfo?.checkP || 0
 		})
 	}, [])
 
@@ -2365,7 +2413,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
 							? {
 									...a,
 									b: +(data.b || 0),
-									p: data?.p || 0,
+									p: data?.p || 0
 							  }
 							: a
 				  )
@@ -2377,15 +2425,15 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
 							.map(a => ({
 								...a,
 								b: +(data.b || 0),
-								p: data?.p || 0,
-							})),
+								p: data?.p || 0
+							}))
 				  ]
 				: items
 						?.filter(a => a.item_uuid === popupInfo.item_uuid)
 						.map(a => ({
 							...a,
 							b: Math.floor(+data.b || 0 || 0),
-							p: +data?.p || 0,
+							p: +data?.p || 0
 						}))
 		)
 		onSave()
@@ -2399,8 +2447,9 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="formGroup">
@@ -2416,7 +2465,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
 											onChange={e =>
 												setdata({
 													...data,
-													b: e.target.value,
+													b: e.target.value
 												})
 											}
 											maxLength={42}
@@ -2435,7 +2484,7 @@ function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
 											onChange={e =>
 												setdata({
 													...data,
-													p: e.target.value,
+													p: e.target.value
 												})
 											}
 											autoComplete={true}
@@ -2471,7 +2520,7 @@ function DiliveryPopup({
 	allowed,
 	setOrder,
 	setLoading,
-	loading,
+	loading
 }) {
 	const [PaymentModes, setPaymentModes] = useState([])
 	const [modes, setModes] = useState([])
@@ -2486,7 +2535,7 @@ function DiliveryPopup({
 			replacement: data?.actual || 0,
 			shortage: data?.shortage || 0,
 			adjustment: data?.adjustment || 0,
-			adjustment_remarks: data?.adjustment_remarks || "",
+			adjustment_remarks: data?.adjustment_remarks || ""
 		})
 	}, [popup])
 	const GetPaymentModes = async () => {
@@ -2495,8 +2544,8 @@ function DiliveryPopup({
 			url: "/paymentModes/GetPaymentModesList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setPaymentModes(response.data.result)
 	}
@@ -2509,7 +2558,7 @@ function DiliveryPopup({
 			time: time.getTime(),
 			invoice_number: order.invoice_number,
 			trip_uuid: order.trip_uuid,
-			counter_uuid: order.counter_uuid,
+			counter_uuid: order.counter_uuid
 		})
 		GetPaymentModes()
 	}, [])
@@ -2524,7 +2573,7 @@ function DiliveryPopup({
 						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
 						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 							? "0"
-							: 1,
+							: 1
 				}))
 			)
 	}, [PaymentModes])
@@ -2544,10 +2593,10 @@ function DiliveryPopup({
 				let itemData = items.find(b => a.item_uuid === b.item_uuid)
 				return {
 					...itemData,
-					...a,
+					...a
 					// price: itemData?.price || 0,
 				}
-			}),
+			})
 		})
 
 		let Tempdata = {
@@ -2555,7 +2604,7 @@ function DiliveryPopup({
 			...billingData,
 			item_details: billingData.items,
 			replacement: data.actual,
-			replacement_mrp: data.mrp,
+			replacement_mrp: data.mrp
 		}
 		let modeTotal = modes.map(a => +a.amt || 0)?.reduce((a, b) => a + b)
 
@@ -2577,7 +2626,7 @@ function DiliveryPopup({
 			counter_uuid: order.counter_uuid,
 			trip_uuid: order.trip_uuid,
 			invoice_number: order.invoice_number,
-			modes,
+			modes
 		}
 		setLoading(true)
 		let response
@@ -2587,8 +2636,8 @@ function DiliveryPopup({
 				url: "/receipts/postReceipt",
 				data: obj,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 		}
 
@@ -2599,8 +2648,8 @@ function DiliveryPopup({
 				url: "/Outstanding/postOutstanding",
 				data: outstanding,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 		if (response.data.success) {
 			postOrderData()
@@ -2621,8 +2670,9 @@ function DiliveryPopup({
 						style={{
 							height: "fit-content",
 							padding: "10px",
-							width: "fit-content",
-						}}>
+							width: "fit-content"
+						}}
+					>
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup">
@@ -2642,7 +2692,7 @@ function DiliveryPopup({
 																	width: "90px",
 																	backgroundColor: "light",
 																	fontSize: "12px",
-																	color: "#fff",
+																	color: "#fff"
 															  }
 															: { width: "80px" }
 													}
@@ -2652,7 +2702,7 @@ function DiliveryPopup({
 																a.mode_uuid === item.mode_uuid
 																	? {
 																			...a,
-																			amt: e.target.value,
+																			amt: e.target.value
 																	  }
 																	: a
 															)
@@ -2682,14 +2732,14 @@ function DiliveryPopup({
 																width: "90px",
 																backgroundColor: "light",
 																fontSize: "12px",
-																color: "#fff",
+																color: "#fff"
 														  }
 														: { width: "80px" }
 												}
 												onChange={e =>
 													setOutstanding(prev => ({
 														...prev,
-														amount: e.target.value,
+														amount: e.target.value
 													}))
 												}
 												disabled={credit_allowed !== "Y"}
@@ -2703,7 +2753,8 @@ function DiliveryPopup({
 											type="button"
 											className="submit"
 											style={{ color: "#fff", backgroundColor: "#7990dd" }}
-											onClick={() => setPopup(true)}>
+											onClick={() => setPopup(true)}
+										>
 											Replacement
 										</button>
 									</div>
@@ -2733,8 +2784,9 @@ function DiliveryPopup({
 							style={{
 								height: "fit-content",
 								padding: "10px",
-								width: "fit-content",
-							}}>
+								width: "fit-content"
+							}}
+						>
 							<div style={{ overflowY: "scroll" }}>
 								<form className="form">
 									<div className="formGroup">
@@ -2760,7 +2812,7 @@ function DiliveryPopup({
 																a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002"
 																	? {
 																			...a,
-																			coin: e.target.value,
+																			coin: e.target.value
 																	  }
 																	: a
 															)
@@ -2795,7 +2847,7 @@ function MinMaxPopup({
 	order,
 	items,
 
-	setLoading,
+	setLoading
 }) {
 	const [warehouse, setWarehouse] = useState([])
 	const [warehouse_uuid, setWarehouse_uuid] = useState("")
@@ -2823,7 +2875,7 @@ function MinMaxPopup({
 			setData(prev => ({
 				...prev,
 				item_title: itemData.item_title,
-				max: warehouseData?.qty,
+				max: warehouseData?.qty
 			}))
 			if (warehouse_uuid) getMinValue()
 		}
@@ -2836,12 +2888,12 @@ function MinMaxPopup({
 			url: "/items/minValue/" + warehouse_uuid + "/" + popupValue.item_uuid,
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		setData(prev => ({
 			...prev,
-			min: prev.max - (+response.data.result || 0),
+			min: prev.max - (+response.data.result || 0)
 		}))
 	}
 	return (
@@ -2857,8 +2909,9 @@ function MinMaxPopup({
 							style={{
 								height: "fit-content",
 								padding: "10px",
-								width: "fit-content",
-							}}>
+								width: "fit-content"
+							}}
+						>
 							<div style={{ overflowY: "scroll" }}>
 								<div className="inputGroup">
 									<label htmlFor="Warehouse">From Warehouse</label>
@@ -2868,15 +2921,15 @@ function MinMaxPopup({
 												{ value: 0, label: "None" },
 												...warehouse.map(a => ({
 													value: a.warehouse_uuid,
-													label: a.warehouse_title,
-												})),
+													label: a.warehouse_title
+												}))
 											]}
 											onChange={doc => setWarehouse_uuid(doc.value)}
 											value={
 												warehouse_uuid
 													? {
 															value: order?.warehouse_uuid,
-															label: warehouse?.find(j => j.warehouse_uuid === warehouse_uuid)?.warehouse_title,
+															label: warehouse?.find(j => j.warehouse_uuid === warehouse_uuid)?.warehouse_title
 													  }
 													: { value: 0, label: "None" }
 											}
@@ -2892,7 +2945,8 @@ function MinMaxPopup({
 											type="button"
 											className="submit"
 											disabled={!warehouse_uuid}
-											onClick={() => setWarehouseSelection(false)}>
+											onClick={() => setWarehouseSelection(false)}
+										>
 											Okay
 										</button>
 									</div>
@@ -2913,8 +2967,9 @@ function MinMaxPopup({
 							style={{
 								height: "fit-content",
 								padding: "10px",
-								width: "fit-content",
-							}}>
+								width: "fit-content"
+							}}
+						>
 							<div style={{ overflowY: "scroll" }}>
 								<form className="form">
 									<div className="formGroup">
@@ -2972,8 +3027,9 @@ function ConfirmPopup({ onSave, onClose, selectedOrder, Navigate }) {
 					className="content"
 					style={{
 						height: "fit-content",
-						padding: "20px",
-					}}>
+						padding: "20px"
+					}}
+				>
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						<form className="form">
 							<div className="flex">
@@ -3041,8 +3097,9 @@ function DeliveryMessagePopup({ onSave, data, credit_allowed }) {
 					className="content"
 					style={{
 						height: "fit-content",
-						padding: "20px",
-					}}>
+						padding: "20px"
+					}}
+				>
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						<form className="form">
 							<div className="flex" style={{ width: "100%" }}>
@@ -3051,7 +3108,8 @@ function DeliveryMessagePopup({ onSave, data, credit_allowed }) {
 									type="button"
 									style={disabled ? { opacity: "0.5", cursor: "not-allowed" } : { opacity: "1", cursor: "pointer" }}
 									className="submit"
-									onClick={onSave}>
+									onClick={onSave}
+								>
 									Okay
 								</button>
 							</div>
@@ -3072,8 +3130,8 @@ function OpenWarningMessage({ onSave, data, users, onClose }) {
 			url: "/orders/GetOrder/" + data.order_uuid,
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log("users", response)
 		if (response.data.result.opened_by === "0") onSave()
@@ -3091,16 +3149,18 @@ function OpenWarningMessage({ onSave, data, users, onClose }) {
 				style={{
 					height: "fit-content",
 					width: "max-content",
-					paddingTop: "50px",
-				}}>
+					paddingTop: "50px"
+				}}
+			>
 				<h2>Order Already Opened By {users.find((a, i) => a.user_uuid === orderData.opened_by)?.user_title}</h2>
 
 				<div
 					className="content"
 					style={{
 						height: "fit-content",
-						padding: "20px",
-					}}>
+						padding: "20px"
+					}}
+				>
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						<form className="form">
 							<div className="flex" style={{ width: "100%" }}>
@@ -3129,7 +3189,7 @@ function NewUserForm({
 
 	deliveryPage,
 	items,
-	onClose,
+	onClose
 }) {
 	const [data, setdata] = useState({})
 	useEffect(() => {
@@ -3138,7 +3198,7 @@ function NewUserForm({
 			: order?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)
 		setdata({
 			b: data?.b || 0,
-			p: data?.p || 0,
+			p: data?.p || 0
 		})
 	}, [])
 
@@ -3154,7 +3214,7 @@ function NewUserForm({
 								? {
 										...a,
 										b: +(+data.b || 0) + parseInt((+data.p || 0) / +a.conversion),
-										p: parseInt((+data.p || 0) % +a.conversion),
+										p: parseInt((+data.p || 0) % +a.conversion)
 								  }
 								: a
 					  )
@@ -3166,15 +3226,15 @@ function NewUserForm({
 								.map(a => ({
 									...a,
 									b: +(+data.b || 0) + parseInt((+data.p || 0) / +a.conversion),
-									p: parseInt((+data.p || 0) % +a.conversion),
-								})),
+									p: parseInt((+data.p || 0) % +a.conversion)
+								}))
 					  ]
 					: items
 							?.filter(a => a.item_uuid === popupInfo.item_uuid)
 							.map(a => ({
 								...a,
 								b: +(+data.b || 0) + +Math.floor(parseInt((+data.p || 0) / +a.conversion)),
-								p: parseInt((+data.p || 0) % +a.conversion),
+								p: parseInt((+data.p || 0) % +a.conversion)
 							}))
 			)
 			onClose()
@@ -3194,7 +3254,7 @@ function NewUserForm({
 											p:
 												+a.p +
 												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) -
-												data.p,
+												data.p
 									  }
 									: a
 						  )
@@ -3203,25 +3263,25 @@ function NewUserForm({
 								{
 									item_uuid: popupInfo.item_uuid,
 									b: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) - data.b,
-									p: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p,
-								},
+									p: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p
+								}
 						  ]
 					: [
 							{
 								item_uuid: popupInfo.item_uuid,
 								b: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) - data.b,
-								p: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p,
-							},
+								p: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p
+							}
 					  ],
 				item_details: orderData.item_details.map(a =>
 					a.item_uuid === popupInfo.item_uuid
 						? {
 								...a,
 								b: (+data.b || 0) + parseInt(+data.p / (+popupInfo.conversion || 1)),
-								p: +data.p % (+popupInfo.conversion || 1),
+								p: +data.p % (+popupInfo.conversion || 1)
 						  }
 						: a
-				),
+				)
 			}
 			onSave(orderData)
 		} else {
@@ -3240,7 +3300,7 @@ function NewUserForm({
 											p:
 												+a.p +
 												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) -
-												data.p,
+												data.p
 									  }
 									: a
 						  )
@@ -3249,25 +3309,25 @@ function NewUserForm({
 								{
 									item_uuid: popupInfo.item_uuid,
 									b: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) - data.b,
-									p: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p,
-								},
+									p: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p
+								}
 						  ]
 					: [
 							{
 								item_uuid: popupInfo.item_uuid,
 								b: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) - data.b,
-								p: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p,
-							},
+								p: (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p
+							}
 					  ],
 				item_details: orderData.item_details.map(a =>
 					a.item_uuid === popupInfo.item_uuid
 						? {
 								...a,
 								b: (+data.b || 0) + parseInt(+data.p / (+popupInfo.conversion || 1)),
-								p: +data.p % (+popupInfo.conversion || 1),
+								p: +data.p % (+popupInfo.conversion || 1)
 						  }
 						: a
-				),
+				)
 			}
 			onSave(orderData)
 		}
@@ -3281,8 +3341,9 @@ function NewUserForm({
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="formGroup">
@@ -3298,7 +3359,7 @@ function NewUserForm({
 											onChange={e =>
 												setdata({
 													...data,
-													b: e.target.value,
+													b: e.target.value
 												})
 											}
 											maxLength={42}
@@ -3317,7 +3378,7 @@ function NewUserForm({
 											onChange={e =>
 												setdata({
 													...data,
-													p: e.target.value,
+													p: e.target.value
 												})
 											}
 											autoComplete={true}
@@ -3350,15 +3411,17 @@ const PhoneList = ({ onSave, mobile }) => {
 				style={{
 					height: "fit-content",
 					width: "max-content",
-					minWidth: "250px",
-				}}>
+					minWidth: "250px"
+				}}
+			>
 				<div
 					className="content"
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						{mobile.length ? (
 							<div className="flex" style={{ flexDirection: "column", width: "100%" }}>
@@ -3366,23 +3429,26 @@ const PhoneList = ({ onSave, mobile }) => {
 									className="user-table"
 									style={{
 										width: "100%",
-										height: "fit-content",
-									}}>
+										height: "fit-content"
+									}}
+								>
 									<tbody className="tbody">
 										{mobile?.map((item, i) => (
 											<tr
 												key={item?.item_uuid || Math.random()}
 												style={{
 													height: "30px",
-													width: "100%",
-												}}>
+													width: "100%"
+												}}
+											>
 												<td
 													colSpan={3}
 													className="flex"
 													onClick={() => {
 														window.location.assign("tel:" + item)
 														onSave()
-													}}>
+													}}
+												>
 													<Phone />
 													{item}
 												</td>
@@ -3427,7 +3493,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 		let dataArray = deleteItems
 			? updateOrders.map(a => ({
 					...a,
-					item_details: a.item_details.filter(b => !(b.item_uuid === items.item_uuid)),
+					item_details: a.item_details.filter(b => !(b.item_uuid === items.item_uuid))
 			  }))
 			: updateOrders
 					.filter(a => a.edit || deleteItemsOrder.filter(b => b === a.order_uuid).length)
@@ -3435,7 +3501,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 						deleteItemsOrder.filter(b => b === a.order_uuid).length
 							? {
 									...a,
-									item_details: a.item_details.filter(b => !(b.item_uuid === items.item_uuid)),
+									item_details: a.item_details.filter(b => !(b.item_uuid === items.item_uuid))
 							  }
 							: a
 					)
@@ -3454,15 +3520,15 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 					let itemData = itemsData.find(b => a.item_uuid === b.item_uuid)
 					return {
 						...itemData,
-						...a,
+						...a
 						// price: itemData?.price || 0,
 					}
-				}),
+				})
 			})
 			data = {
 				...data,
 				...billingData,
-				item_details: billingData.items,
+				item_details: billingData.items
 			}
 			data = Object.keys(data)
 				.filter(key => key !== "others" || key !== "items")
@@ -3480,8 +3546,8 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 			url: "/orders/putOrders",
 			data: finalData,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			onSave()
@@ -3497,16 +3563,18 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 						width: "max-content",
 						minWidth: "206px",
 						padding: "10px",
-						paddingTop: "40px",
-					}}>
+						paddingTop: "40px"
+					}}
+				>
 					<h1>Orders</h1>
 					<div
 						className="content"
 						style={{
 							height: "fit-content",
 							padding: "20px 0",
-							width: "80vw",
-						}}>
+							width: "80vw"
+						}}
+					>
 						<div style={{ overflow: "scroll", width: "100%" }}>
 							{order.length ? (
 								<div className="flex" style={{ flexDirection: "column" }}>
@@ -3516,8 +3584,9 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 											height: "fit-content",
 											fontSize: "10px",
 											width: "max-content",
-											overflow: "scroll",
-										}}>
+											overflow: "scroll"
+										}}
+									>
 										<thead>
 											<tr style={{ color: "#fff", backgroundColor: "#7990dd" }}>
 												<th></th>
@@ -3550,8 +3619,9 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 														color: "#fff",
 														backgroundColor: +deleteItemsOrder.filter(a => a === item.order_uuid).length
 															? "red"
-															: "#7990dd",
-													}}>
+															: "#7990dd"
+													}}
+												>
 													<td style={{ width: "3ch" }}>{i + 1}</td>
 													<td colSpan={3} style={{ width: "70px" }}>
 														{new Date(item?.status[0]?.time).toDateString() +
@@ -3576,7 +3646,7 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 																fontSize: "10px",
 																width: "10ch",
 																overflow: "scroll",
-																padding: "none",
+																padding: "none"
 															}}
 															onClick={e => {
 																e.stopPropagation()
@@ -3595,7 +3665,8 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 																	? prev.filter(a => !(a === item.order_uuid))
 																	: [...(prev || []), item.order_uuid]
 															)
-														}}>
+														}}
+													>
 														{!deleteItemsOrder.filter(a => a === item.order_uuid).length ? <DeleteOutlineIcon /> : ""}
 													</td>
 												</tr>
@@ -3617,9 +3688,10 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 								top: "0px",
 								backgroundColor: "red",
 								fontSize: "15px",
-								width: "90px",
+								width: "90px"
 							}}
-							onClick={() => postOrderData(true)}>
+							onClick={() => postOrderData(true)}
+						>
 							Delete All
 						</button>
 						<button onClick={onClose} className="closeButton">
@@ -3657,7 +3729,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
 		let data = order.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)
 		setdata({
 			b: data?.b || 0,
-			p: data?.p || 0,
+			p: data?.p || 0
 		})
 	}, [])
 	console.log(popupInfo)
@@ -3675,10 +3747,10 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
 									? {
 											...b,
 											b: Math.floor(+data.b + +data.p / +item.conversion || 0),
-											p: +data.p % +item.conversion,
+											p: +data.p % +item.conversion
 									  }
 									: b
-							),
+							)
 					  }
 					: a
 			)
@@ -3694,8 +3766,9 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="formGroup">
@@ -3711,7 +3784,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
 											onChange={e =>
 												setdata({
 													...data,
-													b: e.target.value,
+													b: e.target.value
 												})
 											}
 											maxLength={42}
@@ -3730,7 +3803,7 @@ function QuantityChanged({ onSave, popupInfo, setOrder, order, itemsData }) {
 											onChange={e =>
 												setdata({
 													...data,
-													p: e.target.value,
+													p: e.target.value
 												})
 											}
 											maxLength={42}
