@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react"
 
 const OrderPrint = ({
+	renderID,
 	counter = [],
 	counters = [],
 	order = { item_details: [] },
@@ -10,11 +11,12 @@ const OrderPrint = ({
 	item_details = [],
 	reminderDate,
 	footer = false,
-	paymentModes = [],
-	print_items_length = 12
+	paymentModes = []
 }) => {
+	const [gapSize, setGapSize] = useState(0)
 	const isEstimate = order?.order_type === "E"
 	const [gstValues, setGstVAlues] = useState([])
+
 	let deliveryMessage = useMemo(
 		() =>
 			paymentModes?.filter(
@@ -61,8 +63,15 @@ const OrderPrint = ({
 		return time - item?.created_at < reminderDate * 86400000
 	}
 
+	useEffect(() => {
+		const offsetHeight = document.getElementById(renderID)?.querySelector("table")?.offsetHeight
+		console.log({ offsetHeight })
+		setGapSize(`calc(483px - 48.5px - ${offsetHeight}px)`)
+	}, [renderID])
+
 	return (
 		<div
+			id={renderID}
 			style={{
 				width: "170mm",
 				height: "128mm",
@@ -440,7 +449,7 @@ const OrderPrint = ({
 				<tr
 					style={{
 						height: !isEstimate
-							? ((footer ? print_items_length - 4 : print_items_length) - item_details?.length) * 10 + "px"
+							? gapSize
 							: `calc(483px - 192.11px - ${
 									item_details?.filter(isBorderItem)?.length * 14.44 +
 									item_details?.filter(_i => !isBorderItem(_i))?.length * 17

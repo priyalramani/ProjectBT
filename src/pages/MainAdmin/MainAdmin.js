@@ -23,6 +23,7 @@ import CollectionTag from "../QuikAccess/CollectionTag"
 import { useLocation } from "react-router-dom"
 import context from "../../context/context"
 import { IoCloseCircle } from "react-icons/io5"
+import OrderPrintWrapper from "../../components/OrderPrintWrapper"
 
 const MainAdmin = () => {
 	const [isCollectionTags, setCollectionTags] = useState(false)
@@ -44,7 +45,7 @@ const MainAdmin = () => {
 
 	const [selectedRouteOrder, setSelectedRouteOrder] = useState({})
 	const [selectedTrip, setSelectedTrip] = useState("")
-	const [searchItems, setSearhItems] = useState("")
+	const [searchItems, setSearhItems] = useState("Priyal")
 	const [popupOrder, setPopupOrder] = useState(null)
 	const [users, setUsers] = useState([])
 	const [dropdown, setDropDown] = useState(false)
@@ -122,7 +123,6 @@ const MainAdmin = () => {
 	)
 
 	const selectedPrintOrder = useMemo(() => ordersData?.filter(a => +a.to_print) || [], [ordersData])
-	console.log("selectedPrintOrder", selectedPrintOrder)
 	const getItemsDataReminder = async () => {
 		const response = await axios({
 			method: "get",
@@ -1511,63 +1511,15 @@ const MainAdmin = () => {
 					)}
 				</div>
 			</div>
-			<div
-				style={{
-					position: "fixed",
-					top: -1000,
-					right: -1000,
-					zIndex: "-1000"
-				}}
-			>
-				<div
-					ref={componentRef}
-					style={
-						{
-							// marginTop: "20mm",
-							// marginLeft: "20mm",
-							// marginRight: "20mm",
-							// margin: "45mm 40mm 30mm 60mm",
-							// textAlign: "center",
-							// padding: "10px"
-						}
-					}
-				>
-					{(selectOrder ? selectedOrder : selectedPrintOrder)
-						.map(a => ({
-							...a,
-							sort_order: +counter.find(b => b.counter_uuid === a.counter_uuid)?.sort_order
-						}))
-						.sort((a, b) => a.sort_order - b.sort_order)
-						.map(a => ({
-							...a,
-							item_details: a.item_details.filter(b => b.status !== 3).map((b, i) => ({ ...b, sr: i + 1 }))
-						}))
-						.map((orderData, index) => {
-							let item_details = orderData.item_details
-								.map(a => ({
-									...a,
-									sort_order: +category.find(
-										b => b.counter_uuid === items?.find(c => c.item_uuid - a.item_uuid)?.counter_uuid
-									)?.sort_order
-								}))
-								.sort((a, b) => a.sort_order - b.sort_order)
-							return Array.from(Array(Math.ceil(orderData?.item_details?.length / 12)).keys())?.map((a, i) => (
-								<OrderPrint
-									counter={counter.find(a => a.counter_uuid === orderData?.counter_uuid)}
-									reminderDate={reminderDate}
-									order={orderData}
-									date={new Date(orderData?.status[0]?.time)}
-									user={users.find(a => a.user_uuid === orderData?.status[0]?.user_uuid)?.user_title || ""}
-									itemData={items}
-									item_details={orderData?.item_details?.slice(a * 12, 12 * (a + 1))}
-									footer={!(orderData?.item_details?.length > 12 * (a + 1))}
-									paymentModes={paymentModes}
-									counters={counter}
-								/>
-							))
-						})}
-				</div>
-			</div>
+			{/* <OrderPrintWrapper
+				componentRef={componentRef}
+				orders={selectOrder ? selectedOrder : selectedPrintOrder}
+				reminderDate={reminderDate}
+				users={users}
+				items={items}
+				paymentModes={paymentModes}
+				counters={counter}
+			/> */}
 			{selectedWarehouseOrder ? (
 				<WarehouseUpdatePopup
 					onClose={() =>
@@ -1971,6 +1923,7 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 	const reactToPrintContent = useCallback(() => {
 		return componentRef.current
 	}, [])
+
 	const reactToBoxPrintContent = useCallback(() => {
 		return componentBoxRef.current
 	}, [])

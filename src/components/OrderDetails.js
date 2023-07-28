@@ -6,7 +6,6 @@ import { Billing, CONTROL_AUTO_REFRESH, jumpToNextIndex } from "../Apis/function
 import { Add, CheckCircle, ContentCopy, NoteAdd, WhatsApp } from "@mui/icons-material"
 import { useReactToPrint } from "react-to-print"
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material"
-import OrderPrint from "./OrderPrint"
 
 import FreeItems from "./FreeItems"
 import DiliveryReplaceMent from "./DiliveryReplaceMent"
@@ -16,6 +15,8 @@ import context from "../context/context"
 import { IoCheckmarkDoneOutline } from "react-icons/io5"
 import { FaSave } from "react-icons/fa"
 import Prompt from "./Prompt"
+import OrderPrintWrapper from "./OrderPrintWrapper"
+
 const default_status = [
 	{ value: 0, label: "Preparing" },
 	{ value: 1, label: "Ready" },
@@ -226,15 +227,17 @@ export function OrderDetails({
 			}))
 		}))
 	}
+
 	const reactToPrintContent = useCallback(() => {
 		return componentRef.current
-	}, [printData])
+	}, [])
 
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
 		documentTitle: "Statement",
 		removeAfterPrint: true
 	})
+
 	const getUsers = async () => {
 		if (userData.length) {
 			setUsers(userData)
@@ -790,7 +793,6 @@ export function OrderDetails({
 				"Content-Type": "application/json"
 			}
 		})
-		// console.log(response);
 		if (response.data.success) {
 			setTaskPopup(response.data.result)
 		} else handlePrint()
@@ -2216,40 +2218,16 @@ export function OrderDetails({
 			) : (
 				""
 			)}
-			<div
-				style={{
-					position: "fixed",
-					// top: 10,
-					// left: 10,
-					// zIndex: 100000000000000000,
-					// background: "#fff",
-					top: -100,
-					left: -180,
-					zIndex: "-1000"
-				}}
-			>
-				<div ref={componentRef} id="item-container">
-					{getPrintData()?.map((_printData, _i, array) =>
-						_printData?.item_details?.[0] ? (
-							<OrderPrint
-								print_items_length={print_items_length}
-								counter={counters.find(a => a.counter_uuid === _printData?.counter_uuid)}
-								reminderDate={reminderDate}
-								order={printData}
-								date={new Date(_printData?.status[0]?.time)}
-								user={users.find(a => a.user_uuid === _printData?.status[0]?.user_uuid)?.user_title || ""}
-								itemData={itemsData}
-								item_details={_printData?.item_details}
-								footer={_i + 1 === array.length}
-								paymentModes={paymentModes}
-								counters={counters}
-							/>
-						) : (
-							""
-						)
-					)}
-				</div>
-			</div>
+
+			<OrderPrintWrapper
+				componentRef={componentRef}
+				orders={[printData]}
+				reminderDate={reminderDate}
+				users={users}
+				items={items}
+				paymentModes={paymentModes}
+				counters={counter}
+			/>
 		</>
 	)
 }
