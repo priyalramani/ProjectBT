@@ -45,7 +45,7 @@ const MainAdmin = () => {
 
 	const [selectedRouteOrder, setSelectedRouteOrder] = useState({})
 	const [selectedTrip, setSelectedTrip] = useState("")
-	const [searchItems, setSearhItems] = useState("Priyal")
+	const [searchItems, setSearhItems] = useState("")
 	const [popupOrder, setPopupOrder] = useState(null)
 	const [users, setUsers] = useState([])
 	const [dropdown, setDropDown] = useState(false)
@@ -1511,7 +1511,7 @@ const MainAdmin = () => {
 					)}
 				</div>
 			</div>
-			{/* <OrderPrintWrapper
+			<OrderPrintWrapper
 				componentRef={componentRef}
 				orders={selectOrder ? selectedOrder : selectedPrintOrder}
 				reminderDate={reminderDate}
@@ -1519,7 +1519,7 @@ const MainAdmin = () => {
 				items={items}
 				paymentModes={paymentModes}
 				counters={counter}
-			/> */}
+			/>
 			{selectedWarehouseOrder ? (
 				<WarehouseUpdatePopup
 					onClose={() =>

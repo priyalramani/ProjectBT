@@ -32,7 +32,7 @@ const OrderPrintWrapper = ({ componentRef, orders, counters, reminderDate, users
 	}
 
 	return (
-		<div className="order-print-layout visible-">
+		<div className="order-print-layout">
 			<div ref={componentRef}>
 				{orders
 					?.map(a => ({ ...a, sort_order: +counters?.find(b => b.counter_uuid === a.counter_uuid)?.sort_order }))
