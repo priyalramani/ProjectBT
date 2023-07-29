@@ -44,7 +44,6 @@ const OrderPrintWrapper = ({ componentRef, orders, counters, reminderDate, users
 					?.map(__order => {
 						return getPrintData(__order)?.map((order, i, array) => (
 							<OrderPrint
-								renderID={order?.order_uuid + i}
 								counter={counters.find(a => a.counter_uuid === order?.counter_uuid)}
 								reminderDate={reminderDate}
 								order={order}

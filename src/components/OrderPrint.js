@@ -13,7 +13,6 @@ const OrderPrint = ({
 	footer = false,
 	paymentModes = []
 }) => {
-	const [gapSize, setGapSize] = useState(0)
 	const isEstimate = order?.order_type === "E"
 	const [gstValues, setGstVAlues] = useState([])
 
@@ -63,12 +62,6 @@ const OrderPrint = ({
 		return time - item?.created_at < reminderDate * 86400000
 	}
 
-	useEffect(() => {
-		const offsetHeight = document.getElementById(renderID)?.querySelector("table")?.offsetHeight
-		console.log({ offsetHeight })
-		setGapSize(`calc(483px - 48.5px - ${offsetHeight}px)`)
-	}, [renderID])
-
 	return (
 		<div
 			id={renderID}
@@ -76,7 +69,10 @@ const OrderPrint = ({
 				width: "170mm",
 				height: "128mm",
 				border: "1px solid black",
-				pageBreakAfter: "always"
+				pageBreakAfter: "always",
+				display: "flex",
+				flexDirection: "column",
+				justifyContent: "space-between"
 			}}
 		>
 			<table style={{ width: "100%" }}>
@@ -445,20 +441,8 @@ const OrderPrint = ({
 						</tr>
 					)
 				})}
-
-				<tr
-					style={{
-						height: !isEstimate
-							? gapSize
-							: `calc(483px - 192.11px - ${
-									item_details?.filter(isBorderItem)?.length * 14.44 +
-									item_details?.filter(_i => !isBorderItem(_i))?.length * 17
-							  }px)`
-					}}
-				>
-					<td colSpan="28"></td>
-				</tr>
-
+			</table>
+			<table style={{ width: "100%" }}>
 				{footer ? (
 					<>
 						<tr>

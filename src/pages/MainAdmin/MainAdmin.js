@@ -1511,6 +1511,7 @@ const MainAdmin = () => {
 					)}
 				</div>
 			</div>
+
 			<OrderPrintWrapper
 				componentRef={componentRef}
 				orders={selectOrder ? selectedOrder : selectedPrintOrder}
@@ -1520,6 +1521,7 @@ const MainAdmin = () => {
 				paymentModes={paymentModes}
 				counters={counter}
 			/>
+
 			{selectedWarehouseOrder ? (
 				<WarehouseUpdatePopup
 					onClose={() =>
