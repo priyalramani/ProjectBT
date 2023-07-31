@@ -2224,7 +2224,7 @@ export function OrderDetails({
 				orders={[printData]}
 				reminderDate={reminderDate}
 				users={users}
-				items={items}
+				items={itemsData}
 				paymentModes={paymentModes}
 				counters={counter}
 			/>
