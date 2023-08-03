@@ -406,3 +406,14 @@ svg.table-icon {
 	z-index: 9999999999;
 	background: #ffff;
 }
+
+.performance-summary-table td {
+	border-left: 1px solid darkgray;
+}
+
+.performance-summary-table div {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
+}
