@@ -63,8 +63,8 @@ import Companies from "./pages/Master/Companies"
 import PerformanceSummary from "./pages/Reports/PerformanceSummary"
 
 export let Version = 134
-// export const server = "https://api.btgondia.com"
-export const server = "http://localhost:9000"
+export const server = "https://api.btgondia.com"
+// export const server = "http://localhost:9000"
 
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))
