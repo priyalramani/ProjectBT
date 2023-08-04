@@ -876,7 +876,28 @@ const MainAdmin = () => {
 															a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
 															a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
 													)?.length
-											)
+											) {
+												const orders_data = orders
+													?.filter(
+														_i =>
+															!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
+															!+_i?.payment_pending
+													)
+													?.filter(
+														b =>
+															counter.filter(
+																c =>
+																	c.counter_uuid === b.counter_uuid &&
+																	(route.route_uuid === c.route_uuid ||
+																		((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
+															)?.length
+													)
+													?.filter(
+														a =>
+															!searchItems ||
+															a.invoice_number?.toString()?.includes(searchItems?.toLocaleLowerCase()) ||
+															a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
+													)
 												return (
 													<div key={Math.random()} className="sectionDiv">
 														<h1>
@@ -899,8 +920,12 @@ const MainAdmin = () => {
 															>
 																{route.route_title}
 															</span>{" "}
-															({route.orderLength}) [ Processing {route?.processingLength}, Checking{" "}
-															{route.checkingLength}, Delivery {route?.deliveryLength} ]
+															<span>({route.orderLength})</span>
+															<span>
+																[ Processing {route?.processingLength}, Checking {route.checkingLength}, Delivery{" "}
+																{route?.deliveryLength} ]
+															</span>
+															<span>({[...new Set(orders_data?.map(_i => _i?.counter_uuid))]?.length})</span>
 															{selectOrder ? (
 																<input
 																	type="checkbox"
@@ -1021,29 +1046,9 @@ const MainAdmin = () => {
 															}}
 															id="seats_container"
 														>
-															{orders
-																?.filter(
-																	_i =>
-																		!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
-																		!+_i?.payment_pending
-																)
-																?.filter(
-																	b =>
-																		counter.filter(
-																			c =>
-																				c.counter_uuid === b.counter_uuid &&
-																				(route.route_uuid === c.route_uuid ||
-																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
-																		)?.length
-																)
-																?.filter(
-																	a =>
-																		!searchItems ||
-																		a.invoice_number?.toString()?.includes(searchItems?.toLocaleLowerCase()) ||
-																		a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
-																)
-																.sort((a, b) => +a.time_1 - +b.time_1)
-																.map(item => {
+															{orders_data
+																?.sort((a, b) => +a.time_1 - +b.time_1)
+																?.map(item => {
 																	return (
 																		<div
 																			className={`
@@ -1125,6 +1130,7 @@ const MainAdmin = () => {
 														</div>
 													</div>
 												)
+											}
 										})}
 									</>
 								) : (
@@ -1315,7 +1321,21 @@ const MainAdmin = () => {
 																?.includes(searchItems.toLocaleLowerCase()) ||
 															a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
 													)?.length
-											)
+											) {
+												const orders_data = orders
+													?.filter(
+														_i =>
+															!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
+															!+_i?.payment_pending
+													)
+													?.filter(a => a.trip_uuid === trip.trip_uuid)
+													?.filter(
+														a =>
+															!searchItems ||
+															a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
+															a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
+													)
+
 												return (
 													<div key={Math.random()} className="sectionDiv">
 														<h1>
@@ -1325,14 +1345,19 @@ const MainAdmin = () => {
 															>
 																{trip.trip_title}
 															</span>{" "}
-															({orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length}) [Processing{" "}
-															{trip?.processingLength}, Checking {trip?.checkingLength}, Delivery {trip?.deliveryLength}
-															]
-															{trip?.users?.[0]
-																? `[${trip?.users
-																		?.map(a => users?.find(b => b.user_uuid === a)?.user_title)
-																		?.join(", ")}]`
-																: ""}
+															<span>({orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length})</span>
+															<span>
+																[Processing {trip?.processingLength}, Checking {trip?.checkingLength}, Delivery{" "}
+																{trip?.deliveryLength}]
+															</span>
+															<span>
+																{trip?.users?.[0]
+																	? `[${trip?.users
+																			?.map(a => users?.find(b => b.user_uuid === a)?.user_title)
+																			?.join(", ")}]`
+																	: ""}
+															</span>
+															<span>({[...new Set(orders_data?.map(_i => _i?.counter_uuid))]?.length})</span>
 															{selectOrder ? (
 																<input
 																	type="checkbox"
@@ -1391,21 +1416,9 @@ const MainAdmin = () => {
 															}}
 															id="seats_container"
 														>
-															{orders
-																?.filter(
-																	_i =>
-																		!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
-																		!+_i?.payment_pending
-																)
-																.filter(a => a.trip_uuid === trip.trip_uuid)
-																.filter(
-																	a =>
-																		!searchItems ||
-																		a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
-																		a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
-																)
-																.sort((a, b) => +a.time_1 - +b.time_1)
-																.map(item => {
+															{orders_data
+																?.sort((a, b) => +a.time_1 - +b.time_1)
+																?.map(item => {
 																	return (
 																		<div
 																			className={`seatSearchTarget ${
@@ -1488,6 +1501,7 @@ const MainAdmin = () => {
 														</div>
 													</div>
 												)
+											}
 										})}
 									</>
 								) : (
