@@ -62,7 +62,7 @@ import CashRegister from "./pages/QuikAccess/CashRegister"
 import Companies from "./pages/Master/Companies"
 import PerformanceSummary from "./pages/Reports/PerformanceSummary"
 
-export let Version = 135
+export let Version = 136
 export const server = "https://api.btgondia.com"
 // export const server = "http://localhost:9000"
 

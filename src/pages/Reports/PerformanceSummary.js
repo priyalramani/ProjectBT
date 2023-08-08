@@ -17,14 +17,28 @@ const formatDate = _date => {
 const PerformanceSummary = () => {
 	const [data, setData] = useState()
 	const [dateValues, setDateValues] = useState({ from_date: today, to_date: today })
+
 	const search = async () => {
 		const query = `?from_date=${dateValues?.from_date}&to_date=${dateValues?.to_date}`
 		const response = await axios("users/performance-summary" + query)
 		if (response.status === 200) {
-			console.log({ response: response.data })
-			setData(response.data)
+			const total_values = {}
+			for (const user_orders of Object.values(response.data)) {
+				for (const order_stage in user_orders) {
+					total_values[order_stage] = {
+						count: (total_values[order_stage]?.count || 0) + user_orders[order_stage].count,
+						amount: (total_values[order_stage]?.amount || 0) + user_orders[order_stage].amount
+					}
+				}
+			}
+
+			setData({
+				table_data: response.data,
+				total_values
+			})
 		}
 	}
+
 	return (
 		<>
 			<Sidebar />
@@ -67,14 +81,14 @@ const PerformanceSummary = () => {
 					</div>
 				</div>
 				<div className="table-container-user item-sales-container">
-					<Table data={data} />
+					<Table data={data?.table_data} total={data?.total_values} />
 				</div>
 			</div>
 		</>
 	)
 }
 
-function Table({ data = {} }) {
+function Table({ data = {}, total }) {
 	const columns = ["Placed", "Processed", "Checked", "Delivered", "Completed"]
 	const [sortingState, setSortingState] = useState({})
 
@@ -134,6 +148,29 @@ function Table({ data = {} }) {
 						))}
 					</tr>
 				))}
+				<tr
+					style={{
+						height: "30px",
+						position: "sticky",
+						bottom: 0,
+						background: "#ffffff",
+						boxShadow: "0px 0px 25px -15px black"
+					}}
+				>
+					<td colSpan={2}>
+						<b>TOTAL: </b>
+					</td>
+					{columns?.map(i => (
+						<td>
+							<div>
+								<span>
+									<b>₹{formatIndianCurrency(total?.[i?.toLowerCase()]?.amount || 0)}</b>
+								</span>
+								<span>{total?.[i?.toLowerCase()]?.count || 0}</span>
+							</div>
+						</td>
+					))}
+				</tr>
 			</tbody>
 		</table>
 	)

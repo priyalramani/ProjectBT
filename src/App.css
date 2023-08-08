@@ -454,6 +454,10 @@ svg.table-icon {
 	}
 }
 
+.performance-summary-table * {
+	cursor: auto !important;
+}
+
 .performance-summary-table td {
 	border-left: 1px solid darkgray;
 }
