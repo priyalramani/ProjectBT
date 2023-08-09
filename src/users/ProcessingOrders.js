@@ -156,9 +156,8 @@ const ProcessingOrders = () => {
 		if (Location.pathname.includes("delivery") && selectedOrder && !checking) {
 			let data = paymentModes?.filter(
 				a =>
-					!counters
-						?.find(a => selectedOrder?.counter_uuid === a.counter_uuid)
-						?.payment_modes?.filter(b => b === a.mode_uuid)?.length
+					!counters?.find(a => selectedOrder?.counter_uuid === a.counter_uuid)?.payment_modes?.filter(b => b === a.mode_uuid)
+						?.length
 			)
 			if (data?.length || selectedOrder.credit_allowed !== "Y") {
 				setDeliveryMessage(data || [])
@@ -256,11 +255,7 @@ const ProcessingOrders = () => {
 		}
 	}
 	// console.log("orders", orders);
-	const postOrderData = async (
-		dataArray = selectedOrder ? [selectedOrder] : orders,
-		hold = false,
-		preventPrintUpdate
-	) => {
+	const postOrderData = async (dataArray = selectedOrder ? [selectedOrder] : orders, hold = false, preventPrintUpdate) => {
 		setprintInvicePopup(null)
 		setLoading(true)
 		console.log(dataArray)
@@ -378,18 +373,8 @@ const ProcessingOrders = () => {
 				let dataItem = Location.pathname.includes("processing") ? itemChanged : finalData[0]?.item_details
 
 				let qty = `${
-					dataItem?.length > 1
-						? dataItem?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
-						: dataItem?.length
-						? dataItem[0]?.b
-						: 0
-				}:${
-					dataItem?.length > 1
-						? dataItem?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
-						: dataItem?.length
-						? dataItem[0]?.p
-						: 0
-				}`
+					dataItem?.length > 1 ? dataItem?.reduce((a, b) => (+a.b || 0) + (+b.b || 0)) : dataItem?.length ? dataItem[0]?.b : 0
+				}:${dataItem?.length > 1 ? dataItem?.reduce((a, b) => (+a.p || 0) + (+b.p || 0)) : dataItem?.length ? dataItem[0]?.p : 0}`
 				setLoading(false)
 				setSelectedOrder(false)
 				setHoldPopup(false)
@@ -902,11 +887,7 @@ const ProcessingOrders = () => {
 											>
 												No
 											</button>
-											<button
-												type="button"
-												className="submit"
-												onClick={() => postOrderData([{ ...selectedOrder, to_print: 1 }])}
-											>
+											<button type="button" className="submit" onClick={() => postOrderData([{ ...selectedOrder, to_print: 1 }])}>
 												Yes
 											</button>
 										</div>
@@ -1022,8 +1003,7 @@ const ProcessingOrders = () => {
 					>
 						<thead>
 							<tr>
-								{selectedOrder &&
-								!(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
+								{selectedOrder && !(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
 									<th></th>
 								) : (
 									""
@@ -1116,8 +1096,7 @@ const ProcessingOrders = () => {
 														: "#000"
 												}}
 											>
-												{selectedOrder &&
-												!(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
+												{selectedOrder && !(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
 													<td
 														style={{ padding: "10px", height: "50px" }}
 														onClick={() => {
@@ -1197,9 +1176,7 @@ const ProcessingOrders = () => {
 																				.map(a => {
 																					return {
 																						...a,
-																						b:
-																							+(a.b || 0) +
-																							parseInt(((a?.p || 0) + (+a?.one_pack || 1)) / +a.conversion),
+																						b: +(a.b || 0) + parseInt(((a?.p || 0) + (+a?.one_pack || 1)) / +a.conversion),
 
 																						p: ((a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion
 																					}
@@ -1210,9 +1187,7 @@ const ProcessingOrders = () => {
 																			.map(a => {
 																				return {
 																					...a,
-																					b: Math.floor(
-																						(+a.b || 0) + +((+a?.p || 0) + (+a?.one_pack || 1)) / +a.conversion
-																					),
+																					b: Math.floor((+a.b || 0) + +((+a?.p || 0) + (+a?.one_pack || 1)) / +a.conversion),
 																					p: ((+a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion
 																				}
 																			})
@@ -1451,9 +1426,8 @@ const ProcessingOrders = () => {
 					order={selectedOrder}
 					allowed={paymentModes?.filter(
 						a =>
-							counters
-								?.find(a => selectedOrder?.counter_uuid === a.counter_uuid)
-								?.payment_modes?.filter(b => b === a.mode_uuid)?.length
+							counters?.find(a => selectedOrder?.counter_uuid === a.counter_uuid)?.payment_modes?.filter(b => b === a.mode_uuid)
+								?.length
 					)}
 					counters={counters}
 					items={items}
@@ -1942,9 +1916,7 @@ function HoldPopup({
 
 		categories
 			?.filter(
-				a =>
-					result?.filter(b => a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid)
-						.length
+				a => result?.filter(b => a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid).length
 			)
 			?.forEach(cat => {
 				result
@@ -1997,9 +1969,7 @@ function HoldPopup({
 		if (holdPopup !== "Checking Summary")
 			postHoldOrders(
 				orders
-					.filter(
-						a => a.item_details.filter(b => items.filter(c => c.edit && c.item_uuid === b.item_uuid).length).length
-					)
+					.filter(a => a.item_details.filter(b => items.filter(c => c.edit && c.item_uuid === b.item_uuid).length).length)
 					.map(a => ({
 						...a,
 						item_details: a.item_details.map(a => ({
@@ -2075,8 +2045,7 @@ function HoldPopup({
 												<th colSpan={2}>
 													<div className="t-head-element">Qty</div>
 												</th>
-												{!window.location.pathname.includes("checking") &&
-												!window.location.pathname.includes("delivery") ? (
+												{!window.location.pathname.includes("checking") && !window.location.pathname.includes("delivery") ? (
 													<th colSpan={2}></th>
 												) : (
 													""
@@ -2089,10 +2058,7 @@ function HoldPopup({
 												.filter(
 													a =>
 														items
-															?.filter(
-																b =>
-																	a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid
-															)
+															?.filter(b => a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid)
 															?.filter(
 																a =>
 																	!filterItemTitle ||
@@ -2119,8 +2085,7 @@ function HoldPopup({
 														{items
 															?.filter(
 																b =>
-																	a.category_uuid ===
-																		itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid &&
+																	a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid &&
 																	(!filterItemTitle ||
 																		b.item_title.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase()))
 															)
@@ -2570,8 +2535,7 @@ function DiliveryPopup({
 					amt: "",
 					coin: "",
 					status:
-						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
-						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 							? "0"
 							: 1
 				}))
@@ -3247,14 +3211,8 @@ function NewUserForm({
 								a.item_uuid === popupInfo.item_uuid
 									? {
 											item_uuid: popupInfo.item_uuid,
-											b:
-												+a.b +
-												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) -
-												data.b,
-											p:
-												+a.p +
-												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) -
-												data.p
+											b: +a.b + (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) - data.b,
+											p: +a.p + (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p
 									  }
 									: a
 						  )
@@ -3293,14 +3251,8 @@ function NewUserForm({
 								a.item_uuid === popupInfo.item_uuid
 									? {
 											item_uuid: popupInfo.item_uuid,
-											b:
-												+a.b +
-												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) -
-												data.b,
-											p:
-												+a.p +
-												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) -
-												data.p
+											b: +a.b + (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) - data.b,
+											p: +a.p + (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p
 									  }
 									: a
 						  )
@@ -3520,7 +3472,8 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 					let itemData = itemsData.find(b => a.item_uuid === b.item_uuid)
 					return {
 						...itemData,
-						...a
+						...a,
+						...(deleteItems ? {} : { edit: true })
 						// price: itemData?.price || 0,
 					}
 				})
@@ -3617,16 +3570,12 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 													style={{
 														height: "30px",
 														color: "#fff",
-														backgroundColor: +deleteItemsOrder.filter(a => a === item.order_uuid).length
-															? "red"
-															: "#7990dd"
+														backgroundColor: +deleteItemsOrder.filter(a => a === item.order_uuid).length ? "red" : "#7990dd"
 													}}
 												>
 													<td style={{ width: "3ch" }}>{i + 1}</td>
 													<td colSpan={3} style={{ width: "70px" }}>
-														{new Date(item?.status[0]?.time).toDateString() +
-															" - " +
-															formatAMPM(new Date(item?.status[0]?.time))}
+														{new Date(item?.status[0]?.time).toDateString() + " - " + formatAMPM(new Date(item?.status[0]?.time))}
 													</td>
 													<td colSpan={2} style={{ width: "40px" }}>
 														{item.invoice_number}
