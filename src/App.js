@@ -62,23 +62,14 @@ import CashRegister from "./pages/QuikAccess/CashRegister"
 import Companies from "./pages/Master/Companies"
 import PerformanceSummary from "./pages/Reports/PerformanceSummary"
 
-export let Version = 136
+export let Version = 138
 export const server = "https://api.btgondia.com"
 // export const server = "http://localhost:9000"
 
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))
 	const context = useContext(Context)
-
-	const {
-		calculationPopup = "",
-		loading,
-		notification,
-		setNotification,
-		isItemAvilableOpen,
-		cashRegisterPopup
-	} = context
-
+	const { calculationPopup = "", loading, notification, setNotification, isItemAvilableOpen, cashRegisterPopup } = context
 	axios.defaults.baseURL = server
 
 	const getUserType = async controller => {
