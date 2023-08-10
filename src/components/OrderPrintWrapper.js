@@ -14,8 +14,7 @@ const OrderPrintWrapper = ({ componentRef, orders, counters, reminderDate, users
 				arrayOfArrays.push(sourceArray.slice(max_count * i, max_count * (i + 1)))
 				if (i - 1 === initial_array_count) {
 					const remaining_items = sourceArray.length % max_count
-					if (remaining_items)
-						arrayOfArrays.push(sourceArray.slice(max_count * (i + 1), max_count * (i + 1)) + remaining_items)
+					if (remaining_items) arrayOfArrays.push(sourceArray.slice(max_count * (i + 1), max_count * (i + 1)) + remaining_items)
 				}
 			}
 		} else {
@@ -51,6 +50,7 @@ const OrderPrintWrapper = ({ componentRef, orders, counters, reminderDate, users
 								user={users.find(a => a.user_uuid === order?.status[0]?.user_uuid)?.user_title || ""}
 								itemData={items}
 								item_details={order?.item_details}
+								allOrderItems={__order?.item_details}
 								paymentModes={paymentModes}
 								counters={counters}
 								footer={i + 1 === array.length}

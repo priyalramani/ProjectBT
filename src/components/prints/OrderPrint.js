@@ -5,6 +5,7 @@ const OrderPrint = ({
 	counter = [],
 	counters = [],
 	order = { item_details: [] },
+	allOrderItems,
 	date = "",
 	user = {},
 	itemData = [],
@@ -19,9 +20,7 @@ const OrderPrint = ({
 	let deliveryMessage = useMemo(
 		() =>
 			paymentModes?.filter(
-				a =>
-					counters?.find(a => order?.counter_uuid === a.counter_uuid)?.payment_modes?.filter(b => b === a.mode_uuid)
-						?.length
+				a => counters?.find(a => order?.counter_uuid === a.counter_uuid)?.payment_modes?.filter(b => b === a.mode_uuid)?.length
 			),
 		[counters, order?.counter_uuid, paymentModes]
 	)
@@ -34,8 +33,7 @@ const OrderPrint = ({
 
 		for (let a of gst_value) {
 			let data = order.item_details.filter(b => +b.gst_percentage === a)
-			let amt =
-				data.length > 1 ? data.map(b => +b?.item_total).reduce((a, b) => +a + b) : data.length ? +data[0].item_total : 0
+			let amt = data.length > 1 ? data.map(b => +b?.item_total).reduce((a, b) => +a + b) : data.length ? +data[0].item_total : 0
 			let value = +amt - (+amt * 100) / (100 + a)
 
 			if (value)
@@ -171,11 +169,7 @@ const OrderPrint = ({
 						<td colSpan={28}>
 							<div>
 								<p style={{ fontWeight: "600", fontSize: "small" }}>M/S {counter?.counter_title || ""}</p>
-								{counter?.address ? (
-									<p style={{ fontWeight: "600", fontSize: "small" }}>{counter?.address || ""}</p>
-								) : (
-									""
-								)}
+								{counter?.address ? <p style={{ fontWeight: "600", fontSize: "small" }}>{counter?.address || ""}</p> : ""}
 
 								{counter?.mobile?.length ? (
 									<p style={{ fontWeight: "600", fontSize: "small" }}>
@@ -488,13 +482,13 @@ const OrderPrint = ({
 								}}
 								colSpan={2}
 							>
-								{order?.item_details?.length > 1
-									? order?.item_details?.map(a => +a.b || 0).reduce((a, b) => a + b)
-									: order?.item_details[0]?.b || 0}
+								{allOrderItems?.length > 1
+									? allOrderItems?.map(a => +a.b || 0).reduce((a, b) => a + b)
+									: allOrderItems[0]?.b || 0}
 								:
-								{order?.item_details?.length > 1
-									? order?.item_details?.map(a => +a.p || 0).reduce((a, b) => a + b)
-									: order?.item_details[0]?.p || 0}
+								{allOrderItems?.length > 1
+									? allOrderItems?.map(a => +a.p || 0).reduce((a, b) => a + b)
+									: allOrderItems[0]?.p || 0}
 							</th>
 							<th
 								style={{
@@ -504,9 +498,9 @@ const OrderPrint = ({
 								}}
 								colSpan={2}
 							>
-								{order?.item_details?.length > 1
-									? order?.item_details?.map(a => +a.free || 0).reduce((a, b) => a + b)
-									: order?.item_details[0]?.free || 0}
+								{allOrderItems?.length > 1
+									? allOrderItems?.map(a => +a.free || 0).reduce((a, b) => a + b)
+									: allOrderItems[0]?.free || 0}
 							</th>
 							<td
 								style={{
@@ -583,9 +577,9 @@ const OrderPrint = ({
 								colSpan={2}
 							>
 								{(
-									(order?.item_details?.length > 1
-										? order?.item_details?.map(a => +a.item_total || 0).reduce((a, b) => a + b)
-										: +order?.item_details[0]?.item_total) || 0
+									(allOrderItems?.length > 1
+										? allOrderItems?.map(a => +a.item_total || 0).reduce((a, b) => a + b)
+										: +allOrderItems[0]?.item_total) || 0
 								).toFixed(2)}
 							</th>
 						</tr>
