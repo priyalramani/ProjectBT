@@ -1842,28 +1842,16 @@ function HoldPopup({
 					itemsFilteredData.length > 1
 						? itemsFilteredData?.map(c => +c.free || 0).reduce((c, d) => c + d)
 						: +itemsFilteredData[0]?.free || 0
+				const conversion = +itemsData?.find(b => b.item_uuid === item.item_uuid)?.conversion || 1
+				b = parseInt(+b + (+p + free) / conversion)
+				p = parseInt((+p + free) % conversion)
 				console.log({
+					conversion,
 					b,
 					p,
 					free,
 					item_title: item.item_title
 				})
-				// b = parseInt(
-				//   +b +
-				//     (+p + free) /
-				//       +itemsData?.find((b) => b.item_uuid === item.item_uuid)
-				//         ?.conversion
-				// );
-				// p = parseInt(
-				//   (+p + free) %
-				//     +itemsData?.find((b) => b.item_uuid === item.item_uuid)?.conversion
-				// );
-				// console.log({
-				//   b,
-				//   p,
-				//   free,
-				//   item_title: item.item_title,
-				// });
 				let obj = {
 					...item,
 					free,
@@ -2146,7 +2134,7 @@ function HoldPopup({
 																					if (window.location.pathname.includes("processing")) setPopup(item)
 																				}}
 																			>
-																				{item?.b || 0} : {(+item?.p || 0) + (+item?.free || 0)}
+																				{item?.b || 0} : {+item?.p || 0}
 																				{console.log({ items })}
 																			</td>
 																			{!window.location.pathname.includes("delivery") ? (

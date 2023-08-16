@@ -905,7 +905,7 @@ function Table({ itemsDetails, warehouse_uuid, selectedOrders, setSelectedOrders
 											</td>
 											<td colSpan={2}>{item.item_title || ""}</td>
 											<td colSpan={2}>{item.mrp || ""}</td>
-											<td colSpan={2}>{item.b || ""}</td>
+											<td colSpan={2}>{+item.b ? item.b : +item.b === 0 ? 0 : ""}</td>
 											{order.from_warehouse ? (
 												<td
 													colSpan={2}
