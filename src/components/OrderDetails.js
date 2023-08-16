@@ -329,9 +329,7 @@ export function OrderDetails({
 						...a,
 						category_title: category.find(b => b.category_uuid === a.category_uuid)?.category_title
 					}))
-					.sort(
-						(a, b) => a?.category_title?.localeCompare(b.category_title) || a?.item_title?.localeCompare(b.item_title)
-					)
+					.sort((a, b) => a?.category_title?.localeCompare(b.category_title) || a?.item_title?.localeCompare(b.item_title))
 					?.filter(a => +a.status !== 3)
 					?.map((a, i) => ({
 						...a,
@@ -1185,8 +1183,7 @@ export function OrderDetails({
 															value={{
 																value: orderData.warehouse_uuid || "",
 																label:
-																	warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)
-																		?.warehouse_title || "None"
+																	warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)?.warehouse_title || "None"
 															}}
 															openMenuOnFocus={true}
 															menuPosition="fixed"
@@ -1194,8 +1191,7 @@ export function OrderDetails({
 															placeholder="Item"
 														/>
 													) : (
-														warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)?.warehouse_title ||
-														"None"
+														warehouse.find(a => orderData?.warehouse_uuid === a.warehouse_uuid)?.warehouse_title || "None"
 													)}
 												</th>
 												<th>Grand Total</th>
@@ -1387,11 +1383,7 @@ export function OrderDetails({
 																? "red"
 																: "#fff",
 														color:
-															item.price_approval === "N"
-																? "#000"
-																: +item.status === 1 || +item.status === 3
-																? "#fff"
-																: "#000",
+															item.price_approval === "N" ? "#000" : +item.status === 1 || +item.status === 3 ? "#fff" : "#000",
 														borderBottom: "2px solid #fff"
 													}}
 												>
@@ -1478,10 +1470,7 @@ export function OrderDetails({
 													) : (
 														""
 													)}
-													<td
-														className="ph2 pv1 tl bb b--black-20 bg-white"
-														style={{ textAlign: "center", width: "3ch" }}
-													>
+													<td className="ph2 pv1 tl bb b--black-20 bg-white" style={{ textAlign: "center", width: "3ch" }}>
 														{item.sr || i + 1}
 													</td>
 													<td className="ph2 pv1 tl bb b--black-20 bg-white">
@@ -1507,8 +1496,7 @@ export function OrderDetails({
 																	options={itemsData
 																		?.filter(
 																			a =>
-																				!order?.item_details?.filter(b => a.item_uuid === b.item_uuid)?.length &&
-																				a.status !== 0
+																				!order?.item_details?.filter(b => a.item_uuid === b.item_uuid)?.length && a.status !== 0
 																		)
 																		.sort((a, b) => a?.item_title?.localeCompare(b.item_title))
 																		?.map((a, j) => ({
@@ -1537,9 +1525,7 @@ export function OrderDetails({
 																		key: item.item_uuid || item.uuid
 																	}}
 																	openMenuOnFocus={true}
-																	autoFocus={
-																		focusedInputId === item_title_component_id || (i === 0 && focusedInputId === 0)
-																	}
+																	autoFocus={focusedInputId === item_title_component_id || (i === 0 && focusedInputId === 0)}
 																	menuPosition="fixed"
 																	menuPlacement="auto"
 																	placeholder="Item"
@@ -1596,13 +1582,10 @@ export function OrderDetails({
 																	shiftFocus(item_status_component_id)
 																}}
 																value={
-																	item.status || +item.status === 0
-																		? default_status.find(a => +a.value === +item.status)
-																		: ""
+																	item.status || +item.status === 0 ? default_status.find(a => +a.value === +item.status) : ""
 																}
 																autoFocus={
-																	focusedInputId === item_status_component_id ||
-																	(i === 0 && item.default && focusedInputId === 0)
+																	focusedInputId === item_status_component_id || (i === 0 && item.default && focusedInputId === 0)
 																}
 																openMenuOnFocus={true}
 																menuPosition="fixed"
@@ -1613,10 +1596,7 @@ export function OrderDetails({
 													) : (
 														""
 													)}
-													<td
-														className="ph2 pv1 tc bb b--black-20 bg-white"
-														style={{ textAlign: "center", height: "20px" }}
-													>
+													<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center", height: "20px" }}>
 														{editOrder ? (
 															<input
 																id={"q" + item.uuid}
@@ -1786,7 +1766,11 @@ export function OrderDetails({
 																item?.item_price,
 																item?.price
 															)}
-															<td>Rs.{item.old_price || item.item_price}</td>
+															<td>
+																Rs.{item.old_price || item.item_price}{" "}
+																{item?.old_price?.toString() &&
+																	`(${parseInt(((+item.old_price - +item.price) * 100) / +item.old_price)}%)`}
+															</td>
 															<td>
 																{+item?.item_price !== +item?.price &&
 																	(+getSpecialPrice(counters, item, orderData?.counter_uuid)?.price === +item?.price ? (
@@ -1798,9 +1782,7 @@ export function OrderDetails({
 																		<FaSave
 																			className="table-icon"
 																			title="Save current price as special item price"
-																			onClick={() =>
-																				saveSpecialPrice(item, orderData?.counter_uuid, setCounters, +item?.price)
-																			}
+																			onClick={() => saveSpecialPrice(item, orderData?.counter_uuid, setCounters, +item?.price)}
 																		/>
 																	))}
 															</td>
@@ -1852,11 +1834,7 @@ export function OrderDetails({
 											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 												<div className="inputGroup">Total</div>
 											</td>
-											{editOrder ? (
-												<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}></td>
-											) : (
-												""
-											)}
+											{editOrder ? <td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}></td> : ""}
 											<td className="ph2 pv1 tc bb b--black-20 bg-white" style={{ textAlign: "center" }}>
 												{(orderData?.item_details?.length > 1
 													? orderData?.item_details?.map(a => +a?.b || 0).reduce((a, b) => a + b)
@@ -1912,8 +1890,7 @@ export function OrderDetails({
 							<button
 								type="button"
 								onClick={
-									window.location.pathname.includes("completeOrderReport") ||
-									window.location.pathname.includes("pendingEntry")
+									window.location.pathname.includes("completeOrderReport") || window.location.pathname.includes("pendingEntry")
 										? () => onSubmit({ stage: 0, diliveredUser: "" }, 1)
 										: () => onSubmit()
 								}
@@ -2010,21 +1987,12 @@ export function OrderDetails({
 				""
 			)}
 			{warehousePopup ? (
-				<NewUserForm
-					onClose={() => setWarhousePopup(false)}
-					updateChanges={updateWarehouse}
-					popupInfo={warehousePopup}
-				/>
+				<NewUserForm onClose={() => setWarhousePopup(false)} updateChanges={updateWarehouse} popupInfo={warehousePopup} />
 			) : (
 				""
 			)}
 			{popupDetails ? (
-				<CheckingValues
-					onSave={() => setPopupDetails(false)}
-					popupDetails={popupDetails}
-					users={users}
-					items={itemsData}
-				/>
+				<CheckingValues onSave={() => setPopupDetails(false)} popupDetails={popupDetails} users={users} items={itemsData} />
 			) : (
 				""
 			)}
@@ -2417,9 +2385,7 @@ function CheckingValues({ onSave, popupDetails, users, items }) {
 															? "Order Completed By"
 															: ""}
 													</td>
-													<td colSpan={2}>
-														{new Date(+item.time).toDateString() + " " + formatAMPM(new Date(item.time)) || ""}
-													</td>
+													<td colSpan={2}>{new Date(+item.time).toDateString() + " " + formatAMPM(new Date(item.time)) || ""}</td>
 													<td>
 														{item.user_uuid === "240522"
 															? "Admin"
@@ -2652,9 +2618,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 															}}
 															value={item.value || 0}
 															onChange={e => {
-																setData(prev =>
-																	prev?.map(a => (a.uuid === item.uuid ? { ...a, value: e.target.value } : a))
-																)
+																setData(prev => prev?.map(a => (a.uuid === item.uuid ? { ...a, value: e.target.value } : a)))
 																setEdit(true)
 															}}
 															onFocus={e => {
@@ -2676,11 +2640,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 
 						<div className="flex" style={{ justifyContent: "space-between" }}>
 							{edit ? (
-								<button
-									type="button"
-									className="submit"
-									onClick={() => onUpdate({ ...popupDetails, charges_discount: data })}
-								>
+								<button type="button" className="submit" onClick={() => onUpdate({ ...popupDetails, charges_discount: data })}>
 									Save
 								</button>
 							) : (
@@ -2696,16 +2656,7 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 		</div>
 	)
 }
-function DiliveryPopup({
-	onSave,
-	postOrderData,
-	credit_allowed,
-	counters,
-	order,
-	updateBilling,
-	deliveryPopup,
-	users
-}) {
+function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order, updateBilling, deliveryPopup, users }) {
 	const [PaymentModes, setPaymentModes] = useState([])
 	const [modes, setModes] = useState([])
 	const [error, setError] = useState("")
@@ -2720,9 +2671,7 @@ function DiliveryPopup({
 	time2.setHours(12)
 	let reminder = useMemo(() => {
 		return new Date(
-			time2.setDate(
-				time2.getDate() + (counters.find(a => a.counter_uuid === order?.counter_uuid)?.payment_reminder_days || 0)
-			)
+			time2.setDate(time2.getDate() + (counters.find(a => a.counter_uuid === order?.counter_uuid)?.payment_reminder_days || 0))
 		).getTime()
 	}, [counters, order?.counter_uuid])
 	let type = useMemo(() => {
@@ -2838,8 +2787,7 @@ function DiliveryPopup({
 					amt: "",
 					coin: "",
 					status:
-						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
-						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 							? "0"
 							: 1
 				}))
@@ -3578,9 +3526,7 @@ const UserSelection = ({ users, selection, setSelection }) => {
 									checked={selection?.includes(i?.user_uuid)}
 									onChange={e =>
 										setSelection(state =>
-											state
-												.filter(_i => _i !== i?.user_uuid)
-												.concat(state?.includes(i?.user_uuid) ? [] : [i?.user_uuid])
+											state.filter(_i => _i !== i?.user_uuid).concat(state?.includes(i?.user_uuid) ? [] : [i?.user_uuid])
 										)
 									}
 								/>
