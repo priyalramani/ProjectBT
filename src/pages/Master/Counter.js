@@ -108,6 +108,9 @@ const Counter = () => {
 		GetPaymentModes()
 	}, [])
 
+	const filters = ["Filters", "No Whatsapp Verified Number", "No Call Verified Number", "No Number"]
+	const [counterFilter, setCounterFilter] = useState(0)
+
 	const filterCounter = useMemo(
 		() =>
 			[filterCounterTitle, filterRoute, filterMobile]?.some(i => i?.length >= 3)
@@ -122,11 +125,14 @@ const Counter = () => {
 								a.counter_title &&
 								(filterCounterTitle?.length < 3 ||
 									a.counter_title?.toLocaleLowerCase()?.includes(filterCounterTitle?.toLocaleLowerCase())) &&
-								(filterRoute?.length < 3 ||
-									a.route_title?.toLocaleLowerCase()?.includes(filterRoute?.toLocaleLowerCase())) &&
+								(filterRoute?.length < 3 || a.route_title?.toLocaleLowerCase()?.includes(filterRoute?.toLocaleLowerCase())) &&
 								(filterMobile?.length < 3 || a.mobile?.find(_i => _i.mobile?.includes(filterMobile)))
 						)
-				: [],
+				: // .filter(_counter => {
+				  // 	if(!+counterFilter) return true;
+				  // 	// _counter.
+				  // })
+				  [],
 		[counter, filterCounterTitle, filterRoute, filterMobile, routesData]
 	)
 
@@ -142,9 +148,7 @@ const Counter = () => {
 					(!selectedCounterGroups?.[0] || a?.counter_group_uuid?.find(b => selectedCounterGroups?.includes(b)))
 			)
 			?.sort((a, b) =>
-				a?.route_sort_order - b?.route_sort_order
-					? a?.route_sort_order - b?.route_sort_order
-					: a?.sort_order - b?.sort_order
+				a?.route_sort_order - b?.route_sort_order ? a?.route_sort_order - b?.route_sort_order : a?.sort_order - b?.sort_order
 			)
 			?.map((item, i) => ({
 				...item,
@@ -191,13 +195,26 @@ const Counter = () => {
 		}
 		params?.update(temp)
 	}
+
 	return (
 		<>
 			<Sidebar />
 			<Header />
 			<div className="item-sales-container orders-report-container">
 				<div id="heading">
-					<h2>Counter </h2>
+					<h2>Counter</h2>
+					{/* <div className="inputGroup">
+						<label htmlFor="Warehouse">Filter</label>
+						<div className="inputGroup" style={{ width: "200px" }}>
+							<select value={counterFilter} onChange={e => setCounterFilter(e.target.value)}>
+								{filters?.map((label, index) => (
+									<option key={label} value={index}>
+										{label}
+									</option>
+								))}
+							</select>
+						</div>
+					</div> */}
 				</div>
 				<div id="item-sales-top">
 					<div
@@ -282,11 +299,7 @@ const Counter = () => {
 				""
 			)}
 			{itemPopup ? <ItemPopup onSave={() => setItemPopup(false)} itemPopup={itemPopup} /> : ""}
-			{sequencePopup ? (
-				<CounterSequence onSave={() => setSequencePopup(false)} counters={counter} routesData={routesData} />
-			) : (
-				""
-			)}
+			{sequencePopup ? <CounterSequence onSave={() => setSequencePopup(false)} counters={counter} routesData={routesData} /> : ""}
 			{deletePopup ? (
 				<DeleteCounterPopup onSave={() => setDeletePopup(false)} setItemsData={setCounter} popupInfo={deletePopup} />
 			) : (
@@ -819,16 +832,11 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 			.filter(_i => !_i?.counter_group_title)
 			.concat(
 				i
-					.filter(
-						_i => _i?.counter_group_title && (_data?.counter_group_uuid || [])?.indexOf(_i?.counter_group_uuid) !== -1
-					)
+					.filter(_i => _i?.counter_group_title && (_data?.counter_group_uuid || [])?.indexOf(_i?.counter_group_uuid) !== -1)
 					.sort((a, b) => a?.counter_group_title?.localeCompare(b?.counter_group_title))
 					.concat(
 						i
-							.filter(
-								_i =>
-									_i?.counter_group_title && (_data?.counter_group_uuid || [])?.indexOf(_i?.counter_group_uuid) === -1
-							)
+							.filter(_i => _i?.counter_group_title && (_data?.counter_group_uuid || [])?.indexOf(_i?.counter_group_uuid) === -1)
 							.sort((a, b) => a?.counter_group_title?.localeCompare(b?.counter_group_title))
 					)
 			)
@@ -865,8 +873,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 					payment_modes: paymentModes
 						.filter(
 							a =>
-								a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" ||
-								a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+								a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 						)
 						.map(a => a.mode_uuid),
 					credit_allowed: "N",
@@ -1271,10 +1278,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 														}}
 													>
 														<td>
-															<input
-																type="checkbox"
-																checked={data?.payment_modes?.filter(a => a === occ.mode_uuid).length}
-															/>
+															<input type="checkbox" checked={data?.payment_modes?.filter(a => a === occ.mode_uuid).length} />
 														</td>
 														<td>{occ.mode_title}</td>
 													</tr>
@@ -1807,19 +1811,13 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 									{itemPopup?.type !== "company_discount"
 										? itemsData
 												?.filter(a => a.item_uuid)
+												.filter(a => !filterTitle || a.item_title.toLocaleLowerCase().includes(filterTitle.toLocaleLowerCase()))
 												.filter(
-													a =>
-														!filterTitle || a.item_title.toLocaleLowerCase().includes(filterTitle.toLocaleLowerCase())
+													a => !filterCompany || a?.company_title.toLocaleLowerCase().includes(filterCompany.toLocaleLowerCase())
 												)
 												.filter(
 													a =>
-														!filterCompany ||
-														a?.company_title.toLocaleLowerCase().includes(filterCompany.toLocaleLowerCase())
-												)
-												.filter(
-													a =>
-														!filterCategory ||
-														a?.category_title.toLocaleLowerCase().includes(filterCategory.toLocaleLowerCase())
+														!filterCategory || a?.category_title.toLocaleLowerCase().includes(filterCategory.toLocaleLowerCase())
 												)
 												.map((item, index) => {
 													return (
@@ -1872,8 +1870,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 																					a.item_uuid === item.item_uuid
 																						? {
 																								...a,
-																								[itemPopup?.type === "item_special_price" ? "price" : "discount"]:
-																									e.target.value
+																								[itemPopup?.type === "item_special_price" ? "price" : "discount"]: e.target.value
 																						  }
 																						: a
 																				)
@@ -1896,9 +1893,7 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 												})
 										: companies
 												.filter(
-													a =>
-														!filterCompany ||
-														a?.company_title.toLocaleLowerCase().includes(filterCompany.toLocaleLowerCase())
+													a => !filterCompany || a?.company_title.toLocaleLowerCase().includes(filterCompany.toLocaleLowerCase())
 												)
 												.map((item, index) => {
 													return (

@@ -1769,7 +1769,7 @@ export function OrderDetails({
 															<td>
 																Rs.{item.old_price || item.item_price}{" "}
 																{item?.old_price?.toString() &&
-																	`(${parseInt(((+item.old_price - +item.price) * 100) / +item.old_price)}%)`}
+																	`(${(((+item.old_price - +item.price) * 100) / +item.old_price)?.toFixed(2)}%)`}
 															</td>
 															<td>
 																{+item?.item_price !== +item?.price &&
@@ -2799,11 +2799,11 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 			return
 		}
 		setWaiting(true)
-		if (outstanding.amount && !outstanding.remarks) {
-			setError("Remarks is mandatory")
-			setWaiting(false)
-			return
-		}
+		// if (outstanding.amount && !outstanding.remarks) {
+		// 	setError("Remarks is mandatory")
+		// 	setWaiting(false)
+		// 	return
+		// }
 		if (modes.find(a => a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" && a.amt && !a.remarks)) {
 			setError("Cheque number is mandatory")
 			setWaiting(false)

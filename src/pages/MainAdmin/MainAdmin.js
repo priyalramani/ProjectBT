@@ -577,7 +577,7 @@ const MainAdmin = () => {
 		return data
 	}, [orders, tripData])
 
-	const updatePaymentsVisibility = async () => {
+	const updatePendingPaymentsVisibility = async () => {
 		try {
 			const user = users?.find(_i => _i?.user_uuid === user_uuid)
 			user.hide_pending_payments = +!(user?.hide_pending_payments || 0)
@@ -842,7 +842,7 @@ const MainAdmin = () => {
 									</button>
 								</>
 							)}
-							<button className="simple_Logout_button" onClick={updatePaymentsVisibility}>
+							<button className="simple_Logout_button" onClick={updatePendingPaymentsVisibility}>
 								{!users?.find(_i => _i?.user_uuid === user_uuid)?.hide_pending_payments
 									? "Hide Pending Payments"
 									: "Show Pending Payments"}
@@ -854,620 +854,596 @@ const MainAdmin = () => {
 							<div className="noOrder">No Order</div>
 						) : location.pathname.includes("admin") ? (
 							<>
-								{routesData?.length ? (
-									<>
-										{routeOrderLength.map(route => {
-											if (
-												orders
-													.filter(
-														a =>
-															counter.filter(c => c.counter_uuid === a.counter_uuid && route.route_uuid === c.route_uuid)?.length
-													)
-													.filter(
-														a =>
-															!searchItems ||
-															a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
-															a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
-													)?.length
-											) {
-												const orders_data = orders
-													?.filter(
-														_i => !+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments || !+_i?.payment_pending
-													)
-													?.filter(
-														b =>
-															counter.filter(
-																c =>
-																	c.counter_uuid === b.counter_uuid &&
-																	(route.route_uuid === c.route_uuid ||
-																		((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
-															)?.length
-													)
-													?.filter(
-														a =>
-															!searchItems ||
-															a.invoice_number?.toString()?.includes(searchItems?.toLocaleLowerCase()) ||
-															a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
-													)
-												return (
-													<div key={Math.random()} className="sectionDiv">
-														<h1>
-															<span
-																style={{ cursor: "pointer" }}
-																onClick={() =>
-																	setJoinSummary(
-																		orders?.filter(
-																			b =>
-																				counter.filter(
-																					c =>
-																						c.counter_uuid === b.counter_uuid &&
-																						(route.route_uuid === c.route_uuid ||
-																							((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
-																				)?.length
-																		)
-																	)
-																}
-															>
-																{route.route_title}
-															</span>{" "}
-															<span>({route.orderLength})</span>
-															<span>
-																[ Processing {route?.processingLength}, Checking {route.checkingLength}, Delivery{" "}
-																{route?.deliveryLength} ]
-															</span>
-															<span>({[...new Set(orders_data?.map(_i => _i?.counter_uuid))]?.length})</span>
-															{selectOrder ? (
-																<input
-																	type="checkbox"
-																	style={{
-																		marginLeft: "10px",
-																		transform: "scale(1.5)"
-																	}}
-																	onClick={() =>
-																		orders.filter(
-																			a =>
-																				counter.filter(
-																					c =>
-																						c.counter_uuid === a.counter_uuid &&
-																						(route.route_uuid === c.route_uuid ||
-																							((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
-																				)?.length && selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
-																		)?.length ===
-																		orders.filter(
-																			a =>
-																				counter.filter(
-																					c =>
-																						c.counter_uuid === a.counter_uuid &&
-																						(route.route_uuid === c.route_uuid ||
-																							((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
-																				)?.length
+								{routeOrderLength?.map(route => {
+									const orders_data = orders
+										?.filter(
+											_i => !+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments || !+_i?.payment_pending
+										)
+										?.filter(
+											b =>
+												counter.filter(
+													c =>
+														c.counter_uuid === b.counter_uuid &&
+														(route.route_uuid === c.route_uuid ||
+															((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
+												)?.length
+										)
+										?.filter(
+											a =>
+												!searchItems ||
+												a.invoice_number?.toString()?.includes(searchItems?.toLocaleLowerCase()) ||
+												a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
+										)
+									if (orders_data?.length)
+										return (
+											<div key={Math.random()} className="sectionDiv">
+												<h1>
+													<span
+														style={{ cursor: "pointer" }}
+														onClick={() =>
+															setJoinSummary(
+																orders?.filter(
+																	b =>
+																		counter.filter(
+																			c =>
+																				c.counter_uuid === b.counter_uuid &&
+																				(route.route_uuid === c.route_uuid ||
+																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
 																		)?.length
-																			? setSelectedOrder(
-																					selectedOrder.filter(
-																						b =>
-																							!orders.filter(
-																								a =>
-																									counter.filter(
-																										c =>
-																											c.counter_uuid === a.counter_uuid &&
-																											(route.route_uuid === c.route_uuid ||
-																												((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
-																									)?.length && b.order_uuid === a.order_uuid
-																							)?.length
-																					)
-																			  )
-																			: setSelectedOrder(
-																					selectedOrder?.length
-																						? [
-																								...selectedOrder.filter(
-																									b =>
-																										!orders.filter(
-																											a =>
-																												counter.filter(
-																													c =>
-																														c.counter_uuid === a.counter_uuid &&
-																														(route.route_uuid === c.route_uuid ||
-																															((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
-																												)?.length && b.order_uuid === a.order_uuid
-																										)?.length
-																								),
-																								...orders.filter(
+																)
+															)
+														}
+													>
+														{route.route_title}
+													</span>{" "}
+													<span>({route.orderLength})</span>
+													<span>
+														[ Processing {route?.processingLength}, Checking {route.checkingLength}, Delivery{" "}
+														{route?.deliveryLength} ]
+													</span>
+													<span>({[...new Set(orders_data?.map(_i => _i?.counter_uuid))]?.length})</span>
+													{selectOrder ? (
+														<input
+															type="checkbox"
+															style={{
+																marginLeft: "10px",
+																transform: "scale(1.5)"
+															}}
+															onClick={() =>
+																orders.filter(
+																	a =>
+																		counter.filter(
+																			c =>
+																				c.counter_uuid === a.counter_uuid &&
+																				(route.route_uuid === c.route_uuid ||
+																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
+																		)?.length && selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
+																)?.length ===
+																orders.filter(
+																	a =>
+																		counter.filter(
+																			c =>
+																				c.counter_uuid === a.counter_uuid &&
+																				(route.route_uuid === c.route_uuid ||
+																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
+																		)?.length
+																)?.length
+																	? setSelectedOrder(
+																			selectedOrder.filter(
+																				b =>
+																					!orders.filter(
+																						a =>
+																							counter.filter(
+																								c =>
+																									c.counter_uuid === a.counter_uuid &&
+																									(route.route_uuid === c.route_uuid ||
+																										((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
+																							)?.length && b.order_uuid === a.order_uuid
+																					)?.length
+																			)
+																	  )
+																	: setSelectedOrder(
+																			selectedOrder?.length
+																				? [
+																						...selectedOrder.filter(
+																							b =>
+																								!orders.filter(
 																									a =>
 																										counter.filter(
 																											c =>
 																												c.counter_uuid === a.counter_uuid &&
 																												(route.route_uuid === c.route_uuid ||
 																													((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
-																										)?.length
-																								)
-																						  ]
-																						: orders.filter(
-																								a =>
-																									counter.filter(
-																										c =>
-																											c.counter_uuid === a.counter_uuid &&
-																											(route.route_uuid === c.route_uuid ||
-																												((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
-																									)?.length
-																						  )
-																			  )
-																	}
-																	defaultChecked={
-																		orders.filter(
-																			a =>
-																				counter.filter(
-																					c =>
-																						c.counter_uuid === a.counter_uuid &&
-																						(route.route_uuid === c.route_uuid ||
-																							((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
-																				)?.length && selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
-																		)?.length ===
-																		orders.filter(
-																			a =>
-																				counter.filter(
-																					c =>
-																						c.counter_uuid === a.counter_uuid &&
-																						(route.route_uuid === c.route_uuid ||
-																							((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
-																				)?.length
+																										)?.length && b.order_uuid === a.order_uuid
+																								)?.length
+																						),
+																						...orders.filter(
+																							a =>
+																								counter.filter(
+																									c =>
+																										c.counter_uuid === a.counter_uuid &&
+																										(route.route_uuid === c.route_uuid ||
+																											((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
+																								)?.length
+																						)
+																				  ]
+																				: orders.filter(
+																						a =>
+																							counter.filter(
+																								c =>
+																									c.counter_uuid === a.counter_uuid &&
+																									(route.route_uuid === c.route_uuid ||
+																										((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
+																							)?.length
+																				  )
+																	  )
+															}
+															defaultChecked={
+																orders.filter(
+																	a =>
+																		counter.filter(
+																			c =>
+																				c.counter_uuid === a.counter_uuid &&
+																				(route.route_uuid === c.route_uuid ||
+																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
+																		)?.length && selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
+																)?.length ===
+																orders.filter(
+																	a =>
+																		counter.filter(
+																			c =>
+																				c.counter_uuid === a.counter_uuid &&
+																				(route.route_uuid === c.route_uuid ||
+																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
 																		)?.length
+																)?.length
+															}
+														/>
+													) : (
+														""
+													)}
+												</h1>
+												<div
+													className="content"
+													style={{
+														flexDirection: "row",
+														flexWrap: "wrap",
+														gap: "0px",
+														marginBottom: "10px",
+														paddingBottom: "20px"
+													}}
+													id="seats_container"
+												>
+													{orders_data
+														?.sort((a, b) => +a.time_1 - +b.time_1)
+														?.map(item => {
+															return (
+																<div
+																	className={`
+																		seatSearchTarget ${!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1 ? "shaking-cards" : ""}
+																	`}
+																	style={{ height: "fit-content" }}
+																	key={Math.random()}
+																	seat-name={item.seat_name}
+																	seat-code={item.seat_uuid}
+																	seat={item.seat_uuid}
+																	// section={section.section_uuid}
+																	// section-name={section?.section_name}
+																	// outlet={outletIdState}
+																	onClick={e =>
+																		selectOrder
+																			? setSelectedOrder(prev =>
+																					prev.filter(a => a.order_uuid === item.order_uuid)?.length
+																						? prev.filter(a => a.order_uuid !== item.order_uuid)
+																						: prev?.length
+																						? [...prev, item]
+																						: [item]
+																			  )
+																			: setSelectedRouteOrder(item.order_uuid)
 																	}
-																/>
-															) : (
-																""
-															)}
-														</h1>
-														<div
-															className="content"
-															style={{
-																flexDirection: "row",
-																flexWrap: "wrap",
-																gap: "0px",
-																marginBottom: "10px",
-																paddingBottom: "20px"
-															}}
-															id="seats_container"
-														>
-															{orders_data
-																?.sort((a, b) => +a.time_1 - +b.time_1)
-																?.map(item => {
-																	return (
-																		<div
-																			className={`
-																				seatSearchTarget ${!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1 ? "shaking-cards" : ""}
-																			`}
-																			style={{ height: "fit-content" }}
-																			key={Math.random()}
-																			seat-name={item.seat_name}
-																			seat-code={item.seat_uuid}
-																			seat={item.seat_uuid}
-																			// section={section.section_uuid}
-																			// section-name={section?.section_name}
-																			// outlet={outletIdState}
-																			onClick={e =>
-																				selectOrder
-																					? setSelectedOrder(prev =>
-																							prev.filter(a => a.order_uuid === item.order_uuid)?.length
-																								? prev.filter(a => a.order_uuid !== item.order_uuid)
-																								: prev?.length
-																								? [...prev, item]
-																								: [item]
-																					  )
-																					: setSelectedRouteOrder(item.order_uuid)
-																			}
-																			onDoubleClick={() => setSelectedRouteOrder(item.order_uuid)}
-																		>
-																			<span
-																				className="dblClickTrigger"
-																				style={{ display: "none" }}
-																				// onClick={() =>
-																				//   menuOpenHandler(item)
-																				// }
-																			/>
-																			<Card
-																				details={details}
-																				order={item}
-																				onDoubleClick={() => setPopupOrder(item)}
-																				getOrders={() => {
-																					if (holdOrders) getRunningHoldOrders()
-																					else getRunningOrders()
-																				}}
-																				setSelectOrder={setSelectOrder}
-																				// on_order={on_order && on_order}
-																				// key={item.seat_uuid}
-																				dateTime={item?.status[0]?.time}
-																				title1={item?.invoice_number || ""}
-																				selectedOrder={
-																					selectOrder
-																						? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
-																						: selectedRouteOrder === item.order_uuid
-																				}
-																				selectedCounter={selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length}
-																				title2={item?.counter_title || ""}
-																				status={
-																					+item.status[item.status?.length - 1]?.stage === 1
-																						? "Processing"
-																						: +item.status[item.status?.length - 1]?.stage === 2
-																						? "Checking"
-																						: +item.status[item.status?.length - 1]?.stage === 3
-																						? "Delivery"
-																						: +item.status[item.status?.length - 1]?.stage === 4
-																						? "Complete"
-																						: +item.status[item.status?.length - 1]?.stage === 5
-																						? "Cancelled"
-																						: ""
-																				}
-																				// price={item.price}
-																				// visibleContext={visibleContext}
-																				// setVisibleContext={setVisibleContext}
-																				// isMouseInsideContext={isMouseInsideContext}
-																				// seats={seatsState.filter(s => +s.seat_status === 1)}
-																				rounded
-																			/>
-																		</div>
-																	)
-																})}
-														</div>
-													</div>
-												)
-											}
-										})}
-									</>
-								) : (
-									""
-								)}
+																	onDoubleClick={() => setSelectedRouteOrder(item.order_uuid)}
+																>
+																	<span
+																		className="dblClickTrigger"
+																		style={{ display: "none" }}
+																		// onClick={() =>
+																		//   menuOpenHandler(item)
+																		// }
+																	/>
+																	<Card
+																		details={details}
+																		order={item}
+																		onDoubleClick={() => setPopupOrder(item)}
+																		getOrders={() => {
+																			if (holdOrders) getRunningHoldOrders()
+																			else getRunningOrders()
+																		}}
+																		setSelectOrder={setSelectOrder}
+																		// on_order={on_order && on_order}
+																		// key={item.seat_uuid}
+																		dateTime={item?.status[0]?.time}
+																		title1={item?.invoice_number || ""}
+																		selectedOrder={
+																			selectOrder
+																				? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
+																				: selectedRouteOrder === item.order_uuid
+																		}
+																		selectedCounter={selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length}
+																		title2={item?.counter_title || ""}
+																		status={
+																			+item.status[item.status?.length - 1]?.stage === 1
+																				? "Processing"
+																				: +item.status[item.status?.length - 1]?.stage === 2
+																				? "Checking"
+																				: +item.status[item.status?.length - 1]?.stage === 3
+																				? "Delivery"
+																				: +item.status[item.status?.length - 1]?.stage === 4
+																				? "Complete"
+																				: +item.status[item.status?.length - 1]?.stage === 5
+																				? "Cancelled"
+																				: ""
+																		}
+																		// price={item.price}
+																		// visibleContext={visibleContext}
+																		// setVisibleContext={setVisibleContext}
+																		// isMouseInsideContext={isMouseInsideContext}
+																		// seats={seatsState.filter(s => +s.seat_status === 1)}
+																		rounded
+																	/>
+																</div>
+															)
+														})}
+												</div>
+											</div>
+										)
+									else return ""
+								})}
 							</>
 						) : (
 							<>
-								{orders
-									.filter(
-										a =>
-											!searchItems ||
-											a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
-											a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
-									)
-									.filter(a => !a?.trip_uuid)?.length ? (
-									<div key={Math.random()} className="sectionDiv">
-										<h2>
-											<span style={{ cursor: "pointer" }} onClick={() => setJoinSummary(orders.filter(a => !a?.trip_uuid))}>
-												UnKnown
-											</span>{" "}
-											({orders.filter(a => !a?.trip_uuid)?.length}) [Processing{" "}
-											{TripsOrderLength.find(a => +a.trip_uuid === 0)?.processingLength}, Checking{" "}
-											{TripsOrderLength.find(a => +a.trip_uuid === 0)?.checkingLength}, Delivery{" "}
-											{TripsOrderLength.find(a => +a.trip_uuid === 0)?.deliveryLength}]
-											{selectOrder ? (
-												<input
-													type="checkbox"
-													style={{
-														marginLeft: "10px",
-														transform: "scale(1.5)"
-													}}
-													defaultChecked={
-														orders.filter(a => !a?.trip_uuid && selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length)
-															?.length === orders.filter(a => !a?.trip_uuid)?.length
-													}
-													onClick={() =>
-														orders?.filter(
-															a => !a?.trip_uuid && selectedOrder?.filter(b => b.order_uuid === a.order_uuid)?.length
-														)?.length === orders?.filter(a => !a?.trip_uuid)?.length
-															? setSelectedOrder(
-																	selectedOrder.filter(
-																		b => !orders.filter(a => !a?.trip_uuid && b.order_uuid === a.order_uuid)?.length
-																	)
-															  )
-															: setSelectedOrder(
-																	selectedOrder?.length
-																		? [
-																				...selectedOrder.filter(
-																					b => !orders.filter(a => !a?.trip_uuid && b.order_uuid === a.order_uuid)?.length
-																				),
-																				...orders.filter(a => !a?.trip_uuid)
-																		  ]
-																		: orders?.filter(a => !a?.trip_uuid)
-															  )
-													}
-												/>
-											) : (
-												""
-											)}
-										</h2>
-										<div
-											className="content"
-											style={{
-												flexDirection: "row",
-												flexWrap: "wrap",
-												gap: "0",
-												marginBottom: "10px"
-											}}
-											id="seats_container"
-										>
-											{orders
-												?.filter(
-													_i => !+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments || !+_i?.payment_pending
-												)
-												.filter(a => !a?.trip_uuid)
-												.sort((a, b) => +a.time_1 - +b.time_1)
-												.filter(
-													a =>
-														!searchItems ||
-														a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
-														a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
-												)
-												.map(item => {
-													return (
-														<div
-															className={`seatSearchTarget ${
-																!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1 ? "shaking-cards" : ""
-															}`}
-															style={{ height: "fit-content" }}
-															key={Math.random()}
-															seat-name={item.seat_name}
-															seat-code={item.seat_uuid}
-															seat={item.seat_uuid}
-															// section={section.section_uuid}
-															// section-name={section?.section_name}
-															// outlet={outletIdState}
-															onClick={e =>
-																selectOrder
-																	? setSelectedOrder(prev =>
-																			prev.filter(a => a.order_uuid === item.order_uuid)?.length
-																				? prev.filter(a => a.order_uuid !== item.order_uuid)
-																				: prev?.length
-																				? [...prev, item]
-																				: [item]
-																	  )
-																	: setSelectedRouteOrder(item.order_uuid)
-															}
-														>
-															<span
-																className="dblClickTrigger"
-																style={{ display: "none" }}
-																// onClick={() =>
-																//   menuOpenHandler(item)
-																// }
-															/>
-
-															<Card
-																details={details}
-																getOrders={() => {
-																	if (holdOrders) getRunningHoldOrders()
-																	else getRunningOrders()
-																}}
-																setSelectOrder={setSelectOrder}
-																order={item}
-																onDoubleClick={() => setPopupOrder(item)}
-																// on_order={order}
-																dateTime={item?.status[0]?.time}
-																// key={item.seat_uuid}
-																title1={item?.invoice_number || ""}
-																selectedCounter={selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length}
-																selectedOrder={
-																	selectOrder
-																		? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
-																		: selectedRouteOrder === item.order_uuid
-																}
-																title2={item?.counter_title || ""}
-																status={
-																	+item.status[item.status?.length - 1]?.stage === 1
-																		? "Processing"
-																		: +item.status[item.status?.length - 1]?.stage === 2
-																		? "Checking"
-																		: +item.status[item.status?.length - 1]?.stage === 3
-																		? "Delivery"
-																		: +item.status[item.status?.length - 1]?.stage === 4
-																		? "Complete"
-																		: +item.status[item.status?.length - 1]?.stage === 5
-																		? "Cancelled"
-																		: ""
-																}
-																// price={item.price}
-																// visibleContext={visibleContext}
-																// setVisibleContext={setVisibleContext}
-																// isMouseInsideContext={isMouseInsideContext}
-																// seats={seatsState.filter(s => +s.seat_status === 1)}
-																rounded
-															/>
-														</div>
-													)
-												})}
-										</div>
-									</div>
-								) : (
-									""
-								)}
-								{TripsOrderLength?.length ? (
-									<>
-										{TripsOrderLength.map(trip => {
-											if (
-												orders
-													.filter(a => a.trip_uuid === trip.trip_uuid)
-													.filter(
-														a =>
-															a.invoice_number
-																?.toString()
-
-																?.includes(searchItems.toLocaleLowerCase()) ||
-															a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
-													)?.length
-											) {
-												const orders_data = orders
-													?.filter(
-														_i => !+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments || !+_i?.payment_pending
-													)
-													?.filter(a => a.trip_uuid === trip.trip_uuid)
-													?.filter(
-														a =>
-															!searchItems ||
-															a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
-															a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
-													)
-
-												return (
-													<div key={Math.random()} className="sectionDiv">
-														<h1>
-															<span
-																style={{ cursor: "pointer" }}
-																onClick={() => setJoinSummary(orders.filter(a => a.trip_uuid === trip.trip_uuid))}
-															>
-																{trip.trip_title}
-															</span>{" "}
-															<span>({orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length})</span>
-															<span>
-																[Processing {trip?.processingLength}, Checking {trip?.checkingLength}, Delivery{" "}
-																{trip?.deliveryLength}]
-															</span>
-															<span>
-																{trip?.users?.[0]
-																	? `[${trip?.users?.map(a => users?.find(b => b.user_uuid === a)?.user_title)?.join(", ")}]`
-																	: ""}
-															</span>
-															<span>({[...new Set(orders_data?.map(_i => _i?.counter_uuid))]?.length})</span>
-															{selectOrder ? (
-																<input
-																	type="checkbox"
-																	style={{
-																		marginLeft: "10px",
-																		transform: "scale(1.5)"
-																	}}
-																	defaultChecked={
-																		orders.filter(
-																			a =>
-																				a.trip_uuid === trip.trip_uuid &&
-																				selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
-																		)?.length === orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length
-																	}
-																	onClick={() =>
-																		orders?.filter(
-																			a =>
-																				a.trip_uuid === trip.trip_uuid &&
-																				selectedOrder?.filter(b => b.order_uuid === a.order_uuid)?.length
-																		)?.length === orders?.filter(a => a.trip_uuid === trip.trip_uuid)?.length
-																			? setSelectedOrder(
-																					selectedOrder.filter(
-																						b =>
-																							!orders.filter(a => a.trip_uuid === trip.trip_uuid && b.order_uuid === a.order_uuid)
-																								?.length
-																					)
-																			  )
-																			: setSelectedOrder(
-																					selectedOrder?.length
-																						? [
-																								...selectedOrder.filter(
-																									b =>
-																										!orders.filter(
-																											a => a.trip_uuid === trip.trip_uuid && b.order_uuid === a.order_uuid
-																										)?.length
-																								),
-																								...orders.filter(a => a.trip_uuid === trip.trip_uuid)
-																						  ]
-																						: orders?.filter(a => a.trip_uuid === trip.trip_uuid)
-																			  )
-																	}
-																/>
-															) : (
-																""
-															)}
-														</h1>
-														<div
-															className="content"
+								{[0].map(_ => {
+									const ordersData = orders
+										?.filter(
+											_i => !+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments || !+_i?.payment_pending
+										)
+										.filter(a => !a?.trip_uuid)
+										.sort((a, b) => +a.time_1 - +b.time_1)
+										.filter(
+											a =>
+												!searchItems ||
+												a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
+												a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
+										)
+									if (ordersData?.length)
+										return (
+											<div key={Math.random()} className="sectionDiv">
+												<h2>
+													<span style={{ cursor: "pointer" }} onClick={() => setJoinSummary(orders.filter(a => !a?.trip_uuid))}>
+														UnKnown
+													</span>{" "}
+													({orders.filter(a => !a?.trip_uuid)?.length}) [Processing{" "}
+													{TripsOrderLength.find(a => +a.trip_uuid === 0)?.processingLength}, Checking{" "}
+													{TripsOrderLength.find(a => +a.trip_uuid === 0)?.checkingLength}, Delivery{" "}
+													{TripsOrderLength.find(a => +a.trip_uuid === 0)?.deliveryLength}]
+													{selectOrder ? (
+														<input
+															type="checkbox"
 															style={{
-																flexDirection: "row",
-																flexWrap: "wrap",
-																gap: "0",
-																marginBottom: "10px"
+																marginLeft: "10px",
+																transform: "scale(1.5)"
 															}}
-															id="seats_container"
-														>
-															{orders_data
-																?.sort((a, b) => +a.time_1 - +b.time_1)
-																?.map(item => {
-																	return (
-																		<div
-																			className={`seatSearchTarget ${
-																				!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1
-																					? "shaking-cards"
-																					: ""
-																			}`}
-																			style={{ height: "fit-content" }}
-																			key={Math.random()}
-																			seat-name={item.seat_name}
-																			seat-code={item.seat_uuid}
-																			seat={item.seat_uuid}
-																			// section={section.section_uuid}
-																			// section-name={section?.section_name}
-																			// outlet={outletIdState}
-																			onClick={e =>
-																				selectOrder
-																					? setSelectedOrder(prev =>
-																							prev.filter(a => a.order_uuid === item.order_uuid)?.length
-																								? prev.filter(a => a.order_uuid !== item.order_uuid)
-																								: prev?.length
-																								? [...prev, item]
-																								: [item]
-																					  )
-																					: setSelectedRouteOrder(item.order_uuid)
-																			}
-																		>
-																			<span
-																				className="dblClickTrigger"
-																				style={{ display: "none" }}
-																				// onClick={() =>
-																				//   menuOpenHandler(item)
-																				// }
-																			/>
-																			<Card
-																				details={details}
-																				order={item}
-																				onDoubleClick={() => setPopupOrder(item)}
-																				getOrders={() => {
-																					if (holdOrders) getRunningHoldOrders()
-																					else getRunningOrders()
-																				}}
-																				setSelectOrder={setSelectOrder}
-																				// on_order={on_order && on_order}
-																				// key={item.seat_uuid}
-																				dateTime={item?.status[0]?.time}
-																				title1={item?.invoice_number || ""}
-																				selectedOrder={
-																					selectOrder
-																						? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
-																						: selectedRouteOrder === item.order_uuid
-																				}
-																				selectedCounter={selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length}
-																				title2={item?.counter_title || ""}
-																				status={
-																					+item.status[item.status?.length - 1]?.stage === 1
-																						? "Processing"
-																						: +item.status[item.status?.length - 1]?.stage === 2
-																						? "Checking"
-																						: +item.status[item.status?.length - 1]?.stage === 3
-																						? "Delivery"
-																						: +item.status[item.status?.length - 1]?.stage === 4
-																						? "Complete"
-																						: +item.status[item.status?.length - 1]?.stage === 5
-																						? "Cancelled"
-																						: ""
-																				}
-																				// price={item.price}
-																				// visibleContext={visibleContext}
-																				// setVisibleContext={setVisibleContext}
-																				// isMouseInsideContext={isMouseInsideContext}
-																				// seats={seatsState.filter(s => +s.seat_status === 1)}
-																				rounded
-																			/>
-																		</div>
-																	)
-																})}
-														</div>
-													</div>
-												)
-											}
-										})}
-									</>
-								) : (
-									""
-								)}
+															defaultChecked={
+																orders.filter(
+																	a => !a?.trip_uuid && selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
+																)?.length === orders.filter(a => !a?.trip_uuid)?.length
+															}
+															onClick={() =>
+																orders?.filter(
+																	a => !a?.trip_uuid && selectedOrder?.filter(b => b.order_uuid === a.order_uuid)?.length
+																)?.length === orders?.filter(a => !a?.trip_uuid)?.length
+																	? setSelectedOrder(
+																			selectedOrder.filter(
+																				b => !orders.filter(a => !a?.trip_uuid && b.order_uuid === a.order_uuid)?.length
+																			)
+																	  )
+																	: setSelectedOrder(
+																			selectedOrder?.length
+																				? [
+																						...selectedOrder.filter(
+																							b => !orders.filter(a => !a?.trip_uuid && b.order_uuid === a.order_uuid)?.length
+																						),
+																						...orders.filter(a => !a?.trip_uuid)
+																				  ]
+																				: orders?.filter(a => !a?.trip_uuid)
+																	  )
+															}
+														/>
+													) : (
+														""
+													)}
+												</h2>
+												<div
+													className="content"
+													style={{
+														flexDirection: "row",
+														flexWrap: "wrap",
+														gap: "0",
+														marginBottom: "10px"
+													}}
+													id="seats_container"
+												>
+													{orders
+														?.filter(
+															_i =>
+																!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments || !+_i?.payment_pending
+														)
+														.filter(a => !a?.trip_uuid)
+														.sort((a, b) => +a.time_1 - +b.time_1)
+														.filter(
+															a =>
+																!searchItems ||
+																a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
+																a.counter_title?.toLocaleLowerCase()?.includes(searchItems.toLocaleLowerCase())
+														)
+														.map(item => {
+															return (
+																<div
+																	className={`seatSearchTarget ${
+																		!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1
+																			? "shaking-cards"
+																			: ""
+																	}`}
+																	style={{ height: "fit-content" }}
+																	key={Math.random()}
+																	seat-name={item.seat_name}
+																	seat-code={item.seat_uuid}
+																	seat={item.seat_uuid}
+																	// section={section.section_uuid}
+																	// section-name={section?.section_name}
+																	// outlet={outletIdState}
+																	onClick={e =>
+																		selectOrder
+																			? setSelectedOrder(prev =>
+																					prev.filter(a => a.order_uuid === item.order_uuid)?.length
+																						? prev.filter(a => a.order_uuid !== item.order_uuid)
+																						: prev?.length
+																						? [...prev, item]
+																						: [item]
+																			  )
+																			: setSelectedRouteOrder(item.order_uuid)
+																	}
+																>
+																	<span
+																		className="dblClickTrigger"
+																		style={{ display: "none" }}
+																		// onClick={() =>
+																		//   menuOpenHandler(item)
+																		// }
+																	/>
+
+																	<Card
+																		details={details}
+																		getOrders={() => {
+																			if (holdOrders) getRunningHoldOrders()
+																			else getRunningOrders()
+																		}}
+																		setSelectOrder={setSelectOrder}
+																		order={item}
+																		onDoubleClick={() => setPopupOrder(item)}
+																		// on_order={order}
+																		dateTime={item?.status[0]?.time}
+																		// key={item.seat_uuid}
+																		title1={item?.invoice_number || ""}
+																		selectedCounter={selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length}
+																		selectedOrder={
+																			selectOrder
+																				? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
+																				: selectedRouteOrder === item.order_uuid
+																		}
+																		title2={item?.counter_title || ""}
+																		status={
+																			+item.status[item.status?.length - 1]?.stage === 1
+																				? "Processing"
+																				: +item.status[item.status?.length - 1]?.stage === 2
+																				? "Checking"
+																				: +item.status[item.status?.length - 1]?.stage === 3
+																				? "Delivery"
+																				: +item.status[item.status?.length - 1]?.stage === 4
+																				? "Complete"
+																				: +item.status[item.status?.length - 1]?.stage === 5
+																				? "Cancelled"
+																				: ""
+																		}
+																		// price={item.price}
+																		// visibleContext={visibleContext}
+																		// setVisibleContext={setVisibleContext}
+																		// isMouseInsideContext={isMouseInsideContext}
+																		// seats={seatsState.filter(s => +s.seat_status === 1)}
+																		rounded
+																	/>
+																</div>
+															)
+														})}
+												</div>
+											</div>
+										)
+									else return ""
+								})}
+								{TripsOrderLength?.map(trip => {
+									const orders_data = orders
+										?.filter(
+											_i => !+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments || !+_i?.payment_pending
+										)
+										?.filter(a => a.trip_uuid === trip.trip_uuid)
+										?.filter(
+											a =>
+												!searchItems ||
+												a.invoice_number?.toString()?.includes(searchItems.toLocaleLowerCase()) ||
+												a.counter_title?.toLocaleLowerCase()?.includes(searchItems?.toLocaleLowerCase())
+										)
+
+									if (orders_data?.length)
+										return (
+											<div key={Math.random()} className="sectionDiv">
+												<h1>
+													<span
+														style={{ cursor: "pointer" }}
+														onClick={() => setJoinSummary(orders.filter(a => a.trip_uuid === trip.trip_uuid))}
+													>
+														{trip.trip_title}
+													</span>{" "}
+													<span>({orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length})</span>
+													<span>
+														[Processing {trip?.processingLength}, Checking {trip?.checkingLength}, Delivery {trip?.deliveryLength}
+														]
+													</span>
+													<span>
+														{trip?.users?.[0]
+															? `[${trip?.users?.map(a => users?.find(b => b.user_uuid === a)?.user_title)?.join(", ")}]`
+															: ""}
+													</span>
+													<span>({[...new Set(orders_data?.map(_i => _i?.counter_uuid))]?.length})</span>
+													{selectOrder ? (
+														<input
+															type="checkbox"
+															style={{
+																marginLeft: "10px",
+																transform: "scale(1.5)"
+															}}
+															defaultChecked={
+																orders.filter(
+																	a =>
+																		a.trip_uuid === trip.trip_uuid &&
+																		selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
+																)?.length === orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length
+															}
+															onClick={() =>
+																orders?.filter(
+																	a =>
+																		a.trip_uuid === trip.trip_uuid &&
+																		selectedOrder?.filter(b => b.order_uuid === a.order_uuid)?.length
+																)?.length === orders?.filter(a => a.trip_uuid === trip.trip_uuid)?.length
+																	? setSelectedOrder(
+																			selectedOrder.filter(
+																				b =>
+																					!orders.filter(a => a.trip_uuid === trip.trip_uuid && b.order_uuid === a.order_uuid)
+																						?.length
+																			)
+																	  )
+																	: setSelectedOrder(
+																			selectedOrder?.length
+																				? [
+																						...selectedOrder.filter(
+																							b =>
+																								!orders.filter(
+																									a => a.trip_uuid === trip.trip_uuid && b.order_uuid === a.order_uuid
+																								)?.length
+																						),
+																						...orders.filter(a => a.trip_uuid === trip.trip_uuid)
+																				  ]
+																				: orders?.filter(a => a.trip_uuid === trip.trip_uuid)
+																	  )
+															}
+														/>
+													) : (
+														""
+													)}
+												</h1>
+												<div
+													className="content"
+													style={{
+														flexDirection: "row",
+														flexWrap: "wrap",
+														gap: "0",
+														marginBottom: "10px"
+													}}
+													id="seats_container"
+												>
+													{orders_data
+														?.sort((a, b) => +a.time_1 - +b.time_1)
+														?.map(item => {
+															return (
+																<div
+																	className={`seatSearchTarget ${
+																		!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1
+																			? "shaking-cards"
+																			: ""
+																	}`}
+																	style={{ height: "fit-content" }}
+																	key={Math.random()}
+																	seat-name={item.seat_name}
+																	seat-code={item.seat_uuid}
+																	seat={item.seat_uuid}
+																	// section={section.section_uuid}
+																	// section-name={section?.section_name}
+																	// outlet={outletIdState}
+																	onClick={e =>
+																		selectOrder
+																			? setSelectedOrder(prev =>
+																					prev.filter(a => a.order_uuid === item.order_uuid)?.length
+																						? prev.filter(a => a.order_uuid !== item.order_uuid)
+																						: prev?.length
+																						? [...prev, item]
+																						: [item]
+																			  )
+																			: setSelectedRouteOrder(item.order_uuid)
+																	}
+																>
+																	<span
+																		className="dblClickTrigger"
+																		style={{ display: "none" }}
+																		// onClick={() =>
+																		//   menuOpenHandler(item)
+																		// }
+																	/>
+																	<Card
+																		details={details}
+																		order={item}
+																		onDoubleClick={() => setPopupOrder(item)}
+																		getOrders={() => {
+																			if (holdOrders) getRunningHoldOrders()
+																			else getRunningOrders()
+																		}}
+																		setSelectOrder={setSelectOrder}
+																		// on_order={on_order && on_order}
+																		// key={item.seat_uuid}
+																		dateTime={item?.status[0]?.time}
+																		title1={item?.invoice_number || ""}
+																		selectedOrder={
+																			selectOrder
+																				? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
+																				: selectedRouteOrder === item.order_uuid
+																		}
+																		selectedCounter={selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length}
+																		title2={item?.counter_title || ""}
+																		status={
+																			+item.status[item.status?.length - 1]?.stage === 1
+																				? "Processing"
+																				: +item.status[item.status?.length - 1]?.stage === 2
+																				? "Checking"
+																				: +item.status[item.status?.length - 1]?.stage === 3
+																				? "Delivery"
+																				: +item.status[item.status?.length - 1]?.stage === 4
+																				? "Complete"
+																				: +item.status[item.status?.length - 1]?.stage === 5
+																				? "Cancelled"
+																				: ""
+																		}
+																		// price={item.price}
+																		// visibleContext={visibleContext}
+																		// setVisibleContext={setVisibleContext}
+																		// isMouseInsideContext={isMouseInsideContext}
+																		// seats={seatsState.filter(s => +s.seat_status === 1)}
+																		rounded
+																	/>
+																</div>
+															)
+														})}
+												</div>
+											</div>
+										)
+									else return ""
+								})}
 							</>
 						)}
 
