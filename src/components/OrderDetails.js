@@ -86,6 +86,9 @@ export function OrderDetails({
 	const componentRef = useRef(null)
 	const [deletePopup, setDeletePopup] = useState(false)
 	const [warehouse, setWarehouse] = useState([])
+	const [appliedCounterCharges, setAppliedCounterCharges] = useState(null)
+	const [deductionsPopup, setDeductionsPopup] = useState()
+	const [deductionsData, setDeductionsData] = useState()
 
 	useEffect(CONTROL_AUTO_REFRESH, [])
 	const getOrder = async order_uuid => {
@@ -210,14 +213,13 @@ export function OrderDetails({
 	}
 
 	const shiftFocus = id => jumpToNextIndex(id, reactInputsRef, setFocusedInputId, appendNewRow)
-	// console.log(orderData)
-	const callBilling = async (data = orderData) => {
-		console.log("orderData", data)
+	const callBilling = async (data = orderData, updateInDB) => {
 		if (!data && !editOrder) return
-		// console.log(data);
 		let counter = counters.find(a => data.counter_uuid === a.counter_uuid)
 		let time = new Date()
 		let autoBilling = await Billing({
+			order_uuid: data?.order_uuid,
+			invoice_number: `${data?.order_type}${data?.invoice_number}`,
 			shortage: data.shortage,
 			adjustment: data.adjustment,
 			replacement: data.replacement,
@@ -232,16 +234,20 @@ export function OrderDetails({
 				type: "NEW"
 			}
 		})
-		setOrderData(prev => ({
-			...prev,
-			...(data || {}),
-			...autoBilling,
 
-			item_details: autoBilling.items?.map(a => ({
-				...(prev.item_details.find(b => b.item_uuid === a.item_uuid) || {}),
-				...a
-			}))
-		}))
+		setOrderData(prev => {
+			const updated_data = {
+				...prev,
+				...(data || {}),
+				...autoBilling,
+				item_details: autoBilling.items?.map(a => ({
+					...(prev.item_details.find(b => b.item_uuid === a.item_uuid) || {}),
+					...a
+				}))
+			}
+			if (updateInDB) updateOrder({ data: updated_data })
+			return updated_data
+		})
 	}
 
 	const reactToPrintContent = useCallback(() => {
@@ -313,6 +319,7 @@ export function OrderDetails({
 			setNotesPoup(true)
 		}
 	}, [itemsData, order])
+
 	useEffect(() => {
 		if (counters?.find(a => a.counter_uuid === order?.counter_uuid)?.notes?.filter(a => a)?.length) {
 			setCounterNotesPoup(counters?.find(a => a.counter_uuid === order?.counter_uuid))
@@ -337,6 +344,7 @@ export function OrderDetails({
 					})) || []
 		}))
 	}, [category, orderData])
+
 	const getItemsData = async item => {
 		if (items.length) {
 			console.log(items)
@@ -353,6 +361,7 @@ export function OrderDetails({
 		})
 		if (response.data.success) setItemsData(response.data.result)
 	}
+
 	const getItemsDataReminder = async () => {
 		if (reminder) {
 			setReminderDate(reminder)
@@ -384,6 +393,16 @@ export function OrderDetails({
 			if (response.data.success) setCounters(response.data.result)
 		}
 	}
+
+	const getAppliedCounterCharges = async charges_uuid => {
+		try {
+			const response = await axios.post(`/counterCharges/list`, { charges_uuid })
+			if (response.data.success) setAppliedCounterCharges(response.data.result)
+		} catch (error) {
+			console.error(error)
+		}
+	}
+
 	const sendMsg = async () => {
 		if (waiting) {
 			return
@@ -421,10 +440,18 @@ export function OrderDetails({
 		getItemsDataReminder()
 		GetPaymentModes()
 	}, [])
+
 	useEffect(() => {
 		if (order) {
+			setDeductionsData({
+				actual: +order?.replacement || 0,
+				shortage: +order?.shortage || 0,
+				adjustment: +order?.adjustment || 0,
+				adjustment_remarks: order?.adjustment_remarks || ""
+			})
 			getCounters([order?.counter_uuid])
 			getItemsData(order?.item_details?.map(a => a.item_uuid))
+			if (order?.counter_charges) getAppliedCounterCharges(order?.counter_charges)
 		}
 	}, [order])
 
@@ -458,6 +485,8 @@ export function OrderDetails({
 		}
 
 		let autoBilling = await Billing({
+			order_uuid: data?.order_uuid,
+			invoice_number: `${data?.order_type}${data?.invoice_number}`,
 			counter,
 			items: data.item_details,
 			replacement: data.replacement,
@@ -563,6 +592,7 @@ export function OrderDetails({
 			setMessagePopup(false)
 		}
 	}
+
 	const splitOrder = async (type = { stage: 0 }) => {
 		setWaiting(true)
 		let counter = counters.find(a => orderData?.counter_uuid === a.counter_uuid)
@@ -598,6 +628,8 @@ export function OrderDetails({
 		}
 
 		let autoBilling = await Billing({
+			order_uuid: data?.order_uuid,
+			invoice_number: `${data?.order_type}${data?.invoice_number}`,
 			counter,
 			items: data.item_details,
 			replacement: data.replacement,
@@ -611,6 +643,8 @@ export function OrderDetails({
 			item_details: autoBilling.items
 		}
 		let autoBilling2 = await Billing({
+			order_uuid: data2?.order_uuid,
+			invoice_number: `${data2?.order_type}${data2?.invoice_number}`,
 			counter,
 			items: data2.item_details,
 			replacement: data2.replacement,
@@ -736,6 +770,7 @@ export function OrderDetails({
 			}
 		}
 	}
+
 	const updateWarehouse = async (warehouse_uuid, method) => {
 		const response = await axios({
 			method: "put",
@@ -755,27 +790,12 @@ export function OrderDetails({
 			} else handleTaskChecking()
 		}
 	}
+
 	useEffect(() => {
 		if (!editOrder) return
 		reactInputsRef.current?.[orderData?.item_details?.[0]?.uuid]?.focus()
 	}, [editOrder])
 	const HoldOrder = async (hold = "Y") => {
-		// let data = orderData;
-		// let billingData = await Billing({
-		//   replacement: data.replacement,
-		//   adjustment: data.adjustment,
-		//   shortage: data.shortage,
-		//   counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
-
-		//   items: data.item_details?.map((a) => {
-		//     let itemData = itemsData.find((b) => a.item_uuid === b.item_uuid);
-		//     return {
-		//       ...itemData,
-		//       ...a,
-		//       price: itemData?.price || 0,
-		//     };
-		//   }),
-		// });
 		let data = {
 			...orderData,
 			hold
@@ -1073,6 +1093,13 @@ export function OrderDetails({
 											Cancel Hold
 										</button>
 									)}
+									<button
+										style={{ width: "fit-Content", backgroundColor: "blue" }}
+										className="theme-btn"
+										onClick={() => setDeductionsPopup(true)}
+									>
+										Deductions
+									</button>
 									<button
 										style={{ width: "fit-Content", backgroundColor: "#44cd4a" }}
 										className="theme-btn"
@@ -2211,7 +2238,30 @@ export function OrderDetails({
 				items={itemsData}
 				paymentModes={paymentModes}
 				counters={counter}
+				charges={appliedCounterCharges}
 			/>
+
+			{deductionsPopup ? (
+				<DiliveryReplaceMent
+					onSave={() => setDeductionsPopup(false)}
+					data={deductionsData}
+					setData={setDeductionsData}
+					updateBilling={result =>
+						callBilling(
+							{
+								...order,
+								replacement: result?.actual || 0,
+								shortage: result?.shortage || 0,
+								adjustment: result?.adjustment || 0,
+								adjustment_remarks: result?.adjustment_remarks || ""
+							},
+							true
+						)
+					}
+				/>
+			) : (
+				""
+			)}
 		</>
 	)
 }
@@ -2245,11 +2295,12 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 		}
 
 		let billingData = await Billing({
+			order_uuid: data?.order_uuid,
+			invoice_number: `${data?.order_type}${data?.invoice_number}`,
 			replacement: data.replacement,
 			adjustment: data.adjustment,
 			shortage: data.shortage,
 			counter: counters.find(a => a.counter_uuid === data.counter_uuid),
-
 			items: data.item_details?.map(a => {
 				let itemData = items.find(b => a.item_uuid === b.item_uuid)
 				return {

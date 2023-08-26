@@ -12,7 +12,8 @@ const OrderPrint = ({
 	item_details = [],
 	reminderDate,
 	footer = false,
-	paymentModes = []
+	paymentModes = [],
+	charges = []
 }) => {
 	const isEstimate = order?.order_type === "E"
 	const [gstValues, setGstVAlues] = useState([])
@@ -59,6 +60,12 @@ const OrderPrint = ({
 		let time = new Date().getTime()
 		return time - item?.created_at < reminderDate * 86400000
 	}
+
+	const deductions = [
+		["Replacement", order?.replacement],
+		["Adjustment", order?.adjustment],
+		["Shortage", order?.shortage]
+	]
 
 	return (
 		<div
@@ -675,6 +682,34 @@ const OrderPrint = ({
 														</tr>
 												  ))
 												: ""}
+											{charges?.map(_charge => (
+												<tr>
+													<td
+														style={{
+															fontWeight: "600",
+															fontSize: "xx-small",
+															textAlign: "right"
+														}}
+													>
+														{_charge.narration} : +{_charge.amt}
+													</td>
+												</tr>
+											))}
+											{deductions
+												?.filter(i => +i[1])
+												?.map(i => (
+													<tr>
+														<td
+															style={{
+																fontWeight: "600",
+																fontSize: "xx-small",
+																textAlign: "right"
+															}}
+														>
+															{i[0]} : -{i[1]}
+														</td>
+													</tr>
+												))}
 											<tr>
 												<td
 													style={{

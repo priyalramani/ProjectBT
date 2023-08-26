@@ -279,11 +279,12 @@ const ProcessingOrders = () => {
 				}
 
 			let billingData = await Billing({
+				order_uuid: data?.order_uuid,
+				invoice_number: `${data?.order_type}${data?.invoice_number}`,
 				replacement: data.replacement,
 				adjustment: data.adjustment,
 				shortage: data.shortage,
 				counter: counters.find(a => a.counter_uuid === data.counter_uuid),
-
 				items: data.item_details.map(a => {
 					let itemData = items.find(b => a.item_uuid === b.item_uuid)
 					return {
@@ -649,11 +650,12 @@ const ProcessingOrders = () => {
 	const updateBillingAmount = async (order = selectedOrder) => {
 		// console.log(order);
 		let billingData = await Billing({
+			order_uuid: order?.order_uuid,
+			invoice_number: `${order?.order_type}${order?.invoice_number}`,
 			replacement: order?.replacement,
 			adjustment: order?.adjustment,
 			shortage: order?.shortage,
 			counter: counters.find(a => a.counter_uuid === order.counter_uuid),
-
 			items: order.item_details.map(a => {
 				let itemData = items.find(b => a.item_uuid === b.item_uuid)
 				return {
@@ -1374,8 +1376,9 @@ const ProcessingOrders = () => {
 						if (data) {
 							// setUpdate((prev) => !prev);
 							let billingData = await Billing({
+								order_uuid: data?.order_uuid,
+								invoice_number: `${data?.order_type}${data?.invoice_number}`,
 								counter: counters.find(a => a.counter_uuid === data.counter_uuid),
-
 								items: data.item_details.map(a => {
 									let itemData = items.find(b => a.item_uuid === b.item_uuid)
 									return {
@@ -1589,11 +1592,12 @@ const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
 		}
 
 		let billingData = await Billing({
+			order_uuid: data?.order_uuid,
+			invoice_number: `${data?.order_type}${data?.invoice_number}`,
 			replacement: data.replacement,
 			adjustment: data.adjustment,
 			shortage: data.shortage,
 			counter: counters.find(a => a.counter_uuid === data.counter_uuid),
-
 			items: data.item_details.map(a => {
 				let itemData = items.find(b => a.item_uuid === b.item_uuid)
 				return {
@@ -2536,11 +2540,12 @@ function DiliveryPopup({
 		setLoading(true)
 		setError("")
 		let billingData = await Billing({
+			order_uuid: data?.order_uuid,
+			invoice_number: `${data?.order_type}${data?.invoice_number}`,
 			replacement: data.actual,
 			adjustment: data.adjustment,
 			shortage: data.shortage,
 			counter: counters.find(a => a.counter_uuid === order.counter_uuid),
-
 			items: order.item_details.map(a => {
 				let itemData = items.find(b => a.item_uuid === b.item_uuid)
 				return {
@@ -3451,11 +3456,12 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 			let data = orderObject
 
 			let billingData = await Billing({
+				order_uuid: data?.order_uuid,
+				invoice_number: `${data?.order_type}${data?.invoice_number}`,
 				replacement: data?.replacement,
 				adjustment: data.adjustment,
 				shortage: data.shortage,
 				counter: counter.find(a => a.counter_uuid === data.counter_uuid),
-
 				items: data.item_details.map(a => {
 					let itemData = itemsData.find(b => a.item_uuid === b.item_uuid)
 					return {

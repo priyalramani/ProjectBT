@@ -2844,6 +2844,8 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 			const counterData = counter.find(a => a.counter_uuid === data.counter_uuid)
 
 			let billingData = await Billing({
+				order_uuid: data?.order_uuid,
+				invoice_number: `${data?.order_type}${data?.invoice_number}`,
 				replacement: data.replacement,
 				adjustment: data.adjustment,
 				shortage: data.shortage,

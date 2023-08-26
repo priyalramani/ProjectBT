@@ -114,6 +114,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 				}
 
 				let billingData = await Billing({
+					order_uuid: obj?.order_uuid,
+					invoice_number: `${obj?.order_type}${obj?.invoice_number}`,
 					replacement: obj.replacement,
 					adjustment: obj.adjustment,
 					shortage: obj.shortage,
@@ -440,6 +442,8 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 	const updateBillingAmount = async selectedOrder => {
 		console.log(selectedOrder)
 		let billingData = await Billing({
+			order_uuid: selectedOrder?.order_uuid,
+			invoice_number: `${selectedOrder?.order_type}${selectedOrder?.invoice_number}`,
 			replacement: selectedOrder.replacement,
 			shortage: selectedOrder.shortage,
 			adjustment: selectedOrder.adjustment,
@@ -477,23 +481,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 			setWaiting(false)
 			return
 		}
-		// let billingData = await Billing({
-		//   replacement: data.actual,
-		//   replacement_mrp: data.mrp,
-		//   counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
-		//   items: order.item_details.map((a) => {
-		//     let itemData = items.find((b) => a.item_uuid === b.item_uuid);
-		//     return {
-		//       ...itemData,
-		//       ...a,
-		//     };
-		//   }),
-		// });
-		// let Tempdata = {
-		//   ...order,
-		//   ...billingData,
-		//   item_details: billingData.items,
-		// };
+
 		let modeTotal = modes.map(a => +a.amt || 0)?.reduce((a, b) => a + b)
 
 		if (+order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))) {

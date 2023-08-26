@@ -46,6 +46,8 @@ const SelectedCounterOrder = () => {
 		let counter = counters.find(a => order.counter_uuid === a.counter_uuid)
 		let time = new Date()
 		Billing({
+			order_uuid: order?.order_uuid,
+			invoice_number: `${order?.order_type}${order?.invoice_number}`,
 			counter,
 			items: order.items,
 			others: {
@@ -254,8 +256,7 @@ const SelectedCounterOrder = () => {
 			user_uuid: localStorage.getItem("user_uuid"),
 			role: "Order",
 			narration:
-				counter.counter_title +
-				(sessionStorage.getItem("route_title") ? ", " + sessionStorage.getItem("route_title") : ""),
+				counter.counter_title + (sessionStorage.getItem("route_title") ? ", " + sessionStorage.getItem("route_title") : ""),
 			timestamp: time.getTime(),
 			...others
 		}
@@ -288,10 +289,7 @@ const SelectedCounterOrder = () => {
 				style={cartPage ? { backgroundColor: "#000", maxWidth: "500px" } : { maxWidth: "500px" }}
 			>
 				<div className="user_menubar">
-					<IoArrowBackOutline
-						className="user_Back_icon"
-						onClick={() => (!cartPage ? Navigate(-1) : setCartPage(false))}
-					/>
+					<IoArrowBackOutline className="user_Back_icon" onClick={() => (!cartPage ? Navigate(-1) : setCartPage(false))} />
 				</div>
 				{cartPage ? (
 					<>
@@ -346,11 +344,7 @@ const SelectedCounterOrder = () => {
 						</div>
 
 						<div>
-							<select
-								className="searchInput selectInput"
-								value={filterCompany}
-								onChange={e => setFilterCompany(e.target.value)}
-							>
+							<select className="searchInput selectInput" value={filterCompany} onChange={e => setFilterCompany(e.target.value)}>
 								{companies?.map(a => (
 									<option value={a.company_uuid}>{a.company_title}</option>
 								))}
@@ -375,8 +369,7 @@ const SelectedCounterOrder = () => {
 													.filter(a => a.category_uuid === category.category_uuid)
 													?.filter(
 														a =>
-															!filterItemTitle ||
-															a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())
+															!filterItemTitle || a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())
 													)?.length > 0 && (
 													<div
 														id={!cartPage ? category?.category_uuid : ""}
@@ -411,9 +404,7 @@ const SelectedCounterOrder = () => {
 																										...a,
 																										b:
 																											+(a.b || 0) +
-																											parseInt(
-																												((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion
-																											),
+																											parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
 
 																										p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																								  }
@@ -562,8 +553,7 @@ const SelectedCounterOrder = () => {
 																						.map(a => ({
 																							...a,
 																							b:
-																								+(a.b || 0) +
-																								parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
+																								+(a.b || 0) + parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
 
 																							p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																						}))
@@ -719,8 +709,7 @@ const SelectedCounterOrder = () => {
 																						.map(a => ({
 																							...a,
 																							b:
-																								+(a.b || 0) +
-																								parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
+																								+(a.b || 0) + parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
 
 																							p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																						}))
@@ -912,6 +901,8 @@ const SelectedCounterOrder = () => {
 									setTimeout(async () => {
 										let time = new Date()
 										Billing({
+											order_uuid: order?.order_uuid,
+											invoice_number: `${order?.order_type}${order?.invoice_number}`,
 											counter,
 											items: data.items,
 											others: {

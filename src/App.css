@@ -468,3 +468,32 @@ svg.table-icon {
 	align-items: center;
 	gap: 10px;
 }
+#counter-filter-wrapper {
+	position: absolute;
+	display: flex;
+	right: 20px;
+	top: 50%;
+	translate: 0 -50%;
+	align-items: center;
+	gap: 20px;
+	font-size: 1.15rem;
+	color: #ffffffb8;
+	font-weight: 600;
+}
+#completed-filter {
+	cursor: pointer;
+	font-size: 14px;
+	background: var(--form-theme-light);
+	border: 1px solid var(--form-theme-dark);
+	border-radius: 8px;
+	padding: 10px;
+	font-weight: 500;
+	color: #5e5c68;
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	justify-content: center;
+}
+label {
+	cursor: unset;
+}

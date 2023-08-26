@@ -197,6 +197,10 @@ const Sidebar = ({ setCollectionTags }) => {
 							link: "/admin/completeOrderReport"
 						},
 						{
+							name: "Counter Charges",
+							link: "/admin/counterCharges"
+						},
+						{
 							name: "Items Wise",
 							link: "/admin/OrderItemReport"
 						},

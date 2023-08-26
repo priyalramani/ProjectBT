@@ -61,15 +61,25 @@ import ItemAvilibility from "./pages/QuikAccess/ItemAvilibility"
 import CashRegister from "./pages/QuikAccess/CashRegister"
 import Companies from "./pages/Master/Companies"
 import PerformanceSummary from "./pages/Reports/PerformanceSummary"
+import CounterCharges from "./pages/Reports/CounterCharges"
+import Loader from "./components/Loader"
 
-export let Version = 142
+export let Version = 143
 export const server = "https://api.btgondia.com"
 // export const server = "http://localhost:9000"
 
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))
 	const context = useContext(Context)
-	const { calculationPopup = "", loading, notification, setNotification, isItemAvilableOpen, cashRegisterPopup } = context
+	const {
+		calculationPopup = "",
+		pageLoading,
+		loading,
+		notification,
+		setNotification,
+		isItemAvilableOpen,
+		cashRegisterPopup
+	} = context
 	axios.defaults.baseURL = server
 
 	const getUserType = async controller => {
@@ -248,6 +258,7 @@ function App() {
 							<Route path="/admin/InvoiceNumberWiseOrder" element={<InvoiceNumberWiseOrder />} />
 							<Route path="/admin/itemCategories" element={<ItemCategories />} />
 							<Route path="/admin/counterGroup" element={<CounterGroup />} />
+							<Route path="/admin/counterCharges" element={<CounterCharges />} />
 							<Route path="/admin/itemGroup" element={<ItemGroup />} />
 							<Route path="/admin/Campaigns" element={<Campaigns />} />
 							<Route path="/admin/counter" element={<Counter />} />
@@ -333,6 +344,7 @@ function App() {
 			)}
 			{isItemAvilableOpen && <ItemAvilibility />}
 			{cashRegisterPopup && <CashRegister />}
+			<Loader visible={pageLoading} />
 			{/* {window.location.pathname.split('/').at(-2) === 'processing' && <div id="console">
         <h3>CONSOLE <button onClick={e => window.location.reload()}>Reload</button></h3>
       </div>} */}

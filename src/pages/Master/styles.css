@@ -856,6 +856,8 @@ input#item-sales-searchbar {
 
 .theme-btn {
 	border: none;
+	min-width: 100px;
+	text-align: center;
 	padding: 10px 20px;
 	font-weight: bold;
 	color: white;
@@ -864,9 +866,9 @@ input#item-sales-searchbar {
 	display: flex;
 	flex-wrap: nowrap;
 	align-items: center;
+	justify-content: center;
 	border-radius: 5px;
 	height: fit-content;
-
 	gap: 5px;
 }
 
@@ -1914,11 +1916,19 @@ input#item-sales-searchbar {
 	padding: 10px 20px 10px 10px;
 }
 
+#companies-header #actions-wrapper {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-flow: row nowrap;
+	gap: 10px;
+}
+
 .theme-searchbar {
 	display: flex;
 	align-items: center;
 	padding: 5px 8px;
-	background: #ededed;
+	background: var(--form-theme-light);
 	border-radius: 2rem;
 	border: 1px solid #c5c5c5;
 }
@@ -1951,10 +1961,11 @@ input#item-sales-searchbar {
 	transition: all 0.5s ease-out;
 }
 
-.theme-searchbar button:hover {
-	background: #dddddd;
+.theme-searchbar button:hover,
+.theme-icon-btn:hover {
+	background: var(--form-theme-heavy);
 	scale: 1.1;
-	border-color: #b6b6b6;
+	border-color: #9b9aa3;
 }
 
 .page-heading {
@@ -1982,8 +1993,19 @@ input#item-sales-searchbar {
 
 #companies-list th,
 #companies-list td {
+	white-space: nowrap;
 	text-align: left;
 	padding: 10px;
+}
+
+#companies-list td {
+	font-weight: 500;
+}
+
+#companies-list th {
+	font-weight: 700;
+	font-size: 17px;
+	padding-bottom: 20px;
 }
 
 #companies-list tbody > tr:hover {
@@ -2013,8 +2035,11 @@ input#item-sales-searchbar {
 	display: block;
 	aspect-ratio: 1;
 	display: flex;
-	border: 1px solid #c0c0c0;
+	/* border: 1px solid #c0c0c0; */
+	border: 1px solid var(--form-theme-dark);
 	font-size: 1.3rem;
+	background: var(--form-theme-light);
+	transition: all 0.5s ease-out;
 }
 
 .table-row-icon > div {
@@ -2057,12 +2082,12 @@ input#item-sales-searchbar {
 }
 
 #company-form form > div > *:nth-child(2) {
-	width: 200px;
+	width: 250px;
 }
 
 #company-form .form-input {
-	background: #e9e9e9;
-	border: 1px solid darkgrey;
+	background: var(--form-theme-light);
+	border: 1px solid var(--form-theme-dark);
 	border-radius: 2rem;
 	padding: 12px;
 }
@@ -2084,7 +2109,7 @@ input#item-sales-searchbar {
 #company-form button[type="submit"] {
 	text-align: center;
 	display: block;
-	margin-top: 10px;
+	margin-top: 25px;
 }
 
 #company-form button#close {

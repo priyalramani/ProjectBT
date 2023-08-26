@@ -108,8 +108,13 @@ const Counter = () => {
 		GetPaymentModes()
 	}, [])
 
-	const filters = ["Filters", "No Whatsapp Verified Number", "No Call Verified Number", "No Number"]
-	const [counterFilter, setCounterFilter] = useState(0)
+	const filters = [
+		{ label: "Filters", value: null },
+		{ label: "No Whatsapp Verified Number", value: "wa" },
+		{ label: "No Call Verified Number", value: "cal" },
+		{ label: "No Number", value: "num" }
+	]
+	const [counterFilter, setCounterFilter] = useState(null)
 
 	const filterCounter = useMemo(
 		() =>
@@ -128,15 +133,15 @@ const Counter = () => {
 								(filterRoute?.length < 3 || a.route_title?.toLocaleLowerCase()?.includes(filterRoute?.toLocaleLowerCase())) &&
 								(filterMobile?.length < 3 || a.mobile?.find(_i => _i.mobile?.includes(filterMobile)))
 						)
-				: // .filter(_counter => {
-				  // 	if(!+counterFilter) return true;
-				  // 	// _counter.
-				  // })
-				  [],
-		[counter, filterCounterTitle, filterRoute, filterMobile, routesData]
+						.filter(_counter => {
+							if (!counterFilter) return true
+							if (counterFilter === "num") return !_counter?.mobile?.some(i => i?.mobile?.length === 10)
+							else return !_counter?.mobile?.some(i => i.label?.some(_i => _i.type === counterFilter && !+_i.varification))
+						})
+				: [],
+		[counter, filterCounterTitle, filterRoute, filterMobile, routesData, counterFilter]
 	)
 
-	console.log({ selectedCounterGroups })
 	const fileExtension = ".xlsx"
 
 	const downloadHandler = async () => {
@@ -201,20 +206,20 @@ const Counter = () => {
 			<Sidebar />
 			<Header />
 			<div className="item-sales-container orders-report-container">
-				<div id="heading">
+				<div id="heading" style={{ position: "relative" }}>
 					<h2>Counter</h2>
-					{/* <div className="inputGroup">
+					<div id="counter-filter-wrapper">
 						<label htmlFor="Warehouse">Filter</label>
 						<div className="inputGroup" style={{ width: "200px" }}>
 							<select value={counterFilter} onChange={e => setCounterFilter(e.target.value)}>
-								{filters?.map((label, index) => (
-									<option key={label} value={index}>
+								{filters?.map(({ label, value }) => (
+									<option key={label} value={value}>
 										{label}
 									</option>
 								))}
 							</select>
 						</div>
-					</div> */}
+					</div>
 				</div>
 				<div id="item-sales-top">
 					<div

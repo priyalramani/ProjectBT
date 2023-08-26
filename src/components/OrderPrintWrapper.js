@@ -1,7 +1,7 @@
 import React from "react"
 import OrderPrint from "./prints/OrderPrint"
 
-const OrderPrintWrapper = ({ componentRef, orders, counters, reminderDate, users, items, paymentModes }) => {
+const OrderPrintWrapper = ({ componentRef, orders, counters, reminderDate, users, items, paymentModes, ...props }) => {
 	const getPrintData = order => {
 		const max_count = order?.order_type !== "E" ? 15 : 19
 		const min_count = max_count - 7
@@ -54,6 +54,7 @@ const OrderPrintWrapper = ({ componentRef, orders, counters, reminderDate, users
 								paymentModes={paymentModes}
 								counters={counters}
 								footer={i + 1 === array.length}
+								{...props}
 							/>
 						))
 					})}
