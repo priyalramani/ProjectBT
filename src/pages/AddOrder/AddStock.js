@@ -411,10 +411,6 @@ export default function AddStock() {
 																}
 															}}
 															onChange={e => {
-																// setTimeout(
-																//   () => setQtyDetails((prev) => !prev),
-																//   2000
-																// );
 																setOrder(prev => ({
 																	...prev,
 																	item_details: prev.item_details.map(a => {
@@ -433,8 +429,7 @@ export default function AddStock() {
 															}}
 															value={
 																itemsData
-
-																	.filter(a => a.item_uuid === item.uuid)
+																	.filter(a => a.item_uuid === (item.uuid || item.item_uuid))
 																	.map((a, j) => ({
 																		value: a.item_uuid,
 																		label:
