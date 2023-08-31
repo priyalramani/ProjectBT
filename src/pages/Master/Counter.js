@@ -109,16 +109,16 @@ const Counter = () => {
 	}, [])
 
 	const filters = [
-		{ label: "Filters", value: null },
+		{ label: "None", value: 0 },
 		{ label: "No Whatsapp Verified Number", value: "wa" },
 		{ label: "No Call Verified Number", value: "cal" },
 		{ label: "No Number", value: "num" }
 	]
-	const [counterFilter, setCounterFilter] = useState(null)
+	const [counterFilter, setCounterFilter] = useState("0")
 
 	const filterCounter = useMemo(
 		() =>
-			[filterCounterTitle, filterRoute, filterMobile]?.some(i => i?.length >= 3)
+			[filterCounterTitle, filterRoute, filterMobile]?.some(i => i?.length >= 3) || +counterFilter !== 0
 				? counter
 						.map(b => ({
 							...b,
@@ -134,9 +134,16 @@ const Counter = () => {
 								(filterMobile?.length < 3 || a.mobile?.find(_i => _i.mobile?.includes(filterMobile)))
 						)
 						.filter(_counter => {
-							if (!counterFilter) return true
-							if (counterFilter === "num") return !_counter?.mobile?.some(i => i?.mobile?.length === 10)
-							else return !_counter?.mobile?.some(i => i.label?.some(_i => _i.type === counterFilter && !+_i.varification))
+							console.log({ counterFilter })
+							if (+counterFilter === 0) return true
+							const isNumberAvailable = _counter?.mobile?.some(i => i?.mobile?.length === 10)
+
+							if (counterFilter === "num") return !isNumberAvailable
+							else
+								return (
+									isNumberAvailable &&
+									!_counter?.mobile?.some(i => i.label?.some(_i => _i.type === counterFilter && !+_i.varification))
+								)
 						})
 				: [],
 		[counter, filterCounterTitle, filterRoute, filterMobile, routesData, counterFilter]

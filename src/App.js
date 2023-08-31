@@ -64,7 +64,7 @@ import PerformanceSummary from "./pages/Reports/PerformanceSummary"
 import CounterCharges from "./pages/Reports/CounterCharges"
 import Loader from "./components/Loader"
 
-export let Version = 144
+export let Version = 145
 export const server = "https://api.btgondia.com"
 // export const server = "http://localhost:9000"
 
