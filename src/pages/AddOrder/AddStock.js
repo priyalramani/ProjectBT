@@ -266,7 +266,7 @@ export default function AddStock() {
 							{/* {type === 'edit' && <XIcon className='closeicon' onClick={close} />} */}
 						</div>
 
-						<div className="topInputs">
+						<div className="topInputs" style={{ alignItems: "flex-end" }}>
 							<div className="inputGroup">
 								<label htmlFor="Warehouse">From Warehouse</label>
 								<div className="inputGroup" style={{ width: "400px" }}>
@@ -327,37 +327,29 @@ export default function AddStock() {
 									/>
 								</div>
 							</div>
-							{order.to_warehouse ? (
-								<label htmlFor="upload" className="theme-btn">
-									Upload Bulk
-									<input
-										style={{ display: "none" }}
-										className="numberInput"
-										onWheel={e => e.preventDefault()}
-										index={listItemIndexCount++}
-										type="file"
-										name="upload"
-										id="upload"
-										onChange={readUploadFile}
-									/>
-								</label>
-							) : (
-								""
-							)}
-							{order.to_warehouse ? (
-								<button
-									className="theme-btn"
-									style={{
-										width: "max-content",
-										position: "fixed",
-										right: "100px"
-									}}
-									onClick={() => setSuggestionPopup(order.to_warehouse)}
-								>
-									Suggestions
-								</button>
-							) : (
-								""
+							{order.to_warehouse && (
+								<>
+									<label htmlFor="upload" className="theme-btn" style={{ fontSize: ".825rem" }}>
+										Upload Bulk
+										<input
+											style={{ display: "none" }}
+											className="numberInput"
+											onWheel={e => e.preventDefault()}
+											index={listItemIndexCount++}
+											type="file"
+											name="upload"
+											id="upload"
+											onChange={readUploadFile}
+										/>
+									</label>
+									<button
+										className="theme-btn"
+										style={{ fontSize: ".825rem" }}
+										onClick={() => setSuggestionPopup(order.to_warehouse)}
+									>
+										Suggestions
+									</button>
+								</>
 							)}
 						</div>
 
@@ -461,18 +453,10 @@ export default function AddStock() {
 														index={listItemIndexCount++}
 														value={item.b || ""}
 														onChange={e => {
-															setOrder(prev => {
-																// setTimeout(
-																//   () => setQtyDetails((prev) => !prev),
-																//   2000
-																// );
-																return {
-																	...prev,
-																	item_details: prev.item_details.map(a =>
-																		a.uuid === item.uuid ? { ...a, b: e.target.value } : a
-																	)
-																}
-															})
+															setOrder(prev => ({
+																...prev,
+																item_details: prev.item_details.map(a => (a.uuid === item.uuid ? { ...a, b: e.target.value } : a))
+															}))
 														}}
 														onFocus={e => e.target.select()}
 														onKeyDown={e => (e.key === "Enter" ? jumpToNextIndex("q" + item.uuid) : "")}
@@ -678,7 +662,6 @@ export default function AddStock() {
 													<td>{item.item_title || ""}</td>
 													<td>{item.mrp || ""}</td>
 													<td>{item.b || 0}</td>
-
 													<td>{item.p || 0}</td>
 												</tr>
 											))}
@@ -686,7 +669,6 @@ export default function AddStock() {
 								))}
 							<tr key={Math.random()}>
 								<td className="flex" style={{ justifyContent: "space-between" }}></td>
-
 								<td>Total</td>
 								<td></td>
 								<td>
@@ -798,7 +780,7 @@ export function SuggestionsPopup({ onSave, warehouse, itemsData, order, warehous
 									onClick={() => {
 										setOrder(prev => ({
 											...prev,
-											item_details: selectedItems
+											item_details: selectedItems.map(i => ({ ...i, uuid: i.item_uuid }))
 										}))
 										onSave()
 									}}

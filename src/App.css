@@ -233,7 +233,8 @@ svg.table-icon {
 
 #counters-list .list {
 	overflow: auto;
-	height: 23vh;
+	max-height: 55vh;
+	min-height: 300px;
 }
 #counters-list .list > div {
 	display: flex;
