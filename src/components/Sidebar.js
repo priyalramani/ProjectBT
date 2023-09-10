@@ -213,6 +213,10 @@ const Sidebar = ({ setCollectionTags }) => {
 							link: "/admin/CounterLeger"
 						},
 						{
+							name: "Counter Report",
+							link: "/admin/counterReport"
+						},
+						{
 							name: "Outstandings",
 							link: "/admin/Outstandings"
 						},

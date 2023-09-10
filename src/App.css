@@ -319,7 +319,7 @@ svg.table-icon {
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
-	margin-top: 20px;
+	margin-top: 5px;
 	overflow: auto;
 	max-height: 60vh;
 }
@@ -497,4 +497,57 @@ svg.table-icon {
 }
 label {
 	cursor: unset;
+}
+
+.toggle_button {
+	/* border: 1px solid black; */
+	/* border-radius: 4px; */
+	padding: 12px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	font-weight: 500;
+	gap: 8px;
+}
+
+.toggle_button input {
+	width: 1.1rem;
+	height: 1.1rem;
+}
+
+/* .toggle_button.active {
+	background: black;
+	color: white;
+} */
+
+#retailer-maragin-report .react-select-multiple > div:first-child {
+	padding: 12px;
+}
+
+.mui-multi-select > div:first-child {
+	background: #f1f1f3;
+	padding: 8px 12px;
+	font-size: 0.9rem;
+}
+
+.MuiMenuItem-root.mui-multi-menuitem {
+	padding: 0;
+}
+
+.MuiCheckbox-root.mui-multi-menuitem-checkbox {
+	padding: 8px;
+	padding-left: 12px;
+}
+
+.MuiCheckbox-root.mui-multi-menuitem-checkbox svg {
+	width: 20px;
+	height: 20px;
+}
+
+.MuiListItemText-root.mui-multi-menuitem-text span {
+	font-size: 0.9rem;
+}
+
+.counter-report {
+	font-size: 0.9rem;
 }

@@ -999,11 +999,14 @@ function CancellationReasons({ close, orders, submit }) {
 				}}
 			>
 				<h3>Selected orders will be cancelled</h3>
+				<h4 style={{ marginTop: "10px", textAlign: "left" }}>Cancellation Reason{orders?.[1] ? "s" : ""} -</h4>
 
 				<div id="cancellation-reasons-wrapper">
 					{orders?.map(i => (
 						<div key={i?.order_uuid}>
-							<label>Cancellation reason for order - {i?.invoice_number}</label>
+							<label>
+								{i?.counter_title} - <b>{i?.invoice_number}</b>
+							</label>
 							<textarea
 								type="text"
 								className="cancellation-reason"

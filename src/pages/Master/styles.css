@@ -161,7 +161,7 @@
 
 .orders-report-container > #heading > h2,
 .page-heading > h2 {
-	margin-right: 212px;
+	/* margin-right: 212px; */
 	padding: 7px;
 }
 
@@ -1840,10 +1840,9 @@ input#item-sales-searchbar {
 }
 
 .searchInput {
-	padding: 0.55rem 0.8rem;
+	padding: 12px;
 	border-radius: 4px;
 	font-size: medium;
-	max-width: 32rem;
 	outline: none;
 	border: 1px solid #cccccc;
 }
