@@ -2077,10 +2077,9 @@ export function OrderDetails({
 			{notesPopup ? (
 				<NotesPopup
 					onSave={() => setNotesPoup(false)}
+					setSelectedOrder={setOrderData}
 					notesPopup={notesPopup}
 					HoldOrder={HoldOrder}
-					// postOrderData={() => onSubmit({ stage: 5 })}
-					setSelectedOrder={setOrderData}
 					order={orderData}
 				/>
 			) : (
@@ -3019,6 +3018,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 													}
 													maxLength={42}
 													onWheel={e => e.preventDefault()}
+													autocomplete="off"
 												/>
 											</label>
 											{item.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" &&
@@ -3042,11 +3042,12 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 														}
 														maxLength={42}
 														onWheel={e => e.preventDefault()}
-													/>
+														autocomplete="off"
+														/>
 												</label>
 											) : (
 												""
-											)}
+												)}
 										</div>
 									))}
 									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
@@ -3061,13 +3062,13 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 												disabled={order?.order_type === "E"}
 												style={
 													!credit_allowed === "Y"
-														? {
-																width: "90px",
-																backgroundColor: "light",
-																fontSize: "12px",
-																color: "#fff"
-														  }
-														: { width: "80px" }
+													? {
+														width: "90px",
+														backgroundColor: "light",
+														fontSize: "12px",
+														color: "#fff"
+													}
+													: { width: "80px" }
 												}
 												onContextMenu={e => {
 													e.preventDefault()
@@ -3085,7 +3086,8 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 												}
 												maxLength={42}
 												onWheel={e => e.preventDefault()}
-											/>
+												autocomplete="off"
+												/>
 											{/* {popupInfo.conversion || 0} */}
 										</label>
 										{outstanding?.amount ? (
@@ -3109,6 +3111,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 													}
 													maxLength={42}
 													onWheel={e => e.preventDefault()}
+												autocomplete="off"
 												/>
 												{/* {popupInfo.conversion || 0} */}
 											</label>

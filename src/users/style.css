@@ -274,8 +274,16 @@
 	/* text-shadow: 0 1px 2px #fff; */
 }
 .counterSearch {
-	border: 2px solid #4ac959;
-	width: 100vw;
+	padding: 12px 10px;
+	border-bottom: 1px solid #c9c9c9;
+}
+.counterSearch > div:nth-child(2) small {
+	opacity: 0.7;
+	font-size: 0.78rem;
+}
+.counterSearch > div:first-child {
+	font-size: 0.9rem;
+	display: flex;
 }
 .nav_styling {
 	border: none;
@@ -779,4 +787,15 @@ h6 {
 	bottom: 10px;
 	/* width: 100px; */
 	left: 50vw;
+}
+@keyframes blinking {
+	0% {
+		background-color: #19beff;
+	}
+	100% {
+		background-color: #fff;
+	}
+}
+.blink {
+	animation: blinking 1s infinite;
 }

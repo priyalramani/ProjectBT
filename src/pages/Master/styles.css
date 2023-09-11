@@ -835,6 +835,7 @@ div#no_reports {
 	padding: 10px;
 	justify-content: space-between;
 	gap: 20px;
+	overflow: auto;
 }
 
 #date-input-container {

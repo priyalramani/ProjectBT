@@ -355,6 +355,9 @@ svg.table-icon {
 	font-size: 1.5rem;
 	padding: 0;
 	margin: 0;
+	border: none;
+	background: none;
+	display: flex;
 }
 
 .location-marker {
@@ -550,4 +553,23 @@ label {
 
 .counter-report {
 	font-size: 0.9rem;
+}
+
+.excel-export-btn {
+	background: none;
+	border: none;
+	font-size: 1.75rem;
+	margin-right: 0.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 2rem;
+	width: 38px;
+	height: 38px;
+	padding: 6px;
+	transition: background 350ms ease;
+}
+
+.excel-export-btn:hover {
+	background: #dddddd;
 }

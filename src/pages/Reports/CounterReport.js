@@ -10,6 +10,10 @@ import FormControl from "@mui/material/FormControl"
 import ListItemText from "@mui/material/ListItemText"
 import Select from "@mui/material/Select"
 import Checkbox from "@mui/material/Checkbox"
+import { RiFileExcel2Fill } from "react-icons/ri"
+import * as XLSX from "xlsx"
+import FileSaver from "file-saver"
+import { useRef } from "react"
 
 const ITEM_HEIGHT = 48
 const ITEM_PADDING_TOP = 8
@@ -23,6 +27,7 @@ const MenuProps = {
 }
 
 const today = new Date().getTime()
+let FETCH_MORE = true
 
 const formatDate = _date => {
 	const date = new Date(_date)
@@ -41,19 +46,26 @@ const CounterReport = () => {
 
 	const [selectedCompanies, setSelectedCompanies] = useState([])
 	const [selectedRoutes, setSelectedRoutes] = useState([])
+	const [loading, setLoading] = useState()
 
-	const search = async () => {
-		const response = await axios.post("counters/report", {
+	const tableRef = useRef()
+
+	const search = async lastSortNo => {
+		const skip = lastSortNo ? data?.table_data?.filter(i => i.sort_order === lastSortNo)?.length : undefined
+
+		const response = await axios.post("counters/report/new", {
 			date_range: dateValues,
 			companies: selectedCompanies,
-			routes: selectedRoutes
+			routes: selectedRoutes,
+			lastSortNo,
+			skip
 		})
 		if (response.status === 200) {
-			const counters = response.data.result
+			let counters = response.data.result
+			if (!counters?.length) return -1
 
 			for (const counter of counters) {
 				const company_purchase = {}
-
 				for (const item of counter.item_details) {
 					company_purchase[item.company_uuid] = {
 						total_amount: (company_purchase[item.company_uuid]?.total_amount || 0) + item.item_total,
@@ -69,7 +81,21 @@ const CounterReport = () => {
 				delete counter.item_details
 			}
 
-			const total_values = counters.reduce((result, i) => {
+			if (lastSortNo) {
+				counters = await data?.table_data?.concat(counters)
+				console.log({
+					old_length: data?.table_data?.length,
+					new_length: counters?.length,
+					added_length: response.data.result?.length
+				})
+				console.log({
+					old: data?.table_data,
+					new: counters,
+					added: response.data.result
+				})
+			}
+
+			const total_values = await counters.reduce((result, i) => {
 				for (const company in i.company_purchase) {
 					result[company] = {
 						total_amount: (result[company]?.total_amount || 0) + i.company_purchase[company].total_amount,
@@ -80,15 +106,22 @@ const CounterReport = () => {
 				return result
 			}, {})
 
-			setData({
-				table_data: counters,
-				total_values: total_values,
-				companies: companies?.filter(i => selectedCompanies.includes(i.company_uuid)),
-				routes: selectedRoutes.reduce((obj, i) => ({
-					...obj,
-					[i]: routes?.find(_i => _i.route_uuid === i)?.route_title
+			if (lastSortNo)
+				setData(prev => ({
+					...prev,
+					table_data: counters,
+					total_values: total_values
 				}))
-			})
+			else
+				setData({
+					table_data: counters,
+					total_values: total_values,
+					companies: companies?.filter(i => selectedCompanies.includes(i.company_uuid)),
+					routes: selectedRoutes.reduce((obj, i) => ({
+						...obj,
+						[i]: routes?.find(_i => _i.route_uuid === i)?.route_title
+					}))
+				})
 		}
 	}
 
@@ -166,6 +199,59 @@ const CounterReport = () => {
 		</span>
 	)
 
+	const onScroll = e => {
+		if (!FETCH_MORE) return
+		const viewportHeight = e.target.clientHeight
+		const percentageScrolled = (e.target.scrollTop / (e.target.scrollHeight - viewportHeight)) * 100
+		if (percentageScrolled >= 90) {
+			FETCH_MORE = false
+			setLoading(true)
+			search(data?.table_data?.at(-1)?.sort_order).finally(result => {
+				console.log({ result })
+				setLoading(false)
+				if (result !== -1)
+					setTimeout(() => {
+						FETCH_MORE = true
+					}, 1000)
+			})
+
+			console.log("YOU ARE AT THE BOTTOM OF THE PAGE!!")
+		}
+	}
+
+	const convertToJSON = () => {
+		const table = tableRef.current
+		const header = []
+		const rows = []
+
+		for (let i = 0; i < table.rows[0].cells.length; i++) {
+			header.push(table.rows[0].cells[i].innerText)
+		}
+
+		for (let i = 1; i < table.rows.length - 1; i++) {
+			const row = {}
+			for (let j = 0; j < table.rows[i].cells.length; j++) {
+				row[header[j]] = table.rows[i].cells[j].innerText.split("\n")[0]
+			}
+			rows.push(row)
+		}
+
+		return rows
+	}
+
+	const exportExcel = () => {
+		if (!data?.table_data?.[0]) return
+		const fileExtension = ".xlsx"
+		const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8"
+
+		const sheetData = convertToJSON()
+		const ws = XLSX.utils.json_to_sheet(sheetData)
+		const wb = { Sheets: { Report: ws }, SheetNames: ["Report"] }
+		const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" })
+		const excelData = new Blob([excelBuffer], { type: fileType })
+		FileSaver.saveAs(excelData, "Counter Report" + fileExtension)
+	}
+
 	return (
 		<>
 			<Sidebar />
@@ -216,20 +302,29 @@ const CounterReport = () => {
 								</Select>
 							</FormControl>
 						))}
-						<button style={{ width: "100px", justifyContent: "center", padding: "12px" }} className="theme-btn" onClick={search}>
+						<button
+							style={{ width: "100px", justifyContent: "center", padding: "12px" }}
+							className="theme-btn"
+							onClick={() => search()}
+						>
 							Search
 						</button>
 					</div>
+					<div>
+						<button title="Export as excel" className="excel-export-btn" onClick={exportExcel}>
+							<RiFileExcel2Fill />
+						</button>
+					</div>
 				</div>
-				<div className="table-container-user item-sales-container">
-					<Table {...data} />
+				<div className="table-container-user item-sales-container" onScroll={onScroll} style={{ scrollBehavior: "smooth" }}>
+					<Table tableRef={tableRef} {...data} loading={loading} />
 				</div>
 			</div>
 		</>
 	)
 }
 
-function Table({ table_data: data = [], total_values = {}, companies = [], routes = {} }) {
+function Table({ table_data: data = [], total_values = {}, companies = [], routes = {}, loading, tableRef }) {
 	const columns = ["Route", "Counter"]?.concat(companies?.map(i => i.company_title))
 	const [sortingState, setSortingState] = useState({})
 
@@ -251,7 +346,7 @@ function Table({ table_data: data = [], total_values = {}, companies = [], route
 	}
 
 	return (
-		<table className="user-table performance-summary-table counter-report">
+		<table ref={tableRef} className="user-table performance-summary-table counter-report">
 			<thead>
 				<tr>
 					{columns?.map(i => (
@@ -289,6 +384,23 @@ function Table({ table_data: data = [], total_values = {}, companies = [], route
 						))}
 					</tr>
 				))}
+				{loading && (
+					<tr style={{ position: "sticky", bottom: "40px" }}>
+						<td colSpan={columns?.length}>
+							<span
+								className="loader"
+								style={{
+									width: "20px",
+									height: "20px",
+									borderWidth: "4px",
+									display: "block",
+									margin: "0 auto",
+									background: "white"
+								}}
+							></span>
+						</td>
+					</tr>
+				)}
 				<tr
 					style={{
 						height: "30px",

@@ -55,7 +55,7 @@ const ProcessingOrders = () => {
 	const [dropdown, setDropDown] = useState(false)
 	const [filterItemTitle, setFilterItemTile] = useState("")
 	const Navigate = useNavigate()
-
+	const [notesPopup, setNotesPopup] = useState(false)
 	const audioCallback = elem_id => {
 		setItemChanged(prev => [...prev, selectedOrder.item_details.find(a => a.item_uuid === elem_id)])
 		setSelectedOrder(prev => ({
@@ -139,9 +139,17 @@ const ProcessingOrders = () => {
 				user_uuid: localStorage.getItem("user_uuid")
 			}
 		})
-		// console.log(response);
 		if (response.data.success) {
-			setOrders(response.data.result)
+			const data = response.data.result.sort((a, b) => a.time_1 - b.time_1).sort((a, b) => a.priority - b.priority)
+			let sortedOrders = data.reduce(
+				(result, order) =>
+					!result.some(i => i.counter_uuid === order.counter_uuid)
+						? result.concat(data.filter(i => i.counter_uuid === order.counter_uuid))
+						: result,
+
+				[]
+			)
+			setOrders(sortedOrders)
 			setLoading(false)
 		}
 		if (!response?.data?.result) return
@@ -168,7 +176,7 @@ const ProcessingOrders = () => {
 
 	useEffect(() => {
 		if (!selectedOrder || audiosRef.current?.[0]) return
-
+		if (!notesPopup) setNotesPopup(true)
 		// const audioElements = [];
 		// const unprocessedItems =
 		//   selectedOrder?.item_details?.filter((a) => !a.status) || [];
@@ -914,6 +922,16 @@ const ProcessingOrders = () => {
 			>
 				{selectedOrder ? (
 					<>
+						{notesPopup ? (
+							<NotesPopup
+								onSave={() => setNotesPopup(false)}
+								setSelectedOrder={setSelectedOrder}
+								notesPopup={notesPopup}
+								order={selectedOrder}
+							/>
+						) : (
+							""
+						)}
 						<div className="flex" style={{ justifyContent: "space-between", margin: "10px 0" }}>
 							<h2 style={{ width: "20vw", textAlign: "start" }}>{selectedOrder.invoice_number}</h2>
 							{Location.pathname.includes("delivery") ? (
@@ -1040,7 +1058,10 @@ const ProcessingOrders = () => {
 								) : (
 									<>
 										<th colSpan={2}>
-											<div className="t-head-element">Counter Title</div>
+											<div className="t-head-element">Counter</div>
+										</th>
+										<th colSpan={2}>
+											<div className="t-head-element">Route</div>
 										</th>
 										<th colSpan={2}>
 											<div className="t-head-element">Progress</div>
@@ -1273,51 +1294,28 @@ const ProcessingOrders = () => {
 										?.map((item, i) => (
 											<tr
 												key={Math.random()}
+												className={item.priority ? "blink" : ""}
 												style={{
 													height: "30px",
 													backgroundColor: +item.opened_by || item.opened_by !== "0" ? "yellow" : "#fff"
 												}}
+												onClick={e => {
+													e.stopPropagation()
+													setChecking(false)
+													setWarningPopUp(item)
+												}}
 											>
 												<td>{i + 1}</td>
-												<td
-													colSpan={2}
-													onClick={e => {
-														e.stopPropagation()
-														setChecking(false)
-														setWarningPopUp(item)
-													}}
-												>
-													{item.counter_title}
-												</td>
-												<td
-													colSpan={2}
-													onClick={e => {
-														e.stopPropagation()
-														setChecking(false)
-														setWarningPopUp(item)
-													}}
-												>
+												<td colSpan={2}>{item.counter_title}</td>
+												<td colSpan={2}>{item?.route_title}</td>
+												<td colSpan={2}>
 													{item?.item_details?.filter(a => +a.status === 1)?.length}/
 													{item?.item_details
 														.filter(a => !Location.pathname.includes("delivery") || +a.status !== 3)
 														.filter(a => !Location.pathname.includes("checking") || +a.status === 1)?.length || 0}
 												</td>
-												<td
-													onClick={e => {
-														e.stopPropagation()
-														setChecking(false)
-														setWarningPopUp(item)
-													}}
-												>
-													{item.order_grandtotal}
-												</td>
-												<td
-													onClick={e => {
-														e.stopPropagation()
-														setChecking(false)
-														setWarningPopUp(item)
-													}}
-												>
+												<td>{item.order_grandtotal}</td>
+												<td>
 													{(item?.item_details?.length > 1
 														? item?.item_details?.map(a => +a.b || 0)?.reduce((a, b) => a + b)
 														: item?.item_details[0]?.b || 0) +
@@ -1656,6 +1654,87 @@ const DeleteOrderPopup = ({ onSave, order, counters, items }) => {
 		</div>
 	)
 }
+function NotesPopup({ onSave, order, setSelectedOrder, notesPopup, HoldOrder }) {
+	const [notes, setNotes] = useState([])
+	const [edit, setEdit] = useState(false)
+	useEffect(() => {
+		// console.log(order?.notes);
+		setNotes(order?.notes || [])
+	}, [order])
+	const submitHandler = async () => {
+		const response = await axios({
+			method: "put",
+			url: "/orders/putOrderNotes",
+			data: { notes, invoice_number: order?.invoice_number },
+			headers: {
+				"Content-Type": "application/json"
+			}
+		})
+		if (response.data.success) {
+			setSelectedOrder(prev => ({
+				...prev,
+				notes
+			}))
+			if (notesPopup === "hold") setTimeout(HoldOrder, 2000)
+			onSave()
+		}
+	}
+	return (
+		<>
+			<div className="overlay" style={{ zIndex: 9999999999 }}>
+				<div className="modal" style={{ height: "fit-content", width: "max-content" }}>
+					<div className="flex" style={{ justifyContent: "space-between" }}>
+						<h3>Order Notes</h3>
+						{notesPopup === "hold" ? <h3>Please Enter Notes</h3> : ""}
+					</div>
+					<div
+						className="content"
+						style={{
+							height: "fit-content",
+							padding: "10px",
+							width: "fit-content"
+						}}
+					>
+						<div style={{ overflowY: "scroll" }}>
+							<form className="form">
+								<div className="formGroup">
+									<div className="row" style={{ flexDirection: "row", alignItems: "start" }}>
+										<div style={{ width: "50px" }}>Notes</div>
+										<label className="selectLabel flex" style={{ width: "200px" }}>
+											<textarea
+												name="route_title"
+												className="numberInput"
+												style={{ width: "200px", height: "200px" }}
+												value={notes?.toString()?.replace(/,/g, "\n")}
+												onChange={e => {
+													setNotes(e.target.value.split("\n"))
+													setEdit(true)
+												}}
+											/>
+										</label>
+									</div>
+								</div>
+
+								<div className="flex" style={{ justifyContent: "space-between" }}>
+									<button onClick={onSave} className="closeButton">
+										x
+									</button>
+									{edit ? (
+										<button type="button" className="submit" onClick={submitHandler}>
+											Save
+										</button>
+									) : (
+										""
+									)}
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</>
+	)
+}
 function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }) {
 	const [confirmPopup, setConfirmPopup] = useState(false)
 	return (
@@ -1780,7 +1859,6 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }
 		</>
 	)
 }
-
 function HoldPopup({
 	onSave,
 	orders,
@@ -2350,7 +2428,6 @@ function HoldPopup({
 		</>
 	)
 }
-
 function CheckingItemInput({ onSave, popupInfo, setTempQuantity, items }) {
 	const [data, setdata] = useState({})
 
@@ -2972,7 +3049,6 @@ function MinMaxPopup({
 		</>
 	)
 }
-
 function ConfirmPopup({ onSave, onClose, selectedOrder, Navigate }) {
 	if (!selectedOrder) Navigate(-1)
 	return selectedOrder ? (
