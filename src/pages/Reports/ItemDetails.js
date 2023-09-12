@@ -4,17 +4,21 @@ import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import Select from "react-select"
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid"
+
 const ItemDetails = () => {
+
 	const [counterGroup, setCounterGroup] = useState([])
 	const [itemGroupFilter, setItemGroupFilter] = useState("")
 	const [itemGroup, setItemGroup] = useState([])
+	const [counter, setCounter] = useState([])
+	const [companies, setCompanies] = useState([])
+	const [items, setItems] = useState([])
 	const [searchData, setSearchData] = useState({
 		startDate: "",
 		endDate: "",
 		company_uuid: "",
-		counter_uuid: "",
+		counter_uuid: ""
 	})
-	const [counter, setCounter] = useState([])
 
 	const getCounter = async () => {
 		const response = await axios({
@@ -22,32 +26,33 @@ const ItemDetails = () => {
 			url: "/counters/GetCounterData",
 			data: ["counter_title", "counter_uuid"],
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setCounter(response.data.result)
 	}
-	const [companies, setCompanies] = useState([])
-	const [items, setItems] = useState([])
+
+	
 	const getItemGroup = async () => {
 		const response = await axios({
 			method: "get",
 			url: "/itemGroup/GetItemGroupList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setItemGroup(response.data.result)
 	}
+
 	const getCounterGroup = async () => {
 		const response = await axios({
 			method: "get",
 			url: "/counterGroup/GetCounterGroupList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setCounterGroup(response.data.result)
 	}
@@ -58,11 +63,12 @@ const ItemDetails = () => {
 			url: "/companies/getCompanies",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setCompanies(response.data.result)
 	}
+
 	const getActivityData = async () => {
 		let startDate = new Date(searchData.startDate + " 00:00:00 AM")
 		startDate = startDate.getTime()
@@ -75,15 +81,16 @@ const ItemDetails = () => {
 				company_uuid: searchData.company_uuid,
 				startDate,
 				endDate,
-				counter_uuid: searchData.counter_uuid,
+				counter_uuid: searchData.counter_uuid
 			},
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log("activity", response)
 		if (response.data.success) setItems(response.data.result)
 	}
+
 	useEffect(() => {
 		let time = new Date()
 		let curTime = "yy-mm-dd"
@@ -93,7 +100,7 @@ const ItemDetails = () => {
 		setSearchData(prev => ({
 			...prev,
 			startDate: curTime,
-			endDate: curTime,
+			endDate: curTime
 		}))
 		getCompanies()
 		getCounterGroup()
@@ -107,7 +114,7 @@ const ItemDetails = () => {
 			<Header />
 			<div className="item-sales-container orders-report-container">
 				<div id="heading">
-					<h2>Item Report </h2>
+					<h2>Item Report</h2>
 				</div>
 				<div id="item-sales-top">
 					<div
@@ -117,8 +124,9 @@ const ItemDetails = () => {
 							display: "flex",
 							alignItems: "center",
 							justifyContent: "space-between",
-							width: "100%",
-						}}>
+							width: "100%"
+						}}
+					>
 						<div className="inputGroup">
 							<label htmlFor="Warehouse">Start</label>
 							<input
@@ -126,7 +134,7 @@ const ItemDetails = () => {
 								onChange={e =>
 									setSearchData(prev => ({
 										...prev,
-										startDate: e.target.value,
+										startDate: e.target.value
 									}))
 								}
 								value={searchData.startDate}
@@ -141,7 +149,7 @@ const ItemDetails = () => {
 								onChange={e =>
 									setSearchData(prev => ({
 										...prev,
-										endDate: e.target.value,
+										endDate: e.target.value
 									}))
 								}
 								value={searchData.endDate}
@@ -155,10 +163,11 @@ const ItemDetails = () => {
 								onChange={e =>
 									setSearchData(prev => ({
 										...prev,
-										company_uuid: e.target.value,
+										company_uuid: e.target.value
 									}))
 								}
-								value={searchData.company_uuid}>
+								value={searchData.company_uuid}
+							>
 								<option value="">All</option>
 								{companies.map(a => (
 									<option value={a.company_uuid}>{a.company_title}</option>
@@ -171,10 +180,11 @@ const ItemDetails = () => {
 								onChange={e =>
 									setSearchData(prev => ({
 										...prev,
-										counter_group_uuid: e.target.value,
+										counter_group_uuid: e.target.value
 									}))
 								}
-								value={searchData.counter_group_uuid}>
+								value={searchData.counter_group_uuid}
+							>
 								<option value="">All</option>
 								{counterGroup
 									.filter(a => a.counter_group_uuid)
@@ -200,29 +210,28 @@ const ItemDetails = () => {
 								options={[
 									{
 										value: "",
-										label: "All",
+										label: "All"
 									},
 									...counter.map(a => ({
 										value: a.counter_uuid,
-										label: a.counter_title,
-									})),
+										label: a.counter_title
+									}))
 								]}
 								onChange={doc =>
 									setSearchData(prev => ({
 										...prev,
-										counter_uuid: doc.value,
+										counter_uuid: doc.value
 									}))
 								}
 								value={
 									searchData?.counter_uuid
 										? {
 												value: searchData?.counter_uuid,
-												label: counter?.find(j => j.counter_uuid === searchData.counter_uuid)
-													?.counter_title,
+												label: counter?.find(j => j.counter_uuid === searchData.counter_uuid)?.counter_title
 										  }
 										: {
 												value: "",
-												label: "All",
+												label: "All"
 										  }
 								}
 								openMenuOnFocus={true}
@@ -238,9 +247,7 @@ const ItemDetails = () => {
 				</div>
 				<div className="table-container-user item-sales-container">
 					<Table
-						itemsDetails={items.filter(
-							a => !itemGroupFilter || a?.item_group_uuid?.filter(b => b === itemGroupFilter)?.length
-						)}
+						itemsDetails={items.filter(a => !itemGroupFilter || a?.item_group_uuid?.filter(b => b === itemGroupFilter)?.length)}
 					/>
 				</div>
 			</div>
@@ -259,8 +266,9 @@ function Table({ itemsDetails }) {
 				maxWidth: "100vw",
 				height: "fit-content",
 				overflowX: "scroll",
-				fontSize: "12px",
-			}}>
+				fontSize: "12px"
+			}}
+		>
 			<thead>
 				<tr>
 					<th>S.N</th>
@@ -275,14 +283,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("item_title")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("item_title")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -296,14 +306,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("mrp")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("mrp")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -317,14 +329,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("sales")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("sales")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -338,14 +352,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("sales_amt")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("sales_amt")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -362,14 +378,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("deliver_return")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("deliver_return")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -383,14 +401,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("deliver_return_percentage")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("deliver_return_percentage")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -404,14 +424,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("deliver_return_amt")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("deliver_return_amt")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -428,14 +450,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("processing_canceled")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("processing_canceled")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -449,14 +473,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("auto_added")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("auto_added")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -470,14 +496,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("processing_canceled_amt")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("processing_canceled_amt")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -494,14 +522,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("auto_added")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("auto_added")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -515,14 +545,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("processing_canceled_percentage")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("processing_canceled_percentage")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -536,14 +568,16 @@ function Table({ itemsDetails }) {
 									onClick={() => {
 										setItems("auto_added_amt")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("auto_added_amt")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
