@@ -154,7 +154,8 @@ function Table({ data = {}, total }) {
 						position: "sticky",
 						bottom: 0,
 						background: "#ffffff",
-						boxShadow: "0px 0px 25px -15px black"
+						boxShadow: "0px 0px 25px -15px black",
+						width: "calc(100vw - 100px)"
 					}}
 				>
 					<td colSpan={2}>

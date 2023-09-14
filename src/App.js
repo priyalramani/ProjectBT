@@ -21,7 +21,7 @@ import AddOrder from "./pages/AddOrder/AddOrder"
 import UserActivity from "./pages/Reports/UserActivity"
 import UPITransection from "./pages/Reports/UPITransection"
 import CompleteOrder from "./pages/Reports/CompleteOrder"
-import ItemDetails from "./pages/Reports/ItemDetails"
+import ItemDetails from "./pages/Reports/ItemReport"
 import CompletedTrips from "./pages/Reports/CompletedTrips"
 import { useContext, useEffect, useState } from "react"
 import { updateIndexedDb } from "./Apis/functions"
@@ -65,7 +65,7 @@ import CounterCharges from "./pages/Reports/CounterCharges"
 import Loader from "./components/Loader"
 import CounterReport from "./pages/Reports/CounterReport"
 
-export let Version = 148
+export let Version = 150
 export const server = "https://api.btgondia.com"
 // export const server = "http://localhost:9000"
 
@@ -287,7 +287,7 @@ function App() {
 							<Route path="/admin/completeOrderReport" element={<CompleteOrder />} />
 							<Route path="/admin/RetailerMarginReport" element={<RetailerMarginReport />} />
 							<Route path="/admin/cancelOrders" element={<CancelOrders />} />
-							<Route path="/admin/OrderItemReport" element={<ItemDetails />} />
+							<Route path="/admin/ItemsReport" element={<ItemDetails />} />
 							<Route path="/admin/CompletedTripsReport" element={<CompletedTrips />} />
 							<Route path="/admin/CounterLeger" element={<CounterLeger />} />
 							<Route path="/admin/Outstandings" element={<Outstanding />} />

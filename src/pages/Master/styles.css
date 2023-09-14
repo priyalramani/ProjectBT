@@ -1,6 +1,5 @@
 .table-container-user {
 	background: #fff;
-	max-height: calc(100vh - 154px);
 	overflow-y: auto;
 	overflow-x: hidden;
 	padding: 0 5px;
@@ -826,21 +825,24 @@ div#no_reports {
 	padding: 0px !important;
 	background: white;
 	width: calc(100vw - 100px);
+	height: calc(100vh - 50px);
 	left: 100px;
 }
 
 #item-sales-top {
 	display: flex;
 	align-items: center;
-	padding: 10px;
+	padding: 10px 10px 10px 0;
 	justify-content: space-between;
 	gap: 20px;
-	overflow: auto;
 }
 
 #date-input-container {
 	display: flex;
+	align-items: flex-end;
 	gap: 10px;
+	overflow: auto;
+
 }
 
 div#date-input-container > label {
@@ -859,7 +861,7 @@ input#item-sales-searchbar {
 	border: none;
 	min-width: 100px;
 	text-align: center;
-	padding: 10px 20px;
+	padding: 12px 20px;
 	font-weight: bold;
 	color: white;
 	background-color: black;
@@ -1841,7 +1843,7 @@ input#item-sales-searchbar {
 }
 
 .searchInput {
-	padding: 12px;
+	padding: 10px;
 	border-radius: 4px;
 	font-size: medium;
 	outline: none;

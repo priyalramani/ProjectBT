@@ -458,8 +458,17 @@ svg.table-icon {
 	}
 }
 
+.performance-summary-table {
+	width: auto !important;
+	min-width: 100% !important;
+}
+
 .performance-summary-table * {
 	cursor: auto !important;
+}
+
+.performance-summary-table tr {
+	white-space: nowrap;
 }
 
 .performance-summary-table td {
@@ -572,4 +581,17 @@ label {
 
 .excel-export-btn:hover {
 	background: #dddddd;
+}
+
+.report_date_filter {
+	background: rgb(241, 241, 243);
+}
+
+.label-input-container {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+.label-input-container span {
+	font-size: 0.8rem;
 }

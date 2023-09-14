@@ -12,6 +12,7 @@ import Context from "../../context/context"
 import Prompt from "../../components/Prompt"
 import axios from "axios"
 import { v4 } from "uuid"
+import { Autocomplete, ListItem, TextField, styled } from "@mui/material"
 
 const CounterCharges = () => {
 	const status = ["Pending", "Completed", "Floating"]
@@ -212,12 +213,31 @@ const CompanyForm = ({ close, onSubmit, data = {}, counters }) => {
 		close()
 	}
 
+	const CssTextField = styled(TextField)({
+		"&.MuiTextField-root": {
+			padding: "5px 10px!important"
+		},
+		"& .MuiInput-root.MuiInput-underline": {
+			fontSize: ".85rem",
+			border: "none"
+		},
+		"& .MuiInput-underline:before": {
+			border: "none"
+		},
+		"& .MuiInput-underline:after": {
+			border: "none"
+		},
+		"& .MuiInput-underline:hover:before": {
+			border: "none"
+		}
+	})
+
 	const FormFields = [
 		{ label: "Amount", key: "amt", type: "number", attributes: { placeholder: "₹0.00" } },
 		{ label: "Narration (Displayed)", key: "narration", attributes: { maxlength: 15, placeholder: "Displayed in invoice" } },
 		{ label: "Remarks (Not displayed)", key: "remarks", attributes: { placeholder: "Counter charge remarks" } }
 	]
-
+	console.log({ charge })
 	return (
 		<div className="overlay-wrapper">
 			<div id="company-form">
@@ -244,7 +264,19 @@ const CompanyForm = ({ close, onSubmit, data = {}, counters }) => {
 
 					<div>
 						<label htmlFor={"counter-selection"}>Counter</label>
-						<select
+						<Autocomplete
+							disablePortal
+							value={charge?.counter_uuid || ""}
+							onChange={(e, { value }) => setCharge(prev => ({ ...prev, counter_uuid: value }))}
+							options={counters?.map(i => ({ value: i.counter_uuid, label: i.counter_title }))}
+							renderInput={params => <CssTextField placeholder="None" {...params} variant="standard" className="form-input" />}
+							renderOption={(props, option) => (
+								<ListItem sx={{ fontSize: ".8rem" }} {...props}>
+									{option.label}
+								</ListItem>
+							)}
+						/>
+						{/* <select
 							id="counter-selection"
 							className="form-input"
 							value={charge?.counter_uuid}
@@ -261,7 +293,7 @@ const CompanyForm = ({ close, onSubmit, data = {}, counters }) => {
 									{counter_title}
 								</option>
 							))}
-						</select>
+						</select> */}
 					</div>
 
 					<button type="submit" className="theme-btn round">
