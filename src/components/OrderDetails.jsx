@@ -1539,12 +1539,13 @@ export function OrderDetails({
 																					? {
 																							...a,
 																							...itemsData.find(b => b.item_uuid === e.value),
+																							status: 0,
 																							price: itemsData.find(b => b.item_uuid === e.value)?.item_price
 																					  }
 																					: a
 																			)
 																		}))
-																		shiftFocus(item_title_component_id)
+																		shiftFocus(item_status_component_id)
 																	}}
 																	value={{
 																		value: item.item_uuid || "",
@@ -1598,22 +1599,15 @@ export function OrderDetails({
 																	setOrderData(prev => ({
 																		...prev,
 																		item_details: prev.item_details?.map(a =>
-																			a.uuid === item.uuid
-																				? {
-																						...a,
-																						status: e.value
-																				  }
-																				: a
+																			a.uuid === item.uuid ? { ...a, status: e.value } : a
 																		)
 																	}))
 																	shiftFocus(item_status_component_id)
 																}}
-																value={
-																	item.status || +item.status === 0 ? default_status.find(a => +a.value === +item.status) : ""
-																}
-																autoFocus={
-																	focusedInputId === item_status_component_id || (i === 0 && item.default && focusedInputId === 0)
-																}
+																value={+item.status >= 0 ? default_status.find(a => +a.value === +item.status) : 0}
+																// autoFocus={
+																// 	focusedInputId === item_status_component_id || (i === 0 && item.default && focusedInputId === 0)
+																// }
 																openMenuOnFocus={true}
 																menuPosition="fixed"
 																menuPlacement="auto"
@@ -3043,11 +3037,11 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 														maxLength={42}
 														onWheel={e => e.preventDefault()}
 														autocomplete="off"
-														/>
+													/>
 												</label>
 											) : (
 												""
-												)}
+											)}
 										</div>
 									))}
 									<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
@@ -3062,13 +3056,13 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 												disabled={order?.order_type === "E"}
 												style={
 													!credit_allowed === "Y"
-													? {
-														width: "90px",
-														backgroundColor: "light",
-														fontSize: "12px",
-														color: "#fff"
-													}
-													: { width: "80px" }
+														? {
+																width: "90px",
+																backgroundColor: "light",
+																fontSize: "12px",
+																color: "#fff"
+														  }
+														: { width: "80px" }
 												}
 												onContextMenu={e => {
 													e.preventDefault()
@@ -3087,7 +3081,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 												maxLength={42}
 												onWheel={e => e.preventDefault()}
 												autocomplete="off"
-												/>
+											/>
 											{/* {popupInfo.conversion || 0} */}
 										</label>
 										{outstanding?.amount ? (
@@ -3111,7 +3105,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, order,
 													}
 													maxLength={42}
 													onWheel={e => e.preventDefault()}
-												autocomplete="off"
+													autocomplete="off"
 												/>
 												{/* {popupInfo.conversion || 0} */}
 											</label>

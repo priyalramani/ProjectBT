@@ -365,12 +365,12 @@ const SelectedCounterOrder = () => {
 										?.sort((a, b) => a.sort_order - b.sort_order)
 										?.map(
 											category =>
-												items
-													.filter(a => a.category_uuid === category.category_uuid)
-													?.filter(
-														a =>
-															!filterItemTitle || a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())
-													)?.length > 0 && (
+												items?.filter(
+													a =>
+														(!filterItemTitle ||
+															a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())) &&
+														a.category_uuid === category.category_uuid
+												)?.length > 0 && (
 													<div
 														id={!cartPage ? category?.category_uuid : ""}
 														key={category?.category_uuid}
@@ -378,16 +378,14 @@ const SelectedCounterOrder = () => {
 														className="categoryItemMap"
 													>
 														<h1 className="categoryHeadline">{category?.category_title}</h1>
-
 														{items
 															?.filter(
 																a =>
-																	!filterItemTitle ||
-																	a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())
+																	(!filterItemTitle ||
+																		a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())) &&
+																	a.category_uuid === category.category_uuid
 															)
 															?.sort((a, b) => a.sort_order - b.sort_order)
-
-															.filter(a => a.category_uuid === category.category_uuid)
 															?.map(item => {
 																return (
 																	<div
@@ -439,7 +437,6 @@ const SelectedCounterOrder = () => {
 																	>
 																		<div className="menuItemDetails">
 																			<h1 className="item-name">{item?.item_title}</h1>
-
 																			<div
 																				className="item-mode flex"
 																				style={{
@@ -613,6 +610,7 @@ const SelectedCounterOrder = () => {
 						</div>
 						{confirmItemsPopup ? (
 							<div
+								id="items-popup"
 								style={{
 									backgroundColor: "rgba(128, 128, 128,0.8)",
 									zIndex: 9999999,
@@ -627,7 +625,7 @@ const SelectedCounterOrder = () => {
 								<button
 									onClick={() => setConfirmItemPopup(false)}
 									className="closeButton"
-									style={{ top: "10vh", left: "40%", zIndex: "999999" }}
+									style={{ top: "10vh", left: "50%", translate: "-50%", zIndex: "999999" }}
 								>
 									x
 								</button>
@@ -791,8 +789,7 @@ const SelectedCounterOrder = () => {
 										padding: "3px",
 										opacity: enable ? 1 : 0.5,
 										position: "fixed",
-										zIndex: "9999999",
-										bottom: "1rem"
+										zIndex: "9999999"
 									}}
 									disabled={!enable}
 								>
@@ -808,7 +805,7 @@ const SelectedCounterOrder = () => {
 			<div
 				className="allcategoryList"
 				style={{
-					bottom: itemsCategory?.length > 0 ? "0.5rem" : "1rem"
+					bottom: itemsCategory?.length > 0 ? "0" : "1rem"
 				}}
 			>
 				<div className={`menulist`} style={{ maxWidth: "500px" }}>
@@ -875,7 +872,7 @@ const SelectedCounterOrder = () => {
 							<button
 								type="button"
 								className="cartBtn"
-								style={{ padding: "3px", position: "relative", marginTop: "20px" }}
+								style={{ padding: "3px", position: "relative", width: "100%" }}
 								onClick={async () => {
 									setLoading(true)
 									const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1)
@@ -937,7 +934,7 @@ const SelectedCounterOrder = () => {
 								setCartPage(true)
 							}}
 							className="cartBtn"
-							style={{ padding: "3px", position: "relative", marginTop: "20px" }}
+							style={{ padding: "3px", position: "relative", width: "100%" }}
 						>
 							Cart
 						</button>

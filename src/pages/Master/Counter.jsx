@@ -134,15 +134,13 @@ const Counter = () => {
 								(filterMobile?.length < 3 || a.mobile?.find(_i => _i.mobile?.includes(filterMobile)))
 						)
 						.filter(_counter => {
-							console.log({ counterFilter })
 							if (+counterFilter === 0) return true
-							const isNumberAvailable = _counter?.mobile?.some(i => i?.mobile?.length === 10)
-
+							const isNumberAvailable = _counter?.mobile?.find(i => i?.mobile?.length === 10)
 							if (counterFilter === "num") return !isNumberAvailable
 							else
 								return (
 									isNumberAvailable &&
-									!_counter?.mobile?.some(i => i.label?.some(_i => _i.type === counterFilter && !+_i.varification))
+									!_counter?.mobile?.some(i => i.lable?.some(_i => _i.type === counterFilter && +_i.varification))
 								)
 						})
 				: [],
@@ -188,6 +186,8 @@ const Counter = () => {
 		FileSaver.saveAs(data, "counters" + fileExtension)
 		setSelectedRoutes([])
 	}
+
+	console.log({ filterCounter })
 
 	const onChangeHandler = e => {
 		const params = {}

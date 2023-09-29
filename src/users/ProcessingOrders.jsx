@@ -43,9 +43,7 @@ const ProcessingOrders = () => {
 	const [playerSpeed, setPlayerSpeed] = useState(1)
 	const [orderCreated, setOrderCreated] = useState(false)
 	const [oneTimeState, setOneTimeState] = useState(false)
-	const [barcodeFilter, setBarcodeFilter] = useState("")
 	const [printInvicePopup, setprintInvicePopup] = useState("")
-	const [barcodeFilterState, setBarcodeFilterState] = useState("")
 	const [tempQuantity, setTempQuantity] = useState([])
 	const [users, setUsers] = useState([])
 	const [warningPopup, setWarningPopUp] = useState(false)
@@ -397,17 +395,17 @@ const ProcessingOrders = () => {
 		)
 	}
 
-	useEffect(() => {
-		if (selectedOrder)
-			setBarcodeFilterState(
-				items?.map(a => ({
-					item_uuid: a.item_uuid,
-					one_pack: a.one_pack,
-					qty: 0,
-					barcode: items.find(b => a.item_uuid === b.item_uuid)?.barcode
-				}))
-			)
-	}, [selectedOrder])
+	// useEffect(() => {
+	// 	if (selectedOrder)
+	// 		setBarcodeFilterState(
+	// 			items?.map(a => ({
+	// 				item_uuid: a.item_uuid,
+	// 				one_pack: a.one_pack,
+	// 				qty: 0,
+	// 				barcode: items.find(b => a.item_uuid === b.item_uuid)?.barcode
+	// 			}))
+	// 		)
+	// }, [selectedOrder])
 
 	const checkingQuantity = () => {
 		let orderData = orders
@@ -1228,74 +1226,72 @@ const ProcessingOrders = () => {
 												)}
 											</tr>
 										))
-								: orders
-										?.sort((a, b) => a.sort_order - b.sort_order)
-										?.map((item, i) => (
-											<tr
-												key={Math.random()}
-												className={item.priority ? "blink" : ""}
-												style={{
-													height: "30px",
-													backgroundColor: +item.opened_by || item.opened_by !== "0" ? "yellow" : "#fff"
-												}}
-												onClick={e => {
-													e.stopPropagation()
-													setChecking(false)
-													setWarningPopUp(item)
-													setNotesPopup(true)
-												}}
-											>
-												<td>{i + 1}</td>
-												<td colSpan={2}>{item.counter_title}</td>
-												<td colSpan={2}>{item?.route_title}</td>
-												<td colSpan={2}>
-													{item?.item_details?.filter(a => +a.status === 1)?.length}/
-													{item?.item_details
-														.filter(a => !Location.pathname.includes("delivery") || +a.status !== 3)
-														.filter(a => !Location.pathname.includes("checking") || +a.status === 1)?.length || 0}
-												</td>
-												<td>{item.order_grandtotal}</td>
-												<td>
-													{(item?.item_details?.length > 1
-														? item?.item_details?.map(a => +a.b || 0)?.reduce((a, b) => a + b)
-														: item?.item_details[0]?.b || 0) +
-														":" +
-														(item?.item_details?.length > 1
-															? item?.item_details?.map(a => +a.p || 0)?.reduce((a, b) => a + b)
-															: item?.item_details[0]?.p || 0)}
-												</td>
-												<td>{users.find(a => a.user_uuid === item.opened_by)?.user_title || "-"}</td>
-												<td>
-													{item?.mobile ? (
-														<Phone
-															className="user_Back_icon"
-															style={{ color: "#4ac959" }}
-															onClick={e => {
-																e.stopPropagation()
-																if (item.mobile.length === 1) {
-																	window.location.assign("tel:" + item?.mobile[0]?.mobile)
-																} else {
-																	setPhonePopup(item.mobile)
-																}
-															}}
-														/>
-													) : (
-														"-"
-													)}
-												</td>
-												{!Location.pathname.includes("checking") ? (
-													<td>
-														<DeleteOutlineIcon
-															onClick={() => {
-																setDeletePopup(item)
-															}}
-														/>
-													</td>
+								: orders?.map((item, i) => (
+										<tr
+											key={Math.random()}
+											className={item.priority ? "blink" : ""}
+											style={{
+												height: "30px",
+												backgroundColor: +item.opened_by || item.opened_by !== "0" ? "yellow" : "#fff"
+											}}
+											onClick={e => {
+												e.stopPropagation()
+												setChecking(false)
+												setWarningPopUp(item)
+												setNotesPopup(true)
+											}}
+										>
+											<td>{i + 1}</td>
+											<td colSpan={2}>{item.counter_title}</td>
+											<td colSpan={2}>{item?.route_title}</td>
+											<td colSpan={2}>
+												{item?.item_details?.filter(a => +a.status === 1)?.length}/
+												{item?.item_details
+													.filter(a => !Location.pathname.includes("delivery") || +a.status !== 3)
+													.filter(a => !Location.pathname.includes("checking") || +a.status === 1)?.length || 0}
+											</td>
+											<td>{item.order_grandtotal}</td>
+											<td>
+												{(item?.item_details?.length > 1
+													? item?.item_details?.map(a => +a.b || 0)?.reduce((a, b) => a + b)
+													: item?.item_details[0]?.b || 0) +
+													":" +
+													(item?.item_details?.length > 1
+														? item?.item_details?.map(a => +a.p || 0)?.reduce((a, b) => a + b)
+														: item?.item_details[0]?.p || 0)}
+											</td>
+											<td>{users.find(a => a.user_uuid === item.opened_by)?.user_title || "-"}</td>
+											<td>
+												{item?.mobile ? (
+													<Phone
+														className="user_Back_icon"
+														style={{ color: "#4ac959" }}
+														onClick={e => {
+															e.stopPropagation()
+															if (item.mobile.length === 1) {
+																window.location.assign("tel:" + item?.mobile[0]?.mobile)
+															} else {
+																setPhonePopup(item.mobile)
+															}
+														}}
+													/>
 												) : (
-													""
+													"-"
 												)}
-											</tr>
-										))}
+											</td>
+											{!Location.pathname.includes("checking") ? (
+												<td>
+													<DeleteOutlineIcon
+														onClick={() => {
+															setDeletePopup(item)
+														}}
+													/>
+												</td>
+											) : (
+												""
+											)}
+										</tr>
+								  ))}
 							<tr>
 								<td style={{ height: "150px", backgroundColor: "transparent" }}></td>
 							</tr>

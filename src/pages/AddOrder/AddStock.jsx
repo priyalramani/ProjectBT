@@ -12,6 +12,7 @@ import Select from "react-select"
 
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
 import { useReactToPrint } from "react-to-print"
+import { AiFillCaretDown } from "react-icons/ai"
 let time = new Date()
 
 const CovertedQty = (qty, conversion) => {
@@ -804,18 +805,21 @@ export function SuggestionsPopup({ onSave, warehouse, itemsData, order, warehous
 	)
 }
 function Table({ itemsDetails, warehouse_uuid, selectedOrders, setSelectedOrders, warehouseData, order, category }) {
-	console.log(selectedOrders)
+	const [categoryVisibility, setCategoryVisibility] = useState({})
 	return (
 		<table className="user-table" style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
 			<thead>
 				<tr>
 					<th>S.N</th>
 					<th colSpan={2}>Item Title</th>
-					<th colSpan={2}>MRP</th>
+					<th>MRP</th>
 					<th colSpan={2}>Suggestion Box</th>
 					<th colSpan={2}>
 						{warehouseData.find(a => a.warehouse_uuid === (order?.from_warehouse || order?.to_warehouse))?.warehouse_title}
 					</th>
+					{/* <th></th>
+					<th colSpan={3}>Category</th>
+					<th></th> */}
 				</tr>
 			</thead>
 			<tbody className="tbody">
@@ -824,9 +828,8 @@ function Table({ itemsDetails, warehouse_uuid, selectedOrders, setSelectedOrders
 					.filter(a => itemsDetails?.filter(b => a.category_uuid === b.category_uuid).length)
 					.map(a => (
 						<>
-							<tr style={{ pageBreakAfter: "auto", width: "100%" }}>
+							<tr onClick={() => setCategoryVisibility(i => ({ ...i, [a.category_uuid]: !i[a.category_uuid] }))}>
 								<td
-									colSpan={10}
 									onClick={e => {
 										e.stopPropagation()
 										setSelectedOrders(prev =>
@@ -849,66 +852,74 @@ function Table({ itemsDetails, warehouse_uuid, selectedOrders, setSelectedOrders
 											).length === itemsDetails?.filter(b => a.category_uuid === b.category_uuid).length
 										}
 									/>
-									<span style={{ marginLeft: "20px", fontSize: "1.2rem" }}>
+								</td>
+								<td colSpan={5}>
+									<span>
 										<b>{a.category_title}</b>
 									</span>
 								</td>
+								<td>
+									<AiFillCaretDown style={{ display: "block", margin: "auto" }} />
+								</td>
 							</tr>
-							{itemsDetails
-								?.filter(b => a.category_uuid === b.category_uuid)
-								?.sort((a, b) => +a.item_uuid - +b.item_uuid)
-								?.map((item, i, array) => {
-									let qty = +item.stock.find(a => a.warehouse_uuid === warehouse_uuid)?.qty
-									return (
-										<tr
-											key={Math.random()}
-											style={{ height: "30px" }}
-											onClick={e => {
-												e.stopPropagation()
-												setSelectedOrders(prev =>
-													prev.filter(a => a.item_uuid === item.item_uuid).length
-														? prev.filter(a => a.item_uuid !== item.item_uuid)
-														: [...(prev || []), item]
+							<>
+								{categoryVisibility[[a.category_uuid]]
+									? itemsDetails
+											?.filter(b => a.category_uuid === b.category_uuid)
+											?.sort((a, b) => +a.item_uuid - +b.item_uuid)
+											?.map((item, i, array) => {
+												let qty = +item.stock.find(a => a.warehouse_uuid === warehouse_uuid)?.qty
+												return (
+													<tr
+														key={Math.random()}
+														style={{ height: "30px" }}
+														onClick={e => {
+															e.stopPropagation()
+															setSelectedOrders(prev =>
+																prev.filter(a => a.item_uuid === item.item_uuid).length
+																	? prev.filter(a => a.item_uuid !== item.item_uuid)
+																	: [...(prev || []), item]
+															)
+														}}
+													>
+														<td className="flex" style={{ justifyContent: "flex-end", gap: "10px" }}>
+															<input
+																type="checkbox"
+																checked={selectedOrders.find(a => a.item_uuid === item.item_uuid)}
+																style={{ transform: "scale(1.2)" }}
+															/>
+															<span>{i + 1}</span>
+														</td>
+														<td colSpan={2}>{item.item_title || ""}</td>
+														<td>{item.mrp || ""}</td>
+														<td>{+item.b ? item.b : +item.b === 0 ? 0 : ""}</td>
+														{order.from_warehouse ? (
+															<td
+																style={{
+																	color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red"
+																}}
+															>
+																{CovertedQty(
+																	+item?.stock?.find(a => a.warehouse_uuid === order.from_warehouse)?.qty || 0,
+																	+item.conversion || 1
+																) || ""}
+															</td>
+														) : (
+															""
+														)}
+														<td
+															colSpan={2}
+															style={{
+																color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red"
+															}}
+														>
+															{CovertedQty(qty || 0, +item.conversion || 1) || ""}
+														</td>
+													</tr>
 												)
-											}}
-										>
-											<td className="flex" style={{ justifyContent: "space-between" }}>
-												<input
-													type="checkbox"
-													checked={selectedOrders.find(a => a.item_uuid === item.item_uuid)}
-													style={{ transform: "scale(1.2)" }}
-												/>
-												<span>{i + 1}</span>
-											</td>
-											<td colSpan={2}>{item.item_title || ""}</td>
-											<td colSpan={2}>{item.mrp || ""}</td>
-											<td colSpan={2}>{+item.b ? item.b : +item.b === 0 ? 0 : ""}</td>
-											{order.from_warehouse ? (
-												<td
-													colSpan={2}
-													style={{
-														color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red"
-													}}
-												>
-													{CovertedQty(
-														+item?.stock?.find(a => a.warehouse_uuid === order.from_warehouse)?.qty || 0,
-														+item.conversion || 1
-													) || ""}
-												</td>
-											) : (
-												""
-											)}
-											<td
-												colSpan={2}
-												style={{
-													color: qty === 0 ? "" : qty > 0 ? "#4ac959" : "red"
-												}}
-											>
-												{CovertedQty(qty || 0, +item.conversion || 1) || ""}
-											</td>
-										</tr>
-									)
-								})}
+											})
+									: ""}
+							</>
 						</>
 					))}
 			</tbody>
