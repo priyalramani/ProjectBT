@@ -17,7 +17,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
 import HomeIcon from "@mui/icons-material/Home"
 import { ArrowDropDown } from "@mui/icons-material"
 import DiliveryReplaceMent from "../components/DiliveryReplaceMent"
-
+const selected_order_label = "SELECTED_PROCESSING_ORDER"
 const ProcessingOrders = () => {
 	const [BarcodeMessage, setBarcodeMessage] = useState([])
 	const [minMaxPopup, setMinMaxPopup] = useState()
@@ -171,6 +171,21 @@ const ProcessingOrders = () => {
 			}
 		}
 	}, [selectedOrder])
+
+	useEffect(() => {
+		if (!selectedOrder || !orders?.length) return
+		const elem__index = +sessionStorage.getItem(selected_order_label)
+		if (!elem__index) return
+		const order_uuid = orders?.[elem__index]?.order_uuid
+		if (!order_uuid) return
+		const ivl_id = setInterval(() => {
+			const elem = document.getElementById(order_uuid + selected_order_label)
+			if (!elem) return
+			clearInterval(ivl_id)
+			elem.scrollIntoView()
+			console.log(`Interval Running`)
+		}, 10)
+	}, [selectedOrder, orders])
 
 	const postActivity = async (others = {}) => {
 		let time = new Date()
@@ -1121,7 +1136,6 @@ const ProcessingOrders = () => {
 																				return {
 																					...a,
 																					b: +(a.b || 0) + parseInt((+a?.one_pack || 1) / +a.conversion),
-
 																					p: ((a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion
 																				}
 																			} else {
@@ -1228,7 +1242,8 @@ const ProcessingOrders = () => {
 										))
 								: orders?.map((item, i) => (
 										<tr
-											key={Math.random()}
+											key={item.order_uuid + selected_order_label}
+											id={item.order_uuid + selected_order_label}
 											className={item.priority ? "blink" : ""}
 											style={{
 												height: "30px",
@@ -1239,6 +1254,7 @@ const ProcessingOrders = () => {
 												setChecking(false)
 												setWarningPopUp(item)
 												setNotesPopup(true)
+												if (i) sessionStorage.setItem(selected_order_label, i - 1)
 											}}
 										>
 											<td>{i + 1}</td>
@@ -1305,10 +1321,12 @@ const ProcessingOrders = () => {
 					tempQuantity={tempQuantity}
 					onClose={() => setPopupForm("")}
 					onSave={async data => {
+						setSelectedOrder(prev => ({
+							...prev,
+							...data
+						}))
 						setPopupForm(false)
-						console.log(data)
 						if (data) {
-							// setUpdate((prev) => !prev);
 							let billingData = await Billing({
 								order_uuid: data?.order_uuid,
 								invoice_number: `${data?.order_type}${data?.invoice_number}`,
@@ -1318,7 +1336,6 @@ const ProcessingOrders = () => {
 									return {
 										...itemData,
 										...a
-										// price: itemData?.price || 0,
 									}
 								})
 							})
@@ -1334,7 +1351,6 @@ const ProcessingOrders = () => {
 					setOrder={setSelectedOrder}
 					popupInfo={popupForm}
 					order={selectedOrder}
-					deliveryPage={Location.pathname.includes("delivery")}
 				/>
 			) : (
 				""
@@ -3149,17 +3165,7 @@ function OpenWarningMessage({ onSave, data, users, onClose }) {
 		<div />
 	)
 }
-function NewUserForm({
-	onSave,
-	popupInfo,
-	tempQuantity,
-	setTempQuantity,
-	order,
-
-	deliveryPage,
-	items,
-	onClose
-}) {
+function NewUserForm({ onSave, popupInfo, tempQuantity, setTempQuantity, order, items, onClose }) {
 	const [data, setdata] = useState({})
 	useEffect(() => {
 		let data = window.location.pathname.includes("checking")

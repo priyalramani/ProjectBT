@@ -117,10 +117,13 @@ const CounterReport = () => {
 					table_data: counters,
 					total_values: total_values,
 					companies: companies?.filter(i => selectedCompanies.includes(i.company_uuid)),
-					routes: selectedRoutes.reduce((obj, i) => ({
-						...obj,
-						[i]: routes?.find(_i => _i.route_uuid === i)?.route_title
-					}))
+					routes: selectedRoutes.reduce(
+						(obj, i) => ({
+							...obj,
+							[i]: routes?.find(_i => _i.route_uuid === i)?.route_title
+						}),
+						{}
+					)
 				})
 		}
 	}

@@ -168,6 +168,7 @@ const CompleteOrder = () => {
 					}}
 					order_uuid={popupOrder.order_uuid}
 					orderStatus="edit"
+					counter={counter}
 				/>
 			) : (
 				""

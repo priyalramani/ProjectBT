@@ -44,7 +44,6 @@ const Processing = () => {
 						paddingRight: "5px",
 					}}>
 					<IoArrowBackOutline className="user_Back_icon" onClick={() => Navigate("/users")} />
-
 					<h1
 						style={{
 							width: "80%",
