@@ -138,7 +138,7 @@ const ProcessingOrders = () => {
 			}
 		})
 		if (response.data.success) {
-			const data = response.data.result.sort((a, b) => a.time_1 - b.time_1).sort((a, b) => a.priority - b.priority)
+			const data = response.data.result.sort((a, b) => a.time_1 - b.time_1).sort((a, b) => (+b.priority || 0) - +a.priority)
 			let sortedOrders = data.reduce(
 				(result, order) =>
 					!result.some(i => i.counter_uuid === order.counter_uuid)
@@ -147,6 +147,8 @@ const ProcessingOrders = () => {
 
 				[]
 			)
+
+			console.log({ sortedOrders })
 			setOrders(sortedOrders)
 			setLoading(false)
 		}
@@ -182,9 +184,9 @@ const ProcessingOrders = () => {
 			const elem = document.getElementById(order_uuid + selected_order_label)
 			if (!elem) return
 			clearInterval(ivl_id)
-			elem.scrollIntoView()
+			elem.scrollIntoViewIfNeeded(true)
 			console.log(`Interval Running`)
-		}, 10)
+		}, 1000)
 	}, [selectedOrder, orders])
 
 	const postActivity = async (others = {}) => {
@@ -641,7 +643,7 @@ const ProcessingOrders = () => {
 
 	return (
 		<div>
-			<nav className="user_nav nav_styling" style={{ top: "0", padding: "10px", maxWidth: "500px" }}>
+			<nav className="user_nav nav_styling" style={{ top: "0px", padding: "10px", maxWidth: "500px" }}>
 				<div
 					className="user_menubar flex"
 					style={{
@@ -1244,7 +1246,7 @@ const ProcessingOrders = () => {
 										<tr
 											key={item.order_uuid + selected_order_label}
 											id={item.order_uuid + selected_order_label}
-											className={item.priority ? "blink" : ""}
+											className={+item.priority ? "blink" : ""}
 											style={{
 												height: "30px",
 												backgroundColor: +item.opened_by || item.opened_by !== "0" ? "yellow" : "#fff"

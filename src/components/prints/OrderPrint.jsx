@@ -491,11 +491,11 @@ const OrderPrint = ({
 							>
 								{allOrderItems?.length > 1
 									? allOrderItems?.map(a => +a.b || 0).reduce((a, b) => a + b)
-									: allOrderItems[0]?.b || 0}
+									: allOrderItems?.[0]?.b || 0}
 								:
 								{allOrderItems?.length > 1
 									? allOrderItems?.map(a => +a.p || 0).reduce((a, b) => a + b)
-									: allOrderItems[0]?.p || 0}
+									: allOrderItems?.[0]?.p || 0}
 							</th>
 							<th
 								style={{
@@ -507,7 +507,7 @@ const OrderPrint = ({
 							>
 								{allOrderItems?.length > 1
 									? allOrderItems?.map(a => +a.free || 0).reduce((a, b) => a + b)
-									: allOrderItems[0]?.free || 0}
+									: allOrderItems?.[0]?.free || 0}
 							</th>
 							<td
 								style={{
@@ -586,7 +586,7 @@ const OrderPrint = ({
 								{(
 									(allOrderItems?.length > 1
 										? allOrderItems?.map(a => +a.item_total || 0).reduce((a, b) => a + b)
-										: +allOrderItems[0]?.item_total) || 0
+										: +allOrderItems?.[0]?.item_total) || 0
 								).toFixed(2)}
 							</th>
 						</tr>
