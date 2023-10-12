@@ -566,30 +566,33 @@ export function OrderDetails({
 	}
 
 	const updateOrder = async (param = {}) => {
-		const { data = messagePopup, sendPaymentReminder } = param
 		setWaiting(true)
-		console.log({ messagePopup })
-		const response = await axios({
-			method: "put",
-			url: "/orders/putOrders",
-			data: [
-				{
-					...data,
-					item_details: data.item_details?.map(i => ({ ...i, price: +(+i.price).toFixed(3) }))
+		try {
+			const { data = messagePopup, sendPaymentReminder } = param
+			const response = await axios({
+				method: "put",
+				url: "/orders/putOrders",
+				data: [
+					{
+						...data,
+						item_details: data.item_details?.map(i => ({ ...i, price: +(+i.price).toFixed(3) }))
+					}
+				],
+				headers: {
+					"Content-Type": "application/json"
 				}
-			],
-			headers: {
-				"Content-Type": "application/json"
+			})
+			if (response.data.success) {
+				getOrder(order_uuid, true)
+				setEditOrder(false)
+				if (sendPaymentReminder) sendPaymentReminders([orderData?.counter_uuid])
 			}
-		})
-		if (response.data.success) {
-			getOrder(order_uuid, true)
-			setEditOrder(false)
-			if (sendPaymentReminder) sendPaymentReminders([orderData?.counter_uuid])
-		}
-		setWaiting(false)
-		if (!completeOrder) {
-			setMessagePopup(false)
+			setWaiting(false)
+			if (!completeOrder) {
+				setMessagePopup(false)
+			}
+		} catch (err) {
+			setWaiting(false)
 		}
 	}
 
@@ -745,17 +748,10 @@ export function OrderDetails({
 		if (methodType === "complete") {
 			setComplete(true)
 		}
-		if (
-			warehouse_uuid &&
-			// +warehouse_uuid !== 0 &&
-			warehouse_uuid !== orderData.warehouse_uuid
-		) {
-			// console.log("data", orderData.warehouse_uuid);
-
+		if (warehouse_uuid && warehouse_uuid !== orderData.warehouse_uuid) {
 			if (!orderData.warehouse_uuid) {
 				updateWarehouse(warehouse_uuid, methodType)
 			} else {
-				//   setWarhousePopup(warehouse_uuid);
 				if (methodType === "complete" || complete) {
 					setDeliveryPopup(true)
 				} else {
