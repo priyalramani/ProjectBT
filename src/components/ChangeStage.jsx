@@ -24,126 +24,143 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 	const onSubmit = async (params = {}) => {
 		let { selectedData = orders, diliveredUser = "", reasons = {} } = params
 		setWaiting(true)
-		console.log(selectedData)
-		let user_uuid = localStorage.getItem("user_uuid")
-		let time = new Date()
-		console.log(stage, data)
-		let status =
-			+data.stage === 0
-				? []
-				: stage === 1
-				? +data.stage === 2
-					? [{ stage: 2, time: time.getTime(), user_uuid }]
-					: +data.stage === 3
-					? [
-							{ stage: 2, time: time.getTime(), user_uuid },
-							{ stage: 3, time: time.getTime(), user_uuid }
-					  ]
-					: +data.stage === 4
-					? [
-							{ stage: 2, time: time.getTime(), user_uuid },
-							{ stage: 3, time: time.getTime(), user_uuid },
-							{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-							{ stage: 4, time: time.getTime(), user_uuid }
-					  ]
-					: [
-							{ stage: 2, time: time.getTime(), user_uuid },
-							{ stage: 3, time: time.getTime(), user_uuid },
-							{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-							{ stage: 4, time: time.getTime(), user_uuid },
-							{ stage: 5, time: time.getTime(), user_uuid }
-					  ]
-				: stage === 2
-				? +data.stage === 3
-					? [{ stage: 3, time: time.getTime(), user_uuid }]
-					: +data.stage === 4
-					? [
-							{ stage: 3, time: time.getTime(), user_uuid },
-							{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-							{ stage: 4, time: time.getTime(), user_uuid }
-					  ]
-					: [
-							{ stage: 3, time: time.getTime(), user_uuid },
-							{ stage: 4, time: time.getTime(), user_uuid },
-							{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-							{ stage: 5, time: time.getTime(), user_uuid }
-					  ]
-				: stage === 3
-				? +data.stage === 4
-					? [
-							{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-							{ stage: 4, time: time.getTime(), user_uuid }
-					  ]
-					: [
-							{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-							{ stage: 4, time: time.getTime(), user_uuid },
-							{ stage: 5, time: time.getTime(), user_uuid }
-					  ]
-				: [{ stage: 5, time: time.getTime(), user_uuid }]
+		try {
+			console.log(selectedData)
+			let user_uuid = localStorage.getItem("user_uuid")
+			let time = new Date()
+			console.log(stage, data)
+			let status =
+				+data.stage === 0
+					? []
+					: stage === 1
+					? +data.stage === 2
+						? [{ stage: 2, time: time.getTime(), user_uuid }]
+						: +data.stage === 3
+						? [
+								{ stage: 2, time: time.getTime(), user_uuid },
+								{ stage: 3, time: time.getTime(), user_uuid }
+						  ]
+						: +data.stage === 4
+						? [
+								{ stage: 2, time: time.getTime(), user_uuid },
+								{ stage: 3, time: time.getTime(), user_uuid },
+								{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+								{ stage: 4, time: time.getTime(), user_uuid }
+						  ]
+						: [
+								{ stage: 2, time: time.getTime(), user_uuid },
+								{ stage: 3, time: time.getTime(), user_uuid },
+								{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+								{ stage: 4, time: time.getTime(), user_uuid },
+								{ stage: 5, time: time.getTime(), user_uuid }
+						  ]
+					: stage === 2
+					? +data.stage === 3
+						? [{ stage: 3, time: time.getTime(), user_uuid }]
+						: +data.stage === 4
+						? [
+								{ stage: 3, time: time.getTime(), user_uuid },
+								{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+								{ stage: 4, time: time.getTime(), user_uuid }
+						  ]
+						: [
+								{ stage: 3, time: time.getTime(), user_uuid },
+								{ stage: 4, time: time.getTime(), user_uuid },
+								{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+								{ stage: 5, time: time.getTime(), user_uuid }
+						  ]
+					: stage === 3
+					? +data.stage === 4
+						? [
+								{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+								{ stage: 4, time: time.getTime(), user_uuid }
+						  ]
+						: [
+								{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+								{ stage: 4, time: time.getTime(), user_uuid },
+								{ stage: 5, time: time.getTime(), user_uuid }
+						  ]
+					: [{ stage: 5, time: time.getTime(), user_uuid }]
 
-		selectedData = selectedData?.map(a => ({
-			...a,
-			status: +data.stage === 0 ? a.status : [...a.status, ...status],
-			hold: +data.stage === 0 ? "Y" : a.hold || "N"
-		}))
+			selectedData = selectedData?.map(a => ({
+				...a,
+				status: +data.stage === 0 ? a.status : [...a.status, ...status],
+				hold: +data.stage === 0 ? "Y" : a.hold || "N"
+			}))
 
-		console.log(selectedData)
-		if (+data.stage === 5) {
-			let orderData = []
-			for (let obj of selectedData) {
-				obj = {
-					...obj,
+			console.log(selectedData)
+			if (+data.stage === 5) {
+				let orderData = []
+				for (let obj of selectedData) {
+					obj = {
+						...obj,
 
-					processing_canceled:
-						+stage === 2
-							? obj.processing_canceled?.length
-								? [...obj.processing_canceled, ...obj.item_details]
-								: obj.item_details
-							: obj.processing_canceled || [],
-					delivery_return:
-						+stage === 4
-							? obj.delivery_return?.length
-								? [...obj.delivery_return, ...obj.item_details]
-								: obj.item_details
-							: obj.delivery_return || [],
-					item_details: obj.item_details.map(a => ({
-						...a,
-						b: 0,
-						p: 0
-					}))
+						processing_canceled:
+							+stage === 2
+								? obj.processing_canceled?.length
+									? [...obj.processing_canceled, ...obj.item_details]
+									: obj.item_details
+								: obj.processing_canceled || [],
+						delivery_return:
+							+stage === 4
+								? obj.delivery_return?.length
+									? [...obj.delivery_return, ...obj.item_details]
+									: obj.item_details
+								: obj.delivery_return || [],
+						item_details: obj.item_details.map(a => ({
+							...a,
+							b: 0,
+							p: 0
+						}))
+					}
+
+					let billingData = await Billing({
+						order_uuid: obj?.order_uuid,
+						invoice_number: `${obj?.order_type}${obj?.invoice_number}`,
+						replacement: obj.replacement,
+						adjustment: obj.adjustment,
+						shortage: obj.shortage,
+						counter: counters.find(a => a.counter_uuid === obj.counter_uuid),
+						////add_discounts: true,
+						items: obj.item_details.map(a => {
+							let itemData = items.find(b => a.item_uuid === b.item_uuid)
+							return {
+								...itemData,
+								...a
+							}
+						})
+					})
+
+					const status = obj?.status?.map(_i =>
+						+_i?.stage === 5 ? { ..._i, cancellation_reason: reasons[obj?.order_uuid] } : _i
+					)
+
+					orderData.push({
+						...obj,
+						...billingData,
+						item_details: billingData.items,
+						status
+					})
 				}
 
-				let billingData = await Billing({
-					order_uuid: obj?.order_uuid,
-					invoice_number: `${obj?.order_type}${obj?.invoice_number}`,
-					replacement: obj.replacement,
-					adjustment: obj.adjustment,
-					shortage: obj.shortage,
-					counter: counters.find(a => a.counter_uuid === obj.counter_uuid),
-					////add_discounts: true,
-					items: obj.item_details.map(a => {
-						let itemData = items.find(b => a.item_uuid === b.item_uuid)
-						return {
-							...itemData,
-							...a
-						}
-					})
+				const response = await axios({
+					method: "put",
+					url: "/orders/putOrders",
+					data: orderData,
+					headers: {
+						"Content-Type": "application/json"
+					}
 				})
+				if (response.data.success) {
+					onClose()
+				}
 
-				const status = obj?.status?.map(_i => (+_i?.stage === 5 ? { ..._i, cancellation_reason: reasons[obj?.order_uuid] } : _i))
-
-				orderData.push({
-					...obj,
-					...billingData,
-					item_details: billingData.items,
-					status
-				})
+				return
 			}
-
 			const response = await axios({
 				method: "put",
 				url: "/orders/putOrders",
-				data: orderData,
+				data: selectedData,
 				headers: {
 					"Content-Type": "application/json"
 				}
@@ -151,19 +168,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 			if (response.data.success) {
 				onClose()
 			}
-
-			return
-		}
-		const response = await axios({
-			method: "put",
-			url: "/orders/putOrders",
-			data: selectedData,
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-		if (response.data.success) {
-			onClose()
+		} catch (error) {
+			console.log(error)
 		}
 		setWaiting(false)
 	}
