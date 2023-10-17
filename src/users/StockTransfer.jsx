@@ -383,8 +383,10 @@ function HoldPopup({ onSave, orders, itemsData, categories }) {
 																		colSpan={2}
 																		onClick={e => {
 																			e.stopPropagation()
-
-																			setPopup(item)
+																			setPopup({
+																				...item,
+																				conversion: +itemsData?.find(a => a?.item_uuid === item?.item_uuid)?.conversion || 1
+																			})
 																		}}
 																	>
 																		{item?.b || 0} : {(item?.p || 0) + (item?.free || 0)}
@@ -501,36 +503,32 @@ function HoldPopup({ onSave, orders, itemsData, categories }) {
 			) : (
 				""
 			)}
-			{popup ? (
-				<QuantityChanged popupInfo={items} order={popup} onSave={() => setPopup("")} setOrder={setItems} itemsData={itemsData} />
-			) : (
-				""
-			)}
+			{popup ? <QuantityChanged selectedItem={popup} setItems={setItems} close={() => setPopup("")} /> : ""}
 		</>
 	)
 }
-function QuantityChanged({ onSave, setOrder, order, itemsData }) {
+
+function QuantityChanged({ selectedItem, setItems, close }) {
 	const [data, setdata] = useState({})
 
 	useEffect(() => {
-		setdata(order)
-	}, [order])
+		setdata(selectedItem)
+	}, [selectedItem])
 
 	const submitHandler = async e => {
 		e.preventDefault()
-		let item = itemsData.find(a => a.item_uuid === data.item_uuid)
-		setOrder(prev =>
+		setItems(prev =>
 			prev.map(a =>
-				a.item_uuid === order.item_uuid
+				a.item_uuid === selectedItem?.item_uuid
 					? {
 							...a,
-							b: Math.floor(+data.b + +data.p / +item.conversion) || 0,
-							p: +data.p % +item.conversion
+							b: Math.floor((+data.b || 0) + (+data.p || 0) / selectedItem?.conversion) || 0,
+							p: (+data.p || 0) % selectedItem?.conversion
 					  }
 					: a
 			)
 		)
-		onSave()
+		close()
 	}
 
 	return (
@@ -594,7 +592,7 @@ function QuantityChanged({ onSave, setOrder, order, itemsData }) {
 							</button>
 						</form>
 					</div>
-					<button onClick={onSave} className="closeButton">
+					<button onClick={close} className="closeButton">
 						x
 					</button>
 				</div>
