@@ -5,7 +5,7 @@ import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import "./index.css"
 import { Billing, AutoAdd } from "../../Apis/functions"
-import { AddCircle as AddIcon, AirlineSeatLegroomNormalTwoTone } from "@mui/icons-material"
+import { AddCircle as AddIcon } from "@mui/icons-material"
 import { v4 as uuid } from "uuid"
 import Select from "react-select"
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
@@ -34,7 +34,7 @@ const CovertedQty = (qty, conversion) => {
 	return b + ":" + p
 }
 
-let getInititalValues = () => ({
+export let getInititalValues = () => ({
 	counter_uuid: "",
 	item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
 	priority: 0,

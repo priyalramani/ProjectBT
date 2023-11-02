@@ -595,3 +595,40 @@ label {
 .label-input-container span {
 	font-size: 0.8rem;
 }
+
+.nav-menu-search {
+	position: sticky;
+	top: 0;
+}
+
+.nav-menu-search > input {
+	border: none;
+	border-bottom: 1px solid darkgray;
+	padding: 14px;
+	width: 100%;
+	outline: none;
+}
+
+.recreate-order-btn {
+.refresh {
+	display: none;
+	animation: rotate 2s linear infinite;
+}
+&:disabled {
+	.refresh {
+		display: block;
+	}
+	.add {
+		display: none;
+	}
+}
+}
+
+@keyframes rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }

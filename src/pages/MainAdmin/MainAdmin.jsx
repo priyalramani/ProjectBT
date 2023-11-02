@@ -2445,12 +2445,6 @@ function SummaryPopup({ onSave, orders, itemsData, counter, category, company, s
 		return componentRef.current
 	}, [])
 
-	const handlePrint = useReactToPrint({
-		content: reactToPrintContent,
-		documentTitle: "Statement",
-		removeAfterPrint: true
-	})
-
 	useEffect(() => {
 		let orderStage = orders.map(a => ({
 			...a,

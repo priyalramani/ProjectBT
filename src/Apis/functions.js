@@ -206,7 +206,6 @@ export const Billing = async ({
 	adjustment = 0,
 	add_discounts,
 	creating_new,
-	order_uuid,
 	invoice_number,
 	edit_prices = []
 }) => {
@@ -282,7 +281,6 @@ export const Billing = async ({
 			}
 		}
 
-		// console.log(item);
 		item = {
 			...item,
 			item_desc_total:
@@ -311,12 +309,13 @@ export const Billing = async ({
 			item_desc_total: 0
 		}
 
-		//console.log("item", item);
 		newPriceItems.push(item)
 	}
+
+	console.log({newPriceItems})
 	let order_grandtotal = Math.round(
 		newPriceItems.length > 1
-			? newPriceItems.map(a => +a.item_total || 0).reduce((a, b) => a + b) - replacement - shortage - adjustment
+			? newPriceItems.map(a => +a.item_total || 0).reduce((a, b) => a + b, 0) - replacement - shortage - adjustment
 			: newPriceItems.length
 			? (newPriceItems.map(a => a.item_total)[0] || 0) - replacement - shortage - adjustment
 			: 0

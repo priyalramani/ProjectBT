@@ -16,14 +16,14 @@ import Context from "../../context/context"
 
 const GreenSwitch = styled(Switch)(({ theme }) => ({
 	"& .MuiSwitch-switchBase.Mui-checked": {
-		color: green[500],
+		"color": green[500],
 		"&:hover": {
-			backgroundColor: alpha(green[500], theme.palette.action.hoverOpacity),
-		},
+			backgroundColor: alpha(green[500], theme.palette.action.hoverOpacity)
+		}
 	},
 	"& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-		backgroundColor: green[500],
-	},
+		backgroundColor: green[500]
+	}
 }))
 const WhatsAppNotifications = () => {
 	return (
@@ -49,8 +49,8 @@ const Incetives = () => {
 			url: "/whatsapp_notifications/getWhatsapp_notifications",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setItemsData(response.data.result)
 	}
@@ -63,8 +63,8 @@ const Incetives = () => {
 			url: "/whatsapp_notifications/DeleteWhatsapp_notifications",
 			data,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log(response)
 		if (response.data.success) {
@@ -82,20 +82,16 @@ const Incetives = () => {
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "flex-end",
-						width: "100%",
-					}}>
+						width: "100%"
+					}}
+				>
 					<button className="theme-btn" onClick={() => setPopupForm(true)}>
 						Add
 					</button>
 				</div>
 			</div>
 			<div className="table-container-user item-sales-container">
-				<Table
-					itemsDetails={itemsData}
-					setPopupForm={setPopupForm}
-					setDeletePopup={setDeletePopup}
-					getItemsData={getItemsData}
-				/>
+				<Table itemsDetails={itemsData} setPopupForm={setPopupForm} setDeletePopup={setDeletePopup} getItemsData={getItemsData} />
 			</div>
 
 			{popupForm ? <IncentivePopup onSave={() => setPopupForm(false)} popupForm={popupForm} /> : ""}
@@ -107,8 +103,9 @@ const Incetives = () => {
 							style={{
 								height: "fit-content",
 								paddingTop: "40px",
-								width: "fit-content",
-							}}>
+								width: "fit-content"
+							}}
+						>
 							<div style={{ overflowY: "scroll" }}>Sure You Want to Delete</div>
 
 							<div
@@ -116,8 +113,9 @@ const Incetives = () => {
 									width: "100%",
 									display: "flex",
 									alignItems: "center",
-									justifyContent: "center",
-								}}>
+									justifyContent: "center"
+								}}
+							>
 								<button className="fieldEditButton" onClick={() => DeleteAutoAdd(deletePopup)}>
 									Confirm
 								</button>
@@ -150,8 +148,8 @@ function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }
 			url: "/whatsapp_notifications/UpdateWhatsapp_notifications",
 			data,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log(response)
 		if (response.data.success) {
@@ -162,13 +160,11 @@ function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }
 	const [counterListState, setCounterListState] = useState()
 
 	const getPendingPaymentCounters = async () => {
-		const response = await axios(
-			"/whatsapp_notifications/pending_payments_counters/" + localStorage.getItem("user_uuid")
-		)
+		const response = await axios("/whatsapp_notifications/pending_payments_counters/" + localStorage.getItem("user_uuid"))
 		if (response?.data?.length)
 			setCounterListState({
 				active: true,
-				counters: response?.data?.sort((a, b) => a.counter_title.localeCompare(b.counter_title)),
+				counters: response?.data?.sort((a, b) => a.counter_title.localeCompare(b.counter_title))
 			})
 	}
 
@@ -178,28 +174,9 @@ function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }
 				<thead>
 					<tr>
 						<th>S.N</th>
-						<th colSpan={2}>
-							<div className="t-head-element">
-								<span>Out For Delivery Notification</span>
-								<div className="sort-buttons-container">
-									<button
-										onClick={() => {
-											setItems("message")
-											setOrder("asc")
-										}}>
-										<ChevronUpIcon className="sort-up sort-button" />
-									</button>
-									<button
-										onClick={() => {
-											setItems("message")
-											setOrder("desc")
-										}}>
-										<ChevronDownIcon className="sort-down sort-button" />
-									</button>
-								</div>
-							</div>
-						</th>
-						<th></th>
+						<th colSpan={4}>Notification Title</th>
+						<th>Status</th>
+						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody className="tbody">
@@ -218,16 +195,16 @@ function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }
 							<tr key={item.item_uuid} style={{ height: "30px" }}>
 								<td>{i + 1}</td>
 								<td
-									colSpan={2}
+									colSpan={4}
 									onClick={e => {
 										e.stopPropagation()
 										setPopupForm({ type: "edit", data: item })
-									}}>
+									}}
+								>
 									{item.type}
 								</td>
-
 								<td>
-									<div className="flex" style={{ justifyContent: "space-between" }}>
+									<div style={{ display: "flex", justifyContent: "center" }}>
 										<GreenSwitch
 											checked={item?.status}
 											onChange={e => {
@@ -235,7 +212,10 @@ function Table({ itemsDetails = [], setPopupForm, setDeletePopup, getItemsData }
 												updateStatus({ ...item, status: item.status ? 0 : 1 })
 											}}
 										/>
-
+									</div>
+								</td>
+								<td>
+									<div style={{ display: "flex", justifyContent: "flex-end" }}>
 										{item?.notification_uuid === PAYMENT_REMINDER_NOTIFICATION ? (
 											<button className="theme-btn" onClick={getPendingPaymentCounters}>
 												Shoot Now
@@ -280,9 +260,7 @@ const CounterSelection = ({ counters, onclick, close }) => {
 								id="all-counteres"
 								type="checkbox"
 								checked={selection?.length === counters?.length}
-								onChange={() =>
-									setSelection(selection?.length === counters?.length ? [] : counters.map(_i => _i?.counter_uuid))
-								}
+								onChange={() => setSelection(selection?.length === counters?.length ? [] : counters.map(_i => _i?.counter_uuid))}
 							/>
 							<label htmlFor="all-counteres">Counter Title</label>
 						</div>
@@ -320,7 +298,7 @@ const CounterSelection = ({ counters, onclick, close }) => {
 function IncentivePopup({ onSave, popupForm }) {
 	const [objData, setObgData] = useState({
 		type: "",
-		message: [],
+		message: []
 	})
 	const [active, setActive] = useState("")
 
@@ -342,8 +320,8 @@ function IncentivePopup({ onSave, popupForm }) {
 				url: "/uploadImage",
 				data: form,
 				headers: {
-					"Content-Type": "multipart/form-data",
-				},
+					"Content-Type": "multipart/form-data"
+				}
 			})
 		}
 
@@ -353,8 +331,8 @@ function IncentivePopup({ onSave, popupForm }) {
 				url: "/whatsapp_notifications/UpdateWhatsapp_notifications",
 				data,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			console.log(response)
 			if (response.data.success) {
@@ -366,8 +344,8 @@ function IncentivePopup({ onSave, popupForm }) {
 				url: "/whatsapp_notifications/CreateWhatsapp_notifications",
 				data,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			console.log(response)
 			if (response.data.success) {
@@ -377,7 +355,6 @@ function IncentivePopup({ onSave, popupForm }) {
 	}
 	const addVariable = name => {
 		let element = document.getElementById(active)
-		console.log(element.selectionStart)
 		setObgData(prev => ({
 			...prev,
 			message: prev.message.map(a =>
@@ -387,10 +364,10 @@ function IncentivePopup({ onSave, popupForm }) {
 							text:
 								(a.text || "")?.slice(0, element.selectionStart) +
 								`{${name}}` +
-								(a.text || "")?.slice(element.selectionStart, (a.text || "").length),
+								(a.text || "")?.slice(element.selectionStart, (a.text || "").length)
 					  }
 					: a
-			),
+			)
 		}))
 	}
 	return (
@@ -401,14 +378,16 @@ function IncentivePopup({ onSave, popupForm }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll", maxHeight: "500px" }}>
 						<table
 							className="user-table whatsapp-notification-vars"
 							style={{
-								width: "fit-content",
-							}}>
+								width: "fit-content"
+							}}
+						>
 							<tbody>
 								<tr>
 									<td
@@ -417,8 +396,9 @@ function IncentivePopup({ onSave, popupForm }) {
 											display: "flex",
 											alignItems: "center",
 											justifyContent: "flex-start",
-											width: "400px",
-										}}>
+											width: "400px"
+										}}
+									>
 										<b style={{ width: "100px" }}>Type : </b>
 										<input
 											onWheel={e => e.target.blur()}
@@ -427,14 +407,14 @@ function IncentivePopup({ onSave, popupForm }) {
 											style={{
 												border: "none",
 												borderBottom: "2px solid black",
-												borderRadius: "0px",
+												borderRadius: "0px"
 											}}
 											placeholder=""
 											value={objData.type}
 											onChange={e =>
 												setObgData(prev => ({
 													...prev,
-													type: e.target.value,
+													type: e.target.value
 												}))
 											}
 										/>
@@ -450,8 +430,9 @@ function IncentivePopup({ onSave, popupForm }) {
 												display: "flex",
 												alignItems: "center",
 												justifyContent: "space-between",
-												width: "400px",
-											}}>
+												width: "400px"
+											}}
+										>
 											<input
 												onWheel={e => e.target.blur()}
 												type="checkbox"
@@ -460,14 +441,14 @@ function IncentivePopup({ onSave, popupForm }) {
 													border: "none",
 													borderBottom: "2px solid black",
 													borderRadius: "0px",
-													scale: "2",
+													scale: "2"
 												}}
 												placeholder=""
 												checked={objData.checkbox}
 												onChange={e =>
 													setObgData(prev => ({
 														...prev,
-														checkbox: e.target.checked ? 1 : 0,
+														checkbox: e.target.checked ? 1 : 0
 													}))
 												}
 											/>
@@ -483,18 +464,20 @@ function IncentivePopup({ onSave, popupForm }) {
 										style={{
 											display: "flex",
 											alignItems: "center",
-											justifyContent: "flex-start",
-										}}>
+											justifyContent: "flex-start"
+										}}
+									>
 										<b style={{ width: "100px" }}>Message : </b>
 										<span
 											onClick={e => {
 												console.log(objData)
 												setObgData(prev => ({
 													...prev,
-													message: [...(prev.message || []), { type: "text", uuid: uuid() }],
+													message: [...(prev.message || []), { type: "text", uuid: uuid() }]
 												}))
 											}}
-											className="fieldEditButton">
+											className="fieldEditButton"
+										>
 											<Add />
 										</span>
 									</td>
@@ -509,16 +492,18 @@ function IncentivePopup({ onSave, popupForm }) {
 													style={{
 														display: "flex",
 														alignItems: "center",
-														justifyContent: "flex-start",
-													}}>
+														justifyContent: "flex-start"
+													}}
+												>
 													{i + 1})
 													<span
 														onClick={() =>
 															setObgData(prev => ({
 																...prev,
-																message: prev.message.map(a => (a.uuid === item.uuid ? { ...a, delete: true } : a)),
+																message: prev.message.map(a => (a.uuid === item.uuid ? { ...a, delete: true } : a))
 															}))
-														}>
+														}
+													>
 														<DeleteOutline />
 													</span>
 													<select
@@ -527,11 +512,10 @@ function IncentivePopup({ onSave, popupForm }) {
 														onChange={e => {
 															setObgData(prev => ({
 																...prev,
-																message: prev.message.map(a =>
-																	a.uuid === item.uuid ? { ...a, type: e.target.value } : a
-																),
+																message: prev.message.map(a => (a.uuid === item.uuid ? { ...a, type: e.target.value } : a))
 															}))
-														}}>
+														}}
+													>
 														<option value="text">Text</option>
 														<option value="img">Image</option>
 													</select>
@@ -543,7 +527,7 @@ function IncentivePopup({ onSave, popupForm }) {
 																border: "none",
 																borderBottom: "2px solid black",
 																borderRadius: "0px",
-																height: "100px",
+																height: "100px"
 															}}
 															id={item.uuid}
 															onFocus={() => {
@@ -554,9 +538,7 @@ function IncentivePopup({ onSave, popupForm }) {
 															onChange={e => {
 																setObgData(prev => ({
 																	...prev,
-																	message: prev.message.map(a =>
-																		a.uuid === item.uuid ? { ...a, text: e.target.value } : a
-																	),
+																	message: prev.message.map(a => (a.uuid === item.uuid ? { ...a, text: e.target.value } : a))
 																}))
 															}}
 														/>
@@ -574,7 +556,7 @@ function IncentivePopup({ onSave, popupForm }) {
 																			...prev,
 																			message: prev.message.map(a =>
 																				a.uuid === item.uuid ? { ...a, img: e.target.files[0] } : a
-																			),
+																			)
 																		}))
 																	}
 																/>
@@ -583,7 +565,7 @@ function IncentivePopup({ onSave, popupForm }) {
 																	style={{
 																		width: "100px",
 																		height: "100px",
-																		objectFit: "contain",
+																		objectFit: "contain"
 																	}}
 																	src={server + "/" + item.uuid + ".png"}
 																	onError={({ currentTarget }) => {
@@ -600,16 +582,14 @@ function IncentivePopup({ onSave, popupForm }) {
 																style={{
 																	border: "none",
 																	borderBottom: "2px solid black",
-																	borderRadius: "0px",
+																	borderRadius: "0px"
 																}}
 																placeholder="caption"
 																value={item.caption}
 																onChange={e => {
 																	setObgData(prev => ({
 																		...prev,
-																		message: prev.message.map(a =>
-																			a.uuid === item.uuid ? { ...a, caption: e.target.value } : a
-																		),
+																		message: prev.message.map(a => (a.uuid === item.uuid ? { ...a, caption: e.target.value } : a))
 																	}))
 																}}
 															/>
@@ -625,14 +605,20 @@ function IncentivePopup({ onSave, popupForm }) {
 										style={{
 											display: "flex",
 											alignItems: "center",
-											justifyContent: "flex-start",
-										}}>
+											justifyContent: "flex-start"
+										}}
+									>
 										<button className="theme-btn" onClick={e => addVariable("counter_title")}>
 											Counter Title
 										</button>
 										<button className="theme-btn" onClick={e => addVariable("short_link")}>
 											Counter Link
 										</button>
+										{objData?.notification_uuid === "order_cancellation" && (
+											<button className="theme-btn" onClick={e => addVariable("reason")}>
+												Reason
+											</button>
+										)}
 									</td>
 								</tr>
 								<tr>
@@ -641,8 +627,9 @@ function IncentivePopup({ onSave, popupForm }) {
 										style={{
 											display: "flex",
 											alignItems: "center",
-											justifyContent: "flex-start",
-										}}>
+											justifyContent: "flex-start"
+										}}
+									>
 										<button className="theme-btn" onClick={e => addVariable("invoice_number")}>
 											Invoice Number
 										</button>
@@ -666,8 +653,9 @@ function IncentivePopup({ onSave, popupForm }) {
 							justifyContent: "center",
 							position: "absolute",
 							bottom: 0,
-							left: 0,
-						}}>
+							left: 0
+						}}
+					>
 						<button className="fieldEditButton" onClick={submitHandler}>
 							{popupForm?.type === "edit" ? "Update" : "Save"}
 						</button>

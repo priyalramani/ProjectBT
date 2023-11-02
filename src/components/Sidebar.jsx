@@ -3,10 +3,8 @@ import "./style.css"
 import NavLink from "./Navlink"
 import {
 	AutoAwesomeMosaicOutlined as MasterIcon,
-	AssessmentOutlined as ReportsIcon,
 	FlashOn as QuickAccessIcon,
-	SettingsOutlined as SettingsIcon,
-	UpgradeOutlined
+	SettingsOutlined as SettingsIcon
 } from "@mui/icons-material"
 import AssessmentIcon from "@mui/icons-material/Assessment"
 import AddIcon from "@mui/icons-material/Add"
@@ -53,36 +51,19 @@ let titleData = [
 	{ value: "admin", name: "DASHBOARD - Route" }
 ]
 const Sidebar = ({ setCollectionTags }) => {
-	const [loading, setLoading] = useState(false)
 	const { setcalculationPopup } = useContext(context)
-
 	const location = useLocation()
-	const updateMinLevel = async () => {
-		if (loading) return
-		setLoading(true)
-		const response = await axios({
-			method: "get",
-			url: "MinLevelUpdate",
-
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-		console.log(response.data.result.user_type)
-		setLoading(false)
-	}
 	document.title = useMemo(() => {
 		let title = titleData.find(a => location.pathname.includes(a.value))
-
 		return title.name || "BT"
 	}, [location])
+
 	return (
 		<div className="left-panel" style={{ position: "relative", zIndex: "9000000" }}>
 			<div className="nav" style={{ height: "100vh" }}>
 				<NavLink
 					title="New"
 					icon={<AddIcon sx={{ fontSize: 50 }} />}
-					// href="/admin/addOrder"
 					isActive={false}
 					menuList={[
 						{
@@ -124,10 +105,6 @@ const Sidebar = ({ setCollectionTags }) => {
 							name: "Companies",
 							link: "/admin/companies"
 						},
-						// {
-						//   name: "Test Counter",
-						//   link: "/admin/TestCounter",
-						// },
 						{
 							name: "Routes",
 							link: "/admin/routes"
@@ -183,6 +160,7 @@ const Sidebar = ({ setCollectionTags }) => {
 					title={"Report"}
 					icon={<AssessmentIcon sx={{ fontSize: 50 }} />}
 					isActive={false}
+					options={{ searchBar: true, sort: true }}
 					menuList={[
 						{
 							name: "User Activity",
@@ -307,23 +285,23 @@ const Sidebar = ({ setCollectionTags }) => {
 					]}
 				/>
 				{/* <div
-          className="nav_link_container"
-          onClick={updateMinLevel}
-          style={{ width: "100%" }}
-        >
-          <div className={`nav-link`}>
-            <>
-              <UpgradeOutlined sx={{ fontSize: 50 }} />
-              <p>
-                <span className={`nav_title`}>Update MinLevel</span>
-              </p>
-            </>
-             Submenu popup
-          </div>
-        </div>*/}
+						className="nav_link_container"
+						onClick={updateMinLevel}
+						style={{ width: "100%" }}
+						>
+						<div className={`nav-link`}>
+							<>
+							<UpgradeOutlined sx={{ fontSize: 50 }} />
+							<p>
+								<span className={`nav_title`}>Update MinLevel</span>
+							</p>
+							</>
+							Submenu popup
+						</div>
+        			</div>*/}
 			</div>
 			<div style={{ position: "absolute", bottom: "5px", left: "25px" }}>
-				<b>V: {Version}</b>
+				<b>v{Version}</b>
 			</div>
 		</div>
 	)

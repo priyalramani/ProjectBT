@@ -102,7 +102,8 @@
 	justify-content: center;
 }
 .bottomContent > button,
-.inputGroup > button {
+.inputGroup > button,
+.order-total {
 	background-color: var(--mainColor);
 	color: white;
 	border-radius: 5px;

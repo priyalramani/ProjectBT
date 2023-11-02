@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback, useMemo, useContext } from "react"
 import axios from "axios"
 import Select from "react-select"
-import { v4 as uuid } from "uuid"
+import { v4 as uuid, v4 } from "uuid"
 import { Billing, CONTROL_AUTO_REFRESH, jumpToNextIndex } from "../Apis/functions"
-import { Add, CheckCircle, ContentCopy, NoteAdd, WhatsApp } from "@mui/icons-material"
+import { Add, CheckCircle, ContentCopy, NoteAdd, Refresh, WhatsApp } from "@mui/icons-material"
 import { useReactToPrint } from "react-to-print"
 import { AddCircle as AddIcon, RemoveCircle } from "@mui/icons-material"
 
@@ -16,6 +16,7 @@ import { IoCheckmarkDoneOutline } from "react-icons/io5"
 import { FaSave } from "react-icons/fa"
 import Prompt from "./Prompt"
 import OrderPrintWrapper from "./OrderPrintWrapper"
+import { getInititalValues } from "../pages/AddOrder/AddOrder"
 
 const default_status = [
 	{ value: 0, label: "Preparing" },
@@ -875,29 +876,98 @@ export function OrderDetails({
 		}
 	}
 
-	const print_items_length = orderData?.order_type !== "E" ? 16 : 19
-	const getPrintData = () => {
-		const sourceArray = printData?.item_details
-		const arrayOfArrays = []
-		const l = print_items_length
+	// const print_items_length = orderData?.order_type !== "E" ? 16 : 19
+	// const getPrintData = () => {
+	// 	const sourceArray = printData?.item_details
+	// 	const arrayOfArrays = []
+	// 	const l = print_items_length
 
-		for (let i = 0; i < sourceArray.length; i += l) {
-			if (l - 4 < sourceArray.length - i && sourceArray.length - i < l) {
-				arrayOfArrays.push(sourceArray.slice(i, i + (l - 4)))
-				arrayOfArrays.push(sourceArray.slice(i + (l - 4), i + l))
-			} else {
-				arrayOfArrays.push(sourceArray.slice(i, i + l))
-			}
-			console.log(i, sourceArray.length, arrayOfArrays)
-		}
+	// 	for (let i = 0; i < sourceArray.length; i += l) {
+	// 		if (l - 4 < sourceArray.length - i && sourceArray.length - i < l) {
+	// 			arrayOfArrays.push(sourceArray.slice(i, i + (l - 4)))
+	// 			arrayOfArrays.push(sourceArray.slice(i + (l - 4), i + l))
+	// 		} else {
+	// 			arrayOfArrays.push(sourceArray.slice(i, i + l))
+	// 		}
+	// 		console.log(i, sourceArray.length, arrayOfArrays)
+	// 	}
 
-		const result = arrayOfArrays?.map(_i => ({ ...printData, item_details: _i }))
-		console.log({ arrayOfArrays, result })
-		return result
-	}
+	// 	const result = arrayOfArrays?.map(_i => ({ ...printData, item_details: _i }))
+	// 	console.log({ arrayOfArrays, result })
+	// 	return result
+	// }
 
 	const [additionalNumbers, setAdditionalNumbers] = useState({ count: 0, values: [] })
 	const [userSelection, setUserSelection] = useState([])
+
+	const recreateOrder = async e => {
+		;(e.currentTarget || e.target.parentElement).disabled = true
+		try {
+			const oldOrder = order
+			const { time_1, time_2 } = getInititalValues()
+			console.log({ oldOrder })
+
+			const newOrder = {
+				status: [
+					{
+						stage: "0",
+						time: Date.now(),
+						user_uuid: localStorage.getItem("user_uuid")
+					}
+				],
+				time_1: time_1 + Date.now(),
+				time_2: time_2 + Date.now(),
+				priority: oldOrder?.priority,
+				order_type: oldOrder?.order_type,
+				item_details: oldOrder?.item_details?.map(item => ({
+					...item,
+					b: item?.original_qty?.b,
+					p: item?.original_qty?.p
+				})),
+				order_grandtotal: 0,
+				order_uuid: v4(),
+				warehouse_uuid: oldOrder?.warehouse_uuid,
+				counter_uuid: oldOrder?.counter_uuid,
+				trip_uuid: oldOrder?.trip_uuid
+			}
+
+			let { items, ...billingData } = await Billing({
+				creating_new: 1,
+				order_uuid: newOrder?.order_uuid,
+				replacement: newOrder.replacement,
+				adjustment: newOrder.adjustment,
+				shortage: newOrder.shortage,
+				counter: counters.find(a => a.counter_uuid === newOrder.counter_uuid),
+				items: newOrder.item_details?.map(a => {
+					let _itemData = itemsData.find(b => a.item_uuid === b.item_uuid)
+					return {
+						..._itemData,
+						...a,
+						price: _itemData?.price || 0
+					}
+				})
+			})
+
+			const data = {
+				...newOrder,
+				...billingData,
+				item_details: items
+			}
+
+			const response = await axios.post(`/orders/postOrder/`, data)
+			if (response?.data?.result?.order_uuid)
+				setNotification({ success: true, message: `Order ${response?.data?.result?.invoice_number} recreated successfully!` })
+			else setNotification({ success: false, message: `Failed to recreate order!` })
+		} catch (error) {
+			console.error(error)
+			setNotification({ success: false, message: `Failed to recreate order!` })
+		}
+		setTimeout(() => setNotification(null), 5000)
+		if (e.target.type === "button") e.target.disabled = false
+		else (e.currentTarget || e.target.parentElement).disabled = false
+	}
+
+	const isCancelled = order?.status?.find(i => +i.stage === 5)
 
 	return deliveryPopup ? (
 		<DiliveryPopup
@@ -1058,13 +1128,15 @@ export function OrderDetails({
 										justifyContent: "space-between"
 									}}
 								>
-									<button
-										style={{ width: "fit-Content", backgroundColor: "red" }}
-										className="theme-btn"
-										onClick={() => setDeletePopup("Delete")}
-									>
-										Cancel Order
-									</button>
+									{!isCancelled && (
+										<button
+											style={{ width: "fit-Content", backgroundColor: "red" }}
+											className="theme-btn"
+											onClick={() => setDeletePopup("Delete")}
+										>
+											Cancel Order
+										</button>
+									)}
 
 									{order?.hold !== "Y" ? (
 										<button
@@ -1883,23 +1955,44 @@ export function OrderDetails({
 						style={{
 							background: "white",
 							justifyContent: "space-between",
+							alignItems: "center",
 							paddingTop: "20px"
 						}}
 					>
-						<div id="payment-pending-wrapper">
-							{editOrder ? (
-								<>
-									<input
-										type="checkbox"
-										name="payment-pending-status"
-										id="payment-pending-status"
-										checked={Boolean(orderData?.payment_pending)}
-										onChange={e => setOrderData(x => ({ ...x, payment_pending: +e.target.checked }))}
-									/>
-									<label htmlFor="payment-pending-status">Payment pending</label>
-								</>
-							) : (
-								<span>Payment pending: {orderData?.payment_pending ? "Yes" : "No"}</span>
+						<div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+							<div id="payment-pending-wrapper">
+								{editOrder ? (
+									<>
+										<input
+											type="checkbox"
+											name="payment-pending-status"
+											id="payment-pending-status"
+											checked={Boolean(orderData?.payment_pending)}
+											onChange={e => setOrderData(x => ({ ...x, payment_pending: +e.target.checked }))}
+										/>
+										<label htmlFor="payment-pending-status">Payment pending</label>
+									</>
+								) : (
+									<span>Payment pending: {orderData?.payment_pending ? "Yes" : "No"}</span>
+								)}
+							</div>
+							{isCancelled && order?.item_details?.[0]?.original_qty && (
+								<button
+									type="button"
+									className="order-total recreate-order-btn"
+									onClick={recreateOrder}
+									style={{
+										padding: "10px 14px 10px 10px",
+										display: "flex",
+										alignItems: "center",
+										gap: "5px",
+										whiteSpace: "nowrap"
+									}}
+								>
+									<Refresh className="refresh" />
+									<Add className="add" />
+									<span>Recreate Order</span>
+								</button>
 							)}
 						</div>
 
@@ -1918,25 +2011,30 @@ export function OrderDetails({
 							""
 						)}
 
-						<button
-							type="button"
-							onClick={() => {
-								setCaptionPopup(true)
-							}}
-							style={{
-								width: "max-content",
-								padding: "10px 20px",
-								position: "absolute",
-								right: "300px",
-								backgroundColor: "#fff",
-								color: "var(--main)"
-							}}
-						>
-							<WhatsApp />
-						</button>
-						<button type="button" onClick={() => {}} style={{ width: "max-content", padding: "10px 20px" }}>
-							Order Total : {orderData?.order_grandtotal || 0}
-						</button>
+						<div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+							<button
+								type="button"
+								onClick={() => {
+									setCaptionPopup(true)
+								}}
+								style={{
+									width: "max-content",
+									padding: "10px 20px",
+									backgroundColor: "#fff",
+									color: "var(--main)",
+									border: "none"
+								}}
+							>
+								<WhatsApp />
+							</button>
+							<button
+								type="button"
+								className="order-total"
+								style={{ width: "max-content", padding: "10px 20px", cursor: "default" }}
+							>
+								Order Total : {orderData?.order_grandtotal || 0}
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -2046,9 +2144,7 @@ export function OrderDetails({
 			)}
 			{deletePopup ? (
 				<DeleteOrderPopup
-					onSave={() => {
-						setDeletePopup(false)
-					}}
+					onSave={() => setDeletePopup(false)}
 					onDeleted={() => {
 						setDeletePopup(false)
 						onSave()
@@ -2254,9 +2350,11 @@ export function OrderDetails({
 		</>
 	)
 }
+
 const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePopup, HoldOrder }) => {
 	const [disable, setDisabled] = useState(true)
 	const [reason, setReason] = useState("")
+	const [sendNotification, setSendNotification] = useState(true)
 
 	useEffect(() => {
 		setTimeout(() => setDisabled(false), deletePopup === "hold" ? 100 : 0)
@@ -2280,7 +2378,15 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 				}
 			],
 			fulfillment: order?.fulfillment?.length ? [...order?.fulfillment, ...order?.item_details] : order?.item_details,
-			item_details: order?.item_details?.map(a => ({ ...a, b: 0, p: 0 }))
+			item_details: order?.item_details?.map(a => ({
+				...a,
+				b: 0,
+				p: 0,
+				original_qty: {
+					b: a?.b,
+					p: a?.p
+				}
+			}))
 		}
 
 		let billingData = await Billing({
@@ -2302,6 +2408,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 		data = {
 			...data,
 			...billingData,
+			notifyCancellation: sendNotification,
 			item_details: billingData.items,
 			edit: true
 		}
@@ -2343,6 +2450,16 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 					placeholder="Cancellation reason"
 					required
 				/>
+
+				<div style={{ fontSize: "14px", margin: "10px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+					<input
+						type="checkbox"
+						id="sent-cancellation-notification"
+						value={sendNotification}
+						onChange={e => setSendNotification(e.target.checked)}
+					/>
+					<label htmlFor="sent-cancellation-notification">Send whatsapp update to counter?</label>
+				</div>
 
 				<div className="flex">
 					<button type="submit" className="submit" disabled={disable} style={{ opacity: disable ? "0.5" : "1" }}>
@@ -2573,25 +2690,12 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 
 	return (
 		<div className="overlay" style={{ zIndex: 999999999 }}>
-			<div className="modal" style={{ height: "fit-content", width: "max-content" }}>
+			<div className="modal" style={{ height: "fit-content", width: "500px" }}>
 				<h1>Discount</h1>
-				<div
-					className="content"
-					style={{
-						height: "fit-content",
-						padding: "20px",
-						width: "fit-content"
-					}}
-				>
+				<div className="content">
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						<div className="flex" style={{ flexDirection: "column", width: "100%" }}>
-							<table
-								className="user-table"
-								style={{
-									width: "max-content",
-									height: "fit-content"
-								}}
-							>
+							<table className="user-table">
 								<thead>
 									<tr>
 										<th colSpan={2}>
@@ -2603,12 +2707,12 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 									</tr>
 								</thead>
 								<tbody className="tbody">
-									{data.length
+									{data?.length
 										? data?.map((item, i) => (
 												<tr
 													key={item?.uuid || Math.random()}
 													style={{
-														height: "30px"
+														padding: "10px"
 													}}
 												>
 													<td colSpan={2}>
@@ -2619,12 +2723,11 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 																type="text"
 																className="numberInput"
 																style={{
-																	width: "10ch",
-																	fontSize: "12px",
-																	padding: 0,
-																	height: "20px"
+																	width: "-webkit-fill-available",
+
+																	padding: "10px"
 																}}
-																value={item.title || 0}
+																value={item.title || ""}
 																onChange={e => {
 																	setData(prev =>
 																		prev?.map(a =>
@@ -2651,12 +2754,11 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 															type="number"
 															className="numberInput"
 															style={{
-																width: "10ch",
-																fontSize: "12px",
-																padding: 0,
-																height: "20px"
+																width: "-webkit-fill-available",
+																padding: "10px"
 															}}
-															value={item.value || 0}
+															placeholder="0"
+															value={item.value}
 															onChange={e => {
 																setData(prev => prev?.map(a => (a.uuid === item.uuid ? { ...a, value: e.target.value } : a)))
 																setEdit(true)
@@ -2673,21 +2775,21 @@ function DiscountPopup({ onSave, popupDetails, onUpdate }) {
 										: ""}
 								</tbody>
 							</table>
-							<button type="button" className="submit" onClick={() => setData(prev => [...prev, { uuid: uuid() }])}>
-								<Add />
-							</button>
 						</div>
 
 						<div className="flex" style={{ justifyContent: "space-between" }}>
-							{edit ? (
-								<button type="button" className="submit" onClick={() => onUpdate({ ...popupDetails, charges_discount: data })}>
-									Save
+							<div>
+								<button type="button" style={{ marginRight: "10px" }} className="submit" onClick={onSave}>
+									Cancel
 								</button>
-							) : (
-								""
-							)}
-							<button type="button" className="submit" onClick={onSave}>
-								Cancel
+								{edit && (
+									<button type="button" className="submit" onClick={() => onUpdate({ ...popupDetails, charges_discount: data })}>
+										Save
+									</button>
+								)}
+							</div>
+							<button type="button" className="submit" onClick={() => setData(prev => [...(prev || []), { uuid: uuid() }])}>
+								<Add />
 							</button>
 						</div>
 					</div>
