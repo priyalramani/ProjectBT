@@ -118,41 +118,42 @@ const ProcessingOrders = () => {
 
 	const getTripOrders = async () => {
 		setLoading(true)
-		const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1)
-		let tx = db.transaction("items", "readonly").objectStore("items")
-		let IDBItems = await tx.getAll()
-		setItems(IDBItems)
-		db.close()
-		const response = await axios({
-			method: "post",
-			url: `/orders/${
-				Location.pathname.includes("checking")
-					? "GetOrderCheckingList"
-					: Location.pathname.includes("delivery")
-					? "GetOrderDeliveryList"
-					: "GetOrderProcessingList"
-			}`,
-			data: {
-				trip_uuid: params.trip_uuid,
-				user_uuid: localStorage.getItem("user_uuid")
+		try {
+			const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1)
+			let tx = db.transaction("items", "readonly").objectStore("items")
+			let IDBItems = await tx.getAll()
+			setItems(IDBItems)
+			db.close()
+			const response = await axios({
+				method: "post",
+				url: `/orders/${
+					Location.pathname.includes("checking")
+						? "GetOrderCheckingList"
+						: Location.pathname.includes("delivery")
+						? "GetOrderDeliveryList"
+						: "GetOrderProcessingList"
+				}`,
+				data: {
+					trip_uuid: params.trip_uuid,
+					user_uuid: localStorage.getItem("user_uuid")
+				}
+			})
+			if (response.data.success) {
+				const data = response.data.result.sort((a, b) => a.time_1 - b.time_1).sort((a, b) => (+b.priority || 0) - +a.priority)
+				let sortedOrders = data.reduce(
+					(result, order) =>
+						!result.some(i => i.counter_uuid === order.counter_uuid)
+							? result.concat(data.filter(i => i.counter_uuid === order.counter_uuid))
+							: result,
+
+					[]
+				)
+
+				console.log({ sortedOrders })
+				setOrders(sortedOrders)
 			}
-		})
-		if (response.data.success) {
-			const data = response.data.result.sort((a, b) => a.time_1 - b.time_1).sort((a, b) => (+b.priority || 0) - +a.priority)
-			let sortedOrders = data.reduce(
-				(result, order) =>
-					!result.some(i => i.counter_uuid === order.counter_uuid)
-						? result.concat(data.filter(i => i.counter_uuid === order.counter_uuid))
-						: result,
-
-				[]
-			)
-
-			console.log({ sortedOrders })
-			setOrders(sortedOrders)
-			setLoading(false)
-		}
-		if (!response?.data?.result) return
+		} catch (error) {}
+		setLoading(false)
 	}
 
 	useEffect(() => {
@@ -218,142 +219,144 @@ const ProcessingOrders = () => {
 	}
 	// console.log("orders", orders);
 	const postOrderData = async (dataArray = selectedOrder ? [selectedOrder] : orders, hold = false, preventPrintUpdate) => {
-		setprintInvicePopup(null)
 		setLoading(true)
+		setprintInvicePopup(null)
 		console.log(dataArray)
 		setPopupBarcode(false)
 		setBarcodeMessage([])
-		let finalData = []
-		for (let orderObject of dataArray) {
-			let data = orderObject
-			if (data?.item_details?.filter(a => +a.status === 3)?.length && Location.pathname.includes("processing"))
-				data = {
-					...data,
-					item_details: data.item_details.map(a => (+a.status === 3 ? { ...a, b: 0, p: 0 } : a)),
-					processing_canceled: data.processing_canceled.length
-						? [
-								...data.processing_canceled,
-								...data.item_details.filter(
-									a => +a.status === 3 && !data.processing_canceled.filter(b => a.item_uuid === b.item_uuid).length
-								)
-						  ]
-						: data?.item_details?.filter(a => +a.status === 3)
-				}
-
-			let billingData = await Billing({
-				order_uuid: data?.order_uuid,
-				invoice_number: `${data?.order_type}${data?.invoice_number}`,
-				replacement: data.replacement,
-				adjustment: data.adjustment,
-				shortage: data.shortage,
-				counter: counters.find(a => a.counter_uuid === data.counter_uuid),
-				items: data.item_details.map(a => {
-					let itemData = items.find(b => a.item_uuid === b.item_uuid)
-					return {
-						...itemData,
-						...a
-						// price: itemData?.price || 0,
+		try {
+			let finalData = []
+			for (let orderObject of dataArray) {
+				let data = orderObject
+				if (data?.item_details?.filter(a => +a.status === 3)?.length && Location.pathname.includes("processing"))
+					data = {
+						...data,
+						item_details: data.item_details.map(a => (+a.status === 3 ? { ...a, b: 0, p: 0 } : a)),
+						processing_canceled: data.processing_canceled.length
+							? [
+									...data.processing_canceled,
+									...data.item_details.filter(
+										a => +a.status === 3 && !data.processing_canceled.filter(b => a.item_uuid === b.item_uuid).length
+									)
+							  ]
+							: data?.item_details?.filter(a => +a.status === 3)
 					}
+
+				let billingData = await Billing({
+					order_uuid: data?.order_uuid,
+					invoice_number: `${data?.order_type}${data?.invoice_number}`,
+					replacement: data.replacement,
+					adjustment: data.adjustment,
+					shortage: data.shortage,
+					counter: counters.find(a => a.counter_uuid === data.counter_uuid),
+					items: data.item_details.map(a => {
+						let itemData = items.find(b => a.item_uuid === b.item_uuid)
+						return {
+							...itemData,
+							...a
+							// price: itemData?.price || 0,
+						}
+					})
 				})
-			})
-			data = {
-				...data,
-				...billingData,
-				item_details: billingData.items
-			}
-
-			let time = new Date()
-			if (
-				data?.item_details?.filter(a => +a.status === 1 || +a.status === 3)?.length === data?.item_details.length &&
-				Location.pathname.includes("processing")
-			)
 				data = {
 					...data,
-					status: [
-						...data.status,
-						{
-							stage: "2",
-							time: time.getTime(),
-							user_uuid: localStorage.getItem("user_uuid")
-						}
-					]
+					...billingData,
+					item_details: billingData.items
 				}
-			if (Location.pathname.includes("checking"))
-				data = {
+
+				let time = new Date()
+				if (
+					data?.item_details?.filter(a => +a.status === 1 || +a.status === 3)?.length === data?.item_details.length &&
+					Location.pathname.includes("processing")
+				)
+					data = {
+						...data,
+						status: [
+							...data.status,
+							{
+								stage: "2",
+								time: time.getTime(),
+								user_uuid: localStorage.getItem("user_uuid")
+							}
+						]
+					}
+				if (Location.pathname.includes("checking"))
+					data = {
+						...data,
+						status: [
+							...data.status,
+							{
+								stage: "3",
+								time: time.getTime(),
+								user_uuid: localStorage.getItem("user_uuid")
+							}
+						]
+					}
+				if (Location.pathname.includes("delivery"))
+					data = {
+						...data,
+						status: [
+							...data.status,
+							{
+								stage: "4",
+								time: time.getTime(),
+								user_uuid: localStorage.getItem("user_uuid")
+							}
+						]
+					}
+
+				data = Object.keys(data)
+					.filter(key => key !== "others" || key !== "items")
+					.reduce((obj, key) => {
+						obj[key] = data[key]
+						return obj
+					}, {})
+
+				finalData.push({
 					...data,
-					status: [
-						...data.status,
-						{
-							stage: "3",
-							time: time.getTime(),
-							user_uuid: localStorage.getItem("user_uuid")
-						}
-					]
-				}
-			if (Location.pathname.includes("delivery"))
-				data = {
-					...data,
-					status: [
-						...data.status,
-						{
-							stage: "4",
-							time: time.getTime(),
-							user_uuid: localStorage.getItem("user_uuid")
-						}
-					]
-				}
-
-			data = Object.keys(data)
-				.filter(key => key !== "others" || key !== "items")
-				.reduce((obj, key) => {
-					obj[key] = data[key]
-					return obj
-				}, {})
-
-			finalData.push({
-				...data,
-				opened_by: 0,
-				replacement: orderObject.replacement,
-				replacement_mrp: orderObject.replacement_mrp,
-				preventPrintUpdate
-			})
-		}
-
-		const response = await axios({
-			method: "put",
-			url: "/orders/putOrders",
-			data: finalData,
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-		if (response.data.success) {
-			console.log(response)
-			sessionStorage.setItem("playCount", playCount)
-			setLoading(false)
-			getTripOrders()
-			if (!hold) {
-				let dataItem = Location.pathname.includes("processing") ? itemChanged : finalData[0]?.item_details
-
-				let qty = `${
-					dataItem?.length > 1 ? dataItem?.reduce((a, b) => (+a.b || 0) + (+b.b || 0)) : dataItem?.length ? dataItem[0]?.b : 0
-				}:${dataItem?.length > 1 ? dataItem?.reduce((a, b) => (+a.p || 0) + (+b.p || 0)) : dataItem?.length ? dataItem[0]?.p : 0}`
-				setLoading(false)
-				setSelectedOrder(false)
-				setHoldPopup(false)
-				postActivity({
-					activity:
-						(Location.pathname.includes("checking")
-							? "Checking"
-							: Location.pathname.includes("delivery")
-							? "Delivery"
-							: "Processing") + " End",
-					range: Location.pathname.includes("processing") ? itemChanged.length : finalData[0]?.item_details?.length,
-					qty,
-					amt: finalData[0].order_grandtotal || 0
+					opened_by: 0,
+					replacement: orderObject.replacement,
+					replacement_mrp: orderObject.replacement_mrp,
+					preventPrintUpdate
 				})
 			}
-		}
+
+			const response = await axios({
+				method: "put",
+				url: "/orders/putOrders",
+				data: finalData,
+				headers: {
+					"Content-Type": "application/json"
+				}
+			})
+			if (response.data.success) {
+				console.log(response)
+				sessionStorage.setItem("playCount", playCount)
+				getTripOrders()
+				if (!hold) {
+					let dataItem = Location.pathname.includes("processing") ? itemChanged : finalData[0]?.item_details
+					let qty = `${
+						dataItem?.length > 1 ? dataItem?.reduce((a, b) => (+a.b || 0) + (+b.b || 0)) : dataItem?.length ? dataItem[0]?.b : 0
+					}:${
+						dataItem?.length > 1 ? dataItem?.reduce((a, b) => (+a.p || 0) + (+b.p || 0)) : dataItem?.length ? dataItem[0]?.p : 0
+					}`
+					setSelectedOrder(false)
+					setHoldPopup(false)
+					postActivity({
+						activity:
+							(Location.pathname.includes("checking")
+								? "Checking"
+								: Location.pathname.includes("delivery")
+								? "Delivery"
+								: "Processing") + " End",
+						range: Location.pathname.includes("processing") ? itemChanged.length : finalData[0]?.item_details?.length,
+						qty,
+						amt: finalData[0].order_grandtotal || 0
+					})
+				}
+			}
+		} catch (error) {}
+		setLoading(false)
 	}
 
 	const postOrderContained = async (data = selectedOrder, opened_by = 0) => {
@@ -425,188 +428,72 @@ const ProcessingOrders = () => {
 	// }, [selectedOrder])
 
 	const checkingQuantity = () => {
-		let orderData = orders
 		setLoading(true)
-		let data = []
-		let itemsDetails = []
-		itemsDetails = selectedOrder
-			? selectedOrder?.item_details.filter(a => a.status === 1)
-			: [].concat.apply(
-					[],
-					orderData.map(a => a.item_details.filter(a => a.status === 1))
-			  )
-		let item_details = itemsDetails.reduce((acc, curr) => {
-			let itemData = acc.find(item => item.item_uuid === curr.item_uuid)
-			console.log(acc)
-			if (itemData) {
-				itemData.b = (+itemData.b || 0) + (+curr.b || 0)
-				itemData.p = (+itemData.p || 0) + (+curr.p || 0)
-				itemData.free = (+itemData.free || 0) + (+curr.free || 0)
-			} else {
-				acc.push(curr)
-			}
+		try {
+			let orderData = orders
+			let data = []
+			let itemsDetails = []
+			itemsDetails = selectedOrder
+				? selectedOrder?.item_details.filter(a => a.status === 1)
+				: [].concat.apply(
+						[],
+						orderData.map(a => a.item_details.filter(a => a.status === 1))
+				  )
+			let item_details = itemsDetails.reduce((acc, curr) => {
+				let itemData = acc.find(item => item.item_uuid === curr.item_uuid)
+				console.log(acc)
+				if (itemData) {
+					itemData.b = (+itemData.b || 0) + (+curr.b || 0)
+					itemData.p = (+itemData.p || 0) + (+curr.p || 0)
+					itemData.free = (+itemData.free || 0) + (+curr.free || 0)
+				} else {
+					acc.push(curr)
+				}
 
-			return acc
-		}, [])
+				return acc
+			}, [])
 
-		for (let a of item_details) {
-			let orderItem = tempQuantity.find(b => b.item_uuid === a.item_uuid)
-			let ItemData = items.find(b => b.item_uuid === a.item_uuid)
-			if (
-				(+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + (+orderItem?.p || 0) + (+orderItem?.free || 0) !==
-				(+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p
-			)
-				setBarcodeMessage(prev =>
-					prev.length
-						? [
-								...prev,
-								{
-									...ItemData,
-									...orderItem,
-									...a,
-									barcodeQty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
-									case: 1,
-									qty: (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0)
-								}
-						  ]
-						: [
-								{
-									...ItemData,
-									...orderItem,
-									...a,
-									barcodeQty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
-									case: 1,
-									qty: (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0)
-								}
-						  ]
+			for (let a of item_details) {
+				let orderItem = tempQuantity.find(b => b.item_uuid === a.item_uuid)
+				let ItemData = items.find(b => b.item_uuid === a.item_uuid)
+				if (
+					(+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + (+orderItem?.p || 0) + (+orderItem?.free || 0) !==
+					(+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p
 				)
-			else data.push(a)
-		}
-		// if (selectedOrder) {
-		//   for (let a of barcodeFilterState.filter(
-		//     (a) => !data.filter((b) => b.item_uuid === a.item_uuid).length
-		//   )) {
-		//     let orderItem = item_details.find((b) => b.item_uuid === a.item_uuid);
-		//     let ItemData = items.find((b) => b.item_uuid === a.item_uuid);
-		//     console.log(a.qty, ItemData);
-		//     if (
-		//       (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-		//         orderItem?.p +
-		//         (+orderItem?.free || 0) !==
-		//       a?.qty
-		//     ) {
-		//       if (orderItem)
-		//         setBarcodeMessage((prev) =>
-		//           prev.filter((b) => b.item_uuid === orderItem.item_uuid)?.length
-		//             ? prev.map((b) =>
-		//                 b.item_uuid === orderItem.item_uuid
-		//                   ? {
-		//                       ...b,
-		//                       ...ItemData,
-		//                       ...orderItem,
-		//                       barcodeQty:
-		//                         (+b.barcodeQty || 0) +
-		//                         (+a?.b || 0) * +(+a?.conversion || 1) +
-		//                         a?.p,
-		//                       case: 1,
-		//                       qty:
-		//                         (+orderItem?.b || 0) *
-		//                           +(+ItemData?.conversion || 1) +
-		//                         orderItem?.p +
-		//                         (+orderItem?.free || 0),
-		//                     }
-		//                   : b
-		//               )
-		//             : prev.length
-		//             ? [
-		//                 ...prev,
-		//                 {
-		//                   ...ItemData,
-		//                   ...orderItem,
-		//                   barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
-		//                   case: 1,
-		//                   qty:
-		//                     (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-		//                     orderItem?.p +
-		//                     (+orderItem?.free || 0),
-		//                 },
-		//               ]
-		//             : [
-		//                 {
-		//                   ...ItemData,
-		//                   ...orderItem,
-		//                   barcodeQty: (+a?.b || 0) * +(+a?.conversion || 1) + a?.p,
-		//                   case: 1,
-		//                   qty:
-		//                     (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-		//                     orderItem?.p +
-		//                     (+orderItem?.free || 0),
-		//                 },
-		//               ]
-		//         );
-		//       else if (ItemData && a?.qty)
-		//         setBarcodeMessage((prev) =>
-		//           prev.length
-		//             ? [
-		//                 ...prev,
-		//                 {
-		//                   ...ItemData,
-		//                   barcodeQty: a.qty,
-		//                   case: 2,
-		//                   qty:
-		//                     (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-		//                     orderItem?.p +
-		//                     (+orderItem?.free || 0),
-		//                 },
-		//               ]
-		//             : [
-		//                 {
-		//                   ...ItemData,
-		//                   barcodeQty: a.qty,
-		//                   case: 2,
-		//                   qty:
-		//                     (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-		//                     orderItem?.p +
-		//                     (+orderItem?.free || 0),
-		//                 },
-		//               ]
-		//         );
-		//       else if (a?.qty)
-		//         setBarcodeMessage((prev) =>
-		//           prev.length
-		//             ? [
-		//                 ...prev,
-		//                 {
-		//                   ...a,
-		//                   barcodeQty: a.qty,
-		//                   case: 3,
-		//                   qty:
-		//                     (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-		//                     orderItem?.p +
-		//                     (+orderItem?.free || 0),
-		//                 },
-		//               ]
-		//             : [
-		//                 {
-		//                   ...a,
-		//                   barcodeQty: a.qty,
-		//                   case: 3,
-		//                   qty:
-		//                     (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) +
-		//                     orderItem?.p +
-		//                     (+orderItem?.free || 0),
-		//                 },
-		//               ]
-		//         );
-		//     }
-		//   }
-		// }
-
-		setTimeout(() => {
-			setPopupBarcode(true)
+					setBarcodeMessage(prev =>
+						prev.length
+							? [
+									...prev,
+									{
+										...ItemData,
+										...orderItem,
+										...a,
+										barcodeQty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
+										case: 1,
+										qty: (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0)
+									}
+							  ]
+							: [
+									{
+										...ItemData,
+										...orderItem,
+										...a,
+										barcodeQty: (+orderItem?.b || 0) * +(+ItemData?.conversion || 1) + orderItem?.p,
+										case: 1,
+										qty: (+a?.b || 0) * +(+ItemData?.conversion || 1) + a?.p + (+a?.free || 0)
+									}
+							  ]
+					)
+				else data.push(a)
+			}
+			setTimeout(() => {
+				setPopupBarcode(true)
+				setLoading(false)
+				getTripOrders()
+			}, 2000)
+		} catch (error) {
 			setLoading(false)
-			getTripOrders()
-		}, 2000)
+		}
 	}
 
 	const updateBillingAmount = async (order = selectedOrder) => {
@@ -1396,14 +1283,7 @@ const ProcessingOrders = () => {
 				""
 			)}
 			{minMaxPopup ? (
-				<MinMaxPopup
-					setLoading={setLoading}
-					onSave={() => setMinMaxPopup(false)}
-					popupValue={minMaxPopup}
-					order={selectedOrder}
-					items={items}
-					loading={loading}
-				/>
+				<MinMaxPopup onSave={() => setMinMaxPopup(false)} popupValue={minMaxPopup} order={selectedOrder} items={items} />
 			) : (
 				""
 			)}
@@ -2570,81 +2450,84 @@ function DiliveryPopup({
 		}
 		setLoading(true)
 		setError("")
-		let billingData = await Billing({
-			order_uuid: data?.order_uuid,
-			invoice_number: `${data?.order_type}${data?.invoice_number}`,
-			replacement: data.actual,
-			adjustment: data.adjustment,
-			shortage: data.shortage,
-			counter: counters.find(a => a.counter_uuid === order.counter_uuid),
-			items: order.item_details.map(a => {
-				let itemData = items.find(b => a.item_uuid === b.item_uuid)
-				return {
-					...itemData,
-					...a
-					// price: itemData?.price || 0,
-				}
+		try {
+			let billingData = await Billing({
+				order_uuid: data?.order_uuid,
+				invoice_number: `${data?.order_type}${data?.invoice_number}`,
+				replacement: data.actual,
+				adjustment: data.adjustment,
+				shortage: data.shortage,
+				counter: counters.find(a => a.counter_uuid === order.counter_uuid),
+				items: order.item_details.map(a => {
+					let itemData = items.find(b => a.item_uuid === b.item_uuid)
+					return {
+						...itemData,
+						...a
+						// price: itemData?.price || 0,
+					}
+				})
 			})
-		})
 
-		let Tempdata = {
-			...order,
-			...billingData,
-			item_details: billingData.items,
-			replacement: data.actual,
-			replacement_mrp: data.mrp
-		}
-		let modeTotal = modes.map(a => +a.amt || 0)?.reduce((a, b) => a + b)
+			let Tempdata = {
+				...order,
+				...billingData,
+				item_details: billingData.items,
+				replacement: data.actual,
+				replacement_mrp: data.mrp
+			}
 
-		if (+Tempdata?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))) {
-			setError("Invoice Amount and Payment mismatch")
-			setLoading(false)
-			return
-		}
-		let obj = modes.find(a => a.mode_title === "Cash")
-		if (obj?.amt && obj?.coin === "") {
-			setCoinPopup(true)
-			return
-		}
-		let time = new Date()
-		obj = {
-			user_uuid: localStorage.getItem("user_uuid"),
-			time: time.getTime(),
-			order_uuid,
-			counter_uuid: order.counter_uuid,
-			trip_uuid: order.trip_uuid,
-			invoice_number: order.invoice_number,
-			modes
-		}
-		setLoading(true)
-		let response
-		if (modeTotal) {
-			response = await axios({
-				method: "post",
-				url: "/receipts/postReceipt",
-				data: obj,
-				headers: {
-					"Content-Type": "application/json"
-				}
-			})
-		}
+			let modeTotal = modes.map(a => +a.amt || 0)?.reduce((a, b) => a + b)
 
-		setTimeout(() => setLoading(false), 45000)
-		if (outstanding?.amount)
-			response = await axios({
-				method: "post",
-				url: "/Outstanding/postOutstanding",
-				data: outstanding,
-				headers: {
-					"Content-Type": "application/json"
-				}
-			})
-		if (response.data.success) {
-			postOrderData()
-			setLoading(false)
-			onSave()
-		}
+			if (+Tempdata?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))) {
+				setError("Invoice Amount and Payment mismatch")
+				setLoading(false)
+				return
+			}
+			let obj = modes.find(a => a.mode_title === "Cash")
+			if (obj?.amt && obj?.coin === "") {
+				setCoinPopup(true)
+				setLoading(false)
+				return
+			}
+			let time = new Date()
+			obj = {
+				user_uuid: localStorage.getItem("user_uuid"),
+				time: time.getTime(),
+				order_uuid,
+				counter_uuid: order.counter_uuid,
+				trip_uuid: order.trip_uuid,
+				invoice_number: order.invoice_number,
+				modes
+			}
+			let response
+			if (modeTotal) {
+				response = await axios({
+					method: "post",
+					url: "/receipts/postReceipt",
+					data: obj,
+					headers: {
+						"Content-Type": "application/json"
+					}
+				})
+			}
+
+			if (outstanding?.amount)
+				response = await axios({
+					method: "post",
+					url: "/Outstanding/postOutstanding",
+					data: outstanding,
+					headers: {
+						"Content-Type": "application/json"
+					}
+				})
+			if (response.data.success) {
+				postOrderData()
+				onSave()
+			}
+		} catch (error) {}
+		setLoading(false)
 	}
+
 	return (
 		<>
 			<div className="overlay">
@@ -2828,15 +2711,7 @@ function DiliveryPopup({
 		</>
 	)
 }
-function MinMaxPopup({
-	onSave,
-
-	popupValue,
-	order,
-	items,
-
-	setLoading
-}) {
+function MinMaxPopup({ onSave, popupValue, order, items }) {
 	const [warehouse, setWarehouse] = useState([])
 	const [warehouse_uuid, setWarehouse_uuid] = useState("")
 

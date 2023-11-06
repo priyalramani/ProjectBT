@@ -1,18 +1,16 @@
-import { AiOutlineSearch } from "react-icons/ai"
 import { IoArrowBackOutline } from "react-icons/io5"
 import { useState, useEffect, useMemo, useContext, useRef } from "react"
-import { openDB } from "idb"
-import { useNavigate, useParams } from "react-router-dom"
-import { AutoAdd, Billing } from "../Apis/functions"
+import { useParams } from "react-router-dom"
 import { Link as ScrollLink } from "react-scroll"
 import { v4 as uuid } from "uuid"
 import axios from "axios"
 
-import CloseIcon from "@mui/icons-material/Close"
+import noimg from "../assets/noimg.jpg"
 import MobileNumberPopup from "../components/MobileNumberPopup"
 import context from "../context/context"
 import { server } from "../App"
-import noimg from "../assets/noimg.jpg"
+import { Billing } from "../Apis/functions"
+
 const LinkedCounter = () => {
 	const [items, setItems] = useState([])
 	const [foodLicensePopup, setFoodLicencePopup] = useState(false)
@@ -30,23 +28,19 @@ const LinkedCounter = () => {
 	const [orderStatus, setOrderStatus] = useState(0)
 	const [imgpopup, setImgPopup] = useState("")
 	const wrapperRef = useRef()
-	// const [counters, setCounters] = useState([]);
 	const [counter, setCounter] = useState({})
 
 	const params = useParams()
 	const [filterItemTitle, setFilterItemTile] = useState("")
-	const [filterCompany, setFilterCompany] = useState("")
 	const [itemsCategory, setItemsCategory] = useState([])
 	const [companies, setCompanies] = useState([])
 	const [popupForm, setPopupForm] = useState(false)
-	const [orderCreated, setOrderCreated] = useState(false)
 	const [total, setTotal] = useState(0)
 	const [holdPopup, setHoldPopup] = useState(false)
 	const [discountPopup, setDiscountPopup] = useState(false)
 	const [invoice_number, setInvioceNumber] = useState(false)
 	const [loading, setLoading] = useState(false)
 	const { setNotification } = useContext(context)
-	const Navigate = useNavigate()
 
 	useEffect(() => {
 		if (imgpopup) {
@@ -89,36 +83,43 @@ const LinkedCounter = () => {
 
 	const getCounter = async () => {
 		setLoading(true)
-		const response = await axios({
-			method: "post",
-			url: "/counters/GetCounterByLink",
-			data: {
-				short_link: params.short_link,
-				campaign_short_link: params.campaign_short_link?.includes("cam-") ? params?.campaign_short_link?.replace("cam-", "") : "",
-				form_short_link: params.campaign_short_link?.includes("form-") ? params?.campaign_short_link?.replace("form-", "") : ""
-			},
-			headers: {
-				"Content-Type": "application/json"
+		try {
+			const response = await axios({
+				method: "post",
+				url: "/counters/GetCounterByLink",
+				data: {
+					short_link: params.short_link,
+					campaign_short_link: params.campaign_short_link?.includes("cam-")
+						? params?.campaign_short_link?.replace("cam-", "")
+						: "",
+					form_short_link: params.campaign_short_link?.includes("form-") ? params?.campaign_short_link?.replace("form-", "") : ""
+				},
+				headers: {
+					"Content-Type": "application/json"
+				}
+			})
+			if (response.data.message) setNotification(response.data)
+			setTimeout(() => setNotification(""), 5000)
+			console.log(response.data)
+			if (response.data.success) {
+				if (!response.data.result.order_status) {
+					setNotification({
+						message: "इस रूट के आर्डर अभी स्वीकार नहीं किये जा रहे है"
+					})
+					setTimeout(() => setNotification(""), 5000)
+				}
+				setOrderStatus(response.data.result.order_status)
+				setCounter(response.data.result.counter)
+				localStorage.setItem("counter_uuid", response.data.result.counter.counter_uuid)
+				setItemsCategory(response.data.result.ItemCategories)
+				setItems(response.data.result.items)
+				setCompanies(response.data.result.company)
 			}
-		})
-		if (response.data.message) setNotification(response.data)
-		setTimeout(() => setNotification(""), 5000)
-		console.log(response.data)
-		if (response.data.success) {
-			if (!response.data.result.order_status) {
-				setNotification({
-					message: "इस रूट के आर्डर अभी स्वीकार नहीं किये जा रहे है"
-				})
-				setTimeout(() => setNotification(""), 5000)
-			}
-			setOrderStatus(response.data.result.order_status)
-			setCounter(response.data.result.counter)
-			localStorage.setItem("counter_uuid", response.data.result.counter.counter_uuid)
-			setItemsCategory(response.data.result.ItemCategories)
-			setItems(response.data.result.items)
-			setCompanies(response.data.result.company)
+		} catch (error) {
+			console.error(error)
+		} finally {
+			setLoading(false)
 		}
-		setLoading(false)
 	}
 	const getUsers = async () => {
 		const response = await axios({
@@ -196,83 +197,85 @@ const LinkedCounter = () => {
 	)
 
 	const postOrder = async (orderData = order) => {
-		let time = new Date()
-		let data = await Billing({
-			order_uuid: orderData?.order_uuid,
-			invoice_number: `${order?.order_type}${order?.invoice_number}`,
-			counter,
-			items: orderData.items,
-			others: {
-				stage: 1,
-				user_uuid: localStorage.getItem("user_uuid"),
-				time: time.getTime(),
+		setLoading(true)
+		try {
+			let time = new Date()
+			let data = await Billing({
+				order_uuid: orderData?.order_uuid,
+				invoice_number: `${order?.order_type}${order?.invoice_number}`,
+				counter,
+				items: orderData.items,
+				others: {
+					stage: 1,
+					user_uuid: localStorage.getItem("user_uuid"),
+					time: time.getTime(),
 
-				type: "NEW"
-			},
-			add_discounts: true
-		})
-		data = {
-			...orderData,
-			...data,
-			order_status: orderData?.order_status || "R",
-			order_uuid: uuid(),
-			opened_by: 0,
-			item_details: data.items.map(a => ({
-				...a,
-				b: a.b,
-				p: a.p,
-				unit_price: a.price,
-				gst_percentage: a.item_gst,
-				status: 0,
-				price: a.price || a.item_price
-			})),
-			status: [
-				{
-					stage: orderData?.others?.stage || 1,
-					time: orderData?.others?.time || new Date().getTime(),
-					user_uuid: orderData?.others?.user_uuid || orderData?.counter_uuid
+					type: "NEW"
+				},
+				add_discounts: true
+			})
+			data = {
+				...orderData,
+				...data,
+				order_status: orderData?.order_status || "R",
+				order_uuid: uuid(),
+				opened_by: 0,
+				item_details: data.items.map(a => ({
+					...a,
+					b: a.b,
+					p: a.p,
+					unit_price: a.price,
+					gst_percentage: a.item_gst,
+					status: 0,
+					price: a.price || a.item_price
+				})),
+				status: [
+					{
+						stage: orderData?.others?.stage || 1,
+						time: orderData?.others?.time || new Date().getTime(),
+						user_uuid: orderData?.others?.user_uuid || orderData?.counter_uuid
+					}
+				],
+				counter_order: 1,
+				campaign_short_link: params.campaign_short_link?.includes("cam-") ? params?.campaign_short_link?.replace("cam-", "") : ""
+			}
+			console.log(data)
+			const response = await axios({
+				method: "post",
+				url: "/orders/postOrder",
+				data,
+				headers: {
+					"Content-Type": "application/json"
 				}
-			],
-			counter_order: 1,
-			campaign_short_link: params.campaign_short_link?.includes("cam-") ? params?.campaign_short_link?.replace("cam-", "") : ""
-		}
-		console.log(data)
-		const response = await axios({
-			method: "post",
-			url: "/orders/postOrder",
-			data,
-			headers: {
-				"Content-Type": "application/json"
+			})
+			if (response.data.success) {
+				setInvioceNumber(response.data.result.invoice_number)
+				//   let qty = `${
+				//     data?.item_details?.length > 1
+				//       ? data?.item_details?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
+				//       : data?.item_details?.length
+				//       ? data?.item_details[0]?.b
+				//       : 0
+				//   }:${
+				//     data?.item_details?.length > 1
+				//       ? data?.item_details?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
+				//       : data?.item_details?.length
+				//       ? data?.item_details[0]?.p
+				//       : 0
+				//   }`;
+				//   postActivity({
+				//     activity: "Order End",
+				//     range: data?.item_details?.length,
+				//     qty,
+				//     amt: data.order_grandtotal || 0,
+				//   });
+				if (response.data.incentives) {
+					setCheckNumberPopup(response.data.incentives)
+				}
 			}
-		})
-		if (response.data.success) {
-			setInvioceNumber(response.data.result.invoice_number)
-			//   let qty = `${
-			//     data?.item_details?.length > 1
-			//       ? data?.item_details?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
-			//       : data?.item_details?.length
-			//       ? data?.item_details[0]?.b
-			//       : 0
-			//   }:${
-			//     data?.item_details?.length > 1
-			//       ? data?.item_details?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
-			//       : data?.item_details?.length
-			//       ? data?.item_details[0]?.p
-			//       : 0
-			//   }`;
-			//   postActivity({
-			//     activity: "Order End",
-			//     range: data?.item_details?.length,
-			//     qty,
-			//     amt: data.order_grandtotal || 0,
-			//   });
-			console.log(response.data.incentives)
-			setLoading(false)
-			if (response.data.incentives) {
-				setCheckNumberPopup(response.data.incentives)
-				return
-			}
-		} else {
+		} catch (error) {
+			console.log(error)
+		} finally {
 			setLoading(false)
 		}
 	}
@@ -846,7 +849,6 @@ const LinkedCounter = () => {
 						className="cartBtn"
 						style={{ position: "absolute" }}
 						onClick={async () => {
-							setLoading(true)
 							//   const db = await openDB(
 							//     "BT",
 							//     +localStorage.getItem("IDBVersion") || 1
@@ -1237,7 +1239,6 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 }
 function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 	const [item, setItem] = useState([])
-	const [discount, setDiscount] = useState(0)
 	useEffect(() => {
 		setItem(() => {
 			let data = itemsData.find(a => a.item_uuid === holdPopup.item_uuid)
@@ -1378,7 +1379,6 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 													color: "#000"
 												}}
 												onChange={e => {
-													setDiscount(e.target.value)
 													let item_price = +item.item_price * +item.conversion
 													setItem(prev => ({
 														...prev,
@@ -1419,7 +1419,6 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 }
 function NewUserForm({ onSave, popupInfo, setOrder, order }) {
 	const [data, setdata] = useState({})
-	const [errMassage, setErrorMassage] = useState("")
 	useEffect(() => {
 		let data = order.items?.find(a => a.item_uuid === popupInfo.item_uuid)
 		setdata({
@@ -1517,7 +1516,6 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
 									</label>
 								</div>
 							</div>
-							<i style={{ color: "red" }}>{errMassage === "" ? "" : "Error: " + errMassage}</i>
 
 							<button type="submit" className="submit">
 								Save changes
@@ -1534,7 +1532,6 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
 }
 function DiscountPopup({ onSave, setOrder, order }) {
 	const [data, setdata] = useState({})
-	const [errMassage, setErrorMassage] = useState("")
 	const [itemsData, setItemsData] = useState([])
 	const { counter_uuid } = useParams()
 	const submitHandler = async e => {
@@ -1608,7 +1605,6 @@ function DiscountPopup({ onSave, setOrder, order }) {
 									</div>
 								))}
 							</div>
-							<i style={{ color: "red" }}>{errMassage === "" ? "" : "Error: " + errMassage}</i>
 
 							<button type="submit" className="submit">
 								Save changes

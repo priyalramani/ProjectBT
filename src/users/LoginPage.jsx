@@ -9,7 +9,7 @@ const LoginPage = ({ setUserType }) => {
 	const [isLoading, setIsLoading] = useState(false)
 	const [userData, setUserData] = useState({
 		login_username: "",
-		login_password: "",
+		login_password: ""
 	})
 
 	const onChange = e => setUserData(i => ({ ...i, [e.target.name]: e?.target?.value?.replaceAll(" ", "") }))
@@ -23,8 +23,8 @@ const LoginPage = ({ setUserType }) => {
 				url: "/users/login",
 				data: userData,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				let data = response.data.result
@@ -45,8 +45,8 @@ const LoginPage = ({ setUserType }) => {
 					url: "/users/getDetails",
 					data: userData,
 					headers: {
-						"Content-Type": "application/json",
-					},
+						"Content-Type": "application/json"
+					}
 				})
 				data = result.data.result
 				let Version = +localStorage.getItem("IDBVersion") + 1
@@ -54,10 +54,10 @@ const LoginPage = ({ setUserType }) => {
 					upgrade(db) {
 						for (const property in data) {
 							db.createObjectStore(property, {
-								keyPath: "IDENTIFIER",
+								keyPath: "IDENTIFIER"
 							})
 						}
-					},
+					}
 				})
 				const exitFunction = () => {
 					let time = new Date()
@@ -109,9 +109,10 @@ const LoginPage = ({ setUserType }) => {
 					setNotification(null)
 					setIsLoading(false)
 				}, 5000)
-				setIsLoading(false)
 			}
 		} catch (error) {
+			setIsLoading(false)
+		} finally {
 			setIsLoading(false)
 		}
 	}
@@ -172,7 +173,8 @@ const LoginPage = ({ setUserType }) => {
 									dur="1s"
 									repeatCount="indefinite"
 									keyTimes="0;1"
-									values="0 50 51;360 50 51"></animateTransform>
+									values="0 50 51;360 50 51"
+								></animateTransform>
 							</path>
 						</svg>
 					</button>

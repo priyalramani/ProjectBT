@@ -41,6 +41,7 @@ const SelectedCounterOrder = () => {
 
 	const [invoice_number, setInvioceNumber] = useState(false)
 	const [loading, setLoading] = useState(false)
+
 	const Navigate = useNavigate()
 	const callBilling = async () => {
 		let counter = counters.find(a => order.counter_uuid === a.counter_uuid)
@@ -186,70 +187,70 @@ const SelectedCounterOrder = () => {
 	}, [counter])
 
 	const postOrder = async orderData => {
-		console.log({ orderData })
-		let data = {
-			...orderData,
-			order_status: orderData?.order_status || "R",
-			order_uuid: uuid(),
-			opened_by: 0,
-			item_details: orderData.items.map(a => ({
-				...a,
-				b: a.b,
-				p: a.p,
-				unit_price: a.price,
-				gst_percentage: a.item_gst,
-				status: 0,
-				price: a.price || a.item_price
-			})),
-			status: [
-				{
-					stage: orderData.others.stage,
-					time: orderData.others.time,
-					user_uuid: orderData.others.user_uuid
+		try {
+			let data = {
+				...orderData,
+				order_status: orderData?.order_status || "R",
+				order_uuid: uuid(),
+				opened_by: 0,
+				item_details: orderData.items.map(a => ({
+					...a,
+					b: a.b,
+					p: a.p,
+					unit_price: a.price,
+					gst_percentage: a.item_gst,
+					status: 0,
+					price: a.price || a.item_price
+				})),
+				status: [
+					{
+						stage: orderData.others.stage,
+						time: orderData.others.time,
+						user_uuid: orderData.others.user_uuid
+					}
+				]
+			}
+			const response = await axios({
+				method: "post",
+				url: "/orders/postOrder",
+				data,
+				headers: {
+					"Content-Type": "application/json"
 				}
-			]
-		}
-		console.log(data)
-		const response = await axios({
-			method: "post",
-			url: "/orders/postOrder",
-			data,
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-		if (response.data.success) {
-			console.log(response.data)
-			setInvioceNumber(response.data.result.invoice_number)
-			let qty = `${
-				data?.item_details?.length > 1
-					? data?.item_details?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
-					: data?.item_details?.length
-					? data?.item_details[0]?.b
-					: 0
-			}:${
-				data?.item_details?.length > 1
-					? data?.item_details?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
-					: data?.item_details?.length
-					? data?.item_details[0]?.p
-					: 0
-			}`
-			postActivity({
-				activity: "Order End",
-				range: data?.item_details?.length,
-				qty,
-				amt: data.order_grandtotal || 0
 			})
-			console.log(response.data.incentives)
-			setLoading(false)
-			if (response.data.incentives) {
-				setCheckNumberPopup(response.data.incentives)
-				return
+			if (response.data.success) {
+				console.log(response.data)
+				setInvioceNumber(response.data.result.invoice_number)
+				let qty = `${
+					data?.item_details?.length > 1
+						? data?.item_details?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
+						: data?.item_details?.length
+						? data?.item_details[0]?.b
+						: 0
+				}:${
+					data?.item_details?.length > 1
+						? data?.item_details?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
+						: data?.item_details?.length
+						? data?.item_details[0]?.p
+						: 0
+				}`
+				postActivity({
+					activity: "Order End",
+					range: data?.item_details?.length,
+					qty,
+					amt: data.order_grandtotal || 0
+				})
+				if (response.data.incentives) {
+					setCheckNumberPopup(response.data.incentives)
+				}
 			}
-		} else {
+		} catch (error) {
+			console.log(error)
+		} finally {
 			setLoading(false)
 		}
 	}
+
 	const postActivity = async (others = {}) => {
 		let time = new Date()
 		let data = {

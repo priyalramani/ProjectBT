@@ -11,23 +11,25 @@ const Processing = () => {
 	const Location = useLocation()
 	const getTripData = async () => {
 		setLoading(true)
-		const response = await axios({
-			method: "post",
-			data: { user_uuid: localStorage.getItem("user_uuid") },
-			url: Location.pathname.includes("checking")
-				? "/trips/GetCheckingTripList"
-				: Location.pathname.includes("delivery")
-				? "/trips/GetDeliveryTripList"
-				: "/trips/GetProcessingTripList",
+		try {
+			const response = await axios({
+				method: "post",
+				data: { user_uuid: localStorage.getItem("user_uuid") },
+				url: Location.pathname.includes("checking")
+					? "/trips/GetCheckingTripList"
+					: Location.pathname.includes("delivery")
+					? "/trips/GetDeliveryTripList"
+					: "/trips/GetProcessingTripList",
 
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-		if (response.data.success) {
-			setTripData(response.data.result)
-			setLoading(false)
-		}
+				headers: {
+					"Content-Type": "application/json"
+				}
+			})
+			if (response.data.success) {
+				setTripData(response.data.result)
+			}
+		} catch (error) {}
+		setLoading(false)
 	}
 	useEffect(() => {
 		getTripData()
@@ -41,16 +43,18 @@ const Processing = () => {
 					style={{
 						width: "100%",
 						justifyContent: "space-between",
-						paddingRight: "5px",
-					}}>
+						paddingRight: "5px"
+					}}
+				>
 					<IoArrowBackOutline className="user_Back_icon" onClick={() => Navigate("/users")} />
 					<h1
 						style={{
 							width: "80%",
 							textAlign: "left",
 							marginLeft: "40px",
-							textTransform: "capitalize",
-						}}>
+							textTransform: "capitalize"
+						}}
+					>
 						{Location?.pathname?.split("/")?.filter(i => i)?.[1]}
 					</h1>
 
@@ -74,8 +78,9 @@ const Processing = () => {
 					marginTop: "20px",
 					backgroundColor: "#f2f2f2",
 					overflowY: "scroll",
-					paddingBottom: "100px",
-				}}>
+					paddingBottom: "100px"
+				}}
+			>
 				{tripData.length ? (
 					tripData
 						?.filter(a => a.trip_title && a.orderLength)
@@ -100,7 +105,8 @@ const Processing = () => {
 										}/` + data?.trip_uuid
 
 									Navigate(link)
-								}}>
+								}}
+							>
 								<div className="service">
 									<span>{data.trip_title}</span>
 								</div>
@@ -114,17 +120,15 @@ const Processing = () => {
 				<div className="overlay">
 					<div className="flex" style={{ width: "40px", height: "40px" }}>
 						<svg viewBox="0 0 100 100">
-							<path
-								d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-								fill="#ffffff"
-								stroke="none">
+							<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
 								<animateTransform
 									attributeName="transform"
 									type="rotate"
 									dur="1s"
 									repeatCount="indefinite"
 									keyTimes="0;1"
-									values="0 50 51;360 50 51"></animateTransform>
+									values="0 50 51;360 50 51"
+								></animateTransform>
 							</path>
 						</svg>
 					</div>

@@ -7,6 +7,7 @@ import axios from "axios"
 import { Phone } from "@mui/icons-material"
 import { openDB } from "idb"
 import DiliveryReplaceMent from "../components/DiliveryReplaceMent"
+
 const OutstangingsCollection = () => {
 	const Navigate = useNavigate()
 
@@ -16,10 +17,8 @@ const OutstangingsCollection = () => {
 	const [order, setOrder] = useState()
 	const [itemsData, setItemsData] = useState([])
 	const [tags, setTags] = useState([])
-	const [phonePopup, setPhonePopup] = useState(false)
 
 	const [warehouse, setWarehouse] = useState([])
-
 	const [paymentModes, setPaymentModes] = useState([])
 	const [counters, setCounters] = useState([])
 
@@ -43,8 +42,8 @@ const OutstangingsCollection = () => {
 			url: `"/warehouse/GetWarehouseList"`,
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setWarehouse(response.data.result)
 	}
@@ -54,8 +53,8 @@ const OutstangingsCollection = () => {
 			url: `/orders/GetOrder/${order_uuid}`,
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setOrder(response.data.result)
 	}
@@ -65,8 +64,8 @@ const OutstangingsCollection = () => {
 			url: "/Outstanding/getTagOutstanding/" + collection_tag_uuid,
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log("users", response)
 		if (response.data.success) setItemsData(response.data.result)
@@ -78,8 +77,8 @@ const OutstangingsCollection = () => {
 			url: "/collectionTags/getUserActiveTag/" + localStorage.getItem("user_uuid"),
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log("users", response)
 		if (response.data.success) setTags(response.data.result)
@@ -102,7 +101,7 @@ const OutstangingsCollection = () => {
 					return {
 						...a,
 						counter_title: counterData?.counter_title || "-",
-						mobile: counterData?.mobile || [],
+						mobile: counterData?.mobile || []
 					}
 				})
 				?.filter(
@@ -116,9 +115,7 @@ const OutstangingsCollection = () => {
 	const TagsList = useMemo(
 		() =>
 			tags?.filter(
-				a =>
-					!filterTitle ||
-					a.invoice_number.toString().toLocaleLowerCase().includes(filterTitle.toLocaleLowerCase())
+				a => !filterTitle || a.invoice_number.toString().toLocaleLowerCase().includes(filterTitle.toLocaleLowerCase())
 			) || [],
 		[filterTitle, tags]
 	)
@@ -131,8 +128,9 @@ const OutstangingsCollection = () => {
 						style={{
 							width: "100%",
 							justifyContent: "space-between",
-							paddingRight: "5px",
-						}}>
+							paddingRight: "5px"
+						}}
+					>
 						<IoArrowBackOutline
 							className="user_Back_icon"
 							onClick={() => {
@@ -166,8 +164,9 @@ const OutstangingsCollection = () => {
 						top: "0",
 						display: "flex",
 						minHeight: "85vh",
-						flexDirection: "column",
-					}}>
+						flexDirection: "column"
+					}}
+				>
 					<div id="item-sales-top">
 						<div
 							id="date-input-container"
@@ -176,8 +175,9 @@ const OutstangingsCollection = () => {
 								display: "flex",
 								alignItems: "center",
 								justifyContent: "space-between",
-								width: "100%",
-							}}>
+								width: "100%"
+							}}
+						>
 							<input
 								type="text"
 								onChange={e => setFilterTitle(e.target.value)}
@@ -191,8 +191,9 @@ const OutstangingsCollection = () => {
 						className="user-table"
 						style={{
 							width: order || outstandingList?.length ? "max-content" : "100%",
-							height: "fit-content",
-						}}>
+							height: "fit-content"
+						}}
+					>
 						<thead>
 							{order ? (
 								<tr>
@@ -249,12 +250,11 @@ const OutstangingsCollection = () => {
 											style={{
 												height: "30px",
 												backgroundColor: "#fff",
-												color: "#000",
-											}}>
+												color: "#000"
+											}}
+										>
 											<td>{i + 1}</td>
-											<td colSpan={2}>
-												{items.find(a => a.item_uuid === item.item_uuid)?.item_title}
-											</td>
+											<td colSpan={2}>{items.find(a => a.item_uuid === item.item_uuid)?.item_title}</td>
 											<td>{items.find(a => a.item_uuid === item.item_uuid)?.mrp}</td>
 
 											<td>{item.b + ":" + ((+item.p || 0) + (+item.free || 0))}</td>
@@ -272,8 +272,9 @@ const OutstangingsCollection = () => {
 												key={Math.random()}
 												style={{
 													height: "30px",
-													backgroundColor: "#fff",
-												}}>
+													backgroundColor: "#fff"
+												}}
+											>
 												<td>{i + 1}</td>
 												<td>{item.amount}</td>
 
@@ -288,11 +289,7 @@ const OutstangingsCollection = () => {
 															onClick={e => {
 																e.stopPropagation()
 																if (item.mobile.length === 1) {
-																	window.location.assign(
-																		"tel:" + item?.mobile[0]?.mobile
-																	)
-																} else {
-																	setPhonePopup(item.mobile)
+																	window.location.assign("tel:" + item?.mobile[0]?.mobile)
 																}
 															}}
 														/>
@@ -311,7 +308,8 @@ const OutstangingsCollection = () => {
 																		GetOrder(item.order_uuid)
 																  }
 																: e => {}
-														}>
+														}
+													>
 														Order
 													</button>
 												</td>
@@ -327,8 +325,9 @@ const OutstangingsCollection = () => {
 											key={Math.random()}
 											style={{
 												height: "30px",
-												backgroundColor: "#fff",
-											}}>
+												backgroundColor: "#fff"
+											}}
+										>
 											<td>{i + 1}</td>
 											<td>{item.collection_tag_title}</td>
 											<td>{item.collection_tag_number}</td>
@@ -381,10 +380,9 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
 					amt: "",
 					coin: "",
 					status:
-						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
-						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 							? "0"
-							: 1,
+							: 1
 				}))
 			)
 	}, [PaymentModes])
@@ -415,11 +413,11 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
 					counter_uuid: order.counter_uuid,
 					collection_tag_uuid: order.collection_tag_uuid || "",
 					entry: 0,
-					user_uuid: localStorage.getItem("user_uuid"),
+					user_uuid: localStorage.getItem("user_uuid")
 				},
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 		}
 
@@ -430,11 +428,11 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
 				order_uuid: order.order_uuid,
 				counter_uuid: order.counter_uuid,
 				outstanding_uuid: order.outstanding_uuid,
-				amount,
+				amount
 			},
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 
 		if (response.data.success) {
@@ -457,16 +455,14 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
 						style={{
 							height: "fit-content",
 							padding: "10px",
-							width: "fit-content",
-						}}>
+							width: "fit-content"
+						}}
+					>
 						<div style={{ overflowY: "scroll" }}>
 							<form className="form">
 								<div className="formGroup">
 									{PaymentModes?.map(item => (
-										<div
-											className="row"
-											style={{ flexDirection: "row", alignItems: "center" }}
-											key={item.mode_uuid}>
+										<div className="row" style={{ flexDirection: "row", alignItems: "center" }} key={item.mode_uuid}>
 											<div style={{ width: "50px" }}>{item.mode_title}</div>
 											<label className="selectLabel flex" style={{ width: "80px" }}>
 												<input
@@ -481,7 +477,7 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
 																a.mode_uuid === item.mode_uuid
 																	? {
 																			...a,
-																			amt: e.target.value,
+																			amt: e.target.value
 																	  }
 																	: a
 															)
@@ -500,7 +496,8 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
 											type="button"
 											className="submit"
 											style={{ color: "#fff", backgroundColor: "#7990dd" }}
-											onClick={() => setPopup(true)}>
+											onClick={() => setPopup(true)}
+										>
 											Deductions
 										</button>
 									</div>
@@ -508,11 +505,7 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
 								</div>
 
 								<div className="flex" style={{ justifyContent: "space-between" }}>
-									<button
-										type="button"
-										style={{ backgroundColor: "red" }}
-										className="submit"
-										onClick={onSave}>
+									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
 										Cancel
 									</button>
 									<button type="button" className="submit" onClick={submitHandler}>
@@ -535,7 +528,8 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
 									dur="1s"
 									repeatCount="indefinite"
 									keyTimes="0;1"
-									values="0 50 51;360 50 51"></animateTransform>
+									values="0 50 51;360 50 51"
+								></animateTransform>
 							</path>
 						</svg>
 					</div>
@@ -555,7 +549,7 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
 							replacement: e?.actual || 0,
 							shortage: e?.shortage || 0,
 							adjustment: e?.adjustment || 0,
-							adjustment_remarks: e?.adjustment_remarks || "",
+							adjustment_remarks: e?.adjustment_remarks || ""
 						})
 					}
 					data={data}

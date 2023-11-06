@@ -42,15 +42,9 @@ export function OrderDetails({
 	warehouseData = [],
 	reminder = null
 }) {
-	const {
-		setNotification,
-		promptState,
-		setPromptState,
-		getSpecialPrice,
-		saveSpecialPrice,
-		spcPricePrompt,
-		sendPaymentReminders
-	} = useContext(context)
+	const [promptLocalState, setPromptLocalState] = useState(null)
+	const { setNotification, getSpecialPrice, saveSpecialPrice, spcPricePrompt, sendPaymentReminders } = useContext(context)
+	const [printConfig, setPrintConfig] = useState({})
 	const [counters, setCounters] = useState([])
 	const [waiting, setWaiting] = useState(false)
 	const [caption, setCaption] = useState("")
@@ -106,11 +100,11 @@ export function OrderDetails({
 			setOrder(response.data.result)
 			const reason = response?.data?.result?.status?.find(s => +s.stage === 5)?.cancellation_reason
 			if (reason)
-				setPromptState({
+				setPromptLocalState({
 					active: true,
 					heading: "Cancellation Reason",
 					message: reason,
-					actions: [{ label: "Close", classname: "confirm", action: () => setPromptState(null) }]
+					actions: [{ label: "Close", classname: "confirm", action: () => setPromptLocalState(null) }]
 				})
 		}
 	}
@@ -255,11 +249,56 @@ export function OrderDetails({
 		return componentRef.current
 	}, [])
 
-	const handlePrint = useReactToPrint({
+	const invokePrint = useReactToPrint({
 		content: reactToPrintContent,
 		documentTitle: "Statement",
-		removeAfterPrint: true
+		removeAfterPrint: true,
+		onAfterPrint: () => (printConfig ? setPrintConfig(null) : null)
 	})
+
+	const handlePrint = () => {
+		console.log("Print")
+		setPromptLocalState({
+			active: true,
+			heading: "Print pending payment summary?",
+			message: "If yes, counter's pending payment summary will be included in the order print.",
+			actions: [
+				{
+					label: "No",
+					classname: "cancel",
+					action: () => {
+						setPromptLocalState(null)
+						invokePrint()
+					}
+				},
+				{
+					label: "Yes",
+					classname: "confirm",
+					action: async () => {
+						const response = await axios.get(`/orders/paymentPending/${orderData?.counter_uuid}`)
+						const counterOrders = response?.data?.result
+							?.sort((a, b) => +a.time_1 - +b.time_1)
+							?.reduce(
+								(data, i) => ({
+									...data,
+									[i.counter_uuid]: {
+										orders: (data?.[i.counter_uuid]?.orders || []).concat([i]),
+										numbers:
+											data?.[i.counter_uuid]?.numbers ||
+											counter?.find(c => c?.counter_uuid === i?.counter_uuid)?.mobile?.map(m => m?.mobile)
+									}
+								}),
+								{}
+							)
+
+						console.log({ counterOrders })
+						setPromptLocalState(null)
+						setPrintConfig({ pendingPayments: true, counterOrders })
+					}
+				}
+			]
+		})
+	}
 
 	const getUsers = async () => {
 		if (userData.length) {
@@ -900,23 +939,23 @@ export function OrderDetails({
 	const [additionalNumbers, setAdditionalNumbers] = useState({ count: 0, values: [] })
 	const [userSelection, setUserSelection] = useState([])
 
-	const recreateOrder = async e => {
-		;(e.currentTarget || e.target.parentElement).disabled = true
+	const recreateOrder = async copyStages => {
 		try {
-			const oldOrder = order
+			setPromptLocalState(null)
 			const { time_1, time_2 } = getInititalValues()
-			console.log({ oldOrder })
-
+			const oldOrder = order
 			const newOrder = {
-				status: [
-					{
-						stage: "0",
-						time: Date.now(),
-						user_uuid: localStorage.getItem("user_uuid")
-					}
-				],
-				time_1: time_1 + Date.now(),
-				time_2: time_2 + Date.now(),
+				status: copyStages
+					? oldOrder?.status?.filter(i => +i.stage !== 5)
+					: [
+							{
+								stage: "0",
+								time: Date.now(),
+								user_uuid: localStorage.getItem("user_uuid")
+							}
+					  ],
+				time_1: copyStages ? oldOrder?.time_1 : time_1 + Date.now(),
+				time_2: copyStages ? oldOrder?.time_2 : time_2 + Date.now(),
 				priority: oldOrder?.priority,
 				order_type: oldOrder?.order_type,
 				item_details: oldOrder?.item_details?.map(item => ({
@@ -963,8 +1002,18 @@ export function OrderDetails({
 			setNotification({ success: false, message: `Failed to recreate order!` })
 		}
 		setTimeout(() => setNotification(null), 5000)
-		if (e.target.type === "button") e.target.disabled = false
-		else (e.currentTarget || e.target.parentElement).disabled = false
+	}
+
+	const copyStageConfirmation = () => {
+		setPromptLocalState({
+			active: true,
+			heading: "Copy order stages",
+			message: "Do you want to copy the current order stages to new order?",
+			actions: [
+				{ label: "Yes, copy stages", classname: "confirm", action: () => recreateOrder(true) },
+				{ label: "No, start from processing", classname: "confirm", action: () => recreateOrder(null) }
+			]
+		})
 	}
 
 	const isCancelled = order?.status?.find(i => +i.stage === 5)
@@ -1185,9 +1234,12 @@ export function OrderDetails({
 											if (
 												!window.location.pathname.includes("completeOrderReport") &&
 												(window.location.pathname.includes("admin") || window.location.pathname.includes("trip"))
-											)
+											) {
 												handleWarehouseChacking()
-											else handlePrint()
+											} else {
+												console.log("Invoked: Print")
+												handlePrint()
+											}
 										}}
 									>
 										Print
@@ -1980,7 +2032,7 @@ export function OrderDetails({
 								<button
 									type="button"
 									className="order-total recreate-order-btn"
-									onClick={recreateOrder}
+									onClick={copyStageConfirmation}
 									style={{
 										padding: "10px 14px 10px 10px",
 										display: "flex",
@@ -2039,7 +2091,7 @@ export function OrderDetails({
 				</div>
 			</div>
 
-			{promptState?.active && <Prompt {...promptState} />}
+			{promptLocalState?.active && <Prompt {...promptLocalState} />}
 
 			{waiting ? (
 				<div className="overlay" style={{ zIndex: "99999999999999999" }}>
@@ -2132,7 +2184,7 @@ export function OrderDetails({
 			{taskPopup ? (
 				<TaskPopupMenu
 					onSave={() => {
-						handlePrint()
+						invokePrint()
 						setTaskPopup(false)
 					}}
 					taskData={taskPopup}
@@ -2324,6 +2376,8 @@ export function OrderDetails({
 				paymentModes={paymentModes}
 				counters={counter}
 				charges={appliedCounterCharges}
+				print={invokePrint}
+				{...printConfig}
 			/>
 
 			{deductionsPopup ? (
@@ -2354,7 +2408,7 @@ export function OrderDetails({
 const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePopup, HoldOrder }) => {
 	const [disable, setDisabled] = useState(true)
 	const [reason, setReason] = useState("")
-	const [sendNotification, setSendNotification] = useState(true)
+	const [sendNotification, setSendNotification] = useState()
 
 	useEffect(() => {
 		setTimeout(() => setDisabled(false), deletePopup === "hold" ? 100 : 0)
@@ -2455,7 +2509,7 @@ const DeleteOrderPopup = ({ onSave, order, counters, items, onDeleted, deletePop
 					<input
 						type="checkbox"
 						id="sent-cancellation-notification"
-						value={sendNotification}
+						checked={sendNotification}
 						onChange={e => setSendNotification(e.target.checked)}
 					/>
 					<label htmlFor="sent-cancellation-notification">Send whatsapp update to counter?</label>

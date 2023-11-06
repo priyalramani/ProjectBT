@@ -10,6 +10,7 @@ import { MdOutlineOpenInNew } from "react-icons/md"
 import { v4 as uuid } from "uuid"
 import Loader from "../components/Loader"
 import Popup from "./Popup"
+
 const Orders = ({ refreshDb }) => {
 	const [counters, setCounters] = useState([])
 	const [counterFilter, setCounterFilter] = useState("")
@@ -60,39 +61,42 @@ const Orders = ({ refreshDb }) => {
 
 	const locationHandler = () => {
 		if (!navigator.geolocation) return console.log("Geolocation is not supported by this browser.")
+		try {
+			const counter_uuid = locationState?.counter_uuid
+			setLocationState(i => ({ ...i, active: false }))
+			setLoading(true)
 
-		const counter_uuid = locationState?.counter_uuid
-		setLoading(true)
-		setLocationState(i => ({ ...i, active: false }))
-
-		navigator.geolocation.getCurrentPosition(async position => {
-			try {
-				const location_coords = {
-					latitude: position.coords.latitude,
-					longitude: +position.coords.longitude
+			navigator.geolocation.getCurrentPosition(async position => {
+				try {
+					const location_coords = {
+						latitude: position.coords.latitude,
+						longitude: +position.coords.longitude
+					}
+					const response = await axios.patch("/counters/update_location_coords", {
+						counter_uuid,
+						location_coords
+					})
+					if (response.data.success)
+						setCounters(state =>
+							state.map(i => {
+								if (i.counter_uuid === counter_uuid) {
+									const counter = { ...i, location_coords }
+									openDB("BT", +localStorage.getItem("IDBVersion") || 1).then(db =>
+										db.transaction("counter", "readwrite").objectStore("counter").put(counter)
+									)
+									return counter
+								} else return i
+							})
+						)
+				} catch (error) {
+					console.error(error)
 				}
-				const response = await axios.patch("/counters/update_location_coords", {
-					counter_uuid,
-					location_coords
-				})
-				if (response.data.success)
-					setCounters(state =>
-						state.map(i => {
-							if (i.counter_uuid === counter_uuid) {
-								const counter = { ...i, location_coords }
-								openDB("BT", +localStorage.getItem("IDBVersion") || 1).then(db =>
-									db.transaction("counter", "readwrite").objectStore("counter").put(counter)
-								)
-								return counter
-							} else return i
-						})
-					)
-			} catch (error) {
-				console.error(error)
-			} finally {
-				setLoading(false)
-			}
-		})
+			})
+		} catch (err) {
+			console.log(err)
+		} finally {
+			setLoading(false)
+		}
 	}
 
 	const deleteLocation = async () => {

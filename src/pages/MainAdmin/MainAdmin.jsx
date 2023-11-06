@@ -14,7 +14,6 @@ import { useReactToPrint } from "react-to-print"
 import Select from "react-select"
 import { Billing } from "../../Apis/functions"
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
-import OrderPrint from "../../components/prints/OrderPrint"
 import ChangeStage from "../../components/ChangeStage"
 import MessagePopup from "../../components/MessagePopup"
 import TaskPopupMenu from "../../components/TaskPopupMenu"
@@ -24,6 +23,7 @@ import { useLocation } from "react-router-dom"
 import context from "../../context/context"
 import { IoCloseCircle } from "react-icons/io5"
 import OrderPrintWrapper from "../../components/OrderPrintWrapper"
+import PendingPaymentsSummary from "../../components/prints/PendingPaymentsSummary"
 
 const MainAdmin = () => {
 	const [isCollectionTags, setCollectionTags] = useState(false)
@@ -99,7 +99,6 @@ const MainAdmin = () => {
 				{}
 			)
 
-		console.log({ counterOrders })
 		setPrintDependencies(counterOrders)
 	}
 
@@ -1657,11 +1656,13 @@ const MainAdmin = () => {
 			)}
 
 			{printDependencies && (
-				<PendingPaymentsSummary
-					print={printPaymentSummary}
-					counterOrders={printDependencies}
-					paymentsSummaryRef={paymentsSummaryRef}
-				/>
+				<div className="overlay" style={{ opacity: 0, zIndex: "-1" }}>
+					<PendingPaymentsSummary
+						print={printPaymentSummary}
+						counterOrders={printDependencies}
+						paymentsSummaryRef={paymentsSummaryRef}
+					/>
+				</div>
 			)}
 
 			{showSelect && (
@@ -3207,65 +3208,6 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose, warehouse }) 
 					<button type="button" onClick={() => onClose()} className="closeButton">
 						x
 					</button>
-				</div>
-			</div>
-		</div>
-	)
-}
-
-const PendingPaymentsSummary = ({ print, counterOrders, paymentsSummaryRef }) => {
-	const itemsQuantity = items =>
-		Object.values(
-			items?.reduce(
-				(quantities, i) => ({
-					b: (quantities?.b || 0) + +i?.b,
-					p: (quantities?.p || 0) + +i?.p
-				}),
-				{}
-			)
-		)?.join(":")
-
-	useEffect(() => {
-		print()
-	}, [print])
-
-	const getDate = i => {
-		const date = new Date(i)
-		return [date.getDate(), date.getMonth() + 1, date.getFullYear()].map(i => i.toString().padStart(2, "0")).join("/")
-	}
-
-	return (
-		<div className="overlay" style={{ opacity: 0, zIndex: "-1" }}>
-			<div id="pending-payments-summary" ref={paymentsSummaryRef}>
-				<h3>{new Date().toGMTString().slice(0, -4)}</h3>
-				<div>
-					{Object.keys(counterOrders)?.map(counter_uuid => (
-						<div key={counter_uuid} className="counter-wrapper">
-							<div>
-								<h3>{counterOrders[counter_uuid]?.orders?.[0]?.counter_title}</h3>
-								<span>{counterOrders[counter_uuid]?.numbers?.[0]}</span>
-							</div>
-							{/* <span className="numbers">9876543210, 9876543210, 9876543210</span> */}
-							<table>
-								<tbody>
-									{counterOrders[counter_uuid]?.orders?.map(order => (
-										<tr>
-											<td>{getDate(+order?.time_1)}</td>
-											<td>{(order?.order_type === "I" ? "N" : "E") + order?.invoice_number}</td>
-											<td>Rs.{order?.order_grandtotal}</td>
-											<td>{itemsQuantity(order?.item_details)}</td>
-											<td>[ {order?.notes?.join(", ")} ]</td>
-										</tr>
-									))}
-									<tr>
-										<td colSpan={5} style={{ textAlign: "right" }}>
-											TOTAL: Rs.{counterOrders[counter_uuid]?.orders?.reduce((sum, i) => sum + +i?.order_grandtotal, 0)}
-										</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					))}
 				</div>
 			</div>
 		</div>
