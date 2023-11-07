@@ -256,48 +256,57 @@ export function OrderDetails({
 		onAfterPrint: () => (printConfig ? setPrintConfig(null) : null)
 	})
 
-	const handlePrint = () => {
-		console.log("Print")
-		setPromptLocalState({
-			active: true,
-			heading: "Print pending payment summary?",
-			message: "If yes, counter's pending payment summary will be included in the order print.",
-			actions: [
-				{
-					label: "No",
-					classname: "cancel",
-					action: () => {
-						setPromptLocalState(null)
-						invokePrint()
-					}
-				},
-				{
-					label: "Yes",
-					classname: "confirm",
-					action: async () => {
-						const response = await axios.get(`/orders/paymentPending/${orderData?.counter_uuid}`)
-						const counterOrders = response?.data?.result
-							?.sort((a, b) => +a.time_1 - +b.time_1)
-							?.reduce(
-								(data, i) => ({
-									...data,
-									[i.counter_uuid]: {
-										orders: (data?.[i.counter_uuid]?.orders || []).concat([i]),
-										numbers:
-											data?.[i.counter_uuid]?.numbers ||
-											counter?.find(c => c?.counter_uuid === i?.counter_uuid)?.mobile?.map(m => m?.mobile)
-									}
-								}),
-								{}
-							)
+	const [printLoading, setPrintLoading] = useState()
 
-						console.log({ counterOrders })
-						setPromptLocalState(null)
-						setPrintConfig({ pendingPayments: true, counterOrders })
-					}
-				}
-			]
-		})
+	const handlePrint = async () => {
+		setPrintLoading(true)
+
+		try {
+			const response = await axios.get(`/orders/paymentPending/${orderData?.counter_uuid}`)
+			if (!response?.data?.result?.length) invokePrint()
+			else
+				setPromptLocalState({
+					active: true,
+					heading: "Print pending payment summary?",
+					message: "If yes, counter's pending payment summary will be included in the order print.",
+					actions: [
+						{
+							label: "No",
+							classname: "cancel",
+							action: () => {
+								setPromptLocalState(null)
+								invokePrint()
+							}
+						},
+						{
+							label: "Yes",
+							classname: "confirm",
+							action: async () => {
+								const counterOrders = response?.data?.result
+									?.sort((a, b) => +a.time_1 - +b.time_1)
+									?.reduce(
+										(data, i) => ({
+											...data,
+											[i.counter_uuid]: {
+												orders: (data?.[i.counter_uuid]?.orders || []).concat([i]),
+												numbers:
+													data?.[i.counter_uuid]?.numbers ||
+													counter?.find(c => c?.counter_uuid === i?.counter_uuid)?.mobile?.map(m => m?.mobile)
+											}
+										}),
+										{}
+									)
+
+								setPromptLocalState(null)
+								setPrintConfig({ pendingPayments: true, counterOrders })
+							}
+						}
+					]
+				})
+		} catch (error) {
+			console.error(error)
+		}
+		setPrintLoading(false)
 	}
 
 	const getUsers = async () => {
@@ -1228,7 +1237,7 @@ export function OrderDetails({
 										Complete Order
 									</button>
 									<button
-										style={{ width: "fit-Content", backgroundColor: "black" }}
+										style={{ width: "fit-Content", backgroundColor: "black", position: "relative" }}
 										className="theme-btn"
 										onClick={() => {
 											if (
@@ -1242,7 +1251,25 @@ export function OrderDetails({
 											}
 										}}
 									>
-										Print
+										<span style={printLoading ? { color: "transparent" } : null}>Print</span>
+										{printLoading ? (
+											<span
+												style={{
+													position: "absolute",
+													top: "50%",
+													left: "50%",
+													translate: "-50% -50%",
+													borderColor: "white",
+													borderBottomColor: "transparent",
+													width: "22px",
+													height: "22px",
+													borderWidth: "2px"
+												}}
+												className="loader"
+											/>
+										) : (
+											<></>
+										)}
 									</button>
 									{editOrder ? (
 										<button

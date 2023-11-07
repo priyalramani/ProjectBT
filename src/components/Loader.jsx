@@ -3,7 +3,7 @@ import React from "react"
 const Loader = ({ visible }) => {
 	return visible ? (
 		<div className="overlay">
-			<span className="loader"></span>
+			<span className="loader" />
 		</div>
 	) : (
 		<></>
