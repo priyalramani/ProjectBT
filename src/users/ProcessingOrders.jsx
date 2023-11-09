@@ -231,7 +231,6 @@ const ProcessingOrders = () => {
 		setBarcodeMessage([])
 
 		try {
-			throw Error("AAYO SOMETHING COOL HERE.")
 			let finalData = []
 			for (let orderObject of dataArray) {
 				let data = orderObject
@@ -363,7 +362,6 @@ const ProcessingOrders = () => {
 				}
 			}
 		} catch (error) {
-			console.log()
 			axios.post("/xpress/sendmessage/error", { error: error.stack }).catch(console.error)
 		}
 		setLoading(false)
