@@ -3,22 +3,28 @@
 import axios from "axios"
 import Select from "react-select"
 import React, { useEffect, useState, useRef } from "react"
+import { openDB } from "idb"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { AiOutlineSearch } from "react-icons/ai"
 import { AiFillPlayCircle } from "react-icons/ai"
-import { openDB } from "idb"
-import { Billing, audioLoopFunction, audioAPIFunction } from "../Apis/functions"
 import { AiOutlineReload } from "react-icons/ai"
 import { IoArrowBackOutline } from "react-icons/io5"
-import { Phone } from "@mui/icons-material"
+import { ConstructionOutlined, Phone } from "@mui/icons-material"
+import { ArrowDropDown } from "@mui/icons-material"
 import CloseIcon from "@mui/icons-material/Close"
+import HomeIcon from "@mui/icons-material/Home"
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline"
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
-import HomeIcon from "@mui/icons-material/Home"
-import { ArrowDropDown } from "@mui/icons-material"
+import { Billing, audioLoopFunction, audioAPIFunction } from "../Apis/functions"
 import DiliveryReplaceMent from "../components/DiliveryReplaceMent"
 const selected_order_label = "SELECTED_PROCESSING_ORDER"
+
 const ProcessingOrders = () => {
+	const params = useParams()
+	const audiosRef = useRef()
+	const Location = useLocation()
+	const Navigate = useNavigate()
+
 	const [BarcodeMessage, setBarcodeMessage] = useState([])
 	const [minMaxPopup, setMinMaxPopup] = useState()
 	const [itemChanged, setItemChanged] = useState([])
@@ -28,7 +34,6 @@ const ProcessingOrders = () => {
 	const [popupBarcode, setPopupBarcode] = useState(false)
 	const [deliveryMessage, setDeliveryMessage] = useState(false)
 	const [holdPopup, setHoldPopup] = useState(false)
-	const params = useParams()
 	const [popupForm, setPopupForm] = useState(false)
 	const [orders, setOrders] = useState([])
 	const [items, setItems] = useState([])
@@ -38,8 +43,6 @@ const ProcessingOrders = () => {
 	const [itemCategories, setItemsCategory] = useState([])
 	const [playCount, setPlayCount] = useState(1)
 	const [selectedOrder, setSelectedOrder] = useState()
-	const audiosRef = useRef()
-	const Location = useLocation()
 	const [playerSpeed, setPlayerSpeed] = useState(1)
 	const [orderCreated, setOrderCreated] = useState(false)
 	const [oneTimeState, setOneTimeState] = useState(false)
@@ -52,8 +55,8 @@ const ProcessingOrders = () => {
 	const [phonePopup, setPhonePopup] = useState(false)
 	const [dropdown, setDropDown] = useState(false)
 	const [filterItemTitle, setFilterItemTile] = useState("")
-	const Navigate = useNavigate()
 	const [notesPopup, setNotesPopup] = useState(false)
+
 	const audioCallback = elem_id => {
 		setItemChanged(prev => [...prev, selectedOrder.item_details.find(a => a.item_uuid === elem_id)])
 		setSelectedOrder(prev => ({
@@ -84,7 +87,6 @@ const ProcessingOrders = () => {
 				"Content-Type": "application/json"
 			}
 		})
-		// console.log("users", response);
 		if (response.data.success) setUsers(response.data.result)
 	}
 
@@ -148,11 +150,11 @@ const ProcessingOrders = () => {
 
 					[]
 				)
-
-				console.log({ sortedOrders })
 				setOrders(sortedOrders)
 			}
-		} catch (error) {}
+		} catch (error) {
+			console.log(error)
+		}
 		setLoading(false)
 	}
 
@@ -191,40 +193,45 @@ const ProcessingOrders = () => {
 	}, [selectedOrder, orders])
 
 	const postActivity = async (others = {}) => {
-		let time = new Date()
-		let data = {
-			user_uuid: localStorage.getItem("user_uuid"),
-			role: Location.pathname.includes("checking")
-				? "Checking"
-				: Location.pathname.includes("delivery")
-				? "Delivery"
-				: "Processing",
-			narration:
-				counters.find(a => a.counter_uuid === selectedOrder.counter_uuid)?.counter_title +
-				(sessionStorage.getItem("route_title") ? ", " + sessionStorage.getItem("route_title") : ""),
-			timestamp: time.getTime(),
-			...others
-		}
-		const response = await axios({
-			method: "post",
-			url: "/userActivity/postUserActivity",
-			data,
-			headers: {
-				"Content-Type": "application/json"
+		try {
+			let time = new Date()
+			let data = {
+				user_uuid: localStorage.getItem("user_uuid"),
+				role: Location.pathname.includes("checking")
+					? "Checking"
+					: Location.pathname.includes("delivery")
+					? "Delivery"
+					: "Processing",
+				narration:
+					counters.find(a => a.counter_uuid === selectedOrder.counter_uuid)?.counter_title +
+					(sessionStorage.getItem("route_title") ? ", " + sessionStorage.getItem("route_title") : ""),
+				timestamp: time.getTime(),
+				...others
 			}
-		})
-		if (response.data.success) {
-			console.log(response)
+			const response = await axios({
+				method: "post",
+				url: "/userActivity/postUserActivity",
+				data,
+				headers: {
+					"Content-Type": "application/json"
+				}
+			})
+			if (response.data.success) {
+				console.log(response)
+			}
+		} catch (error) {
+			console.log(error)
 		}
 	}
 	// console.log("orders", orders);
 	const postOrderData = async (dataArray = selectedOrder ? [selectedOrder] : orders, hold = false, preventPrintUpdate) => {
 		setLoading(true)
 		setprintInvicePopup(null)
-		console.log(dataArray)
 		setPopupBarcode(false)
 		setBarcodeMessage([])
+
 		try {
+			throw Error("AAYO SOMETHING COOL HERE.")
 			let finalData = []
 			for (let orderObject of dataArray) {
 				let data = orderObject
@@ -258,6 +265,7 @@ const ProcessingOrders = () => {
 						}
 					})
 				})
+
 				data = {
 					...data,
 					...billingData,
@@ -330,7 +338,6 @@ const ProcessingOrders = () => {
 				}
 			})
 			if (response.data.success) {
-				console.log(response)
 				sessionStorage.setItem("playCount", playCount)
 				getTripOrders()
 				if (!hold) {
@@ -355,7 +362,10 @@ const ProcessingOrders = () => {
 					})
 				}
 			}
-		} catch (error) {}
+		} catch (error) {
+			console.log()
+			axios.post("/xpress/sendmessage/error", { error: error.stack }).catch(console.error)
+		}
 		setLoading(false)
 	}
 
