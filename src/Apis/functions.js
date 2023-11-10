@@ -212,7 +212,6 @@ export const Billing = async ({
 	let counterCharges = []
 	let counter_charges = []
 	try {
-		console.log({ creating_new })
 		counterCharges = await axios.post(
 			`/counterCharges/list`,
 			creating_new ? { counter_uuid: counter.counter_uuid } : { invoice_number }
@@ -312,7 +311,6 @@ export const Billing = async ({
 		newPriceItems.push(item)
 	}
 
-	console.log({newPriceItems})
 	let order_grandtotal = Math.round(
 		newPriceItems.length > 1
 			? newPriceItems.map(a => +a.item_total || 0).reduce((a, b) => a + b, 0) - replacement - shortage - adjustment

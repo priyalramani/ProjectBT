@@ -223,8 +223,9 @@ const ProcessingOrders = () => {
 			console.log(error)
 		}
 	}
-	// console.log("orders", orders);
+
 	const postOrderData = async (dataArray = selectedOrder ? [selectedOrder] : orders, hold = false, preventPrintUpdate) => {
+
 		setLoading(true)
 		setprintInvicePopup(null)
 		setPopupBarcode(false)
@@ -385,7 +386,6 @@ const ProcessingOrders = () => {
 			}
 		})
 		if (response.data.success) {
-			console.log(response)
 			getTripOrders()
 			setTempQuantity([])
 		}
@@ -1687,7 +1687,7 @@ function CheckingValues({ onSave, BarcodeMessage, postOrderData, selectedOrder }
 									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
 										No
 									</button>
-									<button type="button" className="submit" onClick={postOrderData}>
+									<button type="button" className="submit" onClick={() => postOrderData()}>
 										Yes
 									</button>
 								</div>
