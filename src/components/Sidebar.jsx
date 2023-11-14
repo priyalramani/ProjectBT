@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react"
+import React, { useContext, useMemo } from "react"
 import "./style.css"
 import NavLink from "./Navlink"
 import {
@@ -8,10 +8,10 @@ import {
 } from "@mui/icons-material"
 import AssessmentIcon from "@mui/icons-material/Assessment"
 import AddIcon from "@mui/icons-material/Add"
-import axios from "axios"
 import { useLocation } from "react-router-dom"
 import context from "../context/context"
 import { Version } from "../App"
+
 let titleData = [
 	{ value: "RetailerMarginReport", name: "Retailer Margin Report" },
 	{ value: "SalesmanItemSuggestion", name: "Salesman Item Suggestion" },
@@ -77,10 +77,6 @@ const Sidebar = ({ setCollectionTags }) => {
 						{
 							name: "Adjust Stock",
 							link: "/admin/adjustStock"
-						},
-						{
-							name: "Add Outstanding",
-							link: "/admin/AddOutStanding"
 						}
 					]}
 				/>
@@ -143,16 +139,8 @@ const Sidebar = ({ setCollectionTags }) => {
 							link: "#"
 						},
 						{
-							name: "Signed Bills",
-							link: "/admin/signedBills"
-						},
-						{
 							name: "Tasks",
 							link: "/admin/tasks"
-						},
-						{
-							name: "Collection Tags",
-							link: "#"
 						}
 					]}
 				/>
