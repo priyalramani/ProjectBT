@@ -65,9 +65,9 @@ import CounterCharges from "./pages/Reports/CounterCharges"
 import Loader from "./components/Loader"
 import CounterReport from "./pages/Reports/CounterReport"
 
-export let Version = 164
-// export const server = "http://localhost:9000"
+export let Version = 165
 export const server = "https://api.btgondia.com"
+// export const server = "http://localhost:9000"
 
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))

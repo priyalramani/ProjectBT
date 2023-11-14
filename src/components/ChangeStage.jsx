@@ -22,13 +22,11 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 	}, [selectedWarehouseOrders])
 
 	const onSubmit = async (params = {}) => {
-		let { selectedData = orders, diliveredUser = "", reasons = {} } = params
 		setWaiting(true)
 		try {
-			console.log(selectedData)
+			let { selectedData = orders, diliveredUser = "", reasons = {} } = params
 			let user_uuid = localStorage.getItem("user_uuid")
 			let time = new Date()
-			console.log(stage, data)
 			let status =
 				+data.stage === 0
 					? []
@@ -88,13 +86,11 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 				hold: +data.stage === 0 ? "Y" : a.hold || "N"
 			}))
 
-			console.log(selectedData)
 			if (+data.stage === 5) {
 				let orderData = []
 				for (let obj of selectedData) {
 					obj = {
 						...obj,
-
 						processing_canceled:
 							+stage === 2
 								? obj.processing_canceled?.length
@@ -155,6 +151,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 					onClose()
 				}
 
+				setWaiting(false)
 				return
 			}
 			const response = await axios({
@@ -199,25 +196,27 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 	}
 	const updateWarehouse = async (warehouse_uuid, orderData) => {
 		setWaiting(true)
-		const response = await axios({
-			method: "put",
-			url: "/orders/putOrders",
-			data: [{ ...orderData, warehouse_uuid }],
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-		if (response.data.success) {
-			setSelectedWarehouseOrders(prev => {
-				console.log(prev)
-				if (prev?.length === 1) {
-					setDeliveryPopup(true)
-					return []
-				} else {
-					return prev.filter(a => a.orderData.order_uuid !== orderData.order_uuid)
+		try {
+			const response = await axios({
+				method: "put",
+				url: "/orders/putOrders",
+				data: [{ ...orderData, warehouse_uuid }],
+				headers: {
+					"Content-Type": "application/json"
 				}
 			})
-		}
+			if (response.data.success) {
+				setSelectedWarehouseOrders(prev => {
+					console.log(prev)
+					if (prev?.length === 1) {
+						setDeliveryPopup(true)
+						return []
+					} else {
+						return prev.filter(a => a.orderData.order_uuid !== orderData.order_uuid)
+					}
+				})
+			}
+		} catch (error) {}
 		setWaiting(false)
 	}
 	return (
@@ -364,11 +363,17 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 				""
 			)}
 			{selectedWarehouseOrder ? (
-				<WarehouseUpdatePopup onClose={() => {}} updateChanges={updateWarehouse} popupInfo={selectedWarehouseOrder} />
+				<WarehouseUpdatePopup
+					onClose={() => {}}
+					updateChanges={updateWarehouse}
+					popupInfo={selectedWarehouseOrder}
+				/>
 			) : (
 				""
 			)}
-			{cancelPopup && <CancellationReasons close={() => setCancelPopup(false)} orders={orders} submit={onSubmit} />}
+			{cancelPopup && (
+				<CancellationReasons close={() => setCancelPopup(false)} orders={orders} submit={onSubmit} />
+			)}
 		</>
 	)
 }
@@ -381,7 +386,6 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 	const [error, setError] = useState("")
 	const [popup, setPopup] = useState(false)
 	const [waiting, setWaiting] = useState(false)
-	// const [coinPopup, setCoinPopup] = useState(false);
 	const [data, setData] = useState({})
 	const [outstanding, setOutstanding] = useState({})
 	const [count, setCount] = useState(0)
@@ -392,10 +396,18 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 	time2.setHours(12)
 	useEffect(() => {
 		setOrder(orders[0])
+		setData({
+			actual: orders?.[0]?.replacement || 0,
+			shortage: orders?.[0]?.shortage || 0,
+			adjustment: orders?.[0]?.adjustment || 0,
+			adjustment_remarks: orders?.[0]?.adjustment_remarks || 0
+		})
 	}, [])
 	let reminder = useMemo(() => {
 		return new Date(
-			time2.setDate(time2.getDate() + (counters.find(a => a.counter_uuid === order.counter_uuid)?.payment_reminder_days || 0))
+			time2.setDate(
+				time2.getDate() + (counters.find(a => a.counter_uuid === order.counter_uuid)?.payment_reminder_days || 0)
+			)
 		).getTime()
 	}, [counters, order.counter_uuid])
 	let type = useMemo(() => {
@@ -439,7 +451,8 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 					amt: "",
 					coin: "",
 					status:
-						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
+						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 							? "0"
 							: 1
 				}))
@@ -472,6 +485,7 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 	}
 
 	const submitHandler = async () => {
+		console.log({ orders })
 		if (waiting) {
 			return
 		}
@@ -530,15 +544,21 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 					"Content-Type": "application/json"
 				}
 			})
-		if (response.data.success) {
+		if (response?.data?.success) {
 			if (count + 1 === orders?.length) {
 				postOrderData({ selectedData: [...editedOrders, order], diliveredUser })
+				setWaiting(false)
 				onSave()
 			} else {
 				setEditedOrders(prev => [...prev, order])
 				setOrder(orders[count + 1])
 				setCount(prev => prev + 1)
-				setData({})
+				setData({
+					actual: orders?.[count + 1]?.replacement,
+					shortage: orders?.[count + 1]?.shortage,
+					adjustment: orders?.[count + 1]?.adjustment,
+					adjustment_remarks: orders?.[count + 1]?.adjustment_remarks
+				})
 				// setCoinPopup(false);
 			}
 		}
@@ -595,7 +615,11 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 							<form className="form">
 								<div className="formGroup">
 									{PaymentModes.map(item => (
-										<div className="row" style={{ flexDirection: "row", alignItems: "center" }} key={item.mode_uuid}>
+										<div
+											className="row"
+											style={{ flexDirection: "row", alignItems: "center" }}
+											key={item.mode_uuid}
+										>
 											<div style={{ width: "50px" }}>{item.mode_title}</div>
 											<label className="selectLabel flex" style={{ width: "80px" }}>
 												<input
@@ -652,7 +676,9 @@ function DiliveryPopup({ onSave, postOrderData, users, counters, items, orders }
 														}}
 														onChange={e =>
 															setModes(prev =>
-																prev?.map(a => (a.mode_uuid === item.mode_uuid ? { ...a, remarks: e.target.value } : a))
+																prev?.map(a =>
+																	a.mode_uuid === item.mode_uuid ? { ...a, remarks: e.target.value } : a
+																)
 															)
 														}
 														maxLength={42}

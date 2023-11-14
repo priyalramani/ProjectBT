@@ -24,6 +24,8 @@ import context from "../../context/context"
 import { IoCloseCircle } from "react-icons/io5"
 import OrderPrintWrapper from "../../components/OrderPrintWrapper"
 import PendingPaymentsSummary from "../../components/prints/PendingPaymentsSummary"
+import NotesPopup from "../../components/popups/NotesPopup"
+import Loader from "../../components/Loader"
 
 const MainAdmin = () => {
 	const [isCollectionTags, setCollectionTags] = useState(false)
@@ -64,7 +66,10 @@ const MainAdmin = () => {
 	const [reminderDate, setReminderDate] = useState()
 	const [selectedtasks, setSelectedTasks] = useState(false)
 	const location = useLocation()
+	const [notesState, setNotesState] = useState()
+
 	const { updateServerPdf, setLoading } = useContext(context)
+
 	let user_uuid = localStorage.getItem("user_uuid")
 
 	const paymentsSummaryRef = useRef(null)
@@ -372,7 +377,9 @@ const MainAdmin = () => {
 	const orders = useMemo(
 		() =>
 			ordersData.filter(
-				a => !salesPersoneList.length || salesPersoneList.filter(b => b === a.status.find(b => +b.stage === 1)?.user_uuid).length
+				a =>
+					!salesPersoneList.length ||
+					salesPersoneList.filter(b => b === a.status.find(b => +b.stage === 1)?.user_uuid).length
 			),
 		[ordersData, salesPersoneList]
 	)
@@ -457,8 +464,9 @@ const MainAdmin = () => {
 			{
 				route_uuid: "none",
 				route_title: "Unknown",
-				orderLength: orders.filter(a => counter.filter(c => c.counter_uuid === a.counter_uuid && c.route_uuid === "none")?.length)
-					?.length,
+				orderLength: orders.filter(
+					a => counter.filter(c => c.counter_uuid === a.counter_uuid && c.route_uuid === "none")?.length
+				)?.length,
 				checkingLength: orders.filter(
 					b =>
 						counter.filter(c => c.counter_uuid === b.counter_uuid && c.route_uuid === "none")?.length &&
@@ -590,8 +598,36 @@ const MainAdmin = () => {
 		}
 	}
 
+	const [isLoading, setIsLoading] = useState()
+	const markAsPendingPayment = async updatedData => {
+		setIsLoading(true)
+		try {
+			if (notesState?.index < selectedOrder?.length - 1) {
+				setNotesState(prev => ({
+					...prev,
+					index: prev?.index + 1,
+					data: (prev?.data || []).concat(updatedData)
+				}))
+			} else {
+				const data = (notesState?.data || []).concat([updatedData]).map(i => ({ ...i, payment_pending: 1 }))
+				setNotesState({})
+				await axios.put("/orders/putOrders", data)
+				setOrdersData(prev =>
+					prev.map(i => ({
+						...i,
+						...(data?.find(_i => _i.order_uuid === i.order_uuid) || {})
+					}))
+				)
+			}
+		} catch (error) {
+			console.error(error)
+		}
+		setIsLoading(false)
+	}
+
 	return (
 		<>
+			<Loader visible={isLoading} />
 			<div
 				style={{
 					position: "fixed",
@@ -678,7 +714,9 @@ const MainAdmin = () => {
 				)}
 				<div
 					style={
-						holdOrders ? { backgroundColor: "#f2e017", display: "flex", height: "100%" } : { display: "flex", height: "100%" }
+						holdOrders
+							? { backgroundColor: "#f2e017", display: "flex", height: "100%" }
+							: { display: "flex", height: "100%" }
 					}
 				>
 					<VerticalTabs />
@@ -718,7 +756,6 @@ const MainAdmin = () => {
 									setSalesPersoneFilter(!salesPersoneList.length)
 									setSalesPersoneList([])
 								}}
-								// style={{ padding: "10px" }}
 							>
 								{!salesPersoneList.length ? "Sales Person Filter" : "Cancel Filter"}
 							</button>
@@ -730,21 +767,8 @@ const MainAdmin = () => {
 											setPopupForm(true)
 											setDropDown(false)
 										}}
-										// style={{ padding: "10px" }}
 									>
 										Add Trip
-									</button>
-
-									<button
-										// style={{ padding: "10px" }}
-										className="simple_Logout_button"
-										type="button"
-										onClick={() => {
-											setSelectOrder(true)
-											setDropDown(false)
-										}}
-									>
-										Select
 									</button>
 									{holdOrders ? (
 										<button
@@ -759,37 +783,14 @@ const MainAdmin = () => {
 											Show Running Orders
 										</button>
 									) : (
-										<button
-											// style={{ padding: "10px" }}
-											className="simple_Logout_button"
-											type="button"
-											onClick={() => {
-												setHoldOrders(true)
-												setOrdersData([])
-											}}
-										>
-											Show hold Orders
-										</button>
+										<></>
 									)}
 								</>
 							) : (
 								<>
-									<button
-										// style={{ padding: "10px" }}
-										className="simple_Logout_button"
-										type="button"
-										onClick={() => {
-											setSelectOrder(false)
-											setSelectedOrder([])
-											setDropDown(false)
-										}}
-									>
-										Cancel
-									</button>
 									{selectedOrder?.length ? (
 										<>
 											<button
-												// style={{ padding: "10px" }}
 												className="simple_Logout_button"
 												type="button"
 												onClick={() => {
@@ -800,17 +801,13 @@ const MainAdmin = () => {
 												Assign Trip
 											</button>
 											<button
-												// style={{ padding: "10px" }}
 												className="simple_Logout_button"
 												type="button"
-												onClick={() => {
-													handleWarehouseChacking()
-												}}
+												onClick={() => handleWarehouseChacking()}
 											>
 												Print Invoice
 											</button>
 											<button
-												// style={{ padding: "10px" }}
 												className="simple_Logout_button"
 												type="button"
 												onClick={() => {
@@ -821,24 +818,30 @@ const MainAdmin = () => {
 											>
 												Change Stage
 											</button>
+											<button
+												className="simple_Logout_button"
+												type="button"
+												onClick={() => {
+													setSumaryPopup(true)
+													setDropDown(false)
+												}}
+											>
+												Item Summary
+											</button>
+											<button
+												className="simple_Logout_button"
+												type="button"
+												onClick={() => setNotesState({ active: true, index: 0 })}
+											>
+												Mark As Pending Payment
+											</button>
+											<button type="button" className="simple_Logout_button" onClick={paymentSummaryInvokeHandler}>
+												Pending Payments Summary
+											</button>
 										</>
 									) : (
 										""
 									)}
-									<button
-										// style={{ padding: "10px" }}
-										className="simple_Logout_button"
-										type="button"
-										onClick={() => {
-											setSumaryPopup(true)
-											setDropDown(false)
-										}}
-									>
-										Item Summary
-									</button>
-									<button type="button" className="simple_Logout_button" onClick={paymentSummaryInvokeHandler}>
-										Pending Payments Summary
-									</button>
 								</>
 							)}
 							<button className="simple_Logout_button" onClick={updatePendingPaymentsVisibility}>
@@ -856,7 +859,9 @@ const MainAdmin = () => {
 								{routeOrderLength?.map(route => {
 									const orders_data = orders
 										?.filter(
-											_i => !+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments || !+_i?.payment_pending
+											_i =>
+												!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
+												!+_i?.payment_pending
 										)
 										?.filter(
 											b =>
@@ -887,7 +892,8 @@ const MainAdmin = () => {
 																			c =>
 																				c.counter_uuid === b.counter_uuid &&
 																				(route.route_uuid === c.route_uuid ||
-																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
+																					((!c.route_uuid || c.route_uuid === "none") &&
+																						route.route_uuid === "none"))
 																		)?.length
 																)
 															)
@@ -915,7 +921,8 @@ const MainAdmin = () => {
 																			c =>
 																				c.counter_uuid === a.counter_uuid &&
 																				(route.route_uuid === c.route_uuid ||
-																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
+																					((!c.route_uuid || c.route_uuid === "none") &&
+																						route.route_uuid === "none"))
 																		)?.length && selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
 																)?.length ===
 																orders.filter(
@@ -924,7 +931,8 @@ const MainAdmin = () => {
 																			c =>
 																				c.counter_uuid === a.counter_uuid &&
 																				(route.route_uuid === c.route_uuid ||
-																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
+																					((!c.route_uuid || c.route_uuid === "none") &&
+																						route.route_uuid === "none"))
 																		)?.length
 																)?.length
 																	? setSelectedOrder(
@@ -936,7 +944,8 @@ const MainAdmin = () => {
 																								c =>
 																									c.counter_uuid === a.counter_uuid &&
 																									(route.route_uuid === c.route_uuid ||
-																										((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
+																										((!c.route_uuid || +c.route_uuid === 0) &&
+																											+route.route_uuid === 0))
 																							)?.length && b.order_uuid === a.order_uuid
 																					)?.length
 																			)
@@ -952,7 +961,8 @@ const MainAdmin = () => {
 																											c =>
 																												c.counter_uuid === a.counter_uuid &&
 																												(route.route_uuid === c.route_uuid ||
-																													((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
+																													((!c.route_uuid || +c.route_uuid === 0) &&
+																														+route.route_uuid === 0))
 																										)?.length && b.order_uuid === a.order_uuid
 																								)?.length
 																						),
@@ -962,7 +972,8 @@ const MainAdmin = () => {
 																									c =>
 																										c.counter_uuid === a.counter_uuid &&
 																										(route.route_uuid === c.route_uuid ||
-																											((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
+																											((!c.route_uuid || +c.route_uuid === 0) &&
+																												+route.route_uuid === 0))
 																								)?.length
 																						)
 																				  ]
@@ -972,7 +983,8 @@ const MainAdmin = () => {
 																								c =>
 																									c.counter_uuid === a.counter_uuid &&
 																									(route.route_uuid === c.route_uuid ||
-																										((!c.route_uuid || +c.route_uuid === 0) && +route.route_uuid === 0))
+																										((!c.route_uuid || +c.route_uuid === 0) &&
+																											+route.route_uuid === 0))
 																							)?.length
 																				  )
 																	  )
@@ -984,7 +996,8 @@ const MainAdmin = () => {
 																			c =>
 																				c.counter_uuid === a.counter_uuid &&
 																				(route.route_uuid === c.route_uuid ||
-																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
+																					((!c.route_uuid || c.route_uuid === "none") &&
+																						route.route_uuid === "none"))
 																		)?.length && selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
 																)?.length ===
 																orders.filter(
@@ -993,7 +1006,8 @@ const MainAdmin = () => {
 																			c =>
 																				c.counter_uuid === a.counter_uuid &&
 																				(route.route_uuid === c.route_uuid ||
-																					((!c.route_uuid || c.route_uuid === "none") && route.route_uuid === "none"))
+																					((!c.route_uuid || c.route_uuid === "none") &&
+																						route.route_uuid === "none"))
 																		)?.length
 																)?.length
 															}
@@ -1019,7 +1033,11 @@ const MainAdmin = () => {
 															return (
 																<div
 																	className={`
-																		seatSearchTarget ${!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1 ? "shaking-cards" : ""}
+																		seatSearchTarget ${
+																			!selectOrder && +item?.priority === 1 && +item?.status?.at(-1)?.stage === 1
+																				? "shaking-cards"
+																				: ""
+																		}
 																	`}
 																	style={{ height: "fit-content" }}
 																	key={Math.random()}
@@ -1067,7 +1085,9 @@ const MainAdmin = () => {
 																				? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
 																				: selectedRouteOrder === item.order_uuid
 																		}
-																		selectedCounter={selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length}
+																		selectedCounter={
+																			selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length
+																		}
 																		title2={item?.counter_title || ""}
 																		status={
 																			+item.status[item.status?.length - 1]?.stage === 1
@@ -1103,7 +1123,9 @@ const MainAdmin = () => {
 								{[0].map(_ => {
 									const ordersData = orders
 										?.filter(
-											_i => !+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments || !+_i?.payment_pending
+											_i =>
+												!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
+												!+_i?.payment_pending
 										)
 										.filter(a => !a?.trip_uuid)
 										.sort((a, b) => +a.time_1 - +b.time_1)
@@ -1117,7 +1139,10 @@ const MainAdmin = () => {
 										return (
 											<div key={Math.random()} className="sectionDiv">
 												<h2>
-													<span style={{ cursor: "pointer" }} onClick={() => setJoinSummary(orders.filter(a => !a?.trip_uuid))}>
+													<span
+														style={{ cursor: "pointer" }}
+														onClick={() => setJoinSummary(orders.filter(a => !a?.trip_uuid))}
+													>
 														UnKnown
 													</span>{" "}
 													({orders.filter(a => !a?.trip_uuid)?.length}) [Processing{" "}
@@ -1133,23 +1158,31 @@ const MainAdmin = () => {
 															}}
 															defaultChecked={
 																orders.filter(
-																	a => !a?.trip_uuid && selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
+																	a =>
+																		!a?.trip_uuid &&
+																		selectedOrder.filter(b => b.order_uuid === a.order_uuid)?.length
 																)?.length === orders.filter(a => !a?.trip_uuid)?.length
 															}
 															onClick={() =>
 																orders?.filter(
-																	a => !a?.trip_uuid && selectedOrder?.filter(b => b.order_uuid === a.order_uuid)?.length
+																	a =>
+																		!a?.trip_uuid &&
+																		selectedOrder?.filter(b => b.order_uuid === a.order_uuid)?.length
 																)?.length === orders?.filter(a => !a?.trip_uuid)?.length
 																	? setSelectedOrder(
 																			selectedOrder.filter(
-																				b => !orders.filter(a => !a?.trip_uuid && b.order_uuid === a.order_uuid)?.length
+																				b =>
+																					!orders.filter(a => !a?.trip_uuid && b.order_uuid === a.order_uuid)
+																						?.length
 																			)
 																	  )
 																	: setSelectedOrder(
 																			selectedOrder?.length
 																				? [
 																						...selectedOrder.filter(
-																							b => !orders.filter(a => !a?.trip_uuid && b.order_uuid === a.order_uuid)?.length
+																							b =>
+																								!orders.filter(a => !a?.trip_uuid && b.order_uuid === a.order_uuid)
+																									?.length
 																						),
 																						...orders.filter(a => !a?.trip_uuid)
 																				  ]
@@ -1174,7 +1207,8 @@ const MainAdmin = () => {
 													{orders
 														?.filter(
 															_i =>
-																!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments || !+_i?.payment_pending
+																!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
+																!+_i?.payment_pending
 														)
 														.filter(a => !a?.trip_uuid)
 														.sort((a, b) => +a.time_1 - +b.time_1)
@@ -1233,7 +1267,9 @@ const MainAdmin = () => {
 																		dateTime={item?.status[0]?.time}
 																		// key={item.seat_uuid}
 																		title1={item?.invoice_number || ""}
-																		selectedCounter={selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length}
+																		selectedCounter={
+																			selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length
+																		}
 																		selectedOrder={
 																			selectOrder
 																				? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
@@ -1271,7 +1307,9 @@ const MainAdmin = () => {
 								{TripsOrderLength?.map(trip => {
 									const orders_data = orders
 										?.filter(
-											_i => !+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments || !+_i?.payment_pending
+											_i =>
+												!+users?.find(_u => _u?.user_uuid === user_uuid)?.hide_pending_payments ||
+												!+_i?.payment_pending
 										)
 										?.filter(a => a.trip_uuid === trip.trip_uuid)
 										?.filter(
@@ -1293,12 +1331,14 @@ const MainAdmin = () => {
 													</span>{" "}
 													<span>({orders.filter(a => a.trip_uuid === trip.trip_uuid)?.length})</span>
 													<span>
-														[Processing {trip?.processingLength}, Checking {trip?.checkingLength}, Delivery {trip?.deliveryLength}
-														]
+														[Processing {trip?.processingLength}, Checking {trip?.checkingLength}, Delivery{" "}
+														{trip?.deliveryLength}]
 													</span>
 													<span>
 														{trip?.users?.[0]
-															? `[${trip?.users?.map(a => users?.find(b => b.user_uuid === a)?.user_title)?.join(", ")}]`
+															? `[${trip?.users
+																	?.map(a => users?.find(b => b.user_uuid === a)?.user_title)
+																	?.join(", ")}]`
 															: ""}
 													</span>
 													<span>({[...new Set(orders_data?.map(_i => _i?.counter_uuid))]?.length})</span>
@@ -1325,8 +1365,9 @@ const MainAdmin = () => {
 																	? setSelectedOrder(
 																			selectedOrder.filter(
 																				b =>
-																					!orders.filter(a => a.trip_uuid === trip.trip_uuid && b.order_uuid === a.order_uuid)
-																						?.length
+																					!orders.filter(
+																						a => a.trip_uuid === trip.trip_uuid && b.order_uuid === a.order_uuid
+																					)?.length
 																			)
 																	  )
 																	: setSelectedOrder(
@@ -1335,7 +1376,8 @@ const MainAdmin = () => {
 																						...selectedOrder.filter(
 																							b =>
 																								!orders.filter(
-																									a => a.trip_uuid === trip.trip_uuid && b.order_uuid === a.order_uuid
+																									a =>
+																										a.trip_uuid === trip.trip_uuid && b.order_uuid === a.order_uuid
 																								)?.length
 																						),
 																						...orders.filter(a => a.trip_uuid === trip.trip_uuid)
@@ -1413,7 +1455,9 @@ const MainAdmin = () => {
 																				? selectedOrder.filter(a => a.order_uuid === item.order_uuid)?.length
 																				: selectedRouteOrder === item.order_uuid
 																		}
-																		selectedCounter={selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length}
+																		selectedCounter={
+																			selectedOrder.filter(a => a.counter_uuid === item.counter_uuid)?.length
+																		}
 																		title2={item?.counter_title || ""}
 																		status={
 																			+item.status[item.status?.length - 1]?.stage === 1
@@ -1447,11 +1491,18 @@ const MainAdmin = () => {
 						)}
 
 						<div className="searchBar" style={{ width: "400px", zIndex: 1 }}>
-							<input type="text" placeholder="Search..." value={searchItems} onChange={e => setSearhItems(e.target.value)} />
+							<input
+								type="text"
+								placeholder="Search..."
+								value={searchItems}
+								onChange={e => setSearhItems(e.target.value)}
+							/>
 						</div>
 					</div>
 
-					{isCollectionTags && <CollectionTag isItemAvilableOpen={isCollectionTags} setIsItemAvilableOpen={setCollectionTags} />}
+					{isCollectionTags && (
+						<CollectionTag isItemAvilableOpen={isCollectionTags} setIsItemAvilableOpen={setCollectionTags} />
+					)}
 				</div>
 			</div>
 
@@ -1545,10 +1596,14 @@ const MainAdmin = () => {
 						item_details: popupOrder?.item_details
 							?.map(a => ({
 								...a,
-								category_title: category.find(b => b.category_uuid === items.find(b => b.item_uuid === a.item_uuid).category_uuid)
-									?.category_title
+								category_title: category.find(
+									b => b.category_uuid === items.find(b => b.item_uuid === a.item_uuid).category_uuid
+								)?.category_title
 							}))
-							.sort((a, b) => a?.category_title?.localeCompare(b.category_title) || a?.item_title?.localeCompare(b.item_title))
+							.sort(
+								(a, b) =>
+									a?.category_title?.localeCompare(b.category_title) || a?.item_title?.localeCompare(b.item_title)
+							)
 					}}
 					warehouseData={warehouse}
 					reminder={reminderDate}
@@ -1654,7 +1709,6 @@ const MainAdmin = () => {
 			) : (
 				""
 			)}
-
 			{printDependencies && (
 				<div className="overlay" style={{ opacity: 0, zIndex: "-1" }}>
 					<PendingPaymentsSummary
@@ -1664,7 +1718,6 @@ const MainAdmin = () => {
 					/>
 				</div>
 			)}
-
 			{showSelect && (
 				<div className="overlay">
 					<div className="payment-summary-type">
@@ -1678,6 +1731,14 @@ const MainAdmin = () => {
 						</button>
 					</div>
 				</div>
+			)}
+			{notesState?.active && (
+				<NotesPopup
+					orderInfo={true}
+					order={selectedOrder[notesState?.index]}
+					onSave={() => setNotesState(false)}
+					customSubmit={markAsPendingPayment}
+				/>
 			)}
 		</>
 	)
@@ -1818,7 +1879,8 @@ function NewUserForm({ onSave, popupInfo, setSelectedTrip, selectedTrip, trips, 
 															data?.warehouse_uuid
 																? {
 																		value: data?.warehouse_uuid,
-																		label: warehouse?.find(j => j.warehouse_uuid === data.warehouse_uuid)?.warehouse_title
+																		label: warehouse?.find(j => j.warehouse_uuid === data.warehouse_uuid)
+																			?.warehouse_title
 																  }
 																: { value: 0, label: "None" }
 														}
@@ -1896,7 +1958,10 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 	useEffect(() => {
 		let orderStage = orders.map(a => ({
 			...a,
-			stage: a.status?.length > 1 ? a.status.map(b => +b.stage || 0).reduce((c, b) => Math.max(c, b)) : a.status[0].stage
+			stage:
+				a.status?.length > 1
+					? a.status.map(b => +b.stage || 0).reduce((c, b) => Math.max(c, b))
+					: a.status[0].stage
 		}))
 
 		setFilteredOrder(orderStage)
@@ -1943,7 +2008,8 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 						: +itemsFilteredData[0]?.free || 0
 				let obj = {
 					...item,
-					order_count: orders.filter(a => a.item_details.filter(b => b.item_uuid === item.item_uuid)?.length)?.length,
+					order_count: orders.filter(a => a.item_details.filter(b => b.item_uuid === item.item_uuid)?.length)
+						?.length,
 					b: parseInt(+b + (+p + free) / +itemsData?.find(b => b.item_uuid === item.item_uuid)?.conversion),
 					p: parseInt((+p + free) % +itemsData?.find(b => b.item_uuid === item.item_uuid)?.conversion)
 				}
@@ -2077,7 +2143,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 															items?.filter(
 																b =>
 																	(!filterItemTitle ||
-																		b.item_title.toLocaleLowerCase().includes(filterItemTitle?.toLocaleLowerCase())) &&
+																		b.item_title
+																			.toLocaleLowerCase()
+																			.includes(filterItemTitle?.toLocaleLowerCase())) &&
 																	a.category_uuid === b.category_uuid
 															)?.length
 													)
@@ -2091,7 +2159,9 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 																?.filter(
 																	b =>
 																		(!filterItemTitle ||
-																			b.item_title?.toLocaleLowerCase()?.includes(filterItemTitle?.toLocaleLowerCase())) &&
+																			b.item_title
+																				?.toLocaleLowerCase()
+																				?.includes(filterItemTitle?.toLocaleLowerCase())) &&
 																		a.category_uuid === b.category_uuid
 																)
 																.sort((a, b) => a?.item_title?.localeCompare(b?.item_title))
@@ -2140,8 +2210,15 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 													<td colSpan={3}></td>
 													<td colSpan={2}></td>
 													<td colSpan={4}>
-														{Math.floor(items?.length > 1 ? items.map(a => +a.b || 0).reduce((a, b) => a + b) : items[0].b || 0)}{" "}
-														: {items?.length > 1 ? items.map(a => +a.p || 0).reduce((a, b) => a + b) : items[0].p || 0}
+														{Math.floor(
+															items?.length > 1
+																? items.map(a => +a.b || 0).reduce((a, b) => a + b)
+																: items[0].b || 0
+														)}{" "}
+														:{" "}
+														{items?.length > 1
+															? items.map(a => +a.p || 0).reduce((a, b) => a + b)
+															: items[0].p || 0}
 													</td>
 												</tr>
 												<tr
@@ -2345,8 +2422,10 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 									<td colSpan={5} style={{ padding: "5px" }}></td>
 									<td colSpan={3} style={{ padding: "5px" }}></td>
 									<td colSpan={3} style={{ padding: "5px" }}>
-										{Math.floor(items?.length > 1 ? items?.map(a => +a.b || 0).reduce((a, b) => a + b) : items[0]?.b || 0)} :{" "}
-										{items?.length > 1 ? items.map(a => +a.p || 0).reduce((a, b) => a + b) : items[0].p || 0}
+										{Math.floor(
+											items?.length > 1 ? items?.map(a => +a.b || 0).reduce((a, b) => a + b) : items[0]?.b || 0
+										)}{" "}
+										: {items?.length > 1 ? items.map(a => +a.p || 0).reduce((a, b) => a + b) : items[0].p || 0}
 									</td>
 								</tr>
 							</tbody>
@@ -2422,7 +2501,10 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 									<td colSpan={5} style={{ padding: "5px" }}></td>
 									<td colSpan={3} style={{ padding: "5px" }}></td>
 									<td colSpan={3} style={{ padding: "5px" }}>
-										{Math.floor(items?.length > 1 ? items?.map(a => +a.b || 0).reduce((a, b) => a + b) : items[0]?.b || 0)} : {0}
+										{Math.floor(
+											items?.length > 1 ? items?.map(a => +a.b || 0).reduce((a, b) => a + b) : items[0]?.b || 0
+										)}{" "}
+										: {0}
 									</td>
 								</tr>
 							</tbody>
@@ -2435,7 +2517,17 @@ function HoldPopup({ onSave, orders, itemsData, counter, category, setPopupOrder
 		</>
 	)
 }
-function SummaryPopup({ onSave, orders, itemsData, counter, category, company, setPopupOrder, updateOrders, setOrdersData }) {
+function SummaryPopup({
+	onSave,
+	orders,
+	itemsData,
+	counter,
+	category,
+	company,
+	setPopupOrder,
+	updateOrders,
+	setOrdersData
+}) {
 	const [items, setItems] = useState([])
 
 	const [FilteredOrder, setFilteredOrder] = useState([])
@@ -2449,7 +2541,10 @@ function SummaryPopup({ onSave, orders, itemsData, counter, category, company, s
 	useEffect(() => {
 		let orderStage = orders.map(a => ({
 			...a,
-			stage: a.status?.length > 1 ? a.status.map(b => +b.stage || 0).reduce((c, b) => Math.max(c, b)) : a.status[0].stage
+			stage:
+				a.status?.length > 1
+					? a.status.map(b => +b.stage || 0).reduce((c, b) => Math.max(c, b))
+					: a.status[0].stage
 		}))
 		setFilteredOrder(orderStage)
 
@@ -2509,8 +2604,18 @@ function SummaryPopup({ onSave, orders, itemsData, counter, category, company, s
 	}, [itemsData, orders, setOrdersData, popup])
 	const GetItemsQty = category_uuid => {
 		let itemData = items?.filter(b => category_uuid === b.category_uuid)
-		let box = itemData?.length > 1 ? itemData.map(a => +a.b || 0).reduce((a, b) => a + b) : itemData?.length ? itemData[0]?.b : 0
-		let pcs = itemData?.length > 1 ? itemData.map(a => +a.p || 0).reduce((a, b) => a + b) : itemData?.length ? itemData[0]?.p : 0
+		let box =
+			itemData?.length > 1
+				? itemData.map(a => +a.b || 0).reduce((a, b) => a + b)
+				: itemData?.length
+				? itemData[0]?.b
+				: 0
+		let pcs =
+			itemData?.length > 1
+				? itemData.map(a => +a.p || 0).reduce((a, b) => a + b)
+				: itemData?.length
+				? itemData[0]?.p
+				: 0
 		console.log(category.find(a => a.category_uuid === category_uuid)?.category_title, itemData)
 		return box + " : " + pcs
 	}
@@ -2526,15 +2631,27 @@ function SummaryPopup({ onSave, orders, itemsData, counter, category, company, s
 			}))
 
 		itemData = itemData
-			?.filter(b => category.filter(a => a.company_uuid === company_uuid && a.category_uuid === b.category_uuid)?.length)
+			?.filter(
+				b => category.filter(a => a.company_uuid === company_uuid && a.category_uuid === b.category_uuid)?.length
+			)
 			.map(a => {
 				return {
 					...a,
 					total: (+a.b * +a?.conversion + +a.p) * +a.item_price
 				}
 			})
-		let box = itemData?.length > 1 ? itemData.map(a => +a.b || 0).reduce((a, b) => a + b) : itemData?.length ? itemData[0]?.b : 0
-		let pcs = itemData?.length > 1 ? itemData.map(a => +a.p || 0).reduce((a, b) => a + b) : itemData?.length ? itemData[0]?.p : 0
+		let box =
+			itemData?.length > 1
+				? itemData.map(a => +a.b || 0).reduce((a, b) => a + b)
+				: itemData?.length
+				? itemData[0]?.b
+				: 0
+		let pcs =
+			itemData?.length > 1
+				? itemData.map(a => +a.p || 0).reduce((a, b) => a + b)
+				: itemData?.length
+				? itemData[0]?.p
+				: 0
 
 		let Price = Math.floor(
 			itemData?.length > 1
@@ -2779,8 +2896,10 @@ function SummaryPopup({ onSave, orders, itemsData, counter, category, company, s
 									<td colSpan={5}></td>
 									<td colSpan={3}></td>
 									<td colSpan={3}>
-										{Math.floor(items?.length > 1 ? items?.map(a => +a.b || 0).reduce((a, b) => a + b) : items[0]?.b || 0)} :{" "}
-										{items?.length > 1 ? items.map(a => +a.p || 0).reduce((a, b) => a + b) : items[0].p || 0}
+										{Math.floor(
+											items?.length > 1 ? items?.map(a => +a.b || 0).reduce((a, b) => a + b) : items[0]?.b || 0
+										)}{" "}
+										: {items?.length > 1 ? items.map(a => +a.p || 0).reduce((a, b) => a + b) : items[0].p || 0}
 									</td>
 								</tr>
 							</tbody>
@@ -2849,7 +2968,9 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 				items: data.item_details.map(a => {
 					let itemData = itemsData.find(b => a.item_uuid === b.item_uuid)
 					const price =
-						+counterData?.item_special_price?.find(i => i.item_uuid === a.item_uuid)?.price || +itemData?.item_price || 0
+						+counterData?.item_special_price?.find(i => i.item_uuid === a.item_uuid)?.price ||
+						+itemData?.item_price ||
+						0
 					return { ...itemData, ...a, price }
 				})
 			})
@@ -2938,7 +3059,9 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 													style={{
 														height: "30px",
 														color: "#fff",
-														backgroundColor: +deleteItemsOrder.filter(a => a === item.order_uuid)?.length ? "red" : "#7990dd"
+														backgroundColor: +deleteItemsOrder.filter(a => a === item.order_uuid)?.length
+															? "red"
+															: "#7990dd"
 													}}
 													onClick={e => {
 														e.stopPropagation()
@@ -2947,10 +3070,14 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 												>
 													<td>{i + 1}</td>
 													<td colSpan={3}>
-														{new Date(item?.status[0]?.time).toDateString() + " - " + formatAMPM(new Date(item?.status[0]?.time))}
+														{new Date(item?.status[0]?.time).toDateString() +
+															" - " +
+															formatAMPM(new Date(item?.status[0]?.time))}
 													</td>
 													<td colSpan={2}>{item.invoice_number}</td>
-													<td colSpan={2}>{counter?.find(a => a.counter_uuid === item.counter_uuid)?.counter_title || "-"}</td>
+													<td colSpan={2}>
+														{counter?.find(a => a.counter_uuid === item.counter_uuid)?.counter_title || "-"}
+													</td>
 													<td colSpan={2}>
 														<input
 															value={
@@ -2965,7 +3092,9 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 															}}
 														/>
 													</td>
-													<td colSpan={2}>{item.item_details.find(a => a.item_uuid === items.item_uuid)?.free || 0}</td>
+													<td colSpan={2}>
+														{item.item_details.find(a => a.item_uuid === items.item_uuid)?.free || 0}
+													</td>
 													<td
 														onClick={e => {
 															e.stopPropagation()
@@ -2976,7 +3105,11 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose, setPopu
 															)
 														}}
 													>
-														{!deleteItemsOrder.filter(a => a === item.order_uuid)?.length ? <DeleteOutlineIcon /> : ""}
+														{!deleteItemsOrder.filter(a => a === item.order_uuid)?.length ? (
+															<DeleteOutlineIcon />
+														) : (
+															""
+														)}
 													</td>
 												</tr>
 											))}
