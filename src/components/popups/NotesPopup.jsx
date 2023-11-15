@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react"
 import axios from "axios"
 
-function NotesPopup({ onSave: close, order, setSelectedOrder, notesPopup, HoldOrder, customSubmit, orderInfo }) {
+function NotesPopup({
+	onSave: close,
+	order,
+	setSelectedOrder,
+	notesPopup,
+	HoldOrder,
+	customSubmit,
+	orderInfo,
+	counterName
+}) {
 	const [notes, setNotes] = useState([])
 	const [edit, setEdit] = useState(false)
 
@@ -39,8 +48,11 @@ function NotesPopup({ onSave: close, order, setSelectedOrder, notesPopup, HoldOr
 							{orderInfo && (
 								<div style={{ marginBottom: "10px" }}>
 									<small>
-										For order {order?.order_type}
-										{order?.invoice_number} - Rs.{order?.order_grandtotal}
+										In <b>{counterName || "<Counter>"}</b> for order <b>{order?.invoice_number}</b> -{" "}
+										<b>
+											Rs.
+											{order?.order_grandtotal}
+										</b>
 									</small>
 								</div>
 							)}

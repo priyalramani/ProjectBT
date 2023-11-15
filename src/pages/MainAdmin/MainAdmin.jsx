@@ -318,15 +318,17 @@ const MainAdmin = () => {
 		if (response.data.success) setTripData(response.data.result)
 	}
 
+	const [ordersSpinner, setOrdersSpinner] = useState()
+
 	useEffect(() => {
 		const controller = new AbortController()
 		if (holdOrders) getRunningHoldOrders()
 		else getRunningOrders(controller)
 
-		let intervalOrder = setInterval(() => {
+		let intervalOrder = setInterval(async () => {
 			if (+sessionStorage.getItem("PREVENT_AUTO_REFRESH") === 1) return
-			if (holdOrders) getRunningHoldOrders()
-			else getRunningOrders(controller)
+			if (holdOrders) await getRunningHoldOrders()
+			else await getRunningOrders(controller)
 		}, 180000)
 
 		return () => {
@@ -334,6 +336,7 @@ const MainAdmin = () => {
 			controller.abort()
 		}
 	}, [holdOrders, location, popupForm, btn])
+
 	useEffect(() => {
 		let controller = new AbortController()
 		if (location.pathname.includes("admin")) {
@@ -383,8 +386,9 @@ const MainAdmin = () => {
 			),
 		[ordersData, salesPersoneList]
 	)
-	const getRunningOrders = async (controller = new AbortController()) => {
-		setLoading(true)
+	const getRunningOrders = async (controller, setLoadingState = true) => {
+		if (!controller) controller = new AbortController()
+		if (setLoadingState) setLoading(true)
 		const response = await axios({
 			method: "get",
 			signal: controller.signal,
@@ -403,7 +407,7 @@ const MainAdmin = () => {
 			setNoOrder(true)
 			setOrdersData([])
 		}
-		setLoading(false)
+		if (setLoadingState) setLoading(false)
 	}
 	const getRunningHoldOrders = async () => {
 		const response = await axios({
@@ -609,7 +613,14 @@ const MainAdmin = () => {
 					data: (prev?.data || []).concat(updatedData)
 				}))
 			} else {
-				const data = (notesState?.data || []).concat([updatedData]).map(i => ({ ...i, payment_pending: 1 }))
+				const data = (notesState?.data || []).concat([updatedData]).map(i => ({
+					...i,
+					payment_pending: 1,
+					status:
+						Math.max(...i.status.map(s => +s.stage)) < 3
+							? i.status.concat([{ stage: 3, time: Date.now(), user_uuid: localStorage.getItem("user_uuid") }])
+							: i.status
+				}))
 				setNotesState({})
 				await axios.put("/orders/putOrders", data)
 				setOrdersData(prev =>
@@ -662,7 +673,15 @@ const MainAdmin = () => {
 						right: "280px",
 						cursor: "pointer"
 					}}
-					onClick={() => setBtn(prev => !prev)}
+					className={ordersSpinner ? "rotating" : ""}
+					onClick={async () => {
+						setOrdersSpinner(true)
+						try {
+							if (holdOrders) await getRunningHoldOrders()
+							else await getRunningOrders(null, false)
+						} catch (error) {}
+						setOrdersSpinner(null)
+					}}
 				/>
 				{selectedPrintOrder.length ? (
 					<div
@@ -831,7 +850,10 @@ const MainAdmin = () => {
 											<button
 												className="simple_Logout_button"
 												type="button"
-												onClick={() => setNotesState({ active: true, index: 0 })}
+												onClick={() => {
+													setSelectedOrder(prev => prev.filter(i => !i.payment_pending))
+													setNotesState({ active: true, index: 0 })
+												}}
 											>
 												Mark As Pending Payment
 											</button>
@@ -1738,6 +1760,9 @@ const MainAdmin = () => {
 					order={selectedOrder[notesState?.index]}
 					onSave={() => setNotesState(false)}
 					customSubmit={markAsPendingPayment}
+					counterName={
+						counter?.find(i => i.counter_uuid === selectedOrder?.[notesState?.index]?.counter_uuid)?.counter_title
+					}
 				/>
 			)}
 		</>
