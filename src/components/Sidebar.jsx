@@ -36,7 +36,7 @@ let titleData = [
 	{ value: "Outstandings", name: "Outstandings" },
 	{ value: "pendingEntry", name: "Pending Order Entry" },
 	{ value: "pendingReciptsEntry", name: "Pending Recipt Entry" },
-	{ value: "stockTransferVochers", name: "Vochers" },
+	{ value: "stockTransferVouchers", name: "Voucher" },
 	{ value: "currentStock", name: "Current Stock" },
 	{ value: "signedBills", name: "Signed Bills" },
 	{ value: "addOrder", name: "New Order" },
@@ -203,8 +203,8 @@ const Sidebar = ({ setCollectionTags }) => {
 							link: "/admin/currentStock"
 						},
 						{
-							name: "Vochers",
-							link: "/admin/stockTransferVochers"
+							name: "Vouchers",
+							link: "/admin/stockTransferVouchers"
 						},
 						{
 							name: "Cancel Order",

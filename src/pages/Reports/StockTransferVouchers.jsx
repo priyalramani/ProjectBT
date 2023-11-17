@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react"
 import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid"
-import axios from "axios"
 import VoucherDetails from "../../components/VoucherDetails"
 import { DeleteOutline } from "@mui/icons-material"
+import axios from "axios"
 
 const StockTransferVouchers = () => {
 	const [itemsData, setItemsData] = useState([])
@@ -19,49 +19,41 @@ const StockTransferVouchers = () => {
 	const [completed, setCompleted] = useState(0)
 	const [searchData, setSearchData] = useState({
 		startDate: "",
-		endDate: "",
+		endDate: ""
 	})
+
 	const getUsers = async () => {
 		const response = await axios({
 			method: "get",
 			url: "/users/GetUserList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		console.log("users", response)
 		if (response.data.success) setUsers(response.data.result)
 	}
+
 	const GetWarehouseList = async () => {
 		const response = await axios({
 			method: "get",
 			url: "/warehouse/GetWarehouseList",
-
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setWarehouse(response.data.result)
 	}
-	const getItemsData = async () => {
-		const response = await axios({
-			method: "get",
-			url: "/vouchers/GetPendingVoucharsList/" + completed,
 
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
+	const getItemsData = async () => {
+		const response = await axios.get("/vouchers/GetPendingVoucharsList")
 		if (response.data.success)
 			setItemsData(
 				response.data.result.map(b => ({
 					...b,
-
 					created_by_user:
-						+b.created_by === 240522
-							? "Admin"
-							: users.find(a => a.created_by === b.user_uuid)?.user_title || "-",
+						+b.created_by === 240522 ? "Admin" : users.find(a => a.created_by === b.user_uuid)?.user_title || "-",
 					from_warehouse_title:
 						+b.from_warehouse === 0
 							? "None"
@@ -69,43 +61,27 @@ const StockTransferVouchers = () => {
 					to_warehouse_title:
 						+b.to_warehouse === 0
 							? "None"
-							: warehouse.find(a => a.warehouse_uuid === b.to_warehouse)?.warehouse_title || "-",
+							: warehouse.find(a => a.warehouse_uuid === b.to_warehouse)?.warehouse_title || "-"
 				}))
 			)
 		else setItemsData([])
-		setSearchData({
-			startDate: "",
-			endDate: "",
-		})
 	}
+
 	useEffect(() => {
-		getItemsData()
+		if (+completed !== 1) getItemsData()
+		else setItemsData([])
 	}, [popupForm, warehouse, users, completed])
+
 	useEffect(() => {
 		setFilterItemsData(
 			itemsData
 				.filter(
 					a =>
-						!filterFromWarehouse ||
-						a.from_warehouse_title.toLocaleLowerCase().includes(filterFromWarehouse.toLocaleLowerCase())
-				)
-				.filter(
-					a =>
-						!filterToWarehouse ||
-						a.to_warehouse_title.toLocaleLowerCase().includes(filterToWarehouse.toLocaleLowerCase())
-				)
-				.filter(a => !filterType || a.type.toLocaleLowerCase().includes(filterType.toLocaleLowerCase()))
-				.filter(
-					a =>
-						!completed ||
-						!searchData.startDate ||
-						a.created_at > new Date(searchData.startDate + " 00:00:00 AM").getTime()
-				)
-				.filter(
-					a =>
-						!completed ||
-						!searchData.endDate ||
-						a.created_at < new Date(searchData.endDate + " 00:00:00 AM").getTime() + 86400000
+						(!filterFromWarehouse ||
+							a.from_warehouse_title.toLocaleLowerCase().includes(filterFromWarehouse.toLocaleLowerCase())) &&
+						(!filterToWarehouse ||
+							a.to_warehouse_title.toLocaleLowerCase().includes(filterToWarehouse.toLocaleLowerCase())) &&
+						(!filterType || a.type.toLocaleLowerCase().includes(filterType.toLocaleLowerCase()))
 				)
 				.map(a => {
 					let itemsDetails = a.item_details
@@ -113,7 +89,7 @@ const StockTransferVouchers = () => {
 						itemsDetails.length > 1
 							? itemsDetails.reduce((c, d) => ({
 									b: +c.b + +d.b,
-									p: +c.p + +d.p,
+									p: +c.p + +d.p
 							  }))
 							: itemsDetails.length
 							? itemsDetails[0]
@@ -121,31 +97,64 @@ const StockTransferVouchers = () => {
 					return {
 						...a,
 						type: a.type === "ST" ? "Stock Transfer" : "Adjustment",
-						qty,
+						qty
 					}
 				})
 		)
-	}, [
-		completed,
-		filterFromWarehouse,
-		filterToWarehouse,
-		filterType,
-		itemsData,
-		searchData.endDate,
-		searchData.startDate,
-	])
+	}, [completed, filterFromWarehouse, filterToWarehouse, filterType, itemsData])
 
 	useEffect(() => {
 		GetWarehouseList()
 		getUsers()
 	}, [])
+
+	const fetchDeliveredVouchers = async e => {
+		e.preventDefault()
+		try {
+			const response = await axios.post("/vouchers/deliveredVouchers", {
+				fromDate: searchData?.startDate ? new Date(searchData?.startDate).setHours(5, 30, 0, 0) : null,
+				toDate: searchData?.endDate ? new Date(searchData?.endDate).setHours(23, 59, 59, 999) : null
+			})
+			if (response.data.success)
+				setItemsData(
+					response.data.result.map(b => ({
+						...b,
+						created_by_user:
+							+b.created_by === 240522
+								? "Admin"
+								: users.find(a => a.created_by === b.user_uuid)?.user_title || "-",
+						from_warehouse_title:
+							+b.from_warehouse === 0
+								? "None"
+								: warehouse.find(a => a.warehouse_uuid === b.from_warehouse)?.warehouse_title || "-",
+						to_warehouse_title:
+							+b.to_warehouse === 0
+								? "None"
+								: warehouse.find(a => a.warehouse_uuid === b.to_warehouse)?.warehouse_title || "-"
+					}))
+				)
+			else setItemsData([])
+		} catch (error) {}
+	}
+
 	return (
 		<>
 			<Sidebar />
 			<Header />
 			<div className="item-sales-container orders-report-container">
-				<div id="heading">
+				<div id="heading" style={{ position: "relative" }}>
 					<h2>Vouchers</h2>
+					<div
+						style={{
+							position: "absolute",
+							right: "30px",
+							top: "50%",
+							translate: "0 -50%",
+							color: "white"
+						}}
+					>
+						<div>Total Vouchers: {filterItemsData.length}</div>
+					</div>
 				</div>
 				<div id="item-sales-top">
 					<div
@@ -154,18 +163,19 @@ const StockTransferVouchers = () => {
 							overflow: "visible",
 							display: "flex",
 							alignItems: "center",
-							justifyContent: "space-between",
-							width: "100%",
-						}}>
+							width: "100%"
+						}}
+					>
 						{" "}
 						<div className="inputGroup">
 							<label htmlFor="Warehouse">From Warehouse</label>
 							<input
 								type="text"
 								onChange={e => setFilterFromWarehouse(e.target.value)}
+								placeholder="..."
 								value={filterFromWarehouse}
-								placeholder="From Warehouse..."
 								className="searchInput"
+								style={{ width: "150px" }}
 							/>
 						</div>
 						<div className="inputGroup">
@@ -173,9 +183,10 @@ const StockTransferVouchers = () => {
 							<input
 								type="text"
 								onChange={e => setFilterToWarehouse(e.target.value)}
+								placeholder="..."
 								value={filterToWarehouse}
-								placeholder="To Warehouse..."
 								className="searchInput"
+								style={{ width: "150px" }}
 							/>
 						</div>
 						<div className="inputGroup">
@@ -184,11 +195,11 @@ const StockTransferVouchers = () => {
 								type="text"
 								onChange={e => {
 									setFilterType(e.target.value)
-									console.log(e.target.value)
 								}}
 								value={filterType}
 								placeholder="Type..."
-								className="searchInput">
+								className="searchInput"
+							>
 								<option value="ST">Stock Transfer</option>
 								<option value="SA">Adjustment</option>
 							</select>
@@ -199,17 +210,20 @@ const StockTransferVouchers = () => {
 								type="text"
 								onChange={e => {
 									setCompleted(e.target.value)
-									console.log(e.target.value)
 								}}
 								value={completed}
 								placeholder="Search User..."
-								className="searchInput">
+								className="searchInput"
+							>
 								<option value={0}>Pending</option>
 								<option value={1}>Delivered</option>
 							</select>
 						</div>
-						{completed ? (
-							<>
+						{+completed === 1 && (
+							<form
+								onSubmit={fetchDeliveredVouchers}
+								style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}
+							>
 								<div className="inputGroup">
 									<label htmlFor="Warehouse">Start Date</label>
 									<input
@@ -217,13 +231,13 @@ const StockTransferVouchers = () => {
 										onChange={e =>
 											setSearchData(prev => ({
 												...prev,
-												startDate: e.target.value,
+												startDate: e.target.value
 											}))
 										}
 										value={searchData.startDate}
-										placeholder="Search Counter Title..."
 										className="searchInput"
 										pattern="\d{4}-\d{2}-\d{2}"
+										required={!searchData?.startDate && !searchData?.endDate}
 									/>
 								</div>
 								<div className="inputGroup">
@@ -233,20 +247,20 @@ const StockTransferVouchers = () => {
 										onChange={e =>
 											setSearchData(prev => ({
 												...prev,
-												endDate: e.target.value,
+												endDate: e.target.value
 											}))
 										}
 										value={searchData.endDate}
-										placeholder="Search Route Title..."
 										className="searchInput"
 										pattern="\d{4}-\d{2}-\d{2}"
+										required={!searchData?.startDate && !searchData?.endDate}
 									/>
 								</div>
-							</>
-						) : (
-							""
+								<button type="submit" className="theme-btn">
+									Search
+								</button>
+							</form>
 						)}
-						<div>Total Vouchers: {filterItemsData.length}</div>
 					</div>
 				</div>
 				<div className="table-container-user item-sales-container">
@@ -314,14 +328,16 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 									onClick={() => {
 										setItems("type")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("type")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -329,20 +345,22 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 					</th>
 					<th colSpan={3}>
 						<div className="t-head-element">
-							<span>Vocher Number</span>
+							<span>Voucher Number</span>
 							<div className="sort-buttons-container">
 								<button
 									onClick={() => {
 										setItems("type")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("type")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -356,14 +374,16 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 									onClick={() => {
 										setItems("created_by_user")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("created_by_user")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -377,14 +397,16 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 									onClick={() => {
 										setItems("created_at")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("created_at")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -398,14 +420,16 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 									onClick={() => {
 										setItems("from_warehouse_title")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("from_warehouse_title")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -419,14 +443,16 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 									onClick={() => {
 										setItems("to_warehouse_title")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("to_warehouse_title")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -440,14 +466,16 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 									onClick={() => {
 										setItems("qty")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("qty")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -478,12 +506,10 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 							style={{ height: "30px" }}
 							onClick={e => {
 								e.stopPropagation()
-								// if (+item.delivered) return;
-
 								setPopupOrder(item)
-							}}>
+							}}
+						>
 							<td>{i + 1}</td>
-
 							<td colSpan={3}>{item.type}</td>
 							<td colSpan={3}>{item?.vocher_number || ""}</td>
 							<td colSpan={3}>{item.created_by_user}</td>
@@ -507,7 +533,8 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 												e.stopPropagation()
 
 												setPopupForm({ type: "Delivery", data: item })
-											}}>
+											}}
+										>
 											Confirm Delivery
 										</button>
 									</td>
@@ -516,7 +543,8 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 											e.stopPropagation()
 
 											setPopupForm({ type: "Delete", data: item })
-										}}>
+										}}
+									>
 										<DeleteOutline />
 									</td>
 								</>
@@ -546,8 +574,8 @@ function NewUserForm({ onSave, popupInfo }) {
 				url: "/vouchers/DeleteVoucher",
 				data,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				onSave()
@@ -558,8 +586,8 @@ function NewUserForm({ onSave, popupInfo }) {
 				url: "/vouchers/ConfirmVoucher",
 				data,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				onSave()
@@ -577,19 +605,16 @@ function NewUserForm({ onSave, popupInfo }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
 								<h1>Confirm {popupInfo.type}</h1>
 							</div>
 
-							<button
-								style={{ opacity: disabled ? 0.5 : 1 }}
-								type="submit"
-								className="submit"
-								disabled={disabled}>
+							<button style={{ opacity: disabled ? 0.5 : 1 }} type="submit" className="submit" disabled={disabled}>
 								{disabled ? "Please Wait..." : "Confirm"}
 							</button>
 						</form>

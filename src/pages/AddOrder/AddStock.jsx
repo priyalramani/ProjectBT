@@ -87,7 +87,9 @@ export default function AddStock() {
 					)
 					console.log(itemData)
 					if (!itemData) {
-						setNotification("BT Error: ITEM not found for Item Code " + (json[item]["ITEM CODE"] || json[item]["ITEM CODE"]))
+						setNotification(
+							"BT Error: ITEM not found for Item Code " + (json[item]["ITEM CODE"] || json[item]["ITEM CODE"])
+						)
 						setTimeout(() => setNotification(false), 5000)
 						return
 					}
@@ -189,7 +191,6 @@ export default function AddStock() {
 				"Content-Type": "application/json"
 			}
 		})
-		console.log(response)
 		if (response.data.success) {
 			setOrder(Prev => ({
 				...Prev,
@@ -362,7 +363,6 @@ export default function AddStock() {
 										<th className="pa2 tl bb b--black-20 w-30">MRP</th>
 										<th className="pa2 tc bb b--black-20">Boxes</th>
 										<th className="pa2 tc bb b--black-20">Pcs</th>
-
 										<th className="pa2 tc bb b--black-20 "></th>
 									</tr>
 								</thead>
@@ -382,7 +382,9 @@ export default function AddStock() {
 															id={"item_uuid" + item.uuid}
 															options={itemsData
 																.filter(
-																	a => !order.item_details.filter(b => a.item_uuid === b.item_uuid).length && a.status !== 0
+																	a =>
+																		!order.item_details.filter(b => a.item_uuid === b.item_uuid).length &&
+																		a.status !== 0
 																)
 																.sort((a, b) => a?.item_title?.localeCompare(b.item_title))
 																.map((a, j) => ({
@@ -434,7 +436,10 @@ export default function AddStock() {
 																	}))[0]
 															}
 															openMenuOnFocus={true}
-															autoFocus={focusedInputId === `selectContainer-${item.uuid}` || (i === 0 && focusedInputId === 0)}
+															autoFocus={
+																focusedInputId === `selectContainer-${item.uuid}` ||
+																(i === 0 && focusedInputId === 0)
+															}
 															menuPosition="fixed"
 															menuPlacement="auto"
 															placeholder="Item"
@@ -456,7 +461,9 @@ export default function AddStock() {
 														onChange={e => {
 															setOrder(prev => ({
 																...prev,
-																item_details: prev.item_details.map(a => (a.uuid === item.uuid ? { ...a, b: e.target.value } : a))
+																item_details: prev.item_details.map(a =>
+																	a.uuid === item.uuid ? { ...a, b: e.target.value } : a
+																)
 															}))
 														}}
 														onFocus={e => e.target.select()}
@@ -593,7 +600,7 @@ export default function AddStock() {
 										fontWeight: "900"
 									}}
 								>
-									Vocher Number: {order?.vocher_number || "0"}
+									Voucher Number: {order?.vocher_number || "0"}
 								</th>
 							</tr>
 							<tr>
@@ -620,7 +627,8 @@ export default function AddStock() {
 							</tr>
 							<tr>
 								<th colSpan={2} style={{ backgroundColor: "#fff", fontWeight: "900" }}>
-									Created At: {new Date(order?.created_at).toDateString()} - {formatAMPM(new Date(order?.created_at))}
+									Created At: {new Date(order?.created_at).toDateString()} -{" "}
+									{formatAMPM(new Date(order?.created_at))}
 								</th>
 								<th colSpan={3} style={{ backgroundColor: "#fff", fontWeight: "900" }}>
 									Created By: {localStorage.getItem("user_title")}
@@ -790,7 +798,12 @@ export function SuggestionsPopup({ onSave, warehouse, itemsData, order, warehous
 									Load All
 								</button>
 								<h3 style={{ margin: 0, padding: 0 }}>
-									Quantity: {items.length > 1 ? items.map(a => +a.b || 0).reduce((a, b) => a + b) : items.length ? items[0].b : 0}
+									Quantity:{" "}
+									{items.length > 1
+										? items.map(a => +a.b || 0).reduce((a, b) => a + b)
+										: items.length
+										? items[0].b
+										: 0}
 								</h3>
 
 								<button type="button" className="submit" onClick={onSave}>
@@ -804,7 +817,15 @@ export function SuggestionsPopup({ onSave, warehouse, itemsData, order, warehous
 		</>
 	)
 }
-function Table({ itemsDetails, warehouse_uuid, selectedOrders, setSelectedOrders, warehouseData, order, category }) {
+function Table({
+	itemsDetails,
+	warehouse_uuid,
+	selectedOrders,
+	setSelectedOrders,
+	warehouseData,
+	order,
+	category
+}) {
 	const [categoryVisibility, setCategoryVisibility] = useState({})
 	return (
 		<table className="user-table" style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
@@ -815,7 +836,10 @@ function Table({ itemsDetails, warehouse_uuid, selectedOrders, setSelectedOrders
 					<th>MRP</th>
 					<th colSpan={2}>Suggestion Box</th>
 					<th colSpan={2}>
-						{warehouseData.find(a => a.warehouse_uuid === (order?.from_warehouse || order?.to_warehouse))?.warehouse_title}
+						{
+							warehouseData.find(a => a.warehouse_uuid === (order?.from_warehouse || order?.to_warehouse))
+								?.warehouse_title
+						}
 					</th>
 					{/* <th></th>
 					<th colSpan={3}>Category</th>
@@ -837,7 +861,10 @@ function Table({ itemsDetails, warehouse_uuid, selectedOrders, setSelectedOrders
 												itemsDetails?.find(b => a.category_uuid === b.category_uuid && c.item_uuid === b.item_uuid)
 											).length
 												? prev.filter(
-														c => !itemsDetails?.find(b => a.category_uuid === b.category_uuid && c.item_uuid === b.item_uuid)
+														c =>
+															!itemsDetails?.find(
+																b => a.category_uuid === b.category_uuid && c.item_uuid === b.item_uuid
+															)
 												  )
 												: [...(prev || []), ...itemsDetails?.filter(b => a.category_uuid === b.category_uuid)]
 										)

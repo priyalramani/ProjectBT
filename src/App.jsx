@@ -65,7 +65,7 @@ import CounterCharges from "./pages/Reports/CounterCharges"
 import Loader from "./components/Loader"
 import CounterReport from "./pages/Reports/CounterReport"
 
-export let Version = 166
+export let Version = 167
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
 
@@ -293,7 +293,7 @@ function App() {
 							<Route path="/admin/Outstandings" element={<Outstanding />} />
 							<Route path="/admin/pendingEntry" element={<PendingsEntry />} />
 							<Route path="/admin/pendingReciptsEntry" element={<PendingReciptsEntry />} />
-							<Route path="/admin/stockTransferVochers" element={<StockTransferVouchers />} />
+							<Route path="/admin/stockTransferVouchers" element={<StockTransferVouchers />} />
 							<Route path="/admin/currentStock" element={<CurrentStock />} />
 							<Route path="/admin/PartyWiseCompanyDiscount" element={<PartyWiseCompanyDiscount />} />
 							<Route path="/admin/signedBills" element={<SignedBills />} />

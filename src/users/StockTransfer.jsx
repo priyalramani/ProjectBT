@@ -69,9 +69,13 @@ const StockTransfer = () => {
 					qty,
 
 					from_warehouse_title:
-						+a.from_warehouse === 0 ? "None" : warehouse.find(b => b.warehouse_uuid === a.from_warehouse)?.warehouse_title || "-",
+						+a.from_warehouse === 0
+							? "None"
+							: warehouse.find(b => b.warehouse_uuid === a.from_warehouse)?.warehouse_title || "-",
 					to_warehouse_title:
-						+a.to_warehouse === 0 ? "None" : warehouse.find(b => b.warehouse_uuid === a.to_warehouse)?.warehouse_title || "-"
+						+a.to_warehouse === 0
+							? "None"
+							: warehouse.find(b => b.warehouse_uuid === a.to_warehouse)?.warehouse_title || "-"
 				}
 			}),
 		[itemsData, warehouse]
@@ -311,7 +315,11 @@ function HoldPopup({ onSave, orders, itemsData, categories }) {
 												.filter(
 													a =>
 														items
-															?.filter(b => a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid)
+															?.filter(
+																b =>
+																	a.category_uuid ===
+																	itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid
+															)
 															?.filter(
 																a =>
 																	!filterItemTitle ||
@@ -327,7 +335,8 @@ function HoldPopup({ onSave, orders, itemsData, categories }) {
 														{items
 															?.filter(
 																b =>
-																	a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid &&
+																	a.category_uuid ===
+																		itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid &&
 																	(!filterItemTitle ||
 																		b.item_title.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase()))
 															)
@@ -373,7 +382,11 @@ function HoldPopup({ onSave, orders, itemsData, categories }) {
 																			)
 																		}}
 																	>
-																		{+item.status !== 1 ? <CheckCircleOutlineIcon style={{ width: "15px" }} /> : ""}
+																		{+item.status !== 1 ? (
+																			<CheckCircleOutlineIcon style={{ width: "15px" }} />
+																		) : (
+																			""
+																		)}
 																	</td>
 
 																	<td colSpan={3}>{item.item_title}</td>
@@ -385,7 +398,8 @@ function HoldPopup({ onSave, orders, itemsData, categories }) {
 																			e.stopPropagation()
 																			setPopup({
 																				...item,
-																				conversion: +itemsData?.find(a => a?.item_uuid === item?.item_uuid)?.conversion || 1
+																				conversion:
+																					+itemsData?.find(a => a?.item_uuid === item?.item_uuid)?.conversion || 1
 																			})
 																		}}
 																	>
@@ -394,7 +408,9 @@ function HoldPopup({ onSave, orders, itemsData, categories }) {
 																	<td
 																		style={{ width: "50px", padding: "0 2px" }}
 																		onClick={() => {
-																			setItems(prev => prev.map(a => (a.item_uuid === item.item_uuid ? { ...a, status: 3 } : a)))
+																			setItems(prev =>
+																				prev.map(a => (a.item_uuid === item.item_uuid ? { ...a, status: 3 } : a))
+																			)
 																		}}
 																	>
 																		<DeleteOutlineIcon />
