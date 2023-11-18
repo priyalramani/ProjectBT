@@ -41,8 +41,7 @@ const StockTransfer = () => {
 	const getItemsData = async () => {
 		const response = await axios({
 			method: "get",
-			url: "/vouchers/GetPendingVoucharsList/0",
-
+			url: "/vouchers/GetPendingVoucharsList",
 			headers: {
 				"Content-Type": "application/json"
 			}
