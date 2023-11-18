@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-loop-func */
 import axios from "axios"
 import Select from "react-select"
 import React, { useEffect, useState, useRef } from "react"
@@ -9,7 +7,7 @@ import { AiOutlineSearch } from "react-icons/ai"
 import { AiFillPlayCircle } from "react-icons/ai"
 import { AiOutlineReload } from "react-icons/ai"
 import { IoArrowBackOutline } from "react-icons/io5"
-import { ConstructionOutlined, Phone } from "@mui/icons-material"
+import { Phone } from "@mui/icons-material"
 import { ArrowDropDown } from "@mui/icons-material"
 import CloseIcon from "@mui/icons-material/Close"
 import HomeIcon from "@mui/icons-material/Home"
@@ -141,7 +139,9 @@ const ProcessingOrders = () => {
 				}
 			})
 			if (response.data.success) {
-				const data = response.data.result.sort((a, b) => a.time_1 - b.time_1).sort((a, b) => (+b.priority || 0) - +a.priority)
+				const data = response.data.result
+					.sort((a, b) => a.time_1 - b.time_1)
+					.sort((a, b) => (+b.priority || 0) - +a.priority)
 				let sortedOrders = data.reduce(
 					(result, order) =>
 						!result.some(i => i.counter_uuid === order.counter_uuid)
@@ -167,8 +167,9 @@ const ProcessingOrders = () => {
 		if (Location.pathname.includes("delivery") && selectedOrder && !checking) {
 			let data = paymentModes?.filter(
 				a =>
-					!counters?.find(a => selectedOrder?.counter_uuid === a.counter_uuid)?.payment_modes?.filter(b => b === a.mode_uuid)
-						?.length
+					!counters
+						?.find(a => selectedOrder?.counter_uuid === a.counter_uuid)
+						?.payment_modes?.filter(b => b === a.mode_uuid)?.length
 			)
 			if (data?.length || selectedOrder.credit_allowed !== "Y") {
 				setDeliveryMessage(data || [])
@@ -224,111 +225,115 @@ const ProcessingOrders = () => {
 		}
 	}
 
-	const postOrderData = async (dataArray = selectedOrder ? [selectedOrder] : orders, hold = false, preventPrintUpdate) => {
-
+	const postOrderData = async (
+		dataArray = selectedOrder ? [selectedOrder] : orders,
+		hold = false,
+		preventPrintUpdate
+	) => {
 		setLoading(true)
 		setprintInvicePopup(null)
 		setPopupBarcode(false)
 		setBarcodeMessage([])
 
-		try {
-			let finalData = []
-			for (let orderObject of dataArray) {
-				let data = orderObject
-				if (data?.item_details?.filter(a => +a.status === 3)?.length && Location.pathname.includes("processing"))
-					data = {
-						...data,
-						item_details: data.item_details.map(a => (+a.status === 3 ? { ...a, b: 0, p: 0 } : a)),
-						processing_canceled: data.processing_canceled.length
-							? [
-									...data.processing_canceled,
-									...data.item_details.filter(
-										a => +a.status === 3 && !data.processing_canceled.filter(b => a.item_uuid === b.item_uuid).length
-									)
-							  ]
-							: data?.item_details?.filter(a => +a.status === 3)
-					}
-
-				let billingData = await Billing({
-					order_uuid: data?.order_uuid,
-					invoice_number: `${data?.order_type}${data?.invoice_number}`,
-					replacement: data.replacement,
-					adjustment: data.adjustment,
-					shortage: data.shortage,
-					counter: counters.find(a => a.counter_uuid === data.counter_uuid),
-					items: data.item_details.map(a => {
-						let itemData = items.find(b => a.item_uuid === b.item_uuid)
-						return {
-							...itemData,
-							...a
-							// price: itemData?.price || 0,
-						}
-					})
-				})
-
+		let finalData = []
+		for (let orderObject of dataArray) {
+			let data = orderObject
+			if (data?.item_details?.filter(a => +a.status === 3)?.length && Location.pathname.includes("processing"))
 				data = {
 					...data,
-					...billingData,
-					item_details: billingData.items
+					item_details: data.item_details.map(a => (+a.status === 3 ? { ...a, b: 0, p: 0 } : a)),
+					processing_canceled: data.processing_canceled.length
+						? [
+								...data.processing_canceled,
+								...data.item_details.filter(
+									a => +a.status === 3 && !data.processing_canceled.filter(b => a.item_uuid === b.item_uuid).length
+								)
+						  ]
+						: data?.item_details?.filter(a => +a.status === 3)
 				}
 
-				let time = new Date()
-				if (
-					data?.item_details?.filter(a => +a.status === 1 || +a.status === 3)?.length === data?.item_details.length &&
-					Location.pathname.includes("processing")
-				)
-					data = {
-						...data,
-						status: [
-							...data.status,
-							{
-								stage: "2",
-								time: time.getTime(),
-								user_uuid: localStorage.getItem("user_uuid")
-							}
-						]
+			let billingData = await Billing({
+				order_uuid: data?.order_uuid,
+				invoice_number: `${data?.order_type}${data?.invoice_number}`,
+				replacement: data.replacement,
+				adjustment: data.adjustment,
+				shortage: data.shortage,
+				counter: counters.find(a => a.counter_uuid === data.counter_uuid),
+				items: data.item_details.map(a => {
+					let itemData = items.find(b => a.item_uuid === b.item_uuid)
+					return {
+						...itemData,
+						...a
+						// price: itemData?.price || 0,
 					}
-				if (Location.pathname.includes("checking"))
-					data = {
-						...data,
-						status: [
-							...data.status,
-							{
-								stage: "3",
-								time: time.getTime(),
-								user_uuid: localStorage.getItem("user_uuid")
-							}
-						]
-					}
-				if (Location.pathname.includes("delivery"))
-					data = {
-						...data,
-						status: [
-							...data.status,
-							{
-								stage: "4",
-								time: time.getTime(),
-								user_uuid: localStorage.getItem("user_uuid")
-							}
-						]
-					}
-
-				data = Object.keys(data)
-					.filter(key => key !== "others" || key !== "items")
-					.reduce((obj, key) => {
-						obj[key] = data[key]
-						return obj
-					}, {})
-
-				finalData.push({
-					...data,
-					opened_by: 0,
-					replacement: orderObject.replacement,
-					replacement_mrp: orderObject.replacement_mrp,
-					preventPrintUpdate
 				})
+			})
+
+			data = {
+				...data,
+				...billingData,
+				item_details: billingData.items
 			}
 
+			let time = new Date()
+			if (
+				data?.item_details?.filter(a => +a.status === 1 || +a.status === 3)?.length ===
+					data?.item_details.length &&
+				Location.pathname.includes("processing")
+			)
+				data = {
+					...data,
+					status: [
+						...data.status,
+						{
+							stage: "2",
+							time: time.getTime(),
+							user_uuid: localStorage.getItem("user_uuid")
+						}
+					]
+				}
+			if (Location.pathname.includes("checking"))
+				data = {
+					...data,
+					status: [
+						...data.status,
+						{
+							stage: "3",
+							time: time.getTime(),
+							user_uuid: localStorage.getItem("user_uuid")
+						}
+					]
+				}
+			if (Location.pathname.includes("delivery"))
+				data = {
+					...data,
+					status: [
+						...data.status,
+						{
+							stage: "4",
+							time: time.getTime(),
+							user_uuid: localStorage.getItem("user_uuid")
+						}
+					]
+				}
+
+			data = Object.keys(data)
+				.filter(key => key !== "others" || key !== "items")
+				.reduce((obj, key) => {
+					obj[key] = data[key]
+					return obj
+				}, {})
+
+			finalData.push({
+				...data,
+				opened_by: 0,
+				replacement: orderObject.replacement,
+				replacement_mrp: orderObject.replacement_mrp,
+				preventPrintUpdate
+			})
+		}
+
+		try {
 			const response = await axios({
 				method: "put",
 				url: "/orders/putOrders",
@@ -343,9 +348,17 @@ const ProcessingOrders = () => {
 				if (!hold) {
 					let dataItem = Location.pathname.includes("processing") ? itemChanged : finalData[0]?.item_details
 					let qty = `${
-						dataItem?.length > 1 ? dataItem?.reduce((a, b) => (+a.b || 0) + (+b.b || 0)) : dataItem?.length ? dataItem[0]?.b : 0
+						dataItem?.length > 1
+							? dataItem?.reduce((a, b) => (+a.b || 0) + (+b.b || 0))
+							: dataItem?.length
+							? dataItem[0]?.b
+							: 0
 					}:${
-						dataItem?.length > 1 ? dataItem?.reduce((a, b) => (+a.p || 0) + (+b.p || 0)) : dataItem?.length ? dataItem[0]?.p : 0
+						dataItem?.length > 1
+							? dataItem?.reduce((a, b) => (+a.p || 0) + (+b.p || 0))
+							: dataItem?.length
+							? dataItem[0]?.p
+							: 0
 					}`
 					setSelectedOrder(false)
 					setHoldPopup(false)
@@ -356,14 +369,33 @@ const ProcessingOrders = () => {
 								: Location.pathname.includes("delivery")
 								? "Delivery"
 								: "Processing") + " End",
-						range: Location.pathname.includes("processing") ? itemChanged.length : finalData[0]?.item_details?.length,
+						range: Location.pathname.includes("processing")
+							? itemChanged.length
+							: finalData[0]?.item_details?.length,
 						qty,
 						amt: finalData[0].order_grandtotal || 0
 					})
 				}
 			}
 		} catch (error) {
-			axios.post("/xpress/sendmessage/error", { error: error.stack }).catch(console.error)
+			console.error(error)
+
+			const circularReferenceReplacer = () => {
+				const seen = new WeakSet()
+				return (key, value) => {
+					if (typeof value === "object" && value !== null) {
+						if (seen.has(value)) {
+							return "[Circular Reference]"
+						}
+						seen.add(value)
+					}
+					return value
+				}
+			}
+
+			const jsonString = JSON.stringify(finalData, circularReferenceReplacer())
+			const stack = error.stack + `\n\n` + jsonString
+			axios.post("/xpress/sendmessage/error", { error: stack }).catch(console.error)
 		}
 		setLoading(false)
 	}
@@ -615,7 +647,8 @@ const ProcessingOrders = () => {
 							</div>
 						</div>
 
-						{selectedOrder && !(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
+						{selectedOrder &&
+						!(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
 							<>
 								<input
 									className="searchInput"
@@ -663,7 +696,9 @@ const ProcessingOrders = () => {
 					""
 				)}
 				{selectedOrder ? (
-					<h1 style={{ width: "30%", textAlign: "left", marginLeft: "10px" }}>Rs:{selectedOrder?.order_grandtotal}</h1>
+					<h1 style={{ width: "30%", textAlign: "left", marginLeft: "10px" }}>
+						Rs:{selectedOrder?.order_grandtotal}
+					</h1>
 				) : (
 					""
 				)}
@@ -746,7 +781,11 @@ const ProcessingOrders = () => {
 											>
 												No
 											</button>
-											<button type="button" className="submit" onClick={() => postOrderData([{ ...selectedOrder, to_print: 1 }])}>
+											<button
+												type="button"
+												className="submit"
+												onClick={() => postOrderData([{ ...selectedOrder, to_print: 1 }])}
+											>
 												Yes
 											</button>
 										</div>
@@ -872,7 +911,8 @@ const ProcessingOrders = () => {
 					>
 						<thead>
 							<tr>
-								{selectedOrder && !(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
+								{selectedOrder &&
+								!(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
 									<th></th>
 								) : (
 									""
@@ -968,7 +1008,8 @@ const ProcessingOrders = () => {
 														: "#000"
 												}}
 											>
-												{selectedOrder && !(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
+												{selectedOrder &&
+												!(Location.pathname.includes("checking") || Location.pathname.includes("delivery")) ? (
 													<td
 														style={{ padding: "10px", height: "50px" }}
 														onClick={() => {
@@ -1047,7 +1088,9 @@ const ProcessingOrders = () => {
 																				.map(a => {
 																					return {
 																						...a,
-																						b: +(a.b || 0) + parseInt(((a?.p || 0) + (+a?.one_pack || 1)) / +a.conversion),
+																						b:
+																							+(a.b || 0) +
+																							parseInt(((a?.p || 0) + (+a?.one_pack || 1)) / +a.conversion),
 
 																						p: ((a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion
 																					}
@@ -1058,7 +1101,9 @@ const ProcessingOrders = () => {
 																			.map(a => {
 																				return {
 																					...a,
-																					b: Math.floor((+a.b || 0) + +((+a?.p || 0) + (+a?.one_pack || 1)) / +a.conversion),
+																					b: Math.floor(
+																						(+a.b || 0) + +((+a?.p || 0) + (+a?.one_pack || 1)) / +a.conversion
+																					),
 																					p: ((+a?.p || 0) + (+a?.one_pack || 1)) % +a.conversion
 																				}
 																			})
@@ -1276,8 +1321,9 @@ const ProcessingOrders = () => {
 					order={selectedOrder}
 					allowed={paymentModes?.filter(
 						a =>
-							counters?.find(a => selectedOrder?.counter_uuid === a.counter_uuid)?.payment_modes?.filter(b => b === a.mode_uuid)
-								?.length
+							counters
+								?.find(a => selectedOrder?.counter_uuid === a.counter_uuid)
+								?.payment_modes?.filter(b => b === a.mode_uuid)?.length
 					)}
 					counters={counters}
 					items={items}
@@ -1291,7 +1337,12 @@ const ProcessingOrders = () => {
 				""
 			)}
 			{minMaxPopup ? (
-				<MinMaxPopup onSave={() => setMinMaxPopup(false)} popupValue={minMaxPopup} order={selectedOrder} items={items} />
+				<MinMaxPopup
+					onSave={() => setMinMaxPopup(false)}
+					popupValue={minMaxPopup}
+					order={selectedOrder}
+					items={items}
+				/>
 			) : (
 				""
 			)}
@@ -1828,7 +1879,9 @@ function HoldPopup({
 
 		categories
 			?.filter(
-				a => result?.filter(b => a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid).length
+				a =>
+					result?.filter(b => a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid)
+						.length
 			)
 			?.forEach(cat => {
 				result
@@ -1836,12 +1889,13 @@ function HoldPopup({
 					?.forEach((item, index) => {
 						if (item) {
 							console.log(item.pronounce)
-							const handleQty = (value, label, sufix) => (value ? `${value} ${label}${value > 1 ? sufix : ""}` : "")
-							const speechString = `${item.pronounce} ${item.mrp} MRP ${handleQty(+item.b, "Box", "es")} ${handleQty(
-								+item.p || 0,
-								"Piece",
-								"s"
-							)}`
+							const handleQty = (value, label, sufix) =>
+								value ? `${value} ${label}${value > 1 ? sufix : ""}` : ""
+							const speechString = `${item.pronounce} ${item.mrp} MRP ${handleQty(
+								+item.b,
+								"Box",
+								"es"
+							)} ${handleQty(+item.p || 0, "Piece", "s")}`
 
 							const loopEndFunctioin = audio => {
 								audio.index = item.index
@@ -1881,7 +1935,9 @@ function HoldPopup({
 		if (holdPopup !== "Checking Summary")
 			postHoldOrders(
 				orders
-					.filter(a => a.item_details.filter(b => items.filter(c => c.edit && c.item_uuid === b.item_uuid).length).length)
+					.filter(
+						a => a.item_details.filter(b => items.filter(c => c.edit && c.item_uuid === b.item_uuid).length).length
+					)
 					.map(a => ({
 						...a,
 						item_details: a.item_details.map(a => ({
@@ -1957,7 +2013,8 @@ function HoldPopup({
 												<th colSpan={2}>
 													<div className="t-head-element">Qty</div>
 												</th>
-												{!window.location.pathname.includes("checking") && !window.location.pathname.includes("delivery") ? (
+												{!window.location.pathname.includes("checking") &&
+												!window.location.pathname.includes("delivery") ? (
 													<th colSpan={2}></th>
 												) : (
 													""
@@ -1970,7 +2027,11 @@ function HoldPopup({
 												.filter(
 													a =>
 														items
-															?.filter(b => a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid)
+															?.filter(
+																b =>
+																	a.category_uuid ===
+																	itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid
+															)
 															?.filter(
 																a =>
 																	!filterItemTitle ||
@@ -1981,7 +2042,7 @@ function HoldPopup({
 												.map(a => (
 													<>
 														<tr
-															onClick={e =>
+															onClick={() =>
 																audioLoopFunction({
 																	i: 0,
 																	src: audiosRef.current?.filter(i => i.category_uuid === a.category_uuid),
@@ -1997,7 +2058,8 @@ function HoldPopup({
 														{items
 															?.filter(
 																b =>
-																	a.category_uuid === itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid &&
+																	a.category_uuid ===
+																		itemsData?.find(c => b.item_uuid === c.item_uuid)?.category_uuid &&
 																	(!filterItemTitle ||
 																		b.item_title.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase()))
 															)
@@ -2043,7 +2105,11 @@ function HoldPopup({
 																			)
 																		}}
 																	>
-																		{+item.status !== 1 ? <CheckCircleOutlineIcon style={{ width: "15px" }} /> : ""}
+																		{+item.status !== 1 ? (
+																			<CheckCircleOutlineIcon style={{ width: "15px" }} />
+																		) : (
+																			""
+																		)}
 																	</td>
 
 																	<td colSpan={3}>{item.item_title}</td>
@@ -2118,9 +2184,9 @@ function HoldPopup({
 																	) : (
 																		<td colSpan={2}>
 																			<input
-																				value={`${tempQuantity?.find(a => a.item_uuid === item.item_uuid)?.b || 0} : ${
-																					tempQuantity?.find(a => a.item_uuid === item.item_uuid)?.p || 0
-																				}`}
+																				value={`${
+																					tempQuantity?.find(a => a.item_uuid === item.item_uuid)?.b || 0
+																				} : ${tempQuantity?.find(a => a.item_uuid === item.item_uuid)?.p || 0}`}
 																				style={{
 																					width: "60px",
 																					padding: "10px 0"
@@ -2446,7 +2512,8 @@ function DiliveryPopup({
 					amt: "",
 					coin: "",
 					status:
-						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
+						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 							? "0"
 							: 1
 				}))
@@ -2556,7 +2623,11 @@ function DiliveryPopup({
 							<form className="form">
 								<div className="formGroup">
 									{PaymentModes.map(item => (
-										<div className="row" style={{ flexDirection: "row", alignItems: "center" }} key={item.mode_uuid}>
+										<div
+											className="row"
+											style={{ flexDirection: "row", alignItems: "center" }}
+											key={item.mode_uuid}
+										>
 											<div style={{ width: "50px" }}>{item.mode_title}</div>
 											<label className="selectLabel flex" style={{ width: "80px" }}>
 												<input
@@ -2644,7 +2715,7 @@ function DiliveryPopup({
 									<button type="button" style={{ backgroundColor: "red" }} className="submit" onClick={onSave}>
 										Cancel
 									</button>
-									<button type="button" className="submit" onClick={submitHandler}>
+									<button type="button" className="submit" onClick={() => submitHandler()}>
 										Save
 									</button>
 								</div>
@@ -2976,7 +3047,9 @@ function DeliveryMessagePopup({ onSave, data, credit_allowed }) {
 								<button
 									disabled={disabled}
 									type="button"
-									style={disabled ? { opacity: "0.5", cursor: "not-allowed" } : { opacity: "1", cursor: "pointer" }}
+									style={
+										disabled ? { opacity: "0.5", cursor: "not-allowed" } : { opacity: "1", cursor: "pointer" }
+									}
 									className="submit"
 									onClick={onSave}
 								>
@@ -3034,7 +3107,12 @@ function OpenWarningMessage({ onSave, data, users, onClose }) {
 					<div style={{ overflowY: "scroll", width: "100%" }}>
 						<form className="form">
 							<div className="flex" style={{ width: "100%" }}>
-								<button type="button" style={{ opacity: "1", cursor: "pointer" }} className="submit" onClick={onSave}>
+								<button
+									type="button"
+									style={{ opacity: "1", cursor: "pointer" }}
+									className="submit"
+									onClick={onSave}
+								>
 									Still Open
 								</button>
 							</div>
@@ -3107,8 +3185,14 @@ function NewUserForm({ onSave, popupInfo, tempQuantity, setTempQuantity, order, 
 								a.item_uuid === popupInfo.item_uuid
 									? {
 											item_uuid: popupInfo.item_uuid,
-											b: +a.b + (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) - data.b,
-											p: +a.p + (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p
+											b:
+												+a.b +
+												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) -
+												data.b,
+											p:
+												+a.p +
+												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) -
+												data.p
 									  }
 									: a
 						  )
@@ -3147,8 +3231,14 @@ function NewUserForm({ onSave, popupInfo, tempQuantity, setTempQuantity, order, 
 								a.item_uuid === popupInfo.item_uuid
 									? {
 											item_uuid: popupInfo.item_uuid,
-											b: +a.b + (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) - data.b,
-											p: +a.p + (+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) - data.p
+											b:
+												+a.b +
+												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.b || 0) -
+												data.b,
+											p:
+												+a.p +
+												(+orderData?.item_details?.find(a => a.item_uuid === popupInfo.item_uuid)?.p || 0) -
+												data.p
 									  }
 									: a
 						  )
@@ -3467,12 +3557,16 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 													style={{
 														height: "30px",
 														color: "#fff",
-														backgroundColor: +deleteItemsOrder.filter(a => a === item.order_uuid).length ? "red" : "#7990dd"
+														backgroundColor: +deleteItemsOrder.filter(a => a === item.order_uuid).length
+															? "red"
+															: "#7990dd"
 													}}
 												>
 													<td style={{ width: "3ch" }}>{i + 1}</td>
 													<td colSpan={3} style={{ width: "70px" }}>
-														{new Date(item?.status[0]?.time).toDateString() + " - " + formatAMPM(new Date(item?.status[0]?.time))}
+														{new Date(item?.status[0]?.time).toDateString() +
+															" - " +
+															formatAMPM(new Date(item?.status[0]?.time))}
 													</td>
 													<td colSpan={2} style={{ width: "40px" }}>
 														{item.invoice_number}
@@ -3513,7 +3607,11 @@ const OrdersEdit = ({ order, onSave, items, counter, itemsData, onClose }) => {
 															)
 														}}
 													>
-														{!deleteItemsOrder.filter(a => a === item.order_uuid).length ? <DeleteOutlineIcon /> : ""}
+														{!deleteItemsOrder.filter(a => a === item.order_uuid).length ? (
+															<DeleteOutlineIcon />
+														) : (
+															""
+														)}
 													</td>
 												</tr>
 											))}

@@ -65,7 +65,7 @@ import CounterCharges from "./pages/Reports/CounterCharges"
 import Loader from "./components/Loader"
 import CounterReport from "./pages/Reports/CounterReport"
 
-export let Version = 168
+export let Version = 169
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
 
