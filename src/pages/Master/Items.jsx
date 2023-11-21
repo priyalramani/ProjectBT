@@ -1,14 +1,20 @@
 import React, { useState, useEffect, useMemo, useContext } from "react"
-import Header from "../../components/Header"
-import Sidebar from "../../components/Sidebar"
+import axios from "axios"
+import Compressor from "compressorjs"
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid"
 import { DeleteOutline } from "@mui/icons-material"
-import axios from "axios"
-import noimg from "../../assets/noimg.jpg"
-import { server } from "../../App"
-import context from "../../context/context"
+import { GrList } from "react-icons/gr"
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
+import { IoIosCloseCircle } from "react-icons/io"
 import { v4 as uuid } from "uuid"
-import Compressor from "compressorjs"
+import Header from "../../components/Header"
+import Sidebar from "../../components/Sidebar"
+import noimg from "../../assets/noimg.jpg"
+import context from "../../context/context"
+import { server } from "../../App"
+import { IoCheckmarkDoneOutline } from "react-icons/io5"
+import { FaSave } from "react-icons/fa"
+import Prompt from "../../components/Prompt"
 
 const ItemsPage = () => {
 	const [itemsData, setItemsData] = useState([])
@@ -27,8 +33,8 @@ const ItemsPage = () => {
 			url: "/itemCategories/GetItemCategoryList",
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setItemCategories(response.data.result)
 	}
@@ -38,8 +44,8 @@ const ItemsPage = () => {
 			url: "/items/GetItemData",
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setItemsData(response.data.result)
 	}
@@ -56,30 +62,26 @@ const ItemsPage = () => {
 				.map(b => ({
 					...b,
 					company_title: companies.find(a => a.company_uuid === b.company_uuid)?.company_title || "-",
-					category_title:
-						itemCategories.find(a => a.category_uuid === b.category_uuid)?.category_title || "-",
+					category_title: itemCategories.find(a => a.category_uuid === b.category_uuid)?.category_title || "-"
 				}))
 				.filter(
 					a =>
 						a.item_title &&
 						(disabledItem || a.status) &&
 						(!filterTitle || a.item_title.toLocaleLowerCase().includes(filterTitle.toLocaleLowerCase())) &&
-						(!filterCompany ||
-							a.company_title.toLocaleLowerCase().includes(filterCompany.toLocaleLowerCase())) &&
-						(!filterCategory ||
-							a.category_title.toLocaleLowerCase().includes(filterCategory.toLocaleLowerCase()))
+						(!filterCompany || a.company_title.toLocaleLowerCase().includes(filterCompany.toLocaleLowerCase())) &&
+						(!filterCategory || a.category_title.toLocaleLowerCase().includes(filterCategory.toLocaleLowerCase()))
 				),
 		[companies, disabledItem, filterCategory, filterCompany, filterTitle, itemCategories, itemsData]
 	)
-
 	const getCompanies = async (controller = new AbortController()) => {
 		const response = await axios({
 			method: "get",
 			url: "/companies/getCompanies",
 			signal: controller.signal,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setCompanies(response.data.result)
 	}
@@ -91,13 +93,17 @@ const ItemsPage = () => {
 			controller.abort(controller)
 		}
 	}, [])
+
 	return (
 		<>
 			<Sidebar />
 			<Header />
 			<div className="item-sales-container orders-report-container">
-				<div id="heading">
+				<div id="heading" style={{ position: "relative" }}>
 					<h2>Items</h2>
+					<span style={{ position: "absolute", right: "30px", top: "50%", translate: "0 -50%" }}>
+						Total Items: {filterItemsData.length}
+					</span>
 				</div>
 				<div id="item-sales-top">
 					<div
@@ -107,45 +113,49 @@ const ItemsPage = () => {
 							display: "flex",
 							alignItems: "center",
 							justifyContent: "space-between",
-							width: "100%",
-						}}>
-						<input
-							type="text"
-							onChange={e => setFilterTitle(e.target.value)}
-							value={filterTitle}
-							placeholder="Search Item Title..."
-							className="searchInput"
-						/>
-						<input
-							type="text"
-							onChange={e => setFilterCompany(e.target.value)}
-							value={filterCompany}
-							placeholder="Search Company..."
-							className="searchInput"
-						/>
-						<input
-							type="text"
-							onChange={e => setFilterCategory(e.target.value)}
-							value={filterCategory}
-							placeholder="Search Category..."
-							className="searchInput"
-						/>
-						<div>Total Items: {filterItemsData.length}</div>
-						<div
-							style={{
-								display: "flex",
-								width: "120px",
-								alignItems: "center",
-								justifyContent: "space-between",
-							}}>
+							width: "100%"
+						}}
+					>
+						<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
 							<input
-								type="checkbox"
-								onChange={e => setDisabledItem(e.target.checked)}
-								value={disabledItem}
+								type="text"
+								onChange={e => setFilterTitle(e.target.value)}
+								value={filterTitle}
+								placeholder="Search Item Title..."
 								className="searchInput"
-								style={{ scale: "1.2" }}
 							/>
-							<div style={{ width: "100px" }}>Disabled Items</div>
+							<input
+								type="text"
+								onChange={e => setFilterCompany(e.target.value)}
+								value={filterCompany}
+								placeholder="Search Company..."
+								className="searchInput"
+							/>
+							<input
+								type="text"
+								onChange={e => setFilterCategory(e.target.value)}
+								value={filterCategory}
+								placeholder="Search Category..."
+								className="searchInput"
+							/>
+							<label
+								style={{
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "space-between",
+									gap: "8px",
+									cursor: "pointer"
+								}}
+							>
+								<input
+									type="checkbox"
+									onChange={e => setDisabledItem(e.target.checked)}
+									value={disabledItem}
+									className="searchInput"
+									style={{ scale: "1.2" }}
+								/>
+								<span>Disabled Items</span>
+							</label>
 						</div>
 
 						<button className="theme-btn" onClick={() => setPopupForm(true)}>
@@ -199,268 +209,309 @@ export default ItemsPage
 function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
 	const [items, setItems] = useState("sort_order")
 	const [order, setOrder] = useState("")
-
-	console.log(items)
+	const [pricesListState, setPricesListState] = useState()
 	return (
-		<table className="user-table" style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
-			<thead>
-				<tr>
-					<th>S.N</th>
-					<th colSpan={3}>
-						<div className="t-head-element">
-							<span>Company Title</span>
-							<div className="sort-buttons-container">
-								<button
-									onClick={() => {
-										setItems("company_title")
-										setOrder("asc")
-									}}>
-									<ChevronUpIcon className="sort-up sort-button" />
-								</button>
-								<button
-									onClick={() => {
-										setItems("company_title")
-										setOrder("desc")
-									}}>
-									<ChevronDownIcon className="sort-down sort-button" />
-								</button>
-							</div>
-						</div>
-					</th>
-					<th colSpan={3}>
-						<div className="t-head-element">
-							<span>Category Title</span>
-							<div className="sort-buttons-container">
-								<button
-									onClick={() => {
-										setItems("category_title")
-										setOrder("asc")
-									}}>
-									<ChevronUpIcon className="sort-up sort-button" />
-								</button>
-								<button
-									onClick={() => {
-										setItems("category_title")
-										setOrder("desc")
-									}}>
-									<ChevronDownIcon className="sort-down sort-button" />
-								</button>
-							</div>
-						</div>
-					</th>
-					<th colSpan={3}>
-						<div className="t-head-element">
-							<span>Item Title</span>
-							<div className="sort-buttons-container">
-								<button
-									onClick={() => {
-										setItems("item_title")
-										setOrder("asc")
-									}}>
-									<ChevronUpIcon className="sort-up sort-button" />
-								</button>
-								<button
-									onClick={() => {
-										setItems("item_title")
-										setOrder("desc")
-									}}>
-									<ChevronDownIcon className="sort-down sort-button" />
-								</button>
-							</div>
-						</div>
-					</th>
-					<th colSpan={2}>
-						<div className="t-head-element">
-							<span>MRP</span>
-							<div className="sort-buttons-container">
-								<button
-									onClick={() => {
-										setItems("mrp")
-										setOrder("asc")
-									}}>
-									<ChevronUpIcon className="sort-up sort-button" />
-								</button>
-								<button
-									onClick={() => {
-										setItems("mrp")
-										setOrder("desc")
-									}}>
-									<ChevronDownIcon className="sort-down sort-button" />
-								</button>
-							</div>
-						</div>
-					</th>
-					<th colSpan={2}>
-						<div className="t-head-element">
-							<span>Code</span>
-							<div className="sort-buttons-container">
-								<button
-									onClick={() => {
-										setItems("item_code")
-										setOrder("asc")
-									}}>
-									<ChevronUpIcon className="sort-up sort-button" />
-								</button>
-								<button
-									onClick={() => {
-										setItems("item_code")
-										setOrder("desc")
-									}}>
-									<ChevronDownIcon className="sort-down sort-button" />
-								</button>
-							</div>
-						</div>
-					</th>
-					<th colSpan={2}>
-						<div className="t-head-element">
-							<span>Discount</span>
-							<div className="sort-buttons-container">
-								<button
-									onClick={() => {
-										setItems("item_discount")
-										setOrder("asc")
-									}}>
-									<ChevronUpIcon className="sort-up sort-button" />
-								</button>
-								<button
-									onClick={() => {
-										setItems("item_discount")
-										setOrder("desc")
-									}}>
-									<ChevronDownIcon className="sort-down sort-button" />
-								</button>
-							</div>
-						</div>
-					</th>
-					<th colSpan={2}>
-						<div className="t-head-element">
-							<span>Selling Price</span>
-							<div className="sort-buttons-container">
-								<button
-									onClick={() => {
-										setItems("item_price")
+		<>
+			<div style={{ maxWidth: "100vw", height: "fit-content", overflowX: "auto" }}>
+				<table className="user-table" style={{ tableLayout: "auto" }}>
+					<thead>
+						<tr>
+							<th>S.N</th>
+							<th>
+								<div className="t-head-element">
+									<span>Company Title</span>
+									<div className="sort-buttons-container">
+										<button
+											onClick={() => {
+												setItems("company_title")
+												setOrder("asc")
+											}}
+										>
+											<ChevronUpIcon className="sort-up sort-button" />
+										</button>
+										<button
+											onClick={() => {
+												setItems("company_title")
+												setOrder("desc")
+											}}
+										>
+											<ChevronDownIcon className="sort-down sort-button" />
+										</button>
+									</div>
+								</div>
+							</th>
+							<th>
+								<div className="t-head-element">
+									<span>Category Title</span>
+									<div className="sort-buttons-container">
+										<button
+											onClick={() => {
+												setItems("category_title")
+												setOrder("asc")
+											}}
+										>
+											<ChevronUpIcon className="sort-up sort-button" />
+										</button>
+										<button
+											onClick={() => {
+												setItems("category_title")
+												setOrder("desc")
+											}}
+										>
+											<ChevronDownIcon className="sort-down sort-button" />
+										</button>
+									</div>
+								</div>
+							</th>
+							<th>
+								<div className="t-head-element">
+									<span>Item Title</span>
+									<div className="sort-buttons-container">
+										<button
+											onClick={() => {
+												setItems("item_title")
+												setOrder("asc")
+											}}
+										>
+											<ChevronUpIcon className="sort-up sort-button" />
+										</button>
+										<button
+											onClick={() => {
+												setItems("item_title")
+												setOrder("desc")
+											}}
+										>
+											<ChevronDownIcon className="sort-down sort-button" />
+										</button>
+									</div>
+								</div>
+							</th>
+							<th>
+								<div className="t-head-element">
+									<span>MRP</span>
+									<div className="sort-buttons-container">
+										<button
+											onClick={() => {
+												setItems("mrp")
+												setOrder("asc")
+											}}
+										>
+											<ChevronUpIcon className="sort-up sort-button" />
+										</button>
+										<button
+											onClick={() => {
+												setItems("mrp")
+												setOrder("desc")
+											}}
+										>
+											<ChevronDownIcon className="sort-down sort-button" />
+										</button>
+									</div>
+								</div>
+							</th>
+							<th>
+								<div className="t-head-element">
+									<span>Code</span>
+									<div className="sort-buttons-container">
+										<button
+											onClick={() => {
+												setItems("item_code")
+												setOrder("asc")
+											}}
+										>
+											<ChevronUpIcon className="sort-up sort-button" />
+										</button>
+										<button
+											onClick={() => {
+												setItems("item_code")
+												setOrder("desc")
+											}}
+										>
+											<ChevronDownIcon className="sort-down sort-button" />
+										</button>
+									</div>
+								</div>
+							</th>
+							<th>
+								<div className="t-head-element">
+									<span>Discount</span>
+									<div className="sort-buttons-container">
+										<button
+											onClick={() => {
+												setItems("item_discount")
+												setOrder("asc")
+											}}
+										>
+											<ChevronUpIcon className="sort-up sort-button" />
+										</button>
+										<button
+											onClick={() => {
+												setItems("item_discount")
+												setOrder("desc")
+											}}
+										>
+											<ChevronDownIcon className="sort-down sort-button" />
+										</button>
+									</div>
+								</div>
+							</th>
+							<th>
+								<div className="t-head-element">
+									<span>Selling Price</span>
+									<div className="sort-buttons-container">
+										<button
+											onClick={() => {
+												setItems("item_price")
 
-										setOrder("asc")
-									}}>
-									<ChevronUpIcon className="sort-up sort-button" />
-								</button>
-								<button
-									onClick={() => {
-										setItems("item_price")
-										setOrder("desc")
-									}}>
-									<ChevronDownIcon className="sort-down sort-button" />
-								</button>
-							</div>
-						</div>
-					</th>
-					<th colSpan={2}>
-						<div className="t-head-element">
-							<span>Conversion</span>
-							<div className="sort-buttons-container">
-								<button
-									onClick={() => {
-										setItems("conversion")
-										setOrder("asc")
-									}}>
-									<ChevronUpIcon className="sort-up sort-button" />
-								</button>
-								<button
-									onClick={() => {
-										setItems("conversion")
-										setOrder("desc")
-									}}>
-									<ChevronDownIcon className="sort-down sort-button" />
-								</button>
-							</div>
-						</div>
-					</th>
-					<th colSpan={2}>
-						<div className="t-head-element">
-							<span>GST(%)</span>
-							<div className="sort-buttons-container">
-								<button
-									onClick={() => {
-										setItems("item_gst")
-										setOrder("asc")
-									}}>
-									<ChevronUpIcon className="sort-up sort-button" />
-								</button>
-								<button
-									onClick={() => {
-										setItems("item_gst")
-										setOrder("desc")
-									}}>
-									<ChevronDownIcon className="sort-down sort-button" />
-								</button>
-							</div>
-						</div>
-					</th>
-					<th colSpan={2}>
-						<div className="t-head-element">
-							<span>One Pack</span>
-							<div className="sort-buttons-container">
-								<button
-									onClick={() => {
-										setItems("one_pack")
-										setOrder("asc")
-									}}>
-									<ChevronUpIcon className="sort-up sort-button" />
-								</button>
-								<button
-									onClick={() => {
-										setItems("one_pack")
-										setOrder("desc")
-									}}>
-									<ChevronDownIcon className="sort-down sort-button" />
-								</button>
-							</div>
-						</div>
-					</th>
-					<th colSpan={1}></th>
-				</tr>
-			</thead>
-			<tbody className="tbody">
-				{itemsDetails
-					.map(a => ({ ...a, item_discount: +a.item_discount || 0 }))
-					.sort((a, b) =>
-						order === "asc"
-							? typeof a[items] === "string"
-								? a[items]?.localeCompare(b[items])
-								: a[items] - b[items]
-							: typeof a[items] === "string"
-							? b[items]?.localeCompare(a[items])
-							: b[items] - a[items]
-					)
-					?.map((item, i) => (
-						<tr
-							key={Math.random()}
-							style={{ height: "30px" }}
-							onClick={() => setPopupForm({ type: "edit", data: item })}>
-							<td>{i + 1}</td>
-							<td colSpan={3}>{item.company_title}</td>
-							<td colSpan={3}>{item.category_title}</td>
-							<td colSpan={3}>{item.item_title}</td>
-							<td colSpan={2}>{item.mrp}</td>
-							<td colSpan={2}>{item.item_code}</td>
-							<td colSpan={2}>{item.item_discount || 0}</td>
-							<td colSpan={2}>{item.item_price}</td>
-							<td colSpan={2}>{item.conversion}</td>
-							<td colSpan={2}>{item.item_gst}</td>
-							<td colSpan={2}>{item.one_pack}</td>
-							<td
-								colSpan={1}
-								onClick={e => {
-									e.stopPropagation()
-
-									setDeletePopup(item)
-								}}>
-								<DeleteOutline />
-							</td>
+												setOrder("asc")
+											}}
+										>
+											<ChevronUpIcon className="sort-up sort-button" />
+										</button>
+										<button
+											onClick={() => {
+												setItems("item_price")
+												setOrder("desc")
+											}}
+										>
+											<ChevronDownIcon className="sort-down sort-button" />
+										</button>
+									</div>
+								</div>
+							</th>
+							<th>
+								<div className="t-head-element">
+									<span>Conversion</span>
+									<div className="sort-buttons-container">
+										<button
+											onClick={() => {
+												setItems("conversion")
+												setOrder("asc")
+											}}
+										>
+											<ChevronUpIcon className="sort-up sort-button" />
+										</button>
+										<button
+											onClick={() => {
+												setItems("conversion")
+												setOrder("desc")
+											}}
+										>
+											<ChevronDownIcon className="sort-down sort-button" />
+										</button>
+									</div>
+								</div>
+							</th>
+							<th>
+								<div className="t-head-element">
+									<span>GST(%)</span>
+									<div className="sort-buttons-container">
+										<button
+											onClick={() => {
+												setItems("item_gst")
+												setOrder("asc")
+											}}
+										>
+											<ChevronUpIcon className="sort-up sort-button" />
+										</button>
+										<button
+											onClick={() => {
+												setItems("item_gst")
+												setOrder("desc")
+											}}
+										>
+											<ChevronDownIcon className="sort-down sort-button" />
+										</button>
+									</div>
+								</div>
+							</th>
+							<th>
+								<div className="t-head-element">
+									<span>One Pack</span>
+									<div className="sort-buttons-container">
+										<button
+											onClick={() => {
+												setItems("one_pack")
+												setOrder("asc")
+											}}
+										>
+											<ChevronUpIcon className="sort-up sort-button" />
+										</button>
+										<button
+											onClick={() => {
+												setItems("one_pack")
+												setOrder("desc")
+											}}
+										>
+											<ChevronDownIcon className="sort-down sort-button" />
+										</button>
+									</div>
+								</div>
+							</th>
+							<th></th>
 						</tr>
-					))}
-			</tbody>
-		</table>
+					</thead>
+					<tbody className="tbody">
+						{itemsDetails
+							.map(a => ({ ...a, item_discount: +a.item_discount || 0 }))
+							.sort((a, b) =>
+								order === "asc"
+									? typeof a[items] === "string"
+										? a[items]?.localeCompare(b[items])
+										: a[items] - b[items]
+									: typeof a[items] === "string"
+									? b[items]?.localeCompare(a[items])
+									: b[items] - a[items]
+							)
+							?.map((item, i) => (
+								<tr
+									key={Math.random()}
+									style={{ height: "30px" }}
+									onClick={() => setPopupForm({ type: "edit", data: item })}
+								>
+									<td>{i + 1}</td>
+									<td>{item.company_title}</td>
+									<td>{item.category_title}</td>
+									<td>{item.item_title}</td>
+									<td>{item.mrp}</td>
+									<td>{item.item_code}</td>
+									<td>{item.item_discount || 0}</td>
+									<td>{item.item_price}</td>
+									<td>{item.conversion}</td>
+									<td>{item.item_gst}</td>
+									<td>{item.one_pack}</td>
+									<td>
+										<div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+											<GrList
+												style={{ fontSize: "22px" }}
+												onClick={e => {
+													e.stopPropagation()
+													setPricesListState({
+														active: true,
+														item: {
+															item_uuid: item?.item_uuid,
+															item_title: item?.item_title,
+															item_price: item?.item_price
+														}
+													})
+												}}
+											/>
+											<DeleteOutline
+												onClick={e => {
+													setDeletePopup(item)
+												}}
+											/>
+										</div>
+									</td>
+								</tr>
+							))}
+					</tbody>
+				</table>
+			</div>
+			{pricesListState?.active && (
+				<CounterPrices item={pricesListState?.item} close={() => setPricesListState()} />
+			)}
+		</>
 	)
 }
 function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategories, items, setNotification }) {
@@ -476,8 +527,8 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 			url: "/itemGroup/GetItemGroupList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success)
 			setItemGroup(response.data.result.filter(a => a.item_group_uuid && a.item_group_title))
@@ -492,18 +543,17 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 				one_pack: "1",
 				conversion: "1",
 				status: 1,
-				...popupInfo.data,
+				...popupInfo.data
 			})
 		else
 			setdata({
 				one_pack: "1",
 				conversion: "1",
 				company_uuid: companies[0].company_uuid,
-				category_uuid: itemCategories.filter(a => a.company_uuid === companies[0].company_uuid)[0]
-					?.category_uuid,
+				category_uuid: itemCategories.filter(a => a.company_uuid === companies[0].company_uuid)[0]?.category_uuid,
 				free_issue: "N",
 				status: 1,
-				exclude_discount: 0,
+				exclude_discount: 0
 			})
 	}, [companies, itemCategories, popupInfo.data, popupInfo?.type])
 
@@ -540,10 +590,10 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 						url: "/uploadImage",
 						data: form,
 						headers: {
-							"Content-Type": "multipart/form-data",
-						},
+							"Content-Type": "multipart/form-data"
+						}
 					})
-				},
+				}
 			})
 			const newFile = new File([previousFile], data.item_uuid + ".png")
 			const form = new FormData()
@@ -553,8 +603,8 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 				url: "/uploadImage",
 				data: form,
 				headers: {
-					"Content-Type": "multipart/form-data",
-				},
+					"Content-Type": "multipart/form-data"
+				}
 			})
 			obj = { ...obj, img_status: 1 }
 		}
@@ -564,8 +614,8 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 				url: "/items/putItem",
 				data: [obj],
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.result[0].success) {
 				onSave()
@@ -580,8 +630,8 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 				url: "/items/postItem",
 				data: obj,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				onSave()
@@ -608,8 +658,9 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -629,7 +680,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 												setdata({
 													...data,
 													item_title: e.target.value,
-													pronounce: e.target.value,
+													pronounce: e.target.value
 												})
 											}
 											maxLength={60}
@@ -646,7 +697,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 											onChange={e =>
 												setdata({
 													...data,
-													sort_order: e.target.value,
+													sort_order: e.target.value
 												})
 											}
 										/>
@@ -667,7 +718,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 												} else {
 													setdata(prev => ({
 														...prev,
-														img: e.target.files[0],
+														img: e.target.files[0]
 													}))
 												}
 											}}
@@ -676,7 +727,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 											style={{
 												width: "100px",
 												height: "100px",
-												objectFit: "contain",
+												objectFit: "contain"
 											}}
 											src={data.img_status ? server + "/" + data.item_uuid + ".png" : noimg}
 											onError={({ currentTarget }) => {
@@ -690,7 +741,8 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 										<span
 											className="flex"
 											style={{ width: "10%", height: "100px" }}
-											onClick={() => setdata(prev => ({ ...prev, img_status: false }))}>
+											onClick={() => setdata(prev => ({ ...prev, img_status: false }))}
+										>
 											<DeleteOutline />
 										</span>
 									) : (
@@ -708,11 +760,11 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 												setdata({
 													...data,
 													company_uuid: e.target.value,
-													category_uuid: itemCategories.filter(
-														a => a.company_uuid === e.target.value
-													)[0]?.category_uuid,
+													category_uuid: itemCategories.filter(a => a.company_uuid === e.target.value)[0]
+														?.category_uuid
 												})
-											}>
+											}
+										>
 											{companies
 												.sort((a, b) => a.sort_order - b.sort_order)
 												.map(a => (
@@ -729,9 +781,10 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 											onChange={e =>
 												setdata({
 													...data,
-													category_uuid: e.target.value,
+													category_uuid: e.target.value
 												})
-											}>
+											}
+										>
 											{itemCategories
 												.filter(a => a.company_uuid === data.company_uuid)
 												.sort((a, b) => a.sort_order - b.sort_order)
@@ -753,7 +806,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 											onChange={e =>
 												setdata({
 													...data,
-													pronounce: e.target.value,
+													pronounce: e.target.value
 												})
 											}
 											maxLength={42}
@@ -770,7 +823,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 											onChange={e =>
 												setdata({
 													...data,
-													mrp: e.target.value,
+													mrp: e.target.value
 												})
 											}
 											maxLength={5}
@@ -792,7 +845,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 												setdata({
 													...data,
 													item_price: e.target.value,
-													margin: (data.mrp / e.target.value - 1) * 100,
+													margin: (data.mrp / e.target.value - 1) * 100
 												})
 											}
 											maxLength={5}
@@ -811,17 +864,13 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 												let item_price = data?.mrp / (e.target.value / 100 + 1)
 												item_price =
 													item_price - Math.floor(item_price) !== 0
-														? item_price
-																.toString()
-																.match(
-																	new RegExp("^-?\\d+(?:.\\d{0," + (2 || -1) + "})?")
-																)[0]
+														? item_price.toString().match(new RegExp("^-?\\d+(?:.\\d{0," + (2 || -1) + "})?"))[0]
 														: item_price
 
 												setdata({
 													...data,
 													margin: e.target.value,
-													item_price,
+													item_price
 												})
 											}}
 											maxLength={5}
@@ -840,7 +889,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 											onChange={e =>
 												setdata({
 													...data,
-													item_code: e.target.value.replace(/\s+/g, ""),
+													item_code: e.target.value.replace(/\s+/g, "")
 												})
 											}
 										/>
@@ -856,7 +905,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 											onChange={e =>
 												setdata({
 													...data,
-													item_gst: e.target.value,
+													item_gst: e.target.value
 												})
 											}
 											maxLength={3}
@@ -874,7 +923,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 											onChange={e =>
 												setdata({
 													...data,
-													conversion: e.target.value,
+													conversion: e.target.value
 												})
 											}
 											maxLength={5}
@@ -891,7 +940,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 											onChange={e =>
 												setdata({
 													...data,
-													one_pack: e.target.value,
+													one_pack: e.target.value
 												})
 											}
 											maxLength={5}
@@ -910,7 +959,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 											onChange={e =>
 												setdata({
 													...data,
-													item_discount: e.target.value,
+													item_discount: e.target.value
 												})
 											}
 											maxLength={5}
@@ -957,7 +1006,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 											onChange={e =>
 												setdata({
 													...data,
-													barcode: e.target.value.split("\n"),
+													barcode: e.target.value.split("\n")
 												})
 											}
 										/>
@@ -975,7 +1024,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 													onClick={e =>
 														setdata(prev => ({
 															...prev,
-															status: 1,
+															status: 1
 														}))
 													}
 												/>
@@ -991,7 +1040,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 													onClick={e =>
 														setdata(prev => ({
 															...prev,
-															status: 0,
+															status: 0
 														}))
 													}
 												/>
@@ -1008,12 +1057,11 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 											style={{ width: "200px", height: "100px" }}
 											value={data?.item_group_uuid}
 											onChange={onChangeGroupHandler}
-											multiple>
+											multiple
+										>
 											{/* <option selected={occasionsTemp.length===occasionsData.length} value="all">All</option> */}
 											{itemGroup?.map(occ => (
-												<option
-													value={occ.item_group_uuid}
-													style={{ marginBottom: "5px", textAlign: "center" }}>
+												<option value={occ.item_group_uuid} style={{ marginBottom: "5px", textAlign: "center" }}>
 													{occ.item_group_title}
 												</option>
 											))}
@@ -1033,7 +1081,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 														onClick={() =>
 															setdata(prev => ({
 																...prev,
-																exclude_discount: 1,
+																exclude_discount: 1
 															}))
 														}
 													/>
@@ -1049,7 +1097,7 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 														onClick={() =>
 															setdata(prev => ({
 																...prev,
-																exclude_discount: 0,
+																exclude_discount: 0
 															}))
 														}
 													/>
@@ -1064,13 +1112,11 @@ function NewUserForm({ onSave, popupInfo, setItemsData, companies, itemCategorie
 													<div
 														key={_i}
 														className="flex"
-														onClick={() => setdata(x => ({ ...x, billing_type: _i?.[0] }))}>
+														onClick={() => setdata(x => ({ ...x, billing_type: _i?.[0] }))}
+													>
 														<input
 															type="radio"
-															checked={
-																data.billing_type === _i?.[0] ||
-																(idx === 0 && !data.billing_type)
-															}
+															checked={data.billing_type === _i?.[0] || (idx === 0 && !data.billing_type)}
 															style={{ height: "25px", marginRight: "5px" }}
 														/>
 														{_i}
@@ -1110,8 +1156,8 @@ function DeleteItemPopup({ onSave, popupInfo, setItemsData }) {
 				url: "/items/deleteItem",
 				data: { item_uuid: popupInfo.item_uuid },
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				onSave()
@@ -1131,8 +1177,9 @@ function DeleteItemPopup({ onSave, popupInfo, setItemsData }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -1145,22 +1192,17 @@ function DeleteItemPopup({ onSave, popupInfo, setItemsData }) {
 							<i style={{ color: "red" }}>{errMassage === "" ? "" : "Error: " + errMassage}</i>
 							<div className="flex" style={{ justifyContent: "space-between" }}>
 								{loading ? (
-									<button
-										className="submit"
-										id="loading-screen"
-										style={{ background: "red", width: "120px" }}>
+									<button className="submit" id="loading-screen" style={{ background: "red", width: "120px" }}>
 										<svg viewBox="0 0 100 100">
-											<path
-												d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-												fill="#ffffff"
-												stroke="none">
+											<path d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50" fill="#ffffff" stroke="none">
 												<animateTransform
 													attributeName="transform"
 													type="rotate"
 													dur="1s"
 													repeatCount="indefinite"
 													keyTimes="0;1"
-													values="0 50 51;360 50 51"></animateTransform>
+													values="0 50 51;360 50 51"
+												></animateTransform>
 											</path>
 										</svg>
 									</button>
@@ -1178,5 +1220,156 @@ function DeleteItemPopup({ onSave, popupInfo, setItemsData }) {
 				</div>
 			</div>
 		</div>
+	)
+}
+function CounterPrices({ close, item }) {
+	const [countersList, setCountersList] = useState()
+	const [modifiedPrices, setModifiedPrices] = useState({})
+	const [loadingState, setLoadingState] = useState()
+	const [promptState, setPromptState] = useState()
+
+	const saveCounterPrice = async counter_uuid => {
+		setLoadingState(prev => ({ ...prev, [counter_uuid]: true }))
+		try {
+			await axios({
+				method: "patch",
+				url: "/counters/item_special_price/" + counter_uuid,
+				data: [
+					{
+						item_uuid: item.item_uuid,
+						price: modifiedPrices?.[counter_uuid]
+					}
+				]
+			})
+			setCountersList(prev =>
+				prev.map(i =>
+					i.counter_uuid === counter_uuid ? { ...i, special_price: modifiedPrices?.[counter_uuid] } : i
+				)
+			)
+		} catch (error) {}
+		setLoadingState(prev => ({ ...prev, [counter_uuid]: false }))
+	}
+
+	const deleteSpecialPrice = async counter_uuid => {
+		setLoadingState(prev => ({ ...prev, [counter_uuid]: true }))
+		try {
+			await axios({
+				method: "delete",
+				url: "/counters/delete_special_price",
+				data: [
+					{
+						counter_uuid,
+						item_uuid: item.item_uuid
+					}
+				]
+			})
+			setCountersList(prev => prev.filter(i => i.counter_uuid !== counter_uuid))
+		} catch (error) {}
+		setLoadingState(prev => ({ ...prev, [counter_uuid]: false }))
+	}
+
+	const deleteConfirmation = counter => {
+		setPromptState({
+			message: `Item ${item?.item_title}'s special price will be removed from counter '${counter?.counter_title}'. Continue?`,
+			actions: [
+				{ label: "Cancel", classname: "black", action: () => setPromptState() },
+				{ label: "Continue", classname: "delete", action: () => deleteSpecialPrice(counter?.counter_uuid) }
+			]
+		})
+	}
+
+	useEffect(() => {
+		;(async () => {
+			try {
+				const response = await axios.get(`/counters/counter-special-prices/${item?.item_uuid}`)
+				if (response.data) setCountersList(response.data)
+			} catch (error) {
+				console.error(error)
+			}
+		})()
+	}, [])
+
+	return (
+		<>
+			<div className="overlay" style={{ zIndex: 9999999 }}>
+				<div className="modal" style={{ padding: 0, maxHeight: "unset", overflow: "hidden" }}>
+					<div>
+						<div className="theme-heading">
+							<h2>Counter Special Prices</h2>
+							<button className="close-btn" onClick={close}>
+								<IoIosCloseCircle />
+							</button>
+						</div>
+						<div
+							className="table-container-user"
+							style={{ height: "80vh", width: "80vw", padding: "0 0 10px", overflow: "auto" }}
+						>
+							<table className="user-table performance-summary-table nohover">
+								<thead>
+									<tr>
+										<th>Counter Title</th>
+										<th>Route Title</th>
+										<th>Special Price (Original Price: {item?.item_price})</th>
+									</tr>
+								</thead>
+								<tbody className="tbody">
+									{countersList?.map(counter => (
+										<tr key={counter?.counter_uuid} style={{ height: "30px" }}>
+											<td>
+												{counter?.counter_title || (
+													<small style={{ opacity: ".45", fontWeight: "600" }}>N/A</small>
+												)}
+											</td>
+											<td>
+												{counter?.route_title || <small style={{ opacity: ".45", fontWeight: "600" }}>N/A</small>}
+											</td>
+											<td>
+												<div>
+													<input
+														type="text"
+														value={modifiedPrices[counter?.counter_uuid] || counter?.special_price}
+														onChange={e =>
+															setModifiedPrices(prev => ({ ...prev, [counter?.counter_uuid]: e.target.value }))
+														}
+													/>
+													<div>
+														{loadingState?.[counter?.counter_uuid] ? (
+															<span
+																className="loader"
+																style={{ width: "20px", height: "20px", borderWidth: "2px" }}
+															/>
+														) : (
+															<>
+																{+counter?.special_price === +modifiedPrices[counter?.counter_uuid] ||
+																!modifiedPrices[counter?.counter_uuid] ? (
+																	<IoCheckmarkDoneOutline className="table-icon checkmark" style={{ margin: 0 }} />
+																) : (
+																	<FaSave
+																		style={{ margin: 0 }}
+																		className="table-icon"
+																		title="Save current price as special item price"
+																		onClick={() => saveCounterPrice(counter.counter_uuid)}
+																	/>
+																)}
+																<DeleteOutlineIcon
+																	style={{ color: "red" }}
+																	className="table-icon"
+																	onClick={() => deleteConfirmation(counter)}
+																/>
+															</>
+														)}
+													</div>
+												</div>
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			{promptState && <Prompt {...promptState} />}
+		</>
 	)
 }

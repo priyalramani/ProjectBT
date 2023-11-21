@@ -191,6 +191,10 @@ const Sidebar = ({ setCollectionTags }) => {
 							link: "/admin/performanceSummary"
 						},
 						{
+							name: "Deductions Report",
+							link: "/admin/deductionsReport"
+						},
+						{
 							name: "Pending Order Entry",
 							link: "/admin/pendingEntry"
 						},

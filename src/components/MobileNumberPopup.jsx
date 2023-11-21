@@ -30,7 +30,7 @@ const MobileNumberPopup = ({ onSave, counter, getCounter }) => {
         data?.mobile?.filter((a) => a.mobile && a.mobile === item.mobile)
           .length > 1
       ) {
-        setNotification({ success: false, message: "Dublicat Number Present" });
+        setNotification({ success: false, message: "Dublicate Number Present" });
         setTimeout(() => setNotification(null), 5000);
         return;
       }

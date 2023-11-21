@@ -68,7 +68,7 @@ const MainAdmin = () => {
 	const location = useLocation()
 	const [notesState, setNotesState] = useState()
 
-	const { updateServerPdf, setLoading } = useContext(context)
+	const { updateServerPdf, setLoading, setNotification } = useContext(context)
 
 	let user_uuid = localStorage.getItem("user_uuid")
 
@@ -636,6 +636,19 @@ const MainAdmin = () => {
 		setIsLoading(false)
 	}
 
+	const handleRefresh = async () => {
+		setOrdersSpinner(true)
+		try {
+			if (holdOrders) await getRunningHoldOrders()
+			else await getRunningOrders(null, false)
+			setNotification({ success: true, message: "Refreshed successfully!" })
+		} catch (error) {
+			setNotification({ success: false, message: "Failed to refresh!" })
+		}
+		setTimeout(() => setNotification(null), 5000)
+		setOrdersSpinner(null)
+	}
+
 	return (
 		<>
 			<Loader visible={isLoading} />
@@ -674,14 +687,7 @@ const MainAdmin = () => {
 						cursor: "pointer"
 					}}
 					className={ordersSpinner ? "rotating" : ""}
-					onClick={async () => {
-						setOrdersSpinner(true)
-						try {
-							if (holdOrders) await getRunningHoldOrders()
-							else await getRunningOrders(null, false)
-						} catch (error) {}
-						setOrdersSpinner(null)
-					}}
+					onClick={handleRefresh}
 				/>
 				{selectedPrintOrder.length ? (
 					<div

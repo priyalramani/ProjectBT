@@ -64,8 +64,9 @@ import PerformanceSummary from "./pages/Reports/PerformanceSummary"
 import CounterCharges from "./pages/Reports/CounterCharges"
 import Loader from "./components/Loader"
 import CounterReport from "./pages/Reports/CounterReport"
+import DeductionsReport from "./pages/Reports/DeductionsReport"
 
-export let Version = 169
+export let Version = 170
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
 
@@ -119,7 +120,6 @@ function App() {
 	}, [userType])
 
 	document.title = "BT"
-	console.log(notification)
 
 	return (
 		<div className="App">
@@ -282,6 +282,7 @@ function App() {
 							<Route path="/admin/adjustStock" element={<AdjustStock />} />
 							<Route path="/admin/userActivity" element={<UserActivity />} />
 							<Route path="/admin/performanceSummary" element={<PerformanceSummary />} />
+							<Route path="/admin/deductionsReport" element={<DeductionsReport />} />
 							<Route path="/admin/counterReport" element={<CounterReport />} />
 							<Route path="/admin/upiTransactionReport" element={<UPITransection />} />
 							<Route path="/admin/completeOrderReport" element={<CompleteOrder />} />

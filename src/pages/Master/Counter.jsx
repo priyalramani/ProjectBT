@@ -914,7 +914,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 		}
 		for (let item of json.mobile) {
 			if (json?.mobile?.filter(a => a.mobile && a.mobile === item.mobile).length > 1) {
-				setNotification({ success: false, message: "Dublicat Number Present" })
+				setNotification({ success: false, message: "Dublicate Number Present" })
 				setTimeout(() => setNotification(null), 5000)
 				return
 			}
@@ -980,7 +980,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 			return
 		}
 		if (data?.mobile?.filter(a => a.mobile && a.mobile === mobile.mobile).length > 1) {
-			setNotification({ success: false, message: "Dublicat Number Present" })
+			setNotification({ success: false, message: "Dublicate Number Present" })
 			setTimeout(() => setNotification(null), 5000)
 			return
 		}
@@ -1005,7 +1005,7 @@ function NewUserForm({ onSave, popupInfo, routesData, paymentModes, counters, ge
 			return
 		}
 		if (data?.mobile?.filter(a => a.mobile && a.mobile === mobile.mobile).length > 1) {
-			setNotification({ success: false, message: "Dublicat Number Present" })
+			setNotification({ success: false, message: "Dublicate Number Present" })
 			setTimeout(() => setNotification(null), 5000)
 			return
 		}

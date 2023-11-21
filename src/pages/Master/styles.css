@@ -18,7 +18,7 @@
 	color: #4f4f4f;
 	cursor: pointer;
 }
-.user-table .tbody tr:hover {
+.user-table:not(.nohover) .tbody tr:hover {
 	background: rgba(0, 0, 0, 0.175);
 }
 
@@ -842,7 +842,6 @@ div#no_reports {
 	align-items: flex-end;
 	gap: 10px;
 	overflow: auto;
-
 }
 
 div#date-input-container > label {
