@@ -25,7 +25,7 @@ const DeductionsReport = () => {
 			const total_values = {}
 			for (const doc of response.data) {
 				total_values.adjustment = (total_values?.adjustment || 0) + (doc?.adjustment || 0)
-				total_values.shortage = (total_values?.shortage || 0) + (doc?.shortage || 0)
+				total_values.shortage = (total_values?.shortage || 0) + (doc?.shorindtage || 0)
 				total_values.replacement = (total_values?.replacement || 0) + (doc?.replacement || 0)
 			}
 

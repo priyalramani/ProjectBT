@@ -617,7 +617,7 @@ const MainAdmin = () => {
 					...i,
 					payment_pending: 1,
 					status:
-						Math.max(...i.status.map(s => +s.stage)) < 3
+						Math.max(...i?.status?.map(s => +s.stage)) < 3
 							? i.status.concat([{ stage: 3, time: Date.now(), user_uuid: localStorage.getItem("user_uuid") }])
 							: i.status
 				}))

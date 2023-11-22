@@ -66,7 +66,7 @@ import Loader from "./components/Loader"
 import CounterReport from "./pages/Reports/CounterReport"
 import DeductionsReport from "./pages/Reports/DeductionsReport"
 
-export let Version = 170
+export let Version = 171
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
 

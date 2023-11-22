@@ -1241,6 +1241,7 @@ function CounterPrices({ close, item }) {
 					}
 				]
 			})
+
 			setCountersList(prev =>
 				prev.map(i =>
 					i.counter_uuid === counter_uuid ? { ...i, special_price: modifiedPrices?.[counter_uuid] } : i
@@ -1254,15 +1255,11 @@ function CounterPrices({ close, item }) {
 		setLoadingState(prev => ({ ...prev, [counter_uuid]: true }))
 		try {
 			await axios({
-				method: "delete",
+				method: "patch",
 				url: "/counters/delete_special_price",
-				data: [
-					{
-						counter_uuid,
-						item_uuid: item.item_uuid
-					}
-				]
+				data: { counter_uuid, item_uuid: item.item_uuid }
 			})
+			setPromptState(null)
 			setCountersList(prev => prev.filter(i => i.counter_uuid !== counter_uuid))
 		} catch (error) {}
 		setLoadingState(prev => ({ ...prev, [counter_uuid]: false }))

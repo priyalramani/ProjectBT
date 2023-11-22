@@ -2926,6 +2926,7 @@ function MinMaxPopup({ onSave, popupValue, order, items }) {
 													value={data?.min}
 													onWheel={e => e.preventDefault()}
 													maxLength={42}
+													style={{ width: "100px" }}
 												/>
 											</label>
 
@@ -2938,6 +2939,7 @@ function MinMaxPopup({ onSave, popupValue, order, items }) {
 													value={data?.max}
 													onWheel={e => e.preventDefault()}
 													maxLength={42}
+													style={{ width: "100px" }}
 												/>
 											</label>
 										</div>

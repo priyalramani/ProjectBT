@@ -623,6 +623,17 @@ export function OrderDetails({
 		setWaiting(true)
 		try {
 			const { data = messagePopup, sendPaymentReminder } = param
+			const orderUpdateData = data
+			const maxState = Math.max(...orderUpdateData?.status?.map(s => +s.stage))
+
+			if (+orderUpdateData?.payment_pending && maxState < 3) {
+				orderUpdateData.status.push({
+					stage: 3,
+					time: Date.now(),
+					user_uuid: localStorage.getItem("user_uuid")
+				})
+			}
+
 			const response = await axios({
 				method: "put",
 				url: "/orders/putOrders",
