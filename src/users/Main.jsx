@@ -53,6 +53,12 @@ const Main = () => {
 			name: "Collection",
 			link: "/outstandingCollection",
 			img: "dinein.png"
+		},
+		{
+			type: 7,
+			name: "Advance Ordering",
+			link: "/advanceOrdering",
+			img: "dinein.png"
 		}
 	]
 
@@ -69,6 +75,7 @@ const Main = () => {
 		}
 		console.log("user_roles", user_roles)
 		setUserRole(user_roles || [])
+		localStorage.removeItem("selectedCategories");
 		return () => setUserRole([])
 	}, [])
 	useEffect(() => {
