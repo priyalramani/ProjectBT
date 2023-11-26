@@ -59,6 +59,12 @@ const Main = () => {
 			name: "Collection",
 			link: "/outstandingCollection",
 			img: "dinein.png"
+		},
+		{
+			type: 7,
+			name: "Advance Ordering",
+			link: "/advanceOrdering",
+			img: "dinein.png"
 		}
 	]
 
@@ -87,6 +93,7 @@ const Main = () => {
 		if (user_roles) user_roles = JSON.parse(user_roles)
 		setUserRole(user_roles || [])
 		updateWarehouseState(localStorage.getItem("selected_warehouse"))
+		localStorage.removeItem("selectedCategories");
 		return () => setUserRole([])
 	}, [])
 

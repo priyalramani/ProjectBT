@@ -65,6 +65,8 @@ import CounterCharges from "./pages/Reports/CounterCharges"
 import Loader from "./components/Loader"
 import CounterReport from "./pages/Reports/CounterReport"
 import DeductionsReport from "./pages/Reports/DeductionsReport"
+import AdvanceOrdering from "./users/AdvanceOrdering"
+import AdvanceOrderingPage from "./users/AdvanceOrderingPage"
 
 export let Version = 172
 // export const server = "http://localhost:9000"
@@ -155,6 +157,7 @@ function App() {
 									</MobileLayout>
 								}
 							/>
+	
 							<Route
 								path="/users/route/:route_uuid"
 								element={
@@ -189,6 +192,9 @@ function App() {
 							/>
 							<Route path="/users/stock-transfer" element={<StockTransfer />} />
 							<Route path="/users/outstandingCollection" element={<OutstangingsCollection />} />
+							<Route path="/users/advanceOrdering" element={<MobileLayout>
+										<AdvanceOrdering refreshDb={refreshDb} />
+									</MobileLayout>} />
 							<Route
 								path="/users/processing/:trip_uuid"
 								element={
@@ -202,6 +208,14 @@ function App() {
 								element={
 									<MobileLayout>
 										<SelectedCounterOrder />
+									</MobileLayout>
+								}
+							/>
+							<Route
+								path="/users/advanceOrdering/:counter_uuid"
+								element={
+									<MobileLayout>
+										<AdvanceOrderingPage />
 									</MobileLayout>
 								}
 							/>
