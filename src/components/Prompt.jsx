@@ -1,9 +1,10 @@
 import React from "react"
+import Loader from "./Loader"
 
-const Prompt = ({ message, heading, actions }) => {
+const Prompt = ({ message, heading, actions, classes, loading }) => {
 	return (
 		<div className="overlay-wrapper">
-			<div className="prompt">
+			<div className={"prompt " + (classes?.wrapper || "")}>
 				{heading && <h2>{heading}</h2>}
 				<p>{message}</p>
 				<div className="prompt-actions">
@@ -13,6 +14,11 @@ const Prompt = ({ message, heading, actions }) => {
 						</button>
 					))}
 				</div>
+				{loading && (
+					<div id="spinner-wrapper" className={classes?.wrapper}>
+						<span className="loader white small" />
+					</div>
+				)}
 			</div>
 		</div>
 	)

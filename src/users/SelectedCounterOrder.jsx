@@ -43,6 +43,16 @@ const SelectedCounterOrder = () => {
 	const [loading, setLoading] = useState(false)
 
 	const Navigate = useNavigate()
+
+	const getStock = item => {
+		const selected_warehouse = localStorage.getItem("selected_warehouse")
+		const warehouse_stock = item.stock?.find(i => i.warehouse_uuid === selected_warehouse)
+		if (!warehouse_stock) return `N/A`
+		return `${parseInt(+warehouse_stock?.qty / +item?.conversion)}:${parseInt(
+			+warehouse_stock?.qty % +(+item?.conversion)
+		)}`
+	}
+
 	const callBilling = async () => {
 		let counter = counters.find(a => order.counter_uuid === a.counter_uuid)
 		let time = new Date()
@@ -257,7 +267,8 @@ const SelectedCounterOrder = () => {
 			user_uuid: localStorage.getItem("user_uuid"),
 			role: "Order",
 			narration:
-				counter.counter_title + (sessionStorage.getItem("route_title") ? ", " + sessionStorage.getItem("route_title") : ""),
+				counter.counter_title +
+				(sessionStorage.getItem("route_title") ? ", " + sessionStorage.getItem("route_title") : ""),
 			timestamp: time.getTime(),
 			...others
 		}
@@ -283,14 +294,21 @@ const SelectedCounterOrder = () => {
 
 	return (
 		<>
-			{number ? <MobileNumberPopup counter={counter} getCounter={getCounter} onSave={() => setNumber(false)} /> : ""}
+			{number ? (
+				<MobileNumberPopup counter={counter} getCounter={getCounter} onSave={() => setNumber(false)} />
+			) : (
+				""
+			)}
 
 			<nav
 				className="user_nav nav_styling"
 				style={cartPage ? { backgroundColor: "#000", maxWidth: "500px" } : { maxWidth: "500px" }}
 			>
 				<div className="user_menubar">
-					<IoArrowBackOutline className="user_Back_icon" onClick={() => (!cartPage ? Navigate(-1) : setCartPage(false))} />
+					<IoArrowBackOutline
+						className="user_Back_icon"
+						onClick={() => (!cartPage ? Navigate(-1) : setCartPage(false))}
+					/>
 				</div>
 				{cartPage ? (
 					<>
@@ -345,7 +363,11 @@ const SelectedCounterOrder = () => {
 						</div>
 
 						<div>
-							<select className="searchInput selectInput" value={filterCompany} onChange={e => setFilterCompany(e.target.value)}>
+							<select
+								className="searchInput selectInput"
+								value={filterCompany}
+								onChange={e => setFilterCompany(e.target.value)}
+							>
 								{companies?.map(a => (
 									<option value={a.company_uuid}>{a.company_title}</option>
 								))}
@@ -383,7 +405,9 @@ const SelectedCounterOrder = () => {
 															?.filter(
 																a =>
 																	(!filterItemTitle ||
-																		a.item_title?.toLocaleLowerCase().includes(filterItemTitle.toLocaleLowerCase())) &&
+																		a.item_title
+																			?.toLocaleLowerCase()
+																			.includes(filterItemTitle.toLocaleLowerCase())) &&
 																	a.category_uuid === category.category_uuid
 															)
 															?.sort((a, b) => a.sort_order - b.sort_order)
@@ -403,7 +427,9 @@ const SelectedCounterOrder = () => {
 																										...a,
 																										b:
 																											+(a.b || 0) +
-																											parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
+																											parseInt(
+																												((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion
+																											),
 
 																										p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																								  }
@@ -418,7 +444,9 @@ const SelectedCounterOrder = () => {
 																									...a,
 																									b:
 																										+(a.b || 0) +
-																										parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
+																										parseInt(
+																											((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion
+																										),
 
 																									p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																								}))
@@ -429,7 +457,9 @@ const SelectedCounterOrder = () => {
 																								...a,
 																								b:
 																									+(a.b || 0) +
-																									parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
+																									parseInt(
+																										((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion
+																									),
 
 																								p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																							}))
@@ -471,15 +501,16 @@ const SelectedCounterOrder = () => {
 																					) : (
 																						<>Price: {item?.item_price}</>
 																					)}
+																					<span style={{ marginLeft: "20px" }}>Stock {getStock(item)}</span>
 																				</h3>
 																				<h3 className={`item-price`}>MRP: {item?.mrp || ""}</h3>
 																			</div>
 																		</div>
 																		<div className="menuleft">
 																			<input
-																				value={`${order?.items?.find(a => a.item_uuid === item.item_uuid)?.b || 0} : ${
-																					order?.items?.find(a => a.item_uuid === item.item_uuid)?.p || 0
-																				}`}
+																				value={`${
+																					order?.items?.find(a => a.item_uuid === item.item_uuid)?.b || 0
+																				} : ${order?.items?.find(a => a.item_uuid === item.item_uuid)?.p || 0}`}
 																				className="boxPcsInput"
 																				onClick={e => {
 																					e.stopPropagation()
@@ -540,7 +571,9 @@ const SelectedCounterOrder = () => {
 																									...a,
 																									b:
 																										+(a.b || 0) +
-																										parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
+																										parseInt(
+																											((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion
+																										),
 
 																									p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																							  }
@@ -551,7 +584,10 @@ const SelectedCounterOrder = () => {
 																						.map(a => ({
 																							...a,
 																							b:
-																								+(a.b || 0) + parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
+																								+(a.b || 0) +
+																								parseInt(
+																									((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion
+																								),
 
 																							p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																						}))
@@ -683,7 +719,9 @@ const SelectedCounterOrder = () => {
 																									...a,
 																									b:
 																										+(a.b || 0) +
-																										parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
+																										parseInt(
+																											((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion
+																										),
 
 																									p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																							  }
@@ -698,7 +736,9 @@ const SelectedCounterOrder = () => {
 																								...a,
 																								b:
 																									+(a.b || 0) +
-																									parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
+																									parseInt(
+																										((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion
+																									),
 
 																								p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																							}))
@@ -708,7 +748,10 @@ const SelectedCounterOrder = () => {
 																						.map(a => ({
 																							...a,
 																							b:
-																								+(a.b || 0) + parseInt(((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion),
+																								+(a.b || 0) +
+																								parseInt(
+																									((a?.p || 0) + (+item?.one_pack || 1)) / +item.conversion
+																								),
 
 																							p: ((a?.p || 0) + (+item?.one_pack || 1)) % +item.conversion
 																						}))
@@ -757,9 +800,9 @@ const SelectedCounterOrder = () => {
 																	</div>
 																	<div className="menuleft">
 																		<input
-																			value={`${order?.items?.find(a => a.item_uuid === item.item_uuid)?.b || 0} : ${
-																				order?.items?.find(a => a.item_uuid === item.item_uuid)?.p || 0
-																			}`}
+																			value={`${
+																				order?.items?.find(a => a.item_uuid === item.item_uuid)?.b || 0
+																			} : ${order?.items?.find(a => a.item_uuid === item.item_uuid)?.p || 0}`}
 																			className="boxPcsInput"
 																			onClick={e => {
 																				e.stopPropagation()
@@ -950,7 +993,11 @@ const SelectedCounterOrder = () => {
 			) : (
 				""
 			)}
-			{discountPopup ? <DiscountPopup onSave={() => setDiscountPopup(false)} setOrder={setOrder} order={order} /> : ""}
+			{discountPopup ? (
+				<DiscountPopup onSave={() => setDiscountPopup(false)} setOrder={setOrder} order={order} />
+			) : (
+				""
+			)}
 			{popupState ? <PriorityPopup close={() => setPopupState(false)} setOrder={setOrder} order={order} /> : ""}
 			{loading ? (
 				<div className="overlay" style={{ zIndex: 9999999 }}>
@@ -1171,7 +1218,9 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
 														}}
 														onChange={e =>
 															setItems(prev =>
-																prev.map(a => (a.item_uuid === item.item_uuid ? { ...a, free: e.target.value } : a))
+																prev.map(a =>
+																	a.item_uuid === item.item_uuid ? { ...a, free: e.target.value } : a
+																)
 															)
 														}
 														onWheel={e => e.preventDefault()}

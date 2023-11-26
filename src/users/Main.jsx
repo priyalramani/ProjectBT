@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom"
 import PullToRefresh from "react-simple-pull-to-refresh"
 import "./style.css"
 import { Link, useLocation } from "react-router-dom"
-import { deleteDB } from "idb"
+import { deleteDB, openDB } from "idb"
 import CloseIcon from "@mui/icons-material/Close"
 import MenuIcon from "@mui/icons-material/Menu"
 import axios from "axios"
 import { refreshDb } from "../Apis/functions"
 import { Version } from "../App"
+import { MdLogout } from "react-icons/md"
+import Prompt from "../components/Prompt"
 
 const Main = () => {
 	const [userRole, setUserRole] = useState([])
@@ -17,6 +19,10 @@ const Main = () => {
 	const [user_bal, setUserBal] = useState({})
 	const { pathname } = useLocation()
 	const Navigate = useNavigate()
+	const [warehouseState, setWarehouseState] = useState({ current: null, select: null })
+	const [promptState, setPromptState] = useState()
+	const [loading, setLoading] = useState()
+
 	const rolesArray = [
 		{
 			type: 1,
@@ -56,21 +62,34 @@ const Main = () => {
 		}
 	]
 
-	useEffect(() => {
-		let user_uuid = localStorage.getItem("user_uuid")
+	const updateWarehouseState = async selected_warehouse => {
+		if (!selected_warehouse) return
+		const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1)
+		const _warehouse = await db
+			.transaction("warehouse", "readwrite")
+			.objectStore("warehouse")
+			.get(selected_warehouse)
+		setWarehouseState({
+			current: {
+				warehouse_uuid: _warehouse?.warehouse_uuid,
+				warehouse_title: _warehouse?.warehouse_title
+			}
+		})
+		db.close()
+	}
 
-		if (!user_uuid) {
-			Navigate("/login")
+	useEffect(() => {
+		if (!localStorage.getItem("user_uuid")) {
+			return Navigate("/login")
 		}
+
 		let user_roles = localStorage.getItem("user_role")
-		console.log("user_roles", typeof user_roles)
-		if (user_roles) {
-			user_roles = JSON.parse(user_roles)
-		}
-		console.log("user_roles", user_roles)
+		if (user_roles) user_roles = JSON.parse(user_roles)
 		setUserRole(user_roles || [])
+		updateWarehouseState(localStorage.getItem("selected_warehouse"))
 		return () => setUserRole([])
 	}, [])
+
 	useEffect(() => {
 		if (isSideMenuOpen) {
 			axios({
@@ -85,7 +104,39 @@ const Main = () => {
 			})
 		}
 	}, [isSideMenuOpen])
-	console.log(typeof userRole)
+
+	const switchWarehouse = async selected_warehouse => {
+		setLoading(true)
+		try {
+			localStorage.setItem("selected_warehouse", selected_warehouse)
+
+			await axios({
+				method: "put",
+				url: "/users/putUser",
+				data: {
+					user_uuid: localStorage.getItem("user_uuid"),
+					selected_warehouse
+				}
+			})
+
+			await refreshDb()
+			await updateWarehouseState(selected_warehouse)
+		} catch (error) {}
+		setPromptState()
+		setLoading()
+	}
+
+	const invokeAlert = i => {
+		setWarehouseState(prev => ({ ...prev, select: false }))
+		setPromptState({
+			message: `Are you sure you want to switch to warehouse '${i?.warehouse_title}'?`,
+			actions: [
+				{ label: "Cancel", classname: "cancel", action: () => setPromptState() },
+				{ label: "Continue", classname: "confirm", action: () => switchWarehouse(i.warehouse_uuid) }
+			]
+		})
+	}
+
 	return (
 		<>
 			<PullToRefresh onRefresh={() => window.location.reload(true)}>
@@ -94,7 +145,7 @@ const Main = () => {
 						className="time-icon"
 						type="button"
 						onClick={() => setSideMenuOpen(true)}
-						style={{ color: "#000", left: "2rem" }}
+						style={{ color: "#000", left: "1rem" }}
 					>
 						<MenuIcon />
 					</button>
@@ -131,32 +182,55 @@ const Main = () => {
 			</PullToRefresh>
 			{popupForm ? <Logout onSave={() => setPopupForm(false)} popupForm={popupForm} /> : ""}
 			<div
-				className="overlay"
-				style={isSideMenuOpen ? { justifyContent: "center" } : { justifyContent: "flex-start", left: "-9999", display: "none" }}
+				className="user-overlay"
+				style={
+					isSideMenuOpen
+						? { justifyContent: "center" }
+						: { justifyContent: "flex-start", left: "-9999", display: "none" }
+				}
 				//  className={`sidebar ${isSideMenuOpen ? "sideopen" : ""}`}
 			>
-				<div
-					className="sidebarContainer"
-					style={{
-						height: "100vh",
-						width: "100vw",
-						maxWidth: "500px",
-						minHeight: "-webkit-fill-available"
-					}}
-				>
-					<button className="time-icon" type="button" onClick={() => setSideMenuOpen(false)} style={{ right: "1rem" }}>
-						<CloseIcon />
-					</button>
+				<div className="sidebar-container">
 					<div className="links">
-						<h1 style={{ color: "#fff" }}>{user_bal.user_title || "Bharat Traders"}</h1>
-						<h2>Balance Incentive: Rs {user_bal.incentive_balance}</h2>
+						<div id="sidebar-header">
+							<div>
+								<h1 style={{ color: "#fff" }}>{user_bal.user_title || "Bharat Traders"}</h1>
+								<div style={{ marginBottom: "2px" }}>
+									<span>Balance Incentive: Rs {user_bal.incentive_balance}</span>
+								</div>
+								{warehouseState?.current && (
+									<div>
+										<span>Current Warehouse : {warehouseState?.current?.warehouse_title}</span>
+									</div>
+								)}
+							</div>
+							<button type="button" onClick={() => setSideMenuOpen(false)}>
+								<CloseIcon />
+							</button>
+						</div>
 
-						<button className="sidebar-btn" type="button" onClick={() => setPopupForm(true)}>
-							Logout
+						<button
+							className="sidebar-btn"
+							type="button"
+							onClick={() => setWarehouseState(prev => ({ ...prev, select: true }))}
+						>
+							<span>Switch Warehouse</span>
+						</button>
+						<button className="sidebar-btn" id="user-logout-btn" type="button" onClick={() => setPopupForm(true)}>
+							<span>Logout</span>
+							<MdLogout />
 						</button>
 					</div>
 				</div>
 			</div>
+			{warehouseState?.select && (
+				<SwitchWarehouse
+					invokeAlert={invokeAlert}
+					current={warehouseState?.current?.warehouse_uuid}
+					close={() => setWarehouseState(prev => ({ ...prev, select: false }))}
+				/>
+			)}
+			{promptState && <Prompt {...promptState} classes={{ wrapper: "theme-touch" }} loading={loading} />}
 		</>
 	)
 }
@@ -234,6 +308,47 @@ function Logout({ onSave, popupForm }) {
 					<button onClick={onSave} className="closeButton">
 						x
 					</button>
+				</div>
+			</div>
+		</div>
+	)
+}
+
+function SwitchWarehouse({ close, invokeAlert, current }) {
+	const [warehouses, setWarehouses] = useState()
+
+	useEffect(() => {
+		;(async () => {
+			const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1)
+			const _warehouses = await db.transaction("warehouse", "readwrite").objectStore("warehouse").getAll()
+			setWarehouses(
+				_warehouses
+					?.filter(i => !current || i.warehouse_uuid !== current)
+					?.map(i => ({
+						warehouse_uuid: i.warehouse_uuid,
+						warehouse_title: i.warehouse_title
+					}))
+			)
+		})()
+	}, [])
+
+	return (
+		<div className="overlay" style={{ zIndex: 9999999999 }}>
+			<div className="theme-modal theme-touch">
+				<div className="flex between">
+					<h2>Switch Warehouse</h2>
+					<CloseIcon style={{ cursor: "pointer" }} onClick={close} />
+				</div>
+				<div id="warehouses-list">
+					{warehouses?.map(i => (
+						<div key={i.warehouse_uuid} onClick={() => invokeAlert(i)}>
+							{i.warehouse_title || (
+								<small>
+									<em>N/A</em>
+								</small>
+							)}
+						</div>
+					))}
 				</div>
 			</div>
 		</div>

@@ -24,6 +24,7 @@ const Orders = ({ refreshDb }) => {
 
 	const params = useParams()
 	const Navigate = useNavigate()
+
 	const getIndexedDbData = async () => {
 		const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1)
 		let tx = await db.transaction("counter", "readwrite").objectStore("counter")
@@ -193,7 +194,8 @@ const Orders = ({ refreshDb }) => {
 									.sort((a, b) => +a.sort_order - b.sort_order)
 									?.filter(
 										a =>
-											(!counterFilter || a.counter_title.toLocaleLowerCase().includes(counterFilter.toLocaleLowerCase())) &&
+											(!counterFilter ||
+												a.counter_title.toLocaleLowerCase().includes(counterFilter.toLocaleLowerCase())) &&
 											(window.location.pathname.includes("route") ? params.route_uuid === a.route_uuid : true)
 									)
 									?.map((item, index) => {
@@ -221,7 +223,9 @@ const Orders = ({ refreshDb }) => {
 											>
 												<div>
 													<div style={{ width: "60%" }}>{item.counter_title}</div>
-													<div style={{ width: "40%" }}>{routes.find(a => a?.route_uuid === item?.route_uuid)?.route_title}</div>
+													<div style={{ width: "40%" }}>
+														{routes.find(a => a?.route_uuid === item?.route_uuid)?.route_title}
+													</div>
 													<div className="user-counter-actions">
 														<button
 															onClick={e => {
@@ -233,7 +237,9 @@ const Orders = ({ refreshDb }) => {
 																})
 															}}
 														>
-															<HiLocationMarker className={`location-marker ${item?.location_coords && "green"}`} />
+															<HiLocationMarker
+																className={`location-marker ${item?.location_coords && "green"}`}
+															/>
 														</button>
 														{item?.mobile.length ? (
 															<Phone
@@ -388,8 +394,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 	const [data, setdata] = useState({})
 	const [errMassage, setErrorMassage] = useState("")
 	const [loading, setLoading] = useState("")
-	const [otppoup, setOtpPopup] = useState(false)
-	const [otp, setOtp] = useState("")
+	
 	const getRoutesData = async () => {
 		const response = await axios({
 			method: "get",
@@ -422,7 +427,9 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 		setdata({
 			payment_modes: paymentModes
 				?.filter(
-					a => a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+					a =>
+						a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002" ||
+						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 				)
 				.map(a => a.mode_uuid),
 			credit_allowed: "N",
@@ -601,7 +608,9 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 															}
 															setdata(prev => ({
 																...prev,
-																mobile: prev.mobile.map(b => (b.uuid === a.uuid ? { ...b, mobile: e.target.value } : b))
+																mobile: prev.mobile.map(b =>
+																	b.uuid === a.uuid ? { ...b, mobile: e.target.value } : b
+																)
 															}))
 														}}
 														maxLength={10}

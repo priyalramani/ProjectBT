@@ -28,6 +28,7 @@ const LoginPage = ({ setUserType }) => {
 			})
 			if (response.data.success) {
 				let data = response.data.result
+				if (data.selected_warehouse) localStorage.setItem("selected_warehouse", data.selected_warehouse)
 				localStorage.setItem("user_uuid", data.user_uuid)
 				localStorage.setItem("user_title", data.user_title)
 				localStorage.setItem("user_role", JSON.stringify(data.user_role || []))

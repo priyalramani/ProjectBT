@@ -89,6 +89,9 @@
 	align-items: center;
 	justify-content: center;
 }
+.flex.between{
+	justify-content: space-between;
+}
 .user_nav {
 	background-color: #fff;
 	height: 50px;
