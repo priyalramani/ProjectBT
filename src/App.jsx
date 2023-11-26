@@ -68,7 +68,7 @@ import DeductionsReport from "./pages/Reports/DeductionsReport"
 import AdvanceOrdering from "./users/AdvanceOrdering"
 import AdvanceOrderingPage from "./users/AdvanceOrderingPage"
 
-export let Version = 172
+export let Version = 174
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
 
@@ -163,6 +163,14 @@ function App() {
 								element={
 									<MobileLayout>
 										<Orders />
+									</MobileLayout>
+								}
+							/>
+							<Route
+								path="/users/advanceRoute/:route_uuid"
+								element={
+									<MobileLayout>
+										<AdvanceOrdering />
 									</MobileLayout>
 								}
 							/>
