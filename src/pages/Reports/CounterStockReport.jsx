@@ -40,9 +40,7 @@ const CounterStockReport = () => {
     }
     let startDate =  new Date(new Date(searchData.startDate).setHours(0, 0, 0, 0)).getTime();
 
-    let endDate = new Date(new Date(searchData.endDate).setHours(0, 0, 0, 0));
-    endDate.setDate(endDate.getDate() + 1);
-    endDate = endDate.getTime();
+    let endDate = new Date(new Date(searchData.endDate).setHours(0, 0, 0, 0)).getTime();
 
     const response = await axios({
       method: "post",
