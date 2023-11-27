@@ -68,7 +68,7 @@ import DeductionsReport from "./pages/Reports/DeductionsReport"
 import AdvanceOrdering from "./users/AdvanceOrdering"
 import AdvanceOrderingPage from "./users/AdvanceOrderingPage"
 
-export let Version = 172
+export let Version = 173
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
 
@@ -157,7 +157,7 @@ function App() {
 									</MobileLayout>
 								}
 							/>
-	
+
 							<Route
 								path="/users/route/:route_uuid"
 								element={
@@ -192,9 +192,14 @@ function App() {
 							/>
 							<Route path="/users/stock-transfer" element={<StockTransfer />} />
 							<Route path="/users/outstandingCollection" element={<OutstangingsCollection />} />
-							<Route path="/users/advanceOrdering" element={<MobileLayout>
+							<Route
+								path="/users/advanceOrdering"
+								element={
+									<MobileLayout>
 										<AdvanceOrdering refreshDb={refreshDb} />
-									</MobileLayout>} />
+									</MobileLayout>
+								}
+							/>
 							<Route
 								path="/users/processing/:trip_uuid"
 								element={

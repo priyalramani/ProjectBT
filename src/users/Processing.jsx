@@ -82,36 +82,29 @@ const Processing = () => {
 				}}
 			>
 				{tripData.length ? (
-					tripData
-						?.filter(a => a.trip_title && a.orderLength)
-						?.sort((a, b) => (a.created_at ? a.created_at - b.created_at : -1))
-						.map((data, i) => (
-							<div
-								key={i}
-								to={
-									"#"
-									// pathname + rolesArray.find((a) => +a.type === +data)?.link
-								}
-								className="linkDecoration"
-								onClick={() => {
-									sessionStorage.setItem("trip_title", data?.trip_title)
-									let link =
-										`/users/${
-											Location.pathname.includes("checking")
-												? "checking"
-												: Location.pathname.includes("delivery")
-												? "delivery"
-												: "processing"
-										}/` + data?.trip_uuid
+					tripData.map((data, i) => (
+						<div
+							key={i}
+							className="linkDecoration"
+							onClick={() => {
+								sessionStorage.setItem("trip_title", data?.trip_title)
+								let link =
+									`/users/${
+										Location.pathname.includes("checking")
+											? "checking"
+											: Location.pathname.includes("delivery")
+											? "delivery"
+											: "processing"
+									}/` + data?.trip_uuid
 
-									Navigate(link)
-								}}
-							>
-								<div className="service">
-									<span>{data.trip_title}</span>
-								</div>
+								Navigate(link)
+							}}
+						>
+							<div className={"service" + (data?.priorityOrders ? " blink" : "")}>
+								<span>{data.trip_title}</span>
 							</div>
-						))
+						</div>
+					))
 				) : (
 					<h1>No Order</h1>
 				)}

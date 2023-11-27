@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, useContext } from "react"
 import axios from "axios"
 import Select from "react-select"
-import { v4 as uuid, v4 } from "uuid"
+import { v4 as uuid } from "uuid"
 import { Billing, CONTROL_AUTO_REFRESH, jumpToNextIndex } from "../Apis/functions"
 import { Add, CheckCircle, ContentCopy, NoteAdd, Refresh, WhatsApp } from "@mui/icons-material"
 import { useReactToPrint } from "react-to-print"
@@ -989,7 +989,7 @@ export function OrderDetails({
 					p: item?.original_qty?.p
 				})),
 				order_grandtotal: 0,
-				order_uuid: v4(),
+				order_uuid: uuid(),
 				warehouse_uuid: oldOrder?.warehouse_uuid,
 				counter_uuid: oldOrder?.counter_uuid,
 				trip_uuid: oldOrder?.trip_uuid

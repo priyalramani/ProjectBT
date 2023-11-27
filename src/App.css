@@ -693,7 +693,7 @@ label {
 }
 
 .rotating {
-	animation: rotate 2s linear infinite;
+	animation: rotate 1s linear infinite;
 }
 
 @keyframes rotate {

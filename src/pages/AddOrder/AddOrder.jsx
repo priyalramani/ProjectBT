@@ -313,7 +313,9 @@ export default function AddOrder() {
 		if (!order.item_details.filter(a => a.item_uuid).length) return
 		else if (order?.item_details?.some(i => i.billing_type !== order?.order_type))
 			return setPromptState({
-				message: `${getType(order?.order_type, false)} items are not allowed in ${getType(order?.order_type)} order type.`,
+				message: `${getType(order?.order_type, false)} items are not allowed in ${getType(
+					order?.order_type
+				)} order type.`,
 				actions: [{ label: "Ok", classname: "text-btns", action: () => setPromptState(null) }]
 			})
 
@@ -440,6 +442,27 @@ export default function AddOrder() {
 		)
 	}
 
+	const onPiecesKeyDown = (e, item) => {
+		if (e.key === "Enter") jumpToNextIndex("p" + item.uuid)
+		else if (e.key === "+") {
+			e.preventDefault()
+			setOrder(prev => ({
+				...prev,
+				item_details: prev?.item_details?.map(i =>
+					i.item_uuid === item.item_uuid ? { ...i, p: (+i.p || 0) + (+item?.one_pack || 0) } : i
+				)
+			}))
+		} else if (e.key === "-") {
+			e.preventDefault()
+			setOrder(prev => ({
+				...prev,
+				item_details: prev?.item_details?.map(i =>
+					i.item_uuid === item.item_uuid ? { ...i, p: (+i.p || 0) - (+item?.one_pack || 0) } : i
+				)
+			}))
+		}
+	}
+
 	return (
 		<>
 			<Sidebar />
@@ -460,7 +483,9 @@ export default function AddOrder() {
 										ref={ref => (reactInputsRef.current["0"] = ref)}
 										options={counters
 											?.filter(
-												a => !counterFilter || a.counter_title?.toLocaleLowerCase()?.includes(counterFilter.toLocaleLowerCase())
+												a =>
+													!counterFilter ||
+													a.counter_title?.toLocaleLowerCase()?.includes(counterFilter.toLocaleLowerCase())
 											)
 											.map(a => ({
 												value: a.counter_uuid,
@@ -510,7 +535,9 @@ export default function AddOrder() {
 											...warehouse
 												.filter(
 													a =>
-														!user_warehouse.length || +user_warehouse[0] === 1 || user_warehouse.find(b => b === a.warehouse_uuid)
+														!user_warehouse.length ||
+														+user_warehouse[0] === 1 ||
+														user_warehouse.find(b => b === a.warehouse_uuid)
 												)
 												.map(a => ({
 													value: a.warehouse_uuid,
@@ -598,7 +625,9 @@ export default function AddOrder() {
 															className="order-item-select"
 															options={itemsData
 																.filter(
-																	a => !order?.item_details.filter(b => a.item_uuid === b.item_uuid).length && a.status !== 0
+																	a =>
+																		!order?.item_details.filter(b => a.item_uuid === b.item_uuid).length &&
+																		a.status !== 0
 																)
 																.sort((a, b) => a?.item_title?.localeCompare(b.item_title))
 																.map((a, j) => ({
@@ -630,7 +659,8 @@ export default function AddOrder() {
 																		if (a.uuid === item.uuid) {
 																			let item = itemsData.find(b => b.item_uuid === e.value)
 																			const p_price =
-																				+getSpecialPrice(counters, item, order?.counter_uuid)?.price || item.item_price
+																				+getSpecialPrice(counters, item, order?.counter_uuid)?.price ||
+																				item.item_price
 																			return {
 																				...a,
 																				...item,
@@ -657,7 +687,10 @@ export default function AddOrder() {
 																	}))[0]
 															}
 															openMenuOnFocus={true}
-															autoFocus={focusedInputId === `selectContainer-${item.uuid}` || (i === 0 && focusedInputId === 0)}
+															autoFocus={
+																focusedInputId === `selectContainer-${item.uuid}` ||
+																(i === 0 && focusedInputId === 0)
+															}
 															menuPosition="fixed"
 															menuPlacement="auto"
 															placeholder="Item"
@@ -710,7 +743,7 @@ export default function AddOrder() {
 															})
 														}}
 														onFocus={e => e.target.select()}
-														onKeyDown={e => (e.key === "Enter" ? jumpToNextIndex("p" + item.uuid) : "")}
+														onKeyDown={e => onPiecesKeyDown(e, item)}
 														disabled={!item.item_uuid}
 													/>
 												</td>
@@ -1022,7 +1055,8 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 					amt: "",
 					coin: "",
 					status:
-						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" || a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
+						a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
+						a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
 							? "0"
 							: 1
 				}))
@@ -1099,7 +1133,11 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 							<form className="form">
 								<div className="formGroup">
 									{PaymentModes.map(item => (
-										<div className="row" style={{ flexDirection: "row", alignItems: "center" }} key={item.mode_uuid}>
+										<div
+											className="row"
+											style={{ flexDirection: "row", alignItems: "center" }}
+											key={item.mode_uuid}
+										>
 											<div style={{ width: "50px" }}>{item.mode_title}</div>
 											<label className="selectLabel flex" style={{ width: "80px" }}>
 												<input
