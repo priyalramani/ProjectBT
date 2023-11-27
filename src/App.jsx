@@ -67,6 +67,7 @@ import CounterReport from "./pages/Reports/CounterReport"
 import DeductionsReport from "./pages/Reports/DeductionsReport"
 import AdvanceOrdering from "./users/AdvanceOrdering"
 import AdvanceOrderingPage from "./users/AdvanceOrderingPage"
+import CounterStockReport from "./pages/Reports/CounterStockReport"
 
 export let Version = 173
 // export const server = "http://localhost:9000"
@@ -313,6 +314,7 @@ function App() {
 							<Route path="/admin/counterReport" element={<CounterReport />} />
 							<Route path="/admin/upiTransactionReport" element={<UPITransection />} />
 							<Route path="/admin/completeOrderReport" element={<CompleteOrder />} />
+							<Route path="/admin/counterStockReport" element={<CounterStockReport />} />
 							<Route path="/admin/RetailerMarginReport" element={<RetailerMarginReport />} />
 							<Route path="/admin/cancelOrders" element={<CancelOrders />} />
 							<Route path="/admin/ItemsReport" element={<ItemDetails />} />
