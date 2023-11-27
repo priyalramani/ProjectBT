@@ -50,29 +50,7 @@ const AdvanceOrdering = ({ refreshDb }) => {
         setSelectCompanyPopup(true)
     }
   }, []);
-  const postActivity = async (counter, route) => {
-    let time = new Date();
-    let data = {
-      user_uuid: localStorage.getItem("user_uuid"),
-      role: "Order",
-      narration:
-        counter.counter_title +
-        (route.route_title ? ", " + route.route_title : ""),
-      timestamp: time.getTime(),
-      activity: "Counter Open",
-    };
-    const response = await axios({
-      method: "post",
-      url: "/userActivity/postUserActivity",
-      data,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) {
-      console.log(response);
-    }
-  };
+ 
 
   const locationHandler = () => {
     if (!navigator.geolocation)
@@ -258,18 +236,7 @@ const AdvanceOrdering = ({ refreshDb }) => {
                             setRemarks(item.remarks);
                           } else {
                             e.stopPropagation();
-                            postActivity(
-                              item,
-                              routes.find(
-                                (a) => a?.route_uuid === item?.route_uuid
-                              )
-                            );
-                            sessionStorage.setItem(
-                              "route_title",
-                              routes.find(
-                                (a) => a?.route_uuid === item?.route_uuid
-                              )?.route_title
-                            );
+                            
                             Navigate("/users/advanceOrdering/" + item.counter_uuid);
                           }
                         }}
@@ -361,7 +328,7 @@ const AdvanceOrdering = ({ refreshDb }) => {
                         onClick={() => {
                           setCounterFilter("");
                           window.location.assign(
-                            `/users/route/` + data.route_uuid
+                            `/users/advanceRoute/` + data.route_uuid
                           );
                         }}
                       >

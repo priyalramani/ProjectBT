@@ -167,6 +167,14 @@ function App() {
 								}
 							/>
 							<Route
+								path="/users/advanceRoute/:route_uuid"
+								element={
+									<MobileLayout>
+										<AdvanceOrdering />
+									</MobileLayout>
+								}
+							/>
+							<Route
 								path="/users/processing"
 								element={
 									<MobileLayout>

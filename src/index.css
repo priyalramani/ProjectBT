@@ -4,6 +4,8 @@ body {
 		"Helvetica Neue", sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	height: 100vh; /* Fallback for browsers that do not support env() */
+	height: env(safe-area-inset-top) + env(safe-area-inset-bottom);
 }
 
 code {
