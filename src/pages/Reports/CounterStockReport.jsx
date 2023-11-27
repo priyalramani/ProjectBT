@@ -13,7 +13,6 @@ const CounterStockReport = () => {
   const [popupOrder, setPopupOrder] = useState(null);
   const [items, setItems] = useState([]);
   const [counter, setCounter] = useState([]);
-  const [invoiceNumberFilter, setInvoiceNumberFilter] = useState("");
   const [initial, setInitial] = useState(false);
   const { setNotification } = useContext(context);
   const getCounter = async () => {
@@ -39,10 +38,12 @@ const CounterStockReport = () => {
 
       return;
     }
-    let startDate = new Date(searchData.startDate + " 00:00:00 AM");
-    startDate = startDate.getTime();
-    let endDate = new Date(searchData.endDate + " 00:00:00 AM");
+    let startDate =  new Date(new Date(searchData.startDate).setHours(0, 0, 0, 0)).getTime();
+
+    let endDate = new Date(new Date(searchData.endDate).setHours(0, 0, 0, 0));
+    endDate.setDate(endDate.getDate() + 1);
     endDate = endDate.getTime();
+
     const response = await axios({
       method: "post",
       url: "/counterStock/getCounterStocksReport",
@@ -120,14 +121,7 @@ const CounterStockReport = () => {
               className="searchInput"
               pattern="\d{4}-\d{2}-\d{2}"
             />
-            <input
-              type="number"
-              onChange={(e) => setInvoiceNumberFilter(e.target.value)}
-              value={invoiceNumberFilter}
-              placeholder="Search Invoice Number..."
-              className="searchInput"
-              onWheel={(e) => e.preventDefault()}
-            />
+            
             <div className="inputGroup" style={{ width: "50%" }}>
               <Select
                 options={[
