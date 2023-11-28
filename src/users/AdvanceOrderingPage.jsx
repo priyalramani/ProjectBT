@@ -9,7 +9,7 @@ const AdvanceOrderingPage = () => {
 const Navigate=useNavigate();
   const [confirmItemsPopup, setConfirmItemPopup] = useState(false);
 
-  const [userData, setUserData] = useState({});
+
 
   const [order, setOrder] = useState([]);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -65,22 +65,7 @@ const Navigate=useNavigate();
       setLoading(false);
     }
   };
-  const getUsers = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/users/GetUser/" + localStorage.getItem("user_uuid"),
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log("users", response);
-    if (response.data.success) setUserData(response.data.result);
-  };
-
-  useEffect(() => {
-    getUsers();
-  }, []);
+  
  
   const postCounterStocks = async () => {
     setLoading(true);
@@ -90,6 +75,7 @@ const Navigate=useNavigate();
       data: {
         counter_uuid: params.counter_uuid,
         user_uuid: localStorage.getItem("user_uuid"),
+        category_uuid:JSON.parse(localStorage.getItem("selectedCategories")),
         details: order.items.map((a) => ({
           item_uuid: a.item_uuid,
           pcs: a.b * +a.conversion + +a.p,
