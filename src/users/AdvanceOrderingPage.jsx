@@ -99,6 +99,7 @@ const Navigate=useNavigate();
       url: "/counterStock/getStocksItem",
       data: {
         counter_uuid: params.counter_uuid,
+        category_uuid:JSON.parse(localStorage.getItem("selectedCategories")),
         item_uuid,
       },
       headers: {
