@@ -6,10 +6,8 @@ import context from "../context/context";
 
 const AdvanceOrderingPage = () => {
   const [items, setItems] = useState([]);
-const Navigate=useNavigate();
+  const Navigate = useNavigate();
   const [confirmItemsPopup, setConfirmItemPopup] = useState(false);
-
-
 
   const [order, setOrder] = useState([]);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
@@ -65,8 +63,7 @@ const Navigate=useNavigate();
       setLoading(false);
     }
   };
-  
- 
+
   const postCounterStocks = async () => {
     setLoading(true);
     const response = await axios({
@@ -75,7 +72,8 @@ const Navigate=useNavigate();
       data: {
         counter_uuid: params.counter_uuid,
         user_uuid: localStorage.getItem("user_uuid"),
-        category_uuid:JSON.parse(localStorage.getItem("selectedCategories")),
+        category_uuid: JSON.parse(localStorage.getItem("selectedCategories")),
+        timestamp:new Date(new Date().setHours(0, 0, 0, 0)).getTime(),
         details: order.items.map((a) => ({
           item_uuid: a.item_uuid,
           pcs: a.b * +a.conversion + +a.p,
@@ -87,8 +85,8 @@ const Navigate=useNavigate();
     });
     if (response.data.success) {
       setLoading(false);
-      getStocks(order.items.map((a) => a.item_uuid));
-  
+      getStocks(items.map((a) => a.item_uuid));
+
       setNotification({ success: true, message: "Counter Stocks Added" });
       setTimeout(() => setNotification(""), 5000);
     }
@@ -99,7 +97,7 @@ const Navigate=useNavigate();
       url: "/counterStock/getStocksItem",
       data: {
         counter_uuid: params.counter_uuid,
-        category_uuid:JSON.parse(localStorage.getItem("selectedCategories")),
+        category_uuid: JSON.parse(localStorage.getItem("selectedCategories")),
         item_uuid,
       },
       headers: {
@@ -108,15 +106,25 @@ const Navigate=useNavigate();
     });
     if (response.data.success) {
       let data = response.data.result;
-      setOrder((prev) =>({
-		...prev,
-		items:prev.items.map((a) => ({
-          ...a,
-          stock: data?.find((b) => b.item_uuid === a.item_uuid)?.stock || 0,
-        }))
-	  })
-        
-      );
+      setOrder((prev) => {
+        let prevItems = data.map((a) => {
+          let itemA = prev.items.find((b) => b.item_uuid === a.item_uuid);
+          if (!itemA) {
+            itemA = items.find((b) => b.item_uuid === a.item_uuid);
+          }
+          return {
+            ...itemA,
+            b: itemA?.b ?? 0,
+            p: itemA?.p ?? 0,
+            ...a,
+          };
+        });
+        return {
+          ...prev,
+          items: prevItems,
+        };
+      });
+      console.log(order);
     }
   };
 
@@ -349,9 +357,8 @@ const Navigate=useNavigate();
                                       MRP: {item?.mrp || ""}
                                     </h3>
                                     <h3 className={`item-price`}>
-                                      {item.stock
-                                        ? "Projection:" + item?.stock
-                                        : ""}
+                                       Projection: {item?.stock||0}
+                                      
                                     </h3>
                                   </div>
                                 </div>
@@ -450,11 +457,13 @@ const Navigate=useNavigate();
                       type="button"
                       onClick={() => {
                         if (cartPage) {
-							localStorage.setItem("projectionItems",JSON.stringify(order.items))
-							Navigate("/users/orders/" + params.counter_uuid)
-
+                          localStorage.setItem(
+                            "projectionItems",
+                            JSON.stringify(order.items)
+                          );
+                          Navigate("/users/orders/" + params.counter_uuid);
                         } else {
-							postCounterStocks();
+                          postCounterStocks();
                           setCartPage(true);
                           setConfirmItemPopup(false);
                         }
@@ -467,12 +476,11 @@ const Navigate=useNavigate();
                     <button
                       type="button"
                       onClick={() => {
-						if(cartPage){
-							Navigate("/users/orders/" + params.counter_uuid)
-						}else{
-							setConfirmItemPopup(false);
-						}
-                        
+                        if (cartPage) {
+                          Navigate("/users/orders/" + params.counter_uuid);
+                        } else {
+                          setConfirmItemPopup(false);
+                        }
                       }}
                       className="theme-btn"
                     >
