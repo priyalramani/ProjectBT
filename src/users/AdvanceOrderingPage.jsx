@@ -25,11 +25,13 @@ const AdvanceOrderingPage = () => {
   const [companies, setCompanies] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
 
-  const [discountPopup, setDiscountPopup] = useState(false);
-
   const [loading, setLoading] = useState(false);
   const { setNotification } = useContext(context);
+  const [startX, setStartX] = useState(null);
 
+  const handleMouseDown = (e) => {
+    setStartX(e.clientX);
+  };
   const getCounter = async () => {
     setLoading(true);
     try {
@@ -55,7 +57,13 @@ const AdvanceOrderingPage = () => {
           response.data.result.counter.counter_uuid
         );
         setItemsCategory(response.data.result.ItemCategories);
-        setItems(response.data.result.items);
+        setItems(
+          response.data.result.items.map((a) => ({
+            ...a,
+            stockValue: getStockData(a),
+          }))
+        );
+        console.log(items);
         setCompanies(response.data.result.company);
       }
     } catch (error) {
@@ -100,6 +108,18 @@ const AdvanceOrderingPage = () => {
       setTimeout(() => setNotification(""), 5000);
     }
   };
+  function calculateStockValue(stock, one_pack) {
+    if (stock < one_pack) {
+      return one_pack;
+    } else if (stock === one_pack) {
+      return one_pack;
+    } else if (stock % one_pack === 0) {
+      return stock;
+    } else {
+      return Math.ceil(stock / one_pack) * one_pack;
+    }
+  }
+
   const getStocks = async (item_uuid) => {
     const response = await axios({
       method: "post",
@@ -121,11 +141,13 @@ const AdvanceOrderingPage = () => {
           if (!itemA) {
             itemA = items.find((b) => b.item_uuid === a.item_uuid);
           }
+          let projection = a.projection
+            ? calculateStockValue(a.projection, itemA?.one_pack || 1)
+            : 0;
           return {
             ...itemA,
-            b: itemA?.b ?? 0,
-            p: itemA?.p ?? 0,
-            ...a,
+            b: (projection / +itemA?.conversion).toFixed(0),
+            p: projection % +itemA?.conversion,
           };
         });
         return {
@@ -136,13 +158,22 @@ const AdvanceOrderingPage = () => {
       console.log(order);
     }
   };
-
+  const getStockData = (item) => {
+    const selected_warehouse = localStorage.getItem("selected_warehouse");
+    const warehouse_stock = item?.stock?.find(
+      (i) => i.warehouse_uuid === selected_warehouse
+    );
+    if (!warehouse_stock) return `N/A`;
+    return `${parseInt(+warehouse_stock?.qty / +item?.conversion)}:${parseInt(
+      +warehouse_stock?.qty % +(+item?.conversion)
+    )}`;
+  };
   useEffect(() => {
     getCounter();
   }, []);
   let filterItems = useMemo(
     () =>
-      ((cartPage ? order.items.filter((a) => a.stock > 0) : items) || [])
+      ((cartPage ? order.items.filter((a) => a.p > 0 || a.b > 0) : items) || [])
         ?.map((a) => ({
           ...a,
           item_price:
@@ -178,7 +209,7 @@ const AdvanceOrderingPage = () => {
       ),
     [companies, filteredCategory]
   );
-
+  console.log(order.items);
   return (
     <>
       <nav className="user_nav nav_styling" style={{ maxWidth: "500px" }}>
@@ -207,67 +238,305 @@ const AdvanceOrderingPage = () => {
         <div className="container" style={{ maxWidth: "500px" }}>
           <div className="menucontainer">
             <div className="menus">
-              {filteredCompany.length? filteredCompany.map((company) => (
-                <div
-                  id={company?.company_uuid}
-                  key={company?.company_uuid}
-                  name={company?.company_uuid}
-                  className="categoryItemMap"
-                >
-                  <h1
-                    className="categoryHeadline"
-                    style={{
-                      textAlign: "center",
-                      fontSize: "40px",
-                      textDecoration: "underline",
-                      color: "#5BC0F8",
-                    }}
-                  >
-                    {company?.company_title}
-                  </h1>
-                  {filteredCategory
-                    ?.filter((a) => a.company_uuid === company.company_uuid)
-                    ?.sort((a, b) => a.sort_order - b.sort_order)
-                    ?.map((category) => (
-                      <div
-                        id={category?.category_uuid}
-                        key={category?.category_uuid}
-                        name={category?.category_uuid}
-                        className="categoryItemMap"
+              {cartPage ? (
+                filteredCompany.length ? (
+                  filteredCompany.map((company) => (
+                    <div
+                      id={company?.company_uuid}
+                      key={company?.company_uuid}
+                      name={company?.company_uuid}
+                      className="categoryItemMap"
+                    >
+                      <h1
+                        className="categoryHeadline"
+                        style={{
+                          textAlign: "center",
+                          fontSize: "40px",
+                          textDecoration: "underline",
+                          color: "#5BC0F8",
+                        }}
                       >
-                        <h2 className="categoryHeadline small">
-                          {category?.category_title}
-                        </h2>
+                        {company?.company_title}
+                      </h1>
+                      {filteredCategory
+                        ?.filter((a) => a.company_uuid === company.company_uuid)
+                        ?.sort((a, b) => a.sort_order - b.sort_order)
+                        ?.map((category) => (
+                          <div
+                            id={category?.category_uuid}
+                            key={category?.category_uuid}
+                            name={category?.category_uuid}
+                            className="categoryItemMap"
+                          >
+                            <h2 className="categoryHeadline small">
+                              {category?.category_title}
+                            </h2>
 
-                        {filterItems
-                          ?.filter(
-                            (a) =>
-                              !filterItemTitle ||
-                              a.item_title
-                                ?.toLocaleLowerCase()
-                                .includes(filterItemTitle.toLocaleLowerCase())
-                          )
-                          ?.sort((a, b) => a.sort_order - b.sort_order)
+                            {filterItems
+                              ?.filter(
+                                (a) =>
+                                  !filterItemTitle ||
+                                  a.item_title
+                                    ?.toLocaleLowerCase()
+                                    .includes(
+                                      filterItemTitle.toLocaleLowerCase()
+                                    )
+                              )
+                              ?.sort((a, b) => a.sort_order - b.sort_order)
 
-                          ?.filter(
-                            (a) => a.category_uuid === category.category_uuid
-                          )
-                          ?.map((item) => {
-                            return (
-                              <div
-                                key={item?.item_uuid}
-                                className="menu"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (orderStatus)
-                                    setOrder((prev) => ({
-                                      ...prev,
-                                      items: prev?.items?.filter(
-                                        (a) => a.item_uuid === item.item_uuid
-                                      )?.length
-                                        ? prev?.items?.map((a) =>
-                                            a.item_uuid === item.item_uuid
-                                              ? {
+                              ?.filter(
+                                (a) =>
+                                  a.category_uuid === category.category_uuid
+                              )
+                              ?.map((item) => {
+                                return (
+                                  <div
+                                    key={item?.item_uuid}
+                                    className="menu"
+                                    onMouseDown={handleMouseDown}
+                                    onMouseUp={(e) => {
+                                      if (startX !== null) {
+                                        const endX = e.clientX;
+                                        const diffX = endX - startX;
+
+                                        if (diffX > 0) {
+                                          setOrder((prev) => ({
+                                            ...prev,
+                                            items: prev?.items?.map((a) =>
+                                              a.item_uuid === item.item_uuid
+                                                ? {
+                                                    ...a,
+                                                    cancelled: false,
+                                                  }
+                                                : a
+                                            ),
+                                          }));
+                                          // Handle right swipe logic here
+                                        } else if (diffX < 0) {
+                                          setOrder((prev) => ({
+                                            ...prev,
+                                            items: prev?.items?.map((a) =>
+                                              a.item_uuid === item.item_uuid
+                                                ? {
+                                                    ...a,
+                                                    cancelled: true,
+                                                  }
+                                                : a
+                                            ),
+                                          }));
+                                          // Handle left swipe logic here
+                                        }
+
+                                        setStartX(null);
+                                      }
+                                    }}
+                                  >
+                                    <div className="menuItemDetails">
+                                      <h1
+                                        className="item-name"
+                                        style={
+                                          item.cancelled
+                                            ? {
+                                                textDecoration: "line-through",
+                                                color: "red",
+                                              }
+                                            : {}
+                                        }
+                                      >
+                                        {item?.item_title}
+                                      </h1>
+
+                                      <div
+                                        className="item-mode flex"
+                                        style={{
+                                          justifyContent: "space-between",
+                                        }}
+                                      >
+                                        <h3
+                                          className={`item-price`}
+                                          style={{ cursor: "pointer" }}
+                                        >
+                                          {+item?.item_discount ? (
+                                            <>
+                                              <span
+                                                style={{
+                                                  color: "red",
+                                                  textDecoration:
+                                                    "line-through",
+                                                }}
+                                              >
+                                                Price: {item?.item_price}
+                                              </span>
+                                              <br />
+                                              <span
+                                                style={{
+                                                  color: "red",
+                                                  paddingLeft: "10px",
+                                                  marginLeft: "10px",
+                                                  fontWeight: "500",
+                                                  borderLeft: "2px solid red",
+                                                }}
+                                              >
+                                                {item?.item_discount} % OFF
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <>Price: {item?.item_price}</>
+                                          )}
+                                        </h3>
+                                        <h3 className={`item-price`}>
+                                          MRP: {item?.mrp || ""}
+                                        </h3>
+                                        <h3 className={`item-price`}>
+                                          Stock: {item?.stockValue || 0}
+                                        </h3>
+                                      </div>
+                                    </div>
+                                    <div className="menuleft">
+                                      <input
+                                        value={`${
+                                          order?.items?.find(
+                                            (a) =>
+                                              a.item_uuid === item.item_uuid
+                                          )?.b || 0
+                                        } : ${
+                                          order?.items?.find(
+                                            (a) =>
+                                              a.item_uuid === item.item_uuid
+                                          )?.p || 0
+                                        }`}
+                                        disabled={!orderStatus}
+                                        className="boxPcsInput"
+                                        style={
+                                          !orderStatus
+                                            ? {
+                                                border: "2px solid gray",
+                                                boxShadow: "0 2px 8px gray",
+                                              }
+                                            : {}
+                                        }
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (orderStatus) setPopupForm(item);
+                                        }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            <div className="menu">
+                              <div className="menuItemDetails">
+                                <h1 className="item-name"></h1>
+
+                                <div className="item-mode">
+                                  <h3 className={`item-price`}></h3>
+                                </div>
+                              </div>
+                              <div className="menuleft"></div>
+                            </div>
+                          </div>
+                        ))}
+                      <div className="menu">
+                        <div className="menuItemDetails">
+                          <h1 className="item-name"></h1>
+
+                          <div className="item-mode">
+                            <h3 className={`item-price`}></h3>
+                          </div>
+                        </div>
+                        <div className="menuleft"></div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <h1 style={{ textAlign: "center" }}>No Items</h1>
+                )
+              ) : (
+                filteredCompany.map((company) => (
+                  <div
+                    id={company?.company_uuid}
+                    key={company?.company_uuid}
+                    name={company?.company_uuid}
+                    className="categoryItemMap"
+                  >
+                    <h1
+                      className="categoryHeadline"
+                      style={{
+                        textAlign: "center",
+                        fontSize: "40px",
+                        textDecoration: "underline",
+                        color: "#5BC0F8",
+                      }}
+                    >
+                      {company?.company_title}
+                    </h1>
+                    {filteredCategory
+                      ?.filter((a) => a.company_uuid === company.company_uuid)
+                      ?.sort((a, b) => a.sort_order - b.sort_order)
+                      ?.map((category) => (
+                        <div
+                          id={category?.category_uuid}
+                          key={category?.category_uuid}
+                          name={category?.category_uuid}
+                          className="categoryItemMap"
+                        >
+                          <h2 className="categoryHeadline small">
+                            {category?.category_title}
+                          </h2>
+
+                          {filterItems
+                            ?.filter(
+                              (a) =>
+                                !filterItemTitle ||
+                                a.item_title
+                                  ?.toLocaleLowerCase()
+                                  .includes(filterItemTitle.toLocaleLowerCase())
+                            )
+                            ?.sort((a, b) => a.sort_order - b.sort_order)
+
+                            ?.filter(
+                              (a) => a.category_uuid === category.category_uuid
+                            )
+                            ?.map((item) => {
+                              return (
+                                <div
+                                  key={item?.item_uuid}
+                                  className="menu"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (orderStatus)
+                                      setOrder((prev) => ({
+                                        ...prev,
+                                        items: prev?.items?.filter(
+                                          (a) => a.item_uuid === item.item_uuid
+                                        )?.length
+                                          ? prev?.items?.map((a) =>
+                                              a.item_uuid === item.item_uuid
+                                                ? {
+                                                    ...a,
+                                                    b:
+                                                      +(a.b || 0) +
+                                                      parseInt(
+                                                        ((a?.p || 0) + 1) /
+                                                          +item.conversion
+                                                      ),
+
+                                                    p:
+                                                      ((a?.p || 0) + 1) %
+                                                      +item.conversion,
+                                                  }
+                                                : a
+                                            )
+                                          : prev?.items?.length
+                                          ? [
+                                              ...prev.items,
+                                              ...filterItems
+                                                ?.filter(
+                                                  (a) =>
+                                                    a.item_uuid ===
+                                                    item.item_uuid
+                                                )
+                                                .map((a) => ({
                                                   ...a,
                                                   b:
                                                     +(a.b || 0) +
@@ -279,13 +548,9 @@ const AdvanceOrderingPage = () => {
                                                   p:
                                                     ((a?.p || 0) + 1) %
                                                     +item.conversion,
-                                                }
-                                              : a
-                                          )
-                                        : prev?.items?.length
-                                        ? [
-                                            ...prev.items,
-                                            ...filterItems
+                                                })),
+                                            ]
+                                          : filterItems
                                               ?.filter(
                                                 (a) =>
                                                   a.item_uuid === item.item_uuid
@@ -303,132 +568,114 @@ const AdvanceOrderingPage = () => {
                                                   ((a?.p || 0) + 1) %
                                                   +item.conversion,
                                               })),
-                                          ]
-                                        : filterItems
-                                            ?.filter(
-                                              (a) =>
-                                                a.item_uuid === item.item_uuid
-                                            )
-                                            .map((a) => ({
-                                              ...a,
-                                              b:
-                                                +(a.b || 0) +
-                                                parseInt(
-                                                  ((a?.p || 0) + 1) /
-                                                    +item.conversion
-                                                ),
+                                      }));
+                                  }}
+                                >
+                                  <div className="menuItemDetails">
+                                    <h1 className="item-name">
+                                      {item?.item_title}
+                                    </h1>
 
-                                              p:
-                                                ((a?.p || 0) + 1) %
-                                                +item.conversion,
-                                            })),
-                                    }));
-                                }}
-                              >
-                                <div className="menuItemDetails">
-                                  <h1 className="item-name">
-                                    {item?.item_title}
-                                  </h1>
-
-                                  <div
-                                    className="item-mode flex"
-                                    style={{
-                                      justifyContent: "space-between",
-                                    }}
-                                  >
-                                    <h3
-                                      className={`item-price`}
-                                      style={{ cursor: "pointer" }}
+                                    <div
+                                      className="item-mode flex"
+                                      style={{
+                                        justifyContent: "space-between",
+                                      }}
                                     >
-                                      {+item?.item_discount ? (
-                                        <>
-                                          <span
-                                            style={{
-                                              color: "red",
-                                              textDecoration: "line-through",
-                                            }}
-                                          >
-                                            Price: {item?.item_price}
-                                          </span>
-                                          <br />
-                                          <span
-                                            style={{
-                                              color: "red",
-                                              paddingLeft: "10px",
-                                              marginLeft: "10px",
-                                              fontWeight: "500",
-                                              borderLeft: "2px solid red",
-                                            }}
-                                          >
-                                            {item?.item_discount} % OFF
-                                          </span>
-                                        </>
-                                      ) : (
-                                        <>Price: {item?.item_price}</>
-                                      )}
-                                    </h3>
-                                    <h3 className={`item-price`}>
-                                      MRP: {item?.mrp || ""}
-                                    </h3>
-                                    <h3 className={`item-price`}>
-                                      Projection: {item?.stock || 0}
-                                    </h3>
+                                      <h3
+                                        className={`item-price`}
+                                        style={{ cursor: "pointer" }}
+                                      >
+                                        {+item?.item_discount ? (
+                                          <>
+                                            <span
+                                              style={{
+                                                color: "red",
+                                                textDecoration: "line-through",
+                                              }}
+                                            >
+                                              Price: {item?.item_price}
+                                            </span>
+                                            <br />
+                                            <span
+                                              style={{
+                                                color: "red",
+                                                paddingLeft: "10px",
+                                                marginLeft: "10px",
+                                                fontWeight: "500",
+                                                borderLeft: "2px solid red",
+                                              }}
+                                            >
+                                              {item?.item_discount} % OFF
+                                            </span>
+                                          </>
+                                        ) : (
+                                          <>Price: {item?.item_price}</>
+                                        )}
+                                      </h3>
+                                      <h3 className={`item-price`}>
+                                        MRP: {item?.mrp || ""}
+                                      </h3>
+                                      <h3 className={`item-price`}>
+                                        Stock: {item?.stockValue || 0}
+                                      </h3>
+                                    </div>
+                                  </div>
+                                  <div className="menuleft">
+                                    <input
+                                      value={`${
+                                        order?.items?.find(
+                                          (a) => a.item_uuid === item.item_uuid
+                                        )?.b || 0
+                                      } : ${
+                                        order?.items?.find(
+                                          (a) => a.item_uuid === item.item_uuid
+                                        )?.p || 0
+                                      }`}
+                                      disabled={!orderStatus}
+                                      className="boxPcsInput"
+                                      style={
+                                        !orderStatus
+                                          ? {
+                                              border: "2px solid gray",
+                                              boxShadow: "0 2px 8px gray",
+                                            }
+                                          : {}
+                                      }
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (orderStatus) setPopupForm(item);
+                                      }}
+                                    />
                                   </div>
                                 </div>
-                                <div className="menuleft">
-                                  <input
-                                    value={`${
-                                      order?.items?.find(
-                                        (a) => a.item_uuid === item.item_uuid
-                                      )?.b || 0
-                                    } : ${
-                                      order?.items?.find(
-                                        (a) => a.item_uuid === item.item_uuid
-                                      )?.p || 0
-                                    }`}
-                                    disabled={!orderStatus}
-                                    className="boxPcsInput"
-                                    style={
-                                      !orderStatus
-                                        ? {
-                                            border: "2px solid gray",
-                                            boxShadow: "0 2px 8px gray",
-                                          }
-                                        : {}
-                                    }
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (orderStatus) setPopupForm(item);
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          })}
-                        <div className="menu">
-                          <div className="menuItemDetails">
-                            <h1 className="item-name"></h1>
+                              );
+                            })}
+                          <div className="menu">
+                            <div className="menuItemDetails">
+                              <h1 className="item-name"></h1>
 
-                            <div className="item-mode">
-                              <h3 className={`item-price`}></h3>
+                              <div className="item-mode">
+                                <h3 className={`item-price`}></h3>
+                              </div>
                             </div>
+                            <div className="menuleft"></div>
                           </div>
-                          <div className="menuleft"></div>
+                        </div>
+                      ))}
+                    <div className="menu">
+                      <div className="menuItemDetails">
+                        <h1 className="item-name"></h1>
+
+                        <div className="item-mode">
+                          <h3 className={`item-price`}></h3>
                         </div>
                       </div>
-                    ))}
-                  <div className="menu">
-                    <div className="menuItemDetails">
-                      <h1 className="item-name"></h1>
-
-                      <div className="item-mode">
-                        <h3 className={`item-price`}></h3>
-                      </div>
+                      <div className="menuleft"></div>
                     </div>
-                    <div className="menuleft"></div>
                   </div>
-                </div>
-              )):<h1 style={{textAlign:"center"}}>No Items</h1>}
+                ))
+              )}
             </div>
             {confirmItemsPopup ? (
               <div
@@ -472,7 +719,9 @@ const AdvanceOrderingPage = () => {
                         if (cartPage) {
                           localStorage.setItem(
                             "projectionItems",
-                            JSON.stringify(order.items)
+                            JSON.stringify(
+                              order.items.filter((a) => !a.cancelled)
+                            )
                           );
                           Navigate("/users/orders/" + params.counter_uuid);
                         } else {
@@ -599,15 +848,7 @@ const AdvanceOrderingPage = () => {
       ) : (
         ""
       )}
-      {discountPopup ? (
-        <DiscountPopup
-          onSave={() => setDiscountPopup(false)}
-          setOrder={setOrder}
-          order={order}
-        />
-      ) : (
-        ""
-      )}
+
       {loading ? (
         <div className="overlay" style={{ zIndex: 9999999 }}>
           <div className="flex" style={{ width: "40px", height: "40px" }}>
@@ -760,113 +1001,6 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
                     />
                   </label>
                 </div>
-              </div>
-
-              <button type="submit" className="submit">
-                Save changes
-              </button>
-            </form>
-          </div>
-          <button onClick={onSave} className="closeButton">
-            x
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-function DiscountPopup({ onSave, setOrder, order }) {
-  const [data, setdata] = useState({});
-  const [itemsData, setItemsData] = useState([]);
-  const { counter_uuid } = useParams();
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    setOrder((prev) => ({
-      ...prev,
-      items: prev?.items?.map((a) =>
-        a.exclude_discount === 0
-          ? {
-              ...a,
-              charges_discount: [
-                ...(a.charges_discount || []),
-                { title: "Bill Discounting", value: data },
-              ],
-            }
-          : a
-      ),
-    }));
-    onSave();
-  };
-  const DiscountEligablilityChecking = async () => {
-    const response = await axios({
-      method: "post",
-      url: "/counter_scheme/getRangeOrderEligibleDiscounts",
-      data: {
-        ...order,
-        counter_uuid,
-        user_uuid: localStorage.getItem("user_uuid"),
-      },
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setItemsData(response.data.result);
-  };
-  useEffect(() => {
-    DiscountEligablilityChecking();
-  }, []);
-  return (
-    <div className="overlay">
-      <div
-        className="modal"
-        style={{ height: "fit-content", width: "max-content" }}
-      >
-        <div
-          className="content"
-          style={{
-            height: "fit-content",
-            padding: "20px",
-            width: "fit-content",
-          }}
-        >
-          <div style={{ overflowY: "scroll" }}>
-            <form className="form" onSubmit={submitHandler}>
-              <div className="formGroup">
-                <div
-                  className="row"
-                  style={{ flexDirection: "row", alignItems: "flex-start" }}
-                >
-                  <label
-                    className="selectLabel flex"
-                    style={{ width: "100px" }}
-                  >
-                    Discount
-                    <input
-                      type="number"
-                      name="route_title"
-                      className="numberInput"
-                      value={data}
-                      style={{ width: "100px" }}
-                      onChange={(e) => setdata(e.target.value)}
-                      autoFocus={true}
-                      maxLength={42}
-                      onWheel={(e) => e.preventDefault()}
-                    />
-                  </label>
-                </div>
-                {itemsData?.map((item) => (
-                  <div
-                    className="row"
-                    style={{ flexDirection: "row", alignItems: "flex-start" }}
-                  >
-                    <label
-                      className="selectLabel flex"
-                      style={{ width: "100px" }}
-                    >
-                      {item.discount_title || ""} is eligible
-                    </label>
-                  </div>
-                ))}
               </div>
 
               <button type="submit" className="submit">

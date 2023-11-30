@@ -199,13 +199,7 @@ Navigate("/advanceOrdering")
 	
             return {
               ...itemData,
-              b:
-             
-                parseInt(
-                  (projection || 0)  / +itemData.conversion
-                ),
-
-              p: (projection || 0) % +itemData.conversion,
+             ...a,
             };
           }else{
 			return null
