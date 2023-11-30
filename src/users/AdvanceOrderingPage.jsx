@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Link as ScrollLink } from "react-scroll";
 import axios from "axios";
 import context from "../context/context";
+import { IoArrowBackOutline } from "react-icons/io5";
 
 const AdvanceOrderingPage = () => {
   const [items, setItems] = useState([]);
@@ -66,21 +67,26 @@ const AdvanceOrderingPage = () => {
 
   const postCounterStocks = async () => {
     setLoading(true);
+    let category_uuid = JSON.parse(localStorage.getItem("selectedCategories"));
     const response = await axios({
       method: "post",
       url: "/counterStock/add",
       data: {
         counter_uuid: params.counter_uuid,
         user_uuid: localStorage.getItem("user_uuid"),
-        category_uuid: JSON.parse(localStorage.getItem("selectedCategories")),
+        category_uuid,
         timestamp: new Date(new Date().setHours(0, 0, 0, 0)).getTime(),
-        details: items.map((a) => {
-          let itemA = order.items.find((b) => b.item_uuid === a.item_uuid);
-          return {
-            ...a,
-            pcs: +(itemA?.b||0) * +a.conversion + +(itemA?.p??0),
-          };
-        }),
+        details: items
+          .filter(
+            (a) => category_uuid.find((b) => a.category_uuid === b) && a.status
+          )
+          .map((a) => {
+            let itemA = order.items.find((b) => b.item_uuid === a.item_uuid);
+            return {
+              ...a,
+              pcs: +(itemA?.b || 0) * +a.conversion + +(itemA?.p ?? 0),
+            };
+          }),
       },
       headers: {
         "Content-Type": "application/json",
@@ -136,7 +142,7 @@ const AdvanceOrderingPage = () => {
   }, []);
   let filterItems = useMemo(
     () =>
-      ((cartPage ? order.items : items) || [])
+      ((cartPage ? order.items.filter((a) => a.stock > 0) : items) || [])
         ?.map((a) => ({
           ...a,
           item_price:
@@ -144,7 +150,6 @@ const AdvanceOrderingPage = () => {
               ?.price || a.item_price,
           b: 0,
           p: 0,
-          status: 0,
         }))
         ?.filter(
           (a) =>
@@ -178,6 +183,12 @@ const AdvanceOrderingPage = () => {
     <>
       <nav className="user_nav nav_styling" style={{ maxWidth: "500px" }}>
         <div className="user_menubar">
+          <IoArrowBackOutline
+            className="user_Back_icon"
+            onClick={() => Navigate(-1)}
+          />
+        </div>
+        <div className="user_menubar">
           <input
             style={{ width: "200px" }}
             className="searchInput"
@@ -196,7 +207,7 @@ const AdvanceOrderingPage = () => {
         <div className="container" style={{ maxWidth: "500px" }}>
           <div className="menucontainer">
             <div className="menus">
-              {filteredCompany.map((company) => (
+              {filteredCompany.length? filteredCompany.map((company) => (
                 <div
                   id={company?.company_uuid}
                   key={company?.company_uuid}
@@ -417,7 +428,7 @@ const AdvanceOrderingPage = () => {
                     <div className="menuleft"></div>
                   </div>
                 </div>
-              ))}
+              )):<h1 style={{textAlign:"center"}}>No Items</h1>}
             </div>
             {confirmItemsPopup ? (
               <div
