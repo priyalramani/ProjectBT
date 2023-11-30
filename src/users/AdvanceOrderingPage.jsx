@@ -28,7 +28,17 @@ const AdvanceOrderingPage = () => {
   const [loading, setLoading] = useState(false);
   const { setNotification } = useContext(context);
   const [startX, setStartX] = useState(null);
+  const touchStartX = useRef(null);
+  const touchEndX = useRef(null);
+  const [swipeDirection, setSwipeDirection] = useState(null);
 
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
   const handleMouseDown = (e) => {
     setStartX(e.clientX);
   };
@@ -294,6 +304,43 @@ const AdvanceOrderingPage = () => {
                                     key={item?.item_uuid}
                                     className="menu"
                                     onMouseDown={handleMouseDown}
+                                    onTouchStart={handleTouchStart}
+                                    onTouchMove={handleTouchMove}
+                                    onTouchEnd={() => {
+                                      if (touchStartX.current && touchEndX.current) {
+                                        const swipeDistance = touchEndX.current - touchStartX.current;
+                                  
+                                        if (swipeDistance > 0) {
+                                          setOrder((prev) => ({
+                                            ...prev,
+                                            items: prev?.items?.map((a) =>
+                                              a.item_uuid === item.item_uuid
+                                                ? {
+                                                    ...a,
+                                                    cancelled: false,
+                                                  }
+                                                : a
+                                            ),
+                                          }));
+                                        } else if (swipeDistance < 0) {
+                                          setOrder((prev) => ({
+                                            ...prev,
+                                            items: prev?.items?.map((a) =>
+                                              a.item_uuid === item.item_uuid
+                                                ? {
+                                                    ...a,
+                                                    cancelled: true,
+                                                  }
+                                                : a
+                                            ),
+                                          }));
+                                        }
+                                      }
+                                  
+                                      // Reset touchStartX and touchEndX
+                                      touchStartX.current = null;
+                                      touchEndX.current = null;
+                                    }}
                                     onMouseUp={(e) => {
                                       if (startX !== null) {
                                         const endX = e.clientX;
