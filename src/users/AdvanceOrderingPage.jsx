@@ -73,11 +73,14 @@ const AdvanceOrderingPage = () => {
         counter_uuid: params.counter_uuid,
         user_uuid: localStorage.getItem("user_uuid"),
         category_uuid: JSON.parse(localStorage.getItem("selectedCategories")),
-        timestamp:new Date(new Date().setHours(0, 0, 0, 0)).getTime(),
-        details: order.items.map((a) => ({
-          item_uuid: a.item_uuid,
-          pcs: a.b * +a.conversion + +a.p,
-        })),
+        timestamp: new Date(new Date().setHours(0, 0, 0, 0)).getTime(),
+        details: items.map((a) => {
+          let itemA = order.items.find((b) => b.item_uuid === a.item_uuid);
+          return {
+            ...a,
+            pcs: +(itemA?.b||0) * +a.conversion + +(itemA?.p??0),
+          };
+        }),
       },
       headers: {
         "Content-Type": "application/json",
@@ -357,8 +360,7 @@ const AdvanceOrderingPage = () => {
                                       MRP: {item?.mrp || ""}
                                     </h3>
                                     <h3 className={`item-price`}>
-                                       Projection: {item?.stock||0}
-                                      
+                                      Projection: {item?.stock || 0}
                                     </h3>
                                   </div>
                                 </div>

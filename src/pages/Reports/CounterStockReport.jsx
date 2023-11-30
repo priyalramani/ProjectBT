@@ -231,8 +231,7 @@ function Table({ itemsDetails, setPopupOrder }) {
             >
               <td>{i + 1}</td>
               <td colSpan={2}>
-                {new Date(+item.timestamp).toDateString()} -{" "}
-                {formatAMPM(new Date(+item.timestamp))}
+                {new Date(+item.timestamp).toDateString()}
               </td>
 
               <td colSpan={3}>{item?.counter_title || ""}</td>
