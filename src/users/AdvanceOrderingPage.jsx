@@ -105,7 +105,17 @@ const AdvanceOrderingPage = () => {
     }
   };
 
-
+  function calculateStockValue(stock, one_pack) {
+    if (stock < one_pack) {
+      return one_pack;
+    } else if (stock === one_pack) {
+      return one_pack;
+    } else if (stock % one_pack === 0) {
+      return stock;
+    } else {
+      return Math.ceil(stock / one_pack) * one_pack;
+    }
+  }
   const getStocks = async (item_uuid) => {
     setLoading(true);
     const response = await axios({
@@ -128,14 +138,16 @@ const AdvanceOrderingPage = () => {
           if (!itemA) {
             itemA = items.find((b) => b.item_uuid === a.item_uuid);
           }
-          let projection =!a.initialValue&&!a.finalValue&&a.stockValue?itemA.one_pack:
+          let projection =
             a.projection > 0
-              ? a.projection
+              ? calculateStockValue(a.projection, itemA.one_pack)
+              : !a.initialValue && !a.finalValue && itemA.stockValue
+              ? itemA.one_pack
               : 0;
           return {
             ...itemA,
             b: (projection / +itemA?.conversion).toFixed(0),
-            p: projection % +itemA?.conversion,
+            p: (projection % +itemA?.conversion).toFixed(0),
           };
         });
         return {
