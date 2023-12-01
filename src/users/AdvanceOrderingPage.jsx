@@ -27,21 +27,7 @@ const AdvanceOrderingPage = () => {
 
   const [loading, setLoading] = useState(false);
   const { setNotification } = useContext(context);
-  const [startX, setStartX] = useState(null);
-  const touchStartX = useRef(null);
-  const touchEndX = useRef(null);
-  const [swipeDirection, setSwipeDirection] = useState(null);
 
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchMove = (e) => {
-    touchEndX.current = e.touches[0].clientX;
-  };
-  const handleMouseDown = (e) => {
-    setStartX(e.clientX);
-  };
   const getCounter = async () => {
     setLoading(true);
     try {
@@ -118,19 +104,10 @@ const AdvanceOrderingPage = () => {
       setTimeout(() => setNotification(""), 5000);
     }
   };
-  function calculateStockValue(stock, one_pack) {
-    if (stock < one_pack) {
-      return one_pack;
-    } else if (stock === one_pack) {
-      return one_pack;
-    } else if (stock % one_pack === 0) {
-      return stock;
-    } else {
-      return Math.ceil(stock / one_pack) * one_pack;
-    }
-  }
+
 
   const getStocks = async (item_uuid) => {
+    setLoading(true);
     const response = await axios({
       method: "post",
       url: "/counterStock/getStocksItem",
@@ -151,9 +128,10 @@ const AdvanceOrderingPage = () => {
           if (!itemA) {
             itemA = items.find((b) => b.item_uuid === a.item_uuid);
           }
-          let projection = a.projection
-            ? calculateStockValue(a.projection, itemA?.one_pack || 1)
-            : 0;
+          let projection =!a.initialValue&&!a.finalValue&&a.stockValue?itemA.one_pack:
+            a.projection > 0
+              ? a.projection
+              : 0;
           return {
             ...itemA,
             b: (projection / +itemA?.conversion).toFixed(0),
@@ -167,6 +145,7 @@ const AdvanceOrderingPage = () => {
       });
       console.log(order);
     }
+    setLoading(false);
   };
   const getStockData = (item) => {
     const selected_warehouse = localStorage.getItem("selected_warehouse");
@@ -303,79 +282,20 @@ const AdvanceOrderingPage = () => {
                                   <div
                                     key={item?.item_uuid}
                                     className="menu"
-                                    onMouseDown={handleMouseDown}
-                                    onTouchStart={handleTouchStart}
-                                    onTouchMove={handleTouchMove}
-                                    onTouchEnd={() => {
-                                      if (touchStartX.current && touchEndX.current) {
-                                        const swipeDistance = touchEndX.current - touchStartX.current;
-                                  
-                                        if (swipeDistance > 0) {
-                                          setOrder((prev) => ({
-                                            ...prev,
-                                            items: prev?.items?.map((a) =>
-                                              a.item_uuid === item.item_uuid
-                                                ? {
-                                                    ...a,
-                                                    cancelled: false,
-                                                  }
-                                                : a
-                                            ),
-                                          }));
-                                        } else if (swipeDistance < 0) {
-                                          setOrder((prev) => ({
-                                            ...prev,
-                                            items: prev?.items?.map((a) =>
-                                              a.item_uuid === item.item_uuid
-                                                ? {
-                                                    ...a,
-                                                    cancelled: true,
-                                                  }
-                                                : a
-                                            ),
-                                          }));
-                                        }
-                                      }
-                                  
-                                      // Reset touchStartX and touchEndX
-                                      touchStartX.current = null;
-                                      touchEndX.current = null;
-                                    }}
-                                    onMouseUp={(e) => {
-                                      if (startX !== null) {
-                                        const endX = e.clientX;
-                                        const diffX = endX - startX;
-
-                                        if (diffX > 0) {
-                                          setOrder((prev) => ({
-                                            ...prev,
-                                            items: prev?.items?.map((a) =>
-                                              a.item_uuid === item.item_uuid
-                                                ? {
-                                                    ...a,
-                                                    cancelled: false,
-                                                  }
-                                                : a
-                                            ),
-                                          }));
-                                          // Handle right swipe logic here
-                                        } else if (diffX < 0) {
-                                          setOrder((prev) => ({
-                                            ...prev,
-                                            items: prev?.items?.map((a) =>
-                                              a.item_uuid === item.item_uuid
-                                                ? {
-                                                    ...a,
-                                                    cancelled: true,
-                                                  }
-                                                : a
-                                            ),
-                                          }));
-                                          // Handle left swipe logic here
-                                        }
-
-                                        setStartX(null);
-                                      }
+                                    onDoubleClick={() => {
+                                      setOrder((prev) => ({
+                                        ...prev,
+                                        items: prev?.items?.map((a) =>
+                                          a.item_uuid === item.item_uuid
+                                            ? {
+                                                ...a,
+                                                cancelled: a.cancelled
+                                                  ? false
+                                                  : true,
+                                              }
+                                            : a
+                                        ),
+                                      }));
                                     }}
                                   >
                                     <div className="menuItemDetails">
@@ -767,7 +687,9 @@ const AdvanceOrderingPage = () => {
                           localStorage.setItem(
                             "projectionItems",
                             JSON.stringify(
-                              order.items.filter((a) => !a.cancelled)
+                              order.items.filter(
+                                (a) => !a.cancelled && (a.b > 0 || a.p > 0)
+                              )
                             )
                           );
                           Navigate("/users/orders/" + params.counter_uuid);

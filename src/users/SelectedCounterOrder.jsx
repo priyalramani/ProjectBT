@@ -193,9 +193,9 @@ Navigate("/advanceOrdering")
         ...prev,
         items: projectionItems.map((a) => {
           let itemData = item?.find((b) => b.item_uuid === a.item_uuid);
-		  let projection = a.stock>0?a.stock:0
-		  console.log(itemData,projection,a.stock)
-          if (itemData&& projection) {
+		  
+	
+          if (itemData) {
 	
             return {
               ...itemData,

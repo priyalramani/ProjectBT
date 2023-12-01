@@ -69,7 +69,7 @@ import AdvanceOrdering from "./users/AdvanceOrdering"
 import AdvanceOrderingPage from "./users/AdvanceOrderingPage"
 import CounterStockReport from "./pages/Reports/CounterStockReport"
 
-export let Version = 181
+export let Version = 182
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
 
