@@ -15,6 +15,7 @@ const OrderPrint = ({
   paymentModes = [],
   charges = [],
   category = [],
+  route=[]
 }) => {
   const isEstimate = order?.order_type === "E";
   const [gstValues, setGstVAlues] = useState([]);
@@ -34,9 +35,9 @@ const OrderPrint = ({
               ?.category_title || "",
         }))
         .sort(
-          (a, b) =>
+          (a, b) => a.category_title&&b.category_title?
             a.category_title?.localeCompare(b.category_title) ||
-            a.item_title.localeCompare(b.item_title)
+            a.item_title.localeCompare(b.item_title):a.item_title.localeCompare(b.item_title)
         );
   }, [item_details, itemData, category]);
 console.log(itemDetails)
@@ -100,6 +101,7 @@ console.log(itemDetails)
     ["Adjustment", order?.adjustment],
     ["Shortage", order?.shortage],
   ];
+  const route_title=useMemo(()=>route.find(a=>a.route_uuid===counter?.route_uuid)?.route_title||"",[route,order?.route_uuid])
 
   return (
     <div
@@ -174,6 +176,11 @@ console.log(itemDetails)
               </td>
               <td colSpan={14}>
                 <table>
+                  {route_title?<tr>
+                    <td style={{ fontWeight: "600", fontSize: "x-small" }}>
+                      [{route_title || ""}]
+                    </td>
+                  </tr>:""}
                   <tr>
                     <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                       M/S {counter?.counter_title || ""}

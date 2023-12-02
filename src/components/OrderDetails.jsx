@@ -47,6 +47,7 @@ export function OrderDetails({
 	const { setNotification, getSpecialPrice, saveSpecialPrice, spcPricePrompt, sendPaymentReminders } =
 		useContext(context)
 	const [printConfig, setPrintConfig] = useState({})
+	const [routeData, setRoutesData] = useState([])
 	const [counters, setCounters] = useState([])
 	const [waiting, setWaiting] = useState(false)
 	const [caption, setCaption] = useState("")
@@ -86,7 +87,17 @@ export function OrderDetails({
 	const [appliedCounterCharges, setAppliedCounterCharges] = useState(null)
 	const [deductionsPopup, setDeductionsPopup] = useState()
 	const [deductionsData, setDeductionsData] = useState()
+	const getRoutesData = async () => {
+		const response = await axios({
+			method: "get",
+			url: "/routes/GetOrderRouteList",
 
+			headers: {
+				"Content-Type": "application/json"
+			}
+		})
+		if (response.data.success) setRoutesData(response.data.result)
+	}
 	useEffect(CONTROL_AUTO_REFRESH, [])
 	const getOrder = async order_uuid => {
 		const response = await axios({
@@ -493,6 +504,7 @@ export function OrderDetails({
 		getItemCategories()
 		getItemsDataReminder()
 		GetPaymentModes()
+		getRoutesData()
 	}, [])
 
 	useEffect(() => {
@@ -2459,6 +2471,7 @@ export function OrderDetails({
 				charges={appliedCounterCharges}
 				print={invokePrint}
 				category={category}
+				route={routeData}
 				{...printConfig}
 			/>
 

@@ -1543,6 +1543,7 @@ const MainAdmin = () => {
 				paymentModes={paymentModes}
 				counters={counter}
 				category={category}
+				route={routesData}
 			/>
 
 			{selectedWarehouseOrder ? (

@@ -112,6 +112,7 @@ const OrderPdf = () => {
 						footer={!(order?.item_details?.length > 12 * (a + 1))}
 						paymentModes={paymentModes}
 						counters={counters}
+						
 					/>
 				))}
 		</div>

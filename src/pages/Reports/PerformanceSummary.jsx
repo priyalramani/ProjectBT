@@ -19,7 +19,11 @@ const PerformanceSummary = () => {
 	const [dateValues, setDateValues] = useState({ from_date: today, to_date: today })
 
 	const search = async () => {
-		const query = `?from_date=${dateValues?.from_date}&to_date=${dateValues?.to_date}`
+		let startDate =  new Date(new Date(dateValues.from_date).setHours(0, 0, 0, 0)).getTime();
+		let endDate = new Date().setDate(new Date(dateValues.to_date).getDate() + 1);
+			 endDate = new Date(new Date(endDate).setHours(0, 0, 0, 0)).getTime();
+		
+		const query = `?from_date=${startDate}&to_date=${endDate}`
 		const response = await axios("users/performance-summary" + query)
 		if (response.status === 200) {
 			const total_values = {}

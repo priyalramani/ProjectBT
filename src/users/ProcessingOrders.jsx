@@ -1352,6 +1352,7 @@ const ProcessingOrders = () => {
 						setHoldPopup(false)
 						getTripOrders()
 					}}
+					setMinMaxPopup={setMinMaxPopup}
 					orders={orders}
 					holdPopup={holdPopup}
 					itemsData={items}
@@ -1763,7 +1764,8 @@ function HoldPopup({
 	tempQuantity,
 	categories,
 	getTripOrders,
-	counter
+	counter,
+	setMinMaxPopup
 }) {
 	const [items, setItems] = useState([])
 	const [popupForm, setPopupForm] = useState(false)
@@ -2087,6 +2089,11 @@ function HoldPopup({
 																				? "red"
 																				: "#fff"
 																	}}
+																	onClick={e => {
+																		e.stopPropagation()
+																		setMinMaxPopup(item)
+																	}
+																	}
 																>
 																	<td
 																		style={{ padding: "5px" }}
@@ -2805,8 +2812,8 @@ function MinMaxPopup({ onSave, popupValue, order, items }) {
 	}
 	useEffect(() => {
 		getWarehouse()
-
-		if (order?.warehouse_uuid) setWarehouse_uuid(order?.warehouse_uuid)
+let warehouse_uuid=localStorage.getItem("selected_warehouse")
+		if (warehouse_uuid) setWarehouse_uuid(warehouse_uuid)
 		else setWarehouseSelection(true)
 	}, [])
 	useEffect(() => {
@@ -2835,12 +2842,13 @@ function MinMaxPopup({ onSave, popupValue, order, items }) {
 		})
 		setData(prev => ({
 			...prev,
+			max: response.data.result,
 			min: prev.max - (+response.data.result || 0)
 		}))
 	}
 	return (
 		<>
-			<div className="overlay">
+			<div className="overlay" style={{zIndex:99999999999999}}>
 				{warehouseSelection ? (
 					<div className="modal" style={{ height: "fit-content", width: "max-content" }}>
 						<div className="flex" style={{ justifyContent: "space-between" }}>
@@ -2917,7 +2925,7 @@ function MinMaxPopup({ onSave, popupValue, order, items }) {
 									<div className="formGroup">
 										<div className="row" style={{ flexDirection: "row", alignItems: "center" }}>
 											<label className="selectLabel flex">
-												Min
+												Warehouse
 												<input
 													type="number"
 													name="route_title"
@@ -2931,7 +2939,7 @@ function MinMaxPopup({ onSave, popupValue, order, items }) {
 											</label>
 
 											<label className="selectLabel flex">
-												Max
+											In-Transit
 												<input
 													type="number"
 													name="route_title"

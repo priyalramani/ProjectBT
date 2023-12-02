@@ -14,6 +14,7 @@ const OrderPrintWrapper = ({
 	counterOrders,
 	print,
 	category,
+	route=[],
 	...props
 }) => {
 	const getPrintData = order => {
@@ -69,6 +70,7 @@ const OrderPrintWrapper = ({
 								counters={counters}
 								footer={i + 1 === array.length}
 								category={category}
+								route={route}
 								{...props}
 							/>
 						))
