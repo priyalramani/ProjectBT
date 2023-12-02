@@ -216,7 +216,32 @@ const AdvanceOrderingPage = () => {
       ),
     [companies, filteredCategory]
   );
-  console.log(order.items);
+  const onCategoryDoubleTab = (category_uuid) => {
+    setOrder((prev) => ({
+      ...prev,
+      items: prev?.items?.map((a) =>
+        a.category_uuid === category_uuid
+          ? {
+              ...a,
+              cancelled: a.cancelled ? false : true,
+            }
+          : a
+      ),
+    }));
+  };
+  const onItemDoubleTab = (item_uuid) => {
+    setOrder((prev) => ({
+      ...prev,
+      items: prev?.items?.map((a) =>
+        a.item_uuid === item_uuid
+          ? {
+              ...a,
+              cancelled: a.cancelled ? false : true,
+            }
+          : a
+      ),
+    }));
+  };
   return (
     <>
       <nav className="user_nav nav_styling" style={{ maxWidth: "500px" }}>
@@ -275,7 +300,7 @@ const AdvanceOrderingPage = () => {
                             name={category?.category_uuid}
                             className="categoryItemMap"
                           >
-                            <h2 className="categoryHeadline small">
+                            <h2 className="categoryHeadline small" onDoubleClick={()=>onCategoryDoubleTab(category.category_uuid)}>
                               {category?.category_title}
                             </h2>
 
@@ -300,21 +325,7 @@ const AdvanceOrderingPage = () => {
                                   <div
                                     key={item?.item_uuid}
                                     className="menu"
-                                    onDoubleClick={() => {
-                                      setOrder((prev) => ({
-                                        ...prev,
-                                        items: prev?.items?.map((a) =>
-                                          a.item_uuid === item.item_uuid
-                                            ? {
-                                                ...a,
-                                                cancelled: a.cancelled
-                                                  ? false
-                                                  : true,
-                                              }
-                                            : a
-                                        ),
-                                      }));
-                                    }}
+                                    onDoubleClick={() => onItemDoubleTab(item.item_uuid)}
                                   >
                                     <div className="menuItemDetails">
                                       <h1

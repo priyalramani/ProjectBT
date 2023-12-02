@@ -3,10 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { IoArrowBackOutline } from "react-icons/io5";
 import axios from "axios";
-import {
-
-  Phone,
-} from "@mui/icons-material";
+import { Phone } from "@mui/icons-material";
 import { HiLocationMarker } from "react-icons/hi";
 import { MdOutlineOpenInNew } from "react-icons/md";
 
@@ -14,7 +11,6 @@ import { v4 as uuid } from "uuid";
 import Loader from "../components/Loader";
 import Popup from "./Popup";
 import { useMemo } from "react";
-
 
 const AdvanceOrdering = ({ refreshDb }) => {
   const [counters, setCounters] = useState([]);
@@ -46,11 +42,7 @@ const AdvanceOrdering = ({ refreshDb }) => {
   };
   useEffect(() => {
     getIndexedDbData();
-    if(!localStorage.getItem("selectedCategories")){
-        setSelectCompanyPopup(true)
-    }
   }, []);
- 
 
   const locationHandler = () => {
     if (!navigator.geolocation)
@@ -236,8 +228,7 @@ const AdvanceOrdering = ({ refreshDb }) => {
                             setRemarks(item.remarks);
                           } else {
                             e.stopPropagation();
-                            
-                            Navigate("/users/advanceOrdering/" + item.counter_uuid);
+                            setSelectCompanyPopup(item.counter_uuid);
                           }
                         }}
                       >
@@ -426,7 +417,10 @@ const AdvanceOrdering = ({ refreshDb }) => {
       )}
       {selectCompanyPopup ? (
         <SelectCategoryPopup
-          onSave={() => setSelectCompanyPopup(false)}
+          onSave={() => {
+            Navigate("/users/advanceOrdering/" + selectCompanyPopup);
+            setSelectCompanyPopup(false);
+          }}
           popupForm={selectCompanyPopup}
         />
       ) : (
@@ -931,7 +925,7 @@ const PhoneList = ({ onSave, mobile }) => {
     </div>
   );
 };
-function SelectCategoryPopup({ onSave, popupForm }) {
+function SelectCategoryPopup({ onSave }) {
   const [selectedCategory, setSelectedCategory] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -968,8 +962,11 @@ function SelectCategoryPopup({ onSave, popupForm }) {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    localStorage.setItem("selectedCategories",JSON.stringify(selectedCategory))
-    onSave()
+    localStorage.setItem(
+      "selectedCategories",
+      JSON.stringify(selectedCategory)
+    );
+    onSave();
   };
 
   const filterCategory = useMemo(
@@ -1026,7 +1023,7 @@ function SelectCategoryPopup({ onSave, popupForm }) {
                   value={filterCompanyTitle}
                   placeholder="Search Companies..."
                   className="searchInput"
-                  style={{width:"150px"}}
+                  style={{ width: "150px" }}
                 />
                 <input
                   type="text"
@@ -1034,7 +1031,7 @@ function SelectCategoryPopup({ onSave, popupForm }) {
                   value={filterCategoryTitle}
                   placeholder="Search Categories..."
                   className="searchInput"
-                  style={{width:"150px"}}
+                  style={{ width: "150px" }}
                 />
                 <table
                   className="user-table"
@@ -1045,7 +1042,7 @@ function SelectCategoryPopup({ onSave, popupForm }) {
                   }}
                 >
                   <thead>
-                    <tr style={{zIndex:"999999999999"}}>
+                    <tr style={{ zIndex: "999999999999" }}>
                       <th>S.N</th>
                       <th colSpan={2}> Title</th>
                     </tr>
@@ -1096,13 +1093,12 @@ function SelectCategoryPopup({ onSave, popupForm }) {
                                   selectedCategory?.filter((c) =>
                                     filterCategory?.find(
                                       (b) =>
-                                      a.company_uuid === b.company_uuid &&
-                                      c === b.category_uuid
+                                        a.company_uuid === b.company_uuid &&
+                                        c === b.category_uuid
                                     )
                                   ).length ===
                                   filterCategory?.filter(
-                                    (b) => a.company_uuid === b.company_uuid 
-                                  
+                                    (b) => a.company_uuid === b.company_uuid
                                   ).length
                                 }
                                 onChange={() => {}}
@@ -1111,7 +1107,6 @@ function SelectCategoryPopup({ onSave, popupForm }) {
                             </span>
                           </td>
                           <td
-                            
                             style={{
                               // fontSize: "20px",
                               // width: "20px",
@@ -1121,15 +1116,14 @@ function SelectCategoryPopup({ onSave, popupForm }) {
                             {selectedCategory?.filter((c) =>
                               filterCategory?.find(
                                 (b) =>
-                                a.company_uuid === b.company_uuid &&
-                                c === b.category_uuid
+                                  a.company_uuid === b.company_uuid &&
+                                  c === b.category_uuid
                               )
                             ).length +
                               "/" +
                               filterCategory?.filter(
-                                (b) => a.company_uuid === b.company_uuid 
+                                (b) => a.company_uuid === b.company_uuid
                               ).length}
-                          
                           </td>
                         </tr>
                         {filterCategory
@@ -1146,19 +1140,16 @@ function SelectCategoryPopup({ onSave, popupForm }) {
                                 <td
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                  
-                                      setSelectedCategory((prev) =>  prev.filter(
-                                          (a) => a === item.category_uuid
-                                        ).length
-                                          ? prev.filter(
-                                              (a) => a !== item.category_uuid
-                                            )
-                                          : [
-                                              ...(prev || []),
-                                              item.category_uuid,
-                                            ],
-                                      );
-                                    
+
+                                    setSelectedCategory((prev) =>
+                                      prev.filter(
+                                        (a) => a === item.category_uuid
+                                      ).length
+                                        ? prev.filter(
+                                            (a) => a !== item.category_uuid
+                                          )
+                                        : [...(prev || []), item.category_uuid]
+                                    );
                                   }}
                                   className="flex"
                                   style={{
@@ -1201,8 +1192,6 @@ function SelectCategoryPopup({ onSave, popupForm }) {
               Save
             </button>
           </div>
-
-         
         </div>
       </div>
     </div>
