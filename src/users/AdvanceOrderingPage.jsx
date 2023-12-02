@@ -138,10 +138,15 @@ const AdvanceOrderingPage = () => {
           if (!itemA) {
             itemA = items.find((b) => b.item_uuid === a.item_uuid);
           }
+          const selected_warehouse = localStorage.getItem("selected_warehouse");
+    const warehouse_stock = itemA?.stock?.find(
+      (i) => i.warehouse_uuid === selected_warehouse
+    );
+    
           let projection =
             a.projection > 0
               ? calculateStockValue(a.projection, itemA.one_pack)
-              : !a.initialValue && !a.finalValue && itemA.stockValue
+              : !a.initialValue && !a.finalValue && +warehouse_stock?.qty
               ? itemA.one_pack
               : 0;
           return {
@@ -171,6 +176,7 @@ const AdvanceOrderingPage = () => {
   };
   useEffect(() => {
     getCounter();
+    localStorage.removeItem("projectionItems");
   }, []);
   let filterItems = useMemo(
     () =>
