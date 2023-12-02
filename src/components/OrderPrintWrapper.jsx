@@ -13,6 +13,7 @@ const OrderPrintWrapper = ({
 	pendingPayments,
 	counterOrders,
 	print,
+	category,
 	...props
 }) => {
 	const getPrintData = order => {
@@ -67,6 +68,7 @@ const OrderPrintWrapper = ({
 								paymentModes={paymentModes}
 								counters={counters}
 								footer={i + 1 === array.length}
+								category={category}
 								{...props}
 							/>
 						))

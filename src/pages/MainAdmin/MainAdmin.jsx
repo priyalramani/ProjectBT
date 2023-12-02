@@ -1542,6 +1542,7 @@ const MainAdmin = () => {
 				items={items}
 				paymentModes={paymentModes}
 				counters={counter}
+				category={category}
 			/>
 
 			{selectedWarehouseOrder ? (

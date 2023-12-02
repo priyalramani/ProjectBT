@@ -50,15 +50,24 @@ const CurrentStock = () => {
 	const [flushPopup, setFlushPopup] = useState(false)
 	const filteritem = useMemo(
 		() =>
-			itemsData.filter(
+			(itemsData.filter(
 				a =>
 					a.item_title &&
 					(disabledItem || a.status) &&
 					(!filterTitle || a.item_title.toLocaleLowerCase().includes(filterTitle.toLocaleLowerCase())) &&
 					(!filterCompany || a.company_uuid === filterCompany) &&
 					(!filterCategory || a.category_uuid === filterCategory)
-			) || [],
-		[itemsData, filterTitle, filterCategory, filterCompany, disabledItem]
+			) || [])?.map(a => ({
+				...a,
+				category_title: itemCategories.find(
+					b => b.category_uuid === a.category_uuid
+				)?.category_title
+			}))
+			.sort(
+				(a, b) =>
+					a?.category_title?.localeCompare(b.category_title) || a?.item_title?.localeCompare(b.item_title)
+			),
+		[itemsData, disabledItem, filterTitle, filterCompany, filterCategory, itemCategories]
 	)
 	const handleChange = event => {
 		const {
@@ -404,7 +413,7 @@ const CovertedQty = (qty, conversion) => {
 }
 function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
 	const [items, setItems] = useState("sort_order")
-	const [order, setOrder] = useState("")
+	const [order, setOrder] = useState(null)
 	return (
 		<table className="user-table" style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
 			<thead>
@@ -480,7 +489,7 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
 			</thead>
 			<tbody className="tbody">
 				{itemsDetails
-					.sort((a, b) =>
+					.sort((a, b) =>order==null?0:
 						items?.warehouse_uuid
 							? order === "asc"
 								? (a?.stock?.find(c => items.warehouse_uuid === c.warehouse_uuid)?.qty || 0) -

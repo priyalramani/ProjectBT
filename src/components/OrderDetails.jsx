@@ -2458,6 +2458,7 @@ export function OrderDetails({
 				counters={counter}
 				charges={appliedCounterCharges}
 				print={invokePrint}
+				category={category}
 				{...printConfig}
 			/>
 
