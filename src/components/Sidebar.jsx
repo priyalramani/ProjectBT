@@ -31,6 +31,7 @@ let titleData = [
 	{ value: "upiTransactionReport", name: "UPI & Cheque Transaction" },
 	{ value: "completeOrderReport", name: "Complete Order" },
 	{ value: "counterStockReport", name: "Counter Stock Report" },
+	{ value: "StockAdjustmentReport", name: "Stock Adjustment Summary" },
 	{ value: "cancelOrders", name: "cancel Order" },
 	{ value: "CompletedTripsReport", name: "Completed Trips Report" },
 	{ value: "CounterLeger", name: "Counter Leger" },
@@ -170,6 +171,10 @@ const Sidebar = ({ setCollectionTags }) => {
 						{
 							name: "Counter Stock Report",
 							link: "/admin/counterStockReport"
+						},
+						{
+							name: "Stock Adjustment Summary",
+							link: "/admin/StockAdjustmentReport"
 						},
 						{
 							name: "Items Report",

@@ -366,7 +366,18 @@ const CurrentStock = () => {
 				</div>
 				<div className="table-container-user item-sales-container">
 					<Table
-						itemsDetails={filteritem}
+						itemsDetails={filteritem.map(a => ({
+							...a,
+							category_title: itemCategories.find(
+								b => b.category_uuid === a.category_uuid
+							)?.category_title
+						}))
+						.sort(
+							(a, b) =>
+								a?.category_title?.localeCompare(b.category_title) || a?.item_title?.localeCompare(b.item_title)
+						)}
+
+						
 						setItemData={setItem}
 						setItemEditPopup={setItemEditPopup}
 						warehouseData={selectedOptions}

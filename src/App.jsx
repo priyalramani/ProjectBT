@@ -68,8 +68,9 @@ import DeductionsReport from "./pages/Reports/DeductionsReport"
 import AdvanceOrdering from "./users/AdvanceOrdering"
 import AdvanceOrderingPage from "./users/AdvanceOrderingPage"
 import CounterStockReport from "./pages/Reports/CounterStockReport"
+import StockAdjustmentReport from "./pages/Reports/StockAdjustmentReport"
 
-export let Version = 187
+export let Version = 189
 // export const server = "http://localhost:9000"
 export const server = "https://api.btgondia.com"
 
@@ -315,6 +316,7 @@ function App() {
 							<Route path="/admin/upiTransactionReport" element={<UPITransection />} />
 							<Route path="/admin/completeOrderReport" element={<CompleteOrder />} />
 							<Route path="/admin/counterStockReport" element={<CounterStockReport />} />
+							<Route path="/admin/StockAdjustmentReport" element={<StockAdjustmentReport />} />
 							<Route path="/admin/RetailerMarginReport" element={<RetailerMarginReport />} />
 							<Route path="/admin/cancelOrders" element={<CancelOrders />} />
 							<Route path="/admin/ItemsReport" element={<ItemDetails />} />
