@@ -106,7 +106,6 @@ export default function AdjustStock() {
       ...prev,
       item_details: prev.item_details.map((a) => ({
         ...a,
-
       })),
     }));
   }, [qty_details]);
@@ -148,22 +147,16 @@ export default function AdjustStock() {
             let qty =
               a?.stock?.find((b) => b.warehouse_uuid === order.to_warehouse)
                 ?.qty || 0;
-            let b = qty / +a.conversion;
 
-            b = Math.sign(b) * Math.floor(Math.sign(b) * b);
-
-            let p = Math.floor(qty % +a.conversion);
-            console.log(qty, b, p);
             return {
               ...a,
               uuid: a.item_uuid,
+              p: (qty % a.conversion).toFixed(0),
               qty,
-              b,
-              p,
+              b: (qty / a.conversion).toFixed(0),
+              ap: 0,
+              bp: 0,
               visible: 1,
-              adjustmentsP:
-                (+b || 0) * (+a.conversion || 0) + (+p || 0) - (+qty || 0),
-              adjustmentsB: +b +(( +p || 0) - (+qty || 0)/+a.conversion),
             };
           })
           .filter((a) => !balanceOnly || a.qty),
@@ -270,7 +263,9 @@ export default function AdjustStock() {
                     <th className="pa2 tc bb b--black-20" colSpan={2}>
                       Visible
                     </th>
-                    <th className="pa2 tc bb b--black-20" colSpan={2}>Adjustment</th>
+                    <th className="pa2 tc bb b--black-20" colSpan={2}>
+                      Adjustment
+                    </th>
 
                     <th className="pa2 tc bb b--black-20 "></th>
                   </tr>
@@ -317,22 +312,19 @@ export default function AdjustStock() {
                               value={item.b || ""}
                               onChange={(e) => {
                                 setOrder((prev) => {
-                                  // setTimeout(
-                                  //   () => setQtyDetails((prev) => !prev),
-                                  //   2000
-                                  // );
+                                  let b = e.target.value;
+                                  let ab = (
+                                    (-item.qty - b * item.conversion) /
+                                    item.conversion
+                                  ).toFixed(0);
                                   return {
                                     ...prev,
                                     item_details: prev.item_details.map((a) =>
                                       a.uuid === item.uuid
                                         ? {
                                             ...a,
-                                            b: e.target.value,
-                                            adjustments:
-                                              (+e.target.value || 0) *
-                                                (+a.conversion || 0) +
-                                              (+a.p || 0) -
-                                              (+a.qty || 0),
+                                            ab,
+                                            b,
                                           }
                                         : a
                                     ),
@@ -355,23 +347,18 @@ export default function AdjustStock() {
                               onWheel={(e) => e.preventDefault()}
                               value={item.p || ""}
                               onChange={(e) => {
+                                let p = e.target.value;
+
+                                let ap = p - +item.qty;
                                 setOrder((prev) => {
-                                  setTimeout(
-                                    () => setQtyDetails((prev) => !prev),
-                                    2000
-                                  );
                                   return {
                                     ...prev,
                                     item_details: prev.item_details.map((a) =>
                                       a.uuid === item.uuid
                                         ? {
                                             ...a,
-                                            p: e.target.value,
-                                            adjustments:
-                                              (+a.b || 0) *
-                                                (+a.conversion || 0) +
-                                              (+e.target.value || 0) -
-                                              (+a.qty || 0),
+                                            p,
+                                            ap,
                                           }
                                         : a
                                     ),
@@ -412,11 +399,11 @@ export default function AdjustStock() {
                           >
                             <div className="flex">
                               <input
-                                type="checkbox"
+                                type="radio"
                                 checked={item.visible}
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
-                                value={item.p || ""}
+                                value={item.visible || ""}
                                 onChange={(e) => {
                                   setOrder((prev) => {
                                     setTimeout(
@@ -445,7 +432,7 @@ export default function AdjustStock() {
                           >
                             <div className="flex">
                               <input
-                                type="checkbox"
+                                type="radio"
                                 checked={!item.visible}
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
@@ -482,22 +469,23 @@ export default function AdjustStock() {
                               type="number"
                               className="numberInput"
                               onWheel={(e) => e.preventDefault()}
-                              value={item.adjustmentsB || ""}
+                              value={item.ab || ""}
                               placeholder="BOX"
                               onChange={(e) => {
+                                let ab = e.target.value;
+                                let b = (
+                                  (+item.qty - ab * item.conversion) /
+                                  item.conversion
+                                ).toFixed(0);
                                 setOrder((prev) => {
-                                  setTimeout(
-                                    () => setQtyDetails((prev) => !prev),
-                                    2000
-                                  );
                                   return {
                                     ...prev,
                                     item_details: prev.item_details.map((a) =>
                                       a.uuid === item.uuid
                                         ? {
                                             ...a,
-                                            adjustmentsB: e.target.value,
-                                            
+                                            ab,
+                                            b,
                                           }
                                         : a
                                     ),
@@ -519,21 +507,19 @@ export default function AdjustStock() {
                               className="numberInput"
                               placeholder="PCS"
                               onWheel={(e) => e.preventDefault()}
-                              value={item.adjustmentsP || ""}
+                              value={item.ap || ""}
                               onChange={(e) => {
                                 setOrder((prev) => {
-                                  setTimeout(
-                                    () => setQtyDetails((prev) => !prev),
-                                    2000
-                                  );
+                                  let ap = e.target.value;
+                                  let p = +ap - +item.qty;
                                   return {
                                     ...prev,
                                     item_details: prev.item_details.map((a) =>
                                       a.uuid === item.uuid
                                         ? {
                                             ...a,
-                                            adjustmentsP: e.target.value,
-                                            
+                                            p,
+                                            ap,
                                           }
                                         : a
                                     ),
