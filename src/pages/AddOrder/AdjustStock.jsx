@@ -160,8 +160,10 @@ export default function AdjustStock() {
               qty,
               b,
               p,
-              adjustments:
+              visible: 1,
+              adjustmentsP:
                 (+b || 0) * (+a.conversion || 0) + (+p || 0) - (+qty || 0),
+              adjustmentsB: +b +(( +p || 0) - (+qty || 0)/+a.conversion),
             };
           })
           .filter((a) => !balanceOnly || a.qty),
@@ -268,7 +270,7 @@ export default function AdjustStock() {
                     <th className="pa2 tc bb b--black-20" colSpan={2}>
                       Visible
                     </th>
-                    <th className="pa2 tc bb b--black-20">Adjustment</th>
+                    <th className="pa2 tc bb b--black-20" colSpan={2}>Adjustment</th>
 
                     <th className="pa2 tc bb b--black-20 "></th>
                   </tr>
@@ -476,11 +478,12 @@ export default function AdjustStock() {
                           >
                             <input
                               id={"adjustment" + item.uuid}
-                              style={{ width: "80px" }}
+                              style={{ width: "50px" }}
                               type="number"
                               className="numberInput"
                               onWheel={(e) => e.preventDefault()}
-                              value={item.adjustments || ""}
+                              value={item.adjustmentsB || ""}
+                              placeholder="BOX"
                               onChange={(e) => {
                                 setOrder((prev) => {
                                   setTimeout(
@@ -493,16 +496,44 @@ export default function AdjustStock() {
                                       a.uuid === item.uuid
                                         ? {
                                             ...a,
-                                            adjustments: e.target.value,
-                                            b:
-                                              +(((+a.qty || 0) +
-                                              (+e.target.value || 0) -
-                                              (+a.p || 0))/+a.conversion).toFixed(0),
-                                            p:
-                                              (+a.qty || 0) +
-                                              (+e.target.value || 0) -
-                                              (+a.b || 0) *
-                                                (+a.conversion || 0),
+                                            adjustmentsB: e.target.value,
+                                            
+                                          }
+                                        : a
+                                    ),
+                                  };
+                                });
+                              }}
+                              onFocus={(e) => e.target.select()}
+                              disabled={!item.item_uuid}
+                            />
+                          </td>
+                          <td
+                            className="ph2 pv1 tc bb b--black-20 bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            <input
+                              id={"adjustment" + item.uuid}
+                              style={{ width: "50px" }}
+                              type="number"
+                              className="numberInput"
+                              placeholder="PCS"
+                              onWheel={(e) => e.preventDefault()}
+                              value={item.adjustmentsP || ""}
+                              onChange={(e) => {
+                                setOrder((prev) => {
+                                  setTimeout(
+                                    () => setQtyDetails((prev) => !prev),
+                                    2000
+                                  );
+                                  return {
+                                    ...prev,
+                                    item_details: prev.item_details.map((a) =>
+                                      a.uuid === item.uuid
+                                        ? {
+                                            ...a,
+                                            adjustmentsP: e.target.value,
+                                            
                                           }
                                         : a
                                     ),
