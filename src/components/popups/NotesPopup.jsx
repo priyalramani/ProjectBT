@@ -19,7 +19,7 @@ function NotesPopup({
 	}, [order])
 
 	const submitHandler = async () => {
-		if (customSubmit) return customSubmit({ notes, order_uuid: order?.order_uuid, status: order?.status })
+		if (customSubmit) return customSubmit({ ...order,notes })
 		const response = await axios({
 			method: "put",
 			url: "/orders/putOrderNotes",
