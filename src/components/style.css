@@ -642,6 +642,7 @@ div.unsync-count-container {
 
 .searchBar {
 	display: flex;
+	align-items: flex-end;
 	width: 50%;
 	position: fixed;
 	bottom: 0px;
