@@ -14,7 +14,6 @@ const OrderPrint = ({
   footer = false,
   paymentModes = [],
   charges = [],
-  category = [],
   route=[]
 }) => {
   const isEstimate = order?.order_type === "E";
@@ -27,19 +26,8 @@ const OrderPrint = ({
     if (!items?.length) return [];
     else if (items?.length === 1) return items;
     else
-      return items
-        .map((a) => ({
-          ...a,
-          category_title:
-            category.find((b) => b.category_uuid === a.category_uuid)
-              ?.category_title || "",
-        }))
-        .sort(
-          (a, b) => a.category_title&&b.category_title?
-            a.category_title?.localeCompare(b.category_title) ||
-            a.item_title.localeCompare(b.item_title):a.item_title.localeCompare(b.item_title)
-        );
-  }, [item_details, itemData, category]);
+      return items;
+  }, [item_details, itemData]);
 console.log(itemDetails)
   let deliveryMessage = useMemo(
     () =>

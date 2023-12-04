@@ -44,7 +44,7 @@ const OrderPrintWrapper = ({
 		const result = arrayOfArrays?.map(_i => ({ ...order, item_details: _i }))
 		return result
 	}
-
+console.log(orders)
 	return (
 		<div className="order-print-layout">
 			<div ref={componentRef}>
@@ -53,7 +53,18 @@ const OrderPrintWrapper = ({
 					?.sort((a, b) => a.sort_order - b.sort_order)
 					?.map(a => ({
 						...a,
-						item_details: a.item_details.filter(b => b.status !== 3).map((b, i) => ({ ...b, sr: i + 1 }))
+						item_details: a.item_details.filter(b => b.status !== 3).map((a) => ({
+							...a,
+							category_title:
+							  category.find((b) => b.category_uuid === a.category_uuid)
+								?.category_title || "",
+								item_title:items.find(b=>b.item_uuid===a.item_uuid)?.item_title||""
+						  }))
+						  .sort(
+							(a, b) => a.category_title&&b.category_title?
+							  a.category_title?.localeCompare(b.category_title) ||
+							  a.item_title.localeCompare(b.item_title):a.item_title.localeCompare(b.item_title)
+						  ).map((a,i)=>({...a,sr:i+1}))
 					}))
 					?.map(__order => {
 						return getPrintData(__order)?.map((order, i, array) => (
