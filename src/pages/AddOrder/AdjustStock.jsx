@@ -314,7 +314,7 @@ export default function AdjustStock() {
                                 setOrder((prev) => {
                                   let b = e.target.value;
                                   let ab = (
-                                    (-item.qty - b * item.conversion) /
+                                    (item.qty + b * item.conversion) /
                                     item.conversion
                                   ).toFixed(0);
                                   return {
@@ -474,7 +474,7 @@ export default function AdjustStock() {
                               onChange={(e) => {
                                 let ab = e.target.value;
                                 let b = (
-                                  (+item.qty - ab * item.conversion) /
+                                  (+item.qty + +ab * item.conversion) /
                                   item.conversion
                                 ).toFixed(0);
                                 setOrder((prev) => {
@@ -511,7 +511,7 @@ export default function AdjustStock() {
                               onChange={(e) => {
                                 setOrder((prev) => {
                                   let ap = e.target.value;
-                                  let p = +ap - +item.qty;
+                                  let p = +ap + +item.qty;
                                   return {
                                     ...prev,
                                     item_details: prev.item_details.map((a) =>

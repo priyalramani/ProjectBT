@@ -3287,7 +3287,7 @@ function MinMaxPopup({ onSave, popupValue, order, items }) {
       setData((prev) => ({
         ...prev,
         item_title: itemData.item_title,
-        max: warehouseData?.qty,
+        min: warehouseData?.qty||0,
       }));
       if (warehouse_uuid) getMinValue();
     }
@@ -3305,8 +3305,8 @@ function MinMaxPopup({ onSave, popupValue, order, items }) {
     });
     setData((prev) => ({
       ...prev,
-      max: response.data.result,
-      min: prev.max - (+response.data.result || 0),
+      max: response.data.result||0,
+      min: prev.min - (+response.data.result || 0),
     }));
   };
   return (
