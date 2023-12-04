@@ -53,13 +53,15 @@ console.log(orders)
 					?.sort((a, b) => a.sort_order - b.sort_order)
 					?.map(a => ({
 						...a,
-						item_details: a.item_details.filter(b => b.status !== 3).map((a) => ({
+						item_details: a.item_details.filter(b => b.status !== 3).map((a) => {
+							let itemData=items.find(b=>b.item_uuid===a.item_uuid)
+							return {
 							...a,
 							category_title:
-							  category.find((b) => b.category_uuid === a.category_uuid)
+							  category.find((b) => b.category_uuid === itemData.category_uuid)
 								?.category_title || "",
-								item_title:items.find(b=>b.item_uuid===a.item_uuid)?.item_title||""
-						  }))
+								item_title:itemData.item_title
+						  }})
 						  .sort(
 							(a, b) => a.category_title&&b.category_title?
 							  a.category_title?.localeCompare(b.category_title) ||
