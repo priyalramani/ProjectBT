@@ -116,9 +116,8 @@ export default function AdjustStock() {
         ...item,
         b: 0,
         p:
-          (+item.b || 0) * (+item.conversion || 0) +
-          (+item.p || 0) -
-          (+item.qty || 0),
+          (+item.ab || 0) * (+item.conversion || 0) +
+          (+item.ap || 0),
       }))
       .filter((a) => a.p);
     setOrder((prev) => ({ ...prev, item_details }));

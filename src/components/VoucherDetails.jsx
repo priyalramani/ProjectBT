@@ -540,7 +540,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
 																className="numberInput"
 																index={listItemIndexCount++}
 																style={{ width: "10ch", height: "20px" }}
-																value={item.b || 0}
+																value={item.b || ""}
 																onChange={e => {
 																	setOrderData(prev => {
 																		return {
@@ -577,7 +577,7 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
 																className="numberInput"
 																onWheel={e => e.preventDefault()}
 																index={listItemIndexCount++}
-																value={item.p || 0}
+																value={item.p || ""}
 																onChange={e => {
 																	setOrderData(prev => {
 																		return {
