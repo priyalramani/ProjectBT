@@ -433,7 +433,10 @@ function ConfirmPopup({ onSave, onClose, selectedOrder, Navigate }) {
                   type="submit"
                   style={{ backgroundColor: "red" }}
                   className="submit"
-                  onClick={onSave}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onSave();
+                  }}
                 >
                   Confirm
                 </button>
