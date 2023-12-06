@@ -93,7 +93,7 @@ export default function CashRegister() {
 	const getTripData = async () => {
 		const response = await axios({
 			method: "get",
-			url: "/cashRegistrations/GetAllActiveCashRegistrations",
+			url: "/cashRegistrations/GetAllActiveCashRegistrations/"+localStorage.getItem("user_uuid"),
 
 			headers: {
 				"Content-Type": "application/json"
