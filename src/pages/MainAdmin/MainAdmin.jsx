@@ -791,6 +791,7 @@ const MainAdmin = () => {
               cursor: "pointer",
             }}
             onClick={() => {
+              setSelectOrder(false);
               handlePrint();
               axios({
                 method: "put",

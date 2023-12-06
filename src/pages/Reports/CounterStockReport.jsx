@@ -4,6 +4,7 @@ import Sidebar from "../../components/Sidebar";
 import Select from "react-select";
 import axios from "axios";
 import context from "../../context/context";
+import CloseIcon from "@mui/icons-material/Close";
 const CounterStockReport = () => {
   const [searchData, setSearchData] = useState({
     startDate: "",
@@ -14,6 +15,7 @@ const CounterStockReport = () => {
   const [items, setItems] = useState([]);
   const [counter, setCounter] = useState([]);
   const [initial, setInitial] = useState(false);
+  const [deletePopup, setDeletePopup] = useState(false);
   const { setNotification } = useContext(context);
   const getCounter = async () => {
     const response = await axios({
@@ -38,9 +40,13 @@ const CounterStockReport = () => {
 
       return;
     }
-    let startDate =  new Date(new Date(searchData.startDate).setHours(0, 0, 0, 0)).getTime();
-let endDate = new Date().setDate(new Date(searchData.endDate).getDate() + 1);
-     endDate = new Date(new Date(endDate).setHours(0, 0, 0, 0)).getTime();
+    let startDate = new Date(
+      new Date(searchData.startDate).setHours(0, 0, 0, 0)
+    ).getTime();
+    let endDate = new Date().setDate(
+      new Date(searchData.endDate).getDate() + 1
+    );
+    endDate = new Date(new Date(endDate).setHours(0, 0, 0, 0)).getTime();
 
     const response = await axios({
       method: "post",
@@ -76,6 +82,22 @@ let endDate = new Date().setDate(new Date(searchData.endDate).getDate() + 1);
     if (initial) getCounterStockReport();
     else setInitial(true);
   }, [popupOrder]);
+
+  const deleteStock = async (session_uuid) => {
+    const response = await axios({
+      method: "post",
+      url: "/counterStock/deleteCounterStock",
+      data: { session_uuid },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("activity", response);
+    if (response.data.success) {
+      setDeletePopup(false);
+      getCounterStockReport();
+    }
+  };
 
   return (
     <>
@@ -119,7 +141,7 @@ let endDate = new Date().setDate(new Date(searchData.endDate).getDate() + 1);
               className="searchInput"
               pattern="\d{4}-\d{2}-\d{2}"
             />
-            
+
             <div className="inputGroup" style={{ width: "50%" }}>
               <Select
                 options={[
@@ -163,6 +185,7 @@ let endDate = new Date().setDate(new Date(searchData.endDate).getDate() + 1);
             itemsDetails={items}
             setPopupOrder={setPopupOrder}
             counter={counter}
+            setDeletePopup={setDeletePopup}
           />
         </div>
       </div>
@@ -177,13 +200,21 @@ let endDate = new Date().setDate(new Date(searchData.endDate).getDate() + 1);
       ) : (
         ""
       )}
+      {deletePopup ? (
+        <ConfirmPopup
+          onSave={() => deleteStock(deletePopup)}
+          onClose={() => setDeletePopup(false)}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default CounterStockReport;
 
-function Table({ itemsDetails, setPopupOrder }) {
+function Table({ itemsDetails, setPopupOrder, setDeletePopup }) {
   function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -194,17 +225,16 @@ function Table({ itemsDetails, setPopupOrder }) {
     var strTime = hours + ":" + minutes + " " + ampm;
     return strTime;
   }
-  const estimated_price=
-    (items) => {
-      let sum = 0;
-      if (items?.length) {
-        for (let item of items) {
-          sum += +item?.pcs * +item?.item_price;
-        }
+  const estimated_price = (items) => {
+    let sum = 0;
+    if (items?.length) {
+      for (let item of items) {
+        sum += +item?.pcs * +item?.item_price;
       }
-      return sum.toFixed(2);
     }
-  
+    return sum.toFixed(2);
+  };
+
   return (
     <table
       className="user-table"
@@ -218,6 +248,7 @@ function Table({ itemsDetails, setPopupOrder }) {
           <th colSpan={3}>Counter</th>
           <th colSpan={3}>Users</th>
           <th colSpan={3}>Est. Value</th>
+          <th></th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -227,16 +258,28 @@ function Table({ itemsDetails, setPopupOrder }) {
             <tr
               key={Math.random()}
               style={{ height: "30px" }}
-              onClick={() => setPopupOrder(item)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setPopupOrder(item);
+              }}
             >
               <td>{i + 1}</td>
-              <td colSpan={2}>
-                {new Date(+item.timestamp).toDateString()}
-              </td>
+              <td colSpan={2}>{new Date(+item.timestamp).toDateString()}</td>
 
               <td colSpan={3}>{item?.counter_title || ""}</td>
               <td colSpan={3}>{item?.user_title || ""}</td>
               <td colSpan={3}>{estimated_price(item.details) || ""}</td>
+              <td>
+                <button
+                  className="theme-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeletePopup(item.session_uuid);
+                  }}
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
           ))}
       </tbody>
@@ -361,6 +404,45 @@ function ItemDetails({ onSave, data }) {
               Close
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmPopup({ onSave, onClose, selectedOrder, Navigate }) {
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "300px", padding: "20px" }}
+      >
+        <h2 style={{ textAlign: "center" }}>Are you sure?</h2>
+        <h2 style={{ textAlign: "center" }}>Delete Stock</h2>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+          }}
+        >
+          <div style={{ overflowY: "scroll", width: "100%" }}>
+            <form className="form">
+              <div className="flex">
+                <button
+                  type="submit"
+                  style={{ backgroundColor: "red" }}
+                  className="submit"
+                  onClick={onSave}
+                >
+                  Confirm
+                </button>
+              </div>
+            </form>
+          </div>
+          <button onClick={onClose} className="closeButton">
+            <CloseIcon />
+          </button>
         </div>
       </div>
     </div>
