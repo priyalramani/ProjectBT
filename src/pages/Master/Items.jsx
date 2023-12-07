@@ -562,7 +562,7 @@ function NewUserForm({
   items,
   setNotification,
 }) {
-  const [data, setdata] = useState({});
+  const [data, setdata] = useState({item_group_uuid:[]});
 
   const [itemGroup, setItemGroup] = useState([]);
 
@@ -614,11 +614,11 @@ function NewUserForm({
   const submitHandler = async (e) => {
     let obj = { ...data, item_uuid: data.item_uuid || uuid() };
     e.preventDefault();
-	if(!obj.item_group_uuid?.length){
-		setNotification({success:false, message: "Please Select Item Group" });
-		setTimeout(() => setNotification(null), 5000);
-		return;
-	}
+    if (!obj.item_group_uuid?.length) {
+      setNotification({ success: false, message: "Please Select Item Group" });
+      setTimeout(() => setNotification(null), 5000);
+      return;
+    }
     let barcodeChecking = items
       ?.filter((a) => a.item_uuid !== obj.item_uuid)
       ?.filter((a) => a?.barcode?.length)
@@ -706,9 +706,9 @@ function NewUserForm({
   const onChangeGroupHandler = (item_group_uuid) => {
     setdata((prev) => ({
       ...prev,
-      item_group_uuid: prev.item_group_uuid.find((a) => a === item_group_uuid)
-        ? prev.item_group_uuid.filter((a) => a !== item_group_uuid)
-        : [...prev.item_group_uuid, item_group_uuid],
+      item_group_uuid: prev?.item_group_uuid?.find((a) => a === item_group_uuid)
+        ? prev?.item_group_uuid?.filter((a) => a !== item_group_uuid)
+        : [...(prev.item_group_uuid??[]), item_group_uuid],
     }));
   };
   return (
@@ -1155,21 +1155,24 @@ function NewUserForm({
                               key={item.item_group_uuid}
                               style={{ height: "30px" }}
                             >
-                              <td className="flex" style={{justifyContent:"flex-start"}}>
+                              <td
+                                className="flex"
+                                style={{ justifyContent: "flex-start" }}
+                              >
                                 <input
                                   type="checkbox"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     onChangeGroupHandler(item.item_group_uuid);
                                   }}
-                                  checked={data.item_group_uuid.find(
+                                  checked={data.item_group_uuid?.find(
                                     (a) => a === item.item_group_uuid
                                   )}
                                   style={{
                                     transform: "scale(1.3)",
                                   }}
                                 />
-								<div style={{width:"10px"}}></div>
+                                <div style={{ width: "10px" }}></div>
                                 {item.item_group_title || ""}
                               </td>
                             </tr>
