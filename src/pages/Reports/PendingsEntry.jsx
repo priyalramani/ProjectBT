@@ -152,9 +152,7 @@ const PendingsEntry = () => {
         let date = new Date(+order.status[0]?.time);
         let itemData = itemsData.find((a) => a.item_uuid === item.item_uuid);
         sheetData.push({
-          "Party Code": order.replacement
-            ? order.party_code
-            : counters.find((b) => b.counter_uuid === order.counter_uuid)
+          "Party Code": counters.find((b) => b.counter_uuid === order.counter_uuid)
                 ?.counter_code || "",
           "Invoice Number":
             (order.replacement ? "SR" : "N") + order.invoice_number,
@@ -162,9 +160,11 @@ const PendingsEntry = () => {
             .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
             .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))
             .replace("dd", ("00" + date?.getDate().toString()).slice(-2)),
-          "Item Code": itemData.item_code || "",
+          "Item Code":order.replacement
+          ? order.item_code
+          : itemData.item_code || "",
           Box: order.replacement ? 0 : item.b || 0,
-          Pcs: order.replacement ? 0 : item.p || 0,
+          Pcs: order.replacement ? 1 : item.p || 0,
           Free: order.replacement ? 0 : item.free || 0,
           "Item Price":order.replacement
 		  ? order.conversion*order.replacement
@@ -200,7 +200,7 @@ const PendingsEntry = () => {
     const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const data = new Blob([excelBuffer], { type: fileType });
-    FileSaver.saveAs(data, "Book" + fileExtension);
+    FileSaver.saveAs(data, "CN" + fileExtension);
     // setSelectedOrders([]);
   };
   const recipts = useMemo(
