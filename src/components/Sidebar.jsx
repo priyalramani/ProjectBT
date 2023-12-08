@@ -122,6 +122,10 @@ const Sidebar = ({ setCollectionTags }) => {
 						{
 							name: "Warehouse",
 							link: "/admin/warehouse"
+						},
+						{
+							name: "Expenses",
+							link: "/admin/expense"
 						}
 					]}
 				/>
@@ -171,6 +175,10 @@ const Sidebar = ({ setCollectionTags }) => {
 						{
 							name: "Counter Stock Report",
 							link: "/admin/counterStockReport"
+						},
+						{
+							name: "Completed Register",
+							link: "/admin/cashRegisterReport"
 						},
 						{
 							name: "Stock Adjustment Summary",
