@@ -56,7 +56,7 @@ const TransactionsStatement = ({ cash_register, data }) => {
               textAlign: "left",
             }}
           >
-            <b>Grand Total : {data?.grand_total}</b>
+            <b>Total Received : {data?.grand_total}</b>
           </td>
         </tr>
         <tr>
@@ -89,19 +89,21 @@ const TransactionsStatement = ({ cash_register, data }) => {
           <th style={{ border: "1px solid #000" }}>Amount</th>
           <th style={{ border: "1px solid #000" }}>Invoice Number</th>
         </tr>
-        {data?.transactions?.filter(a=>a.type === "in").map((i) => (
-          <tr>
-            <td style={{ border: "1px solid #000" }}>
-              {getDate(+i.created_at)}
-            </td>
-            <td style={{ border: "1px solid #000", textAlign: "right" }}>
-              Rs.{i.amount}
-            </td>
-            <td style={{ border: "1px solid #000", textAlign: "right" }}>
-              {i.counter_title}-{i.invoice_number}
-            </td>
-          </tr>
-        ))}
+        {data?.transactions
+          ?.filter((a) => a.type === "in")
+          .map((i) => (
+            <tr>
+              <td style={{ border: "1px solid #000" }}>
+                {getDate(+i.created_at)}
+              </td>
+              <td style={{ border: "1px solid #000", textAlign: "right" }}>
+                Rs.{i.amount}
+              </td>
+              <td style={{ border: "1px solid #000", textAlign: "right" }}>
+                {i.counter_title}-{i.invoice_number}
+              </td>
+            </tr>
+          ))}
       </table>
       <table style={{ margin: "10px", width: "calc(100% - 18px)" }}>
         <tr>
@@ -118,21 +120,27 @@ const TransactionsStatement = ({ cash_register, data }) => {
         <tr>
           <th style={{ border: "1px solid #000" }}>Created At</th>
           <th style={{ border: "1px solid #000" }}>Amount</th>
+          <th style={{ border: "1px solid #000" }}>Category</th>
           <th style={{ border: "1px solid #000" }}>Remarks</th>
         </tr>
-        {data?.transactions.filter(a=>a.type === "out")?.map((i) => (
-          <tr>
-            <td style={{ border: "1px solid #000" }}>
-              {getDate(+i.created_at)}
-            </td>
-            <td style={{ border: "1px solid #000", textAlign: "right" }}>
-              Rs.{-i.amount}
-            </td>
-            <td style={{ border: "1px solid #000", textAlign: "right" }}>
-              {i.remarks}
-            </td>
-          </tr>
-        ))}
+        {data?.transactions
+          .filter((a) => a.type === "out")
+          ?.map((i) => (
+            <tr>
+              <td style={{ border: "1px solid #000" }}>
+                {getDate(+i.created_at)}
+              </td>
+              <td style={{ border: "1px solid #000", textAlign: "right" }}>
+                Rs.{-i.amount}
+              </td>
+              <td style={{ border: "1px solid #000", textAlign: "right" }}>
+                {i.expense_title}
+              </td>
+              <td style={{ border: "1px solid #000", textAlign: "right" }}>
+                {i.remarks}
+              </td>
+            </tr>
+          ))}
       </table>
     </>
   );

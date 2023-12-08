@@ -177,7 +177,7 @@ const Sidebar = ({ setCollectionTags }) => {
 							link: "/admin/counterStockReport"
 						},
 						{
-							name: "Completed Register",
+							name: "Completed Cash Register",
 							link: "/admin/cashRegisterReport"
 						},
 						{
