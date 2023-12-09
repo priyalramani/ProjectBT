@@ -91,7 +91,6 @@ const PendingsEntry = () => {
     for (let order of selectedOrders?.sort(
       (a, b) => +a.invoice_number - +b.invoice_number
     )) {
-      console.log(order);
       for (let item of order?.item_details?.filter(
         (a) => a.status !== 3 && (a.b || a.p || a.free)
       )) {
@@ -142,58 +141,41 @@ const PendingsEntry = () => {
   const downloadHandlerTwo = async () => {
     let sheetData = [];
     // console.log(sheetData)
-    for (let order of selectedOrders?.sort(
-      (a, b) => +a.invoice_number - +b.invoice_number
-    )) {
-      console.log(order);
-      for (let item of order?.item_details?.filter(
-        (a) => a.status !== 3 && (a.b || a.p || a.free)
-      )) {
-        let date = new Date(+order.status[0]?.time);
-        let itemData = itemsData.find((a) => a.item_uuid === item.item_uuid);
-        sheetData.push({
-          "Party Code": counters.find((b) => b.counter_uuid === order.counter_uuid)
-                ?.counter_code || "",
-          "Invoice Number":
-            (order.replacement ? "SR" : "N") + order.invoice_number,
-          "Invoice Date": "dd/mm/yy"
-            .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
-            .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))
-            .replace("dd", ("00" + date?.getDate().toString()).slice(-2)),
-          "Item Code":order.replacement
+    for (let order of selectedOrders
+      .filter((a) => a.replacement)
+      ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
+      let date = new Date(+order.status[0]?.time);
+      let itemData = itemsData.find(
+        (a) => a.item_uuid === order.item_details[0].item_uuid
+      );
+      sheetData.push({
+        "Party Code":
+          counters.find((b) => b.counter_uuid === order.counter_uuid)
+            ?.counter_code || "",
+        "Invoice Number": "SR" + order.invoice_number,
+        "Invoice Date": "dd/mm/yy"
+          .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
+          .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))
+          .replace("dd", ("00" + date?.getDate().toString()).slice(-2)),
+        "Item Code": order.replacement
           ? order.item_code
           : itemData.item_code || "",
-          Box: order.replacement ? 0 : item.b || 0,
-          Pcs: order.replacement ? 1 : item.p || 0,
-          Free: order.replacement ? 0 : item.free || 0,
-          "Item Price":order.replacement
-		  ? order.conversion*order.replacement
-		  :
-            +(item.price || itemData?.item_price || 0) *
-            +(itemData?.conversion || 1),
-          "Cash Credit":
-            order.modes.filter(
-              (a) =>
-                a.amt && a.mode_uuid !== "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-            ).length || order.unpaid
-              ? "Credit"
-              : "Cash",
-          "Discount 1": order.replacement
-            ? 0
-            : item.charges_discount?.length
-            ? item.charges_discount[0]?.value
-            : 0,
-          "Discount 2": order.replacement
-            ? 0
-            : item.charges_discount?.length
-            ? item.charges_discount[1]?.value
-            : 0,
-          Deductions: order.replacement
-            ? 0
-            : -(+order.replacement + order.shortage + order.adjustment) || 0,
-          "Entry No": (order.replacement ? "SR" : "N") + order.invoice_number,
-        });
-      }
+        Box: 0,
+        Pcs: 1,
+        Free: 0,
+        "Item Price": order.conversion * order.replacement,
+        "Cash Credit":
+          order.modes.filter(
+            (a) =>
+              a.amt && a.mode_uuid !== "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+          ).length || order.unpaid
+            ? "Credit"
+            : "Cash",
+        "Discount 1": 0,
+        "Discount 2": 0,
+        Deductions: 0,
+        "Entry No": "SR" + order.invoice_number,
+      });
     }
 
     const ws = XLSX.utils.json_to_sheet(sheetData);

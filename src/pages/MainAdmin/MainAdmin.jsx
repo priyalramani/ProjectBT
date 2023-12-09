@@ -399,20 +399,30 @@ const MainAdmin = () => {
   }, []);
   const orders = useMemo(
     () =>
-      ordersData.filter(
-        (a) =>
-          (!salesPersoneList.length ||
-            salesPersoneList.filter(
-              (b) => b === a.status.find((b) => +b.stage === 1)?.user_uuid
-            ).length) &&
-          (!stageList.length ||
-            stageList.filter((b) => b === +a.status[a.status.length - 1]?.stage)
-              .length) &&
-          (!+users?.find((_u) => _u?.user_uuid === user_uuid)
-            ?.hide_pending_payments ||
-            !+a?.payment_pending)
-      ),
-    [ordersData, salesPersoneList, stageList, user_uuid, users]
+      ordersData
+        .filter(
+          (a) =>
+            (!salesPersoneList.length ||
+              salesPersoneList.filter(
+                (b) => b === a.status.find((b) => +b.stage === 1)?.user_uuid
+              ).length) &&
+            (!stageList.length ||
+              stageList.filter(
+                (b) => b === +a.status[a.status.length - 1]?.stage
+              ).length) &&
+            (!+users?.find((_u) => _u?.user_uuid === user_uuid)
+              ?.hide_pending_payments ||
+              !+a?.payment_pending) &&
+            (!searchItems ||
+              a.invoice_number
+                ?.toString()
+                ?.includes(searchItems?.toLocaleLowerCase()) ||
+              a.counter_title
+                ?.toLocaleLowerCase()
+                ?.includes(searchItems?.toLocaleLowerCase()))
+        )
+        .sort((a, b) => +a.time_1 - +b.time_1),
+    [ordersData, salesPersoneList, searchItems, stageList, user_uuid, users]
   );
   const getRunningOrders = async (controller, setLoadingState = true) => {
     if (!controller) controller = new AbortController();
@@ -1012,28 +1022,17 @@ const MainAdmin = () => {
             ) : location.pathname.includes("admin") ? (
               <>
                 {routeOrderLength?.map((route) => {
-                  const orders_data = orders
+                  const orders_data = orders?.filter(
+                    (b) =>
+                      counter.filter(
+                        (c) =>
+                          c.counter_uuid === b.counter_uuid &&
+                          (route.route_uuid === c.route_uuid ||
+                            ((!c.route_uuid || c.route_uuid === "none") &&
+                              route.route_uuid === "none"))
+                      )?.length
+                  );
 
-                    ?.filter(
-                      (b) =>
-                        counter.filter(
-                          (c) =>
-                            c.counter_uuid === b.counter_uuid &&
-                            (route.route_uuid === c.route_uuid ||
-                              ((!c.route_uuid || c.route_uuid === "none") &&
-                                route.route_uuid === "none"))
-                        )?.length
-                    )
-                    ?.filter(
-                      (a) =>
-                        !searchItems ||
-                        a.invoice_number
-                          ?.toString()
-                          ?.includes(searchItems?.toLocaleLowerCase()) ||
-                        a.counter_title
-                          ?.toLocaleLowerCase()
-                          ?.includes(searchItems?.toLocaleLowerCase())
-                    );
                   if (orders_data?.length)
                     return (
                       <div key={Math.random()} className="sectionDiv">
@@ -1223,12 +1222,10 @@ const MainAdmin = () => {
                           }}
                           id="seats_container"
                         >
-                          {orders_data
-                            ?.sort((a, b) => +a.time_1 - +b.time_1)
-                            ?.map((item) => {
-                              return (
-                                <div
-                                  className={`
+                          {orders?.map((item) => {
+                            return (
+                              <div
+                                className={`
 																		seatSearchTarget ${
                                       !selectOrder &&
                                       +item?.priority === 1 &&
@@ -1237,99 +1234,98 @@ const MainAdmin = () => {
                                         : ""
                                     }
 																	`}
-                                  style={{ height: "fit-content" }}
-                                  key={Math.random()}
-                                  seat-name={item.seat_name}
-                                  seat-code={item.seat_uuid}
-                                  seat={item.seat_uuid}
-                                  // section={section.section_uuid}
-                                  // section-name={section?.section_name}
-                                  // outlet={outletIdState}
-                                  onClick={(e) =>
+                                style={{ height: "fit-content" }}
+                                key={Math.random()}
+                                seat-name={item.seat_name}
+                                seat-code={item.seat_uuid}
+                                seat={item.seat_uuid}
+                                // section={section.section_uuid}
+                                // section-name={section?.section_name}
+                                // outlet={outletIdState}
+                                onClick={(e) =>
+                                  selectOrder
+                                    ? setSelectedOrder((prev) =>
+                                        prev.filter(
+                                          (a) =>
+                                            a.order_uuid === item.order_uuid
+                                        )?.length
+                                          ? prev.filter(
+                                              (a) =>
+                                                a.order_uuid !== item.order_uuid
+                                            )
+                                          : prev?.length
+                                          ? [...prev, item]
+                                          : [item]
+                                      )
+                                    : setSelectedRouteOrder(item.order_uuid)
+                                }
+                                onDoubleClick={() =>
+                                  setSelectedRouteOrder(item.order_uuid)
+                                }
+                              >
+                                <span
+                                  className="dblClickTrigger"
+                                  style={{ display: "none" }}
+                                  // onClick={() =>
+                                  //   menuOpenHandler(item)
+                                  // }
+                                />
+                                <Card
+                                  details={details}
+                                  order={item}
+                                  onDoubleClick={() => setPopupOrder(item)}
+                                  getOrders={() => {
+                                    if (holdOrders) getRunningHoldOrders();
+                                    else getRunningOrders();
+                                  }}
+                                  setSelectOrder={setSelectOrder}
+                                  // on_order={on_order && on_order}
+                                  // key={item.seat_uuid}
+                                  dateTime={item?.status[0]?.time}
+                                  title1={item?.invoice_number || ""}
+                                  selectedOrder={
                                     selectOrder
-                                      ? setSelectedOrder((prev) =>
-                                          prev.filter(
-                                            (a) =>
-                                              a.order_uuid === item.order_uuid
-                                          )?.length
-                                            ? prev.filter(
-                                                (a) =>
-                                                  a.order_uuid !==
-                                                  item.order_uuid
-                                              )
-                                            : prev?.length
-                                            ? [...prev, item]
-                                            : [item]
-                                        )
-                                      : setSelectedRouteOrder(item.order_uuid)
+                                      ? selectedOrder.filter(
+                                          (a) =>
+                                            a.order_uuid === item.order_uuid
+                                        )?.length
+                                      : selectedRouteOrder === item.order_uuid
                                   }
-                                  onDoubleClick={() =>
-                                    setSelectedRouteOrder(item.order_uuid)
+                                  selectedCounter={
+                                    selectedOrder.filter(
+                                      (a) =>
+                                        a.counter_uuid === item.counter_uuid
+                                    )?.length
                                   }
-                                >
-                                  <span
-                                    className="dblClickTrigger"
-                                    style={{ display: "none" }}
-                                    // onClick={() =>
-                                    //   menuOpenHandler(item)
-                                    // }
-                                  />
-                                  <Card
-                                    details={details}
-                                    order={item}
-                                    onDoubleClick={() => setPopupOrder(item)}
-                                    getOrders={() => {
-                                      if (holdOrders) getRunningHoldOrders();
-                                      else getRunningOrders();
-                                    }}
-                                    setSelectOrder={setSelectOrder}
-                                    // on_order={on_order && on_order}
-                                    // key={item.seat_uuid}
-                                    dateTime={item?.status[0]?.time}
-                                    title1={item?.invoice_number || ""}
-                                    selectedOrder={
-                                      selectOrder
-                                        ? selectedOrder.filter(
-                                            (a) =>
-                                              a.order_uuid === item.order_uuid
-                                          )?.length
-                                        : selectedRouteOrder === item.order_uuid
-                                    }
-                                    selectedCounter={
-                                      selectedOrder.filter(
-                                        (a) =>
-                                          a.counter_uuid === item.counter_uuid
-                                      )?.length
-                                    }
-                                    title2={item?.counter_title || ""}
-                                    status={
-                                      +item.status[item.status?.length - 1]
-                                        ?.stage === 1
-                                        ? "Processing"
-                                        : +item.status[item.status?.length - 1]
-                                            ?.stage === 2
-                                        ? "Checking"
-                                        : +item.status[item.status?.length - 1]
-                                            ?.stage === 3
-                                        ? "Delivery"
-                                        : +item.status[item.status?.length - 1]
-                                            ?.stage === 4
-                                        ? "Complete"
-                                        : +item.status[item.status?.length - 1]
-                                            ?.stage === 5
-                                        ? "Cancelled"
-                                        : ""
-                                    }
-                                    // price={item.price}
-                                    // visibleContext={visibleContext}
-                                    // setVisibleContext={setVisibleContext}
-                                    // isMouseInsideContext={isMouseInsideContext}
-                                    // seats={seatsState.filter(s => +s.seat_status === 1)}
-                                    rounded
-                                  />
-                                </div>
-                              );
-                            })}
+                                  title2={item?.counter_title || ""}
+                                  status={
+                                    +item.status[item.status?.length - 1]
+                                      ?.stage === 1
+                                      ? "Processing"
+                                      : +item.status[item.status?.length - 1]
+                                          ?.stage === 2
+                                      ? "Checking"
+                                      : +item.status[item.status?.length - 1]
+                                          ?.stage === 3
+                                      ? "Delivery"
+                                      : +item.status[item.status?.length - 1]
+                                          ?.stage === 4
+                                      ? "Complete"
+                                      : +item.status[item.status?.length - 1]
+                                          ?.stage === 5
+                                      ? "Cancelled"
+                                      : ""
+                                  }
+                                  // price={item.price}
+                                  // visibleContext={visibleContext}
+                                  // setVisibleContext={setVisibleContext}
+                                  // isMouseInsideContext={isMouseInsideContext}
+                                  // seats={seatsState.filter(s => +s.seat_status === 1)}
+                                  rounded
+                                />
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     );
@@ -1339,20 +1335,8 @@ const MainAdmin = () => {
             ) : (
               <>
                 {[0].map((_) => {
-                  const ordersData = orders
+                  const ordersData = orders.filter((a) => !a?.trip_uuid);
 
-                    .filter((a) => !a?.trip_uuid)
-                    .sort((a, b) => +a.time_1 - +b.time_1)
-                    .filter(
-                      (a) =>
-                        !searchItems ||
-                        a.invoice_number
-                          ?.toString()
-                          ?.includes(searchItems.toLocaleLowerCase()) ||
-                        a.counter_title
-                          ?.toLocaleLowerCase()
-                          ?.includes(searchItems.toLocaleLowerCase())
-                    );
                   if (ordersData?.length)
                     return (
                       <div key={Math.random()} className="sectionDiv">
@@ -1457,17 +1441,7 @@ const MainAdmin = () => {
                           {orders
 
                             .filter((a) => !a?.trip_uuid)
-                            .sort((a, b) => +a.time_1 - +b.time_1)
-                            .filter(
-                              (a) =>
-                                !searchItems ||
-                                a.invoice_number
-                                  ?.toString()
-                                  ?.includes(searchItems.toLocaleLowerCase()) ||
-                                a.counter_title
-                                  ?.toLocaleLowerCase()
-                                  ?.includes(searchItems.toLocaleLowerCase())
-                            )
+
                             .map((item) => {
                               return (
                                 <div
@@ -1575,19 +1549,9 @@ const MainAdmin = () => {
                   else return "";
                 })}
                 {TripsOrderLength?.map((trip) => {
-                  const orders_data = orders
-
-                    ?.filter((a) => a.trip_uuid === trip.trip_uuid)
-                    ?.filter(
-                      (a) =>
-                        !searchItems ||
-                        a.invoice_number
-                          ?.toString()
-                          ?.includes(searchItems.toLocaleLowerCase()) ||
-                        a.counter_title
-                          ?.toLocaleLowerCase()
-                          ?.includes(searchItems?.toLocaleLowerCase())
-                    );
+                  const orders_data = orders?.filter(
+                    (a) => a.trip_uuid === trip.trip_uuid
+                  );
 
                   if (orders_data?.length)
                     return (
@@ -1715,113 +1679,111 @@ const MainAdmin = () => {
                           style={{
                             flexDirection: "row",
                             flexWrap: "wrap",
-                            gap: "0",
+                            gap: "0px",
                             marginBottom: "10px",
+                            paddingBottom: "20px",
                           }}
                           id="seats_container"
                         >
-                          {orders_data
-                            ?.sort((a, b) => +a.time_1 - +b.time_1)
-                            ?.map((item) => {
-                              return (
-                                <div
-                                  className={`seatSearchTarget ${
-                                    !selectOrder &&
-                                    +item?.priority === 1 &&
-                                    +item?.status?.at(-1)?.stage === 1
-                                      ? "shaking-cards"
-                                      : ""
-                                  }`}
-                                  style={{ height: "fit-content" }}
-                                  key={Math.random()}
-                                  seat-name={item.seat_name}
-                                  seat-code={item.seat_uuid}
-                                  seat={item.seat_uuid}
-                                  // section={section.section_uuid}
-                                  // section-name={section?.section_name}
-                                  // outlet={outletIdState}
-                                  onClick={(e) =>
+                          {orders?.map((item) => {
+                            return (
+                              <div
+                                className={`seatSearchTarget ${
+                                  !selectOrder &&
+                                  +item?.priority === 1 &&
+                                  +item?.status?.at(-1)?.stage === 1
+                                    ? "shaking-cards"
+                                    : ""
+                                }`}
+                                style={{ height: "fit-content" }}
+                                key={Math.random()}
+                                seat-name={item.seat_name}
+                                seat-code={item.seat_uuid}
+                                seat={item.seat_uuid}
+                                // section={section.section_uuid}
+                                // section-name={section?.section_name}
+                                // outlet={outletIdState}
+                                onClick={(e) =>
+                                  selectOrder
+                                    ? setSelectedOrder((prev) =>
+                                        prev.filter(
+                                          (a) =>
+                                            a.order_uuid === item.order_uuid
+                                        )?.length
+                                          ? prev.filter(
+                                              (a) =>
+                                                a.order_uuid !== item.order_uuid
+                                            )
+                                          : prev?.length
+                                          ? [...prev, item]
+                                          : [item]
+                                      )
+                                    : setSelectedRouteOrder(item.order_uuid)
+                                }
+                              >
+                                <span
+                                  className="dblClickTrigger"
+                                  style={{ display: "none" }}
+                                  // onClick={() =>
+                                  //   menuOpenHandler(item)
+                                  // }
+                                />
+                                <Card
+                                  details={details}
+                                  order={item}
+                                  onDoubleClick={() => setPopupOrder(item)}
+                                  getOrders={() => {
+                                    if (holdOrders) getRunningHoldOrders();
+                                    else getRunningOrders();
+                                  }}
+                                  setSelectOrder={setSelectOrder}
+                                  // on_order={on_order && on_order}
+                                  // key={item.seat_uuid}
+                                  dateTime={item?.status[0]?.time}
+                                  title1={item?.invoice_number || ""}
+                                  selectedOrder={
                                     selectOrder
-                                      ? setSelectedOrder((prev) =>
-                                          prev.filter(
-                                            (a) =>
-                                              a.order_uuid === item.order_uuid
-                                          )?.length
-                                            ? prev.filter(
-                                                (a) =>
-                                                  a.order_uuid !==
-                                                  item.order_uuid
-                                              )
-                                            : prev?.length
-                                            ? [...prev, item]
-                                            : [item]
-                                        )
-                                      : setSelectedRouteOrder(item.order_uuid)
+                                      ? selectedOrder.filter(
+                                          (a) =>
+                                            a.order_uuid === item.order_uuid
+                                        )?.length
+                                      : selectedRouteOrder === item.order_uuid
                                   }
-                                >
-                                  <span
-                                    className="dblClickTrigger"
-                                    style={{ display: "none" }}
-                                    // onClick={() =>
-                                    //   menuOpenHandler(item)
-                                    // }
-                                  />
-                                  <Card
-                                    details={details}
-                                    order={item}
-                                    onDoubleClick={() => setPopupOrder(item)}
-                                    getOrders={() => {
-                                      if (holdOrders) getRunningHoldOrders();
-                                      else getRunningOrders();
-                                    }}
-                                    setSelectOrder={setSelectOrder}
-                                    // on_order={on_order && on_order}
-                                    // key={item.seat_uuid}
-                                    dateTime={item?.status[0]?.time}
-                                    title1={item?.invoice_number || ""}
-                                    selectedOrder={
-                                      selectOrder
-                                        ? selectedOrder.filter(
-                                            (a) =>
-                                              a.order_uuid === item.order_uuid
-                                          )?.length
-                                        : selectedRouteOrder === item.order_uuid
-                                    }
-                                    selectedCounter={
-                                      selectedOrder.filter(
-                                        (a) =>
-                                          a.counter_uuid === item.counter_uuid
-                                      )?.length
-                                    }
-                                    title2={item?.counter_title || ""}
-                                    status={
-                                      +item.status[item.status?.length - 1]
-                                        ?.stage === 1
-                                        ? "Processing"
-                                        : +item.status[item.status?.length - 1]
-                                            ?.stage === 2
-                                        ? "Checking"
-                                        : +item.status[item.status?.length - 1]
-                                            ?.stage === 3
-                                        ? "Delivery"
-                                        : +item.status[item.status?.length - 1]
-                                            ?.stage === 4
-                                        ? "Complete"
-                                        : +item.status[item.status?.length - 1]
-                                            ?.stage === 5
-                                        ? "Cancelled"
-                                        : ""
-                                    }
-                                    // price={item.price}
-                                    // visibleContext={visibleContext}
-                                    // setVisibleContext={setVisibleContext}
-                                    // isMouseInsideContext={isMouseInsideContext}
-                                    // seats={seatsState.filter(s => +s.seat_status === 1)}
-                                    rounded
-                                  />
-                                </div>
-                              );
-                            })}
+                                  selectedCounter={
+                                    selectedOrder.filter(
+                                      (a) =>
+                                        a.counter_uuid === item.counter_uuid
+                                    )?.length
+                                  }
+                                  title2={item?.counter_title || ""}
+                                  status={
+                                    +item.status[item.status?.length - 1]
+                                      ?.stage === 1
+                                      ? "Processing"
+                                      : +item.status[item.status?.length - 1]
+                                          ?.stage === 2
+                                      ? "Checking"
+                                      : +item.status[item.status?.length - 1]
+                                          ?.stage === 3
+                                      ? "Delivery"
+                                      : +item.status[item.status?.length - 1]
+                                          ?.stage === 4
+                                      ? "Complete"
+                                      : +item.status[item.status?.length - 1]
+                                          ?.stage === 5
+                                      ? "Cancelled"
+                                      : ""
+                                  }
+                                  // price={item.price}
+                                  // visibleContext={visibleContext}
+                                  // setVisibleContext={setVisibleContext}
+                                  // isMouseInsideContext={isMouseInsideContext}
+                                  // seats={seatsState.filter(s => +s.seat_status === 1)}
+                                  rounded
+                                />
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     );

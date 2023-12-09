@@ -603,7 +603,7 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setItemEditPopup({ ...a, type: "qty" });
+                        setItemEditPopup({ ...a, type: "qty",conversion:item.conversion });
                         setItemData(item);
                       }}
                     >
