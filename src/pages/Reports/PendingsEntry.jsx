@@ -125,8 +125,6 @@ const PendingsEntry = () => {
           "Discount 2": item.charges_discount?.length
             ? item.charges_discount[1]?.value
             : 0,
-          Deductions:
-            -(+order.replacement + order.shortage + order.adjustment) || 0,
         });
       }
     }
@@ -145,9 +143,7 @@ const PendingsEntry = () => {
       .filter((a) => a.replacement)
       ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
       let date = new Date(+order.status[0]?.time);
-      let itemData = itemsData.find(
-        (a) => a.item_uuid === order.item_details[0].item_uuid
-      );
+console.log(order)
       sheetData.push({
         "Party Code":
           counters.find((b) => b.counter_uuid === order.counter_uuid)
@@ -157,9 +153,7 @@ const PendingsEntry = () => {
           .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
           .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))
           .replace("dd", ("00" + date?.getDate().toString()).slice(-2)),
-        "Item Code": order.replacement
-          ? order.item_code
-          : itemData.item_code || "",
+        "Item Code": order.item_code || "",
         Box: 0,
         Pcs: 1,
         Free: 0,
@@ -173,8 +167,66 @@ const PendingsEntry = () => {
             : "Cash",
         "Discount 1": 0,
         "Discount 2": 0,
-        Deductions: 0,
-        "Entry No": "SR" + order.invoice_number,
+      });
+    }
+    for (let order of selectedOrders
+      .filter((a) => a.adjustment)
+      ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
+      let date = new Date(+order.status[0]?.time);
+      console.log(order)
+      sheetData.push({
+        "Party Code":
+          counters.find((b) => b.counter_uuid === order.counter_uuid)
+            ?.counter_code || "",
+        "Invoice Number": "SR" + order.invoice_number,
+        "Invoice Date": "dd/mm/yy"
+          .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
+          .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))
+          .replace("dd", ("00" + date?.getDate().toString()).slice(-2)),
+        "Item Code": order.item_code || "",
+        Box: 0,
+        Pcs: 1,
+        Free: 0,
+        "Item Price": order.conversion * order.adjustment,
+        "Cash Credit":
+          order.modes.filter(
+            (a) =>
+              a.amt && a.mode_uuid !== "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+          ).length || order.unpaid
+            ? "Credit"
+            : "Cash",
+        "Discount 1": 0,
+        "Discount 2": 0,
+      });
+    }
+    for (let order of selectedOrders
+      .filter((a) => a.shortage)
+      ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
+      let date = new Date(+order.status[0]?.time);
+      console.log(order)
+      sheetData.push({
+        "Party Code":
+          counters.find((b) => b.counter_uuid === order.counter_uuid)
+            ?.counter_code || "",
+        "Invoice Number": "SR" + order.invoice_number,
+        "Invoice Date": "dd/mm/yy"
+          .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
+          .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))
+          .replace("dd", ("00" + date?.getDate().toString()).slice(-2)),
+        "Item Code": order.item_code || "",
+        Box: 0,
+        Pcs: 1,
+        Free: 0,
+        "Item Price": order.conversion * order.shortage,
+        "Cash Credit":
+          order.modes.filter(
+            (a) =>
+              a.amt && a.mode_uuid !== "c67b54ba-d2b6-11ec-9d64-0242ac120002"
+          ).length || order.unpaid
+            ? "Credit"
+            : "Cash",
+        "Discount 1": 0,
+        "Discount 2": 0,
       });
     }
 
@@ -334,7 +386,11 @@ const PendingsEntry = () => {
                   className="form"
                   onSubmit={(e) => {
                     e.preventDefault();
-                    if (selectedOrders.find((a) => a.replacement)) {
+                    if (
+                      selectedOrders.find(
+                        (a) => a.replacement || a.adjustment || a.shortage
+                      )
+                    ) {
                       setExcelDownloadPopup(true);
                     } else {
                       downloadHandler();

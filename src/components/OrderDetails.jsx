@@ -3086,7 +3086,7 @@ const DeleteOrderPopup = ({
             <tr key={item.id} onClick={(e)=>{
 				e.stopPropagation()
 				setReason((prev)=>prev+item.body)
-			}}>
+			}} style={{cursor:"pointer"}}>
 				<td
                 colSpan={2}
               
