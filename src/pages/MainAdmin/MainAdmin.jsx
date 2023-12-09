@@ -893,7 +893,7 @@ const MainAdmin = () => {
                   setStageList([]);
                 }}
               >
-                {!salesPersoneList.length
+                {!stageList.length
                   ? "Order Status Filter"
                   : "Cancel Status Filter"}
               </button>
