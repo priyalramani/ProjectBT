@@ -421,7 +421,7 @@ const MainAdmin = () => {
                 ?.toLocaleLowerCase()
                 ?.includes(searchItems?.toLocaleLowerCase()))
         )
-        .sort((a, b) => +a.time_1 - +b.time_1),
+        .sort((a, b) => +a.status[0].time - +b.status[0].time),
     [ordersData, salesPersoneList, searchItems, stageList, user_uuid, users]
   );
   const getRunningOrders = async (controller, setLoadingState = true) => {
@@ -1685,7 +1685,7 @@ const MainAdmin = () => {
                           }}
                           id="seats_container"
                         >
-                          {orders?.map((item) => {
+                          {orders_data?.map((item) => {
                             return (
                               <div
                                 className={`seatSearchTarget ${
