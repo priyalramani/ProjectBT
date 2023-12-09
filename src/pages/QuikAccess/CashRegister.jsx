@@ -1192,7 +1192,7 @@ function NewRegisterForm({
                           })
                         }
                       >
-						<option value="">
+						<option value="" disabled>
                               None
                             </option>
                         {expense

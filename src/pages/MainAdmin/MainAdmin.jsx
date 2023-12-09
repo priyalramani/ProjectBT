@@ -43,7 +43,9 @@ const MainAdmin = () => {
   const [details, setDetails] = useState([]);
   const [routesData, setRoutesData] = useState([]);
   const [salesPersonFilterPopup, setSalesPersoneFilter] = useState(false);
+  const [stageFilterPopup, setStageFilterPopup] = useState(false);
   const [salesPersoneList, setSalesPersoneList] = useState([]);
+  const [stageList, setStageList] = useState([]);
   const [tripData, setTripData] = useState([]);
   const [counter, setCounter] = useState([]);
   const [btn, setBtn] = useState(false);
@@ -399,12 +401,18 @@ const MainAdmin = () => {
     () =>
       ordersData.filter(
         (a) =>
-          !salesPersoneList.length ||
-          salesPersoneList.filter(
-            (b) => b === a.status.find((b) => +b.stage === 1)?.user_uuid
-          ).length
+          (!salesPersoneList.length ||
+            salesPersoneList.filter(
+              (b) => b === a.status.find((b) => +b.stage === 1)?.user_uuid
+            ).length) &&
+          (!stageList.length ||
+            stageList.filter((b) => b === +a.status[a.status.length - 1]?.stage)
+              .length) &&
+          (!+users?.find((_u) => _u?.user_uuid === user_uuid)
+            ?.hide_pending_payments ||
+            !+a?.payment_pending)
       ),
-    [ordersData, salesPersoneList]
+    [ordersData, salesPersoneList, stageList, user_uuid, users]
   );
   const getRunningOrders = async (controller, setLoadingState = true) => {
     if (!controller) controller = new AbortController();
@@ -878,6 +886,17 @@ const MainAdmin = () => {
                   ? "Sales Person Filter"
                   : "Cancel Filter"}
               </button>
+              <button
+                className="simple_Logout_button"
+                onClick={() => {
+                  setStageFilterPopup(!stageList.length);
+                  setStageList([]);
+                }}
+              >
+                {!salesPersoneList.length
+                  ? "Order Status Filter"
+                  : "Cancel Status Filter"}
+              </button>
               {!selectOrder ? (
                 <>
                   <button
@@ -994,11 +1013,7 @@ const MainAdmin = () => {
               <>
                 {routeOrderLength?.map((route) => {
                   const orders_data = orders
-                    ?.filter(
-                      (_i) =>
-                        !+users?.find((_u) => _u?.user_uuid === user_uuid)
-                          ?.hide_pending_payments || !+_i?.payment_pending
-                    )
+
                     ?.filter(
                       (b) =>
                         counter.filter(
@@ -1325,11 +1340,7 @@ const MainAdmin = () => {
               <>
                 {[0].map((_) => {
                   const ordersData = orders
-                    ?.filter(
-                      (_i) =>
-                        !+users?.find((_u) => _u?.user_uuid === user_uuid)
-                          ?.hide_pending_payments || !+_i?.payment_pending
-                    )
+
                     .filter((a) => !a?.trip_uuid)
                     .sort((a, b) => +a.time_1 - +b.time_1)
                     .filter(
@@ -1444,13 +1455,7 @@ const MainAdmin = () => {
                           id="seats_container"
                         >
                           {orders
-                            ?.filter(
-                              (_i) =>
-                                !+users?.find(
-                                  (_u) => _u?.user_uuid === user_uuid
-                                )?.hide_pending_payments ||
-                                !+_i?.payment_pending
-                            )
+
                             .filter((a) => !a?.trip_uuid)
                             .sort((a, b) => +a.time_1 - +b.time_1)
                             .filter(
@@ -1571,11 +1576,7 @@ const MainAdmin = () => {
                 })}
                 {TripsOrderLength?.map((trip) => {
                   const orders_data = orders
-                    ?.filter(
-                      (_i) =>
-                        !+users?.find((_u) => _u?.user_uuid === user_uuid)
-                          ?.hide_pending_payments || !+_i?.payment_pending
-                    )
+
                     ?.filter((a) => a.trip_uuid === trip.trip_uuid)
                     ?.filter(
                       (a) =>
@@ -1829,48 +1830,59 @@ const MainAdmin = () => {
               </>
             )}
 
-            <div className="searchBar" style={{ zIndex: 1 ,width:selectedOrder.length?"61%":"400px"}}>
+            <div
+              className="searchBar"
+              style={{
+                zIndex: 1,
+                width: selectedOrder.length ? "61%" : "400px",
+              }}
+            >
               <input
                 type="text"
                 placeholder="Search..."
-				style={{maxWidth:"300px",maxHeight:"50px"}}
+                style={{ maxWidth: "300px", maxHeight: "50px" }}
                 value={searchItems}
                 onChange={(e) => setSearhItems(e.target.value)}
               />
-			  {selectedOrder.length?<>
-              <button
-                className="simple_Logout_button"
-				style={{minWidth:"100px",margin:"0 20px 10px 20px"}}
-                type="button"
-                onClick={() => {
-                  setPopupForm({ type: "edit" });
-                  setDropDown(false);
-                }}
-              >
-                Assign Trip
-              </button>
-              <button
-                className="simple_Logout_button"
-				style={{minWidth:"100px",margin:"0 20px 10px 20px"}}
-                type="button"
-                onClick={() => handleWarehouseChacking()}
-              >
-                Print Invoice
-              </button>
-              <button
-                className="simple_Logout_button"
-				style={{minWidth:"100px",margin:"0 20px 10px 20px"}}
-                type="button"
-                onClick={() => {
-                  const stage = selectedOrder?.map(
-                    (a) => +a.status[a.status?.length - 1]?.stage
-                  );
-                  console.log({ stage });
-                  setChangeStatePopup(stage?.sort((a, b) => a - b)?.at(-1));
-                }}
-              >
-                Change Stage
-              </button></>:""}
+              {selectedOrder.length ? (
+                <>
+                  <button
+                    className="simple_Logout_button"
+                    style={{ minWidth: "100px", margin: "0 20px 10px 20px" }}
+                    type="button"
+                    onClick={() => {
+                      setPopupForm({ type: "edit" });
+                      setDropDown(false);
+                    }}
+                  >
+                    Assign Trip
+                  </button>
+                  <button
+                    className="simple_Logout_button"
+                    style={{ minWidth: "100px", margin: "0 20px 10px 20px" }}
+                    type="button"
+                    onClick={() => handleWarehouseChacking()}
+                  >
+                    Print Invoice
+                  </button>
+                  <button
+                    className="simple_Logout_button"
+                    style={{ minWidth: "100px", margin: "0 20px 10px 20px" }}
+                    type="button"
+                    onClick={() => {
+                      const stage = selectedOrder?.map(
+                        (a) => +a.status[a.status?.length - 1]?.stage
+                      );
+                      console.log({ stage });
+                      setChangeStatePopup(stage?.sort((a, b) => a - b)?.at(-1));
+                    }}
+                  >
+                    Change Stage
+                  </button>
+                </>
+              ) : (
+                ""
+              )}
             </div>
           </div>
 
@@ -2019,6 +2031,17 @@ const MainAdmin = () => {
           }}
           users={users}
           setSalesPersoneList={setSalesPersoneList}
+        />
+      ) : (
+        ""
+      )}
+      {stageFilterPopup ? (
+        <SalesPersoneFilterPopup
+          onClose={() => {
+            setStageFilterPopup(false);
+          }}
+          type="stage"
+          setSalesPersoneList={setStageList}
         />
       ) : (
         ""

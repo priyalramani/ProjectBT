@@ -111,9 +111,9 @@ const CashRegisterReport = () => {
   useEffect(() => {
     let time = new Date();
     let curTime = "yy-mm-dd"
-      .replace("mm", ("00" + (time?.getMonth() + 1)?.toString()).slice(-2))
+      .replace("mm", ("00" + time?.getMonth()?.toString()).slice(-2))
       .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
-      .replace("dd", ("00" + time?.getDate()?.toString()).slice(-2));
+      .replace("dd", ("00" + (time?.getDate()+3)?.toString()).slice(-2));
     let sTime = "yy-mm-dd"
       .replace("mm", ("00" + time?.getMonth()?.toString()).slice(-2))
       .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))

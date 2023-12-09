@@ -1,6 +1,17 @@
 import React, { useState } from "react";
-
-const SalesPersoneFilterPopup = ({ onClose, users, setSalesPersoneList }) => {
+const orderStages=[
+  { title: "Processing", id: 1 },
+  { title: "Checking", id: 2 },
+  { title: "Delivered", id: 3 },
+  // { title: "Complete", id: 4 },
+  // { title: "Cancelled", id: 5 },
+]
+const SalesPersoneFilterPopup = ({
+  onClose,
+  users,
+  setSalesPersoneList,
+  type,
+}) => {
   const [list, setList] = useState([]);
   return (
     <div
@@ -30,46 +41,87 @@ const SalesPersoneFilterPopup = ({ onClose, users, setSalesPersoneList }) => {
             >
               <div className="formGroup">
                 <div className="row">
-                  <label className="selectLabel" style={{ width: "100%" }}>
-                    Sales Persons
-                    <div
-                      className="formGroup"
-                      style={{ height: "350px", overflow: "scroll" }}
-                    >
-                      {users
-                        .filter((a) => a.status)
-                        .sort((a, b) =>
-                          a?.user_title?.localeCompare(b.user_title)
-                        )
-                        .map((occ) => (
-                          <div
-                            style={{
-                              marginBottom: "5px",
-                              textAlign: "center",
-                              backgroundColor: list?.filter(
-                                (a) => a === occ.user_uuid
-                              ).length
-                                ? "#caf0f8"
-                                : "#fff",
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setList((prev) =>
-                                prev?.find((a) => a === occ.user_uuid)
-                                  ? prev?.filter((a) => a !== occ.user_uuid)
-                                  : prev?.length &&
-                                    !prev.filter((a) => +a === 1 || +a === 0)
-                                      .length
-                                  ? [...prev, occ?.user_uuid]
-                                  : [occ?.user_uuid]
-                              );
-                            }}
-                          >
-                            {occ.user_title}
-                          </div>
-                        ))}
-                    </div>
-                  </label>
+                  {type === "stage" ? (
+                    <label className="selectLabel" style={{ width: "100%" }}>
+                      Order Status
+                      <div
+                        className="formGroup"
+                        style={{ height: "120px", overflow: "scroll" }}
+                      >
+                        {orderStages
+                         
+                        
+                          .map((occ) => (
+                            <div
+                              style={{
+                                marginBottom: "5px",
+                                textAlign: "center",
+                                backgroundColor: list?.filter(
+                                  (a) => a === occ.id
+                                ).length
+                                  ? "#caf0f8"
+                                  : "#fff",
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setList((prev) =>
+                                  prev?.find((a) => a === occ.id)
+                                    ? prev?.filter((a) => a !== occ.id)
+                                    : prev?.length &&
+                                      !prev.filter((a) => +a === 1 || +a === 0)
+                                        .length
+                                    ? [...prev, occ?.id]
+                                    : [occ?.id]
+                                );
+                              }}
+                            >
+                              {occ.title}
+                            </div>
+                          ))}
+                      </div>
+                    </label>
+                  ) : (
+                    <label className="selectLabel" style={{ width: "100%" }}>
+                      Sales Persons
+                      <div
+                        className="formGroup"
+                        style={{ height: "350px", overflow: "scroll" }}
+                      >
+                        {users
+                          .filter((a) => a.status)
+                          .sort((a, b) =>
+                            a?.user_title?.localeCompare(b.user_title)
+                          )
+                          .map((occ) => (
+                            <div
+                              style={{
+                                marginBottom: "5px",
+                                textAlign: "center",
+                                backgroundColor: list?.filter(
+                                  (a) => a === occ.user_uuid
+                                ).length
+                                  ? "#caf0f8"
+                                  : "#fff",
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setList((prev) =>
+                                  prev?.find((a) => a === occ.user_uuid)
+                                    ? prev?.filter((a) => a !== occ.user_uuid)
+                                    : prev?.length &&
+                                      !prev.filter((a) => +a === 1 || +a === 0)
+                                        .length
+                                    ? [...prev, occ?.user_uuid]
+                                    : [occ?.user_uuid]
+                                );
+                              }}
+                            >
+                              {occ.user_title}
+                            </div>
+                          ))}
+                      </div>
+                    </label>
+                  )}
                 </div>
 
                 <div className="row">
@@ -81,9 +133,9 @@ const SalesPersoneFilterPopup = ({ onClose, users, setSalesPersoneList }) => {
             </form>
           </div>
         </div>
-      <button onClick={onClose} className="closeButton">
-        x
-      </button>
+        <button onClick={onClose} className="closeButton">
+          x
+        </button>
       </div>
     </div>
   );
