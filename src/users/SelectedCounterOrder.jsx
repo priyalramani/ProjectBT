@@ -252,22 +252,11 @@ const SelectedCounterOrder = () => {
         order_uuid: uuid(),
         opened_by: 0,
         item_details: orderData.items.map((a) => {
-          console.log({charges_discount: [
-            ...(a.charges_discount ?? []),
-            ...(a.discount
-              ? [{ title: "Salesperson Discount", amount: a.discount }]
-              : []),
-          ]});
+          
           return{
           ...a,
           b: a.b,
           p: a.p,
-          charges_discount: [
-            ...(a.charges_discount ?? []),
-            ...(a.discount
-              ? [{ title: "Salesperson Discount", value: a.discount }]
-              : []),
-          ],
           unit_price: a.price,
           gst_percentage: a.item_gst,
           status: 0,
@@ -1180,6 +1169,12 @@ const SelectedCounterOrder = () => {
                       ...a,
                       b: +a.b + parseInt(+a.p / +a.conversion),
                       p: +a.p % +a.conversion,
+                      charges_discount: [
+                        ...(a.charges_discount ?? []),
+                        ...(a.discount
+                          ? [{ title: "Salesperson Discount", value: a.discount }]
+                          : []),
+                      ]
                     })),
                   }));
                   setTimeout(async () => {

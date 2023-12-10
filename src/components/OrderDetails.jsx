@@ -1775,7 +1775,7 @@ export function OrderDetails({
                       <th className="pa2 tc bb b--black-20 ">Price(b)</th>
                       {editOrder ? (
                         <>
-                          <th className="pa2 tc bb b--black-20 ">Old Price</th>
+                          <th className="pa2 tc bb b--black-20 ">Salesperson Discount</th>
                           <th className="pa2 tc bb b--black-20 "></th>
                           <th className="pa2 tc bb b--black-20 "></th>
                         </>
@@ -2282,13 +2282,9 @@ export function OrderDetails({
                                 item?.item_price,
                                 item?.price
                               )}
-                              <td>
-                                Rs.{item.old_price || item.item_price}{" "}
-                                {item?.old_price?.toString() &&
-                                  `(${(
-                                    ((+item.old_price - +item.price) * 100) /
-                                    +item.old_price
-                                  )?.toFixed(2)}%)`}
+                              <td style={{textAlign:"center"}}>
+                                {item?.charges_discount?.find(a=>a.title==="Salesperson Discount")?.value || "0"}{" "}
+                                %
                               </td>
                               <td>
                                 {+item?.item_price !== +item?.price &&

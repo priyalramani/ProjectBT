@@ -33,6 +33,7 @@ import OrderPrintWrapper from "../../components/OrderPrintWrapper";
 import PendingPaymentsSummary from "../../components/prints/PendingPaymentsSummary";
 import NotesPopup from "../../components/popups/NotesPopup";
 import Loader from "../../components/Loader";
+import { getOrderStage } from "../../utils/helperFunctions";
 
 const MainAdmin = () => {
   const [isCollectionTags, setCollectionTags] = useState(false);
@@ -408,7 +409,7 @@ const MainAdmin = () => {
               ).length) &&
             (!stageList.length ||
               stageList.filter(
-                (b) => b === +a.status[a.status.length - 1]?.stage
+                (b) => b === getOrderStage(a.status)
               ).length) &&
             (!+users?.find((_u) => _u?.user_uuid === user_uuid)
               ?.hide_pending_payments ||
@@ -938,7 +939,6 @@ const MainAdmin = () => {
                 <>
                   {selectedOrder?.length ? (
                     <>
-                     
                       <button
                         className="simple_Logout_button"
                         type="button"
@@ -1268,20 +1268,15 @@ const MainAdmin = () => {
                                   }
                                   title2={item?.counter_title || ""}
                                   status={
-                                    +item.status[item.status?.length - 1]
-                                      ?.stage === 1
+                                    getOrderStage(item?.status) === 1
                                       ? "Processing"
-                                      : +item.status[item.status?.length - 1]
-                                          ?.stage === 2
+                                      : getOrderStage(item?.status) === 2
                                       ? "Checking"
-                                      : +item.status[item.status?.length - 1]
-                                          ?.stage === 3
+                                      : getOrderStage(item?.status) === 3
                                       ? "Delivery"
-                                      : +item.status[item.status?.length - 1]
-                                          ?.stage === 4
+                                      : getOrderStage(item?.status) === 4
                                       ? "Complete"
-                                      : +item.status[item.status?.length - 1]
-                                          ?.stage === 5
+                                      : getOrderStage(item?.status) === 5
                                       ? "Cancelled"
                                       : ""
                                   }
@@ -1305,7 +1300,6 @@ const MainAdmin = () => {
               <>
                 {[0].map((_) => {
                   const ordersData = orders.filter((a) => !a?.trip_uuid);
-
                   if (ordersData?.length)
                     return (
                       <div key={Math.random()} className="sectionDiv">
@@ -1485,22 +1479,17 @@ const MainAdmin = () => {
                                     }
                                     title2={item?.counter_title || ""}
                                     status={
-                                      +item.status[item.status?.length - 1]
-                                        ?.stage === 1
-                                        ? "Processing"
-                                        : +item.status[item.status?.length - 1]
-                                            ?.stage === 2
-                                        ? "Checking"
-                                        : +item.status[item.status?.length - 1]
-                                            ?.stage === 3
-                                        ? "Delivery"
-                                        : +item.status[item.status?.length - 1]
-                                            ?.stage === 4
-                                        ? "Complete"
-                                        : +item.status[item.status?.length - 1]
-                                            ?.stage === 5
-                                        ? "Cancelled"
-                                        : ""
+                                      getOrderStage(item?.status) === 1
+                                      ? "Processing"
+                                      : getOrderStage(item?.status) === 2
+                                      ? "Checking"
+                                      : getOrderStage(item?.status) === 3
+                                      ? "Delivery"
+                                      : getOrderStage(item?.status) === 4
+                                      ? "Complete"
+                                      : getOrderStage(item?.status) === 5
+                                      ? "Cancelled"
+                                      : ""
                                     }
                                     // price={item.price}
                                     // visibleContext={visibleContext}
@@ -1521,7 +1510,7 @@ const MainAdmin = () => {
                   const orders_data = orders?.filter(
                     (a) => a.trip_uuid === trip.trip_uuid
                   );
-
+                  console.log(orders_data.length, trip);
                   if (orders_data?.length)
                     return (
                       <div key={Math.random()} className="sectionDiv">
@@ -1726,20 +1715,15 @@ const MainAdmin = () => {
                                   }
                                   title2={item?.counter_title || ""}
                                   status={
-                                    +item.status[item.status?.length - 1]
-                                      ?.stage === 1
+                                    getOrderStage(item?.status) === 1
                                       ? "Processing"
-                                      : +item.status[item.status?.length - 1]
-                                          ?.stage === 2
+                                      : getOrderStage(item?.status) === 2
                                       ? "Checking"
-                                      : +item.status[item.status?.length - 1]
-                                          ?.stage === 3
+                                      : getOrderStage(item?.status) === 3
                                       ? "Delivery"
-                                      : +item.status[item.status?.length - 1]
-                                          ?.stage === 4
+                                      : getOrderStage(item?.status) === 4
                                       ? "Complete"
-                                      : +item.status[item.status?.length - 1]
-                                          ?.stage === 5
+                                      : getOrderStage(item?.status) === 5
                                       ? "Cancelled"
                                       : ""
                                   }

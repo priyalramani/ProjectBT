@@ -1002,9 +1002,7 @@ const ProcessingOrders = () => {
           <table
             className="user-table"
             style={{
-              width: Location.pathname.includes("delivery")
-                ? "100%"
-                : "max-content",
+              width:  "max-content",
               height: "fit-content",
             }}
           >
