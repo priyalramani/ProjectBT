@@ -938,38 +938,7 @@ const MainAdmin = () => {
                 <>
                   {selectedOrder?.length ? (
                     <>
-                      <button
-                        className="simple_Logout_button"
-                        type="button"
-                        onClick={() => {
-                          setPopupForm({ type: "edit" });
-                          setDropDown(false);
-                        }}
-                      >
-                        Assign Trip
-                      </button>
-                      <button
-                        className="simple_Logout_button"
-                        type="button"
-                        onClick={() => handleWarehouseChacking()}
-                      >
-                        Print Invoice
-                      </button>
-                      <button
-                        className="simple_Logout_button"
-                        type="button"
-                        onClick={() => {
-                          const stage = selectedOrder?.map(
-                            (a) => +a.status[a.status?.length - 1]?.stage
-                          );
-                          console.log({ stage });
-                          setChangeStatePopup(
-                            stage?.sort((a, b) => a - b)?.at(-1)
-                          );
-                        }}
-                      >
-                        Change Stage
-                      </button>
+                     
                       <button
                         className="simple_Logout_button"
                         type="button"
@@ -1222,7 +1191,7 @@ const MainAdmin = () => {
                           }}
                           id="seats_container"
                         >
-                          {orders?.map((item) => {
+                          {orders_data?.map((item) => {
                             return (
                               <div
                                 className={`

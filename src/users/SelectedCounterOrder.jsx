@@ -165,13 +165,12 @@ const SelectedCounterOrder = () => {
   };
   const putCounterNumber = async (e) => {
     e.preventDefault();
-	if(localStorage.getItem("projectionItems")){
-localStorage.removeItem("projectionItems")
-Navigate("/advanceOrdering")
-	}else{
-		 Navigate(-1);
-	}
-   
+    if (localStorage.getItem("projectionItems")) {
+      localStorage.removeItem("projectionItems");
+      Navigate("/advanceOrdering");
+    } else {
+      Navigate(-1);
+    }
   };
   const getIndexedDbData = async () => {
     const db = await openDB("BT", +localStorage.getItem("IDBVersion") || 1);
@@ -191,20 +190,20 @@ Navigate("/advanceOrdering")
       projectionItems = JSON.parse(projectionItems);
       setOrder((prev) => ({
         ...prev,
-        items: projectionItems.map((a) => {
-          let itemData = item?.find((b) => b.item_uuid === a.item_uuid);
-		  
-	
-          if (itemData) {
-	
-            return {
-              ...itemData,
-             ...a,
-            };
-          }else{
-			return null
-		  }
-        }).filter(a=>a),
+        items: projectionItems
+          .map((a) => {
+            let itemData = item?.find((b) => b.item_uuid === a.item_uuid);
+
+            if (itemData) {
+              return {
+                ...itemData,
+                ...a,
+              };
+            } else {
+              return null;
+            }
+          })
+          .filter((a) => a),
       }));
     }
     let store = await db
@@ -252,15 +251,28 @@ Navigate("/advanceOrdering")
         order_status: orderData?.order_status || "R",
         order_uuid: uuid(),
         opened_by: 0,
-        item_details: orderData.items.map((a) => ({
+        item_details: orderData.items.map((a) => {
+          console.log({charges_discount: [
+            ...(a.charges_discount ?? []),
+            ...(a.discount
+              ? [{ title: "Salesperson Discount", amount: a.discount }]
+              : []),
+          ]});
+          return{
           ...a,
           b: a.b,
           p: a.p,
+          charges_discount: [
+            ...(a.charges_discount ?? []),
+            ...(a.discount
+              ? [{ title: "Salesperson Discount", value: a.discount }]
+              : []),
+          ],
           unit_price: a.price,
           gst_percentage: a.item_gst,
           status: 0,
           price: a.price || a.item_price,
-        })),
+        }}),
         status: [
           {
             stage: orderData.others.stage,
@@ -1552,8 +1564,7 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
   );
 }
 function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
-  const [item, setItem] = useState([]);
-  const [discount, setDiscount] = useState(0);
+  const [item, setItem] = useState();
   useEffect(() => {
     setItem(() => {
       let data = itemsData.find((a) => a.item_uuid === holdPopup.item_uuid);
@@ -1561,6 +1572,7 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
         ...data,
         p_price: data.item_price,
         b_price: Math.floor(data.item_price * data.conversion || 0),
+        discount: data.discount|| 0,
       };
     });
   }, []);
@@ -1570,9 +1582,8 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
       a.item_uuid === holdPopup.item_uuid
         ? {
             ...a,
-            old_price: a.item_price,
             price_approval: "N",
-            item_price: item.p_price,
+            discount: item.discount,
           }
         : a
     );
@@ -1640,15 +1651,20 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                           backgroundColor: "transparent",
                           color: "#000",
                         }}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setItem((prev) => ({
                             ...prev,
+                            discount: (
+                              ((item?.item_price - e.target.value) /
+                                item?.item_price) *
+                              100
+                            ).toFixed(2),
                             p_price: e.target.value,
                             b_price: (
                               e.target.value * item.conversion || 0
                             ).toFixed(2),
-                          }))
-                        }
+                          }));
+                        }}
                         onWheel={(e) => e.preventDefault()}
                         maxLength={42}
                       />
@@ -1665,15 +1681,21 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                           backgroundColor: "transparent",
                           color: "#000",
                         }}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setItem((prev) => ({
                             ...prev,
+                            discount: (
+                              ((item?.item_price -
+                                e.target.value / item.conversion) /
+                                item?.item_price) *
+                              100
+                            ).toFixed(2),
                             b_price: e.target.value,
                             p_price: (
                               e.target.value / item.conversion || 0
                             ).toFixed(2),
-                          }))
-                        }
+                          }));
+                        }}
                         onWheel={(e) => e.preventDefault()}
                         maxLength={42}
                       />
@@ -1701,10 +1723,10 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
                           color: "#000",
                         }}
                         onChange={(e) => {
-                          setDiscount(e.target.value);
                           let item_price = +item.item_price * +item.conversion;
                           setItem((prev) => ({
                             ...prev,
+                            discount: e.target.value,
                             b_price: (
                               item_price -
                               (item_price * e.target.value) / 100
