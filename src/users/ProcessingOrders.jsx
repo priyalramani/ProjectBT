@@ -995,7 +995,7 @@ const ProcessingOrders = () => {
         <div
           className="table-container-user item-sales-container"
           style={{
-            width: "100vw",
+            width:selectedOrder&&Location.pathname.includes("delivery")? "100%":"100vw",
             overflow: "scroll",
             left: "0",
             top: "0",
@@ -1022,7 +1022,7 @@ const ProcessingOrders = () => {
                 ) : (
                   ""
                 )}
-                <th>S.N</th>
+                <th >S.N</th>
                 {selectedOrder ? (
                   <>
                     <th colSpan={2}>
@@ -1038,7 +1038,7 @@ const ProcessingOrders = () => {
                           <div className="t-head-element">Qty</div>
                         </th>
                       
-                          <th colSpan={2}>
+                          <th>
                             <div className="t-head-element">Action</div>
                           </th>
                 
@@ -1077,6 +1077,7 @@ const ProcessingOrders = () => {
             </thead>
             <tbody className="tbody">
               {selectedOrder
+              ?selectedOrder?.item_details.length
                 ? selectedOrder?.item_details
                     .filter(
                       (a) =>
@@ -1331,7 +1332,7 @@ const ProcessingOrders = () => {
                           ""
                         )}
                         {
-                          Location.pathname.includes("checking") ? (
+                          !Location.pathname.includes("checking") ? (
                           <td>
                               <DeleteOutlineIcon
                                 onClick={() => {
@@ -1354,7 +1355,7 @@ const ProcessingOrders = () => {
                             ):""
                         }
                       </tr>
-                    ))
+                    )):<tr><td colSpan={10} style={{textAlign:"center"}}>No Data Found</td></tr>
                 : orders?.map((item, i) => (
                     <tr
                       key={item.order_uuid + selected_order_label}
@@ -2946,7 +2947,19 @@ function DiliveryPopup({
         replacement: data.actual,
         replacement_mrp: data.mrp,
       };
-
+      if (
+        modes.find(
+          (a) =>
+            a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" &&
+            a.amt &&
+            !a.remarks
+        )
+      ) {
+        setError("Cheque number is mandatory");
+        setLoading(false);
+        return;
+      }
+  
       let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
 
       if (
@@ -2958,11 +2971,11 @@ function DiliveryPopup({
         return;
       }
       let obj = modes.find((a) => a.mode_title === "Cash");
-      if (obj?.amt && obj?.coin === "") {
-        setCoinPopup(true);
-        setLoading(false);
-        return;
-      }
+      // if (obj?.amt && obj?.coin === "") {
+      //   // setCoinPopup(true);
+      //   setLoading(false);
+      //   return;
+      // }
       let time = new Date();
       obj = {
         user_uuid: localStorage.getItem("user_uuid"),
@@ -3078,6 +3091,40 @@ function DiliveryPopup({
                         />
                         {/* {popupInfo.conversion || 0} */}
                       </label>
+                      {item.mode_uuid ===
+                        "c67b5794-d2b6-11ec-9d64-0242ac120002" &&
+                      modes.find((a) => a.mode_uuid === item.mode_uuid)?.amt ? (
+                        <label
+                          className="selectLabel flex"
+                          style={{ width: "200px" }}
+                        >
+                          <input
+                            type="text"
+                            name="route_title"
+                            className="numberInput"
+                            value={item?.remarks}
+                            placeholder={"Cheque Number"}
+                            style={{
+                              width: "100%",
+                              backgroundColor: "light",
+                              fontSize: "12px",
+                            }}
+                            onChange={(e) =>
+                              setModes((prev) =>
+                                prev?.map((a) =>
+                                  a.mode_uuid === item.mode_uuid
+                                    ? { ...a, remarks: e.target.value }
+                                    : a
+                                )
+                              )
+                            }
+                            maxLength={42}
+                            onWheel={(e) => e.preventDefault()}
+                          />
+                        </label>
+                      ) : (
+                        ""
+                      )}
                     </div>
                   ))}
                   <div

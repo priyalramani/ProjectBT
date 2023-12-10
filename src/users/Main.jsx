@@ -44,7 +44,7 @@ const Main = () => {
 		},
 		{
 			type: 4,
-			name: "Delivery",
+			name: "Out For Delivery",
 			link: "/delivery",
 			img: "dinein.png"
 		},

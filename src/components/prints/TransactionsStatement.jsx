@@ -87,6 +87,7 @@ const TransactionsStatement = ({ cash_register, data }) => {
         <tr>
           <th style={{ border: "1px solid #000" }}>Created At</th>
           <th style={{ border: "1px solid #000" }}>Amount</th>
+          <th style={{ border: "1px solid #000" }}>Delivered by</th>
           <th style={{ border: "1px solid #000" }}>Invoice Number</th>
         </tr>
         {data?.transactions
@@ -98,6 +99,9 @@ const TransactionsStatement = ({ cash_register, data }) => {
               </td>
               <td style={{ border: "1px solid #000", textAlign: "right" }}>
                 Rs.{i.amount}
+              </td>
+              <td style={{ border: "1px solid #000", textAlign: "right" }}>
+              {i.user_title}
               </td>
               <td style={{ border: "1px solid #000", textAlign: "right" }}>
                 {i.counter_title}-{i.invoice_number}
