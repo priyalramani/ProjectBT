@@ -35,6 +35,13 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
         setDiliveredUser(response.data.result[0]?.users[0]);
     }
   };
+  useEffect(() => {
+	if (orders?.length) {
+		if (orders[0]?.trip_uuid) {
+			getTripData(orders[0]?.trip_uuid);
+		}
+	}
+	  }, [orders]);
 
   const onSubmit = async (params = {}) => {
     setWaiting(true);
