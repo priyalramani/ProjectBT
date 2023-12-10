@@ -9,7 +9,7 @@ const CounterStockReport = () => {
   const [searchData, setSearchData] = useState({
     startDate: "",
     endDate: "",
-    counter_uuid: "",
+    counter_uuid: 0,
   });
   const [popupOrder, setPopupOrder] = useState(null);
   const [items, setItems] = useState([]);
@@ -29,17 +29,7 @@ const CounterStockReport = () => {
     if (response.data.success) setCounter(response.data.result);
   };
   const getCounterStockReport = async () => {
-    if (!searchData?.counter_uuid) {
-      setNotification({
-        message: "Please select a counter first",
-        success: false,
-      });
-      setTimeout(() => {
-        setNotification(null);
-      }, 3000);
 
-      return;
-    }
     let startDate = new Date(
       new Date(searchData.startDate).setHours(0, 0, 0, 0)
     ).getTime();
@@ -144,7 +134,7 @@ const CounterStockReport = () => {
 
             <div className="inputGroup" style={{ width: "50%" }}>
               <Select
-                options={[
+                options={[{value:0,label:"All"},
                   ...counter.map((a) => ({
                     value: a.counter_uuid,
                     label: a.counter_title + " , " + a.route_title,
@@ -164,7 +154,7 @@ const CounterStockReport = () => {
                           (j) => j.counter_uuid === searchData.counter_uuid
                         )?.counter_title,
                       }
-                    : null
+                    : { value: 0, label: "All"}
                 }
                 openMenuOnFocus={true}
                 menuPosition="fixed"
