@@ -339,6 +339,11 @@ const ProcessingOrders = () => {
           status: [
             ...data.status,
             {
+              stage: "3.5",
+              time: time.getTime(),
+              user_uuid: localStorage.getItem("user_uuid"),
+            },
+            {
               stage: "4",
               time: time.getTime(),
               user_uuid: localStorage.getItem("user_uuid"),
@@ -1032,13 +1037,11 @@ const ProcessingOrders = () => {
                         <th>
                           <div className="t-head-element">Qty</div>
                         </th>
-                        {!Location.pathname.includes("delivery") ? (
+                      
                           <th colSpan={2}>
                             <div className="t-head-element">Action</div>
                           </th>
-                        ) : (
-                          ""
-                        )}
+                
                       </>
                     ) : (
                       <th>Quantity</th>
@@ -1322,7 +1325,14 @@ const ProcessingOrders = () => {
                                 Hold
                               </button>
                             </td>
-                            <td>
+                            
+                          </>
+                        ) : (
+                          ""
+                        )}
+                        {
+                          Location.pathname.includes("checking") ? (
+                          <td>
                               <DeleteOutlineIcon
                                 onClick={() => {
                                   setOneTimeState();
@@ -1341,10 +1351,8 @@ const ProcessingOrders = () => {
                                 }}
                               />
                             </td>
-                          </>
-                        ) : (
-                          ""
-                        )}
+                            ):""
+                        }
                       </tr>
                     ))
                 : orders?.map((item, i) => (

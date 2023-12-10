@@ -33,7 +33,7 @@ import OrderPrintWrapper from "../../components/OrderPrintWrapper";
 import PendingPaymentsSummary from "../../components/prints/PendingPaymentsSummary";
 import NotesPopup from "../../components/popups/NotesPopup";
 import Loader from "../../components/Loader";
-import { getOrderStage } from "../../utils/helperFunctions";
+import { getOrderStage, getStageName } from "../../utils/helperFunctions";
 
 const MainAdmin = () => {
   const [isCollectionTags, setCollectionTags] = useState(false);
@@ -1268,17 +1268,8 @@ const MainAdmin = () => {
                                   }
                                   title2={item?.counter_title || ""}
                                   status={
-                                    getOrderStage(item?.status) === 1
-                                      ? "Processing"
-                                      : getOrderStage(item?.status) === 2
-                                      ? "Checking"
-                                      : getOrderStage(item?.status) === 3
-                                      ? "Delivery"
-                                      : getOrderStage(item?.status) === 4
-                                      ? "Complete"
-                                      : getOrderStage(item?.status) === 5
-                                      ? "Cancelled"
-                                      : ""
+                                    getStageName(getOrderStage(item?.status))
+                                     
                                   }
                                   // price={item.price}
                                   // visibleContext={visibleContext}
@@ -1479,17 +1470,7 @@ const MainAdmin = () => {
                                     }
                                     title2={item?.counter_title || ""}
                                     status={
-                                      getOrderStage(item?.status) === 1
-                                      ? "Processing"
-                                      : getOrderStage(item?.status) === 2
-                                      ? "Checking"
-                                      : getOrderStage(item?.status) === 3
-                                      ? "Delivery"
-                                      : getOrderStage(item?.status) === 4
-                                      ? "Complete"
-                                      : getOrderStage(item?.status) === 5
-                                      ? "Cancelled"
-                                      : ""
+                                      getStageName(getOrderStage(item?.status))
                                     }
                                     // price={item.price}
                                     // visibleContext={visibleContext}
@@ -1715,17 +1696,7 @@ const MainAdmin = () => {
                                   }
                                   title2={item?.counter_title || ""}
                                   status={
-                                    getOrderStage(item?.status) === 1
-                                      ? "Processing"
-                                      : getOrderStage(item?.status) === 2
-                                      ? "Checking"
-                                      : getOrderStage(item?.status) === 3
-                                      ? "Delivery"
-                                      : getOrderStage(item?.status) === 4
-                                      ? "Complete"
-                                      : getOrderStage(item?.status) === 5
-                                      ? "Cancelled"
-                                      : ""
+                                    getStageName(getOrderStage(item?.status))
                                   }
                                   // price={item.price}
                                   // visibleContext={visibleContext}

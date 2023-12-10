@@ -5,7 +5,7 @@ import DiliveryReplaceMent from "./DiliveryReplaceMent";
 import Select from "react-select";
 
 const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
-  const [data, setData] = useState({ stage: stage + 1 });
+  const [data, setData] = useState({ stage: stage === 3 ? 3.5 : stage + 1 });
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
@@ -36,12 +36,12 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
     }
   };
   useEffect(() => {
-	if (orders?.length) {
-		if (orders[0]?.trip_uuid) {
-			getTripData(orders[0]?.trip_uuid);
-		}
-	}
-	  }, [orders]);
+    if (orders?.length) {
+      if (orders[0]?.trip_uuid) {
+        getTripData(orders[0]?.trip_uuid);
+      }
+    }
+  }, [orders]);
 
   const onSubmit = async (params = {}) => {
     setWaiting(true);
@@ -59,7 +59,12 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
             ? [
                 { stage: 2, time: time.getTime(), user_uuid },
                 { stage: 3, time: time.getTime(), user_uuid },
-				{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+              ]
+            : +data.stage === 3.5
+            ? [
+                { stage: 2, time: time.getTime(), user_uuid },
+                { stage: 3, time: time.getTime(), user_uuid },
+                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
               ]
             : +data.stage === 4
             ? [
@@ -77,7 +82,12 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
               ]
           : stage === 2
           ? +data.stage === 3
-            ? [{ stage: 3, time: time.getTime(), user_uuid },{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser }]
+            ? [{ stage: 3, time: time.getTime(), user_uuid }]
+            : +data.stage === 3.5
+            ? [
+                { stage: 3, time: time.getTime(), user_uuid },
+                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+              ]
             : +data.stage === 4
             ? [
                 { stage: 3, time: time.getTime(), user_uuid },
@@ -314,7 +324,19 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
                       }}
                     >
                       <input type="radio" checked={data.stage === 3} />
-                      Delivery
+                      Out For Delivery
+                    </div>
+                    <div
+                      style={{
+                        textDecoration: stage >= 3.5 ? "line-through" : "",
+                      }}
+                      onClick={() => {
+                        if (stage >= 3.5) return;
+                        setData({ ...data, stage: 3.5 });
+                      }}
+                    >
+                      <input type="radio" checked={data.stage === 3.5} />
+                      Delivered
                     </div>
                     <div
                       style={{
@@ -349,7 +371,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
                       Cancel
                     </div>
                   </div>
-                  {data.stage >= 3&&stage<3 &&data.stage<5? (
+                  {data.stage > 3 && stage < 4 && data.stage < 5 ? (
                     <div
                       className="row"
                       style={{ flexDirection: "row", alignItems: "center" }}
