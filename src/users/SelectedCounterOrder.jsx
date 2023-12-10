@@ -1169,12 +1169,6 @@ const SelectedCounterOrder = () => {
                       ...a,
                       b: +a.b + parseInt(+a.p / +a.conversion),
                       p: +a.p % +a.conversion,
-                      charges_discount: [
-                        ...(a.charges_discount ?? []),
-                        ...(a.discount
-                          ? [{ title: "Salesperson Discount", value: a.discount }]
-                          : []),
-                      ]
                     })),
                   }));
                   setTimeout(async () => {

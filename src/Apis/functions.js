@@ -225,7 +225,8 @@ export const Billing = async ({
 		item = { ...item, item_total: 0 }
 		let edit_price = +edit_prices.find(a => a.item_uuid === item.item_uuid)?.item_price
 		let billDiscounts = item.charges_discount?.find(a => a.title === "Bill Discounting")
-		let charges_discount = add_discounts || item.edit ? [] : item.charges_discount?.filter(a => a.value) || []
+		let salesManDiscounts = item.charges_discount?.find(a => a.title === "Salesperson Discount")||{title:"Salesperson Discount",value:item.discount}
+		let charges_discount = (add_discounts || item.edit ? [] : item.charges_discount?.filter(a => a.value) || []).filter(a=>a.title!=="Salesperson Discount")
 		let price = +(add_discounts || item.edit
 			? counter?.item_special_price?.find(a => a.item_uuid === item.item_uuid)?.price || 0
 			: 0)
@@ -285,7 +286,17 @@ export const Billing = async ({
 					  0
 			}
 		}
+		if (salesManDiscounts.value) {
+			charges_discount?.push(salesManDiscounts)
+			item = {
+				...item,
 
+				item_desc_total: item.item_desc_total
+					? item.item_desc_total * ((100 - salesManDiscounts.value) / 100) || 0
+					: (+edit_price || +item?.price || +item.item_price || 0) * ((100 - salesManDiscounts.value) / 100) ||
+					  0
+			}
+		}
 		item = {
 			...item,
 			item_desc_total:
