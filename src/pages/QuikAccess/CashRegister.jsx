@@ -67,14 +67,12 @@ export default function CashRegister() {
         },
         data: {
           transactions: response.data.result,
-          grand_total: response.data.result.filter(a=>a.type === "in").reduce(
-            (sum, i) => sum + (+i.amount || 0),
-            0
-          ),
-          expense_total: response.data.result.filter(a=>a.type === "out").reduce(
-            (sum, i) => sum + (+i.amount || 0),
-            0
-          ),
+          grand_total: response.data.result
+            .filter((a) => a.type === "in")
+            .reduce((sum, i) => sum + (+i.amount || 0), 0),
+          expense_total: response.data.result
+            .filter((a) => a.type === "out")
+            .reduce((sum, i) => sum + (+i.amount || 0), 0),
         },
       });
       printStatement();
@@ -1065,7 +1063,7 @@ function NewRegisterForm({
 
   setNotification,
 }) {
-  const [data, setData] = useState({ amt: 0, expense_uuid: "",remarks:"" });
+  const [data, setData] = useState({ amt: 0, expense_uuid: "", remarks: "" });
   const [expense, setExpense] = useState([]);
   const [loader, setLoader] = useState(false);
 
@@ -1192,9 +1190,9 @@ function NewRegisterForm({
                           })
                         }
                       >
-						<option value="" disabled>
-                              None
-                            </option>
+                        <option value="" disabled>
+                          None
+                        </option>
                         {expense
                           .sort((a, b) =>
                             a.expense_title?.localeCompare(b.expense_title)
@@ -1227,7 +1225,10 @@ function NewRegisterForm({
                         placeholder="Remarks"
                         value={data.remarks}
                         onChange={(e) =>
-                          setData((prev) => ({ ...prev, remarks: e.target.value }))
+                          setData((prev) => ({
+                            ...prev,
+                            remarks: e.target.value,
+                          }))
                         }
                       />
                     </label>

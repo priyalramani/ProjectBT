@@ -1,11 +1,17 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import Select from "react-select";
 import axios from "axios";
 import context from "../../context/context";
 import CloseIcon from "@mui/icons-material/Close";
-import { get } from "react-scroll/modules/mixins/scroller";
 import { useReactToPrint } from "react-to-print";
 import TransactionsStatement from "../../components/prints/TransactionsStatement";
 const CashRegisterReport = () => {
@@ -13,6 +19,7 @@ const CashRegisterReport = () => {
     startDate: "",
     endDate: "",
     user_uuid: "",
+    status: 0,
   });
   const [popupOrder, setPopupOrder] = useState(null);
   const [items, setItems] = useState([]);
@@ -20,6 +27,7 @@ const CashRegisterReport = () => {
   const [initial, setInitial] = useState(false);
   const [deletePopup, setDeletePopup] = useState(false);
   const [statementData, setStatementData] = useState(null);
+  const [newRegisterPopup, setNewRegisterPopup] = useState(false);
   const statementRef = useRef(null);
   const statementContent = useCallback(() => {
     console.log(statementRef.current);
@@ -35,7 +43,7 @@ const CashRegisterReport = () => {
   const getCounter = async () => {
     const response = await axios({
       method: "get",
-      url: "/users/GetAdminUserList",
+      url: "/users/GetActiveUserList",
 
       headers: {
         "Content-Type": "application/json",
@@ -56,14 +64,12 @@ const CashRegisterReport = () => {
         },
         data: {
           transactions: response.data.result,
-          grand_total: response.data.result.filter(a=>a.type === "in").reduce(
-            (sum, i) => sum + (+i.amount || 0),
-            0
-          ),
-          expense_total: response.data.result.filter(a=>a.type === "out").reduce(
-            (sum, i) => sum + (+i.amount || 0),
-            0
-          ),
+          grand_total: response.data.result
+            .filter((a) => a.type === "in")
+            .reduce((sum, i) => sum + (+i.amount || 0), 0),
+          expense_total: response.data.result
+            .filter((a) => a.type === "out")
+            .reduce((sum, i) => sum + (+i.amount || 0), 0),
         },
       });
       printStatement();
@@ -98,6 +104,7 @@ const CashRegisterReport = () => {
         fromDate: startDate,
         toDate: endDate,
         user_uuid: searchData.user_uuid,
+        status: searchData.status,
       },
       headers: {
         "Content-Type": "application/json",
@@ -113,7 +120,7 @@ const CashRegisterReport = () => {
     let curTime = "yy-mm-dd"
       .replace("mm", ("00" + time?.getMonth()?.toString()).slice(-2))
       .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
-      .replace("dd", ("00" + (time?.getDate()+3)?.toString()).slice(-2));
+      .replace("dd", ("00" + (time?.getDate() + 3)?.toString()).slice(-2));
     let sTime = "yy-mm-dd"
       .replace("mm", ("00" + time?.getMonth()?.toString()).slice(-2))
       .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
@@ -194,7 +201,28 @@ const CashRegisterReport = () => {
               className="searchInput"
               pattern="\d{4}-\d{2}-\d{2}"
             />
-
+            <div className="inputGroup" style={{ width: "20%" }}>
+              <Select
+                options={[
+                  { value: 0, label: "Completed" },
+                  { value: 1, label: "Active" },
+                ]}
+                onChange={(doc) =>
+                  setSearchData((prev) => ({
+                    ...prev,
+                    status: doc.value,
+                  }))
+                }
+                value={{
+                  value: searchData?.status,
+                  label: searchData?.status ? "Active" : "Completed",
+                }}
+                openMenuOnFocus={true}
+                menuPosition="fixed"
+                menuPlacement="auto"
+                placeholder="Select user"
+              />
+            </div>
             <div className="inputGroup" style={{ width: "50%" }}>
               <Select
                 options={[
@@ -231,6 +259,12 @@ const CashRegisterReport = () => {
             >
               Search
             </button>
+            <button
+              className="theme-btn"
+              onClick={() => setNewRegisterPopup(true)}
+            >
+              Add
+            </button>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
@@ -238,7 +272,6 @@ const CashRegisterReport = () => {
             itemsDetails={filteredItems}
             getStatement={getStatement}
             users={users}
-   
           />
         </div>
       </div>
@@ -261,6 +294,19 @@ const CashRegisterReport = () => {
       ) : (
         ""
       )}
+      {newRegisterPopup ? (
+        <NewUserForm
+          onSave={() => {
+            setNewRegisterPopup(false);
+            getCounterStockReport();
+          }}
+          users={users}
+          setNotification={setNotification}
+        />
+      ) : (
+        ""
+      )}
+
       <div style={{ display: "none" }}>
         <div ref={statementRef}>
           <TransactionsStatement {...statementData} />
@@ -312,16 +358,12 @@ function Table({ itemsDetails, getStatement }) {
         {itemsDetails
           ?.sort((a, b) => a.created_at - b.created_at)
           ?.map((item, i, array) => (
-            <tr
-              key={Math.random()}
-              style={{ height: "30px" }}
-             
-            >
+            <tr key={Math.random()} style={{ height: "30px" }}>
               <td>{i + 1}</td>
               <td colSpan={2}>{new Date(+item.created_at).toDateString()}</td>
 
               <td colSpan={3}>{item?.user_title || ""}</td>
-              <td colSpan={3}>{item.balance || ""}</td>
+              <td colSpan={3}>{item.balance || "0"}</td>
               <td>
                 <button
                   className="theme-btn"
@@ -498,6 +540,94 @@ function ConfirmPopup({ onSave, onClose, selectedOrder, Navigate }) {
           </div>
           <button onClick={onClose} className="closeButton">
             <CloseIcon />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function NewUserForm({ onSave, users, setNotification }) {
+  const [user_uuid, setUserUuid] = useState("");
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    if (user_uuid === "" || user_uuid === undefined) {
+      setNotification({ success: false, message: "Please Select User" });
+      setTimeout(() => setNotification(null), 5000);
+      return;
+    }
+
+    const response = await axios({
+      method: "post",
+      url: "/cashRegistrations/PostCashRegister",
+      data: {
+        created_by:user_uuid,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+      setNotification({
+        success: true,
+        message: "Register Added Successfully",
+      });
+      setTimeout(() => setNotification(null), 5000);
+    }
+  };
+
+  return (
+    <div className="overlay" style={{ zIndex: 9999999 }}>
+      <div className="modal" style={{ height: "35vh", width: "fit-content" }}>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={submitHandler}>
+              <div className="row">
+                <h1>Add New Register</h1>
+              </div>
+
+              <div className="formGroup">
+                <div className="row">
+                  <label className="selectLabel">
+                    Company
+                    <select
+                      name="user_type"
+                      className="select"
+                      value={user_uuid}
+                      onChange={(e) => setUserUuid(e.target.value)}
+                    >
+                      <option value="" disabled>
+                        None
+                      </option>
+                      {users
+                        ?.sort((a, b) =>
+                          a.user_title?.localeCompare(b.user_title)
+                        )
+                        ?.map((a) => (
+                          <option value={a.user_uuid}>{a.user_title}</option>
+                        ))}
+                    </select>
+                  </label>
+                </div>
+              </div>
+            
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+
+          <button onClick={onSave} className="closeButton">
+            x
           </button>
         </div>
       </div>
