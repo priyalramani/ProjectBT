@@ -396,7 +396,7 @@ const ProcessingOrders = () => {
               ? dataItem[0]?.p
               : 0
           }`;
-          setSelectedOrder(false);
+          
           setHoldPopup(false);
           postActivity({
             activity:
@@ -412,6 +412,7 @@ const ProcessingOrders = () => {
             amt: finalData[0].order_grandtotal || 0,
           });
         }
+        setSelectedOrder(false);
       }
     } catch (error) {
       console.error(error);
@@ -995,7 +996,7 @@ const ProcessingOrders = () => {
         <div
           className="table-container-user item-sales-container"
           style={{
-            width:selectedOrder&&Location.pathname.includes("delivery")? "100%":"100vw",
+            width:selectedOrder&&(Location.pathname.includes("delivery")||Location.pathname.includes("checking"))? "100%":"100vw",
             overflow: "scroll",
             left: "0",
             top: "0",
@@ -1025,7 +1026,7 @@ const ProcessingOrders = () => {
                 <th >S.N</th>
                 {selectedOrder ? (
                   <>
-                    <th colSpan={2}>
+                    <th colSpan={3}>
                       <div className="t-head-element">Item Name</div>
                     </th>
                     <th>
@@ -1038,8 +1039,8 @@ const ProcessingOrders = () => {
                           <div className="t-head-element">Qty</div>
                         </th>
                       
-                          <th>
-                            <div className="t-head-element">Action</div>
+                          <th colSpan={Location.pathname.includes("delivery")?1:2}>
+                            <div className="t-head-element" >Action</div>
                           </th>
                 
                       </>
@@ -1181,7 +1182,7 @@ const ProcessingOrders = () => {
                         )}
                         <td>{i + 1}</td>
                         <td
-                          colSpan={2}
+                          colSpan={3}
                           onClick={(e) => {
                             e.stopPropagation();
                             if (Location.pathname.includes("processing")) {
@@ -1259,6 +1260,7 @@ const ProcessingOrders = () => {
                               );
                             }
                           }}
+                          style={{width:"200px"}}
                         >
                           {
                             items.find((a) => a.item_uuid === item.item_uuid)

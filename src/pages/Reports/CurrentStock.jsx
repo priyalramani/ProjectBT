@@ -603,7 +603,11 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setItemEditPopup({ ...a, type: "qty",conversion:item.conversion });
+                        setItemEditPopup({
+                          ...a,
+                          type: "qty",
+                          conversion: item.conversion,
+                        });
                         setItemData(item);
                       }}
                     >
@@ -645,8 +649,9 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
 }
 function QuantityChanged({ onSave, popupInfo, item, update }) {
   const [data, setdata] = useState({});
+  const [total, setTotal] = useState(null);
   const [warning, setWarning] = useState();
-  const [itemDetails, setItemDetails] = useState();
+  const [itemDetails, setItemDetails] = useState([]);
   const [searchData, setSearchData] = useState({
     startDate: "",
     endDate: "",
@@ -779,10 +784,16 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
       },
     });
     console.log("activity", response);
-    if (response.data.success) setItemDetails(response.data.result);
-    else setItemDetails([]);
+    if (response.data.success) {
+      setItemDetails(response.data.result);
+      setTotal(response.data.total);
+    } else {
+      setItemDetails([]);
+      setTotal(null);
+    }
   };
   console.log(popupInfo);
+
   return popupInfo.type === "qty" ? (
     <div className="overlay">
       <div
@@ -991,9 +1002,17 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
                       </tr>
                     );
                   })}
+                  
                 </tbody>
               </table>
+              
             </div>
+            <div className="flex" style={{justifyContent:"space-between"}}>
+                <h3>Total: </h3>
+                <div style={{width:"30vw"}}></div>
+                <h3>{total?.addedB || 0}:{total?.addedP||0}</h3> 
+                <h3>{total?.reduceB || 0}:{total?.reduceP||0}</h3> 
+              </div>
           </div>
           <button onClick={onSave} className="closeButton">
             x
