@@ -8,7 +8,7 @@ const StockAdjustmentReport = () => {
   const [searchData, setSearchData] = useState({
     startDate: "",
     endDate: "",
-    counter_uuid: "",
+    counter_uuid: 0,
   });
   const [warehouse, setWarehouse] = useState([]);
 
@@ -28,17 +28,17 @@ const StockAdjustmentReport = () => {
       setWarehouse(response.data.result.filter((a) => a.warehouse_title));
   };
   const getCounterStockReport = async () => {
-    if (!searchData?.warehouse_uuid) {
-      setNotification({
-        message: "Please select a warehouse first",
-        success: false,
-      });
-      setTimeout(() => {
-        setNotification(null);
-      }, 3000);
+    // if (!searchData?.warehouse_uuid) {
+    //   setNotification({
+    //     message: "Please select a warehouse first",
+    //     success: false,
+    //   });
+    //   setTimeout(() => {
+    //     setNotification(null);
+    //   }, 3000);
 
-      return;
-    }
+    //   return;
+    // }
     let startDate = new Date(
       new Date(searchData.startDate).setHours(0, 0, 0, 0)
     ).getTime();
@@ -86,7 +86,7 @@ const StockAdjustmentReport = () => {
   }, []);
 
   const typeOptions = [
-    { value: "", label: "All" },
+    { value: 0, label: "All" },
     { value: "+", label: "Added (+)" },
     { value: "-", label: "Reduced (-)" },
   ];
@@ -109,7 +109,7 @@ const StockAdjustmentReport = () => {
               width: "100%",
             }}
           >
-            <div className="inputGroup" style={{ width: "10%" }}>
+            <div className="inputGroup" style={{ width: "15%" }}>
               <label htmlFor="warehouse_uuid">From Date</label>
               <input
                 type="date"
@@ -125,7 +125,7 @@ const StockAdjustmentReport = () => {
                 pattern="\d{4}-\d{2}-\d{2}"
               />
             </div>
-            <div className="inputGroup" style={{ width: "10%" }}>
+            <div className="inputGroup" style={{ width: "15%" }}>
               <label htmlFor="warehouse_uuid">To Date</label>
               <input
                 type="date"
@@ -145,7 +145,7 @@ const StockAdjustmentReport = () => {
               <label htmlFor="warehouse_uuid">Warehouse</label>
               <Select
                 options={[
-                  { value: "", label: "All" },
+                  { value: 0, label: "All" },
                   ...warehouse?.map((a) => ({
                     value: a.warehouse_uuid,
                     label: a.warehouse_title,
@@ -158,14 +158,14 @@ const StockAdjustmentReport = () => {
                   }))
                 }
                 value={
-                  searchData?.type
+                  searchData?.warehouse_uuid
                     ? {
-                        value: searchData?.type,
+                        value: searchData?.warehouse_uuid,
                         label: warehouse?.find(
                           (j) => j.warehouse_uuid === searchData.warehouse_uuid
                         )?.warehouse_title,
                       }
-                    : null
+                    : { value: 0, label: "All"}
                 }
                 openMenuOnFocus={true}
                 menuPosition="fixed"
@@ -173,7 +173,7 @@ const StockAdjustmentReport = () => {
                 placeholder="Select warehouse"
               />
             </div>
-            <div className="inputGroup" style={{ width: "20%" }}>
+            <div className="inputGroup" style={{ width: "15%" }}>
               <label htmlFor="type">Type</label>
               <Select
                 options={typeOptions}
@@ -191,7 +191,7 @@ const StockAdjustmentReport = () => {
                           (j) => j.value === searchData.type
                         )?.label,
                       }
-                    : null
+                    : { value: 0, label: "All" }
                 }
                 openMenuOnFocus={true}
                 menuPosition="fixed"
@@ -199,7 +199,7 @@ const StockAdjustmentReport = () => {
                 placeholder="Select type"
               />
             </div>
-            <div className="inputGroup" style={{ width: "20%" }}>
+            <div className="inputGroup" style={{ width: "15%" }}>
               <label htmlFor="visibility">Visibility</label>
               <Select
                 options={[
@@ -259,6 +259,7 @@ function Table({ itemsDetails }) {
           <th colSpan={3}>Item Name</th>
 
           <th colSpan={2}>Qty</th>
+          <th colSpan={2}>Est. Value</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -269,7 +270,8 @@ function Table({ itemsDetails }) {
               <td>{i + 1}</td>
               <td colSpan={3}>{item.item_title}</td>
 
-              <td colSpan={2}>{item?.qty || ""}</td>
+              <td colSpan={2}>{item?.qty || 0}</td>
+              <td colSpan={2}>{item?.estValue || 0}</td>
             </tr>
           ))}
       </tbody>

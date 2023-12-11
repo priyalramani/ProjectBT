@@ -1081,7 +1081,7 @@ const ProcessingOrders = () => {
                 ? selectedOrder?.item_details
                     .filter(
                       (a) =>
-                        !Location.pathname.includes("delivery") ||
+                        a.p||a.b ||
                         +a.status !== 3
                     )
                     .filter(
@@ -1102,6 +1102,8 @@ const ProcessingOrders = () => {
                           height: "30px",
                           backgroundColor: window.location.pathname.includes(
                             "processing"
+                          )||window.location.pathname.includes(
+                            "delivery"
                           )
                             ? +item.status === 1
                               ? "green"

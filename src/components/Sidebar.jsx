@@ -22,6 +22,7 @@ let titleData = [
 	{ value: "counterGroup", name: "Counter Group" },
 	{ value: "itemGroup", name: "Item Group" },
 	{ value: "adminUsers", name: "Users" },
+	{ value: "performanceSummary", name: "Performance Summary" },
 	{ value: "warehouse", name: "Warehouse" },
 	{ value: "autoIncreaseQty", name: "Auto Increase Quantity" },
 	{ value: "autoIncreaseItem", name: "Auto Add Items" },
@@ -32,6 +33,7 @@ let titleData = [
 	{ value: "completeOrderReport", name: "Complete Order" },
 	{ value: "counterStockReport", name: "Counter Stock Report" },
 	{ value: "StockAdjustmentReport", name: "Stock Adjustment Summary" },
+	{ value: "cashRegisterReport", name: "Cash Registers" },
 	{ value: "cancelOrders", name: "cancel Order" },
 	{ value: "CompletedTripsReport", name: "Completed Trips Report" },
 	{ value: "CounterLeger", name: "Counter Leger" },
@@ -177,7 +179,7 @@ const Sidebar = ({ setCollectionTags }) => {
 							link: "/admin/counterStockReport"
 						},
 						{
-							name: "Completed Cash Register",
+							name: "Cash Registers",
 							link: "/admin/cashRegisterReport"
 						},
 						{

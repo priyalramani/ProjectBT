@@ -18,7 +18,7 @@ const CashRegisterReport = () => {
   const [searchData, setSearchData] = useState({
     startDate: "",
     endDate: "",
-    user_uuid: "",
+    user_uuid: 0,
     status: 0,
   });
   const [popupOrder, setPopupOrder] = useState(null);
@@ -78,17 +78,7 @@ const CashRegisterReport = () => {
     }
   };
   const getCounterStockReport = async () => {
-    if (!searchData?.user_uuid) {
-      setNotification({
-        message: "Please select a user first",
-        success: false,
-      });
-      setTimeout(() => {
-        setNotification(null);
-      }, 3000);
-
-      return;
-    }
+    
     let startDate = new Date(
       new Date(searchData.startDate).setHours(0, 0, 0, 0)
     ).getTime();
@@ -165,7 +155,7 @@ const CashRegisterReport = () => {
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading">
-          <h2>Completed Cash Register</h2>
+          <h2>Cash Registers</h2>
         </div>
         <div id="item-sales-top">
           <div
@@ -225,7 +215,10 @@ const CashRegisterReport = () => {
             </div>
             <div className="inputGroup" style={{ width: "50%" }}>
               <Select
-                options={[
+                options={[{
+                  value: 0,
+                  label: "All",
+                },
                   ...users.map((a) => ({
                     value: a.user_uuid,
                     label: a.user_title,
@@ -245,7 +238,7 @@ const CashRegisterReport = () => {
                           (j) => j.user_uuid === searchData.user_uuid
                         )?.user_title,
                       }
-                    : null
+                    : { value: 0, label: "All"}
                 }
                 openMenuOnFocus={true}
                 menuPosition="fixed"
