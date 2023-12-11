@@ -101,6 +101,21 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
                 { stage: 5, time: time.getTime(), user_uuid },
               ]
           : stage === 3
+          ? +data.stage === 3.5
+            ? [
+                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+              ]
+          : +data.stage === 4
+            ? [
+                // { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+                { stage: 4, time: time.getTime(), user_uuid },
+              ]
+            : [
+                // { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+                { stage: 4, time: time.getTime(), user_uuid },
+                { stage: 5, time: time.getTime(), user_uuid },
+              ]
+          : stage === 3.5
           ? +data.stage === 4
             ? [
                 // { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
