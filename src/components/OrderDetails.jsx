@@ -720,9 +720,9 @@ export function OrderDetails({
         ...orderUpdateData?.status?.map((s) => +s.stage)
       );
 
-      if (+orderUpdateData?.payment_pending && maxState < 3) {
+      if (+orderUpdateData?.payment_pending && maxState < 3.5) {
         orderUpdateData.status.push({
-          stage: 3,
+          stage: 3.5,
           time: Date.now(),
           user_uuid: localStorage.getItem("user_uuid"),
         });
