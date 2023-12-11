@@ -2,7 +2,9 @@ import React, { useState } from "react";
 const orderStages=[
   { title: "Processing", id: 1 },
   { title: "Checking", id: 2 },
-  { title: "Delivered", id: 3 },
+  { title: "Out For Delivery", id: 3 },
+  { title: "Delivered", id: 3.5 },
+
   // { title: "Complete", id: 4 },
   // { title: "Cancelled", id: 5 },
 ]
@@ -46,7 +48,7 @@ const SalesPersoneFilterPopup = ({
                       Order Status
                       <div
                         className="formGroup"
-                        style={{ height: "120px", overflow: "scroll" }}
+                        style={{ height: "150px", overflow: "scroll" }}
                       >
                         {orderStages
                          

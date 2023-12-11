@@ -468,24 +468,7 @@ const MainAdmin = () => {
     }
   };
   // console.log(selectedOrder);
-  // useEffect(() => {
-  //   const controller = new AbortController();
-  //   if (
-  //     location.pathname.includes("admin") ||
-  //     location.pathname.includes("trip")
-  //   ) {
-  //     if (holdOrders) getRunningHoldOrders();
-  //     else getRunningOrders(controller);
-  //   }
-  //   if (location.pathname.includes("admin")) {
-  //     getRoutesData();
-  //   } else if (location.pathname.includes("trip")) {
-  //     getTripData(controller);
-  //   }
-  //   return () => {
-  //     controller.abort();
-  //   };
-  // }, [btn, popupForm]);
+ 
   const postOrderData = async () => {
     const response = await axios({
       method: "put",
@@ -556,6 +539,18 @@ const MainAdmin = () => {
                   .reduce((c, d) => Math.max(c, d)) === 3
               : +b?.status[0]?.stage === 3)
         )?.length,
+        deliveredLength: orders.filter(
+          (b) =>
+            counter.filter(
+              (c) =>
+                c.counter_uuid === b.counter_uuid && c.route_uuid === "none"
+            )?.length &&
+            (b.status?.length > 1
+              ? +b.status
+                  .map((x) => +x.stage || 0)
+                  .reduce((c, d) => Math.max(c, d)) === 3.5
+              : +b?.status[0]?.stage === 3.5)
+        )?.length,
       },
     ];
 
@@ -610,6 +605,19 @@ const MainAdmin = () => {
                   .reduce((c, d) => Math.max(c, d)) === 3
               : +b?.status[0]?.stage === 3)
         )?.length,
+        deliveredLength: orders.filter(
+          (b) =>
+            counter.filter(
+              (c) =>
+                c.counter_uuid === b.counter_uuid &&
+                route.route_uuid === c.route_uuid
+            )?.length &&
+            (b.status?.length > 1
+              ? +b.status
+                  .map((x) => +x.stage || 0)
+                  .reduce((c, d) => Math.max(c, d)) === 3.5
+              : +b?.status[0]?.stage === 3.5)
+        )?.length,
       });
     }
     return data;
@@ -648,6 +656,15 @@ const MainAdmin = () => {
                   .reduce((c, d) => Math.max(c, d)) === 3
               : +b?.status[0]?.stage === 3)
         )?.length,
+        deliveredLength: orders.filter(
+          (b) =>
+            !b.trip_uuid &&
+            (b.status?.length > 1
+              ? +b.status
+                  .map((x) => +x.stage)
+                  .reduce((c, d) => Math.max(c, d)) === 3.5
+              : +b?.status[0]?.stage === 3.5)
+        )?.length,
       },
     ];
 
@@ -682,6 +699,15 @@ const MainAdmin = () => {
                   .map((x) => +x.stage)
                   .reduce((c, d) => Math.max(c, d)) === 3
               : +b?.status[0]?.stage === 3)
+        )?.length,
+        deliveredLength: orders.filter(
+          (b) =>
+            trip.trip_uuid === b.trip_uuid &&
+            (b.status?.length > 1
+              ? +b.status
+                  .map((x) => +x.stage)
+                  .reduce((c, d) => Math.max(c, d)) === 3.5
+              : +b?.status[0]?.stage === 3.5)
         )?.length,
       });
     }
@@ -1029,8 +1055,9 @@ const MainAdmin = () => {
                           <span>({route.orderLength})</span>
                           <span>
                             [ Processing {route?.processingLength}, Checking{" "}
-                            {route.checkingLength}, Delivery{" "}
-                            {route?.deliveryLength} ]
+                            {route.checkingLength}, OFD{" "}
+                            {route?.deliveryLength}, Delivered{" "}
+                            {route?.deliveredLength} ]
                           </span>
                           <span>
                             (
@@ -1305,7 +1332,7 @@ const MainAdmin = () => {
                           >
                             UnKnown
                           </span>{" "}
-                          ({orders.filter((a) => !a?.trip_uuid)?.length})
+                          ({ordersData?.length})
                           [Processing{" "}
                           {
                             TripsOrderLength.find((a) => +a.trip_uuid === 0)
@@ -1316,10 +1343,15 @@ const MainAdmin = () => {
                             TripsOrderLength.find((a) => +a.trip_uuid === 0)
                               ?.checkingLength
                           }
-                          , Delivery{" "}
+                          , OFD{" "}
                           {
                             TripsOrderLength.find((a) => +a.trip_uuid === 0)
                               ?.deliveryLength
+                          }
+                          , OFD{" "}
+                          {
+                            TripsOrderLength.find((a) => +a.trip_uuid === 0)
+                              ?.deliveredLength
                           }
                           ]
                           {selectOrder ? (
@@ -1491,7 +1523,6 @@ const MainAdmin = () => {
                   const orders_data = orders?.filter(
                     (a) => a.trip_uuid === trip.trip_uuid
                   );
-                  console.log(orders_data.length, trip);
                   if (orders_data?.length)
                     return (
                       <div key={Math.random()} className="sectionDiv">
@@ -1511,16 +1542,15 @@ const MainAdmin = () => {
                           <span>
                             (
                             {
-                              orders.filter(
-                                (a) => a.trip_uuid === trip.trip_uuid
-                              )?.length
+                              trip.orderLength
                             }
                             )
                           </span>
                           <span>
                             [Processing {trip?.processingLength}, Checking{" "}
-                            {trip?.checkingLength}, Delivery{" "}
-                            {trip?.deliveryLength}]
+                            {trip?.checkingLength}, OFD{" "}
+                            {trip?.deliveryLength},Delivered{" "}
+                            {trip?.deliveredLength}]
                           </span>
                           <span>
                             {trip?.users?.[0]
@@ -2296,7 +2326,9 @@ function HoldPopup({
     { value: "all", label: "All" },
     { value: 1, label: "Processing" },
     { value: 2, label: "Checking" },
-    { value: 3, label: "Delivery" },
+    { value: 3, label: "Out For Delivery" },
+    { value: 3.5, label: "Out For Delivery" },
+
   ];
   const ItemsStatusData = [
     { value: "all", label: "All" },
