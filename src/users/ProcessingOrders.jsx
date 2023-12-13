@@ -1082,7 +1082,7 @@ const ProcessingOrders = () => {
                 ? selectedOrder?.item_details
                     .filter(
                       (a) =>
-                        a.p||a.b ||
+                        a.p||a.b ||a.free
                         +a.status !== 3
                     )
                     .filter(

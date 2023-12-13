@@ -26,6 +26,7 @@ const CashRegisterReport = () => {
   const [users, setUsers] = useState([]);
   const [initial, setInitial] = useState(false);
   const [deletePopup, setDeletePopup] = useState(false);
+  const [completePopup, setCompletePopup] = useState(false);
   const [statementData, setStatementData] = useState(null);
   const [newRegisterPopup, setNewRegisterPopup] = useState(false);
   const statementRef = useRef(null);
@@ -78,7 +79,6 @@ const CashRegisterReport = () => {
     }
   };
   const getCounterStockReport = async () => {
-    
     let startDate = new Date(
       new Date(searchData.startDate).setHours(0, 0, 0, 0)
     ).getTime();
@@ -215,10 +215,11 @@ const CashRegisterReport = () => {
             </div>
             <div className="inputGroup" style={{ width: "50%" }}>
               <Select
-                options={[{
-                  value: 0,
-                  label: "All",
-                },
+                options={[
+                  {
+                    value: 0,
+                    label: "All",
+                  },
                   ...users.map((a) => ({
                     value: a.user_uuid,
                     label: a.user_title,
@@ -238,7 +239,7 @@ const CashRegisterReport = () => {
                           (j) => j.user_uuid === searchData.user_uuid
                         )?.user_title,
                       }
-                    : { value: 0, label: "All"}
+                    : { value: 0, label: "All" }
                 }
                 openMenuOnFocus={true}
                 menuPosition="fixed"
@@ -265,6 +266,7 @@ const CashRegisterReport = () => {
             itemsDetails={filteredItems}
             getStatement={getStatement}
             users={users}
+            setPopupForm={setCompletePopup}
           />
         </div>
       </div>
@@ -299,6 +301,18 @@ const CashRegisterReport = () => {
       ) : (
         ""
       )}
+      {completePopup ? (
+        <NewRegisterForm
+          onSave={() => {
+            setCompletePopup(false);
+            getCounterStockReport();
+          }}
+          popupInfo={completePopup}
+          setNotification={setNotification}
+        />
+      ) : (
+        ""
+      )}
 
       <div style={{ display: "none" }}>
         <div ref={statementRef}>
@@ -311,7 +325,7 @@ const CashRegisterReport = () => {
 
 export default CashRegisterReport;
 
-function Table({ itemsDetails, getStatement }) {
+function Table({ itemsDetails, getStatement, setPopupForm }) {
   function formatAMPM(date) {
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -344,7 +358,7 @@ function Table({ itemsDetails, getStatement }) {
 
           <th colSpan={3}>Users</th>
           <th colSpan={3}>Value</th>
-          <th></th>
+          <th colSpan={2}></th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -367,6 +381,27 @@ function Table({ itemsDetails, getStatement }) {
                 >
                   Statement
                 </button>
+              </td>
+              <td>
+                {item.status === 1 ? (
+                  <button
+                    className="theme-btn"
+                    style={{
+                      display: "inline",
+                      cursor: item?.orderLength ? "not-allowed" : "pointer",
+                      width: "100%",
+                    }}
+                    type="button"
+                    onClick={() => {
+                      setPopupForm({ ...item, status: 0 });
+                    }}
+                    disabled={item?.orderLength}
+                  >
+                    Complete
+                  </button>
+                ) : (
+                  ""
+                )}
               </td>
             </tr>
           ))}
@@ -554,7 +589,7 @@ function NewUserForm({ onSave, users, setNotification }) {
       method: "post",
       url: "/cashRegistrations/PostCashRegister",
       data: {
-        created_by:user_uuid,
+        created_by: user_uuid,
       },
       headers: {
         "Content-Type": "application/json",
@@ -611,7 +646,6 @@ function NewUserForm({ onSave, users, setNotification }) {
                   </label>
                 </div>
               </div>
-            
 
               <button type="submit" className="submit">
                 Save changes
@@ -619,6 +653,204 @@ function NewUserForm({ onSave, users, setNotification }) {
             </form>
           </div>
 
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+function NewRegisterForm({
+  onSave,
+  popupInfo,
+
+  setNotification,
+}) {
+  const [data, setData] = useState({ amt: 0, expense_uuid: "", remarks: "" });
+  const [expense, setExpense] = useState([]);
+  const [loader, setLoader] = useState(false);
+
+  const submitHandler = async (e) => {
+    let obj = { created_by: localStorage.getItem("user_uuid") };
+    e.preventDefault();
+
+    if (popupInfo?.expense) {
+      if (data.expense_uuid === "") {
+        setNotification({ success: false, message: "Please select expense" });
+        setTimeout(() => setNotification(null), 3000);
+        return;
+      }
+      obj = { register_uuid: popupInfo.register_uuid, ...data };
+      const response = await axios({
+        method: "put",
+        url: "/cashRegistrations/PutExpenseCashRegister",
+        data: obj,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        onSave();
+      }
+    } else if (popupInfo?.register_uuid) {
+      obj = { register_uuid: popupInfo.register_uuid, status: 0 };
+      const response = await axios({
+        method: "put",
+        url: "/cashRegistrations/PutCashRegister",
+        data: obj,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        onSave();
+      }
+    } else {
+      const response = await axios({
+        method: "post",
+        url: "/cashRegistrations/PostCashRegister",
+        data: obj,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        onSave();
+      } else {
+        setNotification(response.data);
+        setTimeout(() => setNotification(null), 3000);
+      }
+    }
+  };
+  const getItemsData = async (controller = new AbortController()) => {
+    setLoader(true);
+    const response = await axios({
+      method: "get",
+      url: "/expense/GetAllExpenses",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setExpense(response.data.result);
+    setLoader(false);
+  };
+  useEffect(() => {
+    const controller = new AbortController();
+    if (popupInfo?.expense) getItemsData(controller);
+    return () => {
+      controller.abort();
+    };
+  }, [popupInfo?.expense]);
+  return (
+    <div className="overlay" style={{ zIndex: 9999999 }}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          {loader ? (
+            <div className="loader">
+              <div className="loader-spinner"></div>
+            </div>
+          ) : (
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form" onSubmit={submitHandler}>
+                <div className="row">
+                  <h1>
+                    {popupInfo.expense
+                      ? "Expense"
+                      : popupInfo.register_uuid
+                      ? "Complete"
+                      : "Add"}{" "}
+                    Register
+                  </h1>
+                </div>
+
+                {popupInfo.expense ? (
+                  <div className="row">
+                    <label className="selectLabel">
+                      Expense
+                      <select
+                        name="user_type"
+                        className="select"
+                        value={data?.expense_uuid}
+                        onChange={(e) =>
+                          setData({
+                            ...data,
+                            expense_uuid: e.target.value,
+                            expense_title:
+                              expense.find(
+                                (a) => a.company_uuid === e.target.value
+                              )?.expense_title ?? "",
+                          })
+                        }
+                      >
+                        <option value="" disabled>
+                          None
+                        </option>
+                        {expense
+                          .sort((a, b) =>
+                            a.expense_title?.localeCompare(b.expense_title)
+                          )
+                          .map((a) => (
+                            <option value={a.expense_uuid}>
+                              {a.expense_title}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                    <label className="selectLabel">
+                      Amount
+                      <input
+                        type="number"
+                        name="one_pack"
+                        className="numberInput"
+                        value={data.amt}
+                        onChange={(e) =>
+                          setData((prev) => ({ ...prev, amt: e.target.value }))
+                        }
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      Remarks
+                      <input
+                        type="text"
+                        name="one_pack"
+                        className="numberInput"
+                        placeholder="Remarks"
+                        value={data.remarks}
+                        onChange={(e) =>
+                          setData((prev) => ({
+                            ...prev,
+                            remarks: e.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                  </div>
+                ) : (
+                  ""
+                )}
+
+                <button type="submit" className="submit">
+                  {popupInfo.expense
+                    ? "Save"
+                    : popupInfo.register_uuid
+                    ? "Complete"
+                    : " Save"}
+                </button>
+              </form>
+            </div>
+          )}
           <button onClick={onSave} className="closeButton">
             x
           </button>

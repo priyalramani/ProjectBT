@@ -102,6 +102,7 @@ const Processing = () => {
 						>
 							<div className={"service" + (data?.priorityOrders ? " blink" : "")}>
 								<span>{data.trip_title}</span>
+								<span>{data.ordersLength||data.orderLength||0}</span>
 							</div>
 						</div>
 					))
