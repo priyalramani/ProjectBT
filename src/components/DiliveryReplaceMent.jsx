@@ -27,12 +27,12 @@ function DiliveryReplaceMent({ onSave, data = {}, setData, updateBilling = () =>
 											type="number"
 											name="route_title"
 											className="numberInput"
-											value={values.actual}
+											value={values.replacement}
 											style={{ width: "100px" }}
 											onChange={e =>
 												setValues(prev => ({
 													...prev,
-													actual: e.target.value
+													replacement: e.target.value
 												}))
 											}
 											maxLength={42}

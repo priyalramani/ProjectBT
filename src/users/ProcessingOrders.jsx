@@ -366,6 +366,7 @@ const ProcessingOrders = () => {
         preventPrintUpdate,
       });
     }
+    console.log(finalData);
 
     try {
       const response = await axios({
@@ -396,7 +397,7 @@ const ProcessingOrders = () => {
               ? dataItem[0]?.p
               : 0
           }`;
-          
+
           setHoldPopup(false);
           postActivity({
             activity:
@@ -996,7 +997,12 @@ const ProcessingOrders = () => {
         <div
           className="table-container-user item-sales-container"
           style={{
-            width:selectedOrder&&(Location.pathname.includes("delivery")||Location.pathname.includes("checking"))? "100%":"100vw",
+            width:
+              selectedOrder &&
+              (Location.pathname.includes("delivery") ||
+                Location.pathname.includes("checking"))
+                ? "100%"
+                : "100vw",
             overflow: "scroll",
             left: "0",
             top: "0",
@@ -1008,7 +1014,7 @@ const ProcessingOrders = () => {
           <table
             className="user-table"
             style={{
-              width:  "max-content",
+              width: "max-content",
               height: "fit-content",
             }}
           >
@@ -1023,7 +1029,7 @@ const ProcessingOrders = () => {
                 ) : (
                   ""
                 )}
-                <th >S.N</th>
+                <th>S.N</th>
                 {selectedOrder ? (
                   <>
                     <th colSpan={3}>
@@ -1038,11 +1044,14 @@ const ProcessingOrders = () => {
                         <th>
                           <div className="t-head-element">Qty</div>
                         </th>
-                      
-                          <th colSpan={Location.pathname.includes("delivery")?1:2}>
-                            <div className="t-head-element" >Action</div>
-                          </th>
-                
+
+                        <th
+                          colSpan={
+                            Location.pathname.includes("delivery") ? 1 : 2
+                          }
+                        >
+                          <div className="t-head-element">Action</div>
+                        </th>
                       </>
                     ) : (
                       <th>Quantity</th>
@@ -1077,14 +1086,10 @@ const ProcessingOrders = () => {
               </tr>
             </thead>
             <tbody className="tbody">
-              {selectedOrder
-              ?selectedOrder?.item_details.length
-                ? selectedOrder?.item_details
-                    .filter(
-                      (a) =>
-                        a.p||a.b ||(Location.pathname.includes("delivery")&&a.free)
-                        +a.status !== 3
-                    )
+              {selectedOrder ? (
+                selectedOrder?.item_details.length ? (
+                  selectedOrder?.item_details
+                    .filter((a) => a.p || a.b || a.free || +a.status !== 3)
                     .filter(
                       (a) =>
                         !Location.pathname.includes("checking") ||
@@ -1101,19 +1106,17 @@ const ProcessingOrders = () => {
                         key={item.item_uuid}
                         style={{
                           height: "30px",
-                          backgroundColor: window.location.pathname.includes(
-                            "processing"
-                          )||window.location.pathname.includes(
-                            "delivery"
-                          )
-                            ? +item.status === 1
-                              ? "green"
-                              : +item.status === 2
-                              ? "yellow"
-                              : +item.status === 3
-                              ? "red"
-                              : "#fff"
-                            : "#fff",
+                          backgroundColor:
+                            window.location.pathname.includes("processing") ||
+                            window.location.pathname.includes("delivery")
+                              ? +item.status === 1
+                                ? "green"
+                                : +item.status === 2
+                                ? "yellow"
+                                : +item.status === 3
+                                ? "red"
+                                : "#fff"
+                              : "#fff",
                           color: window.location.pathname.includes("processing")
                             ? +item.status === 1 || +item.status === 3
                               ? "#fff"
@@ -1260,7 +1263,7 @@ const ProcessingOrders = () => {
                               );
                             }
                           }}
-                          style={{width:"200px"}}
+                          style={{ width: "200px" }}
                         >
                           {
                             items.find((a) => a.item_uuid === item.item_uuid)
@@ -1330,129 +1333,137 @@ const ProcessingOrders = () => {
                                 Hold
                               </button>
                             </td>
-                            
                           </>
                         ) : (
                           ""
                         )}
-                        {
-                          !Location.pathname.includes("checking") ? (
+                        {!Location.pathname.includes("checking") ? (
                           <td>
-                              <DeleteOutlineIcon
-                                onClick={() => {
-                                  setOneTimeState();
+                            <DeleteOutlineIcon
+                              onClick={() => {
+                                setOneTimeState();
 
-                                  setSelectedOrder((prev) => ({
-                                    ...prev,
-                                    item_details: prev.item_details.map((a) =>
-                                      a.item_uuid === item.item_uuid
-                                        ? {
-                                            ...a,
-                                            status: +a.status === 3 ? 0 : 3,
-                                          }
-                                        : a
-                                    ),
-                                  }));
-                                }}
-                              />
-                            </td>
-                            ):""
-                        }
-                      </tr>
-                    )):<tr><td colSpan={10} style={{textAlign:"center"}}>No Data Found</td></tr>
-                : orders?.map((item, i) => (
-                    <tr
-                      key={item.order_uuid + selected_order_label}
-                      id={item.order_uuid + selected_order_label}
-                      className={+item.priority ? "blink" : ""}
-                      style={{
-                        height: "30px",
-                        backgroundColor:
-                          +item.opened_by || item.opened_by !== "0"
-                            ? "yellow"
-                            : "#fff",
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setChecking(false);
-                        setWarningPopUp(item);
-                        setNotesPopup(true);
-                        if (i)
-                          sessionStorage.setItem(selected_order_label, i - 1);
-                      }}
-                    >
-                      <td>{i + 1}</td>
-                      <td colSpan={2}>{item.counter_title}</td>
-                      <td colSpan={2}>{item?.route_title}</td>
-                      <td colSpan={2}>
-                        {
-                          item?.item_details?.filter((a) => +a.status === 1)
-                            ?.length
-                        }
-                        /
-                        {item?.item_details
-                          .filter(
-                            (a) =>
-                              !Location.pathname.includes("delivery") ||
-                              +a.status !== 3
-                          )
-                          .filter(
-                            (a) =>
-                              !Location.pathname.includes("checking") ||
-                              +a.status === 1
-                          )?.length || 0}
-                      </td>
-                      <td>{item.order_grandtotal}</td>
-                      <td>
-                        {(item?.item_details?.length > 1
-                          ? item?.item_details
-                              ?.map((a) => +a.b || 0)
-                              ?.reduce((a, b) => a + b)
-                          : item?.item_details[0]?.b || 0) +
-                          ":" +
-                          (item?.item_details?.length > 1
-                            ? item?.item_details
-                                ?.map((a) => +a.p || 0)
-                                ?.reduce((a, b) => a + b)
-                            : item?.item_details[0]?.p || 0)}
-                      </td>
-                      <td>
-                        {users.find((a) => a.user_uuid === item.opened_by)
-                          ?.user_title || "-"}
-                      </td>
-                      <td>
-                        {item?.mobile ? (
-                          <Phone
-                            className="user_Back_icon"
-                            style={{ color: "#4ac959" }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (item.mobile.length === 1) {
-                                window.location.assign(
-                                  "tel:" + item?.mobile[0]?.mobile
-                                );
-                              } else {
-                                setPhonePopup(item.mobile);
-                              }
-                            }}
-                          />
+                                setSelectedOrder((prev) => ({
+                                  ...prev,
+                                  item_details: prev.item_details.map((a) =>
+                                    a.item_uuid === item.item_uuid
+                                      ? {
+                                          ...a,
+                                          status: +a.status === 3 ? 0 : 3,
+                                        }
+                                      : a
+                                  ),
+                                }));
+                              }}
+                            />
+                          </td>
                         ) : (
-                          "-"
+                          ""
                         )}
-                      </td>
-                      {!Location.pathname.includes("checking") ? (
-                        <td>
-                          <DeleteOutlineIcon
-                            onClick={() => {
-                              setDeletePopup(item);
-                            }}
-                          />
-                        </td>
+                      </tr>
+                    ))
+                ) : (
+                  <tr>
+                    <td colSpan={10} style={{ textAlign: "center" }}>
+                      No Data Found
+                    </td>
+                  </tr>
+                )
+              ) : (
+                orders?.map((item, i) => (
+                  <tr
+                    key={item.order_uuid + selected_order_label}
+                    id={item.order_uuid + selected_order_label}
+                    className={+item.priority ? "blink" : ""}
+                    style={{
+                      height: "30px",
+                      backgroundColor:
+                        +item.opened_by || item.opened_by !== "0"
+                          ? "yellow"
+                          : "#fff",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setChecking(false);
+                      setWarningPopUp(item);
+                      setNotesPopup(true);
+                      if (i)
+                        sessionStorage.setItem(selected_order_label, i - 1);
+                    }}
+                  >
+                    <td>{i + 1}</td>
+                    <td colSpan={2}>{item.counter_title}</td>
+                    <td colSpan={2}>{item?.route_title}</td>
+                    <td colSpan={2}>
+                      {
+                        item?.item_details?.filter((a) => +a.status === 1)
+                          ?.length
+                      }
+                      /
+                      {item?.item_details
+                        .filter(
+                          (a) =>
+                            !Location.pathname.includes("delivery") ||
+                            +a.status !== 3
+                        )
+                        .filter(
+                          (a) =>
+                            !Location.pathname.includes("checking") ||
+                            +a.status === 1
+                        )?.length || 0}
+                    </td>
+                    <td>{item.order_grandtotal}</td>
+                    <td>
+                      {(item?.item_details?.length > 1
+                        ? item?.item_details
+                            ?.map((a) => +a.b || 0)
+                            ?.reduce((a, b) => a + b)
+                        : item?.item_details[0]?.b || 0) +
+                        ":" +
+                        (item?.item_details?.length > 1
+                          ? item?.item_details
+                              ?.map((a) => +a.p || 0)
+                              ?.reduce((a, b) => a + b)
+                          : item?.item_details[0]?.p || 0)}
+                    </td>
+                    <td>
+                      {users.find((a) => a.user_uuid === item.opened_by)
+                        ?.user_title || "-"}
+                    </td>
+                    <td>
+                      {item?.mobile ? (
+                        <Phone
+                          className="user_Back_icon"
+                          style={{ color: "#4ac959" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (item.mobile.length === 1) {
+                              window.location.assign(
+                                "tel:" + item?.mobile[0]?.mobile
+                              );
+                            } else {
+                              setPhonePopup(item.mobile);
+                            }
+                          }}
+                        />
                       ) : (
-                        ""
+                        "-"
                       )}
-                    </tr>
-                  ))}
+                    </td>
+                    {!Location.pathname.includes("checking") ? (
+                      <td>
+                        <DeleteOutlineIcon
+                          onClick={() => {
+                            setDeletePopup(item);
+                          }}
+                        />
+                      </td>
+                    ) : (
+                      ""
+                    )}
+                  </tr>
+                ))
+              )}
               <tr>
                 <td
                   style={{ height: "150px", backgroundColor: "transparent" }}
@@ -2869,17 +2880,28 @@ function DiliveryPopup({
   const [modes, setModes] = useState([]);
   const [error, setError] = useState("");
   const [popup, setPopup] = useState(false);
-  const [coinPopup, setCoinPopup] = useState(false);
+  const [firstTime, setFirstTime] = useState(true);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
 
   useEffect(() => {
-    setOrder({
-      replacement: data?.actual || 0,
-      shortage: data?.shortage || 0,
-      adjustment: data?.adjustment || 0,
-      adjustment_remarks: data?.adjustment_remarks || "",
-    });
+    console.log({ order });
+    if (firstTime) {
+      setData({
+        replacement: order?.replacement || 0,
+        shortage: order?.shortage || 0,
+        adjustment: order?.adjustment || 0,
+        adjustment_remarks: order?.adjustment_remarks || "",
+      });
+      setFirstTime(false);
+    }else{
+      setOrder({
+        replacement: data?.replacement || 0,
+        shortage: data?.shortage || 0,
+        adjustment: data?.adjustment || 0,
+        adjustment_remarks: data?.adjustment_remarks || "",
+      });
+    }
   }, [popup]);
   const GetPaymentModes = async () => {
     const response = await axios({
@@ -2930,7 +2952,7 @@ function DiliveryPopup({
       let billingData = await Billing({
         order_uuid: data?.order_uuid,
         invoice_number: `${data?.order_type}${data?.invoice_number}`,
-        replacement: data.actual,
+        replacement: data.replacement,
         adjustment: data.adjustment,
         shortage: data.shortage,
         counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
@@ -2948,7 +2970,7 @@ function DiliveryPopup({
         ...order,
         ...billingData,
         item_details: billingData.items,
-        replacement: data.actual,
+        replacement: data.replacement,
         replacement_mrp: data.mrp,
       };
       if (
@@ -2963,7 +2985,7 @@ function DiliveryPopup({
         setLoading(false);
         return;
       }
-  
+
       let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
 
       if (
@@ -3181,7 +3203,7 @@ function DiliveryPopup({
                       style={{ color: "#fff", backgroundColor: "#7990dd" }}
                       onClick={() => setPopup(true)}
                     >
-                      Replacement
+                      Deduction
                     </button>
                   </div>
                   <i style={{ color: "red" }}>{error}</i>
@@ -3221,95 +3243,7 @@ function DiliveryPopup({
       ) : (
         ""
       )}
-      {coinPopup ? (
-        <div className="overlay">
-          <div
-            className="modal"
-            style={{ height: "fit-content", width: "max-content" }}
-          >
-            <h3>Cash Coin</h3>
-            <div
-              className="content"
-              style={{
-                height: "fit-content",
-                padding: "10px",
-                width: "fit-content",
-              }}
-            >
-              <div style={{ overflowY: "scroll" }}>
-                <form className="form">
-                  <div className="formGroup">
-                    <div
-                      className="row"
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      <div style={{ width: "50px" }}>Cash</div>
-
-                      <label
-                        className="selectLabel flex"
-                        style={{ width: "80px" }}
-                      >
-                        <input
-                          type="number"
-                          name="route_title"
-                          className="numberInput"
-                          placeholder="Coins"
-                          onWheel={(e) => e.preventDefault()}
-                          value={
-                            modes.find(
-                              (a) =>
-                                a.mode_uuid ===
-                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-                            )?.coin
-                          }
-                          style={
-                            !allowed.find(
-                              (a) =>
-                                a.mode_uuid ===
-                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-                            )
-                              ? { width: "70px", backgroundColor: "gray" }
-                              : { width: "70px" }
-                          }
-                          onChange={(e) =>
-                            setModes((prev) =>
-                              prev.map((a) =>
-                                a.mode_uuid ===
-                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-                                  ? {
-                                      ...a,
-                                      coin: e.target.value,
-                                    }
-                                  : a
-                              )
-                            )
-                          }
-                          maxLength={42}
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  <div
-                    className="flex"
-                    style={{ justifyContent: "space-between" }}
-                  >
-                    <button
-                      type="button"
-                      className="submit"
-                      onClick={() => submitHandler()}
-                    >
-                      Save
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        ""
-      )}
+      
     </>
   );
 }
@@ -3344,7 +3278,7 @@ function MinMaxPopup({ onSave, popupValue, order, items }) {
       setData((prev) => ({
         ...prev,
         item_title: itemData.item_title,
-        min: warehouseData?.qty||0,
+        min: warehouseData?.qty || 0,
       }));
       if (warehouse_uuid) getMinValue();
     }
@@ -3362,7 +3296,7 @@ function MinMaxPopup({ onSave, popupValue, order, items }) {
     });
     setData((prev) => ({
       ...prev,
-      max: response.data.result||0,
+      max: response.data.result || 0,
       min: prev.min - (+response.data.result || 0),
     }));
   };
