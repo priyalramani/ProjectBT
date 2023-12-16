@@ -89,7 +89,7 @@ console.log(itemDetails)
     ["Adjustment", order?.adjustment],
     ["Shortage", order?.shortage],
   ];
-  const route_title=useMemo(()=>route.find(a=>a.route_uuid===counter?.route_uuid)?.route_title||"",[route,order?.route_uuid])
+  const route_title=useMemo(()=>route.find(a=>a.route_uuid===counter?.route_uuid),[route, counter?.route_uuid])
 
   return (
     <div
@@ -166,7 +166,7 @@ console.log(itemDetails)
                 <table>
                   {route_title?<tr>
                     <td style={{ fontWeight: "600", fontSize: "x-small" }}>
-                      [{route_title || ""}]
+                      [{route_title.route_title || ""}-{route_title.sort_order || ""}]
                     </td>
                   </tr>:""}
                   <tr>
