@@ -517,7 +517,7 @@ function DiliveryPopup({
   useEffect(() => {
     setOrder(orders[0]);
     setData({
-      actual: orders?.[0]?.replacement || 0,
+      replacement: orders?.[0]?.replacement || 0,
       shortage: orders?.[0]?.shortage || 0,
       adjustment: orders?.[0]?.adjustment || 0,
       adjustment_remarks: orders?.[0]?.adjustment_remarks || 0,
@@ -694,7 +694,7 @@ function DiliveryPopup({
         setOrder(orders[count + 1]);
         setCount((prev) => prev + 1);
         setData({
-          actual: orders?.[count + 1]?.replacement,
+          replacement: orders?.[count + 1]?.replacement,
           shortage: orders?.[count + 1]?.shortage,
           adjustment: orders?.[count + 1]?.adjustment,
           adjustment_remarks: orders?.[count + 1]?.adjustment_remarks,
@@ -707,7 +707,7 @@ function DiliveryPopup({
   useEffect(() => {
     updateBillingAmount({
       ...order,
-      replacement: data?.actual || 0,
+      replacement: data?.replacement || 0,
       shortage: data?.shortage || 0,
       adjustment: data?.adjustment || 0,
       adjustment_remarks: data?.adjustment_remarks || "",

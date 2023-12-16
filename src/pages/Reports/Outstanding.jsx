@@ -682,7 +682,7 @@ function DiliveryPopup({
 					updateBilling={e =>
 						updateBilling({
 							...order,
-							replacement: e?.actual || 0,
+							replacement: e?.replacement || 0,
 							shortage: e?.shortage || 0,
 							adjustment: e?.adjustment || 0,
 							adjustment_remarks: e?.adjustment_remarks || "",

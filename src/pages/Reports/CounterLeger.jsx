@@ -354,7 +354,7 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 		setWaiting(true)
 		updateBilling({
 			...order,
-			replacement: data?.actual || 0,
+			replacement: data?.replacement || 0,
 			shortage: data?.shortage || 0,
 			adjustment: data?.adjustment || 0,
 			adjustment_remarks: data?.adjustment_remarks || "",
@@ -661,7 +661,7 @@ function DiliveryPopup({ onSave, postOrderData, order, updateBilling, deliveryPo
 					updateBilling={e =>
 						updateBilling({
 							...order,
-							replacement: e?.actual || 0,
+							replacement: e?.replacement || 0,
 							shortage: e?.shortage || 0,
 							adjustment: e?.adjustment || 0,
 							adjustment_remarks: e?.adjustment_remarks || "",

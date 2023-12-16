@@ -34,6 +34,7 @@ import PendingPaymentsSummary from "../../components/prints/PendingPaymentsSumma
 import NotesPopup from "../../components/popups/NotesPopup";
 import Loader from "../../components/Loader";
 import { getOrderStage, getStageName } from "../../utils/helperFunctions";
+import SkipStagesPopup from "../../components/SkipStagesPopup";
 
 const MainAdmin = () => {
   const [isCollectionTags, setCollectionTags] = useState(false);
@@ -52,6 +53,7 @@ const MainAdmin = () => {
   const [btn, setBtn] = useState(false);
   const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
+  const [skipStages, setSkipStages] = useState([]);
 
   const [selectedOrder, setSelectedOrder] = useState([]);
 
@@ -1750,7 +1752,7 @@ const MainAdmin = () => {
               className="searchBar"
               style={{
                 zIndex: 1,
-                width: selectedOrder.length ? "61%" : "400px",
+                width: selectedOrder.length ? "69%" : "510px",
               }}
             >
               <input
@@ -1760,6 +1762,16 @@ const MainAdmin = () => {
                 value={searchItems}
                 onChange={(e) => setSearhItems(e.target.value)}
               />
+              <button
+                className="simple_Logout_button"
+                style={{ minWidth: "100px", margin: "0 20px 10px 20px" }}
+                type="button"
+                onClick={() => {
+                  setSkipStages(true);
+                }}
+              >
+                Skip Stages
+              </button>
               {selectedOrder.length ? (
                 <>
                   <button
@@ -1958,6 +1970,16 @@ const MainAdmin = () => {
           }}
           type="stage"
           setSalesPersoneList={setStageList}
+        />
+      ) : (
+        ""
+      )}
+      {skipStages ? (
+        <SkipStagesPopup
+          onClose={() => {
+            setSkipStages(false);
+          }}
+          type="stage"
         />
       ) : (
         ""

@@ -561,7 +561,7 @@ export function OrderDetails({
   useEffect(() => {
     if (order) {
       setDeductionsData({
-        actual: +order?.replacement || 0,
+        replacement: +order?.replacement || 0,
         shortage: +order?.shortage || 0,
         adjustment: +order?.adjustment || 0,
         adjustment_remarks: order?.adjustment_remarks || "",
@@ -2883,7 +2883,7 @@ export function OrderDetails({
             callBilling(
               {
                 ...order,
-                replacement: result?.actual || 0,
+                replacement: result?.replacement || 0,
                 shortage: result?.shortage || 0,
                 adjustment: result?.adjustment || 0,
                 adjustment_remarks: result?.adjustment_remarks || "",
@@ -3715,7 +3715,7 @@ function DiliveryPopup({
     }
     updateBilling({
       ...order,
-      replacement: data?.actual || 0,
+      replacement: data?.replacement || 0,
       shortage: data?.shortage || 0,
       adjustment: data?.adjustment || 0,
       adjustment_remarks: data?.adjustment_remarks || "",
@@ -4117,7 +4117,7 @@ function DiliveryPopup({
           updateBilling={(e) =>
             updateBilling({
               ...order,
-              replacement: e?.actual || 0,
+              replacement: e?.replacement || 0,
               shortage: e?.shortage || 0,
               adjustment: e?.adjustment || 0,
               adjustment_remarks: e?.adjustment_remarks || "",

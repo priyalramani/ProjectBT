@@ -1017,7 +1017,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 	const [outstanding, setOutstanding] = useState({})
 	useEffect(() => {
 		updateBilling({
-			replacement: data?.actual || 0,
+			replacement: data?.replacement || 0,
 			shortage: data?.shortage || 0,
 			adjustment: data?.adjustment || 0,
 			adjustment_remarks: data?.adjustment_remarks || ""
@@ -1085,7 +1085,7 @@ function DiliveryPopup({ onSave, postOrderData, credit_allowed, counters, items,
 			...order,
 			...billingData,
 			item_details: billingData.items,
-			replacement: data?.actual || 0,
+			replacement: data?.replacement || 0,
 			shortage: data?.shortage || 0,
 			adjustment: data?.adjustment || 0,
 			adjustment_remarks: data?.adjustment_remarks || ""
