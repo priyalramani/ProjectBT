@@ -1483,6 +1483,7 @@ export function OrderDetails({
                           width: "22px",
                           height: "22px",
                           borderWidth: "2px",
+                          zIndex:99999999999999999
                         }}
                         className="loader"
                       />

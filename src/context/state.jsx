@@ -6,6 +6,7 @@ const State = props => {
 	const [calculationPopup, setcalculationPopup] = useState(null)
 	const [cashRegisterPopup, setCashRegisterPopup] = useState(null)
 	const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false)
+	const [skipStages, setSkipStages] = useState(false);
 	const [notification, setNotification] = useState(null)
 	const [loading, setLoading] = useState(null)
 	const [pageLoading, setPageLoading] = useState(null)
@@ -133,7 +134,9 @@ const State = props => {
 				pageLoading,
 				setPageLoading,
 				PAYMENT_REMINDER_NOTIFICATION,
-				sendPaymentReminders
+				sendPaymentReminders,
+				skipStages,
+				setSkipStages
 			}}
 		>
 			{props.children}

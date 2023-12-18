@@ -261,6 +261,7 @@ const Sidebar = ({ setCollectionTags }) => {
 					icon={<SettingsIcon sx={{ fontSize: 50 }} />}
 					isActive={false}
 					setcalculationPopup={setcalculationPopup}
+				
 					menuList={[
 						{
 							name: "Auto Increase Quantity",
@@ -293,7 +294,11 @@ const Sidebar = ({ setCollectionTags }) => {
 						{
 							name: "WhatsApp Notifications",
 							link: "/admin/WhatsAppNotifications"
-						}
+						},
+						{
+							name: "Skip Stage",
+							link: "#"
+						},
 					]}
 				/>
 				{/* <div

@@ -53,7 +53,7 @@ const MainAdmin = () => {
   const [btn, setBtn] = useState(false);
   const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
-  const [skipStages, setSkipStages] = useState([]);
+
 
   const [selectedOrder, setSelectedOrder] = useState([]);
 
@@ -80,7 +80,7 @@ const MainAdmin = () => {
   const location = useLocation();
   const [notesState, setNotesState] = useState();
 
-  const { updateServerPdf, setLoading, setNotification } = useContext(context);
+  const { updateServerPdf, setLoading, setNotification,skipStages,setSkipStages } = useContext(context);
 
   let user_uuid = localStorage.getItem("user_uuid");
 
@@ -1762,16 +1762,7 @@ const MainAdmin = () => {
                 value={searchItems}
                 onChange={(e) => setSearhItems(e.target.value)}
               />
-              <button
-                className="simple_Logout_button"
-                style={{ minWidth: "100px", margin: "0 20px 10px 20px" }}
-                type="button"
-                onClick={() => {
-                  setSkipStages(true);
-                }}
-              >
-                Skip Stages
-              </button>
+             
               {selectedOrder.length ? (
                 <>
                   <button

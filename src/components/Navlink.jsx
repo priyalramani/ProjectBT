@@ -5,7 +5,7 @@ import context from "../context/context"
 
 const NavLink = ({ title, icon, menuList, draggable, href, setCollectionTags, setcalculationPopup, options }) => {
 	const [menuVisible, setMenuVisible] = useState(false)
-	const { setCashRegisterPopup, setIsItemAvilableOpen } = useContext(context)
+	const { setCashRegisterPopup, setIsItemAvilableOpen,  setSkipStages} = useContext(context)
 	const [searchFilter, setSearchFilter] = useState()
 	const sortList = _list => {
 		let data = _list.filter(i => i && (!searchFilter || i.name.toLowerCase().includes(searchFilter.toLowerCase())))
@@ -74,6 +74,8 @@ const NavLink = ({ title, icon, menuList, draggable, href, setCollectionTags, se
 											setcalculationPopup(prev => !prev)
 										} else if (menu.name === "Collection Tags") {
 											setCollectionTags(true)
+										}else if (menu.name === "Skip Stage") {
+											setSkipStages(true)
 										}
 									}}
 								>
