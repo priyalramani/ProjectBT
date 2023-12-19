@@ -510,7 +510,7 @@ export default function AdjustStock() {
                               onChange={(e) => {
                                 setOrder((prev) => {
                                   let ap = e.target.value;
-                                  let p = +ap + +item.qty;
+                                  let p = +ap + (+item.qty - +item.b*item.conversion);
                                   return {
                                     ...prev,
                                     item_details: prev.item_details.map((a) =>

@@ -94,10 +94,15 @@ const StockTransferVouchers = () => {
 							: itemsDetails.length
 							? itemsDetails[0]
 							: { b: 0, p: 0 }
+							let estValue = 0
+							itemsDetails.forEach(item => {
+								estValue += item.estValue
+							})
 					return {
 						...a,
 						type: a.type === "ST" ? "Stock Transfer" : "Adjustment",
-						qty
+						qty,
+						estValue: estValue.toFixed(2)
 					}
 				})
 		)
@@ -481,7 +486,29 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 							</div>
 						</div>
 					</th>
-
+					<th colSpan={2}>
+						<div className="t-head-element">
+							<span>Est. Value</span>
+							<div className="sort-buttons-container">
+								<button
+									onClick={() => {
+										setItems("qty")
+										setOrder("asc")
+									}}
+								>
+									<ChevronUpIcon className="sort-up sort-button" />
+								</button>
+								<button
+									onClick={() => {
+										setItems("qty")
+										setOrder("desc")
+									}}
+								>
+									<ChevronDownIcon className="sort-down sort-button" />
+								</button>
+							</div>
+						</div>
+					</th>
 					{+completed ? "" : <th colSpan={3}></th>}
 				</tr>
 			</thead>
@@ -521,7 +548,9 @@ function Table({ itemsDetails, setPopupForm, completed, setPopupOrder }) {
 							<td colSpan={2}>
 								{item.qty.b || 0}:{item.qty.p || 0}
 							</td>
-
+							<td colSpan={2}>
+								{item.estValue}
+							</td>
 							{+completed ? (
 								""
 							) : (
