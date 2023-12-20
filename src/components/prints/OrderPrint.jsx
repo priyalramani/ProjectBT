@@ -166,7 +166,7 @@ console.log(itemDetails)
                 <table>
                   {route_title?<tr>
                     <td style={{ fontWeight: "600", fontSize: "x-small" }}>
-                      [{route_title.route_title || ""}-{route_title.sort_order || ""}]
+                      [{route_title.route_title || ""}-{counter.sort_order || ""}]
                     </td>
                   </tr>:""}
                   <tr>
