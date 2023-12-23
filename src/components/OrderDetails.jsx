@@ -460,11 +460,7 @@ export function OrderDetails({
   }, [category, orderData]);
 
   const getItemsData = async (item) => {
-    if (items.length) {
-      console.log(items);
-      setItemsData(items);
-      return;
-    }
+ 
     const response = await axios({
       method: "post",
       url: "/items/GetItemList",
@@ -559,7 +555,9 @@ export function OrderDetails({
   }, []);
 
   useEffect(() => {
+    console.log({order});
     if (order) {
+      getItemsData(order?.item_details?.map((a) => a.item_uuid));
       setDeductionsData({
         replacement: +order?.replacement || 0,
         shortage: +order?.shortage || 0,
@@ -567,7 +565,7 @@ export function OrderDetails({
         adjustment_remarks: order?.adjustment_remarks || "",
       });
       getCounters([order?.counter_uuid]);
-      getItemsData(order?.item_details?.map((a) => a.item_uuid));
+      
       if (order?.counter_charges)
         getAppliedCounterCharges(order?.counter_charges);
     }
@@ -2767,7 +2765,7 @@ export function OrderDetails({
                       <div>
                         <span>Users</span>
                         <UserSelection
-                          users={users}
+                          users={users.filter(a=>a.status===1)}
                           selection={userSelection}
                           setSelection={setUserSelection}
                         />
