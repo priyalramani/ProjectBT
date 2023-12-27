@@ -704,3 +704,7 @@ label {
 		transform: rotate(360deg);
 	}
 }
+.hoverLink:hover{
+	text-decoration: underline;
+	color: blue;
+}

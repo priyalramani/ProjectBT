@@ -530,6 +530,7 @@ export function OrderDetails({
         invoice_number: orderData.invoice_number,
         additional_users: userSelection,
         additional_numbers: Object.values(additionalNumbers?.values),
+        sendCounter
       },
       headers: {
         "Content-Type": "application/json",
@@ -1096,6 +1097,7 @@ export function OrderDetails({
     count: 0,
     values: [],
   });
+  const [sendCounter, setSendCounter] = useState(true);
   const [userSelection, setUserSelection] = useState([]);
 
   const recreateOrder = async (copyStages) => {
@@ -1956,6 +1958,10 @@ export function OrderDetails({
                                       key: a.item_uuid,
                                     }))}
                                   onChange={(e) => {
+                                    let itemData = itemsData.find(
+                                      (a) => a.item_uuid === e.value
+                                    );
+                                    console.log(itemData);
                                     setOrderData((prev) => ({
                                       ...prev,
                                       item_details: prev.item_details?.map(
@@ -1967,9 +1973,11 @@ export function OrderDetails({
                                                   (b) => b.item_uuid === e.value
                                                 ),
                                                 status: 0,
-                                                price: itemsData.find(
-                                                  (b) => b.item_uuid === e.value
-                                                )?.item_price,
+                                                price:+getSpecialPrice(
+                                                  counters,
+                                                  itemData,
+                                                  orderData?.counter_uuid
+                                                )?.price|| itemData?.item_price,
                                               }
                                             : a
                                       ),
@@ -2271,16 +2279,7 @@ export function OrderDetails({
                           </td>
                           {editOrder ? (
                             <>
-                              {console.log(
-                                "---------------------------------------------",
-                                getSpecialPrice(
-                                  counters,
-                                  item,
-                                  orderData?.counter_uuid
-                                ),
-                                item?.item_price,
-                                item?.price
-                              )}
+                              
                               <td style={{textAlign:"center"}}>
                                 {item?.charges_discount?.find(a=>a.title==="Salesperson Discount")?.value || "0"}{" "}
                                 %
@@ -2691,6 +2690,34 @@ export function OrderDetails({
                 <div style={{ overflowY: "scroll" }}>
                   <form className="form">
                     <div className="formGroup" style={{ gap: "20px" }}>
+                      <div
+                        className="row"
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "start",
+                        }}
+                      >
+                        
+                        <label
+                          className="selectLabel flex"
+                          style={{ width: "20px" }}
+                        >
+                          <input
+                            type="checkbox"
+                            name="route_title"
+                            className="numberInput"
+                            style={{ width: "20px" }}
+                            checked={sendCounter}
+                            placeholder="Enter your title here"
+                            onChange={(e) => {
+                              setSendCounter(e.target.checked);
+                            }}
+                          />
+                          
+                        </label>
+                        <div >Send To Counter</div>
+                      </div>
                       <div
                         className="row"
                         style={{

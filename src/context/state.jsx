@@ -31,6 +31,7 @@ const State = props => {
 	const [promptState, setPromptState] = useState()
 
 	const getSpecialPrice = (counters, item, counter_uuid) => {
+		console.log({ counters, item, counter_uuid, counter: counters?.find(i => i.counter_uuid === counter_uuid),item_special_price:counters?.find(i => i.counter_uuid === counter_uuid)?.item_special_price.find(i => i.item_uuid === item.item_uuid) })
 		const data = counters
 			?.find(i => i.counter_uuid === counter_uuid)
 			?.item_special_price?.find(i => i.item_uuid === item.item_uuid)

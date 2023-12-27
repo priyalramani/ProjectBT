@@ -618,6 +618,7 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
                         textAlign: "right",
                         cursor: "pointer",
                       }}
+                      className="hoverLink"
                       onClick={(e) => {
                         e.stopPropagation();
                         setItemEditPopup({ ...a, type: "min_level" });
@@ -984,6 +985,7 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
                     <th>S.N</th>
                     <th colSpan={2}>Date</th>
                     <th colSpan={2}>To</th>
+                    <th colSpan={2}>Invoice Number</th>
                     <th colSpan={2}>Added</th>
                     <th colSpan={2}>Reduce</th>
                   </tr>
@@ -997,6 +999,7 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
                           {new Date(item.date)?.toDateString() || ""}
                         </td>
                         <td colSpan={2}>{item.to || ""}</td>
+                        <td colSpan={2}>N{item.invoice_number || ""}</td>
                         <td colSpan={2}>{item.added || 0}</td>
                         <td colSpan={2}>{item.reduce || 0}</td>
                       </tr>

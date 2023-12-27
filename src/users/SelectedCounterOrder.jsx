@@ -270,6 +270,7 @@ const SelectedCounterOrder = () => {
           },
         ],
       };
+      console.log(data);
       const response = await axios({
         method: "post",
         url: "/orders/postOrder",
@@ -1176,6 +1177,7 @@ const SelectedCounterOrder = () => {
                     Billing({
                       order_uuid: order?.order_uuid,
                       invoice_number: `${order?.order_type}${order?.invoice_number}`,
+                      creating_new: true,
                       counter,
                       items: data.items,
                       others: {

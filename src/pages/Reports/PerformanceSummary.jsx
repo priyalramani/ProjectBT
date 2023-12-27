@@ -21,6 +21,7 @@ const formatDate = (_date) => {
 
 const PerformanceSummary = () => {
   const [data, setData] = useState();
+  const [popupData, setPopupData] = useState();
   const [dateValues, setDateValues] = useState({
     from_date: today,
     to_date: today,
@@ -98,34 +99,25 @@ const PerformanceSummary = () => {
           </div>
         </div>
         <div className="table-container-user item-sales-container">
-          <Table data={data} />
+          <Table data={data} setPopupData={setPopupData} />
         </div>
       </div>
+      {popupData ? (
+        <PerformancePopup
+          onSave={() => {
+            setPopupData(null);
+          }}
+          itemDetails={popupData}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
-function Table({ data = [] }) {
+function Table({ data = [],setPopupData }) {
   const columns = ["Placed", "Processed", "Checked", "Delivered", "Completed"];
-  const [sortingState, setSortingState] = useState({});
-  const [items, setItems] = useState("sort_order");
-  const [order, setOrder] = useState(null);
-  // const sortData = keys => {
-  // 	const sortTarget = sortingState?.sort_target?.toLowerCase()
-  // 	const sortMethod = sortingState[sortingState?.sort_target]
-  // 	const sortedData = keys?.sort(
-  // 		(a, b) =>
-  // 			(sortTarget === "user"
-  // 				? data[a]?.user_title?.localeCompare(data[b]?.user_title)
-  // 				: (data[a]?.[sortTarget]?.amount || 0) - (data[b]?.[sortTarget]?.amount || 0)) * sortMethod
-  // 	)
-  // 	return sortedData
-  // }
-
-  function formatIndianCurrency(number) {
-    const indianNumberFormat = new Intl.NumberFormat("en-IN");
-    return indianNumberFormat.format(number);
-  }
 
   return (
     <table
@@ -138,24 +130,7 @@ function Table({ data = [] }) {
           <th colSpan={2}>
             <div className="t-head-element">
               <span>Users</span>
-              <div className="sort-buttons-container">
-                {/* <button
-                  onClick={() => {
-                    setItems("item_title");
-                    setOrder("asc");
-                  }}
-                >
-                  <ChevronUpIcon className="sort-up sort-button" />
-                </button>
-                <button
-                  onClick={() => {
-                    setItems("item_title");
-                    setOrder("desc");
-                  }}
-                >
-                  <ChevronDownIcon className="sort-down sort-button" />
-                </button> */}
-              </div>
+              <div className="sort-buttons-container"></div>
             </div>
           </th>
 
@@ -163,112 +138,136 @@ function Table({ data = [] }) {
             <th colSpan={2}>
               <div className="t-head-element">
                 <span>{a}</span>
-                {/* <div className="sort-buttons-container">
-                  <button
-                    onClick={() => {
-                      setItems(a);
-                      setOrder("asc");
-                    }}
-                  >
-                    <ChevronUpIcon className="sort-up sort-button" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setItems(a);
-                      setOrder("desc");
-                    }}
-                  >
-                    <ChevronDownIcon className="sort-down sort-button" />
-                  </button>
-                </div> */}
               </div>
             </th>
           ))}
         </tr>
       </thead>
       <tbody className="tbody">
-        {data
-          .sort((a, b) =>
-            order == null
-              ? 0
-              : items?.warehouse_uuid
-              ? order === "asc"
-                ? (a?.stock?.find(
-                    (c) => items.warehouse_uuid === c.warehouse_uuid
-                  )?.qty || 0) -
-                  (b?.stock?.find(
-                    (c) => items.warehouse_uuid === c.warehouse_uuid
-                  )?.qty || 0)
-                : (b?.stock?.find(
-                    (c) => items.warehouse_uuid === c.warehouse_uuid
-                  )?.qty || 0) -
-                  (a?.stock?.find(
-                    (c) => items.warehouse_uuid === c.warehouse_uuid
-                  )?.qty || 0)
-              : order === "asc"
-              ? typeof a[items] === "string"
-                ? a[items].localeCompare(b[items])
-                : a[items] - b[items]
-              : typeof a[items] === "string"
-              ? b[items].localeCompare(a[items])
-              : b[items] - a[items]
-          )
-          ?.map((item, i, array) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
-              <td className="flex" style={{ justifyContent: "space-between" }}>
-                {i + 1}
-              </td>
-
-              <td colSpan={2}>{item.user_title || ""}</td>
-              {columns.map((a) => {
-                let value = item[a.toLowerCase()];
-                return (
-                  <>
-                    <td
-                      style={{
-                        textAlign: "left",
-                        cursor: "pointer",
-                      }}
-                    >
-                      ₹{value?.amount || 0}
-                    </td>
-                    <td
-                      style={{
-                        textAlign: "right",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {value?.count || 0}
-                    </td>
-                  </>
-                );
-              })}
-            </tr>
-          ))}
-        
-          <tr style={{fontWeight:"bolder"}}>
-            <td colSpan={3} style={{ textAlign: "center" }}>
-              Total
-              {/* <ChevronDownIcon className="sort-down sort-button" /> */}
+        {data?.map((item, i, array) => (
+          <tr key={Math.random()} style={{ height: "30px" }}>
+            <td className="flex" style={{ justifyContent: "space-between" }}>
+              {i + 1}
             </td>
-            {columns?.map((a) => {
-              let totalAmount = 0;
-              let totalQty = 0;
-              data.forEach((item) => {
-                totalAmount += item[a.toLowerCase()]?.amount || 0;
-                totalQty += item[a.toLowerCase()]?.count || 0;
-              });
+
+            <td colSpan={2}>{item.user_title || ""}</td>
+            {columns.map((a) => {
+              let value = item[a.toLowerCase()];
               return (
                 <>
-                  <td style={{ textAlign: "left" }}>₹{totalAmount}</td>
-                  <td style={{ textAlign: "right" }}>{totalQty}</td>
+                  <td
+                    style={{
+                      textAlign: "left",
+                      cursor: "pointer",
+                    }}
+                  >
+                    ₹{value?.amount || 0}
+                  </td>
+                  <td
+                    style={{
+                      textAlign: "right",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setPopupData(value?.orders)}
+                  >
+                    {value?.count || 0}
+                  </td>
                 </>
               );
             })}
           </tr>
-       
+        ))}
+
+        <tr style={{ fontWeight: "bolder" }}>
+          <td colSpan={3} style={{ textAlign: "center" }}>
+            Total
+            {/* <ChevronDownIcon className="sort-down sort-button" /> */}
+          </td>
+          {columns?.map((a) => {
+            let totalAmount = 0;
+            let totalQty = 0;
+            data.forEach((item) => {
+              totalAmount += item[a.toLowerCase()]?.amount || 0;
+              totalQty += item[a.toLowerCase()]?.count || 0;
+            });
+            return (
+              <>
+                <td style={{ textAlign: "left" }}>₹{totalAmount}</td>
+                <td style={{ textAlign: "right" }}>{totalQty}</td>
+              </>
+            );
+          })}
+        </tr>
       </tbody>
     </table>
+  );
+}
+function PerformancePopup({ onSave, itemDetails }) {
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{
+          height: "fit-content",
+          width: "90vw",
+          padding: "50px",
+          zIndex: "999999999",
+          border: "2px solid #000",
+        }}
+      >
+        <div className="inventory">
+          <div
+            className="accountGroup"
+            id="voucherForm"
+            action=""
+            style={{
+              height: "400px",
+              maxHeight: "500px",
+              overflow: "scroll",
+            }}
+          >
+            <div className="table-container-user item-sales-container">
+              <table
+                className="user-table"
+                style={{
+                  maxWidth: "100vw",
+                  height: "fit-content",
+                  overflowX: "scroll",
+                }}
+              >
+                <thead>
+                  <tr>
+                    <th>S.N</th>
+                    <th colSpan={2}>Date</th>
+                    <th colSpan={2}>Counter Title</th>
+                    <th colSpan={2}>Invoice Number</th>
+                    <th colSpan={2}>Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="tbody">
+                  {itemDetails?.map((item, i, array) => {
+                    return (
+                      <tr key={Math.random()} style={{ height: "30px" }}>
+                        <td>{i + 1}</td>
+                        <td colSpan={2}>
+                          {new Date(item.date)?.toDateString() || ""}
+                        </td>
+                        <td colSpan={2}>{item.counter_title || ""}</td>
+                        <td colSpan={2}>N{item.invoice_number || ""}</td>
+                        <td colSpan={2}>{item.order_grandtotal || 0}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
