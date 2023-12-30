@@ -110,18 +110,19 @@ const CashRegisterReport = () => {
     let curTime = "yy-mm-dd"
       .replace("mm", ("00" + time?.getMonth()?.toString()).slice(-2))
       .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
-      .replace("dd", ("00" + (time?.getDate() + 3)?.toString()).slice(-2));
+      .replace("dd", ("00" + (time?.getDate()-7)?.toString()).slice(-2));
     let sTime = "yy-mm-dd"
       .replace("mm", ("00" + time?.getMonth()?.toString()).slice(-2))
       .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
       .replace("dd", ("00" + time?.getDate()?.toString()).slice(-2));
     setSearchData((prev) => ({
       ...prev,
-      startDate: sTime,
-      endDate: curTime,
+      startDate: curTime,
+      endDate: sTime,
     }));
     getCounter();
   }, []);
+  console.log({searchData})
   useEffect(() => {
     if (initial) getCounterStockReport();
     else setInitial(true);

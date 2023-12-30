@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
 
 const OrderPrint = ({
@@ -13,11 +14,25 @@ const OrderPrint = ({
   reminderDate,
   footer = false,
   paymentModes = [],
-  charges = [],
   route=[]
 }) => {
   const isEstimate = order?.order_type === "E";
   const [gstValues, setGstVAlues] = useState([]);
+  const [appliedCounterCharges, setAppliedCounterCharges] = useState(null);
+  const getAppliedCounterCharges = async (charges_uuid) => {
+    try {
+      const response = await axios.post(`/counterCharges/list`, {
+        charges_uuid,
+      });
+      if (response.data.success) setAppliedCounterCharges(response.data.result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(()=>{
+    if (order?.counter_charges)
+        getAppliedCounterCharges(order?.counter_charges);
+  },[order?.counter_charges])
   const itemDetails = useMemo(() => {
     let items = item_details?.map((a) => ({
       ...a,
@@ -782,7 +797,7 @@ console.log(itemDetails)
                             </tr>
                           ))
                         : ""}
-                      {charges?.map((_charge) => (
+                      {appliedCounterCharges?.map((_charge) => (
                         <tr>
                           <td
                             style={{

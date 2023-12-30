@@ -108,7 +108,7 @@ export function OrderDetails({
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
-  const [appliedCounterCharges, setAppliedCounterCharges] = useState(null);
+
   const [deductionsPopup, setDeductionsPopup] = useState();
   const [deductionsData, setDeductionsData] = useState();
   const getRoutesData = async () => {
@@ -504,16 +504,6 @@ export function OrderDetails({
     }
   };
 
-  const getAppliedCounterCharges = async (charges_uuid) => {
-    try {
-      const response = await axios.post(`/counterCharges/list`, {
-        charges_uuid,
-      });
-      if (response.data.success) setAppliedCounterCharges(response.data.result);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const sendMsg = async () => {
     if (waiting) {
@@ -567,8 +557,7 @@ export function OrderDetails({
       });
       getCounters([order?.counter_uuid]);
       
-      if (order?.counter_charges)
-        getAppliedCounterCharges(order?.counter_charges);
+      
     }
   }, [order]);
 
@@ -2893,7 +2882,6 @@ export function OrderDetails({
         items={itemsData}
         paymentModes={paymentModes}
         counters={counter}
-        charges={appliedCounterCharges}
         print={invokePrint}
         category={category}
         route={routeData}

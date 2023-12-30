@@ -151,8 +151,8 @@ const AdvanceOrderingPage = () => {
               : 0;
           return {
             ...itemA,
-            b: (projection / +itemA?.conversion).toFixed(0),
-            p: (projection % +itemA?.conversion).toFixed(0),
+            b: ~~(projection / +itemA?.conversion),
+            p: ~~(projection % +itemA?.conversion),
           };
         });
         return {

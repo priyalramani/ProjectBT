@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import OrderPrint from "./prints/OrderPrint";
 import PendingPaymentsSummary from "./prints/PendingPaymentsSummary";
+import axios from "axios";
 
 const OrderPrintWrapper = ({
   componentRef,
@@ -17,6 +18,8 @@ const OrderPrintWrapper = ({
   route = [],
   ...props
 }) => {
+  
+
   const getPrintData = (order) => {
     const max_count = order?.order_type !== "E" ? 15 : 19;
     const min_count = max_count - 7;

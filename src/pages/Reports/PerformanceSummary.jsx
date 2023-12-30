@@ -8,6 +8,7 @@ import {
   TiArrowUnsorted,
 } from "react-icons/ti";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/solid";
+import { formatAMPM } from "../../utils/helperFunctions";
 const today = new Date().getTime();
 
 const formatDate = (_date) => {
@@ -250,7 +251,7 @@ function PerformancePopup({ onSave, itemDetails }) {
                       <tr key={Math.random()} style={{ height: "30px" }}>
                         <td>{i + 1}</td>
                         <td colSpan={2}>
-                          {new Date(item.date)?.toDateString() || ""}
+                          {formatAMPM(new Date(item.date))} {new Date(item.date)?.toDateString() || ""}
                         </td>
                         <td colSpan={2}>{item.counter_title || ""}</td>
                         <td colSpan={2}>N{item.invoice_number || ""}</td>

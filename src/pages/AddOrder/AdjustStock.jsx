@@ -150,9 +150,9 @@ export default function AdjustStock() {
             return {
               ...a,
               uuid: a.item_uuid,
-              p: (qty % a.conversion).toFixed(0),
+              p: ~~(qty % a.conversion),
               qty,
-              b: (qty / a.conversion).toFixed(0),
+              b: ~~(qty / a.conversion),
               ap: 0,
               bp: 0,
               visible: 1,
@@ -312,10 +312,10 @@ export default function AdjustStock() {
                               onChange={(e) => {
                                 setOrder((prev) => {
                                   let b = e.target.value;
-                                  let ab = (
+                                  let ab =~~(
                                     (item.qty + b * item.conversion) /
                                     item.conversion
-                                  ).toFixed(0);
+                                  );
                                   return {
                                     ...prev,
                                     item_details: prev.item_details.map((a) =>
@@ -472,10 +472,10 @@ export default function AdjustStock() {
                               placeholder="BOX"
                               onChange={(e) => {
                                 let ab = e.target.value;
-                                let b = (
+                                let b = ~~(
                                   (+item.qty + +ab * item.conversion) /
                                   item.conversion
-                                ).toFixed(0);
+                                );
                                 setOrder((prev) => {
                                   return {
                                     ...prev,
@@ -510,7 +510,8 @@ export default function AdjustStock() {
                               onChange={(e) => {
                                 setOrder((prev) => {
                                   let ap = e.target.value;
-                                  let p = +ap + (+item.qty - +item.b*item.conversion);
+                                  console.log({ap,qty:item.qty,b:item.b,conversion:item.conversion});
+                                  let p = +ap + (+item.qty - item.b* +item.conversion);
                                   return {
                                     ...prev,
                                     item_details: prev.item_details.map((a) =>
