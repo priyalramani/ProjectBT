@@ -104,7 +104,7 @@ const OrderPdf = () => {
 					<OrderPrint
 						counter={counter.find(a => a.counter_uuid === order?.counter_uuid)}
 						reminderDate={reminderDate}
-						order={order}
+						order={JSON.parse(JSON.stringify(order))}
 						date={new Date(order?.status?.[0]?.time)}
 						user={user?.user_title || ""}
 						itemData={itemData}

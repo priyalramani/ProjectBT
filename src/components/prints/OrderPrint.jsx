@@ -14,7 +14,8 @@ const OrderPrint = ({
   reminderDate,
   footer = false,
   paymentModes = [],
-  route=[]
+  route=[],
+  defaultOrder={item_details:[]},
 }) => {
   const isEstimate = order?.order_type === "E";
   const [gstValues, setGstVAlues] = useState([]);
@@ -43,7 +44,6 @@ const OrderPrint = ({
     else
       return items;
   }, [item_details, itemData]);
-console.log(itemDetails)
   let deliveryMessage = useMemo(
     () =>
       paymentModes?.filter(
@@ -56,13 +56,14 @@ console.log(itemDetails)
   );
   useEffect(() => {
     let arr = [];
-    let gst_value = order.item_details.map((a) => a.gst_percentage);
+    let gst_value = defaultOrder.item_details.map((a) => a.gst_percentage);
+    console.log({gst_value});
     gst_value = gst_value.filter((item, pos) => {
       return gst_value.indexOf(item) === pos;
     });
 
     for (let a of gst_value) {
-      let data = order.item_details.filter((b) => +b.gst_percentage === a);
+      let data = defaultOrder.item_details.filter((b) => +b.gst_percentage === a);
       let amt =
         data.length > 1
           ? data.map((b) => +b?.item_total).reduce((a, b) => +a + b)
@@ -79,7 +80,7 @@ console.log(itemDetails)
         });
     }
     setGstVAlues(arr);
-  }, [order.item_details]);
+  }, [defaultOrder.item_details]);
   let total_desc_amt =
     order?.item_details?.map((item) => {
       const itemInfo = itemData?.find((a) => a.item_uuid === item.item_uuid);

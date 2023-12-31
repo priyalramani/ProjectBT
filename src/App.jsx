@@ -76,8 +76,9 @@ import CounterStockReport from "./pages/Reports/CounterStockReport";
 import StockAdjustmentReport from "./pages/Reports/StockAdjustmentReport";
 import CashRegisterReport from "./pages/Reports/CashRegisterReport";
 import ExpansesPage from "./pages/Master/Expances";
+import StockTrack from "./pages/Reports/StockTrack";
 
-export let Version = 228;
+export let Version = 229;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
@@ -371,6 +372,10 @@ function App() {
               <Route
                 path="/admin/completeOrderReport"
                 element={<CompleteOrder />}
+              />
+              <Route  
+                path="/admin/stockTracker"
+                element={<StockTrack />}
               />
               <Route
                 path="/admin/counterStockReport"

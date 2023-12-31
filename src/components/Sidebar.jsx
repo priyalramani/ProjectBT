@@ -31,6 +31,7 @@ let titleData = [
 	{ value: "ItemIncentive", name: "Item Incentive" },
 	{ value: "upiTransactionReport", name: "UPI & Cheque Transaction" },
 	{ value: "completeOrderReport", name: "Complete Order" },
+	{ value: "stockTracker", name: "Stock Tracker" },
 	{ value: "counterStockReport", name: "Counter Stock Report" },
 	{ value: "StockAdjustmentReport", name: "Stock Adjustment Summary" },
 	{ value: "cashRegisterReport", name: "Cash Registers" },
@@ -253,7 +254,11 @@ const Sidebar = ({ setCollectionTags }) => {
 						{
 							name: "OrderForm",
 							link: "/admin/OrderForm"
-						}
+						},
+						{
+							name: "Stock Tracker",
+							link: "/admin/stockTracker"
+						},
 					]}
 				/>
 				<NavLink

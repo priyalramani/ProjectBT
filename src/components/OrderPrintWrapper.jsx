@@ -21,6 +21,7 @@ const OrderPrintWrapper = ({
   
 
   const getPrintData = (order) => {
+
     const max_count = order?.order_type !== "E" ? 15 : 19;
     const min_count = max_count - 7;
     const sourceArray = order?.item_details;
@@ -98,6 +99,7 @@ const OrderPrintWrapper = ({
                 )}
                 reminderDate={reminderDate}
                 order={order}
+                defaultOrder={__order}
                 date={new Date(order?.status[0]?.time)}
                 user={
                   users.find((a) => a.user_uuid === order?.status[0]?.user_uuid)
