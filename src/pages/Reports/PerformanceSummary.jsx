@@ -37,8 +37,14 @@ const PerformanceSummary = () => {
     );
     endDate = new Date(new Date(endDate).setHours(0, 0, 0, 0)).getTime();
 
-    const query = `?from_date=${startDate}&to_date=${endDate}`;
-    const response = await axios("users/performance-summary" + query);
+   
+    const response = await axios("users/performance-summary",{
+      method: "post",
+      data: {
+        from_date: startDate,
+        to_date: endDate,
+      },
+    });
     if (response.status === 200) {
       setData(response.data.result);
     }

@@ -78,7 +78,7 @@ import CashRegisterReport from "./pages/Reports/CashRegisterReport";
 import ExpansesPage from "./pages/Master/Expances";
 import StockTrack from "./pages/Reports/StockTrack";
 
-export let Version = 229;
+export let Version = 230;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
