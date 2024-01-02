@@ -79,7 +79,6 @@ const State = props => {
 	}
 
 	const spcPricePrompt = (...params) => {
-		console.log({ params })
 		setPromptState({
 			active: true,
 			message: "Item special price will be deleted. Do you wish to continue?",
