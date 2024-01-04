@@ -43,6 +43,8 @@ const PerformanceSummary = () => {
       data: {
         from_date: startDate,
         to_date: endDate,
+        from:new Date(dateValues.from_date).getDate(),
+        to:new Date(dateValues.to_date).getDate(),
       },
     });
     if (response.status === 200) {
