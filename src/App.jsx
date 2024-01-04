@@ -73,8 +73,8 @@ import ExpansesPage from "./pages/Master/Expances"
 import StockTrack from "./pages/Reports/StockTrack"
 
 export let Version = 232
-export const server = "http://localhost:9000";
-// export const server = "https://api.btgondia.com"
+// export const server = "http://localhost:9000";
+export const server = "https://api.btgondia.com"
 
 function App() {
 	const [userType, setUserType] = useState(sessionStorage.getItem("userType"))
