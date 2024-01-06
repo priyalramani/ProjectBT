@@ -227,6 +227,7 @@ export function OrderDetails({
   useEffect(() => {
     getTripData();
   }, [popupForm]);
+
   useEffect(() => {
     if (order?.order_status === "A") setEditOrder(true);
   }, [order?.order_status]);
@@ -460,7 +461,6 @@ export function OrderDetails({
   }, [category, orderData]);
 
   const getItemsData = async (item) => {
- 
     const response = await axios({
       method: "post",
       url: "/items/GetItemList",
@@ -504,7 +504,6 @@ export function OrderDetails({
     }
   };
 
-
   const sendMsg = async () => {
     if (waiting) {
       return;
@@ -520,7 +519,7 @@ export function OrderDetails({
         invoice_number: orderData.invoice_number,
         additional_users: userSelection,
         additional_numbers: Object.values(additionalNumbers?.values),
-        sendCounter
+        sendCounter,
       },
       headers: {
         "Content-Type": "application/json",
@@ -546,7 +545,7 @@ export function OrderDetails({
   }, []);
 
   useEffect(() => {
-    console.log({order});
+    console.log({ order });
     if (order) {
       getItemsData(order?.item_details?.map((a) => a.item_uuid));
       setDeductionsData({
@@ -556,8 +555,6 @@ export function OrderDetails({
         adjustment_remarks: order?.adjustment_remarks || "",
       });
       getCounters([order?.counter_uuid]);
-      
-      
     }
   }, [order]);
 
@@ -1472,7 +1469,7 @@ export function OrderDetails({
                           width: "22px",
                           height: "22px",
                           borderWidth: "2px",
-                          zIndex:99999999999999999
+                          zIndex: 99999999999999999,
                         }}
                         className="loader"
                       />
@@ -1765,7 +1762,9 @@ export function OrderDetails({
                       <th className="pa2 tc bb b--black-20 ">Price(b)</th>
                       {editOrder ? (
                         <>
-                          <th className="pa2 tc bb b--black-20 ">Salesperson Discount</th>
+                          <th className="pa2 tc bb b--black-20 ">
+                            Salesperson Discount
+                          </th>
                           <th className="pa2 tc bb b--black-20 "></th>
                           <th className="pa2 tc bb b--black-20 "></th>
                         </>
@@ -1950,6 +1949,29 @@ export function OrderDetails({
                                     let itemData = itemsData.find(
                                       (a) => a.item_uuid === e.value
                                     );
+                                    let counterData= counters.find(
+                                      (a) => a.counter_uuid === orderData.counter_uuid
+                                    )
+
+                                    let item_rate = counterData?.company_discount?.find(
+                                        (a) =>
+                                          a.company_uuid === itemData.company_uuid
+                                      )?.item_rate;
+                                   
+                                    let item_price = itemData.item_price;
+                                    if (item_rate === "a")
+                                      item_price = itemData.item_price_a;
+                                    if (item_rate === "b")
+                                      item_price = itemData.item_price_b;
+                                    if (item_rate === "c")
+                                      item_price = itemData.item_price_c;
+
+                               console.log({
+                                counter,
+                                      item_rate,
+                                      item_title: itemData.item_title,
+                                    });
+
                                     console.log(itemData);
                                     setOrderData((prev) => ({
                                       ...prev,
@@ -1962,11 +1984,13 @@ export function OrderDetails({
                                                   (b) => b.item_uuid === e.value
                                                 ),
                                                 status: 0,
-                                                price:+getSpecialPrice(
-                                                  counters,
-                                                  itemData,
-                                                  orderData?.counter_uuid
-                                                )?.price|| itemData?.item_price,
+                                                price:
+                                                  +getSpecialPrice(
+                                                    counters,
+                                                    itemData,
+                                                    orderData?.counter_uuid
+                                                  )?.price ||
+                                                  item_price ||0,
                                               }
                                             : a
                                       ),
@@ -2268,9 +2292,10 @@ export function OrderDetails({
                           </td>
                           {editOrder ? (
                             <>
-                              
-                              <td style={{textAlign:"center"}}>
-                                {item?.charges_discount?.find(a=>a.title==="Salesperson Discount")?.value || "0"}{" "}
+                              <td style={{ textAlign: "center" }}>
+                                {item?.charges_discount?.find(
+                                  (a) => a.title === "Salesperson Discount"
+                                )?.value || "0"}{" "}
                                 %
                               </td>
                               <td>
@@ -2687,7 +2712,6 @@ export function OrderDetails({
                           justifyContent: "start",
                         }}
                       >
-                        
                         <label
                           className="selectLabel flex"
                           style={{ width: "20px" }}
@@ -2703,9 +2727,8 @@ export function OrderDetails({
                               setSendCounter(e.target.checked);
                             }}
                           />
-                          
                         </label>
-                        <div >Send To Counter</div>
+                        <div>Send To Counter</div>
                       </div>
                       <div
                         className="row"
@@ -2781,7 +2804,7 @@ export function OrderDetails({
                       <div>
                         <span>Users</span>
                         <UserSelection
-                          users={users.filter(a=>a.status===1)}
+                          users={users.filter((a) => a.status === 1)}
                           selection={userSelection}
                           setSelection={setUserSelection}
                         />
@@ -3084,7 +3107,6 @@ const DeleteOrderPopup = ({
           </button>
         </div>
 
-       
         <div
           style={{
             overflowY: "scroll",
@@ -3093,46 +3115,39 @@ const DeleteOrderPopup = ({
           }}
         >
           {messageTemplate?.map((item, i) => (
-            <tr key={item.id} onClick={(e)=>{
-				e.stopPropagation()
-				setReason((prev)=>prev+item.body)
-			}} style={{cursor:"pointer"}}>
-				<td
-                colSpan={2}
-              
-              >
-          
+            <tr
+              key={item.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                setReason((prev) => prev + item.body);
+              }}
+              style={{ cursor: "pointer" }}
+            >
+              <td colSpan={2}>
                 <button
                   type="button"
                   className="submit"
-                  style={{ padding: "0" ,background:"transparent",color:"red",height:"20px",marginTop:"0"}}
+                  style={{
+                    padding: "0",
+                    background: "transparent",
+                    color: "red",
+                    height: "20px",
+                    marginTop: "0",
+                  }}
                   onClick={(e) => {
-					e.stopPropagation()
-					deleteMessageTemplate(item);
-				  }}
+                    e.stopPropagation();
+                    deleteMessageTemplate(item);
+                  }}
                 >
-                  <DeleteOutline style={{height:"20px",marginTop:"5px"}}/>
+                  <DeleteOutline style={{ height: "20px", marginTop: "5px" }} />
                 </button>
               </td>
-              <td
-               
-                
-              >
-                {i + 1})
-                
-              </td>
-			  <td
-                colSpan={3}
-                
-              >
-                {item.body}
-                
-              </td>
-			  
+              <td>{i + 1})</td>
+              <td colSpan={3}>{item.body}</td>
             </tr>
           ))}
         </div>
-		<div
+        <div
           style={{
             fontSize: "14px",
             margin: "10px 0",

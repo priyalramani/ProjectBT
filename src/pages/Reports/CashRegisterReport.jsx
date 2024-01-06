@@ -14,6 +14,7 @@ import context from "../../context/context";
 import CloseIcon from "@mui/icons-material/Close";
 import { useReactToPrint } from "react-to-print";
 import TransactionsStatement from "../../components/prints/TransactionsStatement";
+import { getLastWeekDates } from "../../utils/helperFunctions";
 const CashRegisterReport = () => {
   const [searchData, setSearchData] = useState({
     startDate: "",
@@ -105,23 +106,27 @@ const CashRegisterReport = () => {
     else setItems([]);
   };
 
-  useEffect(() => {
-    let time = new Date();
-    let curTime = "yy-mm-dd"
-      .replace("mm", ("00" + time?.getMonth()?.toString()).slice(-2))
-      .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
-      .replace("dd", ("00" + (time?.getDate()-7)?.toString()).slice(-2));
-    let sTime = "yy-mm-dd"
-      .replace("mm", ("00" + time?.getMonth()?.toString()).slice(-2))
-      .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
-      .replace("dd", ("00" + time?.getDate()?.toString()).slice(-2));
-    setSearchData((prev) => ({
-      ...prev,
-      startDate: curTime,
-      endDate: sTime,
-    }));
-    getCounter();
-  }, []);
+
+	useEffect(() => {
+		let time = new Date()
+		let curTime = "yy-mm-dd"
+			.replace("mm", ("00" + (time?.getMonth() + 1)?.toString()).slice(-2))
+			.replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
+			.replace("dd", ("00" + time?.getDate()?.toString()).slice(-2))
+		let sTime = getLastWeekDates()
+		sTime=
+		"yy-mm-dd"
+			.replace("mm", ("00" + (sTime?.getMonth() + 1)?.toString()).slice(-2))
+			.replace("yy", ("0000" + sTime?.getFullYear()?.toString()).slice(-4))
+			.replace("dd", ("00" + sTime?.getDate()?.toString()).slice(-2))
+			console.log({sTime,curTime})
+		setSearchData(prev => ({
+			...prev,
+			startDate: sTime,
+			endDate: curTime,
+		}))
+		getCounter()
+	}, [])
   console.log({searchData})
   useEffect(() => {
     if (initial) getCounterStockReport();

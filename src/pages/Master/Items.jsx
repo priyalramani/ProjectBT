@@ -497,7 +497,10 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
                 <tr
                   key={Math.random()}
                   style={{ height: "30px" }}
-                  onClick={() => setPopupForm({ type: "edit", data: item })}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPopupForm({ type: "edit", data: item });
+                  }}
                 >
                   <td>{i + 1}</td>
                   <td>{item.company_title}</td>
@@ -518,6 +521,19 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
                         gap: "5px",
                       }}
                     >
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          fontSize: 20,
+                          paddingRight: 10,
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPopupForm({ type: "price", data: item });
+                        }}
+                      >
+                        ₹
+                      </div>
                       <GrList
                         style={{ fontSize: "22px" }}
                         onClick={(e) => {
@@ -562,7 +578,7 @@ function NewUserForm({
   items,
   setNotification,
 }) {
-  const [data, setdata] = useState({item_group_uuid:[]});
+  const [data, setdata] = useState({ item_group_uuid: [] });
 
   const [itemGroup, setItemGroup] = useState([]);
 
@@ -597,6 +613,14 @@ function NewUserForm({
         status: 1,
         ...popupInfo.data,
       });
+    else if (popupInfo?.type === "price")
+      setdata({
+        item_uuid: popupInfo.data.item_uuid,
+        item_title: popupInfo.data.item_title,
+        item_price_a: popupInfo.data.item_price_a || 0,
+        item_price_b: popupInfo.data.item_price_b || 0,
+        item_price_c: popupInfo.data.item_price_c || 0,
+      });
     else
       setdata({
         one_pack: "1",
@@ -610,11 +634,11 @@ function NewUserForm({
         exclude_discount: 0,
       });
   }, [companies, itemCategories, popupInfo.data, popupInfo?.type]);
-
+console.log({data})
   const submitHandler = async (e) => {
     let obj = { ...data, item_uuid: data.item_uuid || uuid() };
     e.preventDefault();
-    if (!obj.item_group_uuid?.length) {
+    if (!obj.item_group_uuid?.length&&popupInfo.type!=="price") {
       setNotification({ success: false, message: "Please Select Item Group" });
       setTimeout(() => setNotification(null), 5000);
       return;
@@ -673,7 +697,7 @@ function NewUserForm({
       });
       obj = { ...obj, img_status: 1 };
     }
-    if (popupInfo?.type === "edit") {
+    if (popupInfo?.type === "edit"||popupInfo.type==="price") {
       const response = await axios({
         method: "put",
         url: "/items/putItem",
@@ -708,12 +732,18 @@ function NewUserForm({
       ...prev,
       item_group_uuid: prev?.item_group_uuid?.find((a) => a === item_group_uuid)
         ? prev?.item_group_uuid?.filter((a) => a !== item_group_uuid)
-        : [...(prev.item_group_uuid??[]), item_group_uuid],
+        : [...(prev.item_group_uuid ?? []), item_group_uuid],
     }));
   };
   return (
     <div className="overlay" style={{ zIndex: 9999999 }}>
-      <div className="modal" style={{ height: "90vh", width: "fit-content" }}>
+      <div
+        className="modal"
+        style={{
+          height: popupInfo.type === "price" ? "65vh" : "90vh",
+          width: "fit-content",
+        }}
+      >
         <div
           className="content"
           style={{
@@ -725,533 +755,610 @@ function NewUserForm({
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={submitHandler}>
               <div className="row">
-                <h1>{popupInfo.type === "edit" ? "Edit" : "Add"} Items</h1>
+                <h1>
+                  {popupInfo.type === "price"
+                    ? "Item Price"
+                    : popupInfo.type === "edit"
+                    ? "Edit Items"
+                    : "Add Items"}
+                </h1>
               </div>
-
-              <div className="formGroup">
-                <div className="row">
-                  <label className="selectLabel">
-                    Item Title
-                    <input
-                      type="text"
-                      name="route_title"
-                      className="numberInput"
-                      value={data?.item_title}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          item_title: e.target.value,
-                          pronounce: e.target.value,
-                        })
-                      }
-                      maxLength={60}
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    Sort Order
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
-                      className="numberInput"
-                      value={data?.sort_order}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          sort_order: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                </div>
-                <div className="row">
-                  <label htmlFor={data.item_uuid} className="flex">
-                    Upload Image
-                    <input
-                      className="searchInput"
-                      type="file"
-                      id={data.item_uuid}
-                      style={{ display: "none" }}
-                      onChange={(e) => {
-                        if (e.target.files[0].size > 500000) {
-                          setNotification({ message: "File is too big!" });
-                          setTimeout(() => setNotification(null), 500);
-                        } else {
-                          setdata((prev) => ({
-                            ...prev,
-                            img: e.target.files[0],
-                          }));
+              {popupInfo.type === "price" ? (
+                <div className="formGroup">
+                  <div className="row">
+                    <label className="selectLabel">
+                      Item Price A
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="route_title"
+                        className="numberInput"
+                        step="0.001"
+                        value={data?.item_price_a}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_price_a: e.target.value,
+                          })
                         }
-                      }}
-                    />
-                    <img
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        objectFit: "contain",
-                      }}
-                      src={
-                        data.img_status
-                          ? server + "/" + data.item_uuid + ".png"
-                          : noimg
-                      }
-                      onError={({ currentTarget }) => {
-                        currentTarget.onerror = null; // prevents looping
-                        currentTarget.src = noimg;
-                      }}
-                      alt=""
-                    />
-                  </label>
-                  {data.img_status ? (
-                    <span
-                      className="flex"
-                      style={{ width: "10%", height: "100px" }}
-                      onClick={() =>
-                        setdata((prev) => ({ ...prev, img_status: false }))
-                      }
-                    >
-                      <DeleteOutline />
-                    </span>
-                  ) : (
-                    ""
-                  )}
+                        maxLength={5}
+                      />
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Item Price B
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="route_title"
+                        className="numberInput"
+                        step="0.001"
+                        value={data?.item_price_b}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_price_b: e.target.value,
+                          })
+                        }
+                        maxLength={5}
+                      />
+                    </label>
+                  </div>
+                  <sdiv className="row">
+                    <label className="selectLabel">
+                      Item Price C
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="route_title"
+                        className="numberInput"
+                        step="0.001"
+                        value={data?.item_price_c}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_price_c: e.target.value,
+                          })
+                        }
+                        maxLength={5}
+                      />
+                    </label>
+                  </sdiv>
                 </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    Company
-                    <select
-                      name="user_type"
-                      className="select"
-                      value={data?.company_uuid}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          company_uuid: e.target.value,
-                          category_uuid: itemCategories.filter(
-                            (a) => a.company_uuid === e.target.value
-                          )[0]?.category_uuid,
-                        })
-                      }
-                    >
-                      {companies
-                        .sort((a, b) => a.sort_order - b.sort_order)
-                        .map((a) => (
-                          <option value={a.company_uuid}>
-                            {a.company_title}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
-                  <label className="selectLabel">
-                    Item Category
-                    <select
-                      name="user_type"
-                      className="select"
-                      value={data?.category_uuid}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          category_uuid: e.target.value,
-                        })
-                      }
-                    >
-                      {itemCategories
-                        .filter((a) => a.company_uuid === data.company_uuid)
-                        .sort((a, b) => a.sort_order - b.sort_order)
-                        .map((a) => (
-                          <option value={a.category_uuid}>
-                            {a.category_title}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
-                </div>
-
-                <div className="row">
-                  <label className="selectLabel">
-                    Pronounce
-                    <input
-                      type="text"
-                      name="route_title"
-                      className="numberInput"
-                      value={data?.pronounce}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          pronounce: e.target.value,
-                        })
-                      }
-                      maxLength={42}
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    MRP
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
-                      className="numberInput"
-                      value={data?.mrp}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          mrp: e.target.value,
-                        })
-                      }
-                      maxLength={5}
-                    />
-                  </label>
-                </div>
-
-                <div className="row">
-                  <label className="selectLabel">
-                    Item Price
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="route_title"
-                      className="numberInput"
-                      step="0.001"
-                      value={data?.item_price}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          item_price: e.target.value,
-                          margin: (data.mrp / e.target.value - 1) * 100,
-                        })
-                      }
-                      maxLength={5}
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    Item Margin
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="route_title"
-                      className="numberInput"
-                      step="0.001"
-                      value={data?.margin}
-                      onChange={(e) => {
-                        let item_price = data?.mrp / (e.target.value / 100 + 1);
-                        item_price =
-                          item_price - Math.floor(item_price) !== 0
-                            ? item_price
-                                .toString()
-                                .match(
-                                  new RegExp(
-                                    "^-?\\d+(?:.\\d{0," + (2 || -1) + "})?"
-                                  )
-                                )[0]
-                            : item_price;
-
-                        setdata({
-                          ...data,
-                          margin: e.target.value,
-                          item_price,
-                        });
-                      }}
-                      maxLength={5}
-                    />
-                  </label>{" "}
-                </div>
-
-                <div className="row">
-                  <label className="selectLabel">
-                    Item Code
-                    <input
-                      type="text"
-                      name="one_pack"
-                      className="numberInput"
-                      value={data?.item_code}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          item_code: e.target.value.replace(/\s+/g, ""),
-                        })
-                      }
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    GST
-                    <input
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
-                      className="numberInput"
-                      value={data?.item_gst}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          item_gst: e.target.value,
-                        })
-                      }
-                      maxLength={3}
-                    />
-                  </label>
-                </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    Conversion
-                    <input
-                      type="text"
-                      name="route_title"
-                      className="numberInput"
-                      value={data?.conversion}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          conversion: e.target.value,
-                        })
-                      }
-                      maxLength={5}
-                      disabled={popupInfo.type === "edit"}
-                    />
-                  </label>
-                  <label className="selectLabel">
-                    One Pack
-                    <input
-                      type="text"
-                      name="one_pack"
-                      className="numberInput"
-                      value={data?.one_pack}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          one_pack: e.target.value,
-                        })
-                      }
-                      maxLength={5}
-                    />
-                  </label>
-                </div>
-
-                <div className="row">
-                  <label className="selectLabel">
-                    Item Discount
-                    <input
-                      type="text"
-                      name="one_pack"
-                      className="numberInput"
-                      value={data?.item_discount}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          item_discount: e.target.value,
-                        })
-                      }
-                      maxLength={5}
-                    />
-                  </label>
-                  <label className="selectLabel" style={{ width: "100px" }}>
-                    Free Issue
-                    <div
-                      className="flex"
-                      style={{ justifyContent: "space-between" }}
-                    >
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="statusOnn"
-                          className="numberInput"
-                          checked={data.free_issue === "Y"}
-                          style={{ height: "25px" }}
-                          onClick={() =>
-                            setdata((prev) => ({ ...prev, free_issue: "Y" }))
-                          }
-                        />
-                        Yes
-                      </div>
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="statusOff"
-                          className="numberInput"
-                          checked={data.free_issue === "N"}
-                          style={{ height: "25px" }}
-                          onClick={() =>
-                            setdata((prev) => ({ ...prev, free_issue: "N" }))
-                          }
-                        />
-                        No
-                      </div>
-                    </div>
-                  </label>
-                </div>
-                <div className="row">
-                  <label className="selectLabel">
-                    Barcode
-                    <textarea
-                      type="number"
-                      onWheel={(e) => e.target.blur()}
-                      name="sort_order"
-                      className="numberInput"
-                      value={data?.barcode?.toString()?.replace(/,/g, "\n")}
-                      style={{ height: "50px" }}
-                      onChange={(e) =>
-                        setdata({
-                          ...data,
-                          barcode: e.target.value.split("\n"),
-                        })
-                      }
-                    />
-                  </label>
-                  <label className="selectLabel" style={{ width: "100px" }}>
-                    Status
-                    <div
-                      className="flex"
-                      style={{ justifyContent: "space-between" }}
-                    >
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="sort_order"
-                          className="numberInput"
-                          checked={data.status}
-                          style={{ height: "25px" }}
-                          onClick={(e) =>
+              ) : (
+                <div className="formGroup">
+                  <div className="row">
+                    <label className="selectLabel">
+                      Item Title
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.item_title}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_title: e.target.value,
+                            pronounce: e.target.value,
+                          })
+                        }
+                        maxLength={60}
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      Sort Order
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="sort_order"
+                        className="numberInput"
+                        value={data?.sort_order}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            sort_order: e.target.value,
+                          })
+                        }
+                      />
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label htmlFor={data.item_uuid} className="flex">
+                      Upload Image
+                      <input
+                        className="searchInput"
+                        type="file"
+                        id={data.item_uuid}
+                        style={{ display: "none" }}
+                        onChange={(e) => {
+                          if (e.target.files[0].size > 500000) {
+                            setNotification({ message: "File is too big!" });
+                            setTimeout(() => setNotification(null), 500);
+                          } else {
                             setdata((prev) => ({
                               ...prev,
-                              status: 1,
-                            }))
+                              img: e.target.files[0],
+                            }));
                           }
-                        />
-                        On
-                      </div>
-                      <div className="flex">
-                        <input
-                          type="radio"
-                          name="sort_order"
-                          className="numberInput"
-                          checked={!data?.status}
-                          style={{ height: "25px" }}
-                          onClick={(e) =>
-                            setdata((prev) => ({
-                              ...prev,
-                              status: 0,
-                            }))
-                          }
-                        />
-                        Off
-                      </div>
-                    </div>
-                  </label>
-                </div>
-                <div className="row">
-                  <label
-                    className="selectLabel"
-                    style={{
-                      maxWidth: "400px",
-                      maxHeight: "150px",
-                      overflowX: "scroll",
-                    }}
-                  >
-                    Item Group
-                    <table className="user-table">
-                      <tbody className="tbody">
-                        {itemGroup?.map((item) => {
-                          return (
-                            <tr
-                              key={item.item_group_uuid}
-                              style={{ height: "30px" }}
-                            >
-                              <td
-                                className="flex"
-                                style={{ justifyContent: "flex-start" }}
-                              >
-                                <input
-                                  type="checkbox"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onChangeGroupHandler(item.item_group_uuid);
-                                  }}
-                                  checked={data.item_group_uuid?.find(
-                                    (a) => a === item.item_group_uuid
-                                  )}
-                                  style={{
-                                    transform: "scale(1.3)",
-                                  }}
-                                />
-                                <div style={{ width: "10px" }}></div>
-                                {item.item_group_title || ""}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </label>
-                  <div style={{ flexDirection: "column", gap: "10px" }}>
-                    <div>
-                      Exclude Discount
+                        }}
+                      />
+                      <img
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          objectFit: "contain",
+                        }}
+                        src={
+                          data.img_status
+                            ? server + "/" + data.item_uuid + ".png"
+                            : noimg
+                        }
+                        onError={({ currentTarget }) => {
+                          currentTarget.onerror = null; // prevents looping
+                          currentTarget.src = noimg;
+                        }}
+                        alt=""
+                      />
+                    </label>
+                    {data.img_status ? (
+                      <span
+                        className="flex"
+                        style={{ width: "10%", height: "100px" }}
+                        onClick={() =>
+                          setdata((prev) => ({ ...prev, img_status: false }))
+                        }
+                      >
+                        <DeleteOutline />
+                      </span>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Company
+                      <select
+                        name="user_type"
+                        className="select"
+                        value={data?.company_uuid}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            company_uuid: e.target.value,
+                            category_uuid: itemCategories.filter(
+                              (a) => a.company_uuid === e.target.value
+                            )[0]?.category_uuid,
+                          })
+                        }
+                      >
+                        {companies
+                          .sort((a, b) => a.sort_order - b.sort_order)
+                          .map((a) => (
+                            <option value={a.company_uuid}>
+                              {a.company_title}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                    <label className="selectLabel">
+                      Item Category
+                      <select
+                        name="user_type"
+                        className="select"
+                        value={data?.category_uuid}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            category_uuid: e.target.value,
+                          })
+                        }
+                      >
+                        {itemCategories
+                          .filter((a) => a.company_uuid === data.company_uuid)
+                          .sort((a, b) => a.sort_order - b.sort_order)
+                          .map((a) => (
+                            <option value={a.category_uuid}>
+                              {a.category_title}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="row">
+                    <label className="selectLabel">
+                      Pronounce
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.pronounce}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            pronounce: e.target.value,
+                          })
+                        }
+                        maxLength={42}
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      MRP
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="sort_order"
+                        className="numberInput"
+                        value={data?.mrp}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            mrp: e.target.value,
+                          })
+                        }
+                        maxLength={5}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="row">
+                    <label className="selectLabel">
+                      Item Price
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="route_title"
+                        className="numberInput"
+                        step="0.001"
+                        value={data?.item_price}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_price: e.target.value,
+                            margin: (data.mrp / e.target.value - 1) * 100,
+                          })
+                        }
+                        maxLength={5}
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      Item Margin
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="route_title"
+                        className="numberInput"
+                        step="0.001"
+                        value={data?.margin}
+                        onChange={(e) => {
+                          let item_price =
+                            data?.mrp / (e.target.value / 100 + 1);
+                          item_price =
+                            item_price - Math.floor(item_price) !== 0
+                              ? item_price
+                                  .toString()
+                                  .match(
+                                    new RegExp(
+                                      "^-?\\d+(?:.\\d{0," + (2 || -1) + "})?"
+                                    )
+                                  )[0]
+                              : item_price;
+
+                          setdata({
+                            ...data,
+                            margin: e.target.value,
+                            item_price,
+                          });
+                        }}
+                        maxLength={5}
+                      />
+                    </label>{" "}
+                  </div>
+
+                  <div className="row">
+                    <label className="selectLabel">
+                      Item Code
+                      <input
+                        type="text"
+                        name="one_pack"
+                        className="numberInput"
+                        value={data?.item_code}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_code: e.target.value.replace(/\s+/g, ""),
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      GST
+                      <input
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="sort_order"
+                        className="numberInput"
+                        value={data?.item_gst}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_gst: e.target.value,
+                          })
+                        }
+                        maxLength={3}
+                      />
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Conversion
+                      <input
+                        type="text"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.conversion}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            conversion: e.target.value,
+                          })
+                        }
+                        maxLength={5}
+                        disabled={popupInfo.type === "edit"}
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      One Pack
+                      <input
+                        type="text"
+                        name="one_pack"
+                        className="numberInput"
+                        value={data?.one_pack}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            one_pack: e.target.value,
+                          })
+                        }
+                        maxLength={5}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="row">
+                    <label className="selectLabel">
+                      Item Discount
+                      <input
+                        type="text"
+                        name="one_pack"
+                        className="numberInput"
+                        value={data?.item_discount}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            item_discount: e.target.value,
+                          })
+                        }
+                        maxLength={5}
+                      />
+                    </label>
+                    <label className="selectLabel" style={{ width: "100px" }}>
+                      Free Issue
                       <div
                         className="flex"
-                        style={{ justifyContent: "flex-start", gap: "20px" }}
+                        style={{ justifyContent: "space-between" }}
                       >
                         <div className="flex">
                           <input
-                            type="checkbox"
-                            name="sort_order"
+                            type="radio"
+                            name="statusOnn"
                             className="numberInput"
-                            checked={data.exclude_discount}
-                            style={{ height: "25px", marginRight: "5px" }}
+                            checked={data.free_issue === "Y"}
+                            style={{ height: "25px" }}
                             onClick={() =>
-                              setdata((prev) => ({
-                                ...prev,
-                                exclude_discount: 1,
-                              }))
+                              setdata((prev) => ({ ...prev, free_issue: "Y" }))
                             }
                           />
                           Yes
                         </div>
                         <div className="flex">
                           <input
-                            type="checkbox"
-                            name="sort_order"
+                            type="radio"
+                            name="statusOff"
                             className="numberInput"
-                            checked={!data.exclude_discount}
-                            style={{ height: "25px", marginRight: "5px" }}
+                            checked={data.free_issue === "N"}
+                            style={{ height: "25px" }}
                             onClick={() =>
-                              setdata((prev) => ({
-                                ...prev,
-                                exclude_discount: 0,
-                              }))
+                              setdata((prev) => ({ ...prev, free_issue: "N" }))
                             }
                           />
                           No
                         </div>
                       </div>
-                    </div>
-                    <div>
-                      Billing Type
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label className="selectLabel">
+                      Barcode
+                      <textarea
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="sort_order"
+                        className="numberInput"
+                        value={data?.barcode?.toString()?.replace(/,/g, "\n")}
+                        style={{ height: "50px" }}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            barcode: e.target.value.split("\n"),
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="selectLabel" style={{ width: "100px" }}>
+                      Status
                       <div
                         className="flex"
-                        style={{ justifyContent: "flex-start", gap: "20px" }}
+                        style={{ justifyContent: "space-between" }}
                       >
-                        {["Invoice", "Estimate"]?.map((_i, idx) => (
-                          <div
-                            key={_i}
-                            className="flex"
-                            onClick={() =>
-                              setdata((x) => ({ ...x, billing_type: _i?.[0] }))
+                        <div className="flex">
+                          <input
+                            type="radio"
+                            name="sort_order"
+                            className="numberInput"
+                            checked={data.status}
+                            style={{ height: "25px" }}
+                            onClick={(e) =>
+                              setdata((prev) => ({
+                                ...prev,
+                                status: 1,
+                              }))
                             }
-                          >
+                          />
+                          On
+                        </div>
+                        <div className="flex">
+                          <input
+                            type="radio"
+                            name="sort_order"
+                            className="numberInput"
+                            checked={!data?.status}
+                            style={{ height: "25px" }}
+                            onClick={(e) =>
+                              setdata((prev) => ({
+                                ...prev,
+                                status: 0,
+                              }))
+                            }
+                          />
+                          Off
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  <div className="row">
+                    <label
+                      className="selectLabel"
+                      style={{
+                        maxWidth: "400px",
+                        maxHeight: "150px",
+                        overflowX: "scroll",
+                      }}
+                    >
+                      Item Group
+                      <table className="user-table">
+                        <tbody className="tbody">
+                          {itemGroup?.map((item) => {
+                            return (
+                              <tr
+                                key={item.item_group_uuid}
+                                style={{ height: "30px" }}
+                              >
+                                <td
+                                  className="flex"
+                                  style={{ justifyContent: "flex-start" }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onChangeGroupHandler(
+                                        item.item_group_uuid
+                                      );
+                                    }}
+                                    checked={data.item_group_uuid?.find(
+                                      (a) => a === item.item_group_uuid
+                                    )}
+                                    style={{
+                                      transform: "scale(1.3)",
+                                    }}
+                                  />
+                                  <div style={{ width: "10px" }}></div>
+                                  {item.item_group_title || ""}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </label>
+                    <div style={{ flexDirection: "column", gap: "10px" }}>
+                      <div>
+                        Exclude Discount
+                        <div
+                          className="flex"
+                          style={{ justifyContent: "flex-start", gap: "20px" }}
+                        >
+                          <div className="flex">
                             <input
-                              type="radio"
-                              checked={
-                                data.billing_type === _i?.[0] ||
-                                (idx === 0 && !data.billing_type)
-                              }
+                              type="checkbox"
+                              name="sort_order"
+                              className="numberInput"
+                              checked={data.exclude_discount}
                               style={{ height: "25px", marginRight: "5px" }}
+                              onClick={() =>
+                                setdata((prev) => ({
+                                  ...prev,
+                                  exclude_discount: 1,
+                                }))
+                              }
                             />
-                            {_i}
+                            Yes
                           </div>
-                        ))}
+                          <div className="flex">
+                            <input
+                              type="checkbox"
+                              name="sort_order"
+                              className="numberInput"
+                              checked={!data.exclude_discount}
+                              style={{ height: "25px", marginRight: "5px" }}
+                              onClick={() =>
+                                setdata((prev) => ({
+                                  ...prev,
+                                  exclude_discount: 0,
+                                }))
+                              }
+                            />
+                            No
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        Billing Type
+                        <div
+                          className="flex"
+                          style={{ justifyContent: "flex-start", gap: "20px" }}
+                        >
+                          {["Invoice", "Estimate"]?.map((_i, idx) => (
+                            <div
+                              key={_i}
+                              className="flex"
+                              onClick={() =>
+                                setdata((x) => ({
+                                  ...x,
+                                  billing_type: _i?.[0],
+                                }))
+                              }
+                            >
+                              <input
+                                type="radio"
+                                checked={
+                                  data.billing_type === _i?.[0] ||
+                                  (idx === 0 && !data.billing_type)
+                                }
+                                style={{ height: "25px", marginRight: "5px" }}
+                              />
+                              {_i}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
+
               <i style={{ color: "red" }}>
                 {errMassage === "" ? "" : "Error: " + errMassage}
               </i>

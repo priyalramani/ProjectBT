@@ -4,6 +4,7 @@ import Header from "../../components/Header"
 import { OrderDetails } from "../../components/OrderDetails"
 import Sidebar from "../../components/Sidebar"
 import Select from "react-select"
+import { getLastMonthDate } from "../../utils/helperFunctions"
 const CompleteOrder = () => {
 	const [searchData, setSearchData] = useState({
 		startDate: "",
@@ -46,16 +47,21 @@ const CompleteOrder = () => {
 		else setItems([])
 	}
 
+
+	
 	useEffect(() => {
 		let time = new Date()
 		let curTime = "yy-mm-dd"
 			.replace("mm", ("00" + (time?.getMonth() + 1)?.toString()).slice(-2))
 			.replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
 			.replace("dd", ("00" + time?.getDate()?.toString()).slice(-2))
-		let sTime = "yy-mm-dd"
-			.replace("mm", ("00" + time?.getMonth()?.toString()).slice(-2))
-			.replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
-			.replace("dd", ("00" + time?.getDate()?.toString()).slice(-2))
+		let sTime = getLastMonthDate()
+		sTime=
+		"yy-mm-dd"
+			.replace("mm", ("00" + (sTime?.getMonth() + 1)?.toString()).slice(-2))
+			.replace("yy", ("0000" + sTime?.getFullYear()?.toString()).slice(-4))
+			.replace("dd", ("00" + sTime?.getDate()?.toString()).slice(-2))
+			console.log({sTime,curTime})
 		setSearchData(prev => ({
 			...prev,
 			startDate: sTime,

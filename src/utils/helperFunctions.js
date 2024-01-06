@@ -25,3 +25,29 @@ export function formatAMPM(date) {
     var strTime = hours + ":" + minutes + " " + ampm
     return strTime
 }
+export function getLastWeekDates() {
+    // Get the current date
+    var currentDate = new Date();
+  
+    // Set the date to the first day of the current month
+   
+  
+    // Subtract one day to get the last day of the previous month
+    currentDate.setDate(currentDate.getDay() - 7);
+  
+    // Return the date
+    return currentDate;
+  }
+export  function getLastMonthDate() {
+    // Get the current date
+    var currentDate = new Date();
+  
+    // Set the date to the first day of the current month
+    currentDate.setDate(1);
+  
+    // Subtract one day to get the last day of the previous month
+    currentDate.setDate(currentDate.getDate() - 1);
+  
+    // Return the date
+    return currentDate;
+  }
