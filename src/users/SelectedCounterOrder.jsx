@@ -229,18 +229,31 @@ const SelectedCounterOrder = () => {
   useEffect(() => {
     if (counters.length)
       setCounter(counters?.find((a) => params.counter_uuid === a.counter_uuid));
-  }, [counters]);
+  }, [counters, params.counter_uuid]);
   useEffect(() => {
     setItems((prev) =>
-      prev?.map((a) => ({
+      prev?.map((a) => {
+        let item_price=a.item_price;
+        let item_special_price=counter?.item_special_price?.find((b) => b.item_uuid === a.item_uuid)?.price;
+        let item_rate=counter?.company_discount?.find((b) => b.company_uuid === a.company_uuid)?.item_rate;
+
+        if(item_special_price){
+          item_price=item_special_price;
+        }else if(item_rate==="a"){
+          item_price=a.item_price_a;
+        }else if(item_rate==="b"){
+          item_price=a.item_price_b;
+        }else if(item_rate==="c"){
+          item_price=a.item_price_c;
+        }
+
+        return{
         ...a,
-        item_price:
-          counter.item_special_price?.find((b) => b.item_uuid === a.item_uuid)
-            ?.price || a.item_price,
+        item_price,
         b: 0,
         p: 0,
         status: 0,
-      }))
+      }})
     );
   }, [counter]);
 
@@ -253,6 +266,7 @@ const SelectedCounterOrder = () => {
         opened_by: 0,
         item_details: orderData.items.map((a) => {
           
+          
           return{
           ...a,
           b: a.b,
@@ -260,7 +274,7 @@ const SelectedCounterOrder = () => {
           unit_price: a.price,
           gst_percentage: a.item_gst,
           status: 0,
-          price: a.price || a.item_price,
+          price: a.item_price,
         }}),
         status: [
           {

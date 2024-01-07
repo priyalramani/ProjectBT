@@ -72,7 +72,7 @@ import CashRegisterReport from "./pages/Reports/CashRegisterReport"
 import ExpansesPage from "./pages/Master/Expances"
 import StockTrack from "./pages/Reports/StockTrack"
 
-export let Version = 233
+export let Version = 234
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com"
 

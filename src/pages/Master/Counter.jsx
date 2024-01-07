@@ -31,6 +31,7 @@ const Counter = () => {
   const [deletePopup, setDeletePopup] = useState(false);
   const [sequencePopup, setSequencePopup] = useState(false);
   const [counterGroups, setCounterGroups] = useState([]);
+  const [rateAndDiscountPopup, setRateAndDiscountPopup] = useState(false);
 
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -333,6 +334,7 @@ const Counter = () => {
             setItemPopup={setItemPopup}
             setDeletePopup={setDeletePopup}
             setCounterNotesPoup={setCounterNotesPoup}
+            setRateAndDiscountPopup={setRateAndDiscountPopup}
           />
         </div>
       </div>
@@ -365,6 +367,14 @@ const Counter = () => {
       )}
       {itemPopup ? (
         <ItemPopup onSave={() => setItemPopup(false)} itemPopup={itemPopup} />
+      ) : (
+        ""
+      )}
+      {rateAndDiscountPopup ? (
+        <CounterRatesAndDiscounts
+          onSave={() => setRateAndDiscountPopup(false)}
+          itemPopup={rateAndDiscountPopup}
+        />
       ) : (
         ""
       )}
@@ -504,6 +514,7 @@ function Table({
   setItemPopup,
   setDeletePopup,
   setCounterNotesPoup,
+  setRateAndDiscountPopup,
 }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState("");
@@ -745,7 +756,7 @@ function Table({
                   className="fieldEditButton"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setItemPopup({ item, type: "company_discount" });
+                    setRateAndDiscountPopup(item);
                   }}
                 >
                   Rates and Company Discount
@@ -2167,7 +2178,6 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
                                     }
                                     className="searchInput"
                                   />
-                               
                                 </td>
                               ) : (
                                 <td />
@@ -2264,35 +2274,37 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
                                     placeholder="Discount..."
                                     className="searchInput"
                                   />
-								     {itemPopup?.type === "company_discount" ?  (
+                                  {itemPopup?.type === "company_discount" ? (
                                     <select
-									style={{ width: "100px" }}
-									className="searchInput"
-									onChange={(e) =>
-										setValue((prev) =>
-										  prev.map((a) =>
-											a.company_uuid === item.company_uuid
-											  ? {
-												  ...a,
-												  item_rate: e.target.value,
-												}
-											  : a
-										  )
-										)
-									  }
-									  value={
-										value.find(
-										  (a) =>
-											a.company_uuid === item.company_uuid
-										)?.item_rate
-									  }
+                                      style={{ width: "100px" }}
+                                      className="searchInput"
+                                      onChange={(e) =>
+                                        setValue((prev) =>
+                                          prev.map((a) =>
+                                            a.company_uuid === item.company_uuid
+                                              ? {
+                                                  ...a,
+                                                  item_rate: e.target.value,
+                                                }
+                                              : a
+                                          )
+                                        )
+                                      }
+                                      value={
+                                        value.find(
+                                          (a) =>
+                                            a.company_uuid === item.company_uuid
+                                        )?.item_rate
+                                      }
                                     >
                                       <option value="">Default</option>
                                       <option value="a">A</option>
                                       <option value="b">B</option>
                                       <option value="c">C</option>
                                     </select>
-                                  ):""}
+                                  ) : (
+                                    ""
+                                  )}
                                 </td>
                               ) : (
                                 <td />
@@ -2300,6 +2312,230 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
                             </tr>
                           );
                         })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <button className="fieldEditButton" onClick={submitHandler}>
+              Save
+            </button>
+          </div>
+
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+const CounterRatesAndDiscounts = ({
+  onSave,
+  itemPopup,
+}) => {
+  const [companies, setCompanies] = useState([]);
+  const [value, setValue] = useState([]);
+
+  const [filterCompany, setFilterCompany] = useState("");
+
+
+  const getCounterData = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/counters/GetCounter/" + itemPopup?.counter_uuid,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setValue(response.data.result?.company_discount);
+    }
+  };
+  console.log({value})
+
+
+  const getCompanies = async () => {
+    const response = await axios({
+      method: "get",
+      url: "/companies/getCompanies",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCompanies(response.data.result);
+  };
+  useEffect(() => {
+    getCompanies();
+    getCounterData()
+  
+  }, []);
+  const submitHandler = async () => {
+    const response = await axios({
+      method: "put",
+      url: "/counters/putCounter",
+      data: [
+        {
+          counter_uuid: itemPopup.counter_uuid,
+          company_discount: value,
+        },
+      ],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+    }
+  };
+
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                overflowY: "scroll",
+                height: "45vh",
+              }}
+            >
+              <input
+                type="text"
+                onChange={(e) => setFilterCompany(e.target.value)}
+                value={filterCompany}
+                placeholder="Search Company Title..."
+                className="searchInput"
+              />
+
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th className="description" style={{ width: "20%" }}>
+                      Company
+                    </th>
+
+                    <th style={{ textAlign: "center" }} colSpan={2}>
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {companies
+                    .filter(
+                      (a) =>
+                        !filterCompany ||
+                        a?.company_title
+                          .toLocaleLowerCase()
+                          .includes(filterCompany.toLocaleLowerCase())
+                    )
+                    .map((item, index) => {
+                      return (
+                        <tr key={item.item_uuid}>
+                          <td>{item.company_title}</td>
+
+                          <td>
+                            <input
+                              type="number"
+                              onWheel={(e) => e.target.blur()}
+                              style={{ width: "100px" }}
+                              onChange={(e) =>
+                                setValue((prev) =>
+                                  prev.find(
+                                    (a) => a.company_uuid === item.company_uuid
+                                  )
+                                    ? prev.map((a) =>
+                                        a.company_uuid === item.company_uuid
+                                          ? {
+                                              ...a,
+                                              discount: e.target.value,
+                                            }
+                                          : a
+                                      )
+                                    : [
+                                        ...prev,
+                                        {
+                                          company_uuid: item.company_uuid,
+                                          discount: e.target.value,
+                                        },
+                                      ]
+                                )
+                              }
+                              value={
+                                value.find(
+                                  (a) => a.company_uuid === item.company_uuid
+                                )?.discount
+                              }
+                              placeholder="Discount..."
+                              className="searchInput"
+                            />
+</td>
+<td>
+                            <select
+                              style={{ width: "100px" }}
+                              className="searchInput"
+                              onChange={(e) =>
+                                setValue((prev) =>
+                                  prev.find(
+                                    (a) => a.company_uuid === item.company_uuid
+                                  )
+                                    ? prev.map((a) =>
+                                        a.company_uuid === item.company_uuid
+                                          ? {
+                                              ...a,
+                                              item_rate: e.target.value,
+                                            }
+                                          : a
+                                      )
+                                    : [
+                                        ...prev,
+                                        {
+                                          company_uuid: item.company_uuid,
+                                          item_rate: e.target.value,
+                                        },
+                                      ]
+                                )
+                              }
+                              value={
+                                value.find(
+                                  (a) => a.company_uuid === item.company_uuid
+                                )?.item_rate
+                              }
+                            >
+                              <option value="">Default</option>
+                              <option value="a">A</option>
+                              <option value="b">B</option>
+                              <option value="c">C</option>
+                            </select>
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
             </div>
