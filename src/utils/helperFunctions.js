@@ -43,10 +43,10 @@ export  function getLastMonthDate() {
     var currentDate = new Date();
   
     // Set the date to the first day of the current month
-    currentDate.setDate(1);
+    // currentDate.setDate(1);
   
     // Subtract one day to get the last day of the previous month
-    currentDate.setDate(currentDate.getDate() - 1);
+    currentDate.setMonth(currentDate.getMonth() - 1);
   
     // Return the date
     return currentDate;

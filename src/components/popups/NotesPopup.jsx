@@ -15,8 +15,8 @@ function NotesPopup({
 	const [edit, setEdit] = useState(false)
 
 	useEffect(() => {
-		setNotes(order?.notes || [])
-	}, [order])
+		if(order?.notes?.length) close()
+	}, [order?.notes])
 
 	const submitHandler = async () => {
 		if (customSubmit) return customSubmit({ ...order,notes })

@@ -2,6 +2,16 @@ import React from "react";
 
 const TransactionsStatement = ({ cash_register, data }) => {
   const getDate = (value) => new Date(value)?.toLocaleString();
+  const getListUserWise = data?.transactions
+    ?.filter((a) => a.type === "in")
+    .reduce((acc, curr) => {
+      if (acc[curr.user_title]) {
+        acc[curr.user_title] += curr.amount;
+      } else {
+        acc[curr.user_title] = curr.amount;
+      }
+      return acc;
+    }, {});
   return (
     <>
       <table style={{ width: "100%", margin: "10px" }}>
@@ -101,7 +111,7 @@ const TransactionsStatement = ({ cash_register, data }) => {
                 Rs.{i.amount}
               </td>
               <td style={{ border: "1px solid #000", textAlign: "right" }}>
-              {i.user_title}
+                {i.user_title}
               </td>
               <td style={{ border: "1px solid #000", textAlign: "right" }}>
                 {i.counter_title}-{i.invoice_number}
@@ -109,43 +119,62 @@ const TransactionsStatement = ({ cash_register, data }) => {
             </tr>
           ))}
       </table>
-      <table style={{ margin: "10px", width: "calc(100% - 18px)" }}>
-        <tr>
-          <td
-            style={{
-              fontWeight: "600",
-              fontSize: "small",
-              textAlign: "left",
-            }}
-          >
-            Expanses:
-          </td>
-        </tr>
-        <tr>
-          <th style={{ border: "1px solid #000" }}>Created At</th>
-          <th style={{ border: "1px solid #000" }}>Amount</th>
-          <th style={{ border: "1px solid #000" }}>Category</th>
-          <th style={{ border: "1px solid #000" }}>Remarks</th>
-        </tr>
-        {data?.transactions
-          .filter((a) => a.type === "out")
-          ?.map((i) => (
+      {getListUserWise ? (
+        <table style={{ margin: "10px", width: "calc(100% - 18px)" }}>
+          <tr>User Total</tr>
+          {Object.keys(getListUserWise).map((i) => (
             <tr>
-              <td style={{ border: "1px solid #000" }}>
-                {getDate(+i.created_at)}
-              </td>
-              <td style={{ border: "1px solid #000", textAlign: "right" }}>
-                Rs.{-i.amount}
-              </td>
-              <td style={{ border: "1px solid #000", textAlign: "right" }}>
-                {i.expense_title}
-              </td>
-              <td style={{ border: "1px solid #000", textAlign: "right" }}>
-                {i.remarks}
+              <td>{i || "None"}</td>
+              <td style={{ textAlign: "right" }}>
+                Rs.{getListUserWise[i]?.toFixed(2)}
               </td>
             </tr>
           ))}
-      </table>
+        </table>
+      ) : (
+        ""
+      )}
+      {data?.transactions?.filter((a) => a.type === "out")?.length ? (
+        <table style={{ margin: "10px", width: "calc(100% - 18px)" }}>
+          <tr>
+            <td
+              style={{
+                fontWeight: "600",
+                fontSize: "small",
+                textAlign: "left",
+              }}
+            >
+              Expanses:
+            </td>
+          </tr>
+          <tr>
+            <th style={{ border: "1px solid #000" }}>Created At</th>
+            <th style={{ border: "1px solid #000" }}>Amount</th>
+            <th style={{ border: "1px solid #000" }}>Category</th>
+            <th style={{ border: "1px solid #000" }}>Remarks</th>
+          </tr>
+          {data?.transactions
+            .filter((a) => a.type === "out")
+            ?.map((i) => (
+              <tr>
+                <td style={{ border: "1px solid #000" }}>
+                  {getDate(+i.created_at)}
+                </td>
+                <td style={{ border: "1px solid #000", textAlign: "right" }}>
+                  Rs.{-i.amount}
+                </td>
+                <td style={{ border: "1px solid #000", textAlign: "right" }}>
+                  {i.expense_title}
+                </td>
+                <td style={{ border: "1px solid #000", textAlign: "right" }}>
+                  {i.remarks}
+                </td>
+              </tr>
+            ))}
+        </table>
+      ) : (
+        ""
+      )}
     </>
   );
 };

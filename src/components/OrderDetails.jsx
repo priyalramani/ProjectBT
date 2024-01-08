@@ -683,6 +683,7 @@ export function OrderDetails({
               ) || []),
             ],
           };
+
     if (completedOrderEdited) {
       setOrderData(data);
       setDeliveryPopup("edit");
@@ -2494,7 +2495,8 @@ export function OrderDetails({
                 type="button"
                 onClick={
                   window.location.pathname.includes("completeOrderReport") ||
-                  window.location.pathname.includes("pendingEntry")
+                  window.location.pathname.includes("pendingEntry")||
+                  window.location.pathname.includes("upiTransactionReport") 
                     ? () => onSubmit({ stage: 0, diliveredUser: "" }, 1)
                     : () => onSubmit()
                 }
