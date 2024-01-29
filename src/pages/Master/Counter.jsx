@@ -1567,7 +1567,7 @@ function NewUserForm({
                   <label className="selectLabel" style={{ width: "50%" }}>
                     Mobile
                     <div>
-                      {data?.mobile?.slice(0, 2).map((a) => (
+                      {data?.mobile?.map((a) => (
                         <div
                           key={a.uuid}
                           style={{
@@ -1577,6 +1577,35 @@ function NewUserForm({
                             margin: "5px 0",
                           }}
                         >
+                          <input
+                            type="text"
+                            name="route_title"
+                            className="numberInput"
+                            value={a?.title}
+                            style={{ width: "10ch",marginLeft:"10px" }}
+                            placeholder="Title"
+                            onChange={(e) => {
+                              if (
+                                e.target.value.length > 10 ||
+                                a.lable?.find(
+                                  (c) =>
+                                    (c.type === "cal" || c.type === "wa") &&
+                                    +c.varification
+                                )
+                              ) {
+                                return;
+                              }
+                              setdata((prev) => ({
+                                ...prev,
+                                mobile: prev.mobile.map((b) =>
+                                  b.uuid === a.uuid
+                                    ? { ...b, title: e.target.value }
+                                    : b
+                                ),
+                              }));
+                            }}
+                            maxLength={10}
+                          />
                           <input
                             type="number"
                             name="route_title"
@@ -1609,6 +1638,7 @@ function NewUserForm({
                               }));
                             }}
                             maxLength={10}
+                            placeholder="Mobile"
                           />
                           <span
                             style={{
@@ -1692,133 +1722,7 @@ function NewUserForm({
                       ))}
                     </div>
                   </label>
-                  <label className="selectLabel" style={{ width: "50%" }}>
-                    <div>
-                      {data?.mobile?.slice(2, 4).map((a) => (
-                        <div
-                          key={a.uuid}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            margin: "5px 0",
-                          }}
-                        >
-                          <input
-                            type="number"
-                            name="route_title"
-                            className="numberInput"
-                            value={a?.mobile}
-                            style={{ width: "15ch" }}
-                            disabled={a.lable?.find(
-                              (c) =>
-                                (c.type === "cal" || c.type === "wa") &&
-                                +c.varification
-                            )}
-                            onChange={(e) => {
-                              if (
-                                e.target.value.length > 10 ||
-                                a.lable?.find(
-                                  (c) =>
-                                    (c.type === "cal" || c.type === "wa") &&
-                                    +c.varification
-                                )
-                              ) {
-                                return;
-                              }
-                              setdata((prev) => ({
-                                ...prev,
-                                mobile: prev.mobile.map((b) =>
-                                  b.uuid === a.uuid
-                                    ? { ...b, mobile: e.target.value }
-                                    : b
-                                ),
-                              }));
-                            }}
-                            maxLength={10}
-                          />
-                          <span
-                            style={{
-                              color: a.lable?.find(
-                                (c) => c.type === "wa" && !+c.varification
-                              )
-                                ? "red"
-                                : a.lable?.find(
-                                    (c) => c.type === "wa" && +c.varification
-                                  )
-                                ? "green"
-                                : "gray",
-                              cursor: "pointer",
-                            }}
-                            onClick={(e) => {
-                              if (a.mobile) sendOtp({ ...a, lable: "wa" });
-                              //   setdata((prev) => ({
-                              //     ...prev,
-                              //     mobile: prev.mobile.map((b) =>
-                              //       b.uuid === a.uuid
-                              //         ? {
-                              //             ...b,
-                              //             lable: b.lable?.find(
-                              //               (c) => c.type === "wa"
-                              //             )
-                              //               ? b.lable.filter(
-                              //                   (c) => c.type !== "wa"
-                              //                 )
-                              //               : [
-                              //                   ...(b?.lable || []),
-                              //                   { type: "wa", varification: 0 },
-                              //                 ],
-                              //           }
-                              //         : b
-                              //     ),
-                              //   }));
-                            }}
-                          >
-                            <WhatsApp />
-                          </span>
-                          <span
-                            style={{
-                              color: a.lable?.find(
-                                (c) => c.type === "cal" && !+c.varification
-                              )
-                                ? "red"
-                                : a.lable?.find(
-                                    (c) => c.type === "cal" && +c.varification
-                                  )
-                                ? "green"
-                                : "gray",
-                              cursor: "pointer",
-                            }}
-                            onClick={(e) => {
-                              if (a.mobile) sendCallOtp({ ...a, lable: "cal" });
-                              //   setdata((prev) => ({
-                              //     ...prev,
-                              //     mobile: prev.mobile.map((b) =>
-                              //       b.uuid === a.uuid
-                              //         ? {
-                              //             ...b,
-                              //             lable: b.lable?.find(
-                              //               (c) => c.type === "cal"
-                              //             )
-                              //               ? b.lable.filter(
-                              //                   (c) => c.type !== "cal"
-                              //                 )
-                              //               : [
-                              //                   ...(b?.lable || []),
-                              //                   { type: "cal", varification: 0 },
-                              //                 ],
-                              //           }
-                              //         : b
-                              //     ),
-                              //   }));
-                            }}
-                          >
-                            <Phone />
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </label>
+                 
                 </div>
                 <i style={{ color: "red" }}>
                   {errMassage === "" ? "" : "Error: " + errMassage}

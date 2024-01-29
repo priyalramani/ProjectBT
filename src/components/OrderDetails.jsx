@@ -91,7 +91,7 @@ export function OrderDetails({
   const [complete, setComplete] = useState(false);
   const [completeOrder, setCompleteOrder] = useState(false);
   const [order, setOrder] = useState({});
-
+  const [edit_prices, setEditPrices] = useState([]);
   const [taskPopup, setTaskPopup] = useState(false);
   const [warehousePopup, setWarhousePopup] = useState(false);
   const [users, setUsers] = useState([]);
@@ -606,6 +606,7 @@ export function OrderDetails({
       replacement: data.replacement,
       adjustment: data.adjustment,
       shortage: data.shortage,
+      edit_prices,
       others: {},
     });
     data = {
@@ -800,6 +801,7 @@ export function OrderDetails({
       replacement: data.replacement,
       adjustment: data.adjustment,
       shortage: data.shortage,
+      edit_prices,
       others: {},
     });
     data = {
@@ -814,6 +816,7 @@ export function OrderDetails({
       items: data2.item_details,
       replacement: data2.replacement,
       adjustment: data2.adjustment,
+      edit_prices,
       shortage: data2.shortage,
       others: {},
     });
@@ -1125,6 +1128,7 @@ export function OrderDetails({
         replacement: newOrder.replacement,
         adjustment: newOrder.adjustment,
         shortage: newOrder.shortage,
+        edit_prices,
         counter: counters.find((a) => a.counter_uuid === newOrder.counter_uuid),
         items: newOrder.item_details?.map((a) => {
           let _itemData = itemsData.find((b) => a.item_uuid === b.item_uuid);
@@ -1950,15 +1954,19 @@ export function OrderDetails({
                                     let itemData = itemsData.find(
                                       (a) => a.item_uuid === e.value
                                     );
-                                    let counterData= counters.find(
-                                      (a) => a.counter_uuid === orderData.counter_uuid
-                                    )
+                                    let counterData = counters.find(
+                                      (a) =>
+                                        a.counter_uuid ===
+                                        orderData.counter_uuid
+                                    );
 
-                                    let item_rate = counterData?.company_discount?.find(
+                                    let item_rate =
+                                      counterData?.company_discount?.find(
                                         (a) =>
-                                          a.company_uuid === itemData.company_uuid
+                                          a.company_uuid ===
+                                          itemData.company_uuid
                                       )?.item_rate;
-                                   
+
                                     let item_price = itemData.item_price;
                                     if (item_rate === "a")
                                       item_price = itemData.item_price_a;
@@ -1967,8 +1975,8 @@ export function OrderDetails({
                                     if (item_rate === "c")
                                       item_price = itemData.item_price_c;
 
-                               console.log({
-                                counter,
+                                    console.log({
+                                      counter,
                                       item_rate,
                                       item_title: itemData.item_title,
                                     });
@@ -1991,7 +1999,8 @@ export function OrderDetails({
                                                     itemData,
                                                     orderData?.counter_uuid
                                                   )?.price ||
-                                                  item_price ||0,
+                                                  item_price ||
+                                                  0,
                                               }
                                             : a
                                       ),
@@ -2221,6 +2230,24 @@ export function OrderDetails({
                                       ),
                                     };
                                   });
+                                  setEditPrices((prev) =>
+                                    prev.find((a) => a.item_uuid === item.item_uuid)
+                                      ? prev.map((a) =>
+                                          a.item_uuid === item.item_uuid
+                                            ? {
+                                                ...a,
+                                                item_price: e.target.value,
+                                              }
+                                            : a
+                                        )
+                                      : [
+                                          ...prev,
+                                          {
+                                            item_uuid: item.item_uuid,
+                                            item_price: e.target.value,
+                                          },
+                                        ]
+                                  );
                                 }}
                                 onFocus={(e) => {
                                   e.target.onwheel = () => false;
@@ -2274,6 +2301,30 @@ export function OrderDetails({
                                       ),
                                     };
                                   });
+                                  setEditPrices((prev) =>
+                                    prev.find((a) => a.item_uuid === item.item_uuid)
+                                      ? prev.map((a) =>
+                                          a.item_uuid === item.item_uuid
+                                            ? {
+                                                ...a,
+                                                item_price: +(
+                                                  e.target.value /
+                                                  item.conversion
+                                                ),
+                                              }
+                                            : a
+                                        )
+                                      : [
+                                          ...prev,
+                                          {
+                                            item_uuid: item.item_uuid,
+                                            item_price: +(
+                                              e.target.value /
+                                              item.conversion
+                                            ),
+                                          },
+                                        ]
+                                  );
                                 }}
                                 onFocus={(e) => {
                                   e.target.onwheel = () => false;
@@ -2495,8 +2546,8 @@ export function OrderDetails({
                 type="button"
                 onClick={
                   window.location.pathname.includes("completeOrderReport") ||
-                  window.location.pathname.includes("pendingEntry")||
-                  window.location.pathname.includes("upiTransactionReport") 
+                  window.location.pathname.includes("pendingEntry") ||
+                  window.location.pathname.includes("upiTransactionReport")
                     ? () => onSubmit({ stage: 0, diliveredUser: "" }, 1)
                     : () => onSubmit()
                 }
@@ -2672,6 +2723,7 @@ export function OrderDetails({
           items={itemsData}
           item_details={order?.item_details}
           HoldOrder={HoldOrder}
+          edit_prices={edit_prices}
         />
       ) : (
         ""
@@ -2926,6 +2978,7 @@ export function OrderDetails({
                 shortage: result?.shortage || 0,
                 adjustment: result?.adjustment || 0,
                 adjustment_remarks: result?.adjustment_remarks || "",
+                edit_prices
               },
               true
             )
@@ -2945,6 +2998,7 @@ const DeleteOrderPopup = ({
   items,
   onDeleted,
   deletePopup,
+  edit_prices,
   HoldOrder,
 }) => {
   const [disable, setDisabled] = useState(true);
@@ -3039,6 +3093,7 @@ const DeleteOrderPopup = ({
       replacement: data.replacement,
       adjustment: data.adjustment,
       shortage: data.shortage,
+      edit_prices,
       counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
       items: data.item_details?.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);

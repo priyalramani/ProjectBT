@@ -902,6 +902,7 @@ const PhoneList = ({ onSave, mobile }) => {
                           >
                             <Phone style={{ marginRight: "10px" }} />
                             {item?.mobile}
+                            {item?.title||""}
                           </td>
                         </tr>
                       ))}
