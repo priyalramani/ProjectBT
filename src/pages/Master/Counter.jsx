@@ -1022,6 +1022,7 @@ function NewUserForm({
               uuid: uuid(),
               mobile: "",
               type: "",
+              title: "",
             })),
           ].slice(0, 4),
         };
@@ -1038,6 +1039,7 @@ function NewUserForm({
           status: 1,
           mobile: [1, 2, 3, 4].map((a) => ({
             uuid: uuid(),
+            title: "",
             mobile: "",
             type: "",
           })),
@@ -1268,7 +1270,7 @@ function NewUserForm({
                   </div>
                   <div className="row">
                     <label className="selectLabel">
-                      Adress
+                      Address
                       <input
                         type="text"
                         name="route_title"
@@ -1585,16 +1587,6 @@ function NewUserForm({
                             style={{ width: "10ch",marginLeft:"10px" }}
                             placeholder="Title"
                             onChange={(e) => {
-                              if (
-                                e.target.value.length > 10 ||
-                                a.lable?.find(
-                                  (c) =>
-                                    (c.type === "cal" || c.type === "wa") &&
-                                    +c.varification
-                                )
-                              ) {
-                                return;
-                              }
                               setdata((prev) => ({
                                 ...prev,
                                 mobile: prev.mobile.map((b) =>
@@ -1604,7 +1596,7 @@ function NewUserForm({
                                 ),
                               }));
                             }}
-                            maxLength={10}
+                       
                           />
                           <input
                             type="number"

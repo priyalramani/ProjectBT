@@ -10,14 +10,15 @@ function NotesPopup({
   customSubmit,
   orderInfo,
   counterName,
+  mainDashboard
 }) {
   const [notes, setNotes] = useState([]);
   const [edit, setEdit] = useState(false);
 
   useEffect(() => {
-    if (!customSubmit && order.notes?.length) close();
+    if (customSubmit&&mainDashboard && order.notes?.length) close();
     if (order?.notes?.length) setNotes(order?.notes);
-  }, [order?.notes]);
+  }, [customSubmit, mainDashboard, order.notes]);
 
   const submitHandler = async () => {
     if (customSubmit) return customSubmit({ ...order, notes });

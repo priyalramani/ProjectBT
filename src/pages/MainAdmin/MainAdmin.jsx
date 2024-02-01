@@ -2086,6 +2086,7 @@ const MainAdmin = () => {
       )}
       {notesState?.active && (
         <NotesPopup
+        mainDashboard={true}
           orderInfo={true}
           order={selectedOrder[notesState?.index]}
           onSave={() => setNotesState(false)}
