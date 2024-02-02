@@ -71,6 +71,7 @@ import StockAdjustmentReport from "./pages/Reports/StockAdjustmentReport"
 import CashRegisterReport from "./pages/Reports/CashRegisterReport"
 import ExpansesPage from "./pages/Master/Expances"
 import StockTrack from "./pages/Reports/StockTrack"
+import PrivacyPolicy from "./PrivacyPolicy"
 
 export let Version = 238
 // export const server = "http://localhost:9000";
@@ -131,6 +132,7 @@ function App() {
 		<div className="App">
 			<Routes>
 				<Route path="/" element={<Navigate replace to={"/users"} />} />
+        <Route path="/Privacy_Policy" element={<PrivacyPolicy/>} />
 				<Route
 					path="/counter/:short_link"
 					element={
