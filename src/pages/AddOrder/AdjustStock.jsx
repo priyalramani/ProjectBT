@@ -8,6 +8,7 @@ import "./index.css";
 import Select from "react-select";
 
 import { useReactToPrint } from "react-to-print";
+import { formatAMPM } from "../../utils/helperFunctions";
 let time = new Date();
 const CovertedQty = (qty, conversion) => {
   let b = +qty / +conversion;
@@ -71,16 +72,7 @@ export default function AdjustStock() {
     });
     if (response.data.success) setItemsData(response.data.result);
   };
-  function formatAMPM(date) {
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var ampm = hours >= 12 ? "pm" : "am";
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    var strTime = hours + ":" + minutes + " " + ampm;
-    return strTime;
-  }
+
   const GetWarehouseList = async () => {
     const response = await axios({
       method: "get",

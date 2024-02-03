@@ -65,6 +65,12 @@ const Main = () => {
 			name: "Advance Ordering",
 			link: "/advanceOrdering",
 			img: "dinein.png"
+		},
+		{
+			type: 8,
+			name: "Stock Adjustments",
+			link: "/stock-adjustments",
+			img: "dinein.png"
 		}
 	]
 

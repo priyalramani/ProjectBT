@@ -70,7 +70,15 @@ export default function AddOrder() {
   const [focusedInputId, setFocusedInputId] = useState(0);
   const [edit_prices, setEditPrices] = useState([]);
   const [autoAdd, setAutoAdd] = useState(false);
-
+  const [company, setCompanies] = useState([]);
+	const fetchCompanies = async () => {
+		try {
+			const response = await axios.get("/companies/getCompanies")
+			if (response?.data?.result?.[0]) setCompanies(response?.data?.result)
+		} catch (error) {
+			console.log(error)
+		}
+  }
   const GetWarehouseList = async () => {
     const response = await axios({
       method: "get",
@@ -156,6 +164,7 @@ export default function AddOrder() {
     getAutoBill();
     GetUserWarehouse();
     GetWarehouseList();
+    fetchCompanies();
   }, []);
 
   useEffect(() => {
@@ -721,7 +730,7 @@ console.log({item_rate,item_title:item.item_title})
                                   label:
                                     a.item_title +
                                     "______" +
-                                    a.mrp +
+                                    a.mrp + `, ${company.find((b) => b.company_uuid === a.company_uuid)?.company_title}`+
                                     (a.qty > 0
                                       ? " _______[" +
                                         CovertedQty(a.qty || 0, a.conversion) +
@@ -783,7 +792,7 @@ console.log({item_rate,item_title:item.item_title})
                                     label:
                                       a.item_title +
                                       "______" +
-                                      a.mrp +
+                                      a.mrp +`, ${company.find((b) => b.company_uuid === a.company_uuid)?.company_title}`+
                                       (a.qty > 0
                                         ? "[" +
                                           CovertedQty(

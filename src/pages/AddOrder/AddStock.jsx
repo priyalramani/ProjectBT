@@ -736,7 +736,6 @@ export function SuggestionsPopup({ onSave, warehouse, itemsData, order, warehous
 		const response = await axios.get(`warehouse/suggestions/${warehouse.warehouse_uuid}`)
 		if (response.status !== 200) return
 		setItems(response.data)
-		setSeletedItems(response.data)
 	}
 
 	useEffect(() => {

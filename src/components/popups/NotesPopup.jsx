@@ -16,7 +16,7 @@ function NotesPopup({
   const [edit, setEdit] = useState(false);
 
   useEffect(() => {
-    if (customSubmit&&mainDashboard && order.notes?.length) close();
+    if (customSubmit&&mainDashboard && order.notes?.length) return customSubmit({ ...order, notes });
     if (order?.notes?.length) setNotes(order?.notes);
   }, [customSubmit, mainDashboard, order.notes]);
 

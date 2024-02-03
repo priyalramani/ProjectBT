@@ -72,8 +72,9 @@ import CashRegisterReport from "./pages/Reports/CashRegisterReport"
 import ExpansesPage from "./pages/Master/Expances"
 import StockTrack from "./pages/Reports/StockTrack"
 import PrivacyPolicy from "./PrivacyPolicy"
+import StockAdjustmentMobile from "./users/StockAdjustmentMobile"
 
-export let Version = 238
+export let Version = 239
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com"
 
@@ -158,6 +159,14 @@ function App() {
                 element={
                   <MobileLayout>
                     <Orders refreshDb={refreshDb} />
+                  </MobileLayout>
+                }
+              />
+              <Route
+                path="/users/stock-adjustments"
+                element={
+                  <MobileLayout>
+                    <StockAdjustmentMobile />
                   </MobileLayout>
                 }
               />

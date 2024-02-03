@@ -53,10 +53,9 @@ export function OrderDetails({
   order_uuid,
   onSave,
   orderStatus,
-  items = [],
-  counter = [],
   paymentModeData = [],
   itemCategories = [],
+  counter = [],
   trips = [],
   userData = [],
   warehouseData = [],
@@ -343,7 +342,7 @@ export function OrderDetails({
                         ]),
                         numbers:
                           data?.[i.counter_uuid]?.numbers ||
-                          counter
+                          counters
                             ?.find((c) => c?.counter_uuid === i?.counter_uuid)
                             ?.mobile?.map((m) => m?.mobile),
                       },
@@ -1974,14 +1973,6 @@ export function OrderDetails({
                                       item_price = itemData.item_price_b;
                                     if (item_rate === "c")
                                       item_price = itemData.item_price_c;
-
-                                    console.log({
-                                      counter,
-                                      item_rate,
-                                      item_title: itemData.item_title,
-                                    });
-
-                                    console.log(itemData);
                                     setOrderData((prev) => ({
                                       ...prev,
                                       item_details: prev.item_details?.map(
@@ -2231,7 +2222,9 @@ export function OrderDetails({
                                     };
                                   });
                                   setEditPrices((prev) =>
-                                    prev.find((a) => a.item_uuid === item.item_uuid)
+                                    prev.find(
+                                      (a) => a.item_uuid === item.item_uuid
+                                    )
                                       ? prev.map((a) =>
                                           a.item_uuid === item.item_uuid
                                             ? {
@@ -2302,7 +2295,9 @@ export function OrderDetails({
                                     };
                                   });
                                   setEditPrices((prev) =>
-                                    prev.find((a) => a.item_uuid === item.item_uuid)
+                                    prev.find(
+                                      (a) => a.item_uuid === item.item_uuid
+                                    )
                                       ? prev.map((a) =>
                                           a.item_uuid === item.item_uuid
                                             ? {
@@ -2319,8 +2314,7 @@ export function OrderDetails({
                                           {
                                             item_uuid: item.item_uuid,
                                             item_price: +(
-                                              e.target.value /
-                                              item.conversion
+                                              e.target.value / item.conversion
                                             ),
                                           },
                                         ]
@@ -2950,7 +2944,7 @@ export function OrderDetails({
       ) : (
         ""
       )}
-
+{console.log({counters})}
       <OrderPrintWrapper
         componentRef={componentRef}
         orders={[printData]}
@@ -2958,7 +2952,7 @@ export function OrderDetails({
         users={users}
         items={itemsData}
         paymentModes={paymentModes}
-        counters={counter}
+        counters={counters}
         print={invokePrint}
         category={category}
         route={routeData}
@@ -2978,7 +2972,7 @@ export function OrderDetails({
                 shortage: result?.shortage || 0,
                 adjustment: result?.adjustment || 0,
                 adjustment_remarks: result?.adjustment_remarks || "",
-                edit_prices
+                edit_prices,
               },
               true
             )
@@ -3005,6 +2999,7 @@ const DeleteOrderPopup = ({
   const [reason, setReason] = useState("");
   const [sendNotification, setSendNotification] = useState();
   const [messageTemplate, setMessageTemplate] = useState([]);
+  const [confirm, setConfirm] = useState(false);
 
   useEffect(() => {
     let controller = new AbortController();
@@ -3126,118 +3121,164 @@ const DeleteOrderPopup = ({
   console.log({ messageTemplate });
   return (
     <div className="overlay" style={{ zIndex: 9999999999 }}>
-      <form
-        className="modal"
-        style={{
-          height: "fit-content",
-          width: "max-content",
-          paddingTop: "50px",
-        }}
-        onSubmit={(e) => {
-          e.preventDefault();
-          PutOrder();
-        }}
-      >
-        <h3>
-          Order will be{" "}
-          {deletePopup?.toLowerCase() === "delete"
-            ? "deleted"
-            : deletePopup?.toLowerCase()}
-        </h3>
-        <div className="flex">
-          <textarea
-            type="text"
-            name="cancellation-reason"
-            className="cancellation-reason"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="Cancellation reason"
-            required
-          />
-          <button
-            type="button"
-            className="submit"
-            style={{ width: "50px", padding: "8px" }}
-            onClick={postMessageTemplate}
-          >
-            <AddIcon />
-          </button>
-        </div>
-
+      {confirm ? (
         <div
+          className="modal"
           style={{
-            overflowY: "scroll",
-            maxHeight: "150px",
-            minHeight: "100px",
+            height: "fit-content",
+            width: "max-content",
+            paddingTop: "50px",
           }}
         >
-          {messageTemplate?.map((item, i) => (
-            <tr
-              key={item.id}
+          <h3>Do you want to delete message?</h3>
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <button
+              type="submit"
+              className="submit"
               onClick={(e) => {
-                e.stopPropagation();
-                setReason((prev) => prev + item.body);
+                e.preventDefault();
+                setConfirm(false);
               }}
-              style={{ cursor: "pointer" }}
+              style={{ backgroundColor: "red" }}
             >
-              <td colSpan={2}>
-                <button
-                  type="button"
-                  className="submit"
-                  style={{
-                    padding: "0",
-                    background: "transparent",
-                    color: "red",
-                    height: "20px",
-                    marginTop: "0",
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteMessageTemplate(item);
-                  }}
-                >
-                  <DeleteOutline style={{ height: "20px", marginTop: "5px" }} />
-                </button>
-              </td>
-              <td>{i + 1})</td>
-              <td colSpan={3}>{item.body}</td>
-            </tr>
-          ))}
+              Discard
+            </button>
+            <button
+              type="submit"
+              className="submit"
+              onClick={(e) => {
+                e.preventDefault();
+                deleteMessageTemplate(confirm);
+                setConfirm(false);
+              }}
+            >
+              Confirm
+            </button>
+          </div>
         </div>
-        <div
+      ) : (
+        <form
+          className="modal"
           style={{
-            fontSize: "14px",
-            margin: "10px 0",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
+            height: "fit-content",
+            width: "max-content",
+            paddingTop: "50px",
+          }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            PutOrder();
           }}
         >
-          <input
-            type="checkbox"
-            id="sent-cancellation-notification"
-            checked={sendNotification}
-            onChange={(e) => setSendNotification(e.target.checked)}
-          />
-          <label htmlFor="sent-cancellation-notification">
-            Send whatsapp update to counter?
-          </label>
-        </div>
-        <div className="flex">
-          <button
-            type="submit"
-            className="submit"
-            disabled={disable}
-            style={{ opacity: disable ? "0.5" : "1" }}
-          >
-            Confirm
-          </button>
-        </div>
+          <h3>
+            Order will be{" "}
+            {deletePopup?.toLowerCase() === "delete"
+              ? "deleted"
+              : deletePopup?.toLowerCase()}
+          </h3>
+          <div className="flex">
+            <textarea
+              type="text"
+              name="cancellation-reason"
+              className="cancellation-reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Cancellation reason"
+              required
+            />
+            <button
+              type="button"
+              className="submit"
+              style={{ width: "50px", padding: "8px" }}
+              onClick={postMessageTemplate}
+            >
+              <AddIcon />
+            </button>
+          </div>
 
-        <button onClick={onSave} className="closeButton">
-          x
-        </button>
-      </form>
+          <div
+            style={{
+              overflowY: "scroll",
+              maxHeight: "150px",
+              minHeight: "100px",
+              width: "100%",
+            }}
+          >
+            {messageTemplate?.map((item, i) => (
+              <div
+                key={item.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setReason((prev) => prev + item.body);
+                }}
+                className="flex"
+                style={{
+                  cursor: "pointer",
+                  width: "100%",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div>
+                  {i + 1}) {item.body}
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    className="submit"
+                    style={{
+                      padding: "0",
+                      background: "transparent",
+                      color: "red",
+                      height: "20px",
+                      marginTop: "0",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setConfirm(item);
+                    }}
+                  >
+                    <DeleteOutline
+                      style={{ height: "20px", marginTop: "5px" }}
+                    />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div
+            style={{
+              fontSize: "14px",
+              margin: "10px 0",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <input
+              type="checkbox"
+              id="sent-cancellation-notification"
+              checked={sendNotification}
+              onChange={(e) => setSendNotification(e.target.checked)}
+            />
+            <label htmlFor="sent-cancellation-notification">
+              Send whatsapp update to counter?
+            </label>
+          </div>
+          <div className="flex">
+            <button
+              type="submit"
+              className="submit"
+              disabled={disable}
+              style={{ opacity: disable ? "0.5" : "1" }}
+            >
+              Confirm
+            </button>
+          </div>
+
+          <button onClick={onSave} className="closeButton">
+            x
+          </button>
+        </form>
+      )}
     </div>
   );
 };
