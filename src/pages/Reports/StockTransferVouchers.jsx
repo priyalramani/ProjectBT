@@ -75,13 +75,13 @@ const StockTransferVouchers = () => {
 	useEffect(() => {
 		setFilterItemsData(
 			itemsData
-				.filter(
+				?.filter(
 					a =>
 						(!filterFromWarehouse ||
-							a.from_warehouse_title.toLocaleLowerCase().includes(filterFromWarehouse.toLocaleLowerCase())) &&
+							a.from_warehouse_title?.toLocaleLowerCase().includes(filterFromWarehouse?.toLocaleLowerCase())) &&
 						(!filterToWarehouse ||
-							a.to_warehouse_title.toLocaleLowerCase().includes(filterToWarehouse.toLocaleLowerCase())) &&
-						(!filterType || a.type.toLocaleLowerCase().includes(filterType.toLocaleLowerCase()))
+							a.to_warehouse_title?.toLocaleLowerCase().includes(filterToWarehouse?.toLocaleLowerCase())) &&
+						(!filterType || a.type?.toLocaleLowerCase().includes(filterType?.toLocaleLowerCase()))
 				)
 				.map(a => {
 					let itemsDetails = a.item_details

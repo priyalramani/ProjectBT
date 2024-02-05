@@ -74,7 +74,7 @@ import StockTrack from "./pages/Reports/StockTrack"
 import PrivacyPolicy from "./PrivacyPolicy"
 import StockAdjustmentMobile from "./users/StockAdjustmentMobile"
 
-export let Version = 239
+export let Version = 240
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com"
 

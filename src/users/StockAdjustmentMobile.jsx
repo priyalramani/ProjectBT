@@ -39,7 +39,7 @@ const StockAdjustmentMobile = () => {
     console.log(response);
     if (response.data.success) {
       setLoading(false);
-      handlePrint();
+      Navigate(-1);
     }
   };
   const reactToPrintContent = useCallback(() => {

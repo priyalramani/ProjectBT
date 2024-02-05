@@ -189,7 +189,7 @@ function Table({
 
   const { setNotification } = context;
   const sendMessage = async (item) => {
-	setLoading(true);
+    setLoading(true);
     let response = await axios({
       method: "post",
       url: "/orders/sendMsg",
@@ -203,7 +203,7 @@ function Table({
     console.log(response.data);
     setNotification(response.data);
     setTimeout(() => setNotification(null), 3000);
-	setLoading(false);
+    setLoading(false);
   };
   const copySendMessage = async (item) => {
     setLoading(true);
@@ -222,7 +222,10 @@ function Table({
       setNotification({ success: true, message: "Message Copied" });
       setTimeout(() => setNotification(null), 3000);
       setLoading(false);
-      return response.data.WhatsappNotification[0]?.text || "";
+      console.log(response.data.result.WhatsappNotification.message[0]?.text);
+      navigator.clipboard.writeText(
+        response.data.result.WhatsappNotification.message[0]?.text || ""
+      );
     } else {
       setNotification({ success: false, message: "Message Not Copied" });
       setTimeout(() => setNotification(null), 3000);
@@ -244,7 +247,7 @@ function Table({
           <th colSpan={2}>Payment Date</th>
           <th colSpan={3}>User</th>
           <th colSpan={3}>Type</th>
-          <th colSpan={5}>Action</th>
+          <th colSpan={6}>Action</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -286,10 +289,9 @@ function Table({
               </td>
               <td
                 style={{ color: "green" }}
-                onClick={async (e) => {
+                onClick={(e) => {
                   e.stopPropagation();
-                  let message = await copySendMessage(item);
-                  navigator.clipboard.writeText("abc");
+                  copySendMessage(item);
                 }}
               >
                 <CopyAll />
