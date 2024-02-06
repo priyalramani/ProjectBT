@@ -5,11 +5,20 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useReactToPrint } from "react-to-print";
 import { formatAMPM } from "../utils/helperFunctions";
+let time = new Date();
 const StockAdjustmentMobile = () => {
   const [items, setItems] = useState([]);
   const [warehouseUuid, setWarehouseUuid] = useState("");
   const [warehouse, setWarehouse] = useState([]);
-  const [order, setOrder] = useState([]);
+  const [filterItemTitle, setFilterItemTile] = useState("");
+  const [order, setOrder] = useState({
+    type: "SA",
+    created_by: localStorage.getItem("user_uuid"),
+    from_warehouse: 0,
+    to_warehouse: "",
+    created_at: time.getTime(),
+    item_details: [],
+  });
   const [filterCategory, setFilterCategory] = useState("");
   const [itemsCategory, setItemsCategory] = useState([]);
   const [popupForm, setPopupForm] = useState(false);
@@ -19,19 +28,32 @@ const StockAdjustmentMobile = () => {
   const onSubmit = async () => {
     setLoading(true);
     let item_details = order.items
-      .map((item) => ({
-        ...item,
-        b: 0,
-        p:
-          (+item.ab || 0) * (+item.conversion || 0) +
-          (+item.ap || 0),
-      }))
+      .map((item) => {
+        console.log({
+          stockQty: item.stockQty,
+          p: item.p,
+          b: item.b,
+          final:
+            (+item.b || 0) * (+item.conversion || 0) +
+            (+item.p || 0) -
+            item.stockQty,
+        });
+        return {
+          ...item,
+          b: 0,
+          p:
+            (+item.b || 0) * (+item.conversion || 0) +
+            (+item.p || 0) -
+            item.stockQty,
+        };
+      })
       .filter((a) => a.p);
+
     setOrder((prev) => ({ ...prev, item_details }));
     const response = await axios({
       method: "post",
       url: "/vouchers/postVoucher",
-      data: { ...order, item_details },
+      data: { ...order, to_warehouse: warehouseUuid, item_details },
       headers: {
         "Content-Type": "application/json",
       },
@@ -98,8 +120,7 @@ const StockAdjustmentMobile = () => {
     getIndexedDbData();
   }, []);
   useEffect(() => {
-    if(warehouseUuid)
-    getItemsData(warehouseUuid);
+    if (warehouseUuid) getItemsData(warehouseUuid);
   }, [warehouseUuid]);
   useEffect(() => {
     if (warehouseUuid) {
@@ -107,6 +128,7 @@ const StockAdjustmentMobile = () => {
         ...prev,
         items: items
           ?.filter((a) => a.category_uuid === filterCategory)
+          .sort((a, b) => a.item_title.localeCompare(b.item_title))
           .map((a) => {
             const warehouse_stock = a.stock?.find(
               (i) => i.warehouse_uuid === warehouseUuid
@@ -115,8 +137,9 @@ const StockAdjustmentMobile = () => {
             return {
               ...a,
               p: ~~(stockQty % a.conversion),
-       
+
               b: ~~(stockQty / a.conversion),
+              stockQty,
             };
           }),
       }));
@@ -125,47 +148,63 @@ const StockAdjustmentMobile = () => {
 
   return (
     <>
-      <nav className="user_nav nav_styling" style={{ maxWidth: "500px" }}>
-        <div className="user_menubar">
-          <IoArrowBackOutline
-            className="user_Back_icon"
-            onClick={() => Navigate(-1)}
+      <nav
+        className="user_nav nav_styling"
+        style={{ maxWidth: "500px", flexDirection: "column", height: "100px" }}
+      >
+        <div
+          className="flex"
+          style={{ justifyContent: "space-between", width: "100%" }}
+        >
+          <div className="user_menubar">
+            <IoArrowBackOutline
+              className="user_Back_icon"
+              onClick={() => Navigate(-1)}
+            />
+          </div>
+          <select
+            className="searchInput selectInput"
+            value={warehouseUuid}
+            onChange={(e) => setWarehouseUuid(e.target.value)}
+            style={{ width: "100%", marginRight: "10px", marginLeft: "10px" }}
+          >
+            {warehouse?.map((a) => (
+              <option value={a.warehouse_uuid}>{a.warehouse_title}</option>
+            ))}
+          </select>
+
+          <select
+            className="searchInput selectInput"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            style={{ width: "100%" }}
+          >
+            {itemsCategory?.map((a) => (
+              <option value={a.category_uuid}>{a.category_title}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <input
+            style={{ width: "200px" }}
+            className="searchInput"
+            type="text"
+            placeholder="Search Items"
+            value={filterItemTitle}
+            onChange={(e) => setFilterItemTile(e.target.value)}
           />
         </div>
-
-        <select
-          className="searchInput selectInput"
-          value={warehouseUuid}
-          onChange={(e) => setWarehouseUuid(e.target.value)}
-          style={{ width: "100%", marginRight: "10px", marginLeft: "10px" }}
-        >
-          {console.log({ warehouse })}
-          {warehouse?.map((a) => (
-            <option value={a.warehouse_uuid}>{a.warehouse_title}</option>
-          ))}
-        </select>
-
-        <select
-          className="searchInput selectInput"
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          style={{ width: "100%" }}
-        >
-          {itemsCategory?.map((a) => (
-            <option value={a.category_uuid}>{a.category_title}</option>
-          ))}
-        </select>
       </nav>
-      <div className="home">
-        <div className="container" style={{ maxWidth: "500px" }}>
+      <div className="home" >
+        <div className="container" style={{ maxWidth: "500px",marginTop: "100px"  }}>
           <div className="menucontainer">
-            <div className="menus">
-              {console.log({
-                filterCategory,
-                items: items?.filter((a) => a.category_uuid === filterCategory),
-              })}
+            <div className="menus" style={{paddingBottom:"10vh"}}>
               {order?.items
-                ?.sort((a, b) => a.sort_order - b.sort_order)
+                ?.filter((a) =>
+                  a.item_title
+                    .toLowerCase()
+                    .includes(filterItemTitle.toLowerCase())
+                )
                 ?.map((item) => {
                   return (
                     <div
@@ -304,24 +343,23 @@ const StockAdjustmentMobile = () => {
                   );
                 })}
             </div>
-            
+
             <button
-                  type="button"
-                  onClick={() => {
-                    onSubmit();
-                  }}
-                  className="cartBtn"
-                  style={{
-                    padding: "3px",
-                    opacity: order.items?.length ? 1 : 0.5,
-                    position: "fixed",
-                    zIndex: "9999999",
-                  }}
-                  disabled={order.items?.length ? false : true}
-                >
-                  Done
-                </button>
-           
+              type="button"
+              onClick={() => {
+                onSubmit();
+              }}
+              className="cartBtn"
+              style={{
+                padding: "3px",
+                opacity: order.items?.length ? 1 : 0.5,
+                position: "fixed",
+                zIndex: "9999999",
+              }}
+              disabled={order.items?.length ? false : true}
+            >
+              Done
+            </button>
           </div>
         </div>
       </div>
@@ -451,28 +489,25 @@ const StockAdjustmentMobile = () => {
               </tr>
             </thead>
             <tbody className="tbody">
-              
-                    {order?.items
-                      ?.sort((a, b) =>
-                        a?.item_title?.localeCompare(b?.item_title)
-                      )
-                      .map((item, i, array) => (
-                        <tr key={Math.random()}>
-                          <td
-                            className="flex"
-                            style={{ justifyContent: "space-between" }}
-                          >
-                            {i + 1}
-                          </td>
+              {order?.items
+                ?.sort((a, b) => a?.item_title?.localeCompare(b?.item_title))
+                .map((item, i, array) => (
+                  <tr key={Math.random()}>
+                    <td
+                      className="flex"
+                      style={{ justifyContent: "space-between" }}
+                    >
+                      {i + 1}
+                    </td>
 
-                          <td>{item.item_title || ""}</td>
-                          <td>{item.mrp || ""}</td>
-                          <td>{item.b || 0}</td>
+                    <td>{item.item_title || ""}</td>
+                    <td>{item.mrp || ""}</td>
+                    <td>{item.b || 0}</td>
 
-                          <td>{item.p || 0}</td>
-                        </tr>
-                      ))}
-                
+                    <td>{item.p || 0}</td>
+                  </tr>
+                ))}
+
               <tr key={Math.random()}>
                 <td
                   className="flex"
@@ -527,34 +562,15 @@ function NewUserForm({ onSave, popupInfo, setOrder, order }) {
     e.preventDefault();
     setOrder((prev) => ({
       ...prev,
-      items: (prev?.items?.filter((a) => a.item_uuid === popupInfo.item_uuid)
-        ?.length
-        ? prev?.items?.map((a) =>
-            a.item_uuid === popupInfo.item_uuid
-              ? {
-                  ...a,
-                  b: +data.b + parseInt(+data.p / +popupInfo.conversion),
-                  p: +data.p % +popupInfo.conversion,
-                }
-              : a
-          )
-        : prev?.items?.length
-        ? [
-            ...prev?.items,
-            {
-              ...popupInfo,
+      items: prev?.items?.map((a) =>
+        a.item_uuid === popupInfo.item_uuid
+          ? {
+              ...a,
               b: +data.b + parseInt(+data.p / +popupInfo.conversion),
               p: +data.p % +popupInfo.conversion,
-            },
-          ]
-        : [
-            {
-              ...popupInfo,
-              b: +data.b + parseInt(+data.p / +popupInfo.conversion),
-              p: +data.p % +popupInfo.conversion,
-            },
-          ]
-      ).filter((a) => a.b || a.p || a.free),
+            }
+          : a
+      ),
     }));
     onSave();
   };
