@@ -71,14 +71,15 @@ export default function AddOrder() {
   const [edit_prices, setEditPrices] = useState([]);
   const [autoAdd, setAutoAdd] = useState(false);
   const [company, setCompanies] = useState([]);
-	const fetchCompanies = async () => {
-		try {
-			const response = await axios.get("/companies/getCompanies")
-			if (response?.data?.result?.[0]) setCompanies(response?.data?.result)
-		} catch (error) {
-			console.log(error)
-		}
-  }
+  const [companyFilter, setCompanyFilter] = useState("all");
+  const fetchCompanies = async () => {
+    try {
+      const response = await axios.get("/companies/getCompanies");
+      if (response?.data?.result?.[0]) setCompanies(response?.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const GetWarehouseList = async () => {
     const response = await axios({
       method: "get",
@@ -181,7 +182,7 @@ export default function AddOrder() {
           let item_rate = counterData?.company_discount?.find(
             (a) => a.company_uuid === item.company_uuid
           )?.item_rate;
-console.log({item_rate,item_title:item.item_title})
+          console.log({ item_rate, item_title: item.item_title });
           let item_price = item.item_price;
           if (item_rate === "a") item_price = item.item_price_a;
           if (item_rate === "b") item_price = item.item_price_b;
@@ -540,9 +541,9 @@ console.log({item_rate,item_title:item.item_title})
             </div>
 
             <div className="topInputs">
-              <div className="inputGroup">
+              <div className="inputGroup" style={{width:"50px"}}>
                 <label htmlFor="Warehouse">Counter</label>
-                <div className="inputGroup" style={{ width: "380px" }}>
+                <div className="inputGroup" >
                   <Select
                     ref={(ref) => (reactInputsRef.current["0"] = ref)}
                     options={counters
@@ -597,9 +598,9 @@ console.log({item_rate,item_title:item.item_title})
                   ""
                 )}
               </div>
-              <div className="inputGroup">
+              <div className="inputGroup" style={{width:"100px"}}>
                 <label htmlFor="Warehouse">Warehouse</label>
-                <div className="inputGroup" style={{ width: "300px" }}>
+                <div className="inputGroup" >
                   <Select
                     options={[
                       { value: 0, label: "None" },
@@ -638,7 +639,7 @@ console.log({item_rate,item_title:item.item_title})
                   />
                 </div>
               </div>
-              <div className="inputGroup">
+              <div className="inputGroup" style={{width:"100px"}}>
                 <label htmlFor="Warehouse">Priority</label>
                 <div className="inputGroup">
                   <Select
@@ -656,7 +657,7 @@ console.log({item_rate,item_title:item.item_title})
                   />
                 </div>
               </div>
-              <div className="inputGroup">
+              <div className="inputGroup" style={{width:"100px"}}>
                 <label htmlFor="Warehouse">Type</label>
                 <div className="inputGroup">
                   <Select
@@ -667,6 +668,38 @@ console.log({item_rate,item_title:item.item_title})
                     value={options.orderTypeOptions?.find(
                       (j) => j.value === order.order_type
                     )}
+                    openMenuOnFocus={true}
+                    menuPosition="fixed"
+                    menuPlacement="auto"
+                    placeholder="Select Order Type"
+                  />
+                </div>
+              </div>
+              <div className="inputGroup" style={{width:"100px"}}>
+                <label htmlFor="Warehouse">Company</label>
+                <div className="inputGroup">
+                  <Select
+                    options={[
+                      {
+                        value: "all",
+                        label: "All",
+                      },
+                      ...company.map((a) => ({
+                        value: a.company_uuid,
+                        label: a.company_title,
+                      })),
+                    ]}
+                    onChange={(doc) => setCompanyFilter(doc?.value)}
+                    value={[
+                      {
+                        value: "all",
+                        label: "All",
+                      },
+                      ...company.map((a) => ({
+                        value: a.company_uuid,
+                        label: a.company_title,
+                      })),
+                    ].find((j) => j.value === companyFilter)}
                     openMenuOnFocus={true}
                     menuPosition="fixed"
                     menuPlacement="auto"
@@ -720,7 +753,10 @@ console.log({item_rate,item_title:item.item_title})
                                   (a) =>
                                     !order?.item_details.filter(
                                       (b) => a.item_uuid === b.item_uuid
-                                    ).length && a.status !== 0
+                                    ).length &&
+                                    a.status !== 0 &&
+                                    (companyFilter === "all" ||
+                                      a.company_uuid === companyFilter)
                                 )
                                 .sort((a, b) =>
                                   a?.item_title?.localeCompare(b.item_title)
@@ -730,7 +766,12 @@ console.log({item_rate,item_title:item.item_title})
                                   label:
                                     a.item_title +
                                     "______" +
-                                    a.mrp + `, ${company.find((b) => b.company_uuid === a.company_uuid)?.company_title}`+
+                                    a.mrp +
+                                    `, ${
+                                      company.find(
+                                        (b) => b.company_uuid === a.company_uuid
+                                      )?.company_title
+                                    }` +
                                     (a.qty > 0
                                       ? " _______[" +
                                         CovertedQty(a.qty || 0, a.conversion) +
@@ -792,7 +833,13 @@ console.log({item_rate,item_title:item.item_title})
                                     label:
                                       a.item_title +
                                       "______" +
-                                      a.mrp +`, ${company.find((b) => b.company_uuid === a.company_uuid)?.company_title}`+
+                                      a.mrp +
+                                      `, ${
+                                        company.find(
+                                          (b) =>
+                                            b.company_uuid === a.company_uuid
+                                        )?.company_title
+                                      }` +
                                       (a.qty > 0
                                         ? "[" +
                                           CovertedQty(
