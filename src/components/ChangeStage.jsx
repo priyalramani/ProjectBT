@@ -365,14 +365,14 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
                       <input type="radio" checked={data.stage === 4} />
                       Complete
                     </div>
-                    <div
+                    {/* <div
                       onClick={() => {
                         setData({ ...data, stage: 0 });
                       }}
                     >
                       <input type="radio" checked={data.stage === 0} />
                       Hold
-                    </div>
+                    </div> */}
                     <div
                       style={{
                         textDecoration: stage >= 5 ? "line-through" : "",

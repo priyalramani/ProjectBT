@@ -1566,6 +1566,24 @@ function NewUserForm({
                   </label>
                 </div>
                 <div className="row">
+                    <label className="selectLabel">
+                    Credit Rating
+                      <input
+                        type="text"
+                        name="one_pack"
+                        className="numberInput"
+                        value={data?.credit_rating}
+                        onChange={(e) =>
+                          setdata({
+                            ...data,
+                            credit_rating: e.target.value,
+                          })
+                        }
+                      />
+                    </label>
+                 
+                  </div>
+                <div className="row">
                   <label className="selectLabel" style={{ width: "50%" }}>
                     Mobile
                     <div>

@@ -684,7 +684,7 @@ export default function AddOrder() {
                         value: "all",
                         label: "All",
                       },
-                      ...company.map((a) => ({
+                      ...company.filter(a=>+a.status).map((a) => ({
                         value: a.company_uuid,
                         label: a.company_title,
                       })),

@@ -246,7 +246,9 @@ function Table({
           <th colSpan={2}>Order Date</th>
           <th colSpan={2}>Payment Date</th>
           <th colSpan={3}>User</th>
-          <th colSpan={3}>Type</th>
+          <th>Type</th>
+          <th>Days</th>
+
           <th colSpan={6}>Action</th>
         </tr>
       </thead>
@@ -277,7 +279,9 @@ function Table({
                 {formatAMPM(new Date(item.payment_date)) || ""}
               </td>
               <td colSpan={3}>{item.user_title || ""}</td>
-              <td colSpan={3}>{item.mode_title || ""}</td>
+              <td>{item.mode_title || ""}</td>
+              <td>{item.payment_reminder_days || ""}</td>
+
               <td
                 style={{ color: "green" }}
                 onClick={(e) => {
