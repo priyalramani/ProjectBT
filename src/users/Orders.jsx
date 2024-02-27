@@ -318,7 +318,8 @@ const Orders = ({ refreshDb }) => {
 						style={{
 							height: "fit-content",
 							width: "max-content",
-							padding: "50px"
+							padding: "50px",
+							backgroundColor:"red"
 						}}
 					>
 						<h3>{remarks}</h3>

@@ -26,6 +26,14 @@ const options = {
     { value: "E", label: "Estimate" },
   ],
 };
+const customStyles = {
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.data.isHighlighted ? 'red' : 'white',
+    color: state.data.isHighlighted ? 'white' : 'black',
+  }),
+};
+
 
 const CovertedQty = (qty, conversion) => {
   let b = qty / +conversion;
@@ -72,6 +80,7 @@ export default function AddOrder() {
   const [autoAdd, setAutoAdd] = useState(false);
   const [company, setCompanies] = useState([]);
   const [companyFilter, setCompanyFilter] = useState("all");
+  const [remarks, setRemarks] = useState("");
   const fetchCompanies = async () => {
     try {
       const response = await axios.get("/companies/getCompanies");
@@ -557,13 +566,17 @@ export default function AddOrder() {
                       .map((a) => ({
                         value: a.counter_uuid,
                         label: a.counter_title + " , " + a.route_title,
+                        isHighlighted:a.remarks
                       }))}
                     onChange={(doc) => {
+                      if(doc?.isHighlighted)setRemarks(doc?.isHighlighted)
+                      else
                       setOrder((prev) => ({
                         ...prev,
                         counter_uuid: doc?.value,
                       }));
                     }}
+                    styles={customStyles}
                     value={
                       order?.counter_uuid
                         ? {
@@ -1169,6 +1182,27 @@ export default function AddOrder() {
       ) : (
         ""
       )}
+      {remarks ? (
+				<div className="overlay">
+					<div
+						className="modal"
+						style={{
+							height: "fit-content",
+							width: "max-content",
+							padding: "50px",
+							backgroundColor:"red"
+						}}
+					>
+						<h3>{remarks}</h3>
+
+						<button onClick={() => setRemarks(false)} className="closeButton">
+							x
+						</button>
+					</div>
+				</div>
+			) : (
+				""
+			)}
     </>
   );
 }

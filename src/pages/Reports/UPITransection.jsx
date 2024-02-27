@@ -232,6 +232,22 @@ function Table({
       setLoading(false);
     }
   };
+  const isTimestampPlusDaysLessThanCurrent = ({
+    timestamp,
+    numberOfDays = 2,
+  }) => {
+    // Convert timestamp to milliseconds
+    timestamp = new Date(timestamp).getTime();
+
+    // Calculate the timestamp plus the number of days in milliseconds
+    var timestampPlusDays = timestamp + numberOfDays * 24 * 60 * 60 * 1000;
+
+    // Get the current date in milliseconds
+    var currentDate = new Date().getTime();
+
+    // Compare the two dates
+    return timestampPlusDays < currentDate;
+  };
   return (
     <table
       className="user-table"
@@ -258,7 +274,21 @@ function Table({
           ?.map((item, i, array) => (
             <tr
               key={Math.random()}
-              style={{ height: "30px" }}
+              style={{
+                height: "30px",
+                background: isTimestampPlusDaysLessThanCurrent({
+                  timestamp: +item.payment_date,
+                  numberOfDays: item.payment_date,
+                })
+                  ? "red"
+                  : "white",
+                color: isTimestampPlusDaysLessThanCurrent({
+                  timestamp: +item.payment_date,
+                  numberOfDays: item.payment_date,
+                })
+                  ? "white"
+                  : "black",
+              }}
               onClick={(e) => {
                 e.stopPropagation();
                 getOrderData(item.order_uuid);
