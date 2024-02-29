@@ -5,7 +5,6 @@ import OrderPrint from "./OrderPrint"
 
 const OrderPdf = () => {
 	const params = useParams()
-	const [paymentModes, setPaymentModes] = useState([])
 	const [counter, setCounter] = useState([])
 	const [order, setOrder] = useState(null)
 	const [user, setUser] = useState({})
@@ -47,16 +46,7 @@ const OrderPdf = () => {
 		if (response.data.success) setUser(response.data.result)
 	}
 
-	const GetPaymentModes = async () => {
-		const response = await axios({
-			method: "get",
-			url: "/paymentModes/GetPaymentModesList",
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-		if (response.data.success) setPaymentModes(response.data.result)
-	}
+
 
 	const getItemsDataReminder = async () => {
 		const response = await axios({
@@ -79,7 +69,7 @@ const OrderPdf = () => {
 			getCounters(api_response.data.result?.counter_uuid)
 			getUser(api_response.data.result.status[0]?.user_uuid)
 			getItemsDataReminder()
-			GetPaymentModes()
+	
 		})()
 	}, [params.order_uuid])
 
@@ -96,7 +86,7 @@ const OrderPdf = () => {
 						itemData={itemData}
 						item_details={order?.item_details?.slice(a * 12, 12 * (a + 1))}
 						footer={!(order?.item_details?.length > 12 * (a + 1))}
-						paymentModes={paymentModes}
+						
 					/>
 				))}
 		</div>

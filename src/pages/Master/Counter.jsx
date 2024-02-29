@@ -1566,11 +1566,12 @@ function NewUserForm({
                   </label>
                 </div>
                 <div className="row">
+                  {console.log(data)}
                     <label className="selectLabel">
                     Credit Rating
                       <input
                         type="text"
-                        name="one_pack"
+                        name="credit_rating"
                         className="numberInput"
                         value={data?.credit_rating}
                         onChange={(e) =>

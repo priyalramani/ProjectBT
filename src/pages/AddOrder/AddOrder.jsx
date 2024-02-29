@@ -29,8 +29,9 @@ const options = {
 const customStyles = {
   option: (provided, state) => ({
     ...provided,
-    backgroundColor: state.data.isHighlighted ? 'red' : 'white',
-    color: state.data.isHighlighted ? 'white' : 'black',
+    backgroundColor: state.data.isHighlighted ? 'red' : provided.backgroundColor,
+    color: state.data.isHighlighted ? 'white' : provided.color,
+    
   }),
 };
 
@@ -566,7 +567,7 @@ export default function AddOrder() {
                       .map((a) => ({
                         value: a.counter_uuid,
                         label: a.counter_title + " , " + a.route_title,
-                        isHighlighted:a.remarks
+                        isHighlighted:a.status===2?a.remarks:"",
                       }))}
                     onChange={(doc) => {
                       if(doc?.isHighlighted)setRemarks(doc?.isHighlighted)

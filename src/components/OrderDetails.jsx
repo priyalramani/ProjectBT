@@ -86,7 +86,7 @@ export function OrderDetails({
   const [holdPopup, setHoldPopup] = useState(false);
   const [messagePopup, setMessagePopup] = useState(false);
   const [splitHoldPopup, setSplitHold] = useState(false);
-  const [paymentModes, setPaymentModes] = useState([]);
+
   const [complete, setComplete] = useState(false);
   const [completeOrder, setCompleteOrder] = useState(false);
   const [order, setOrder] = useState({});
@@ -164,21 +164,7 @@ export function OrderDetails({
       getOrder(order_uuid);
     }
   }, [orderJson, order_uuid]);
-  const GetPaymentModes = async () => {
-    if (paymentModeData.length) {
-      setPaymentModes(paymentModeData);
-      return;
-    }
-    const response = await axios({
-      method: "get",
-      url: "/paymentModes/GetPaymentModesList",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setPaymentModes(response.data.result);
-  };
   const getItemCategories = async () => {
     if (itemCategories.length) {
       setCategory(itemCategories);
@@ -539,7 +525,6 @@ export function OrderDetails({
     getWarehouseData();
     getItemCategories();
     getItemsDataReminder();
-    GetPaymentModes();
     getRoutesData();
   }, []);
 
@@ -2944,14 +2929,13 @@ export function OrderDetails({
       ) : (
         ""
       )}
-{console.log({counters})}
+
       <OrderPrintWrapper
         componentRef={componentRef}
         orders={[printData]}
         reminderDate={reminderDate}
         users={users}
         items={itemsData}
-        paymentModes={paymentModes}
         counters={counters}
         print={invokePrint}
         category={category}
@@ -4033,7 +4017,10 @@ function DiliveryPopup({
                             type="text"
                             name="route_title"
                             className="numberInput"
-                            value={item?.remarks}
+                            value={
+                              modes.find((a) => a.mode_uuid === item.mode_uuid)
+                                ?.remarks
+                            }
                             placeholder={"Cheque Number"}
                             style={{
                               width: "100%",

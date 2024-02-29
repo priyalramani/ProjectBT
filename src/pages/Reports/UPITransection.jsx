@@ -278,13 +278,13 @@ function Table({
                 height: "30px",
                 background: isTimestampPlusDaysLessThanCurrent({
                   timestamp: +item.payment_date,
-                  numberOfDays: item.payment_date,
+                  numberOfDays: item.payment_reminder_days,
                 })
                   ? "red"
                   : "white",
                 color: isTimestampPlusDaysLessThanCurrent({
                   timestamp: +item.payment_date,
-                  numberOfDays: item.payment_date,
+                  numberOfDays: item.payment_reminder_days,
                 })
                   ? "white"
                   : "black",

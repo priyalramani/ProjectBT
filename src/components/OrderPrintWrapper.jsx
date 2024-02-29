@@ -9,7 +9,7 @@ const OrderPrintWrapper = ({
 	reminderDate,
 	users,
 	items,
-	paymentModes,
+
 	pendingPayments,
 	counterOrders,
 	print,
@@ -89,7 +89,7 @@ const OrderPrintWrapper = ({
 								itemData={items}
 								item_details={order?.item_details}
 								allOrderItems={__order?.item_details}
-								paymentModes={paymentModes}
+							
 								footer={i + 1 === array.length}
 								category={category}
 								route={route}

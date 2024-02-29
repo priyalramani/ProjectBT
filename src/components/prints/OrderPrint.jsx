@@ -12,7 +12,6 @@ const OrderPrint = ({
 	item_details = [],
 	reminderDate,
 	footer = false,
-	paymentModes = [],
 	route = [],
 	defaultOrder = { item_details: [] }
 }) => {
@@ -45,7 +44,6 @@ const OrderPrint = ({
 		else return items
 	}, [item_details, itemData])
 
-	let counterPaymentMethods = paymentModes?.filter(a => counter?.payment_modes?.find(b => b === a.mode_uuid))
 
 	useEffect(() => {
 		if (!defaultOrder?.item_details?.length) return
@@ -778,7 +776,7 @@ const OrderPrint = ({
 									</th>
 								</tr>
 								<tr>
-									{counterPaymentMethods?.length ? (
+						
 										<td
 											colSpan={28}
 											style={{
@@ -787,11 +785,9 @@ const OrderPrint = ({
 												textAlign: "left"
 											}}
 										>
-											{counterPaymentMethods.map((a, i) => (i === 0 ? a.mode_title : ", " + a.mode_title))} Allowed
+											{counter.credit_rating||""}
 										</td>
-									) : (
-										""
-									)}
+								
 								</tr>
 							</>
 						) : (

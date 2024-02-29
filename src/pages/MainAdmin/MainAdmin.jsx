@@ -54,7 +54,6 @@ const MainAdmin = () => {
   const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
 
-
   const [selectedOrder, setSelectedOrder] = useState([]);
 
   const [selectedRouteOrder, setSelectedRouteOrder] = useState({});
@@ -80,7 +79,13 @@ const MainAdmin = () => {
   const location = useLocation();
   const [notesState, setNotesState] = useState();
 
-  const { updateServerPdf, setLoading, setNotification,skipStages,setSkipStages } = useContext(context);
+  const {
+    updateServerPdf,
+    setLoading,
+    setNotification,
+    skipStages,
+    setSkipStages,
+  } = useContext(context);
 
   let user_uuid = localStorage.getItem("user_uuid");
 
@@ -410,9 +415,7 @@ const MainAdmin = () => {
                 (b) => b === a.status.find((b) => +b.stage === 1)?.user_uuid
               ).length) &&
             (!stageList.length ||
-              stageList.filter(
-                (b) => b === getOrderStage(a.status)
-              ).length) &&
+              stageList.filter((b) => b === getOrderStage(a.status)).length) &&
             (!+users?.find((_u) => _u?.user_uuid === user_uuid)
               ?.hide_pending_payments ||
               !+a?.payment_pending) &&
@@ -470,7 +473,7 @@ const MainAdmin = () => {
     }
   };
   // console.log(selectedOrder);
- 
+
   const postOrderData = async () => {
     const response = await axios({
       method: "put",
@@ -1057,9 +1060,8 @@ const MainAdmin = () => {
                           <span>({route.orderLength})</span>
                           <span>
                             [ Processing {route?.processingLength}, Checking{" "}
-                            {route.checkingLength}, OFD{" "}
-                            {route?.deliveryLength}, Delivered{" "}
-                            {route?.deliveredLength} ]
+                            {route.checkingLength}, OFD {route?.deliveryLength},
+                            Delivered {route?.deliveredLength} ]
                           </span>
                           <span>
                             (
@@ -1296,10 +1298,9 @@ const MainAdmin = () => {
                                     )?.length
                                   }
                                   title2={item?.counter_title || ""}
-                                  status={
-                                    getStageName(getOrderStage(item?.status))
-                                     
-                                  }
+                                  status={getStageName(
+                                    getOrderStage(item?.status)
+                                  )}
                                   // price={item.price}
                                   // visibleContext={visibleContext}
                                   // setVisibleContext={setVisibleContext}
@@ -1334,8 +1335,7 @@ const MainAdmin = () => {
                           >
                             UnKnown
                           </span>{" "}
-                          ({ordersData?.length})
-                          [Processing{" "}
+                          ({ordersData?.length}) [Processing{" "}
                           {
                             TripsOrderLength.find((a) => +a.trip_uuid === 0)
                               ?.processingLength
@@ -1503,9 +1503,9 @@ const MainAdmin = () => {
                                         : selectedRouteOrder === item.order_uuid
                                     }
                                     title2={item?.counter_title || ""}
-                                    status={
-                                      getStageName(getOrderStage(item?.status))
-                                    }
+                                    status={getStageName(
+                                      getOrderStage(item?.status)
+                                    )}
                                     // price={item.price}
                                     // visibleContext={visibleContext}
                                     // setVisibleContext={setVisibleContext}
@@ -1541,18 +1541,11 @@ const MainAdmin = () => {
                           >
                             {trip.trip_title}
                           </span>{" "}
-                          <span>
-                            (
-                            {
-                              trip.orderLength
-                            }
-                            )
-                          </span>
+                          <span>({trip.orderLength})</span>
                           <span>
                             [Processing {trip?.processingLength}, Checking{" "}
-                            {trip?.checkingLength}, OFD{" "}
-                            {trip?.deliveryLength},Delivered{" "}
-                            {trip?.deliveredLength}]
+                            {trip?.checkingLength}, OFD {trip?.deliveryLength}
+                            ,Delivered {trip?.deliveredLength}]
                           </span>
                           <span>
                             {trip?.users?.[0]
@@ -1727,9 +1720,9 @@ const MainAdmin = () => {
                                     )?.length
                                   }
                                   title2={item?.counter_title || ""}
-                                  status={
-                                    getStageName(getOrderStage(item?.status))
-                                  }
+                                  status={getStageName(
+                                    getOrderStage(item?.status)
+                                  )}
                                   // price={item.price}
                                   // visibleContext={visibleContext}
                                   // setVisibleContext={setVisibleContext}
@@ -1762,7 +1755,7 @@ const MainAdmin = () => {
                 value={searchItems}
                 onChange={(e) => setSearhItems(e.target.value)}
               />
-             
+
               {selectedOrder.length ? (
                 <>
                   <button
@@ -1820,7 +1813,6 @@ const MainAdmin = () => {
         reminderDate={reminderDate}
         users={users}
         items={items}
-        paymentModes={paymentModes}
         counters={counter}
         category={category}
         route={routesData}
@@ -2086,7 +2078,7 @@ const MainAdmin = () => {
       )}
       {notesState?.active && (
         <NotesPopup
-        mainDashboard={true}
+          mainDashboard={true}
           orderInfo={true}
           order={selectedOrder[notesState?.index]}
           onSave={() => setNotesState(false)}
@@ -2342,7 +2334,6 @@ function HoldPopup({
     { value: 2, label: "Checking" },
     { value: 3, label: "Out For Delivery" },
     { value: 3.5, label: "Out For Delivery" },
-
   ];
   const ItemsStatusData = [
     { value: "all", label: "All" },
