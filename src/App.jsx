@@ -73,8 +73,11 @@ import ExpansesPage from "./pages/Master/Expances"
 import StockTrack from "./pages/Reports/StockTrack"
 import PrivacyPolicy from "./PrivacyPolicy"
 import StockAdjustmentMobile from "./users/StockAdjustmentMobile"
+import MainAdmin1 from "./pages/MainAdmin/MainAdmin1"
+import LedgersPage from "./pages/Master/Ledgers"
+import LedgerGroups from "./pages/Master/LedgerGroups"
 
-export let Version = 250
+export let Version = 251
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com"
 
@@ -88,7 +91,8 @@ function App() {
 		notification,
 		setNotification,
 		isItemAvilableOpen,
-		cashRegisterPopup
+		cashRegisterPopup,
+    view
 	} = context
 	axios.defaults.baseURL = server
 
@@ -295,8 +299,8 @@ function App() {
           ) : userType === "0" ? (
             <>
               {/* admin Routes */}
-              <Route path="/admin" element={<MainAdmin />} />
-              <Route path="/trip" element={<MainAdmin />} />
+              <Route path="/admin" element={view?<MainAdmin1 />:<MainAdmin />} />
+              <Route path="/trip" element={view?<MainAdmin1 />:<MainAdmin />} />
               <Route
                 path="/admin/SalesmanItemSuggestion"
                 element={<SalesmanItemSuggestion />}
@@ -321,6 +325,10 @@ function App() {
               <Route path="/admin/TestCounter" element={<TestCounter />} />
               <Route path="/admin/adminUsers" element={<Users />} />
               <Route path="/admin/items" element={<ItemsPage />} />
+              <Route path="/admin/ledgers" element={<LedgersPage />} />
+              <Route path="/admin/ledgerGroup" element={<LedgerGroups />} />
+
+
               <Route path="/admin/expense" element={<ExpansesPage />} />
               <Route path="/admin/warehouse" element={<Warehouse />} />
               <Route path="/admin/companies" element={<Companies />} />

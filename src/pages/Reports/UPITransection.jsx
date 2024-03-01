@@ -276,17 +276,12 @@ function Table({
               key={Math.random()}
               style={{
                 height: "30px",
-                background: isTimestampPlusDaysLessThanCurrent({
-                  timestamp: +item.payment_date,
-                  numberOfDays: item.payment_reminder_days,
-                })
-                  ? "red"
-                  : "white",
+
                 color: isTimestampPlusDaysLessThanCurrent({
                   timestamp: +item.payment_date,
                   numberOfDays: item.payment_reminder_days,
                 })
-                  ? "white"
+                  ? "red"
                   : "black",
               }}
               onClick={(e) => {
