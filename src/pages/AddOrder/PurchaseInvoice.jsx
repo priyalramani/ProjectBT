@@ -168,7 +168,12 @@ export default function PurchaseInvoice() {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setLedgerData(response.data.result);
+    if (response.data.success)
+      setLedgerData(
+        response.data.result.filter(
+          (a) => a.ledger_group_uuid === "004fd020-853c-4575-bebe-b29faefae3c9"
+        )
+      );
   };
 
   useEffect(() => {
@@ -370,7 +375,9 @@ export default function PurchaseInvoice() {
 
     if (!order.item_details.filter((a) => a.item_uuid).length) return;
     else if (
-      order?.item_details.filter(a=>a.item_uuid)?.some((i) => i.billing_type !== order?.order_type)
+      order?.item_details
+        .filter((a) => a.item_uuid)
+        ?.some((i) => i.billing_type !== order?.order_type)
     )
       return setPromptState({
         message: `${getType(
@@ -567,15 +574,13 @@ export default function PurchaseInvoice() {
                       )
                       .map((a) => ({
                         value: a.ledger_uuid,
-                        label: a.ledger_title
+                        label: a.ledger_title,
                       }))}
                     onChange={(doc) => {
-
-                      
-                        setOrder((prev) => ({
-                          ...prev,
-                          ledger_uuid: doc?.value,
-                        }));
+                      setOrder((prev) => ({
+                        ...prev,
+                        ledger_uuid: doc?.value,
+                      }));
                     }}
                     styles={customStyles}
                     value={
@@ -596,21 +601,7 @@ export default function PurchaseInvoice() {
                   />
                 </div>
 
-                {order.ledger_uuid ? (
-                  <button
-                    className="theme-btn"
-                    style={{
-                      width: "max-content",
-                      position: "fixed",
-                      right: "100px",
-                    }}
-                    onClick={() => setHoldPopup("Summary")}
-                  >
-                    Free
-                  </button>
-                ) : (
-                  ""
-                )}
+               
               </div>
               <div className="inputGroup" style={{ width: "100px" }}>
                 <label htmlFor="Warehouse">Warehouse</label>
@@ -653,42 +644,7 @@ export default function PurchaseInvoice() {
                   />
                 </div>
               </div>
-              <div className="inputGroup" style={{ width: "100px" }}>
-                <label htmlFor="Warehouse">Priority</label>
-                <div className="inputGroup">
-                  <Select
-                    options={options.priorityOptions}
-                    onChange={(doc) =>
-                      setOrder((x) => ({ ...x, priority: doc?.value }))
-                    }
-                    value={options.priorityOptions?.find(
-                      (j) => j.value === order.priority
-                    )}
-                    openMenuOnFocus={true}
-                    menuPosition="fixed"
-                    menuPlacement="auto"
-                    placeholder="Select Priority"
-                  />
-                </div>
-              </div>
-              <div className="inputGroup" style={{ width: "100px" }}>
-                <label htmlFor="Warehouse">Type</label>
-                <div className="inputGroup">
-                  <Select
-                    options={options.orderTypeOptions}
-                    onChange={(doc) =>
-                      setOrder((x) => ({ ...x, order_type: doc?.value }))
-                    }
-                    value={options.orderTypeOptions?.find(
-                      (j) => j.value === order.order_type
-                    )}
-                    openMenuOnFocus={true}
-                    menuPosition="fixed"
-                    menuPlacement="auto"
-                    placeholder="Select Order Type"
-                  />
-                </div>
-              </div>
+            
               <div className="inputGroup" style={{ width: "100px" }}>
                 <label htmlFor="Warehouse">Company</label>
                 <div className="inputGroup">
@@ -823,7 +779,7 @@ export default function PurchaseInvoice() {
                                       );
                                       const p_price =
                                         +getSpecialPrice(
-                                            ledgerData,
+                                          ledgerData,
                                           item,
                                           order?.ledger_uuid
                                         )?.price || item.item_price;
@@ -1039,7 +995,7 @@ export default function PurchaseInvoice() {
                         <td className="ph2 pv1 tc bb b--black-20 bg-white">
                           {+item?.item_price !== +item?.p_price &&
                             (+getSpecialPrice(
-                                ledgerData,
+                              ledgerData,
                               item,
                               order?.ledger_uuid
                             )?.price === +item?.p_price ? (
@@ -1116,11 +1072,20 @@ export default function PurchaseInvoice() {
               <button
                 type="button"
                 onClick={() => {
-                  let empty_item = order.item_details.filter((a) => a.item_uuid)
-                    .map((a) => ({ ...a, is_empty: !((+a.p||0) + (+a.b||0) + (+a.free||0)) }))
+                  let empty_item = order.item_details
+                    .filter((a) => a.item_uuid)
+                    .map((a) => ({
+                      ...a,
+                      is_empty: !((+a.p || 0) + (+a.b || 0) + (+a.free || 0)),
+                    }))
                     .find((a) => a.is_empty);
-                    console.log({empty_item,order:order.item_details
-                      .map((a) => ({ ...a, is_empty: !(+a.p + +a.b + +a.free) }))});
+                  console.log({
+                    empty_item,
+                    order: order.item_details.map((a) => ({
+                      ...a,
+                      is_empty: !(+a.p + +a.b + +a.free),
+                    })),
+                  });
                   if (empty_item) {
                     setNotification({
                       message: `${empty_item.item_title} has 0 Qty.

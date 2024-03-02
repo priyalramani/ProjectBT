@@ -77,8 +77,8 @@ import MainAdmin1 from "./pages/MainAdmin/MainAdmin1"
 import LedgersPage from "./pages/Master/Ledgers"
 import LedgerGroups from "./pages/Master/LedgerGroups"
 import PurchaseInvoice from "./pages/AddOrder/PurchaseInvoice"
-
-export let Version = 252
+import AddVoucher from "./pages/AddOrder/NewVoucher"
+export let Version = 253
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com"
 
@@ -358,6 +358,8 @@ function App() {
               <Route path="/admin/ItemIncentive" element={<ItemIncentive />} />
               <Route path="/admin/addOrder" element={<AddOrder />} />
               <Route path="/admin/purchaseInvoice" element={<PurchaseInvoice />} />
+              <Route path="/admin/addVoucher" element={<AddVoucher />} />
+
 
               <Route
                 path="/admin/AddOutStanding"

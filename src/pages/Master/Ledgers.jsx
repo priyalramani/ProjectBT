@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useMemo, useContext } from "react";
 import axios from "axios";
-import Compressor from "compressorjs";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import { DeleteOutline } from "@mui/icons-material";
-import { GrList } from "react-icons/gr";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { IoIosCloseCircle } from "react-icons/io";
 import { v4 as uuid } from "uuid";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
-import noimg from "../../assets/noimg.jpg";
 import context from "../../context/context";
-import { server } from "../../App";
 import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import { FaSave } from "react-icons/fa";
 import Prompt from "../../components/Prompt";
@@ -267,35 +263,9 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
                         gap: "5px",
                       }}
                     >
-                      <div
-                        style={{
-                          fontWeight: 700,
-                          fontSize: 20,
-                          paddingRight: 10,
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPopupForm({ type: "price", data: item });
-                        }}
-                      >
-                        ₹
-                      </div>
-                      <GrList
-                        style={{ fontSize: "22px" }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPricesListState({
-                            active: true,
-                            item: {
-                              ledger_uuid: item?.ledger_uuid,
-                              ledger_title: item?.ledger_title,
-                              item_price: item?.item_price,
-                            },
-                          });
-                        }}
-                      />
                       <DeleteOutline
                         onClick={(e) => {
+                          e.stopPropagation();
                           setDeletePopup(item);
                         }}
                       />
@@ -338,12 +308,12 @@ function NewUserForm({
       const response = await axios({
         method: "put",
         url: "/ledger/putLedger",
-        data: [obj],
+        data: obj,
         headers: {
           "Content-Type": "application/json",
         },
       });
-      if (response.data.result[0].success) {
+      if (response.data.success) {
         onSave();
       }
     } else {
@@ -459,7 +429,7 @@ function DeleteItemPopup({ onSave, popupInfo, setLedgerData }) {
     try {
       const response = await axios({
         method: "delete",
-        url: "/items/deleteItem",
+        url: "/ledger/deleteLedger",
         data: { ledger_uuid: popupInfo.ledger_uuid },
         headers: {
           "Content-Type": "application/json",
