@@ -45,6 +45,7 @@ let titleData = [
   { value: "currentStock", name: "Current Stock" },
   { value: "signedBills", name: "Signed Bills" },
   { value: "addOrder", name: "New Order" },
+  { value: "purchaseInvoice", name: "Purchase Invoice" },
   { value: "addStock", name: "New Stock Tranfer" },
   { value: "adjustStock", name: "Adjust Stock" },
   { value: "ItemsReport", name: "Items Report" },
@@ -53,7 +54,7 @@ let titleData = [
   { value: "counter", name: "Counters" },
   { value: "routes", name: "Routes" },
   { value: "items", name: "Items" },
-  {value:"ledgerGroup",name:"Ledger Group"},
+  { value: "ledgerGroup", name: "Ledger Group" },
   { value: "ledgers", name: "Ledgers" },
   { value: "admin", name: "DASHBOARD - Route" },
 ];
@@ -77,7 +78,12 @@ const Sidebar = ({ setCollectionTags }) => {
           isActive={false}
           menuList={
             view
-              ? []
+              ? [
+                  {
+                    name: "Purchase Invoice",
+                    link: "/admin/purchaseInvoice",
+                  },
+                ]
               : [
                   {
                     name: "Add Order",
@@ -105,10 +111,10 @@ const Sidebar = ({ setCollectionTags }) => {
                     name: "Ledgers",
                     link: "/admin/ledgers",
                   },
-				  {
-					name:"Ledger Group",
-					link:"/admin/ledgerGroup"
-				  }
+                  {
+                    name: "Ledger Group",
+                    link: "/admin/ledgerGroup",
+                  },
                 ]
               : [
                   {

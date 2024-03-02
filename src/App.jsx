@@ -76,8 +76,9 @@ import StockAdjustmentMobile from "./users/StockAdjustmentMobile"
 import MainAdmin1 from "./pages/MainAdmin/MainAdmin1"
 import LedgersPage from "./pages/Master/Ledgers"
 import LedgerGroups from "./pages/Master/LedgerGroups"
+import PurchaseInvoice from "./pages/AddOrder/PurchaseInvoice"
 
-export let Version = 251
+export let Version = 252
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com"
 
@@ -356,6 +357,8 @@ function App() {
               <Route path="/admin/OrderForm" element={<OrderForms />} />
               <Route path="/admin/ItemIncentive" element={<ItemIncentive />} />
               <Route path="/admin/addOrder" element={<AddOrder />} />
+              <Route path="/admin/purchaseInvoice" element={<PurchaseInvoice />} />
+
               <Route
                 path="/admin/AddOutStanding"
                 element={<AddOutStanding />}

@@ -44,7 +44,7 @@ const CovertedQty = (qty, conversion) => {
 };
 
 export let getInititalValues = () => ({
-  counter_uuid: "",
+  ledger_uuid: "",
   item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
   priority: 0,
   order_type: "I",
@@ -55,7 +55,7 @@ export let getInititalValues = () => ({
     : "",
 });
 
-export default function AddOrder() {
+export default function PurchaseInvoice() {
   const {
     promptState,
     setPromptState,
@@ -67,7 +67,7 @@ export default function AddOrder() {
   } = useContext(Context);
   const [order, setOrder] = useState(getInititalValues());
   const [deliveryPopup, setDeliveryPopup] = useState(false);
-  const [counters, setCounters] = useState([]);
+  const [ledgerData, setLedgerData] = useState([]);
   const [counterFilter] = useState("");
   const [holdPopup, setHoldPopup] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
@@ -162,13 +162,13 @@ export default function AddOrder() {
   const getCounter = async () => {
     const response = await axios({
       method: "get",
-      url: "/counters/GetCounterList",
+      url: "/ledger/getLedger",
 
       headers: {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setCounters(response.data.result);
+    if (response.data.success) setLedgerData(response.data.result);
   };
 
   useEffect(() => {
@@ -184,9 +184,9 @@ export default function AddOrder() {
     if (order?.warehouse_uuid) getItemsData();
   }, [order.warehouse_uuid]);
   useEffect(() => {
-    if (order?.counter_uuid) {
-      const counterData = counters.find(
-        (a) => a.counter_uuid === order.counter_uuid
+    if (order?.ledger_uuid) {
+      const counterData = ledgerData.find(
+        (a) => a.ledger_uuid === order.ledger_uuid
       );
       setItemsData((prev) =>
         prev.map((item) => {
@@ -203,7 +203,7 @@ export default function AddOrder() {
         })
       );
     }
-  }, [order.counter_uuid]);
+  }, [order.ledger_uuid]);
 
   const setQuantity = () => {
     console.count("qty_details");
@@ -218,7 +218,7 @@ export default function AddOrder() {
   };
 
   const onSubmit = async (type) => {
-    let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
+    let counter = ledgerData.find((a) => order.ledger_uuid === a.ledger_uuid);
     let data = {
       ...order,
       item_details: order.item_details
@@ -387,7 +387,7 @@ export default function AddOrder() {
       });
 
     setPopup(true);
-    let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
+    let counter = ledgerData.find((a) => order.ledger_uuid === a.ledger_uuid);
     let time = new Date();
     let autoBilling = await Billing({
       creating_new: 1,
@@ -465,7 +465,7 @@ export default function AddOrder() {
 
   const onItemPriceChange = async (e, item) => {
     if (e.target.value.toString().toLowerCase().includes("no special")) {
-      await deleteSpecialPrice(item, order?.counter_uuid, setCounters);
+      await deleteSpecialPrice(item, order?.ledger_uuid, setLedgerData);
       e.target.value = +e.target.value
         .split("")
         .filter((i) => i)
@@ -548,49 +548,47 @@ export default function AddOrder() {
         <div className="inventory">
           <div className="accountGroup" id="voucherForm" action="">
             <div className="inventory_header">
-              <h2>Add Order </h2>
-              {/* {type === 'edit' && <XIcon className='closeicon' onClick={close} />} */}
+              <h2>Purchase Invoice </h2>
             </div>
 
             <div className="topInputs">
               <div className="inputGroup" style={{ width: "50px" }}>
-                <label htmlFor="Warehouse">Counter</label>
+                <label htmlFor="Warehouse">Ledger</label>
                 <div className="inputGroup">
                   <Select
                     ref={(ref) => (reactInputsRef.current["0"] = ref)}
-                    options={counters
+                    options={ledgerData
                       ?.filter(
                         (a) =>
                           !counterFilter ||
-                          a.counter_title
+                          a.ledger_title
                             ?.toLocaleLowerCase()
                             ?.includes(counterFilter.toLocaleLowerCase())
                       )
                       .map((a) => ({
-                        value: a.counter_uuid,
-                        label: a.counter_title + " , " + a.route_title,
-                        isHighlighted: a.status === 2 ? a.remarks : "",
+                        value: a.ledger_uuid,
+                        label: a.ledger_title
                       }))}
                     onChange={(doc) => {
-                      if (doc?.isHighlighted) setRemarks(doc?.isHighlighted);
-                      else
+
+                      
                         setOrder((prev) => ({
                           ...prev,
-                          counter_uuid: doc?.value,
+                          ledger_uuid: doc?.value,
                         }));
                     }}
                     styles={customStyles}
                     value={
-                      order?.counter_uuid
+                      order?.ledger_uuid
                         ? {
-                            value: order?.counter_uuid,
-                            label: counters?.find(
-                              (j) => j.counter_uuid === order.counter_uuid
-                            )?.counter_title,
+                            value: order?.ledger_uuid,
+                            label: ledgerData?.find(
+                              (j) => j.ledger_uuid === order.ledger_uuid
+                            )?.ledger_title,
                           }
                         : ""
                     }
-                    autoFocus={!order?.counter_uuid}
+                    autoFocus={!order?.ledger_uuid}
                     openMenuOnFocus={true}
                     menuPosition="fixed"
                     menuPlacement="auto"
@@ -598,7 +596,7 @@ export default function AddOrder() {
                   />
                 </div>
 
-                {order.counter_uuid ? (
+                {order.ledger_uuid ? (
                   <button
                     className="theme-btn"
                     style={{
@@ -743,7 +741,7 @@ export default function AddOrder() {
                     <th className="pa2 tc bb b--black-20 "></th>
                   </tr>
                 </thead>
-                {order.counter_uuid ? (
+                {order.ledger_uuid ? (
                   <tbody className="lh-copy">
                     {order?.item_details?.map((item, i) => (
                       <tr
@@ -825,9 +823,9 @@ export default function AddOrder() {
                                       );
                                       const p_price =
                                         +getSpecialPrice(
-                                          counters,
+                                            ledgerData,
                                           item,
-                                          order?.counter_uuid
+                                          order?.ledger_uuid
                                         )?.price || item.item_price;
                                       return {
                                         ...a,
@@ -1041,17 +1039,17 @@ export default function AddOrder() {
                         <td className="ph2 pv1 tc bb b--black-20 bg-white">
                           {+item?.item_price !== +item?.p_price &&
                             (+getSpecialPrice(
-                              counters,
+                                ledgerData,
                               item,
-                              order?.counter_uuid
+                              order?.ledger_uuid
                             )?.price === +item?.p_price ? (
                               <IoCheckmarkDoneOutline
                                 className="table-icon checkmark"
                                 onClick={() =>
                                   spcPricePrompt(
                                     item,
-                                    order?.counter_uuid,
-                                    setCounters
+                                    order?.ledger_uuid,
+                                    setLedgerData
                                   )
                                 }
                               />
@@ -1062,8 +1060,8 @@ export default function AddOrder() {
                                 onClick={() =>
                                   saveSpecialPrice(
                                     item,
-                                    order?.counter_uuid,
-                                    setCounters
+                                    order?.ledger_uuid,
+                                    setLedgerData
                                   )
                                 }
                               />
@@ -1198,7 +1196,7 @@ export default function AddOrder() {
           postOrderData={(obj) => onSubmit({ stage: 5, autoAdd, obj })}
           setSelectedOrder={setOrder}
           order={order}
-          counters={counters}
+          ledgerData={ledgerData}
           items={itemsData}
           updateBilling={callBilling}
         />
@@ -1347,7 +1345,7 @@ function DiliveryPopup({
       time: time.getTime(),
       invoice_number: order.invoice_number,
       trip_uuid: order.trip_uuid,
-      counter_uuid: order.counter_uuid,
+      ledger_uuid: order.ledger_uuid,
     });
     GetPaymentModes();
   }, []);
@@ -1375,7 +1373,7 @@ function DiliveryPopup({
       replacement: order.replacement,
       shortage: order.shortage,
       adjustment: order.adjustment,
-      counter: counters.find((a) => a.counter_uuid === order.counter_uuid),
+      counter: counters.find((a) => a.ledger_uuid === order.ledger_uuid),
       items: order.item_details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {

@@ -546,6 +546,20 @@ export function OrderDetails({
     type = { stage: 0, diliveredUser: "" },
     completedOrderEdited
   ) => {
+    let empty_item = orderData.item_details.filter((a) => a.item_uuid)
+    .map((a) => ({ ...a, is_empty: !((+a.p||0) + (+a.b||0) + (+a.free||0)) }))
+    .find((a) => a.is_empty);
+    console.log({empty_item,order:order.item_details
+      .map((a) => ({ ...a, is_empty: !(+a.p + +a.b + +a.free) }))});
+  if (empty_item) {
+    setNotification({
+      message: `${empty_item.item_title} has 0 Qty.
+      0 Qty Not allowed.`,
+      success: false,
+    });
+    setTimeout(() => setNotification(null), 2000);
+    return;
+  }
     if (orderData?.payment_pending && !orderData.notes?.length)
       return setNotesPoup(true);
     let counter = counters.find(
