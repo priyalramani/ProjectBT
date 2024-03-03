@@ -16,9 +16,10 @@ export let getInititalValues = () => {
   let time = new Date();
   return {
     voucher_uuid: uuid(),
-    voucher_type: "",
-    user_uuid: localStorage.getItem("user_uuid"),
-
+    type: "",
+    created_by: localStorage.getItem("user_uuid"),
+    created_at: time.getTime(),
+    amt:0,
     details: [],
     voucher_date: "yy-mm-dd"
       .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
@@ -108,11 +109,11 @@ export default function NewVoucher() {
   const onSubmit = async () => {
     // check all add and sub sum is 0
     if (totalSum !== totalSub) {
-        setNotification({
-            message: "Total Debit and Credit Not Equal",
-            success: false,
-        });
-        setTimeout(() => setNotification(null), 2000);
+      setNotification({
+        message: "Total Debit and Credit Not Equal",
+        success: false,
+      });
+      setTimeout(() => setNotification(null), 2000);
       return;
     }
     const response = await axios({
@@ -120,9 +121,10 @@ export default function NewVoucher() {
       url: "/vouchers/postAccountVoucher",
       data: {
         ...order,
+        amt: totalSum,
         details: order.details.map((a) => {
           return {
-            ledger_uuid: a.ledger_uuid||a.counter_uuid,
+            ledger_uuid: a.ledger_uuid || a.counter_uuid,
             amount: a.add || -(a.sub || 0),
           };
         }),
@@ -213,10 +215,18 @@ export default function NewVoucher() {
       }));
     }
   };
+
   const LedgerOptions = useMemo(
     () =>
       [...ledgerData, ...counters]
-
+        .filter(
+          (a) =>
+            !order.details.find(
+              (b) =>
+                (a.ledger_uuid && b.ledger_uuid === a.ledger_uuid) ||
+                (a.counter_uuid && b.counter_uuid === a.counter_uuid)
+            )
+        )
         .sort((a, b) =>
           (a?.counter_title || a?.ledger_title)?.localeCompare(
             b.counter_title || b.ledger_title
@@ -270,11 +280,13 @@ export default function NewVoucher() {
                     onChange={(doc) => {
                       setOrder((prev) => ({
                         ...prev,
-                        voucher_type: doc.value,
+                        type: doc.value,
                       }));
                     }}
                     value={
-                      typeOptions.find((a) => a.value === order.voucher_type) || {
+                      typeOptions.find(
+                        (a) => a.value === order.type
+                      ) || {
                         value: "",
                         label: "Select",
                       }
@@ -490,8 +502,7 @@ export default function NewVoucher() {
               <button
                 type="button"
                 onClick={() => {
-                  
-                 onSubmit();
+                  onSubmit();
                 }}
               >
                 Bill
