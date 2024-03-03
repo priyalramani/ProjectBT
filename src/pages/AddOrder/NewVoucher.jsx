@@ -4,34 +4,13 @@ import { useEffect, useRef, useState, useContext, useMemo } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
-import { Billing, AutoAdd } from "../../Apis/functions";
+import { Billing } from "../../Apis/functions";
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import Select from "react-select";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { FaSave } from "react-icons/fa";
-import FreeItems from "../../components/FreeItems";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
-import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
-
-const customStyles = {
-  option: (provided, state) => ({
-    ...provided,
-    backgroundColor: state.data.isHighlighted
-      ? "red"
-      : provided.backgroundColor,
-    color: state.data.isHighlighted ? "white" : provided.color,
-  }),
-};
-
-const CovertedQty = (qty, conversion) => {
-  let b = qty / +conversion;
-  b = Math.sign(b) * Math.floor(Math.sign(b) * b);
-  let p = Math.floor(qty % +conversion);
-  return b + ":" + p;
-};
 
 export let getInititalValues = () => {
   let time = new Date();
@@ -44,28 +23,25 @@ export let getInititalValues = () => {
       .replace("dd", ("00" + time?.getDate().toString()).slice(-2)),
   };
 };
+let typeOptions = [
+  { value: "PURCHASE", label: "Purchase" },
+  { value: "SALE", label: "Sales" },
+  { value: "RCPT", label: "Receipt" },
+  { value: "JPNL", label: "Journal" },
+  { value: "CNTR", label: "Contra" },
+];
 
 export default function NewVoucher() {
-  const { promptState, setPromptState, deleteSpecialPrice, setNotification } =
-    useContext(Context);
+  const { promptState, setPromptState, setNotification } = useContext(Context);
   const [order, setOrder] = useState(getInititalValues());
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [ledgerData, setLedgerData] = useState([]);
   const [counters, setCounters] = useState([]);
-  const [counterFilter] = useState("");
-  const [holdPopup, setHoldPopup] = useState(false);
-  const [warehouse, setWarehouse] = useState([]);
-  const [user_warehouse, setUser_warehouse] = useState([]);
   const [itemsData, setItemsData] = useState([]);
-  const [qty_details, setQtyDetails] = useState(false);
   const [popup, setPopup] = useState(false);
-  const [autoBills, setAutoBills] = useState([]);
   const reactInputsRef = useRef({});
   const [focusedInputId, setFocusedInputId] = useState(0);
-  const [edit_prices, setEditPrices] = useState([]);
   const [autoAdd, setAutoAdd] = useState(false);
-
-  const [companyFilter, setCompanyFilter] = useState("all");
   const [remarks, setRemarks] = useState("");
 
   const getLedgers = async () => {
@@ -141,64 +117,6 @@ export default function NewVoucher() {
       });
       return;
     }
-  };
-
-  const callBilling = async (type = {}) => {
-    const getType = (code, match = true) =>
-      ["Estimate", "Invoice"]?.find((i) => (i[0] === code) === match);
-
-    if (!order.item_details.filter((a) => a.item_uuid).length) return;
-    else if (
-      order?.item_details
-        .filter((a) => a.item_uuid)
-        ?.some((i) => i.billing_type !== order?.order_type)
-    )
-      return setPromptState({
-        message: `${getType(
-          order?.order_type,
-          false
-        )} items are not allowed in ${getType(order?.order_type)} order type.`,
-        actions: [
-          {
-            label: "Ok",
-            classname: "text-btns",
-            action: () => setPromptState(null),
-          },
-        ],
-      });
-
-    setPopup(true);
-    let counter = ledgerData.find((a) => order.ledger_uuid === a.ledger_uuid);
-    let time = new Date();
-    let autoBilling = await Billing({
-      creating_new: 1,
-      order_uuid: order?.order_uuid,
-      invoice_number: `${order?.order_type}${order?.invoice_number}`,
-      replacement: order.replacement,
-      adjustment: order.adjustment,
-      shortage: order.shortage,
-      counter,
-      items: order.item_details.map((a) => ({ ...a, item_price: a.p_price })),
-      others: {
-        stage: 1,
-        user_uuid: localStorage.getItem("user_uuid"),
-        time: time.getTime(),
-
-        type: "NEW",
-      },
-      add_discounts: true,
-      edit_prices: edit_prices.map((a) => ({
-        ...a,
-        item_price: a.p_price,
-      })),
-      ...type,
-    });
-    setOrder((prev) => ({
-      ...prev,
-      ...autoBilling,
-      ...type,
-      item_details: autoBilling.items,
-    }));
   };
 
   const jumpToNextIndex = (id) => {
@@ -321,9 +239,19 @@ export default function NewVoucher() {
                 <label htmlFor="Warehouse">Type</label>
                 <div className="inputGroup">
                   <Select
-                    options={[]}
-                    onChange={(doc) => {}}
-                    value={{ value: 0, label: "None" }}
+                    options={typeOptions}
+                    onChange={(doc) => {
+                      setOrder((prev) => ({
+                        ...prev,
+                        type: doc.value,
+                      }));
+                    }}
+                    value={
+                      typeOptions.find((a) => a.value === order.type) || {
+                        value: "",
+                        label: "Select",
+                      }
+                    }
                     openMenuOnFocus={true}
                     menuPosition="fixed"
                     menuPlacement="auto"
@@ -431,10 +359,6 @@ export default function NewVoucher() {
                           value={item.add || ""}
                           onChange={(e) => {
                             setOrder((prev) => {
-                              setTimeout(
-                                () => setQtyDetails((prev) => !prev),
-                                2000
-                              );
                               return {
                                 ...prev,
                                 item_details: prev.item_details.map((a) =>
@@ -467,10 +391,6 @@ export default function NewVoucher() {
                           value={item.sub || ""}
                           onChange={(e) => {
                             setOrder((prev) => {
-                              setTimeout(
-                                () => setQtyDetails((prev) => !prev),
-                                2000
-                              );
                               return {
                                 ...prev,
                                 item_details: prev.item_details.map((a) =>
@@ -570,7 +490,6 @@ export default function NewVoucher() {
                     ...prev,
                     item_details: prev.item_details.filter((a) => a.item_uuid),
                   }));
-                  callBilling();
                 }}
               >
                 Bill
@@ -624,7 +543,6 @@ export default function NewVoucher() {
           order={order}
           ledgerData={ledgerData}
           items={itemsData}
-          updateBilling={callBilling}
         />
       ) : (
         ""
