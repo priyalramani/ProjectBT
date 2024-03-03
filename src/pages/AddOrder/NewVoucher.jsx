@@ -15,9 +15,12 @@ import Prompt from "../../components/Prompt";
 export let getInititalValues = () => {
   let time = new Date();
   return {
-    item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
-    type: "",
-    date: "yy-mm-dd"
+    voucher_uuid: uuid(),
+    voucher_type: "",
+    user_uuid: localStorage.getItem("user_uuid"),
+
+    details: [],
+    voucher_date: "yy-mm-dd"
       .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
       .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
       .replace("dd", ("00" + time?.getDate().toString()).slice(-2)),
@@ -95,28 +98,52 @@ export default function NewVoucher() {
     }
   }, [order.ledger_uuid]);
   const totalSum = useMemo(() => {
-    let total = order?.item_details.reduce((a, b) => a + +(b.add || 0), 0);
+    let total = order?.details.reduce((a, b) => a + +(b.add || 0), 0);
     return total;
-  }, [order.item_details]);
+  }, [order.details]);
   const totalSub = useMemo(() => {
-    let total = order?.item_details.reduce((a, b) => a + +(b.sub || 0), 0);
+    let total = order?.details.reduce((a, b) => a + +(b.sub || 0), 0);
     return total;
-  }, [order.item_details]);
-  const onSubmit = async (type) => {
+  }, [order.details]);
+  const onSubmit = async () => {
     // check all add and sub sum is 0
     if (totalSum !== totalSub) {
-      setPromptState({
-        message: `Add and Sub Qty not matched.`,
-        actions: [
-          {
-            label: "Ok",
-            classname: "text-btns",
-            action: () => setPromptState(null),
-          },
-        ],
-      });
+        setNotification({
+            message: "Total Debit and Credit Not Equal",
+            success: false,
+        });
+        setTimeout(() => setNotification(null), 2000);
       return;
     }
+    const response = await axios({
+      method: "post",
+      url: "/vouchers/postAccountVoucher",
+      data: {
+        ...order,
+        details: order.details.map((a) => {
+          return {
+            ledger_uuid: a.ledger_uuid||a.counter_uuid,
+            amount: a.add || -(a.sub || 0),
+          };
+        }),
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setNotification({
+        message: "Voucher Added",
+        success: true,
+      });
+      setOrder(getInititalValues());
+    } else {
+      setNotification({
+        message: "Voucher Not Added",
+        success: false,
+      });
+    }
+    setTimeout(() => setNotification(null), 2000);
   };
 
   const jumpToNextIndex = (id) => {
@@ -143,13 +170,13 @@ export default function NewVoucher() {
         () =>
           setOrder((prev) => ({
             ...prev,
-            item_details: [
-              ...prev.item_details,
+            details: [
+              ...prev.details,
               {
                 uuid: nextElemId,
                 b: 0,
                 p: 0,
-                sr: prev.item_details.length + 1,
+                sr: prev.details.length + 1,
               },
             ],
           })),
@@ -168,7 +195,7 @@ export default function NewVoucher() {
       e.preventDefault();
       setOrder((prev) => ({
         ...prev,
-        item_details: prev?.item_details?.map((i) =>
+        details: prev?.details?.map((i) =>
           i.item_uuid === item.item_uuid
             ? { ...i, p: (+i.p || 0) + (+item?.one_pack || 0) }
             : i
@@ -178,7 +205,7 @@ export default function NewVoucher() {
       e.preventDefault();
       setOrder((prev) => ({
         ...prev,
-        item_details: prev?.item_details?.map((i) =>
+        details: prev?.details?.map((i) =>
           i.item_uuid === item.item_uuid
             ? { ...i, p: (+i.p || 0) - (+item?.one_pack || 0) }
             : i
@@ -202,7 +229,7 @@ export default function NewVoucher() {
           ledger_uuid: a.ledger_uuid,
           counter_uuid: a.counter_uuid,
         })),
-    [ledgerData, counters, order.item_details]
+    [ledgerData, counters, order.details]
   );
 
   return (
@@ -225,10 +252,10 @@ export default function NewVoucher() {
                     onChange={(e) =>
                       setOrder((prev) => ({
                         ...prev,
-                        date: e.target.value,
+                        voucher_date: e.target.value,
                       }))
                     }
-                    value={order.date}
+                    value={order.voucher_date}
                     placeholder="Search Counter Title..."
                     className="searchInput"
                     pattern="\d{4}-\d{2}-\d{2}"
@@ -243,11 +270,11 @@ export default function NewVoucher() {
                     onChange={(doc) => {
                       setOrder((prev) => ({
                         ...prev,
-                        type: doc.value,
+                        voucher_type: doc.value,
                       }));
                     }}
                     value={
-                      typeOptions.find((a) => a.value === order.type) || {
+                      typeOptions.find((a) => a.value === order.voucher_type) || {
                         value: "",
                         label: "Select",
                       }
@@ -269,13 +296,13 @@ export default function NewVoucher() {
                 <thead className="lh-copy" style={{ position: "static" }}>
                   <tr className="white">
                     <th className="pa2 tl bb b--black-20 w-30">Ledger</th>
-                    <th className="pa2 tc bb b--black-20">+</th>
                     <th className="pa2 tc bb b--black-20">-</th>
+                    <th className="pa2 tc bb b--black-20">+</th>
                   </tr>
                 </thead>
 
                 <tbody className="lh-copy">
-                  {order?.item_details?.map((item, i) => (
+                  {order?.details?.map((item, i) => (
                     <tr key={item.uuid} item-billing-type={item?.billing_type}>
                       <td
                         className="ph2 pv1 tl bb b--black-20 bg-white"
@@ -301,7 +328,7 @@ export default function NewVoucher() {
                               // );
                               setOrder((prev) => ({
                                 ...prev,
-                                item_details: prev.item_details.map((a) => {
+                                details: prev.details.map((a) => {
                                   if (a.uuid === item.uuid) {
                                     let item = ledgerData.find(
                                       (a) => a.ledger_uuid === e.value
@@ -341,6 +368,37 @@ export default function NewVoucher() {
                             placeholder="Item"
                           />
                         </div>
+                      </td>{" "}
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        <input
+                          id={"p" + item.uuid}
+                          style={{ width: "100px" }}
+                          type="number"
+                          className="numberInput"
+                          onWheel={(e) => e.preventDefault()}
+                          index={listItemIndexCount++}
+                          value={item.sub || ""}
+                          onChange={(e) => {
+                            setOrder((prev) => {
+                              return {
+                                ...prev,
+                                details: prev.details.map((a) =>
+                                  a.uuid === item.uuid
+                                    ? { ...a, sub: e.target.value }
+                                    : a
+                                ),
+                              };
+                            });
+                          }}
+                          onFocus={(e) => e.target.select()}
+                          onKeyDown={(e) => onPiecesKeyDown(e, item)}
+                          disabled={
+                            !(item.counter_uuid || item.ledger_uuid) || item.add
+                          }
+                        />
                       </td>
                       <td
                         className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -361,7 +419,7 @@ export default function NewVoucher() {
                             setOrder((prev) => {
                               return {
                                 ...prev,
-                                item_details: prev.item_details.map((a) =>
+                                details: prev.details.map((a) =>
                                   a.uuid === item.uuid
                                     ? { ...a, add: e.target.value }
                                     : a
@@ -377,37 +435,6 @@ export default function NewVoucher() {
                           }
                         />
                       </td>
-                      <td
-                        className="ph2 pv1 tc bb b--black-20 bg-white"
-                        style={{ textAlign: "center" }}
-                      >
-                        <input
-                          id={"p" + item.uuid}
-                          style={{ width: "100px" }}
-                          type="number"
-                          className="numberInput"
-                          onWheel={(e) => e.preventDefault()}
-                          index={listItemIndexCount++}
-                          value={item.sub || ""}
-                          onChange={(e) => {
-                            setOrder((prev) => {
-                              return {
-                                ...prev,
-                                item_details: prev.item_details.map((a) =>
-                                  a.uuid === item.uuid
-                                    ? { ...a, sub: e.target.value }
-                                    : a
-                                ),
-                              };
-                            });
-                          }}
-                          onFocus={(e) => e.target.select()}
-                          onKeyDown={(e) => onPiecesKeyDown(e, item)}
-                          disabled={
-                            !(item.counter_uuid || item.ledger_uuid) || item.add
-                          }
-                        />
-                      </td>
                     </tr>
                   ))}
                   <tr>
@@ -415,8 +442,8 @@ export default function NewVoucher() {
                       onClick={() =>
                         setOrder((prev) => ({
                           ...prev,
-                          item_details: [
-                            ...prev.item_details,
+                          details: [
+                            ...prev.details,
                             { uuid: uuid(), b: 0, p: 0 },
                           ],
                         }))
@@ -446,13 +473,13 @@ export default function NewVoucher() {
                       className="ph2 pv1 tc bb b--black-20 bg-white"
                       style={{ textAlign: "center" }}
                     >
-                      {totalSum}
+                      {totalSub}
                     </td>
                     <td
                       className="ph2 pv1 tc bb b--black-20 bg-white"
                       style={{ textAlign: "center" }}
                     >
-                      {totalSub}
+                      {totalSum}
                     </td>
                   </tr>
                 </tbody>
@@ -463,33 +490,8 @@ export default function NewVoucher() {
               <button
                 type="button"
                 onClick={() => {
-                  let empty_item = order.item_details
-                    .filter((a) => a.item_uuid)
-                    .map((a) => ({
-                      ...a,
-                      is_empty: !((+a.p || 0) + (+a.b || 0) + (+a.free || 0)),
-                    }))
-                    .find((a) => a.is_empty);
-                  console.log({
-                    empty_item,
-                    order: order.item_details.map((a) => ({
-                      ...a,
-                      is_empty: !(+a.p + +a.b + +a.free),
-                    })),
-                  });
-                  if (empty_item) {
-                    setNotification({
-                      message: `${empty_item.item_title} has 0 Qty.
-                      0 Qty Not allowed.`,
-                      success: false,
-                    });
-                    setTimeout(() => setNotification(null), 2000);
-                    return;
-                  }
-                  setOrder((prev) => ({
-                    ...prev,
-                    item_details: prev.item_details.filter((a) => a.item_uuid),
-                  }));
+                  
+                 onSubmit();
                 }}
               >
                 Bill
@@ -504,7 +506,7 @@ export default function NewVoucher() {
                   }}
                   type="button"
                   onClick={() => {
-                    // if (!order.item_details.filter((a) => a.item_uuid).length)
+                    // if (!order.details.filter((a) => a.item_uuid).length)
                     //   return;
                     // setPopup(true);
                   }}
@@ -718,7 +720,7 @@ function DiliveryPopup({
       shortage: order.shortage,
       adjustment: order.adjustment,
       counter: counters.find((a) => a.ledger_uuid === order.ledger_uuid),
-      items: order.item_details.map((a) => {
+      items: order.details.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);
         return {
           ...itemData,
@@ -730,7 +732,7 @@ function DiliveryPopup({
     let Tempdata = {
       ...order,
       ...billingData,
-      item_details: billingData.items,
+      details: billingData.items,
       replacement: data?.replacement || 0,
       shortage: data?.shortage || 0,
       adjustment: data?.adjustment || 0,
