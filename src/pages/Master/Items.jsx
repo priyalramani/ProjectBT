@@ -634,11 +634,11 @@ function NewUserForm({
         exclude_discount: 0,
       });
   }, [companies, itemCategories, popupInfo.data, popupInfo?.type]);
-console.log({data})
+  console.log({ data });
   const submitHandler = async (e) => {
     let obj = { ...data, item_uuid: data.item_uuid || uuid() };
     e.preventDefault();
-    if (!obj.item_group_uuid?.length&&popupInfo.type!=="price") {
+    if (!obj.item_group_uuid?.length && popupInfo.type !== "price") {
       setNotification({ success: false, message: "Please Select Item Group" });
       setTimeout(() => setNotification(null), 5000);
       return;
@@ -697,7 +697,7 @@ console.log({data})
       });
       obj = { ...obj, img_status: 1 };
     }
-    if (popupInfo?.type === "edit"||popupInfo.type==="price") {
+    if (popupInfo?.type === "edit" || popupInfo.type === "price") {
       const response = await axios({
         method: "put",
         url: "/items/putItem",
@@ -1141,6 +1141,23 @@ console.log({data})
                           })
                         }
                         maxLength={5}
+                      />
+                    </label>
+                    <label className="selectLabel">
+                      Product HSN
+                      <input
+                        type="number"
+                        name="one_pack"
+                        className="numberInput"
+                        value={data?.hsn}
+                        onChange={(e) => {
+                          if (e.target.value.length <= 8)
+                            setdata({
+                              ...data,
+                              hsn: e.target.value,
+                            });
+                        }}
+                        maxLength={8}
                       />
                     </label>
                     <label className="selectLabel" style={{ width: "100px" }}>

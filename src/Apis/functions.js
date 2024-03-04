@@ -274,8 +274,9 @@ export const Billing = async ({
     let salesManDiscounts = item.charges_discount?.find(
       (a) => a.title === "Salesperson Discount"
     ) || { title: "Salesperson Discount", value: item.discount };
+    console.log(add_discounts , item.edit);
     let charges_discount = (
-      add_discounts || item.edit
+       item.edit
         ? []
         : item.charges_discount?.filter((a) => a.value) || []
     ).filter((a) => a.title !== "Salesperson Discount");
@@ -398,9 +399,9 @@ export const Billing = async ({
     if (item_total) item_total = (+item_total || 0).toFixed(2);
     item = {
       ...item,
-      charges_discount: item_special_price
-        ? charges_discount.map((a) => ({ ...a, value: 0 }))
-        : charges_discount,
+      // charges_discount: item_special_price
+      //   ? charges_discount.map((a) => ({ ...a, value: 0 }))
+      //   : charges_discount,
       item_total,
       item_desc_total: 0,
     };

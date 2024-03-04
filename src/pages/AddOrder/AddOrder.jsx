@@ -73,7 +73,6 @@ export default function AddOrder() {
   const [warehouse, setWarehouse] = useState([]);
   const [user_warehouse, setUser_warehouse] = useState([]);
   const [itemsData, setItemsData] = useState([]);
-  const [qty_details, setQtyDetails] = useState(false);
   const [popup, setPopup] = useState(false);
   const [autoBills, setAutoBills] = useState([]);
   const reactInputsRef = useRef({});
@@ -370,7 +369,9 @@ export default function AddOrder() {
 
     if (!order.item_details.filter((a) => a.item_uuid).length) return;
     else if (
-      order?.item_details.filter(a=>a.item_uuid)?.some((i) => i.billing_type !== order?.order_type)
+      order?.item_details
+        .filter((a) => a.item_uuid)
+        ?.some((i) => i.billing_type !== order?.order_type)
     )
       return setPromptState({
         message: `${getType(
@@ -420,7 +421,10 @@ export default function AddOrder() {
     }));
   };
 
-  const jumpToNextIndex = (id) => {
+
+
+  const jumpToNextIndex = async(id) => {
+    
     document.querySelector(`#${id}`).blur();
     const index = document.querySelector(`#${id}`).getAttribute("index");
     const nextElem = document.querySelector(`[index="${+index + 1}"]`);
@@ -458,8 +462,9 @@ export default function AddOrder() {
       );
     }
     // setQuantity();
+    
   };
-  console.count("render");
+
 
   let listItemIndexCount = 0;
 
@@ -739,7 +744,12 @@ export default function AddOrder() {
                     <th className="pa2 tc bb b--black-20">Pcs</th>
                     <th className="pa2 tc bb b--black-20 ">Price (pcs)</th>
                     <th className="pa2 tc bb b--black-20 ">Price (box)</th>
+                    <th className="pa2 tc bb b--black-20 ">Dsc1</th>
+                    <th className="pa2 tc bb b--black-20 ">desc2</th>
+
                     <th className="pa2 tc bb b--black-20 ">Special Price</th>
+                    <th className="pa2 tc bb b--black-20 ">Item Total</th>
+
                     <th className="pa2 tc bb b--black-20 "></th>
                   </tr>
                 </thead>
@@ -812,10 +822,6 @@ export default function AddOrder() {
                                 },
                               }}
                               onChange={(e) => {
-                                // setTimeout(
-                                //   () => setQtyDetails((prev) => !prev),
-                                //   2000
-                                // );
                                 setOrder((prev) => ({
                                   ...prev,
                                   item_details: prev.item_details.map((a) => {
@@ -833,6 +839,16 @@ export default function AddOrder() {
                                         ...a,
                                         ...item,
                                         p_price,
+                                        charges_discount: [
+                                          {
+                                            title: "dsc1",
+                                            value: 0,
+                                          },
+                                          {
+                                            title: "dsc2",
+                                            value: 0,
+                                          },
+                                        ],
                                         b_price: Math.floor(
                                           p_price * item.conversion || 0
                                         ),
@@ -895,10 +911,6 @@ export default function AddOrder() {
                             value={item.b || ""}
                             onChange={(e) => {
                               setOrder((prev) => {
-                                setTimeout(
-                                  () => setQtyDetails((prev) => !prev),
-                                  2000
-                                );
                                 return {
                                   ...prev,
                                   item_details: prev.item_details.map((a) =>
@@ -932,10 +944,6 @@ export default function AddOrder() {
                             value={item.p || ""}
                             onChange={(e) => {
                               setOrder((prev) => {
-                                setTimeout(
-                                  () => setQtyDetails((prev) => !prev),
-                                  2000
-                                );
                                 return {
                                   ...prev,
                                   item_details: prev.item_details.map((a) =>
@@ -951,6 +959,7 @@ export default function AddOrder() {
                             disabled={!item.item_uuid}
                           />
                         </td>
+
                         <td
                           className="ph2 pv1 tc bb b--black-20 bg-white"
                           style={{ textAlign: "center" }}
@@ -1038,6 +1047,94 @@ export default function AddOrder() {
                             }}
                           />
                         </td>
+                        <td
+                          className="ph2 pv1 tc bb b--black-20 bg-white"
+                          style={{ textAlign: "center" }}
+                        >
+                          <input
+                 
+                            style={{ width: "100px" }}
+                            type="number"
+                            className="numberInput"
+                            onWheel={(e) => e.preventDefault()}
+                        
+                            value={
+                              item?.charges_discount?.find(
+                                (b) => b.title === "dsc1"
+                              )?.value || ""
+                            }
+                            onChange={(e) => {
+                              setOrder((prev) => {
+                                return {
+                                  ...prev,
+                                  item_details: prev.item_details.map((a) =>
+                                    a.uuid === item.uuid
+                                      ? {
+                                          ...a,
+                                          charges_discount:
+                                            a.charges_discount.map((b) =>
+                                              b.title === "dsc1"
+                                                ? {
+                                                    ...b,
+                                                    value: e.target.value,
+                                                  }
+                                                : b
+                                            ),
+                                        }
+                                      : a
+                                  ),
+                                };
+                              });
+                            }}
+                            onFocus={(e) => e.target.select()}
+                            onKeyDown={(e) => onPiecesKeyDown(e, item)}
+                            disabled={!item.item_uuid}
+                          />
+                        </td>
+                        <td
+                          className="ph2 pv1 tc bb b--black-20 bg-white"
+                          style={{ textAlign: "center" }}
+                        >
+                          <input
+                          
+                            style={{ width: "100px" }}
+                            type="number"
+                            className="numberInput"
+                            onWheel={(e) => e.preventDefault()}
+              
+                            value={
+                              item?.charges_discount?.find(
+                                (b) => b.title === "dsc2"
+                              )?.value || ""
+                            }
+                            onChange={(e) => {
+                              setOrder((prev) => {
+                                return {
+                                  ...prev,
+                                  item_details: prev.item_details.map((a) =>
+                                    a.uuid === item.uuid
+                                      ? {
+                                          ...a,
+                                          charges_discount:
+                                            a.charges_discount.map((b) =>
+                                              b.title === "dsc2"
+                                                ? {
+                                                    ...b,
+                                                    value: e.target.value,
+                                                  }
+                                                : b
+                                            ),
+                                        }
+                                      : a
+                                  ),
+                                };
+                              });
+                            }}
+                            onFocus={(e) => e.target.select()}
+                            onKeyDown={(e) => onPiecesKeyDown(e, item)}
+                            disabled={!item.item_uuid}
+                          />
+                        </td>
                         <td className="ph2 pv1 tc bb b--black-20 bg-white">
                           {+item?.item_price !== +item?.p_price &&
                             (+getSpecialPrice(
@@ -1068,6 +1165,12 @@ export default function AddOrder() {
                                 }
                               />
                             ))}
+                        </td>
+                        <td
+                          className="ph2 pv1 tc bb b--black-20 bg-white"
+                          style={{ textAlign: "center" }}
+                        >
+                          {item?.item_total || ""}
                         </td>
                         <td
                           className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -1118,11 +1221,13 @@ export default function AddOrder() {
               <button
                 type="button"
                 onClick={() => {
-                  let empty_item = order.item_details.filter((a) => a.item_uuid)
-                    .map((a) => ({ ...a, is_empty: !((+a.p||0) + (+a.b||0) + (+a.free||0)) }))
+                  let empty_item = order.item_details
+                    .filter((a) => a.item_uuid)
+                    .map((a) => ({
+                      ...a,
+                      is_empty: !((+a.p || 0) + (+a.b || 0) + (+a.free || 0)),
+                    }))
                     .find((a) => a.is_empty);
-                    console.log({empty_item,order:order.item_details
-                      .map((a) => ({ ...a, is_empty: !(+a.p + +a.b + +a.free) }))});
                   if (empty_item) {
                     setNotification({
                       message: `${empty_item.item_title} has 0 Qty.
