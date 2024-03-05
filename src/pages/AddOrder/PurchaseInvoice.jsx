@@ -31,8 +31,8 @@ const CovertedQty = (qty, conversion) => {
 };
 
 const rateTypeOptions = [
-  { value: "Before Tex", label: "bt" },
-  { value: "After Tex", label: "at" },
+  { label: "Before Tex", value: "bt" },
+  { label: "After Tex", value: "at" },
 ];
 
 export let getInititalValues = () => ({
@@ -585,11 +585,11 @@ export default function PurchaseInvoice() {
                 </div>
               </div>
               <div className="inputGroup" style={{ width: "100px" }}>
-                <label htmlFor="Warehouse">Party Number</label>
+                <label htmlFor="Warehouse">Party Invoice Number</label>
                 <div className="inputGroup">
                   <input
                     style={{ width: "100px" }}
-                    type="number"
+                    type="text"
                     className="numberInput"
                     onWheel={(e) => e.preventDefault()}
                     value={order.party_number || ""}
