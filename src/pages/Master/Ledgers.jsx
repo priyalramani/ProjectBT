@@ -398,6 +398,30 @@ function NewUserForm({
                       ))}
                     </select>
                   </label>
+                  {data.ledger_group_uuid ===
+                  "9c2a6c85-c0f0-4acf-957e-dcea223f3d00" ? (
+                    <label className="selectLabel">
+                      Transaction tags
+                      <textarea
+                        type="number"
+                        onWheel={(e) => e.target.blur()}
+                        name="sort_order"
+                        className="numberInput"
+                        value={data?.transaction_tags
+                          ?.toString()
+                          ?.replace(/,/g, "\n")}
+                        style={{ height: "50px" }}
+                        onChange={(e) =>
+                          setData({
+                            ...data,
+                            transaction_tags: e.target.value.split("\n"),
+                          })
+                        }
+                      />
+                    </label>
+                  ) : (
+                    ""
+                  )}
                 </div>
               </div>
 

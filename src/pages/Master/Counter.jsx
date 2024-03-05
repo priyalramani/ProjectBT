@@ -1566,24 +1566,41 @@ function NewUserForm({
                   </label>
                 </div>
                 <div className="row">
-                  {console.log(data)}
-                    <label className="selectLabel">
+                  <label className="selectLabel">
                     Credit Rating
-                      <input
-                        type="text"
-                        name="credit_rating"
-                        className="numberInput"
-                        value={data?.credit_rating}
-                        onChange={(e) =>
-                          setdata({
-                            ...data,
-                            credit_rating: e.target.value,
-                          })
-                        }
-                      />
-                    </label>
-                 
-                  </div>
+                    <input
+                      type="text"
+                      name="credit_rating"
+                      className="numberInput"
+                      value={data?.credit_rating}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          credit_rating: e.target.value,
+                        })
+                      }
+                    />
+                  </label>
+                  <label className="selectLabel">
+                    Transaction tags
+                    <textarea
+                      type="number"
+                      onWheel={(e) => e.target.blur()}
+                      name="sort_order"
+                      className="numberInput"
+                      value={data?.transaction_tags
+                        ?.toString()
+                        ?.replace(/,/g, "\n")}
+                      style={{ height: "50px" }}
+                      onChange={(e) =>
+                        setdata({
+                          ...data,
+                          transaction_tags: e.target.value.split("\n"),
+                        })
+                      }
+                    />
+                  </label>
+                </div>
                 <div className="row">
                   <label className="selectLabel" style={{ width: "50%" }}>
                     Mobile
@@ -1603,7 +1620,7 @@ function NewUserForm({
                             name="route_title"
                             className="numberInput"
                             value={a?.title}
-                            style={{ width: "10ch",marginLeft:"10px" }}
+                            style={{ width: "10ch", marginLeft: "10px" }}
                             placeholder="Title"
                             onChange={(e) => {
                               setdata((prev) => ({
@@ -1615,7 +1632,6 @@ function NewUserForm({
                                 ),
                               }));
                             }}
-                       
                           />
                           <input
                             type="number"
@@ -1733,7 +1749,6 @@ function NewUserForm({
                       ))}
                     </div>
                   </label>
-                 
                 </div>
                 <i style={{ color: "red" }}>
                   {errMassage === "" ? "" : "Error: " + errMassage}
@@ -2252,15 +2267,11 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
     </div>
   );
 };
-const CounterRatesAndDiscounts = ({
-  onSave,
-  itemPopup,
-}) => {
+const CounterRatesAndDiscounts = ({ onSave, itemPopup }) => {
   const [companies, setCompanies] = useState([]);
   const [value, setValue] = useState([]);
 
   const [filterCompany, setFilterCompany] = useState("");
-
 
   const getCounterData = async () => {
     const response = await axios({
@@ -2274,8 +2285,7 @@ const CounterRatesAndDiscounts = ({
       setValue(response.data.result?.company_discount);
     }
   };
-  console.log({value})
-
+  console.log({ value });
 
   const getCompanies = async () => {
     const response = await axios({
@@ -2290,8 +2300,7 @@ const CounterRatesAndDiscounts = ({
   };
   useEffect(() => {
     getCompanies();
-    getCounterData()
-  
+    getCounterData();
   }, []);
   const submitHandler = async () => {
     const response = await axios({
@@ -2409,8 +2418,8 @@ const CounterRatesAndDiscounts = ({
                               placeholder="Discount..."
                               className="searchInput"
                             />
-</td>
-<td>
+                          </td>
+                          <td>
                             <select
                               style={{ width: "100px" }}
                               className="searchInput"

@@ -164,6 +164,9 @@ const CurrentStock = () => {
   useEffect(() => {
     getItemsData();
     GetWarehouseList();
+    return () => {
+      sessionStorage.removeItem("password");
+    };
   }, []);
   useEffect(() => {
     setSelectedOptions(warehouseData);
@@ -653,6 +656,10 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
   const [total, setTotal] = useState(null);
   const [warning, setWarning] = useState();
   const [itemDetails, setItemDetails] = useState([]);
+  const [passwordPopup, setPasswordPopup] = useState(false);
+  const [password, setPassword] = useState(
+    sessionStorage.getItem("password") || ""
+  );
   const [searchData, setSearchData] = useState({
     startDate: "",
     endDate: "",
@@ -794,6 +801,21 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
     }
   };
   console.log(popupInfo);
+  const checkPassword = async (e) => {
+    e.preventDefault();
+    const response = await axios({
+      method: "get",
+      url: "/details/checkPassword/" + password,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setPasswordPopup(false);
+      sessionStorage.setItem("password", password);
+      submitHandler(e);
+    }
+  };
 
   return popupInfo.type === "qty" ? (
     <div className="overlay">
@@ -827,9 +849,49 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
                 </button>
               </form>
             </div>
+          ) : passwordPopup ? (
+            <div style={{ overflowY: "scroll" }}>
+              <form className="form" onSubmit={checkPassword}>
+                <div className="formGroup">
+                  <div
+                    className="row"
+                    style={{ flexDirection: "row", alignItems: "flex-start" }}
+                  >
+                    <label
+                      className="selectLabel flex"
+                      style={{ width: "100px" }}
+                    >
+                      Password
+                      <input
+                        type="number"
+                        name="password"
+                        className="numberInput"
+                        value={password}
+                        style={{ width: "100px" }}
+                        onChange={(e) => setPassword(e.target.value)}
+                        maxLength={42}
+                        onWheel={(e) => e.preventDefault()}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <button type="submit" className="submit">
+                  Save changes
+                </button>
+              </form>
+            </div>
           ) : (
             <div style={{ overflowY: "scroll" }}>
-              <form className="form" onSubmit={submitHandler}>
+              <form
+                className="form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (password) {
+                    submitHandler(e);
+                  } else setPasswordPopup(true);
+                }}
+              >
                 <div className="formGroup">
                   <div
                     className="row"
@@ -1005,17 +1067,19 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
                       </tr>
                     );
                   })}
-                  
                 </tbody>
               </table>
-              
             </div>
-            <div className="flex" style={{justifyContent:"space-between"}}>
-                <h3>Total: </h3>
-                <div style={{width:"30vw"}}></div>
-                <h3>{total?.addedB || 0}:{total?.addedP||0}</h3> 
-                <h3>{total?.reduceB || 0}:{total?.reduceP||0}</h3> 
-              </div>
+            <div className="flex" style={{ justifyContent: "space-between" }}>
+              <h3>Total: </h3>
+              <div style={{ width: "30vw" }}></div>
+              <h3>
+                {total?.addedB || 0}:{total?.addedP || 0}
+              </h3>
+              <h3>
+                {total?.reduceB || 0}:{total?.reduceP || 0}
+              </h3>
+            </div>
           </div>
           <button onClick={onSave} className="closeButton">
             x

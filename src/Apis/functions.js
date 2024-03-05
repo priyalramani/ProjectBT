@@ -274,11 +274,9 @@ export const Billing = async ({
     let salesManDiscounts = item.charges_discount?.find(
       (a) => a.title === "Salesperson Discount"
     ) || { title: "Salesperson Discount", value: item.discount };
-    console.log(add_discounts , item.edit);
+    console.log(add_discounts, item.edit);
     let charges_discount = (
-       item.edit
-        ? []
-        : item.charges_discount?.filter((a) => a.value) || []
+      item.edit ? [] : item.charges_discount?.filter((a) => a.value) || []
     ).filter((a) => a.title !== "Salesperson Discount");
     let price = +(add_discounts || item.edit
       ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
@@ -374,7 +372,7 @@ export const Billing = async ({
     let item_special_price =
       counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
         ?.price || 0;
-   
+
     let item_total =
       item.status !== 3
         ? (
@@ -386,11 +384,14 @@ export const Billing = async ({
               0) * (+item.qty || 0)
           ).toFixed(2)
         : 0;
-        console.log(edit_prices,+edit_price ,
-          +item_special_price ,
-          +item.item_desc_total ,
-          +item?.price ,
-          +item.item_price)
+    console.log(
+      edit_prices,
+      +edit_price,
+      +item_special_price,
+      +item.item_desc_total,
+      +item?.price,
+      +item.item_price
+    );
     if (billDiscounts && add_discounts) {
       charges_discount.push(billDiscounts);
       item_total = item_total * +((100 - +billDiscounts.value) / 100);
@@ -399,9 +400,11 @@ export const Billing = async ({
     if (item_total) item_total = (+item_total || 0).toFixed(2);
     item = {
       ...item,
-      // charges_discount: item_special_price
-      //   ? charges_discount.map((a) => ({ ...a, value: 0 }))
-      //   : charges_discount,
+      charges_discount: item_special_price
+        ? charges_discount.map((a) =>
+            a.title === "dsc1" || a.title === "dsc2" ? a : { ...a, value: 0 }
+          )
+        : charges_discount,
       item_total,
       item_desc_total: 0,
     };

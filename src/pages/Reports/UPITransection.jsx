@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import { OrderDetails } from "../../components/OrderDetails";
@@ -7,6 +7,7 @@ import * as XLSX from "xlsx";
 import Context from "../../context/context";
 import * as FileSaver from "file-saver";
 import { CopyAll, WhatsApp } from "@mui/icons-material";
+import Select from "react-select";
 const fileExtension = ".xlsx";
 const fileType =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -24,6 +25,7 @@ const UPITransection = () => {
   const [popupOrder, setPopupOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [remarksPopup, setRemarksPoup] = useState();
+  const [type, setType] = useState("All");
 
   const [items, setItems] = useState([]);
   const getActivityData = async (controller = new AbortController()) => {
@@ -99,6 +101,13 @@ const UPITransection = () => {
     const data = new Blob([excelBuffer], { type: fileType });
     FileSaver.saveAs(data, "TripOrders" + fileExtension);
   };
+  const itemDetails = useMemo(() => {
+    if (type === "All") {
+      return items;
+    } else {
+      return items.filter((a) => a.mode_title === type);
+    }
+  }, [items, type]);
   return (
     <>
       <Sidebar />
@@ -110,10 +119,38 @@ const UPITransection = () => {
             Exels
           </button> */}
         </div>
-
+        <div id="item-sales-top">
+          <div
+            id="date-input-container"
+            style={{
+              overflow: "visible",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
+            <div className="inputGroup" style={{ width: "20%" }}>
+              Type
+              <Select
+                options={[
+                  { value: "All", label: "All" },
+                  { value: "UPI", label: "UPI" },
+                  { value: "Cheque", label: "Cheque" },
+                ]}
+                onChange={(doc) => setType(doc.value)}
+                value={{ value: type, label: type }}
+                openMenuOnFocus={true}
+                menuPosition="fixed"
+                menuPlacement="auto"
+                placeholder="Select Type"
+              />
+            </div>
+          </div>
+        </div>
         <div className="table-container-user item-sales-container">
           <Table
-            itemsDetails={items}
+            itemsDetails={itemDetails}
             putActivityData={putActivityData}
             getOrderData={getOrderData}
             setRemarksPoup={setRemarksPoup}
@@ -279,7 +316,7 @@ function Table({
 
                 color: isTimestampPlusDaysLessThanCurrent({
                   timestamp: +item.payment_date,
-                  numberOfDays: item.payment_reminder_days,
+                  numberOfDays: item.payment_reminder_days || 2,
                 })
                   ? "red"
                   : "black",
