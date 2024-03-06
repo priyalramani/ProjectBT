@@ -348,19 +348,19 @@ export default function AddOrder() {
 
     console.log("orderJSon", data);
 
-    const response = await axios({
-      method: "post",
-      url: "/orders/postOrder",
-      data,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-    if (response.data.success) {
-      // window.location.reload();
-      setOrder(getInititalValues());
-    }
+    // const response = await axios({
+    //   method: "post",
+    //   url: "/orders/postOrder",
+    //   data,
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    // });
+    // console.log(response);
+    // if (response.data.success) {
+    //   // window.location.reload();
+    //   setOrder(getInititalValues());
+    // }
   };
 
   const callBilling = async (type = {}) => {
@@ -421,10 +421,7 @@ export default function AddOrder() {
     }));
   };
 
-
-
-  const jumpToNextIndex = async(id) => {
-    
+  const jumpToNextIndex = async (id) => {
     document.querySelector(`#${id}`).blur();
     const index = document.querySelector(`#${id}`).getAttribute("index");
     const nextElem = document.querySelector(`[index="${+index + 1}"]`);
@@ -462,9 +459,7 @@ export default function AddOrder() {
       );
     }
     // setQuantity();
-    
   };
-
 
   let listItemIndexCount = 0;
 
@@ -1052,12 +1047,10 @@ export default function AddOrder() {
                           style={{ textAlign: "center" }}
                         >
                           <input
-                 
                             style={{ width: "100px" }}
                             type="number"
                             className="numberInput"
                             onWheel={(e) => e.preventDefault()}
-                        
                             value={
                               item?.charges_discount?.find(
                                 (b) => b.title === "dsc1"
@@ -1096,12 +1089,10 @@ export default function AddOrder() {
                           style={{ textAlign: "center" }}
                         >
                           <input
-                          
                             style={{ width: "100px" }}
                             type="number"
                             className="numberInput"
                             onWheel={(e) => e.preventDefault()}
-              
                             value={
                               item?.charges_discount?.find(
                                 (b) => b.title === "dsc2"

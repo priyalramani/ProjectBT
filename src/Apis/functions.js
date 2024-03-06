@@ -277,7 +277,7 @@ export const Billing = async ({
     console.log(add_discounts, item.edit);
     let charges_discount = (
       item.edit ? [] : item.charges_discount?.filter((a) => a.value) || []
-    ).filter((a) => a.title !== "Salesperson Discount");
+    ).filter((a) => a.title !== "Salesperson Discount" && a.title !== "Company Discount");
     let price = +(add_discounts || item.edit
       ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
           ?.price || 0

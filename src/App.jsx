@@ -78,7 +78,7 @@ import LedgersPage from "./pages/Master/Ledgers"
 import LedgerGroups from "./pages/Master/LedgerGroups"
 import PurchaseInvoice from "./pages/AddOrder/PurchaseInvoice"
 import AddVoucher from "./pages/AddOrder/NewVoucher"
-export let Version = 257
+export let Version = 258
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com"
 
@@ -429,7 +429,7 @@ function App() {
               />
               <Route path="/admin/signedBills" element={<SignedBills />} />
               <Route path="/admin/tasks" element={<TasksPage />} />
-              <Route path="*" element={<Navigate replace to={"/admin"} />} />
+              <Route path="*" element={<Navigate replace to={"/trip"} />} />
             </>
           ) : (
             <>
