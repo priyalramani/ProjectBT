@@ -250,6 +250,7 @@ export const Billing = async ({
   creating_new,
   invoice_number,
   edit_prices = [],
+  order_edit
 }) => {
   let counterCharges = [];
   let counter_charges = [];
@@ -267,7 +268,7 @@ export const Billing = async ({
     item = { ...item, item_total: 0 };
     console.log(item);
     let edit_price = +edit_prices.find((a) => a.item_uuid === item.item_uuid)
-      ?.item_price;
+      ?.item_price||item.edit_price||0;
     let billDiscounts = item.charges_discount?.find(
       (a) => a.title === "Bill Discounting"
     );
@@ -277,7 +278,7 @@ export const Billing = async ({
     console.log(add_discounts, item.edit);
     let charges_discount = (
       item.edit ? [] : item.charges_discount?.filter((a) => a.value) || []
-    ).filter((a) => a.title !== "Salesperson Discount" && a.title !== "Company Discount");
+    ).filter((a) => a.title !== "Salesperson Discount" && !(a.title === "Company Discount"&&order_edit));
     let price = +(add_discounts || item.edit
       ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
           ?.price || 0
@@ -368,6 +369,7 @@ export const Billing = async ({
               : item?.charges_discount?.length
               ? (100 - +charges_discount[0]?.value) / 100
               : 1),
+              edit_price,
     };
     let item_special_price =
       counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)

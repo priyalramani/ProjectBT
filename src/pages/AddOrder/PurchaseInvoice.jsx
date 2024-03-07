@@ -31,8 +31,8 @@ const CovertedQty = (qty, conversion) => {
 };
 
 const rateTypeOptions = [
-  { label: "Before Tex", value: "bt" },
-  { label: "After Tex", value: "at" },
+  { label: "Before Tax", value: "bt" },
+  { label: "After Tax", value: "at" },
 ];
 
 export let getInititalValues = () => ({
@@ -529,7 +529,7 @@ export default function PurchaseInvoice() {
                 </div>
               </div>
 
-              <div className="inputGroup" style={{ width: "100px" }}>
+              <div className="inputGroup" style={{ width: "50px" }}>
                 <label htmlFor="Warehouse">Company</label>
                 <div className="inputGroup">
                   <Select
@@ -563,7 +563,7 @@ export default function PurchaseInvoice() {
                   />
                 </div>
               </div>
-              <div className="inputGroup" style={{ width: "100px" }}>
+              <div className="inputGroup" style={{ width: "50px" }}>
                 <label htmlFor="Warehouse">Rate</label>
                 <div className="inputGroup">
                   <Select
@@ -588,7 +588,7 @@ export default function PurchaseInvoice() {
                 <label htmlFor="Warehouse">Party Invoice Number</label>
                 <div className="inputGroup">
                   <input
-                    style={{ width: "100px" }}
+                    style={{ width: "200px" }}
                     type="text"
                     className="numberInput"
                     onWheel={(e) => e.preventDefault()}
@@ -621,7 +621,7 @@ export default function PurchaseInvoice() {
                     <th className="pa2 tc bb b--black-20 ">Price (pcs)</th>
                     <th className="pa2 tc bb b--black-20 ">Price (box)</th>
                     <th className="pa2 tc bb b--black-20 ">Dsc1</th>
-                    <th className="pa2 tc bb b--black-20 ">desc2</th>
+                    <th className="pa2 tc bb b--black-20 ">Dsc2</th>
 
                     <th className="pa2 tc bb b--black-20 ">Special Price</th>
                     <th className="pa2 tc bb b--black-20 ">Item Total</th>
@@ -709,7 +709,7 @@ export default function PurchaseInvoice() {
                                       return {
                                         ...a,
                                         ...item,
-                                        p_price: 0,
+                                        p_price: item?.last_purchase_price||0,
                                         charges_discount: [
                                           {
                                             title: "dsc1",
@@ -720,7 +720,10 @@ export default function PurchaseInvoice() {
                                             value: 0,
                                           },
                                         ],
-                                        b_price: 0,
+                                        b_price: (
+                                          (item?.last_purchase_price||0) *
+                                          item?.conversion
+                                        ).toFixed(2),
                                       };
                                     } else return a;
                                   }),

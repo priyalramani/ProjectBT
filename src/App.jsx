@@ -78,7 +78,8 @@ import LedgersPage from "./pages/Master/Ledgers"
 import LedgerGroups from "./pages/Master/LedgerGroups"
 import PurchaseInvoice from "./pages/AddOrder/PurchaseInvoice"
 import AddVoucher from "./pages/AddOrder/NewVoucher"
-export let Version = 258
+import CounterLegerReport from "./pages/Reports/CounterLedgerReport"
+export let Version = 259
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com"
 
@@ -411,7 +412,7 @@ function App() {
                 path="/admin/CompletedTripsReport"
                 element={<CompletedTrips />}
               />
-              <Route path="/admin/CounterLeger" element={<CounterLeger />} />
+              <Route path="/admin/CounterLeger" element={view?<CounterLegerReport/>:<CounterLeger />} />
               <Route path="/admin/Outstandings" element={<Outstanding />} />
               <Route path="/admin/pendingEntry" element={<PendingsEntry />} />
               <Route

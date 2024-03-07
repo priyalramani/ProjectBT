@@ -38,7 +38,7 @@ let titleData = [
   { value: "cancelOrders", name: "cancel Order" },
   { value: "CompletedTripsReport", name: "Completed Trips Report" },
   { value: "CounterLeger", name: "Counter Leger" },
-  {value:"addVoucher",name:"Add Voucher"},
+  { value: "addVoucher", name: "Add Voucher" },
   { value: "Outstandings", name: "Outstandings" },
   { value: "pendingEntry", name: "Pending Order Entry" },
   { value: "pendingReciptsEntry", name: "Pending Recipt Entry" },
@@ -84,10 +84,10 @@ const Sidebar = ({ setCollectionTags }) => {
                     name: "Purchase Invoice",
                     link: "/admin/purchaseInvoice",
                   },
-				  {
-				name:"New Voucher",
-				link:"/admin/addVoucher"
-				  }
+                  {
+                    name: "New Voucher",
+                    link: "/admin/addVoucher",
+                  },
                 ]
               : [
                   {
@@ -197,7 +197,12 @@ const Sidebar = ({ setCollectionTags }) => {
           options={{ searchBar: true, sort: true }}
           menuList={
             view
-              ? []
+              ? [
+                  {
+                    name: "Ledger",
+                    link: "/admin/CounterLeger",
+                  },
+                ]
               : [
                   {
                     name: "User Activity",

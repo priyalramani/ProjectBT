@@ -657,6 +657,7 @@ function DiliveryPopup({
       order_uuid: order.order_uuid,
       counter_uuid: order.counter_uuid,
       trip_uuid: order.trip_uuid,
+      order_grandtotal: order?.order_grandtotal,
       invoice_number: order.invoice_number,
       modes: modes?.map((a) =>
         a.mode_title === "Cash" ? { ...a, coin: 0 } : a

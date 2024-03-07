@@ -46,6 +46,7 @@ const CovertedQty = (qty, conversion) => {
 export let getInititalValues = () => ({
   counter_uuid: "",
   item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
+  item:[],
   priority: 0,
   order_type: "I",
   time_1: 24 * 60 * 60 * 1000,
@@ -284,7 +285,7 @@ export default function AddOrder() {
               {
                 stage: 1,
                 time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid,
+                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
               },
             ]
           : type.stage === 2
@@ -292,12 +293,12 @@ export default function AddOrder() {
               {
                 stage: 1,
                 time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid,
+                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
               },
               {
                 stage: 2,
                 time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid,
+                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
               },
             ]
           : type.stage === 3
@@ -305,39 +306,39 @@ export default function AddOrder() {
               {
                 stage: 1,
                 time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid,
+                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
               },
               {
                 stage: 2,
                 time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid,
+                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
               },
               {
                 stage: 3,
                 time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid,
+                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
               },
             ]
           : [
               {
                 stage: 1,
                 time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid,
+                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
               },
               {
                 stage: 2,
                 time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid,
+                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
               },
               {
                 stage: 3,
                 time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid,
+                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
               },
               {
                 stage: 4,
                 time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid,
+                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
               },
             ],
       ...(type.obj || {}),
@@ -740,7 +741,7 @@ export default function AddOrder() {
                     <th className="pa2 tc bb b--black-20 ">Price (pcs)</th>
                     <th className="pa2 tc bb b--black-20 ">Price (box)</th>
                     <th className="pa2 tc bb b--black-20 ">Dsc1</th>
-                    <th className="pa2 tc bb b--black-20 ">desc2</th>
+                    <th className="pa2 tc bb b--black-20 ">Dsc2</th>
 
                     <th className="pa2 tc bb b--black-20 ">Special Price</th>
                     <th className="pa2 tc bb b--black-20 ">Item Total</th>

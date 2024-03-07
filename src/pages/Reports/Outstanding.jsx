@@ -542,6 +542,7 @@ function DiliveryPopup({
 					order_uuid: order.order_uuid,
 					invoice_number: order.invoice_number,
 					counter_uuid: order.counter_uuid,
+					order_grandtotal: order?.order_grandtotal,
 					collection_tag_uuid: order.collection_tag_uuid || "",
 					entry: 0,
 					user_uuid: localStorage.getItem("user_uuid"),

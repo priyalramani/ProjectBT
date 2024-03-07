@@ -410,6 +410,7 @@ function DiliveryPopup({ onSave, PaymentModes, order, updateBilling }) {
 					modes,
 					order_uuid: order.order_uuid,
 					invoice_number: order.invoice_number,
+					order_grandtotal: order?.order_grandtotal,
 					counter_uuid: order.counter_uuid,
 					collection_tag_uuid: order.collection_tag_uuid || "",
 					entry: 0,

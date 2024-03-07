@@ -245,6 +245,7 @@ export function OrderDetails({
     let counter = counters.find((a) => data.counter_uuid === a.counter_uuid);
     let time = new Date();
     let autoBilling = await Billing({
+      order_edit: true,
       order_uuid: data?.order_uuid,
       invoice_number: `${data?.order_type}${data?.invoice_number}`,
       shortage: data.shortage,
@@ -445,11 +446,12 @@ export function OrderDetails({
     }));
   }, [category, orderData]);
 
-  const getItemsData = async (item) => {
+  const getItemsData = async (item,controller) => {
     const response = await axios({
       method: "post",
       url: "/items/GetItemList",
       data: { items: item },
+      signal:controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
@@ -529,9 +531,10 @@ export function OrderDetails({
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
     console.log({ order });
     if (order) {
-      getItemsData(order?.item_details?.map((a) => a.item_uuid));
+      getItemsData(order?.item_details?.map((a) => a.item_uuid),controller);
       setDeductionsData({
         replacement: +order?.replacement || 0,
         shortage: +order?.shortage || 0,
@@ -540,26 +543,33 @@ export function OrderDetails({
       });
       getCounters([order?.counter_uuid]);
     }
+    return ()=>{
+      controller.abort();
+    }
   }, [order]);
 
   const onSubmit = async (
     type = { stage: 0, diliveredUser: "" },
     completedOrderEdited
   ) => {
-    let empty_item = orderData.item_details.filter((a) => a.item_uuid)
-    .map((a) => ({ ...a, is_empty: !((+a.p||0) + (+a.b||0) + (+a.free||0)) }))
-    .find((a) => a.is_empty);
-    console.log({empty_item,order:order.item_details
-      .map((a) => ({ ...a, is_empty: !(+a.p + +a.b + +a.free) }))});
-  if (empty_item) {
-    setNotification({
-      message: `${empty_item.item_title} has 0 Qty.
+    let empty_item = orderData.item_details
+      .filter((a) => a.item_uuid)
+      .map((a) => ({
+        ...a,
+        is_empty:
+          !((+a.p || 0) + (+a.b || 0) + (+a.free || 0)) && a.status !== 3,
+      }))
+      .find((a) => a.is_empty);
+
+    if (empty_item) {
+      setNotification({
+        message: `${empty_item.item_title} has 0 Qty.
       0 Qty Not allowed.`,
-      success: false,
-    });
-    setTimeout(() => setNotification(null), 2000);
-    return;
-  }
+        success: false,
+      });
+      setTimeout(() => setNotification(null), 2000);
+      return;
+    }
     if (orderData?.payment_pending && !orderData.notes?.length)
       return setNotesPoup(true);
     let counter = counters.find(
@@ -597,6 +607,7 @@ export function OrderDetails({
     };
 
     let autoBilling = await Billing({
+      order_edit: true,
       order_uuid: data?.order_uuid,
       invoice_number: `${data?.order_type}${data?.invoice_number}`,
       counter,
@@ -792,6 +803,7 @@ export function OrderDetails({
     };
 
     let autoBilling = await Billing({
+      order_edit: true,
       order_uuid: data?.order_uuid,
       invoice_number: `${data?.order_type}${data?.invoice_number}`,
       counter,
@@ -808,6 +820,7 @@ export function OrderDetails({
       item_details: autoBilling.items,
     };
     let autoBilling2 = await Billing({
+      order_edit: true,
       order_uuid: data2?.order_uuid,
       invoice_number: `${data2?.order_type}${data2?.invoice_number}`,
       counter,
@@ -1121,6 +1134,7 @@ export function OrderDetails({
       };
 
       let { items, ...billingData } = await Billing({
+        order_edit: true,
         creating_new: 1,
         order_uuid: newOrder?.order_uuid,
         replacement: newOrder.replacement,
@@ -2204,7 +2218,13 @@ export function OrderDetails({
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
-                                value={+(+item.price || 0).toFixed(3)}
+                                value={
+                                  +(
+                                    item.edit_price ||
+                                    item.price ||
+                                    0
+                                  ).toFixed(3)
+                                }
                                 onChange={(e) => {
                                   setOrderData((prev) => {
                                     return {
@@ -2253,7 +2273,7 @@ export function OrderDetails({
                                 disabled={!item.item_uuid}
                               />
                             ) : (
-                              "Rs:" + (item?.price || 0)
+                              "Rs:" + (item?.edit_price|| item?.price || 0)
                             )}
                           </td>
                           <td
@@ -2273,7 +2293,9 @@ export function OrderDetails({
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
                                 value={Math.floor(
-                                  item.price * item.conversion || 0
+                                  (item.edit_price ||
+                                    item.price ||
+                                    0) * item.conversion || 0
                                 )}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
@@ -2332,7 +2354,7 @@ export function OrderDetails({
                               />
                             ) : (
                               "Rs:" +
-                              (+item.price * +item.conversion || 0).toFixed(2)
+                              (+(item?.edit_price||item.price) * +item.conversion || 0).toFixed(2)
                             )}
                           </td>
                           {editOrder ? (
@@ -3081,6 +3103,7 @@ const DeleteOrderPopup = ({
     };
 
     let billingData = await Billing({
+      order_edit: true,
       order_uuid: data?.order_uuid,
       invoice_number: `${data?.order_type}${data?.invoice_number}`,
       replacement: data.replacement,
@@ -3839,6 +3862,7 @@ function DiliveryPopup({
       return;
     }
     updateBilling({
+      order_edit: true,
       ...order,
       replacement: data?.replacement || 0,
       shortage: data?.shortage || 0,
@@ -3911,6 +3935,7 @@ function DiliveryPopup({
         counter_uuid: order?.counter_uuid,
         trip_uuid: order?.trip_uuid,
         invoice_number: order?.invoice_number,
+        order_grandtotal: order?.order_grandtotal,
         modes: modes?.map((a) =>
           a.mode_title === "Cash" ? { ...a, coin: 0 } : a
         ),
@@ -4244,6 +4269,7 @@ function DiliveryPopup({
           setData={setData}
           updateBilling={(e) =>
             updateBilling({
+              order_edit: true,
               ...order,
               replacement: e?.replacement || 0,
               shortage: e?.shortage || 0,
