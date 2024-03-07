@@ -283,7 +283,7 @@ export default function AddOrder() {
           ? [
               {
                 stage: 1,
-                time: data.others.time,
+                time: data?.others?.time||new Date().getTime(),
                 user_uuid: data.others.user_uuid,
               },
             ]
@@ -291,12 +291,12 @@ export default function AddOrder() {
           ? [
               {
                 stage: 1,
-                time: data.others.time,
+                time: data?.others?.time||new Date().getTime(),
                 user_uuid: data.others.user_uuid,
               },
               {
                 stage: 2,
-                time: data.others.time,
+                time: data?.others?.time||new Date().getTime(),
                 user_uuid: data.others.user_uuid,
               },
             ]
@@ -304,39 +304,39 @@ export default function AddOrder() {
           ? [
               {
                 stage: 1,
-                time: data.others.time,
+                time: data?.others?.time||new Date().getTime(),
                 user_uuid: data.others.user_uuid,
               },
               {
                 stage: 2,
-                time: data.others.time,
+                time: data?.others?.time||new Date().getTime(),
                 user_uuid: data.others.user_uuid,
               },
               {
                 stage: 3,
-                time: data.others.time,
+                time: data?.others?.time||new Date().getTime(),
                 user_uuid: data.others.user_uuid,
               },
             ]
           : [
               {
                 stage: 1,
-                time: data.others.time,
+                time: data?.others?.time||new Date().getTime(),
                 user_uuid: data.others.user_uuid,
               },
               {
                 stage: 2,
-                time: data.others.time,
+                time: data?.others?.time||new Date().getTime(),
                 user_uuid: data.others.user_uuid,
               },
               {
                 stage: 3,
-                time: data.others.time,
+                time: data?.others?.time||new Date().getTime(),
                 user_uuid: data.others.user_uuid,
               },
               {
                 stage: 4,
-                time: data.others.time,
+                time: data?.others?.time||new Date().getTime(),
                 user_uuid: data.others.user_uuid,
               },
             ],
@@ -348,19 +348,19 @@ export default function AddOrder() {
 
     console.log("orderJSon", data);
 
-    // const response = await axios({
-    //   method: "post",
-    //   url: "/orders/postOrder",
-    //   data,
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    // });
-    // console.log(response);
-    // if (response.data.success) {
-    //   // window.location.reload();
-    //   setOrder(getInititalValues());
-    // }
+    const response = await axios({
+      method: "post",
+      url: "/orders/postOrder",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    if (response.data.success) {
+      // window.location.reload();
+      setOrder(getInititalValues());
+    }
   };
 
   const callBilling = async (type = {}) => {
