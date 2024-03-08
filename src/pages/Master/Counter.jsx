@@ -3,8 +3,10 @@ import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import axios from "axios";
 import {
+  AddCircle,
   CopyAllOutlined,
   DeleteOutline,
+  DeleteOutlineOutlined,
   NoteAdd,
   Phone,
   WhatsApp,
@@ -15,6 +17,8 @@ import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { v4 as uuid } from "uuid";
 import Context from "../../context/context";
+import { get } from "react-scroll/modules/mixins/scroller";
+import { getFormateDate } from "../../utils/helperFunctions";
 const Counter = () => {
   const [counter, setCounter] = useState([]);
   const [paymentModes, setPaymentModes] = useState([]);
@@ -1011,6 +1015,10 @@ function NewUserForm({
       if (popupInfo?.type === "edit") {
         _data = await {
           ...popupInfo.data,
+          opening_balance: popupInfo.data.opening_balance?.map((a) => ({
+            ...a,
+            uuid: a.uuid || uuid(),
+          })),
           mobile: [
             ...(popupInfo?.data?.mobile
               ?.map((a) => ({
@@ -1037,6 +1045,14 @@ function NewUserForm({
             .map((a) => a.mode_uuid),
           credit_allowed: "N",
           status: 1,
+          opening_balance: [
+            {
+              uuid: uuid(),
+
+              date: getFormateDate(new Date()),
+              amount: "",
+            },
+          ],
           mobile: [1, 2, 3, 4].map((a) => ({
             uuid: uuid(),
             title: "",
@@ -1599,6 +1615,113 @@ function NewUserForm({
                         })
                       }
                     />
+                  </label>
+                </div>
+                <div className="row">
+                  <label className="selectLabel" style={{ width: "50%" }}>
+                    Opening Balance{" "}
+                    <span
+                      onClick={() => {
+                        setdata((prev) => {
+                          let time = new Date();
+
+                          return {
+                            ...prev,
+                            opening_balance: [
+                              ...(prev.opening_balance || []),
+                              {
+                                uuid: uuid(),
+                                date: time.getTime(),
+                                amount: "",
+                              },
+                            ],
+                          };
+                        });
+                      }}
+                    >
+                      <AddCircle
+                        sx={{ fontSize: 40 }}
+                        style={{ color: "#4AC959", cursor: "pointer" }}
+                      />
+                    </span>
+                    <div>
+                      {data?.opening_balance?.map((a) => (
+                        <div
+                          key={a.uuid}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            margin: "5px 0",
+                          }}
+                        >
+                          <div style={{ width: "200px" }}>
+                            <input
+                              type="date"
+                              onChange={(e) =>
+                                setdata((prev) => ({
+                                  ...prev,
+                                  opening_balance: prev.opening_balance.map(
+                                    (b) =>
+                                      b.uuid === a.uuid
+                                        ? {
+                                            ...b,
+                                            date: new Date(
+                                              e.target.value
+                                            ).getTime(),
+                                          }
+                                        : b
+                                  ),
+                                }))
+                              }
+                              value={getFormateDate(new Date(a.date))}
+                              placeholder="Search Counter Title..."
+                              className="searchInput"
+                              pattern="\d{4}-\d{2}-\d{2}"
+                            />
+                          </div>
+                          <input
+                            type="number"
+                            name="route_title"
+                            className="numberInput"
+                            value={a?.amount}
+                            style={{ width: "15ch" }}
+                            onChange={(e) => {
+                              setdata((prev) => ({
+                                ...prev,
+                                opening_balance: prev.opening_balance.map((b) =>
+                                  b.uuid === a.uuid
+                                    ? { ...b, amount: e.target.value }
+                                    : b
+                                ),
+                              }));
+                            }}
+                            maxLength={10}
+                            placeholder="Amount"
+                          />
+                          <span
+                            style={{
+                              color: "red",
+
+                              cursor: "pointer",
+                            }}
+                            onClick={(e) => {
+                              setdata((prev) => ({
+                                ...prev,
+                                opening_balance: prev.opening_balance.filter(
+                                  (b) => b.uuid !== a.uuid
+                                ),
+                              }));
+                            }}
+                          >
+                            <DeleteOutlineOutlined
+                              style={{ color: "red" }}
+                              className="table-icon"
+                            />
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </label>
                 </div>
                 <div className="row">

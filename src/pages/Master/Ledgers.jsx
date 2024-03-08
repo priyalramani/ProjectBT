@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useMemo, useContext } from "react";
 import axios from "axios";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
-import { DeleteOutline } from "@mui/icons-material";
+import {
+  AddCircle,
+  DeleteOutline,
+  DeleteOutlineOutlined,
+} from "@mui/icons-material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { IoIosCloseCircle } from "react-icons/io";
 import { v4 as uuid } from "uuid";
@@ -11,6 +15,7 @@ import context from "../../context/context";
 import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import { FaSave } from "react-icons/fa";
 import Prompt from "../../components/Prompt";
+import { getFormateDate } from "../../utils/helperFunctions";
 
 const LedgersPage = () => {
   const [ledgerData, setLedgerData] = useState([]);
@@ -285,21 +290,22 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
     </>
   );
 }
-function NewUserForm({
-  onSave,
-  popupInfo,
-  ledgerGroup,
-  items,
-  setNotification,
-}) {
+function NewUserForm({ onSave, popupInfo, ledgerGroup }) {
   const [data, setData] = useState({ item_group_uuid: [] });
 
   const [errMassage, setErrorMassage] = useState("");
 
   useEffect(() => {
-    if (popupInfo?.type === "edit") setData(popupInfo.data);
-  }, [popupInfo.data, popupInfo?.type]);
-  console.log({ data });
+    if (popupInfo?.type === "edit")
+      setData({
+        ...popupInfo.data,
+        opening_balance: popupInfo.data.opening_balance?.map((a) => ({
+          ...a,
+          uuid: a.uuid || uuid(),
+        })),
+      });
+  }, [popupInfo.data, popupInfo.data.opening_balance, popupInfo?.type]);
+
   const submitHandler = async (e) => {
     let obj = { ...data, ledger_uuid: data.ledger_uuid || uuid() };
     e.preventDefault();
@@ -422,6 +428,113 @@ function NewUserForm({
                   ) : (
                     ""
                   )}
+                </div>
+                <div className="row">
+                  <label className="selectLabel" style={{ width: "50%" }}>
+                    Opening Balance{" "}
+                    <span
+                      onClick={() => {
+                        setData((prev) => {
+                          let time = new Date();
+
+                          return {
+                            ...prev,
+                            opening_balance: [
+                              ...(prev.opening_balance || []),
+                              {
+                                uuid: uuid(),
+                                date: time.getTime(),
+                                amount: "",
+                              },
+                            ],
+                          };
+                        });
+                      }}
+                    >
+                      <AddCircle
+                        sx={{ fontSize: 40 }}
+                        style={{ color: "#4AC959", cursor: "pointer" }}
+                      />
+                    </span>
+                    <div>
+                      {data?.opening_balance?.map((a) => (
+                        <div
+                          key={a.uuid}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            margin: "5px 0",
+                          }}
+                        >
+                          <div style={{ width: "200px" }}>
+                            <input
+                              type="date"
+                              onChange={(e) =>
+                                setData((prev) => ({
+                                  ...prev,
+                                  opening_balance: prev.opening_balance.map(
+                                    (b) =>
+                                      b.uuid === a.uuid
+                                        ? {
+                                            ...b,
+                                            date: new Date(
+                                              e.target.value
+                                            ).getTime(),
+                                          }
+                                        : b
+                                  ),
+                                }))
+                              }
+                              value={getFormateDate(new Date(a.date))}
+                              placeholder="Search Counter Title..."
+                              className="searchInput"
+                              pattern="\d{4}-\d{2}-\d{2}"
+                            />
+                          </div>
+                          <input
+                            type="number"
+                            name="route_title"
+                            className="numberInput"
+                            value={a?.amount}
+                            style={{ width: "15ch" }}
+                            onChange={(e) => {
+                              setData((prev) => ({
+                                ...prev,
+                                opening_balance: prev.opening_balance.map((b) =>
+                                  b.uuid === a.uuid
+                                    ? { ...b, amount: e.target.value }
+                                    : b
+                                ),
+                              }));
+                            }}
+                            maxLength={10}
+                            placeholder="Amount"
+                          />
+                          <span
+                            style={{
+                              color: "red",
+
+                              cursor: "pointer",
+                            }}
+                            onClick={(e) => {
+                              setData((prev) => ({
+                                ...prev,
+                                opening_balance: prev.opening_balance.filter(
+                                  (b) => b.uuid !== a.uuid
+                                ),
+                              }));
+                            }}
+                          >
+                            <DeleteOutlineOutlined
+                              style={{ color: "red" }}
+                              className="table-icon"
+                            />
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </label>
                 </div>
               </div>
 

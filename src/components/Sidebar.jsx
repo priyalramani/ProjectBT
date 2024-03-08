@@ -120,6 +120,10 @@ const Sidebar = ({ setCollectionTags }) => {
                     name: "Ledger Group",
                     link: "/admin/ledgerGroup",
                   },
+                  {
+                    name: "Counter",
+                    link: "/admin/counter",
+                  },
                 ]
               : [
                   {

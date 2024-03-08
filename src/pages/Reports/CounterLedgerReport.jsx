@@ -220,6 +220,7 @@ function Table({ itemsDetails, setPopupOrder, setPopupRecipt }) {
           <th>S.N</th>
           <th colSpan={3}>Date</th>
           <th colSpan={2}>Reference Number</th>
+          <th colSpan={2}>Type</th>
           <th colSpan={1}>Debit</th>
           <th colSpan={1}>Credit</th>
           <th colSpan={1}>Balance</th>
@@ -240,6 +241,7 @@ function Table({ itemsDetails, setPopupOrder, setPopupRecipt }) {
                 {formatAMPM(new Date(item.voucher_date))}
               </td>
               <td colSpan={2}>{item.accounting_voucher_number}</td>
+              <td colSpan={2}>{item.type}</td>
               <td colSpan={1}>{item.amount<0?-item.amount: ""}</td>
               <td colSpan={1}>{item.amount>0?item.amount:""}</td>
               <td colSpan={1}></td>
