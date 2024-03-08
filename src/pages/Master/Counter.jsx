@@ -40,7 +40,7 @@ const Counter = () => {
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const context = useContext(Context);
-  const { setNotification } = context;
+  const { setNotification, view } = context;
 
   const getRoutesData = async (controller = new AbortController()) => {
     const response = await axios({
@@ -365,6 +365,7 @@ const Counter = () => {
           counters={counter}
           getCounter={getCounter}
           setNotification={setNotification}
+          view={view}
         />
       ) : (
         ""
@@ -918,6 +919,7 @@ function NewUserForm({
   counters,
   getCounter,
   setNotification,
+  view,
 }) {
   const [data, setdata] = useState({});
   const [otppoup, setOtpPopup] = useState(false);
@@ -1019,6 +1021,10 @@ function NewUserForm({
             ...a,
             uuid: a.uuid || uuid(),
           })),
+          closing_balance: popupInfo.data.closing_balance?.map((a) => ({
+            ...a,
+            uuid: a.uuid || uuid(),
+          })),
           mobile: [
             ...(popupInfo?.data?.mobile
               ?.map((a) => ({
@@ -1049,6 +1055,13 @@ function NewUserForm({
             {
               uuid: uuid(),
 
+              date: getFormateDate(new Date()),
+              amount: "",
+            },
+          ],
+          closing_balance: [
+            {
+              uuid: uuid(),
               date: getFormateDate(new Date()),
               amount: "",
             },
@@ -1617,113 +1630,230 @@ function NewUserForm({
                     />
                   </label>
                 </div>
-                <div className="row">
-                  <label className="selectLabel" style={{ width: "50%" }}>
-                    Opening Balance{" "}
-                    <span
-                      onClick={() => {
-                        setdata((prev) => {
-                          let time = new Date();
+                {view ? (
+                  <>
+                    <div className="row">
+                      <label className="selectLabel" style={{ width: "50%" }}>
+                        Opening Balance{" "}
+                        <span
+                          onClick={() => {
+                            setdata((prev) => {
+                              let time = new Date();
 
-                          return {
-                            ...prev,
-                            opening_balance: [
-                              ...(prev.opening_balance || []),
-                              {
-                                uuid: uuid(),
-                                date: time.getTime(),
-                                amount: "",
-                              },
-                            ],
-                          };
-                        });
-                      }}
-                    >
-                      <AddCircle
-                        sx={{ fontSize: 40 }}
-                        style={{ color: "#4AC959", cursor: "pointer" }}
-                      />
-                    </span>
-                    <div>
-                      {data?.opening_balance?.map((a) => (
-                        <div
-                          key={a.uuid}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            margin: "5px 0",
+                              return {
+                                ...prev,
+                                opening_balance: [
+                                  ...(prev.opening_balance || []),
+                                  {
+                                    uuid: uuid(),
+                                    date: time.getTime(),
+                                    amount: "",
+                                  },
+                                ],
+                              };
+                            });
                           }}
                         >
-                          <div style={{ width: "200px" }}>
-                            <input
-                              type="date"
-                              onChange={(e) =>
-                                setdata((prev) => ({
-                                  ...prev,
-                                  opening_balance: prev.opening_balance.map(
-                                    (b) =>
-                                      b.uuid === a.uuid
-                                        ? {
-                                            ...b,
-                                            date: new Date(
-                                              e.target.value
-                                            ).getTime(),
-                                          }
-                                        : b
-                                  ),
-                                }))
-                              }
-                              value={getFormateDate(new Date(a.date))}
-                              placeholder="Search Counter Title..."
-                              className="searchInput"
-                              pattern="\d{4}-\d{2}-\d{2}"
-                            />
-                          </div>
-                          <input
-                            type="number"
-                            name="route_title"
-                            className="numberInput"
-                            value={a?.amount}
-                            style={{ width: "15ch" }}
-                            onChange={(e) => {
-                              setdata((prev) => ({
-                                ...prev,
-                                opening_balance: prev.opening_balance.map((b) =>
-                                  b.uuid === a.uuid
-                                    ? { ...b, amount: e.target.value }
-                                    : b
-                                ),
-                              }));
-                            }}
-                            maxLength={10}
-                            placeholder="Amount"
+                          <AddCircle
+                            sx={{ fontSize: 40 }}
+                            style={{ color: "#4AC959", cursor: "pointer" }}
                           />
-                          <span
-                            style={{
-                              color: "red",
+                        </span>
+                        <div>
+                          {data?.opening_balance?.map((a) => (
+                            <div
+                              key={a.uuid}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                margin: "5px 0",
+                              }}
+                            >
+                              <div style={{ width: "200px" }}>
+                                <input
+                                  type="date"
+                                  onChange={(e) =>
+                                    setdata((prev) => ({
+                                      ...prev,
+                                      opening_balance: prev.opening_balance.map(
+                                        (b) =>
+                                          b.uuid === a.uuid
+                                            ? {
+                                                ...b,
+                                                date: new Date(
+                                                  e.target.value
+                                                ).getTime(),
+                                              }
+                                            : b
+                                      ),
+                                    }))
+                                  }
+                                  value={getFormateDate(new Date(a.date))}
+                                  placeholder="Search Counter Title..."
+                                  className="searchInput"
+                                  pattern="\d{4}-\d{2}-\d{2}"
+                                />
+                              </div>
+                              <input
+                                type="number"
+                                name="route_title"
+                                className="numberInput"
+                                value={a?.amount}
+                                style={{ width: "15ch" }}
+                                onChange={(e) => {
+                                  setdata((prev) => ({
+                                    ...prev,
+                                    opening_balance: prev.opening_balance.map(
+                                      (b) =>
+                                        b.uuid === a.uuid
+                                          ? { ...b, amount: e.target.value }
+                                          : b
+                                    ),
+                                  }));
+                                }}
+                                maxLength={10}
+                                placeholder="Amount"
+                              />
+                              <span
+                                style={{
+                                  color: "red",
 
-                              cursor: "pointer",
-                            }}
-                            onClick={(e) => {
-                              setdata((prev) => ({
-                                ...prev,
-                                opening_balance: prev.opening_balance.filter(
-                                  (b) => b.uuid !== a.uuid
-                                ),
-                              }));
-                            }}
-                          >
-                            <DeleteOutlineOutlined
-                              style={{ color: "red" }}
-                              className="table-icon"
-                            />
-                          </span>
+                                  cursor: "pointer",
+                                }}
+                                onClick={(e) => {
+                                  setdata((prev) => ({
+                                    ...prev,
+                                    opening_balance:
+                                      prev.opening_balance.filter(
+                                        (b) => b.uuid !== a.uuid
+                                      ),
+                                  }));
+                                }}
+                              >
+                                <DeleteOutlineOutlined
+                                  style={{ color: "red" }}
+                                  className="table-icon"
+                                />
+                              </span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      </label>
                     </div>
-                  </label>
-                </div>
+                    <div className="row">
+                      <label className="selectLabel" style={{ width: "50%" }}>
+                        Closing Balance{" "}
+                        <span
+                          onClick={() => {
+                            setdata((prev) => {
+                              let time = new Date();
+
+                              return {
+                                ...prev,
+                                closing_balance: [
+                                  ...(prev.closing_balance || []),
+                                  {
+                                    uuid: uuid(),
+                                    date: time.getTime(),
+                                    amount: "",
+                                  },
+                                ],
+                              };
+                            });
+                          }}
+                        >
+                          <AddCircle
+                            sx={{ fontSize: 40 }}
+                            style={{ color: "#4AC959", cursor: "pointer" }}
+                          />
+                        </span>
+                        <div>
+                          {data?.closing_balance?.map((a) => (
+                            <div
+                              key={a.uuid}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                margin: "5px 0",
+                              }}
+                            >
+                              <div style={{ width: "200px" }}>
+                                <input
+                                  type="date"
+                                  onChange={(e) =>
+                                    setdata((prev) => ({
+                                      ...prev,
+                                      closing_balance: prev.closing_balance.map(
+                                        (b) =>
+                                          b.uuid === a.uuid
+                                            ? {
+                                                ...b,
+                                                date: new Date(
+                                                  e.target.value
+                                                ).getTime(),
+                                              }
+                                            : b
+                                      ),
+                                    }))
+                                  }
+                                  value={getFormateDate(new Date(a.date))}
+                                  placeholder="Search Counter Title..."
+                                  className="searchInput"
+                                  pattern="\d{4}-\d{2}-\d{2}"
+                                />
+                              </div>
+                              <input
+                                type="number"
+                                name="route_title"
+                                className="numberInput"
+                                value={a?.amount}
+                                style={{ width: "15ch" }}
+                                onChange={(e) => {
+                                  setdata((prev) => ({
+                                    ...prev,
+                                    closing_balance: prev.closing_balance.map(
+                                      (b) =>
+                                        b.uuid === a.uuid
+                                          ? { ...b, amount: e.target.value }
+                                          : b
+                                    ),
+                                  }));
+                                }}
+                                maxLength={10}
+                                placeholder="Amount"
+                              />
+                              <span
+                                style={{
+                                  color: "red",
+
+                                  cursor: "pointer",
+                                }}
+                                onClick={(e) => {
+                                  setdata((prev) => ({
+                                    ...prev,
+                                    closing_balance:
+                                      prev.closing_balance.filter(
+                                        (b) => b.uuid !== a.uuid
+                                      ),
+                                  }));
+                                }}
+                              >
+                                <DeleteOutlineOutlined
+                                  style={{ color: "red" }}
+                                  className="table-icon"
+                                />
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </label>
+                    </div>
+                  </>
+                ) : (
+                  ""
+                )}
                 <div className="row">
                   <label className="selectLabel" style={{ width: "50%" }}>
                     Mobile
