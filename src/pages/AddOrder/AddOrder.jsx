@@ -239,6 +239,7 @@ export default function AddOrder() {
     }
     let time = new Date();
     let autoBilling = await Billing({
+      new_order: 1,
       creating_new: 1,
       order_uuid: data?.order_uuid,
       invoice_number: `${data?.order_type}${data?.invoice_number}`,
@@ -393,6 +394,7 @@ export default function AddOrder() {
     let time = new Date();
     let autoBilling = await Billing({
       creating_new: 1,
+      new_order: 1,
       order_uuid: order?.order_uuid,
       invoice_number: `${order?.order_type}${order?.invoice_number}`,
       replacement: order.replacement,
@@ -1467,6 +1469,7 @@ function DiliveryPopup({
     setError("");
     let billingData = await Billing({
       creating_new: 1,
+      new_order: 1,
       order_uuid: order?.order_uuid,
       invoice_number: `${order?.order_type}${order?.invoice_number}`,
       replacement: order.replacement,
