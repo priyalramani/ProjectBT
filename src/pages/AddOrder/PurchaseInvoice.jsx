@@ -13,6 +13,7 @@ import { FaSave } from "react-icons/fa";
 import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import Context from "../../context/context";
 import { getFormateDate } from "../../utils/helperFunctions";
+import MessagePopup from "../../components/MessagePopup";
 
 const customStyles = {
   option: (provided, state) => ({
@@ -66,7 +67,7 @@ export default function PurchaseInvoice() {
   const [warehouse, setWarehouse] = useState([]);
   const [user_warehouse, setUser_warehouse] = useState([]);
   const [itemsData, setItemsData] = useState([]);
-  const [autoBills, setAutoBills] = useState([]);
+  const [confirmPopup, setConfirmPopup] = useState(false);
   const reactInputsRef = useRef({});
   const [focusedInputId, setFocusedInputId] = useState(0);
   const [edit_prices, setEditPrices] = useState([]);
@@ -107,36 +108,6 @@ export default function PurchaseInvoice() {
       setUser_warehouse(response.data.result.warehouse);
   };
 
-  const getAutoBill = async () => {
-    let data = [];
-    const response = await axios({
-      method: "get",
-      url: "/autoBill/autoBillItem",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) data = response.data.result;
-    const response1 = await axios({
-      method: "get",
-      url: "/autoBill/autoBillQty",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response1.data.success)
-      data = data.length
-        ? response1.data.result.length
-          ? [...data, ...response1.data.result]
-          : data
-        : response1.data.result.length
-        ? response1.data.result
-        : [];
-    setAutoBills(data.filter((a) => a.status));
-  };
-
   const getItemsData = async () => {
     const response = await axios({
       method: "get",
@@ -168,7 +139,6 @@ export default function PurchaseInvoice() {
 
   useEffect(() => {
     getCounter();
-    getAutoBill();
     GetUserWarehouse();
     GetWarehouseList();
     fetchCompanies();
@@ -256,7 +226,7 @@ export default function PurchaseInvoice() {
           (a.price || a.item_price || 0) *
           (data.rate_type === "bt" ? 1 + a.item_gst / 100 : 1),
       })),
-      ...(type.obj || {}),
+      ...(type?.obj || {}),
     };
 
     data.time_1 = data.time_1 + Date.now();
@@ -307,7 +277,7 @@ export default function PurchaseInvoice() {
       ...type,
     });
 
-    onSubmit(type, {
+    setConfirmPopup({
       ...order,
       ...autoBilling,
       ...type,
@@ -1160,7 +1130,21 @@ export default function PurchaseInvoice() {
           </div>
         </div>
       </div>
-
+      {confirmPopup ? (
+        <MessagePopup
+          message="Are you sure you want to bill?"
+          message2={`Total: ${confirmPopup?.order_grandtotal || 0}`}
+          onClose={() => setConfirmPopup(false)}
+          onSave={() => {
+            onSubmit(confirmPopup.type, confirmPopup);
+            setConfirmPopup(false);
+          }}
+          button1="Cancel"
+          button2="Confirm"
+        />
+      ) : (
+        ""
+      )}
       {remarks ? (
         <div className="overlay">
           <div

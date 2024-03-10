@@ -80,7 +80,7 @@ import PurchaseInvoice from "./pages/AddOrder/PurchaseInvoice"
 import AddVoucher from "./pages/AddOrder/NewVoucher"
 import CounterLegerReport from "./pages/Reports/CounterLedgerReport"
 import StockValuationReport from "./pages/Reports/StockValuationReport"
-export let Version = 263
+export let Version = 264
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com"
 

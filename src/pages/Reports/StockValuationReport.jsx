@@ -11,7 +11,6 @@ import MenuItem from "@mui/material/MenuItem";
 import Selected from "@mui/material/Select";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
-import { get } from "react-scroll/modules/mixins/scroller";
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -26,9 +25,9 @@ let ValutionOptions = [
   { value: "mrp", label: "MRP" },
   { value: "item_price", label: "Item Price" },
   { value: "last_purchase_price", label: "Purchase Price" },
-  { value: "price_a", label: "Price A" },
-  { value: "price_b", label: "Price B" },
-  { value: "price_c", label: "Price C" },
+  { value: "item_price_a", label: "Price A" },
+  { value: "item_price_b", label: "Price B" },
+  { value: "item_price_c", label: "Price C" },
 ];
 
 const StockValuationReport = () => {
@@ -44,7 +43,6 @@ const StockValuationReport = () => {
   const [companies, setCompanies] = useState([]);
   const [warehouseData, setWarehouseData] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
-  const [personName, setPersonName] = React.useState([]);
   const [disabledItem, setDisabledItem] = useState(false);
   const [flushPopup, setFlushPopup] = useState(false);
   const filteritem = useMemo(
@@ -82,15 +80,7 @@ const StockValuationReport = () => {
       itemCategories,
     ]
   );
-  const handleChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setPersonName(
-      // On autofill we get a stringified value.
-      typeof value === "string" ? value.split(",") : value
-    );
-  };
+
   const fileExtension = ".xlsx";
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -244,31 +234,27 @@ const StockValuationReport = () => {
   const getTotalValuation = useMemo(
     () => (qty, item) => {
       let value = 0;
-      switch (volution) {
-        case "mrp":
-          value = qty * +item.mrp;
-          break;
-        case "item_price":
-          value = qty * +item.item_price;
-          break;
-        case "purchase_price":
-          value = qty * +item.purchase_price;
-          break;
-        case "price_a":
-          value = qty * +item.item_price_a;
-          break;
-        case "price_b":
-          value = qty * +item.item_price_b;
-          break;
-        case "price_c":
-          value = qty * +item.item_price_c;
-          break;
-        default:
-          value = qty * +item.item_price;
-      }
+      if (item[volution]) value = qty * +item[volution];
+
       return value.toFixed(0);
     },
     [volution]
+  );
+  const getAllItemValuation = useMemo(
+    () => (warehouse_uuid) => {
+      let value = 0;
+      for (let item of filteritem) {
+        let objData = item.stock.find(
+          (b) => b.warehouse_uuid === warehouse_uuid
+        );
+        let qty = objData?.qty || 0;
+        if (item[volution]) {
+          value += qty * +item[volution];
+        }
+      }
+      return value.toFixed(0);
+    },
+    [filteritem, volution]
   );
   const categoryOptions = useMemo(() => {
     return [
@@ -445,6 +431,7 @@ const StockValuationReport = () => {
         </div>
         <div className="table-container-user item-sales-container">
           <Table
+            getAllItemValuation={getAllItemValuation}
             getTotalValuation={getTotalValuation}
             valuation={volution}
             itemsDetails={filteritem
@@ -511,6 +498,7 @@ function Table({
   setItemData,
   getTotalValuation,
   valuation,
+  getAllItemValuation,
 }) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState(null);
@@ -707,6 +695,48 @@ function Table({
               </td>
             </tr>
           ))}
+        <tr key={Math.random()} style={{ height: "30px" }}>
+          <td className="flex" style={{ justifyContent: "space-between" }}>
+            <b>Total</b>
+          </td>
+
+          <td colSpan={2}></td>
+          <td colSpan={2}></td>
+          {warehouseData.map((a) => {
+            return (
+              <>
+                <td
+                  style={{
+                    textAlign: "left",
+                  }}
+                >
+                  <b>
+                    {itemsDetails.reduce(
+                      (c, d) =>
+                        c +
+                        (+d?.stock?.find(
+                          (e) => e.warehouse_uuid === a.warehouse_uuid
+                        )?.qty || 0),
+                      0
+                    )}
+                  </b>
+                </td>
+                <td
+                  style={{
+                    textAlign: "right",
+                  }}
+                ></td>
+                <td>{getAllItemValuation(a.warehouse_uuid)}</td>
+                <td
+                  style={{
+                    textAlign: "right",
+                  }}
+                ></td>
+              </>
+            );
+          })}
+          <td></td>
+        </tr>
       </tbody>
     </table>
   );

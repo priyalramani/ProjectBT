@@ -1,11 +1,10 @@
 import axios from "axios";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Header from "../../components/Header";
 import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
-import Select,{components} from "react-select";
+import Select from "react-select";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
-const { Option } = components;
 
 const CounterLegerReport = () => {
   const [ledgerData, setLedgerData] = useState([]);
@@ -19,7 +18,7 @@ const CounterLegerReport = () => {
   const [items, setItems] = useState([]);
   const [counter, setCounter] = useState([]);
 
-  const getCounter = async (controller=new AbortController()) => {
+  const getCounter = async (controller = new AbortController()) => {
     const response = await axios({
       method: "post",
       url: "/counters/GetCounterList",
@@ -92,12 +91,18 @@ const CounterLegerReport = () => {
   const counterList = useMemo(
     () =>
       [...counter, ...ledgerData].map((a) => ({
+        label: a.counter_title || a.ledger_title,
         value: a.counter_uuid || a.ledger_uuid,
-        label: (a.counter_title || a.ledger_title),
-        closing_balance: a.closing_balance||"",
+        closing_balance: a.closing_balance,
       })),
     [counter, ledgerData]
   );
+  const filterOption = (data, value) => {
+    let label = data.data.label;
+    if (label.toLowerCase().includes(value.toLowerCase())) return true;
+    return false;
+  };
+
   return (
     <>
       <Sidebar />
@@ -144,11 +149,14 @@ const CounterLegerReport = () => {
               <Select
                 options={counterList}
                 getOptionLabel={(option) => (
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
                     <span>{option.label}</span>
                     <span>{option.closing_balance}</span>
                   </div>
                 )}
+                filterOption={filterOption}
                 onChange={(doc) =>
                   setSearchData((prev) => ({
                     ...prev,
@@ -244,11 +252,7 @@ function Table({ itemsDetails, setPopupOrder, setPopupRecipt }) {
         {itemsDetails
           ?.sort((a, b) => a.order_date - b.order_date)
           ?.map((item, i, array) => (
-            <tr
-              key={Math.random()}
-              style={{ height: "30px" }}
-              
-            >
+            <tr key={Math.random()} style={{ height: "30px" }}>
               <td>{i + 1}</td>
               <td colSpan={3}>
                 {new Date(item.voucher_date).toDateString()} -{" "}
@@ -256,8 +260,8 @@ function Table({ itemsDetails, setPopupOrder, setPopupRecipt }) {
               </td>
               <td colSpan={2}>{item.accounting_voucher_number}</td>
               <td colSpan={2}>{item.type}</td>
-              <td colSpan={1}>{item.amount<0?-item.amount: ""}</td>
-              <td colSpan={1}>{item.amount>0?item.amount:""}</td>
+              <td colSpan={1}>{item.amount < 0 ? -item.amount : ""}</td>
+              <td colSpan={1}>{item.amount > 0 ? item.amount : ""}</td>
               <td colSpan={1}></td>
             </tr>
           ))}
