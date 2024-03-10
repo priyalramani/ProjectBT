@@ -2222,11 +2222,11 @@ export function OrderDetails({
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
-                                value={
-                                  +(item.edit_price || item.price || 0).toFixed(
-                                    3
-                                  )
-                                }
+                                value={(+(
+                                  item.edit_price ||
+                                  item.price ||
+                                  0
+                                )).toFixed(3)}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
                                     return {
