@@ -446,12 +446,12 @@ export function OrderDetails({
     }));
   }, [category, orderData]);
 
-  const getItemsData = async (item,controller) => {
+  const getItemsData = async (item, controller = new AbortController()) => {
     const response = await axios({
       method: "post",
       url: "/items/GetItemList",
       data: { items: item },
-      signal:controller.signal,
+      signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
       },
@@ -534,7 +534,10 @@ export function OrderDetails({
     const controller = new AbortController();
     console.log({ order });
     if (order) {
-      getItemsData(order?.item_details?.map((a) => a.item_uuid),controller);
+      getItemsData(
+        order?.item_details?.map((a) => a.item_uuid),
+        controller
+      );
       setDeductionsData({
         replacement: +order?.replacement || 0,
         shortage: +order?.shortage || 0,
@@ -543,9 +546,9 @@ export function OrderDetails({
       });
       getCounters([order?.counter_uuid]);
     }
-    return ()=>{
+    return () => {
       controller.abort();
-    }
+    };
   }, [order]);
 
   const onSubmit = async (
@@ -1521,6 +1524,7 @@ export function OrderDetails({
                     onClick={(e) => {
                       reactInputsRef.current = {};
                       e.target.blur();
+                      console.log({ editOrder });
                       if (!editOrder) {
                         getItemsData([]);
                         getCounters([]);
@@ -2219,11 +2223,9 @@ export function OrderDetails({
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
                                 value={
-                                  +(
-                                    item.edit_price ||
-                                    item.price ||
-                                    0
-                                  ).toFixed(3)
+                                  +(item.edit_price || item.price || 0).toFixed(
+                                    3
+                                  )
                                 }
                                 onChange={(e) => {
                                   setOrderData((prev) => {
@@ -2273,7 +2275,7 @@ export function OrderDetails({
                                 disabled={!item.item_uuid}
                               />
                             ) : (
-                              "Rs:" + (item?.edit_price|| item?.price || 0)
+                              "Rs:" + (item?.edit_price || item?.price || 0)
                             )}
                           </td>
                           <td
@@ -2293,9 +2295,8 @@ export function OrderDetails({
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
                                 value={Math.floor(
-                                  (item.edit_price ||
-                                    item.price ||
-                                    0) * item.conversion || 0
+                                  (item.edit_price || item.price || 0) *
+                                    item.conversion || 0
                                 )}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
@@ -2354,7 +2355,10 @@ export function OrderDetails({
                               />
                             ) : (
                               "Rs:" +
-                              (+(item?.edit_price||item.price) * +item.conversion || 0).toFixed(2)
+                              (
+                                +(item?.edit_price || item.price) *
+                                  +item.conversion || 0
+                              ).toFixed(2)
                             )}
                           </td>
                           {editOrder ? (

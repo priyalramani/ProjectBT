@@ -79,7 +79,7 @@ import LedgerGroups from "./pages/Master/LedgerGroups"
 import PurchaseInvoice from "./pages/AddOrder/PurchaseInvoice"
 import AddVoucher from "./pages/AddOrder/NewVoucher"
 import CounterLegerReport from "./pages/Reports/CounterLedgerReport"
-export let Version = 261
+export let Version = 262
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com"
 
