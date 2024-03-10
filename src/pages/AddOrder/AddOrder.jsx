@@ -1231,6 +1231,21 @@ export default function AddOrder() {
                     setTimeout(() => setNotification(null), 2000);
                     return;
                   }
+                  let empty_price = order.item_details
+                    .filter((a) => a.item_uuid&&!a.free&&a.state!==3)
+                    .map((a) => ({
+                      ...a,
+                      is_empty: !a.p_price,
+                    }))
+                    .find((a) => a.is_empty);
+                  if (empty_price) {
+                    setNotification({
+                      message: `item ${empty_item.item_title} has 0 price.`,
+                      success: false,
+                    });
+                    setTimeout(() => setNotification(null), 2000);
+                    return;
+                  }
                   setOrder((prev) => ({
                     ...prev,
                     item_details: prev.item_details.filter((a) => a.item_uuid),

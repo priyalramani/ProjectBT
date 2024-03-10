@@ -3,8 +3,10 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import Header from "../../components/Header";
 import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
-import Select from "react-select";
+import Select,{components} from "react-select";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
+const { Option } = components;
+
 const CounterLegerReport = () => {
   const [ledgerData, setLedgerData] = useState([]);
   const [searchData, setSearchData] = useState({
@@ -17,10 +19,11 @@ const CounterLegerReport = () => {
   const [items, setItems] = useState([]);
   const [counter, setCounter] = useState([]);
 
-  const getCounter = async () => {
+  const getCounter = async (controller=new AbortController()) => {
     const response = await axios({
       method: "post",
       url: "/counters/GetCounterList",
+      signal: controller.signal,
       data: { counters: [] },
       headers: {
         "Content-Type": "application/json",
@@ -57,6 +60,7 @@ const CounterLegerReport = () => {
   };
 
   useEffect(() => {
+    let controller = new AbortController();
     let time = new Date();
     let curTime = "yy-mm-dd"
       .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
@@ -71,8 +75,11 @@ const CounterLegerReport = () => {
       startDate: sTime,
       endDate: curTime,
     }));
-    getCounter();
-    getLedgerData();
+    getCounter(controller);
+    getLedgerData(controller);
+    return () => {
+      controller.abort();
+    };
   }, []);
   useEffect(() => {
     if (counter.length)
@@ -86,7 +93,8 @@ const CounterLegerReport = () => {
     () =>
       [...counter, ...ledgerData].map((a) => ({
         value: a.counter_uuid || a.ledger_uuid,
-        label: a.counter_title || a.ledger_title,
+        label: (a.counter_title || a.ledger_title),
+        closing_balance: a.closing_balance||"",
       })),
     [counter, ledgerData]
   );
@@ -135,6 +143,12 @@ const CounterLegerReport = () => {
             <div className="inputGroup" style={{ width: "50%" }}>
               <Select
                 options={counterList}
+                getOptionLabel={(option) => (
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{option.label}</span>
+                    <span>{option.closing_balance}</span>
+                  </div>
+                )}
                 onChange={(doc) =>
                   setSearchData((prev) => ({
                     ...prev,

@@ -11,6 +11,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Selected from "@mui/material/Select";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
+import { get } from "react-scroll/modules/mixins/scroller";
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -21,21 +22,19 @@ const MenuProps = {
     },
   },
 };
-const names = [
-  "Oliver Hansen",
-  "Van Henry",
-  "April Tucker",
-  "Ralph Hubbard",
-  "Omar Alexander",
-  "Carlos Abbott",
-  "Miriam Wagner",
-  "Bradley Wilkerson",
-  "Virginia Andrews",
-  "Kelly Snyder",
+let ValutionOptions = [
+  { value: "mrp", label: "MRP" },
+  { value: "item_price", label: "Item Price" },
+  { value: "last_purchase_price", label: "Purchase Price" },
+  { value: "price_a", label: "Price A" },
+  { value: "price_b", label: "Price B" },
+  { value: "price_c", label: "Price C" },
 ];
-const CurrentStock = () => {
+
+const StockValuationReport = () => {
   const [itemsData, setItemsData] = useState([]);
   const [filterTitle, setFilterTitle] = useState("");
+  const [volution, setValution] = useState("item_price");
 
   const [itemEditPopup, setItemEditPopup] = useState("");
   const [item, setItem] = useState("");
@@ -230,25 +229,6 @@ const CurrentStock = () => {
       target: { value },
     } = event;
 
-    console.log(value);
-
-    const filterdValue = value.filter(
-      (item) => selectedOptions.findIndex((o) => o.id === item.id) >= 0
-    );
-
-    let duplicatesRemoved = value.filter((item, itemIndex) =>
-      value.findIndex((o, oIndex) => o.id === item.id && oIndex !== itemIndex)
-    );
-
-    // console.log(duplicatesRemoved);
-
-    // let map = {};
-
-    // for (let list of value) {
-    //   map[Object.values(list).join('')] = list;
-    // }
-    // console.log('Using Map', Object.values(map));
-
     let duplicateRemoved = [];
 
     value.forEach((item) => {
@@ -261,6 +241,35 @@ const CurrentStock = () => {
 
     setSelectedOptions(duplicateRemoved);
   };
+  const getTotalValuation = useMemo(
+    () => (qty, item) => {
+      let value = 0;
+      switch (volution) {
+        case "mrp":
+          value = qty * +item.mrp;
+          break;
+        case "item_price":
+          value = qty * +item.item_price;
+          break;
+        case "purchase_price":
+          value = qty * +item.purchase_price;
+          break;
+        case "price_a":
+          value = qty * +item.item_price_a;
+          break;
+        case "price_b":
+          value = qty * +item.item_price_b;
+          break;
+        case "price_c":
+          value = qty * +item.item_price_c;
+          break;
+        default:
+          value = qty * +item.item_price;
+      }
+      return value.toFixed(0);
+    },
+    [volution]
+  );
   const categoryOptions = useMemo(() => {
     return [
       { value: "", label: "All" },
@@ -278,7 +287,7 @@ const CurrentStock = () => {
       <Headers />
       <div className="item-sales-container orders-report-container">
         <div id="heading" className="flex">
-          <h2 style={{ width: "70%" }}>Current Stock</h2>
+          <h2 style={{ width: "70%" }}>Stock Valuation</h2>
         </div>
         <div id="item-sales-top">
           <div
@@ -392,6 +401,22 @@ const CurrentStock = () => {
                 </Selected>
               </div>
             </div>
+            <div className="inputGroup">
+              <label htmlFor="Warehouse">Valuation on</label>
+              <div className="inputGroup" style={{ width: "150px" }}>
+                <Select
+                  options={ValutionOptions}
+                  onChange={(doc) => {
+                    setValution(doc.value);
+                  }}
+                  value={ValutionOptions.find((j) => j.value === volution)}
+                  openMenuOnFocus={true}
+                  menuPosition="fixed"
+                  menuPlacement="auto"
+                  placeholder="Select"
+                />
+              </div>
+            </div>
             <div
               style={{
                 display: "flex",
@@ -420,6 +445,8 @@ const CurrentStock = () => {
         </div>
         <div className="table-container-user item-sales-container">
           <Table
+            getTotalValuation={getTotalValuation}
+            valuation={volution}
             itemsDetails={filteritem
               .map((a) => ({
                 ...a,
@@ -465,7 +492,7 @@ const CurrentStock = () => {
   );
 };
 
-export default CurrentStock;
+export default StockValuationReport;
 
 const CovertedQty = (qty, conversion) => {
   let b = qty / +conversion;
@@ -476,7 +503,15 @@ const CovertedQty = (qty, conversion) => {
 
   return b + ":" + p;
 };
-function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
+
+function Table({
+  itemsDetails,
+  warehouseData,
+  setItemEditPopup,
+  setItemData,
+  getTotalValuation,
+  valuation,
+}) {
   const [items, setItems] = useState("sort_order");
   const [order, setOrder] = useState(null);
   return (
@@ -534,29 +569,36 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
             </div>
           </th>
           {warehouseData.map((a) => (
-            <th colSpan={2}>
-              <div className="t-head-element">
-                <span>{a.warehouse_title}</span>
-                <div className="sort-buttons-container">
-                  <button
-                    onClick={() => {
-                      setItems(a);
-                      setOrder("asc");
-                    }}
-                  >
-                    <ChevronUpIcon className="sort-up sort-button" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      setItems(a);
-                      setOrder("desc");
-                    }}
-                  >
-                    <ChevronDownIcon className="sort-down sort-button" />
-                  </button>
+            <>
+              <th colSpan={2}>
+                <div className="t-head-element">
+                  <span>{a.warehouse_title}</span>
+                  <div className="sort-buttons-container">
+                    <button
+                      onClick={() => {
+                        setItems(a);
+                        setOrder("asc");
+                      }}
+                    >
+                      <ChevronUpIcon className="sort-up sort-button" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setItems(a);
+                        setOrder("desc");
+                      }}
+                    >
+                      <ChevronDownIcon className="sort-down sort-button" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </th>
+              </th>
+              <th colSpan={2}>
+                <div className="t-head-element">
+                  <span>Value</span>
+                </div>
+              </th>
+            </>
           ))}
           <th>Total</th>
         </tr>
@@ -632,6 +674,21 @@ function Table({ itemsDetails, warehouseData, setItemEditPopup, setItemData }) {
                       }}
                     >
                       ({data?.min_level || 0})
+                    </td>
+                    <td>{getTotalValuation(+(data?.qty || 0), item)}</td>
+                    <td
+                      style={{
+                        textAlign: "right",
+                        // cursor: "pointer",
+                      }}
+                      //   className="hoverLink"
+                      //   onClick={(e) => {
+                      //     e.stopPropagation();
+                      //     setItemEditPopup({ ...a, type: "min_level" });
+                      //     setItemData(item);
+                      //   }}
+                    >
+                      ({item[valuation] ? item[valuation] : 0})
                     </td>
                   </>
                 );

@@ -34,6 +34,7 @@ let titleData = [
   { value: "stockTracker", name: "Stock Tracker" },
   { value: "counterStockReport", name: "Counter Stock Report" },
   { value: "StockAdjustmentReport", name: "Stock Adjustment Summary" },
+  { value: "StockValuationReport", name: "Stock Valuation" },
   { value: "cashRegisterReport", name: "Cash Registers" },
   { value: "cancelOrders", name: "cancel Order" },
   { value: "CompletedTripsReport", name: "Completed Trips Report" },
@@ -206,6 +207,10 @@ const Sidebar = ({ setCollectionTags }) => {
                     name: "Ledger",
                     link: "/admin/CounterLeger",
                   },
+                  {
+                    name: "Stock Valuation",
+                    link: "/admin/StockValuationReport",
+                  }
                 ]
               : [
                   {

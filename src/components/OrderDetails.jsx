@@ -573,6 +573,21 @@ export function OrderDetails({
       setTimeout(() => setNotification(null), 2000);
       return;
     }
+    let empty_price = orderData.item_details
+      .filter((a) => a.item_uuid && !a.free && a.state !== 3)
+      .map((a) => ({
+        ...a,
+        is_empty: !a.p_price,
+      }))
+      .find((a) => a.is_empty);
+    if (empty_price) {
+      setNotification({
+        message: `item ${empty_item.item_title} has 0 price.`,
+        success: false,
+      });
+      setTimeout(() => setNotification(null), 2000);
+      return;
+    }
     if (orderData?.payment_pending && !orderData.notes?.length)
       return setNotesPoup(true);
     let counter = counters.find(

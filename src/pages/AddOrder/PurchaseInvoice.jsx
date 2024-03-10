@@ -12,6 +12,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { FaSave } from "react-icons/fa";
 import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import Context from "../../context/context";
+import { getFormateDate } from "../../utils/helperFunctions";
 
 const customStyles = {
   option: (provided, state) => ({
@@ -47,6 +48,7 @@ export let getInititalValues = () => ({
   warehouse_uuid: localStorage.getItem("warehouse")
     ? JSON.parse(localStorage.getItem("warehouse")) || ""
     : "",
+  party_invoice_date: new Date().getTime(),
 });
 
 export default function PurchaseInvoice() {
@@ -585,6 +587,24 @@ export default function PurchaseInvoice() {
                 </div>
               </div>
               <div className="inputGroup" style={{ width: "100px" }}>
+                <label htmlFor="Warehouse">Party Invoice Date</label>
+                <div className="inputGroup">
+                  <input
+                    type="date"
+                    onChange={(e) => {
+                      setOrder((prev) => ({
+                        ...prev,
+                        party_invoice_date: new Date(e.target.value).getTime(),
+                      }));
+                    }}
+                    value={getFormateDate(new Date(order.party_invoice_date))}
+                    placeholder="Search Counter Title..."
+                    className="searchInput"
+                    pattern="\d{4}-\d{2}-\d{2}"
+                  />
+                </div>
+              </div>
+              <div className="inputGroup" style={{ width: "100px" }}>
                 <label htmlFor="Warehouse">Party Invoice Number</label>
                 <div className="inputGroup">
                   <input
@@ -709,7 +729,7 @@ export default function PurchaseInvoice() {
                                       return {
                                         ...a,
                                         ...item,
-                                        p_price: item?.last_purchase_price||0,
+                                        p_price: item?.last_purchase_price || 0,
                                         charges_discount: [
                                           {
                                             title: "dsc1",
@@ -721,7 +741,7 @@ export default function PurchaseInvoice() {
                                           },
                                         ],
                                         b_price: (
-                                          (item?.last_purchase_price||0) *
+                                          (item?.last_purchase_price || 0) *
                                           item?.conversion
                                         ).toFixed(2),
                                       };

@@ -303,10 +303,6 @@ function NewUserForm({ onSave, popupInfo, ledgerGroup }) {
           ...a,
           uuid: a.uuid || uuid(),
         })),
-        closing_balance: popupInfo.data.closing_balance?.map((a) => ({
-          ...a,
-          uuid: a.uuid || uuid(),
-        })),
       });
   }, [popupInfo.data, popupInfo.data.opening_balance, popupInfo?.type]);
 
@@ -539,116 +535,52 @@ function NewUserForm({ onSave, popupInfo, ledgerGroup }) {
                       ))}
                     </div>
                   </label>
+                  <label className="selectLabel">
+                    GST
+                    <input
+                      type="text"
+                      name="GST"
+                      className="numberInput"
+                      value={data?.gst}
+                      onChange={(e) =>
+                        setData({
+                          ...data,
+                          gst: e.target.value,
+                        })
+                      }
+                      maxLength={42}
+                    />
+                  </label>
                 </div>
                 <div className="row">
-                      <label className="selectLabel" style={{ width: "50%" }}>
-                        Closing Balance{" "}
-                        <span
-                          onClick={() => {
-                            setData((prev) => {
-                              let time = new Date();
-
-                              return {
-                                ...prev,
-                                closing_balance: [
-                                  ...(prev.closing_balance || []),
-                                  {
-                                    uuid: uuid(),
-                                    date: time.getTime(),
-                                    amount: "",
-                                  },
-                                ],
-                              };
-                            });
-                          }}
-                        >
-                          <AddCircle
-                            sx={{ fontSize: 40 }}
-                            style={{ color: "#4AC959", cursor: "pointer" }}
-                          />
-                        </span>
-                        <div>
-                          {data?.closing_balance?.map((a) => (
-                            <div
-                              key={a.uuid}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                margin: "5px 0",
-                              }}
-                            >
-                              <div style={{ width: "200px" }}>
-                                <input
-                                  type="date"
-                                  onChange={(e) =>
-                                    setData((prev) => ({
-                                      ...prev,
-                                      closing_balance: prev.closing_balance.map(
-                                        (b) =>
-                                          b.uuid === a.uuid
-                                            ? {
-                                                ...b,
-                                                date: new Date(
-                                                  e.target.value
-                                                ).getTime(),
-                                              }
-                                            : b
-                                      ),
-                                    }))
-                                  }
-                                  value={getFormateDate(new Date(a.date))}
-                                  placeholder="Search Counter Title..."
-                                  className="searchInput"
-                                  pattern="\d{4}-\d{2}-\d{2}"
-                                />
-                              </div>
-                              <input
-                                type="number"
-                                name="route_title"
-                                className="numberInput"
-                                value={a?.amount}
-                                style={{ width: "15ch" }}
-                                onChange={(e) => {
-                                  setData((prev) => ({
-                                    ...prev,
-                                    closing_balance: prev.closing_balance.map(
-                                      (b) =>
-                                        b.uuid === a.uuid
-                                          ? { ...b, amount: e.target.value }
-                                          : b
-                                    ),
-                                  }));
-                                }}
-                                maxLength={10}
-                                placeholder="Amount"
-                              />
-                              <span
-                                style={{
-                                  color: "red",
-
-                                  cursor: "pointer",
-                                }}
-                                onClick={(e) => {
-                                  setData((prev) => ({
-                                    ...prev,
-                                    closing_balance:
-                                      prev.closing_balance.filter(
-                                        (b) => b.uuid !== a.uuid
-                                      ),
-                                  }));
-                                }}
-                              >
-                                <DeleteOutlineOutlined
-                                  style={{ color: "red" }}
-                                  className="table-icon"
-                                />
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </label>
+                  <label className="selectLabel" style={{ width: "50%" }}>
+                    Closing Balance{" "}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        margin: "5px 0",
+                      }}
+                    >
+                      <input
+                        type="number"
+                        name="route_title"
+                        className="numberInput"
+                        value={data?.closing_balance}
+                        style={{ width: "15ch" }}
+                        onChange={(e) => {
+                          setData((prev) => ({
+                            ...prev,
+                            closing_balance: e.target.value,
+                          }));
+                        }}
+                        maxLength={10}
+                        placeholder="Amount"
+                      />
                     </div>
+                  </label>
+                </div>
               </div>
 
               <i style={{ color: "red" }}>
