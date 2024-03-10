@@ -14,6 +14,7 @@ import { Version } from "../App";
 
 let titleData = [
   { value: "RetailerMarginReport", name: "Retailer Margin Report" },
+  { value: "BankReconciliation", name: "Bank Reconciliation" },
   { value: "SalesmanItemSuggestion", name: "Salesman Item Suggestion" },
   { value: "InvoiceNumberWiseOrder", name: "Invoice Number Wise Order" },
   { value: "PartyWiseCompanyDiscount", name: "Party Wise Company Discount" },
@@ -39,6 +40,7 @@ let titleData = [
   { value: "cancelOrders", name: "cancel Order" },
   { value: "CompletedTripsReport", name: "Completed Trips Report" },
   { value: "CounterLeger", name: "Counter Leger" },
+  { value: "BankStatementImport", name: "Bank Statement Import" },
   { value: "addVoucher", name: "Add Voucher" },
   { value: "Outstandings", name: "Outstandings" },
   { value: "pendingEntry", name: "Pending Order Entry" },
@@ -178,7 +180,12 @@ const Sidebar = ({ setCollectionTags }) => {
           isActive={false}
           menuList={
             view
-              ? []
+              ? [
+                  {
+                    name: "Bank Reconciliation",
+                    link: "/admin/BankReconciliation",
+                  },
+                ]
               : [
                   {
                     name: "Cash Register",
@@ -210,7 +217,7 @@ const Sidebar = ({ setCollectionTags }) => {
                   {
                     name: "Stock Valuation",
                     link: "/admin/StockValuationReport",
-                  }
+                  },
                 ]
               : [
                   {
@@ -323,7 +330,12 @@ const Sidebar = ({ setCollectionTags }) => {
           setcalculationPopup={setcalculationPopup}
           menuList={
             view
-              ? []
+              ? [
+                  {
+                    name: "Bank Statement Import",
+                    link: "#",
+                  },
+                ]
               : [
                   {
                     name: "Auto Increase Quantity",

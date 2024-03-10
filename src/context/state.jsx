@@ -6,6 +6,7 @@ const State = props => {
 	const [calculationPopup, setcalculationPopup] = useState(null)
 	const [cashRegisterPopup, setCashRegisterPopup] = useState(null)
 	const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false)
+	const [bankStatementImport, setBankStatementImport] = useState(false)
 	const [view, setView] = useState(0)
 	const [skipStages, setSkipStages] = useState(false);
 	const [notification, setNotification] = useState(null)
@@ -131,7 +132,9 @@ const State = props => {
 				skipStages,
 				setSkipStages,
 				view,
-				setView
+				setView,
+				bankStatementImport,
+				setBankStatementImport
 			}}
 		>
 			{props.children}
