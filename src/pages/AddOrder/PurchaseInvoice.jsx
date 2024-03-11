@@ -145,7 +145,6 @@ export default function PurchaseInvoice() {
   }, []);
 
   useEffect(() => {
-    console.log({ order });
     if (order?.warehouse_uuid) getItemsData();
   }, [order.warehouse_uuid]);
   useEffect(() => {
@@ -184,6 +183,7 @@ export default function PurchaseInvoice() {
 
     let time = new Date();
     let autoBilling = await Billing({
+      rate_type:order.rate_type,
       creating_new: 1,
       order_uuid: data?.order_uuid,
       invoice_number: `${data?.order_type}${data?.invoice_number}`,
@@ -222,9 +222,7 @@ export default function PurchaseInvoice() {
           a.price,
         gst_percentage: a.item_gst,
         status: 0,
-        price:
-          (a.price || a.item_price || 0) *
-          (data.rate_type === "bt" ? 1 + a.item_gst / 100 : 1),
+        price: a.price || a.item_price || 0,
       })),
       ...(type?.obj || {}),
     };
@@ -254,6 +252,7 @@ export default function PurchaseInvoice() {
     let counter = ledgerData.find((a) => order.ledger_uuid === a.ledger_uuid);
     let time = new Date();
     let autoBilling = await Billing({
+      rate_type:order.rate_type,
       creating_new: 1,
       order_uuid: order?.order_uuid,
       invoice_number: `${order?.order_type}${order?.invoice_number}`,

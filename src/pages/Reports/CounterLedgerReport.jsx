@@ -254,15 +254,14 @@ function Table({ itemsDetails, setPopupOrder, setPopupRecipt }) {
           ?.map((item, i, array) => (
             <tr key={Math.random()} style={{ height: "30px" }}>
               <td>{i + 1}</td>
-              <td colSpan={3}>
-                {new Date(item.voucher_date).toDateString()} -{" "}
-                {formatAMPM(new Date(item.voucher_date))}
+              <td colSpan={3}>{new Date(item.created_at).toDateString()}</td>
+              <td colSpan={2}>
+                {item.accounting_voucher_number || item.invoice_number || ""}
               </td>
-              <td colSpan={2}>{item.accounting_voucher_number}</td>
               <td colSpan={2}>{item.type}</td>
               <td colSpan={1}>{item.amount < 0 ? -item.amount : ""}</td>
               <td colSpan={1}>{item.amount > 0 ? item.amount : ""}</td>
-              <td colSpan={1}></td>
+              <td colSpan={1}>{item.balance || ""}</td>
             </tr>
           ))}
       </tbody>

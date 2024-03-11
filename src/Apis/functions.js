@@ -250,7 +250,8 @@ export const Billing = async ({
   creating_new,
   invoice_number,
   edit_prices = [],
-  new_order
+  new_order,
+  rate_type,
 }) => {
   let counterCharges = [];
   let counter_charges = [];
@@ -267,8 +268,10 @@ export const Billing = async ({
   for (let item of items) {
     item = { ...item, item_total: 0 };
     console.log(item);
-    let edit_price = +edit_prices.find((a) => a.item_uuid === item.item_uuid)
-      ?.item_price||item.edit_price||0;
+    let edit_price =
+      +edit_prices.find((a) => a.item_uuid === item.item_uuid)?.item_price ||
+      item.edit_price ||
+      0;
     let billDiscounts = item.charges_discount?.find(
       (a) => a.title === "Bill Discounting"
     );
@@ -278,7 +281,11 @@ export const Billing = async ({
     console.log(add_discounts, item.edit);
     let charges_discount = (
       item.edit ? [] : item.charges_discount?.filter((a) => a.value) || []
-    ).filter((a) => a.title !== "Salesperson Discount" && !(a.title === "Company Discount"&&new_order));
+    ).filter(
+      (a) =>
+        a.title !== "Salesperson Discount" &&
+        !(a.title === "Company Discount" && new_order)
+    );
     let price = +(add_discounts || item.edit
       ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
           ?.price || 0
@@ -369,12 +376,11 @@ export const Billing = async ({
               : item?.charges_discount?.length
               ? (100 - +charges_discount[0]?.value) / 100
               : 1),
-              edit_price,
+      edit_price,
     };
     let item_special_price =
       counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
         ?.price || 0;
-
     let item_total =
       item.status !== 3
         ? (
@@ -383,17 +389,12 @@ export const Billing = async ({
               +item.item_desc_total ||
               +item?.price ||
               +item.item_price ||
-              0) * (+item.qty || 0)
+              0) *
+            (+item.qty || 0) *
+            (rate_type === "bt" ? 1 + item.item_gst / 100 : 1)
           ).toFixed(2)
         : 0;
-    console.log(
-      edit_prices,
-      +edit_price,
-      +item_special_price,
-      +item.item_desc_total,
-      +item?.price,
-      +item.item_price
-    );
+
     if (billDiscounts && add_discounts) {
       charges_discount.push(billDiscounts);
       item_total = item_total * +((100 - +billDiscounts.value) / 100);

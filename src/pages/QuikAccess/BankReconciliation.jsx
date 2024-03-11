@@ -245,12 +245,60 @@ function Table({ itemsDetails, setPopupForm }) {
   );
 }
 
-function ImportStatements({ onSave, popupInfo }) {
+function ImportStatements({ onSave, popupInfo, setNotification }) {
   const [errMassage, setErrorMassage] = useState("");
   const [loading, setLoading] = useState(false);
-  const fileExtension = ".xlsx";
-  const fileType =
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  const [data, setData] = useState(null);
+
+  const createImportedVouchers = async (e) => {
+    e.preventDefault();
+    let dataArray = data.data.filter((item) => item.reference_no);
+    console.log(dataArray);
+    let array = [];
+    let time = new Date();
+    for (let item of dataArray) {
+      array.push({
+        voucher_uuid: uuid(),
+        type: item.paid_amount ? "PAYMENT" : "Receipt",
+        created_by: localStorage.getItem("user_uuid"),
+        created_at: time.getTime(),
+        amt: item.paid_amount || item.received_amount,
+        details: [
+          {
+            ledger_uuid: popupInfo.ledger_uuid,
+            amt: item.paid_amount || -item.received_amount,
+          },
+          {
+            ledger_uuid: item.counter_uuid,
+            amt: -item.paid_amount || +item.received_amount,
+          },
+        ],
+        voucher_date: item.date,
+      });
+    }
+    
+    const response = await axios({
+      method: "post",
+      url: "/vouchers/postAccountVouchers",
+      data:array,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setNotification({
+        message: "Voucher Added",
+        success: true,
+      });
+      setData(null);
+    } else {
+      setNotification({
+        message: "Voucher Not Added",
+        success: false,
+      });
+    }
+  };
+
   const submitHandler = async (data) => {
     setLoading(true);
     const response = await axios({
@@ -265,12 +313,9 @@ function ImportStatements({ onSave, popupInfo }) {
       },
     });
     if (response.data.success) {
-      const ws = XLSX.utils.json_to_sheet(response.data.result);
-      const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
-      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      const data = new Blob([excelBuffer], { type: fileType });
-      FileSaver.saveAs(data, "Statement" + fileExtension);
-      onSave();
+      setData(response.data.result);
+
+      setLoading(false);
     } else {
       setErrorMassage(response.data.message);
     }
@@ -303,14 +348,68 @@ function ImportStatements({ onSave, popupInfo }) {
         >
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={submitHandler}>
-              <div className="row">
-                <h1>Import File</h1>
-              </div>
-
+              {data ? (
+                <>
+                  <div className="row" style={{ width: "80vw" }}>
+                    <h5>Total Recodes:{data?.total_recode || 0}</h5>
+                    <h5>Matched Recodes:{data?.matched_recode || 0}</h5>
+                    <h5>Unmatched Recodes:{data?.unmatched_recode || 0}</h5>
+                    <h5>Total Amount Paid:{data?.total_paid_amount || 0}</h5>
+                    <h5>
+                      Total Amount Received:{data?.total_received_amount || 0}
+                    </h5>
+                  </div>
+                  <table className="user-table" style={{ tableLayout: "auto" }}>
+                    <thead>
+                      <tr>
+                        <th>Sr.</th>
+                        <th>Reference No.</th>
+                        <th>Counter Matches</th>
+                        <th>Route</th>
+                        <th>Paid Amt</th>
+                        <th>Received Amt</th>
+                      </tr>
+                    </thead>
+                    <tbody className="tbody">
+                      {data?.data?.map((item, i) => (
+                        <tr key={Math.random()} style={{ height: "30px" }}>
+                          <td>{item.sr}</td>
+                          <td>{item.reference_no}</td>
+                          <td>{item.counter_title}</td>
+                          <td>{item.route_title}</td>
+                          <td>{item.paid_amount || ""}</td>
+                          <td>{item.received_amount || ""}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </>
+              ) : (
+                ""
+              )}
+              {data ? (
+                ""
+              ) : (
+                <div className="row">
+                  <h1>Import File</h1>
+                </div>
+              )}
               <i style={{ color: "red" }}>
                 {errMassage === "" ? "" : "Error: " + errMassage}
               </i>
-              <div className="flex" style={{ justifyContent: "space-between" }}>
+              <div
+                className="flex"
+                style={{ justifyContent: "space-between", minWidth: "300px" }}
+              >
+                <button
+                  className="submit"
+                  style={{ background: "red" }}
+                  onClick={() => {
+                    onSave();
+                  }}
+                >
+                  Cancel{data ? " Import" : ""}
+                </button>
                 {loading ? (
                   <button
                     className="submit"
@@ -333,6 +432,10 @@ function ImportStatements({ onSave, popupInfo }) {
                         ></animateTransform>
                       </path>
                     </svg>
+                  </button>
+                ) : data ? (
+                  <button className="submit" onClick={createImportedVouchers}>
+                    Import Matched
                   </button>
                 ) : (
                   <label
@@ -357,16 +460,6 @@ function ImportStatements({ onSave, popupInfo }) {
                     />
                   </label>
                 )}
-                <div style={{ width: "50px" }}></div>
-                <button
-                  className="submit"
-                  style={{ background: "red" }}
-                  onClick={() => {
-                    onSave();
-                  }}
-                >
-                  Cancel
-                </button>
               </div>
             </form>
           </div>

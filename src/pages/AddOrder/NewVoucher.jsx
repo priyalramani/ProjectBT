@@ -29,6 +29,7 @@ export let getInititalValues = () => {
 };
 let typeOptions = [
   { value: "PURCHASE", label: "Purchase" },
+  { value: "PAYMENT", label: "Payment" },
   { value: "SALE", label: "Sales" },
   { value: "RCPT", label: "Receipt" },
   { value: "JPNL", label: "Journal" },
