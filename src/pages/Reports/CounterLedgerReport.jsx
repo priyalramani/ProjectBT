@@ -6,6 +6,7 @@ import Sidebar from "../../components/Sidebar";
 import Select from "react-select";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import { useNavigate } from "react-router-dom";
+import { get } from "react-scroll/modules/mixins/scroller";
 
 const CounterLegerReport = () => {
   const [ledgerData, setLedgerData] = useState([]);
@@ -43,15 +44,16 @@ const CounterLegerReport = () => {
     });
     if (response.data.success) setLedgerData(response.data.result);
   };
-  const getCompleteOrders = async () => {
-    let startDate = new Date(searchData.startDate + " 00:00:00 AM");
+  const getCompleteOrders = async (data = searchData) => {
+    sessionStorage.setItem("ledgerData", JSON.stringify(data));
+    let startDate = new Date(data.startDate + " 00:00:00 AM");
     startDate = startDate.getTime();
-    let endDate = new Date(searchData.endDate + " 00:00:00 AM");
+    let endDate = new Date(data.endDate + " 00:00:00 AM");
     endDate = endDate.getTime();
     const response = await axios({
       method: "post",
       url: "/ledger/getLegerReport",
-      data: { startDate, endDate, counter_uuid: searchData.counter_uuid },
+      data: { startDate, endDate, counter_uuid: data.counter_uuid },
       headers: {
         "Content-Type": "application/json",
       },
@@ -63,19 +65,27 @@ const CounterLegerReport = () => {
   useEffect(() => {
     let controller = new AbortController();
     let time = new Date();
-    let curTime = "yy-mm-dd"
-      .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
-      .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
-      .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
-    let sTime = "yy-mm-dd"
-      .replace("mm", ("00" + time?.getMonth().toString()).slice(-2))
-      .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
-      .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
-    setSearchData((prev) => ({
-      ...prev,
-      startDate: sTime,
-      endDate: curTime,
-    }));
+    let prevData = JSON.parse(sessionStorage.getItem("ledgerData"));
+    console.log({prevData});
+    if (prevData) {
+      setSearchData(prevData);
+      getCompleteOrders(prevData);
+    } else {
+      let curTime = "yy-mm-dd"
+        .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
+        .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
+        .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
+      let sTime = "yy-mm-dd"
+        .replace("mm", ("00" + time?.getMonth().toString()).slice(-2))
+        .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
+        .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
+      setSearchData((prev) => ({
+        ...prev,
+        startDate: sTime,
+        endDate: curTime,
+      }));
+    }
+
     getCounter(controller);
     getLedgerData(controller);
     return () => {

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useContext } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
-import { Billing } from "../../Apis/functions";
+import { Billing, PurchaseInvoiceBilling } from "../../Apis/functions";
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import Select from "react-select";
@@ -64,7 +64,6 @@ export default function PurchaseInvoice() {
   const [confirmPopup, setConfirmPopup] = useState(false);
   const reactInputsRef = useRef({});
   const [focusedInputId, setFocusedInputId] = useState(0);
-  const [edit_prices, setEditPrices] = useState([]);
   const [company, setCompanies] = useState([]);
   const [companyFilter, setCompanyFilter] = useState("all");
   const [remarks, setRemarks] = useState("");
@@ -164,7 +163,6 @@ export default function PurchaseInvoice() {
   }, [order.ledger_uuid]);
 
   const onSubmit = async (type, orderData = order) => {
-    let counter = ledgerData.find((a) => order.ledger_uuid === a.ledger_uuid);
     let data = {
       ...orderData,
       item_details: order.item_details
@@ -175,31 +173,12 @@ export default function PurchaseInvoice() {
         })),
     };
 
-    let time = new Date();
-    let autoBilling = await Billing({
+    let autoBilling = await PurchaseInvoiceBilling({
       rate_type: order.rate_type,
-      creating_new: 1,
-      order_uuid: data?.order_uuid,
-      invoice_number: `${data?.order_type}${data?.invoice_number}`,
-      replacement: data.replacement,
-      adjustment: data.adjustment,
-      shortage: data.shortage,
-      counter,
+
       items: data.item_details.map((a) => ({
         ...a,
         item_price: a.p_price || a.item_price,
-      })),
-      others: {
-        stage: 1,
-        user_uuid: localStorage.getItem("user_uuid"),
-        time: time.getTime(),
-
-        type: "NEW",
-      },
-      add_discounts: true,
-      edit_prices: edit_prices.map((a) => ({
-        ...a,
-        item_price: a.p_price,
       })),
     });
 
@@ -226,48 +205,28 @@ export default function PurchaseInvoice() {
 
     console.log("orderJSon", data);
 
-    const response = await axios({
-      method: "post",
-      url: "/purchaseInvoice/postAccountVoucher",
-      data,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-    if (response.data.success) {
-      // window.location.reload();
-      setOrder(getInititalValues());
-    }
+    // const response = await axios({
+    //   method: "post",
+    //   url: "/purchaseInvoice/postAccountVoucher",
+    //   data,
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    // });
+    // console.log(response);
+    // if (response.data.success) {
+    //   // window.location.reload();
+    //   setOrder(getInititalValues());
+    // }
   };
 
   const callBilling = async (type = {}) => {
     if (!order.item_details.filter((a) => a.item_uuid).length) return;
-    let counter = ledgerData.find((a) => order.ledger_uuid === a.ledger_uuid);
-    let time = new Date();
-    let autoBilling = await Billing({
-      rate_type: order.rate_type,
-      creating_new: 1,
-      order_uuid: order?.order_uuid,
-      invoice_number: `${order?.order_type}${order?.invoice_number}`,
-      replacement: order.replacement,
-      adjustment: order.adjustment,
-      shortage: order.shortage,
-      counter,
-      items: order.item_details.map((a) => ({ ...a, item_price: a.p_price })),
-      others: {
-        stage: 1,
-        user_uuid: localStorage.getItem("user_uuid"),
-        time: time.getTime(),
 
-        type: "NEW",
-      },
-      add_discounts: true,
-      edit_prices: edit_prices.map((a) => ({
-        ...a,
-        item_price: a.p_price,
-      })),
-      ...type,
+    let autoBilling = await PurchaseInvoiceBilling({
+      rate_type: order.rate_type,
+
+      items: order.item_details.map((a) => ({ ...a, item_price: a.p_price })),
     });
 
     setConfirmPopup({
@@ -330,40 +289,12 @@ export default function PurchaseInvoice() {
             ? {
                 ...a,
                 p_price: e.target.value,
-                b_price: (e.target.value * item.conversion || 0).toFixed(2),
+                b_price: (e.target.value * item.conversion || 0).toFixed(4),
               }
             : a
         ),
       };
     });
-    setEditPrices((prev) =>
-      prev.filter((a) => a.item_uuid === item.item_uuid).length
-        ? prev.map((a) =>
-            a.item_uuid === item.item_uuid
-              ? {
-                  ...a,
-                  p_price: e.target.value,
-                  b_price: (e.target.value * item.conversion || 0).toFixed(2),
-                }
-              : a
-          )
-        : prev.length
-        ? [
-            ...prev,
-            {
-              ...item,
-              p_price: e.target.value,
-              b_price: (e.target.value * item.conversion || 0).toFixed(2),
-            },
-          ]
-        : [
-            {
-              ...item,
-              p_price: e.target.value,
-              b_price: (e.target.value * item.conversion || 0).toFixed(2),
-            },
-          ]
-    );
   };
 
   const onPiecesKeyDown = (e, item) => {
@@ -696,8 +627,8 @@ export default function PurchaseInvoice() {
                                         ],
                                         b_price: (
                                           (item?.last_purchase_price || 0) *
-                                          item?.conversion
-                                        ).toFixed(2),
+                                          +item?.conversion
+                                        ).toFixed(4),
                                       };
                                     } else return a;
                                   }),
@@ -844,52 +775,13 @@ export default function PurchaseInvoice() {
                                           ...a,
                                           b_price: e.target.value,
                                           p_price: (
-                                            e.target.value / item.conversion ||
-                                            0
-                                          ).toFixed(2),
+                                            e.target.value / +item.conversion
+                                          ).toFixed(4),
                                         }
                                       : a
                                   ),
                                 };
                               });
-                              setEditPrices((prev) =>
-                                prev.filter(
-                                  (a) => a.item_uuid === item.item_uuid
-                                ).length
-                                  ? prev.map((a) =>
-                                      a.item_uuid === item.item_uuid
-                                        ? {
-                                            ...a,
-                                            b_price: e.target.value,
-                                            p_price: (
-                                              e.target.value /
-                                                item.conversion || 0
-                                            ).toFixed(2),
-                                          }
-                                        : a
-                                    )
-                                  : prev.length
-                                  ? [
-                                      ...prev,
-                                      {
-                                        ...item,
-                                        b_price: e.target.value,
-                                        p_price: (
-                                          e.target.value / item.conversion || 0
-                                        ).toFixed(2),
-                                      },
-                                    ]
-                                  : [
-                                      {
-                                        ...item,
-
-                                        b_price: e.target.value,
-                                        p_price: (
-                                          e.target.value / item.conversion || 0
-                                        ).toFixed(2),
-                                      },
-                                    ]
-                              );
                             }}
                           />
                         </td>

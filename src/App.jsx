@@ -82,7 +82,7 @@ import CounterLegerReport from "./pages/Reports/CounterLedgerReport";
 import StockValuationReport from "./pages/Reports/StockValuationReport";
 import BankStatementImport from "./pages/others/BankStatementImport";
 import BankReconciliation from "./pages/QuikAccess/BankReconciliation";
-export let Version = 268;
+export let Version = 269;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 

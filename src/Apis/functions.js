@@ -251,7 +251,6 @@ export const Billing = async ({
   invoice_number,
   edit_prices = [],
   new_order,
-  rate_type,
 }) => {
   let counterCharges = [];
   let counter_charges = [];
@@ -403,12 +402,9 @@ export const Billing = async ({
               +item.item_desc_total ||
               +item?.price ||
               +item.item_price ||
-              0) *
-            (+item.qty || 0) *
-            (rate_type === "bt" ? 1 + +(item.item_gst || 0) / 100 : 1)
+              0) * (+item.qty || 0)
           ).toFixed(2)
         : 0;
-  
 
     if (billDiscounts && add_discounts) {
       charges_discount.push(billDiscounts);
@@ -455,6 +451,56 @@ export const Billing = async ({
     order_grandtotal,
     items: newPriceItems,
     others,
+  };
+};
+export const PurchaseInvoiceBilling = async ({
+  items = [],
+  rate_type,
+}) => {
+  let newPriceItems = [];
+  for (let item of items) {
+    item = { ...item, item_total: 0 };
+
+    item = {
+      ...item,
+      qty: +item.conversion * +item.b + +item.p,
+    };
+
+    let descInputs =
+      item.charges_discount
+        ?.filter((a) => a.title === "dsc1" || a.title === "dsc2")
+        .reduce((a, b) => a + +(b.value || 0), 0) || 0;
+
+    let item_price =
+      ((item?.price || item?.item_price || 0) * (100 - (descInputs || 0))) /
+      100;
+
+    let item_total =
+      item.status !== 3
+        ? 
+            (item_price *
+            (+item.qty || 0) *
+            (rate_type === "bt" ? 1 + +(item.item_gst || 0) / 100 : 1)).toFixed(4)
+          
+        : 0;
+    console.log({ item_price, item_total, rate_type,qty:item.qty });
+    if (item_total) item_total = (+item_total || 0).toFixed(2);
+    item = {
+      ...item,
+      item_total,
+      item_desc_total: 0,
+    };
+
+    newPriceItems.push(item);
+  }
+
+  let order_grandtotal = Math.round(
+    newPriceItems.reduce((a, b) => a + +b.item_total, 0)
+  );
+
+  return {
+    order_grandtotal,
+    items: newPriceItems,
   };
 };
 

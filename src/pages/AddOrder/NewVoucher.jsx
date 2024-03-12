@@ -5,7 +5,7 @@ import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
 import { Billing } from "../../Apis/functions";
-import { AddCircle as AddIcon, ArrowBack } from "@mui/icons-material";
+import { AddCircle as AddIcon, ArrowBack, ArrowBackIos } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import Select from "react-select";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
@@ -294,8 +294,8 @@ export default function NewVoucher() {
           <div className="accountGroup" id="voucherForm" action="">
             <div className="inventory_header">
               {params.accounting_voucher_uuid ? (
-                <div style={{ cursor: "pointer" }} onClick={() => navigate(-1)}>
-                  <ArrowBack />
+                <div style={{ cursor: "pointer",padding:"5px",backgroundColor:"#000",borderRadius:"50%" }} onClick={() => navigate(-1)}>
+                  <ArrowBack style={{fontSize:"40px",color:"#fff"}}/>
                 </div>
               ) : (
                 ""
@@ -426,9 +426,10 @@ export default function NewVoucher() {
                             }
                             openMenuOnFocus={true}
                             autoFocus={
-                              focusedInputId ===
+                              !params.accounting_voucher_uuid &&
+                              (focusedInputId ===
                                 `selectContainer-${item.uuid}` ||
-                              (i === 0 && focusedInputId === 0)
+                                (i === 0 && focusedInputId === 0))
                             }
                             menuPosition="fixed"
                             menuPlacement="auto"

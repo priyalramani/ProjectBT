@@ -260,7 +260,17 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
     for (let item of dataArray) {
       array.push({
         voucher_uuid: uuid(),
-        type: item.paid_amount ? "PAYMENT" : "Receipt",
+        type:
+          item.ledger_group_uuid === "9c2a6c85-c0f0-4acf-957e-dcea223f3d00" ||
+          item.counter_uuid
+            ? "RCPT"
+            : item.ledger_group_uuid === "004fd020-853c-4575-bebe-b29faefae3c9"
+            ? "PAYMENT"
+            : item.ledger_group_uuid ===
+                "8550248f-41e9-4f5f-aea0-927b12a7146c" ||
+              item.ledger_group_uuid === "0c0c8cbd-1a2a-4adc-9b65-d5c807f275c7"
+            ? "CNTR"
+            : "",
         created_by: localStorage.getItem("user_uuid"),
         created_at: time.getTime(),
         amt: item.paid_amount || item.received_amount,
@@ -291,13 +301,19 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
         message: "Voucher Imported Successfully",
         success: true,
       });
-      setData(null);
+      setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+      onSave();
     } else {
       setNotification({
         message: "Voucher Not imported",
         success: false,
       });
     }
+    setTimeout(() => {
+      setNotification(null);
+    }, 5000);
   };
 
   const submitHandler = async (data) => {
@@ -377,7 +393,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                           key={Math.random()}
                           style={{
                             height: "30px",
-                            color: item.unMatch ? "green" : "red",
+                            color: !item.unMatch ? "green" : "red",
                           }}
                         >
                           <td>{item.sr}</td>
