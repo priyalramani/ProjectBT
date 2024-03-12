@@ -5,6 +5,7 @@ import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
 import Select from "react-select";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
+import { useNavigate } from "react-router-dom";
 
 const CounterLegerReport = () => {
   const [ledgerData, setLedgerData] = useState([]);
@@ -17,6 +18,7 @@ const CounterLegerReport = () => {
   const [popupRecipt, setPopupRecipt] = useState(null);
   const [items, setItems] = useState([]);
   const [counter, setCounter] = useState([]);
+  const navigate = useNavigate();
 
   const getCounter = async (controller = new AbortController()) => {
     const response = await axios({
@@ -187,6 +189,7 @@ const CounterLegerReport = () => {
             setPopupOrder={setPopupOrder}
             counter={counter}
             setPopupRecipt={setPopupRecipt}
+            navigate={navigate}
           />
         </div>
       </div>
@@ -220,18 +223,7 @@ const CounterLegerReport = () => {
 
 export default CounterLegerReport;
 
-function Table({ itemsDetails, setPopupOrder, setPopupRecipt }) {
-  function formatAMPM(date) {
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var ampm = hours >= 12 ? "pm" : "am";
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    var strTime = hours + ":" + minutes + " " + ampm;
-    return strTime;
-  }
-
+function Table({ itemsDetails, navigate }) {
   return (
     <table
       className="user-table"
@@ -252,7 +244,13 @@ function Table({ itemsDetails, setPopupOrder, setPopupRecipt }) {
         {itemsDetails
           ?.sort((a, b) => a.order_date - b.order_date)
           ?.map((item, i, array) => (
-            <tr key={Math.random()} style={{ height: "30px" }}>
+            <tr
+              key={Math.random()}
+              style={{ height: "30px" }}
+              onClick={() =>
+                navigate("/admin/editVoucher/" + item.accounting_voucher_uuid)
+              }
+            >
               <td>{i + 1}</td>
               <td colSpan={3}>{new Date(item.created_at).toDateString()}</td>
               <td colSpan={2}>

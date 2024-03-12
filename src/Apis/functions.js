@@ -391,9 +391,10 @@ export const Billing = async ({
               +item.item_price ||
               0) *
             (+item.qty || 0) *
-            (rate_type === "bt" ? 1 + item.item_gst / 100 : 1)
+            (rate_type === "bt" ? 1 + +(item.item_gst || 0) / 100 : 1)
           ).toFixed(2)
         : 0;
+    console.log({ item_title: item.item_title, item_total ,rate_type});
 
     if (billDiscounts && add_discounts) {
       charges_discount.push(billDiscounts);

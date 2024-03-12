@@ -82,7 +82,7 @@ import CounterLegerReport from "./pages/Reports/CounterLedgerReport";
 import StockValuationReport from "./pages/Reports/StockValuationReport";
 import BankStatementImport from "./pages/others/BankStatementImport";
 import BankReconciliation from "./pages/QuikAccess/BankReconciliation";
-export let Version = 266;
+export let Version = 267;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
@@ -378,6 +378,7 @@ function App() {
               element={<PurchaseInvoice />}
             />
             <Route path="/admin/addVoucher" element={<AddVoucher />} />
+            <Route path="/admin/editVoucher/:accounting_voucher_uuid" element={<AddVoucher />} />
 
             <Route path="/admin/AddOutStanding" element={<AddOutStanding />} />
             <Route path="/admin/addStock" element={<AddStock />} />

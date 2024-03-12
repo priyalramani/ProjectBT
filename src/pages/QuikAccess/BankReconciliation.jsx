@@ -141,6 +141,7 @@ const BankReconciliation = () => {
           }}
           setLedgerData={setLedgerData}
           popupInfo={popupForm}
+          setNotification={setNotification}
         />
       ) : (
         ""
@@ -266,34 +267,34 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
         details: [
           {
             ledger_uuid: popupInfo.ledger_uuid,
-            amt: item.paid_amount || -item.received_amount,
+            amount: item.paid_amount || -item.received_amount,
           },
           {
             ledger_uuid: item.counter_uuid,
-            amt: -item.paid_amount || +item.received_amount,
+            amount: -item.paid_amount || +item.received_amount,
           },
         ],
         voucher_date: item.date,
       });
     }
-    
+
     const response = await axios({
       method: "post",
       url: "/vouchers/postAccountVouchers",
-      data:array,
+      data: array,
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (response.data.success) {
       setNotification({
-        message: "Voucher Added",
+        message: "Voucher Imported Successfully",
         success: true,
       });
       setData(null);
     } else {
       setNotification({
-        message: "Voucher Not Added",
+        message: "Voucher Not imported",
         success: false,
       });
     }
@@ -372,7 +373,13 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                     </thead>
                     <tbody className="tbody">
                       {data?.data?.map((item, i) => (
-                        <tr key={Math.random()} style={{ height: "30px" }}>
+                        <tr
+                          key={Math.random()}
+                          style={{
+                            height: "30px",
+                            color: item.unMatch ? "green" : "red",
+                          }}
+                        >
                           <td>{item.sr}</td>
                           <td>{item.reference_no}</td>
                           <td>{item.counter_title}</td>

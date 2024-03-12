@@ -5,12 +5,13 @@ import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
 import { Billing } from "../../Apis/functions";
-import { AddCircle as AddIcon } from "@mui/icons-material";
+import { AddCircle as AddIcon, ArrowBack } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import Select from "react-select";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
+import { useNavigate, useParams } from "react-router-dom";
 
 export let getInititalValues = () => {
   let time = new Date();
@@ -19,7 +20,7 @@ export let getInititalValues = () => {
     type: "",
     created_by: localStorage.getItem("user_uuid"),
     created_at: time.getTime(),
-    amt:0,
+    amt: 0,
     details: [],
     voucher_date: "yy-mm-dd"
       .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
@@ -48,6 +49,8 @@ export default function NewVoucher() {
   const [focusedInputId, setFocusedInputId] = useState(0);
   const [autoAdd, setAutoAdd] = useState(false);
   const [remarks, setRemarks] = useState("");
+  const params = useParams();
+  const navigate = useNavigate();
 
   const getLedgers = async () => {
     const response = await axios({
@@ -71,12 +74,38 @@ export default function NewVoucher() {
     });
     if (response.data.success) setCounters(response.data.result);
   };
+  const getVoucher = async (accounting_voucher_uuid) => {
+    const response = await axios({
+      method: "get",
+      url: "/vouchers/getAccountVoucher/" + accounting_voucher_uuid,
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      let data = response.data.result;
+      setOrder({
+        ...data,
+        details: data.details.map((a) => ({
+          ...a,
+          uuid: a.ledger_uuid,
+          add: a.amount > 0 ? a.amount : 0,
+          sub: a.amount < 0 ? -a.amount : 0,
+        })),
+      });
+    }
+  };
 
   useEffect(() => {
     getCounter();
 
     getLedgers();
   }, []);
+  useEffect(() => {
+    if (params.accounting_voucher_uuid)
+      getVoucher(params.accounting_voucher_uuid);
+  }, [params.accounting_voucher_uuid]);
 
   useEffect(() => {
     if (order?.ledger_uuid) {
@@ -117,9 +146,14 @@ export default function NewVoucher() {
       setTimeout(() => setNotification(null), 2000);
       return;
     }
+
     const response = await axios({
-      method: "post",
-      url: "/vouchers/postAccountVoucher",
+      method: params.accounting_voucher_uuid ? "put" : "post",
+      url: `/vouchers/${
+        params.accounting_voucher_uuid
+          ? "putAccountVoucher"
+          : "postAccountVoucher"
+      }`,
       data: {
         ...order,
         amt: totalSum,
@@ -135,6 +169,14 @@ export default function NewVoucher() {
       },
     });
     if (response.data.success) {
+      if (params.accounting_voucher_uuid) {
+        setNotification({
+          message: "Voucher Updated",
+          success: true,
+        });
+        navigate(-1);
+        return;
+      }
       setNotification({
         message: "Voucher Added",
         success: true,
@@ -251,6 +293,13 @@ export default function NewVoucher() {
         <div className="inventory">
           <div className="accountGroup" id="voucherForm" action="">
             <div className="inventory_header">
+              {params.accounting_voucher_uuid ? (
+                <div style={{ cursor: "pointer" }} onClick={() => navigate(-1)}>
+                  <ArrowBack />
+                </div>
+              ) : (
+                ""
+              )}
               <h2>Purchase Invoice </h2>
             </div>
 
@@ -285,9 +334,7 @@ export default function NewVoucher() {
                       }));
                     }}
                     value={
-                      typeOptions.find(
-                        (a) => a.value === order.type
-                      ) || {
+                      typeOptions.find((a) => a.value === order.type) || {
                         value: "",
                         label: "Select",
                       }
@@ -354,6 +401,7 @@ export default function NewVoucher() {
                                     return {
                                       ...a,
                                       ...item,
+                                      ledger_uuid: e.value,
                                     };
                                   } else return a;
                                 }),
@@ -361,14 +409,20 @@ export default function NewVoucher() {
                               jumpToNextIndex(`selectContainer-${item.uuid}`);
                             }}
                             value={
-                              itemsData
+                              item.ledger_uuid
+                                ? [...counters, ...ledgerData]
 
-                                .filter((a) => a.item_uuid === item.item_uuid)
-                                .map((a, j) => ({
-                                  value: a.item_uuid,
-                                  label: a.counter_title || a.ledger_title,
-                                  key: a.item_uuid,
-                                }))[0]
+                                    .filter(
+                                      (a) =>
+                                        a.counter_uuid === item.ledger_uuid ||
+                                        a.ledger_uuid === item.ledger_uuid
+                                    )
+                                    .map((a, j) => ({
+                                      value: a.ledger_uuid || a.counter_uuid,
+                                      label: a.counter_title || a.ledger_title,
+                                      key: a.ledger_uuid || a.counter_uuid,
+                                    }))[0]
+                                : { value: "", label: "" }
                             }
                             openMenuOnFocus={true}
                             autoFocus={

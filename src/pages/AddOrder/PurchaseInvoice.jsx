@@ -53,13 +53,7 @@ export let getInititalValues = () => ({
 });
 
 export default function PurchaseInvoice() {
-  const {
-    getSpecialPrice,
-    saveSpecialPrice,
-    deleteSpecialPrice,
-    spcPricePrompt,
-    setNotification,
-  } = useContext(Context);
+  const { setNotification } = useContext(Context);
   const [order, setOrder] = useState(getInititalValues());
   const [ledgerData, setLedgerData] = useState([]);
   const [counterFilter] = useState("");
@@ -183,7 +177,7 @@ export default function PurchaseInvoice() {
 
     let time = new Date();
     let autoBilling = await Billing({
-      rate_type:order.rate_type,
+      rate_type: order.rate_type,
       creating_new: 1,
       order_uuid: data?.order_uuid,
       invoice_number: `${data?.order_type}${data?.invoice_number}`,
@@ -252,7 +246,7 @@ export default function PurchaseInvoice() {
     let counter = ledgerData.find((a) => order.ledger_uuid === a.ledger_uuid);
     let time = new Date();
     let autoBilling = await Billing({
-      rate_type:order.rate_type,
+      rate_type: order.rate_type,
       creating_new: 1,
       order_uuid: order?.order_uuid,
       invoice_number: `${order?.order_type}${order?.invoice_number}`,
@@ -328,14 +322,6 @@ export default function PurchaseInvoice() {
   let listItemIndexCount = 0;
 
   const onItemPriceChange = async (e, item) => {
-    if (e.target.value.toString().toLowerCase().includes("no special")) {
-      await deleteSpecialPrice(item, order?.ledger_uuid, setLedgerData);
-      e.target.value = +e.target.value
-        .split("")
-        .filter((i) => i)
-        .filter((i) => +i || +i === 0)
-        .join("");
-    }
     setOrder((prev) => {
       return {
         ...prev,
@@ -612,7 +598,6 @@ export default function PurchaseInvoice() {
                     <th className="pa2 tc bb b--black-20 ">Dsc1</th>
                     <th className="pa2 tc bb b--black-20 ">Dsc2</th>
 
-                    <th className="pa2 tc bb b--black-20 ">Special Price</th>
                     <th className="pa2 tc bb b--black-20 ">Item Total</th>
 
                     <th className="pa2 tc bb b--black-20 "></th>
@@ -992,37 +977,7 @@ export default function PurchaseInvoice() {
                             disabled={!item.item_uuid}
                           />
                         </td>
-                        <td className="ph2 pv1 tc bb b--black-20 bg-white">
-                          {+item?.item_price !== +item?.p_price &&
-                            (+getSpecialPrice(
-                              ledgerData,
-                              item,
-                              order?.counter_uuid
-                            )?.price === +item?.p_price ? (
-                              <IoCheckmarkDoneOutline
-                                className="table-icon checkmark"
-                                onClick={() =>
-                                  spcPricePrompt(
-                                    item,
-                                    order?.counter_uuid,
-                                    setLedgerData
-                                  )
-                                }
-                              />
-                            ) : (
-                              <FaSave
-                                className="table-icon"
-                                title="Save current price as special item price"
-                                onClick={() =>
-                                  saveSpecialPrice(
-                                    item,
-                                    order?.counter_uuid,
-                                    setLedgerData
-                                  )
-                                }
-                              />
-                            ))}
-                        </td>
+
                         <td
                           className="ph2 pv1 tc bb b--black-20 bg-white"
                           style={{ textAlign: "center" }}
@@ -1133,13 +1088,13 @@ export default function PurchaseInvoice() {
         <MessagePopup
           message="Are you sure you want to bill?"
           message2={`Total: ${confirmPopup?.order_grandtotal || 0}`}
-          onClose={() => setConfirmPopup(false)}
-          onSave={() => {
+          onSave={() => setConfirmPopup(false)}
+          onClose={() => {
             onSubmit(confirmPopup.type, confirmPopup);
             setConfirmPopup(false);
           }}
-          button1="Cancel"
-          button2="Confirm"
+          button2="Cancel"
+          button1="Confirm"
         />
       ) : (
         ""
