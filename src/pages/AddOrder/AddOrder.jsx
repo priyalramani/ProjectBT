@@ -46,7 +46,7 @@ const CovertedQty = (qty, conversion) => {
 export let getInititalValues = () => ({
   counter_uuid: "",
   item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
-  item:[],
+  item: [],
   priority: 0,
   order_type: "I",
   time_1: 24 * 60 * 60 * 1000,
@@ -285,61 +285,71 @@ export default function AddOrder() {
           ? [
               {
                 stage: 1,
-                time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
+                time: data?.others?.time || new Date().getTime(),
+                user_uuid:
+                  data.others.user_uuid || localStorage.getItem("user_uuid"),
               },
             ]
           : type.stage === 2
           ? [
               {
                 stage: 1,
-                time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
+                time: data?.others?.time || new Date().getTime(),
+                user_uuid:
+                  data.others.user_uuid || localStorage.getItem("user_uuid"),
               },
               {
                 stage: 2,
-                time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
+                time: data?.others?.time || new Date().getTime(),
+                user_uuid:
+                  data.others.user_uuid || localStorage.getItem("user_uuid"),
               },
             ]
           : type.stage === 3
           ? [
               {
                 stage: 1,
-                time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
+                time: data?.others?.time || new Date().getTime(),
+                user_uuid:
+                  data.others.user_uuid || localStorage.getItem("user_uuid"),
               },
               {
                 stage: 2,
-                time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
+                time: data?.others?.time || new Date().getTime(),
+                user_uuid:
+                  data.others.user_uuid || localStorage.getItem("user_uuid"),
               },
               {
                 stage: 3,
-                time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
+                time: data?.others?.time || new Date().getTime(),
+                user_uuid:
+                  data.others.user_uuid || localStorage.getItem("user_uuid"),
               },
             ]
           : [
               {
                 stage: 1,
-                time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
+                time: data?.others?.time || new Date().getTime(),
+                user_uuid:
+                  data.others.user_uuid || localStorage.getItem("user_uuid"),
               },
               {
                 stage: 2,
-                time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
+                time: data?.others?.time || new Date().getTime(),
+                user_uuid:
+                  data.others.user_uuid || localStorage.getItem("user_uuid"),
               },
               {
                 stage: 3,
-                time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
+                time: data?.others?.time || new Date().getTime(),
+                user_uuid:
+                  data.others.user_uuid || localStorage.getItem("user_uuid"),
               },
               {
                 stage: 4,
-                time: data?.others?.time||new Date().getTime(),
-                user_uuid: data.others.user_uuid||localStorage.getItem("user_uuid"),
+                time: data?.others?.time || new Date().getTime(),
+                user_uuid:
+                  data.others.user_uuid || localStorage.getItem("user_uuid"),
               },
             ],
       ...(type.obj || {}),
@@ -350,19 +360,19 @@ export default function AddOrder() {
 
     console.log("orderJSon", data);
 
-    const response = await axios({
-      method: "post",
-      url: "/orders/postOrder",
-      data,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response);
-    if (response.data.success) {
-      // window.location.reload();
-      setOrder(getInititalValues());
-    }
+    // const response = await axios({
+    //   method: "post",
+    //   url: "/orders/postOrder",
+    //   data,
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    // });
+    // console.log(response);
+    // if (response.data.success) {
+    //   // window.location.reload();
+    //   setOrder(getInititalValues());
+    // }
   };
 
   const callBilling = async (type = {}) => {
@@ -1059,6 +1069,14 @@ export default function AddOrder() {
                                 (b) => b.title === "dsc1"
                               )?.value || ""
                             }
+                            disabled={
+                              !item.item_uuid ||
+                              +getSpecialPrice(
+                                counters,
+                                item,
+                                order?.counter_uuid
+                              )?.price === +item?.p_price
+                            }
                             onChange={(e) => {
                               setOrder((prev) => {
                                 return {
@@ -1084,13 +1102,13 @@ export default function AddOrder() {
                             }}
                             onFocus={(e) => e.target.select()}
                             onKeyDown={(e) => onPiecesKeyDown(e, item)}
-                            disabled={!item.item_uuid}
                           />
                         </td>
                         <td
                           className="ph2 pv1 tc bb b--black-20 bg-white"
                           style={{ textAlign: "center" }}
                         >
+                          {console.log(item)}
                           <input
                             style={{ width: "100px" }}
                             type="number"
@@ -1106,7 +1124,9 @@ export default function AddOrder() {
                                 return {
                                   ...prev,
                                   item_details: prev.item_details.map((a) =>
-                                    a.uuid === item.uuid
+                                    a.uuid === item.uuid ||
+                                    (a.item_uuid &&
+                                      a.item_uuid === item.item_uuid)
                                       ? {
                                           ...a,
                                           charges_discount:
@@ -1126,7 +1146,14 @@ export default function AddOrder() {
                             }}
                             onFocus={(e) => e.target.select()}
                             onKeyDown={(e) => onPiecesKeyDown(e, item)}
-                            disabled={!item.item_uuid}
+                            disabled={
+                              !item.item_uuid ||
+                              +getSpecialPrice(
+                                counters,
+                                item,
+                                order?.counter_uuid
+                              )?.price === +item?.p_price
+                            }
                           />
                         </td>
                         <td className="ph2 pv1 tc bb b--black-20 bg-white">
@@ -1232,7 +1259,7 @@ export default function AddOrder() {
                     return;
                   }
                   let empty_price = order.item_details
-                    .filter((a) => a.item_uuid&&!a.free&&a.state!==3)
+                    .filter((a) => a.item_uuid && !a.free && a.state !== 3)
                     .map((a) => ({
                       ...a,
                       is_empty: !a.p_price,

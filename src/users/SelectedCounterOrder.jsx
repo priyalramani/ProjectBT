@@ -59,6 +59,7 @@ const SelectedCounterOrder = () => {
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let time = new Date();
     Billing({
+      new_order: 1,
       order_uuid: order?.order_uuid,
       invoice_number: `${order?.order_type}${order?.invoice_number}`,
       counter,
@@ -1189,6 +1190,7 @@ const SelectedCounterOrder = () => {
                   setTimeout(async () => {
                     let time = new Date();
                     Billing({
+                      new_order: 1,
                       order_uuid: order?.order_uuid,
                       invoice_number: `${order?.order_type}${order?.invoice_number}`,
                       creating_new: true,

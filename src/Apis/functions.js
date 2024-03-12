@@ -284,7 +284,10 @@ export const Billing = async ({
     ).filter(
       (a) =>
         a.title !== "Salesperson Discount" &&
-        !(a.title === "Company Discount" && new_order)
+        !(
+          (a.title === "Company Discount" || a.title === "Bill Discounting") &&
+          new_order
+        )
     );
     let price = +(add_discounts || item.edit
       ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
@@ -352,6 +355,10 @@ export const Billing = async ({
               ((100 - company_discount_percentage) / 100) || 0,
       };
     }
+    let descInputs =
+      charges_discount
+        ?.filter((a) => a.title === "dsc1" || a.title === "dsc2")
+        .reduce((a, b) => a + +(b.value || 0), 0) || 0;
     if (salesManDiscounts.value) {
       charges_discount?.push(salesManDiscounts);
       item = {
@@ -363,6 +370,13 @@ export const Billing = async ({
               ((100 - salesManDiscounts.value) / 100) || 0,
       };
     }
+    if (descInputs) {
+      item = {
+        ...item,
+        item_desc_total: (item.item_desc_total * (100 - descInputs)) / 100,
+      };
+    }
+    console.log({ item_desc_total: item.item_desc_total });
     item = {
       ...item,
       item_desc_total:
@@ -394,7 +408,7 @@ export const Billing = async ({
             (rate_type === "bt" ? 1 + +(item.item_gst || 0) / 100 : 1)
           ).toFixed(2)
         : 0;
-    console.log({ item_title: item.item_title, item_total ,rate_type});
+  
 
     if (billDiscounts && add_discounts) {
       charges_discount.push(billDiscounts);
