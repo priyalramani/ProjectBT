@@ -5,13 +5,18 @@ import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
 import { Billing } from "../../Apis/functions";
-import { AddCircle as AddIcon, ArrowBack, ArrowBackIos } from "@mui/icons-material";
+import {
+  AddCircle as AddIcon,
+  ArrowBack,
+  ArrowBackIos,
+} from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import Select from "react-select";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
 import { useNavigate, useParams } from "react-router-dom";
+import { getFormateDate } from "../../utils/helperFunctions";
 
 export let getInititalValues = () => {
   let time = new Date();
@@ -35,10 +40,13 @@ let typeOptions = [
   { value: "RCPT", label: "Receipt" },
   { value: "JPNL", label: "Journal" },
   { value: "CNTR", label: "Contra" },
+  { value: "SALE_ORDER", label: "Sale Order" },
+  { value: "RECEIPT_ORDER", label: "Purchase Order" },
 ];
 
 export default function NewVoucher() {
   const { promptState, setPromptState, setNotification } = useContext(Context);
+  const [isEdit, setIsEdit] = useState(true);
   const [order, setOrder] = useState(getInititalValues());
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [ledgerData, setLedgerData] = useState([]);
@@ -85,13 +93,14 @@ export default function NewVoucher() {
     });
     if (response.data.success) {
       let data = response.data.result;
+      setIsEdit(false);
       setOrder({
         ...data,
         details: data.details.map((a) => ({
           ...a,
           uuid: a.ledger_uuid,
-          add: a.amount > 0 ? a.amount : 0,
-          sub: a.amount < 0 ? -a.amount : 0,
+          add: a.amount > 0 ? a.amount.toFixed(3) : 0,
+          sub: a.amount < 0 ? (-a.amount).toFixed(3) : 0,
         })),
       });
     }
@@ -130,13 +139,13 @@ export default function NewVoucher() {
   }, [order.ledger_uuid]);
   const totalSum = useMemo(() => {
     let total = order?.details.reduce((a, b) => a + +(b.add || 0), 0);
-    return total;
+    return total.toFixed(3);
   }, [order.details]);
   const totalSub = useMemo(() => {
     let total = order?.details.reduce((a, b) => a + +(b.sub || 0), 0);
-    return total;
+    return total.toFixed(3);
   }, [order.details]);
-  const onSubmit = async () => {
+  const onSubmit = async (isDelete) => {
     // check all add and sub sum is 0
     if (totalSum !== totalSub) {
       setNotification({
@@ -150,7 +159,9 @@ export default function NewVoucher() {
     const response = await axios({
       method: params.accounting_voucher_uuid ? "put" : "post",
       url: `/vouchers/${
-        params.accounting_voucher_uuid
+        isDelete
+          ? "deleteAccountVoucher"
+          : params.accounting_voucher_uuid
           ? "putAccountVoucher"
           : "postAccountVoucher"
       }`,
@@ -169,6 +180,14 @@ export default function NewVoucher() {
       },
     });
     if (response.data.success) {
+      if (isDelete) {
+        setNotification({
+          message: "Voucher Deleted",
+          success: true,
+        });
+        navigate(-1);
+        return;
+      }
       if (params.accounting_voucher_uuid) {
         setNotification({
           message: "Voucher Updated",
@@ -294,13 +313,21 @@ export default function NewVoucher() {
           <div className="accountGroup" id="voucherForm" action="">
             <div className="inventory_header">
               {params.accounting_voucher_uuid ? (
-                <div style={{ cursor: "pointer",padding:"5px",backgroundColor:"#000",borderRadius:"50%" }} onClick={() => navigate(-1)}>
-                  <ArrowBack style={{fontSize:"40px",color:"#fff"}}/>
+                <div
+                  style={{
+                    cursor: "pointer",
+                    padding: "5px",
+                    backgroundColor: "#000",
+                    borderRadius: "50%",
+                  }}
+                  onClick={() => navigate(-1)}
+                >
+                  <ArrowBack style={{ fontSize: "40px", color: "#fff" }} />
                 </div>
               ) : (
                 ""
               )}
-              <h2>Purchase Invoice </h2>
+              <h2>Voucher </h2>
             </div>
 
             <div className="topInputs">
@@ -312,13 +339,14 @@ export default function NewVoucher() {
                     onChange={(e) =>
                       setOrder((prev) => ({
                         ...prev,
-                        voucher_date: e.target.value,
+                        voucher_date: new Date(e.target.value).getTime(),
                       }))
                     }
-                    value={order.voucher_date}
+                    value={getFormateDate(new Date(+order.voucher_date))}
                     placeholder="Search Counter Title..."
                     className="searchInput"
                     pattern="\d{4}-\d{2}-\d{2}"
+                    disabled={!isEdit}
                   />
                 </div>
               </div>
@@ -326,7 +354,10 @@ export default function NewVoucher() {
                 <label htmlFor="Warehouse">Type</label>
                 <div className="inputGroup">
                   <Select
-                    options={typeOptions}
+                    options={typeOptions.filter(
+                      (a) =>
+                        a.value !== "SALE_ORDER" && a.value !== "RECEIPT_ORDER"
+                    )}
                     onChange={(doc) => {
                       setOrder((prev) => ({
                         ...prev,
@@ -343,6 +374,7 @@ export default function NewVoucher() {
                     menuPosition="fixed"
                     menuPlacement="auto"
                     placeholder="Select"
+                    isDisabled={!isEdit}
                   />
                 </div>
               </div>
@@ -381,11 +413,8 @@ export default function NewVoucher() {
                             id={"item_uuid" + item.uuid}
                             className="order-item-select"
                             options={LedgerOptions}
+                            isDisabled={!isEdit}
                             onChange={(e) => {
-                              // setTimeout(
-                              //   () => setQtyDetails((prev) => !prev),
-                              //   2000
-                              // );
                               setOrder((prev) => ({
                                 ...prev,
                                 details: prev.details.map((a) => {
@@ -463,9 +492,7 @@ export default function NewVoucher() {
                           }}
                           onFocus={(e) => e.target.select()}
                           onKeyDown={(e) => onPiecesKeyDown(e, item)}
-                          disabled={
-                            !(item.counter_uuid || item.ledger_uuid) || item.add
-                          }
+                          disabled={!isEdit || item.add}
                         />
                       </td>
                       <td
@@ -479,9 +506,7 @@ export default function NewVoucher() {
                           className="numberInput"
                           onWheel={(e) => e.preventDefault()}
                           index={listItemIndexCount++}
-                          disabled={
-                            !(item.counter_uuid || item.ledger_uuid) || item.sub
-                          }
+                          disabled={!isEdit || item.sub}
                           value={item.add || ""}
                           onChange={(e) => {
                             setOrder((prev) => {
@@ -508,13 +533,15 @@ export default function NewVoucher() {
                   <tr>
                     <td
                       onClick={() =>
-                        setOrder((prev) => ({
-                          ...prev,
-                          details: [
-                            ...prev.details,
-                            { uuid: uuid(), b: 0, p: 0 },
-                          ],
-                        }))
+                        isEdit
+                          ? setOrder((prev) => ({
+                              ...prev,
+                              details: [
+                                ...prev.details,
+                                { uuid: uuid(), b: 0, p: 0 },
+                              ],
+                            }))
+                          : ""
                       }
                     >
                       <AddIcon
@@ -558,11 +585,25 @@ export default function NewVoucher() {
               <button
                 type="button"
                 onClick={() => {
-                  onSubmit();
+                  if (isEdit) onSubmit();
+                  else setIsEdit(true);
                 }}
               >
-                Bill
+                {isEdit ? "Save" : "Edit"}
               </button>
+              {params.accounting_voucher_uuid ? (
+                <button
+                  type="button"
+                  style={{ backgroundColor: "red" }}
+                  onClick={() => {
+                    onSubmit(true);
+                  }}
+                >
+                  Delete
+                </button>
+              ) : (
+                ""
+              )}
               {order?.order_grandtotal ? (
                 <button
                   style={{
