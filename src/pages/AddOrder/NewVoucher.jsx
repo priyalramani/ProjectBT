@@ -388,8 +388,8 @@ export default function NewVoucher() {
                 <thead className="lh-copy" style={{ position: "static" }}>
                   <tr className="white">
                     <th className="pa2 tl bb b--black-20 w-30">Ledger</th>
-                    <th className="pa2 tc bb b--black-20">-</th>
-                    <th className="pa2 tc bb b--black-20">+</th>
+                    <th className="pa2 tc bb b--black-20">Debit</th>
+                    <th className="pa2 tc bb b--black-20">Credit</th>
                   </tr>
                 </thead>
 
