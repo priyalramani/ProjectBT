@@ -1,5 +1,6 @@
 import axios from "axios";
 import { deleteDB, openDB } from "idb";
+import { truncateDecimals } from "../utils/helperFunctions";
 
 export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
   let eligibleItems = items;
@@ -396,14 +397,14 @@ export const Billing = async ({
         ?.price || 0;
     let item_total =
       item.status !== 3
-        ? (
+        ? truncateDecimals(
             (+edit_price ||
               +item_special_price ||
               +item.item_desc_total ||
               +item?.price ||
               +item.item_price ||
               0) * (+item.qty || 0)
-          ).toFixed(2)
+          ,3)
         : 0;
 
     if (billDiscounts && add_discounts) {
@@ -411,7 +412,7 @@ export const Billing = async ({
       item_total = item_total * +((100 - +billDiscounts.value) / 100);
     }
 
-    if (item_total) item_total = (+item_total || 0).toFixed(2);
+    if (item_total) item_total = truncateDecimals(+item_total || 0,3);
     item = {
       ...item,
       charges_discount: item_special_price
@@ -478,13 +479,13 @@ export const PurchaseInvoiceBilling = async ({
     let item_total =
       item.status !== 3
         ? 
-            (item_price *
+            truncateDecimals(item_price *
             (+item.qty || 0) *
-            (rate_type === "bt" ? 1 + +(item.item_gst || 0) / 100 : 1)).toFixed(4)
+            (rate_type === "bt" ? 1 + +(item.item_gst || 0) / 100 : 1),3)
           
         : 0;
     console.log({ item_price, item_total, rate_type,qty:item.qty });
-    if (item_total) item_total = (+item_total || 0).toFixed(2);
+    if (item_total) item_total = truncateDecimals(+item_total || 0,3);
     item = {
       ...item,
       item_total,

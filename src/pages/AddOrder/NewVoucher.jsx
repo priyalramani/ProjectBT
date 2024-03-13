@@ -10,7 +10,7 @@ import Select from "react-select";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
 import { useNavigate, useParams } from "react-router-dom";
-import { getFormateDate } from "../../utils/helperFunctions";
+import { getFormateDate, truncateDecimals } from "../../utils/helperFunctions";
 
 export let getInititalValues = () => {
   let time = new Date();
@@ -90,8 +90,8 @@ export default function NewVoucher() {
         details: data.details.map((a) => ({
           ...a,
           uuid: a.ledger_uuid,
-          add: a.amount > 0 ? a.amount.toFixed(3) : 0,
-          sub: a.amount < 0 ? (-a.amount).toFixed(3) : 0,
+          add: a.amount > 0 ? truncateDecimals(a.amount,3) : 0,
+          sub: a.amount < 0 ? truncateDecimals(-a.amount,3) : 0,
         })),
       });
     }
@@ -109,11 +109,11 @@ export default function NewVoucher() {
 
   const totalSum = useMemo(() => {
     let total = order?.details.reduce((a, b) => a + +(b.add || 0), 0);
-    return total.toFixed(3);
+    return truncateDecimals(total,3);
   }, [order.details]);
   const totalSub = useMemo(() => {
     let total = order?.details.reduce((a, b) => a + +(b.sub || 0), 0);
-    return total.toFixed(3);
+    return truncateDecimals(total,3);
   }, [order.details]);
   const onSubmit = async (isDelete) => {
     // check all add and sub sum is 0

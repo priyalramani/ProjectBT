@@ -99,7 +99,7 @@ const Header = () => {
           )}
         </div>
         <div className="header_right">
-          <div className="header_right_link" onClick={() => Navigate("/admin")}>
+          <div className="header_right_link" onClick={() => Navigate("/trip")}>
             Dashboard
           </div>
           <div

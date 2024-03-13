@@ -2653,31 +2653,6 @@ export function OrderDetails({
       </div>
 
       {promptLocalState?.active && <Prompt {...promptLocalState} />}
-
-      {waiting ? (
-        <div className="overlay" style={{ zIndex: "99999999999999999" }}>
-          <div className="flex" style={{ width: "40px", height: "40px" }}>
-            <svg viewBox="0 0 100 100">
-              <path
-                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-                fill="#ffffff"
-                stroke="none"
-              >
-                <animateTransform
-                  attributeName="transform"
-                  type="rotate"
-                  dur="1s"
-                  repeatCount="indefinite"
-                  keyTimes="0;1"
-                  values="0 50 51;360 50 51"
-                ></animateTransform>
-              </path>
-            </svg>
-          </div>
-        </div>
-      ) : (
-        ""
-      )}
       {holdPopup ? (
         <FreeItems
           onSave={() => setHoldPopup(false)}

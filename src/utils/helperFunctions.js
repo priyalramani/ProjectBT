@@ -57,3 +57,15 @@ export function getFormateDate(time) {
     .replace("dd", ("00" + time?.getDate()?.toString()).slice(-2));
   return curTime;
 }
+export function truncateDecimals(number, digits) {
+  const stringNumber = number.toString();
+  const decimalIndex = stringNumber.indexOf('.');
+  
+  if (decimalIndex === -1) {
+      // If there's no decimal point, return the original number
+      return number;
+  }
+  
+  const truncatedString = stringNumber.slice(0, decimalIndex + 1 + digits);
+  return parseFloat(truncatedString).toFixed(2);
+}
