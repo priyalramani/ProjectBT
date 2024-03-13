@@ -496,6 +496,7 @@ export function OrderDetails({
       return;
     }
     setWaiting(true);
+    setTimeout(() => setWaiting(false), 60000);
     const response = await axios({
       method: "post",
       url: "/orders/sendPdf",
@@ -726,7 +727,11 @@ export function OrderDetails({
   };
 
   const updateOrder = async (param = {}) => {
+    if (waiting) {
+      return;
+    }
     setWaiting(true);
+    setTimeout(() => setWaiting(false), 60000);
     try {
       const { data = messagePopup, sendPaymentReminder } = param;
       const orderUpdateData = data;
@@ -774,7 +779,11 @@ export function OrderDetails({
   };
 
   const splitOrder = async (type = { stage: 0 }) => {
+    if (waiting) {
+      return;
+    }
     setWaiting(true);
+    setTimeout(() => setWaiting(false), 60000);
     let counter = counters.find(
       (a) => orderData?.counter_uuid === a.counter_uuid
     );
@@ -2593,6 +2602,25 @@ export function OrderDetails({
             )}
 
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              {waiting?<div style={{ width: "40px" }}>
+                <svg viewBox="0 0 100 100">
+                  <path
+                    d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                    fill="#000"
+                    stroke="none"
+                  >
+                    <animateTransform
+                      attributeName="transform"
+                      type="rotate"
+                      dur="1s"
+                      repeatCount="indefinite"
+                      keyTimes="0;1"
+                      values="0 50 51;360 50 51"
+                    ></animateTransform>
+                  </path>
+                </svg>
+              </div>:""}
+
               <button
                 type="button"
                 onClick={() => {
@@ -3863,11 +3891,7 @@ function DiliveryPopup({
       return;
     }
     setWaiting(true);
-    // if (outstanding.amount && !outstanding.remarks) {
-    // 	setError("Remarks is mandatory")
-    // 	setWaiting(false)
-    // 	return
-    // }
+    setTimeout(() => setWaiting(false), 60000);
     if (
       modes.find(
         (a) =>
@@ -4256,30 +4280,7 @@ function DiliveryPopup({
           </div>
         </div>
       </div>
-      {waiting ? (
-        <div className="overlay" style={{ zIndex: "999999999999999999" }}>
-          <div className="flex" style={{ width: "40px", height: "40px" }}>
-            <svg viewBox="0 0 100 100">
-              <path
-                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-                fill="#ffffff"
-                stroke="none"
-              >
-                <animateTransform
-                  attributeName="transform"
-                  type="rotate"
-                  dur="1s"
-                  repeatCount="indefinite"
-                  keyTimes="0;1"
-                  values="0 50 51;360 50 51"
-                ></animateTransform>
-              </path>
-            </svg>
-          </div>
-        </div>
-      ) : (
-        ""
-      )}
+
       {popup ? (
         <DiliveryReplaceMent
           onSave={() => {

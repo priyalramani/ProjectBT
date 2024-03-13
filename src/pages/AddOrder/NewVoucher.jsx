@@ -4,15 +4,9 @@ import { useEffect, useRef, useState, useContext, useMemo } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
-import { Billing } from "../../Apis/functions";
-import {
-  AddCircle as AddIcon,
-  ArrowBack,
-  ArrowBackIos,
-} from "@mui/icons-material";
+import { AddCircle as AddIcon, ArrowBack } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import Select from "react-select";
-import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
 import { useNavigate, useParams } from "react-router-dom";
@@ -45,18 +39,15 @@ let typeOptions = [
 ];
 
 export default function NewVoucher() {
-  const { promptState, setPromptState, setNotification } = useContext(Context);
+  const { promptState, setNotification } = useContext(Context);
   const [isEdit, setIsEdit] = useState(true);
+  const [confirm, setConfirm] = useState(false);
   const [order, setOrder] = useState(getInititalValues());
-  const [deliveryPopup, setDeliveryPopup] = useState(false);
+
   const [ledgerData, setLedgerData] = useState([]);
   const [counters, setCounters] = useState([]);
-  const [itemsData, setItemsData] = useState([]);
-  const [popup, setPopup] = useState(false);
   const reactInputsRef = useRef({});
   const [focusedInputId, setFocusedInputId] = useState(0);
-  const [autoAdd, setAutoAdd] = useState(false);
-  const [remarks, setRemarks] = useState("");
   const params = useParams();
   const navigate = useNavigate();
 
@@ -116,27 +107,6 @@ export default function NewVoucher() {
       getVoucher(params.accounting_voucher_uuid);
   }, [params.accounting_voucher_uuid]);
 
-  useEffect(() => {
-    if (order?.ledger_uuid) {
-      const counterData = ledgerData.find(
-        (a) => a.ledger_uuid === order.ledger_uuid
-      );
-      setItemsData((prev) =>
-        prev.map((item) => {
-          let item_rate = counterData?.company_discount?.find(
-            (a) => a.company_uuid === item.company_uuid
-          )?.item_rate;
-          console.log({ item_rate, item_title: item.item_title });
-          let item_price = item.item_price;
-          if (item_rate === "a") item_price = item.item_price_a;
-          if (item_rate === "b") item_price = item.item_price_b;
-          if (item_rate === "c") item_price = item.item_price_c;
-
-          return { ...item, item_price };
-        })
-      );
-    }
-  }, [order.ledger_uuid]);
   const totalSum = useMemo(() => {
     let total = order?.details.reduce((a, b) => a + +(b.add || 0), 0);
     return total.toFixed(3);
@@ -147,7 +117,7 @@ export default function NewVoucher() {
   }, [order.details]);
   const onSubmit = async (isDelete) => {
     // check all add and sub sum is 0
-    if (totalSum !== totalSub) {
+    if (totalSum !== totalSub && !isDelete) {
       setNotification({
         message: "Total Debit and Credit Not Equal",
         success: false,
@@ -157,7 +127,7 @@ export default function NewVoucher() {
     }
 
     const response = await axios({
-      method: params.accounting_voucher_uuid ? "put" : "post",
+      method:isDelete?"delete": params.accounting_voucher_uuid ? "put" : "post",
       url: `/vouchers/${
         isDelete
           ? "deleteAccountVoucher"
@@ -180,6 +150,7 @@ export default function NewVoucher() {
       },
     });
     if (response.data.success) {
+      setTimeout(() => setNotification(null), 2000);
       if (isDelete) {
         setNotification({
           message: "Voucher Deleted",
@@ -327,7 +298,10 @@ export default function NewVoucher() {
               ) : (
                 ""
               )}
-              <h2>Voucher </h2>
+              <h2>
+                Voucher -
+                {order.accounting_voucher_number || order.invoice_number || ""}{" "}
+              </h2>
             </div>
 
             <div className="topInputs">
@@ -596,7 +570,7 @@ export default function NewVoucher() {
                   type="button"
                   style={{ backgroundColor: "red" }}
                   onClick={() => {
-                    onSubmit(true);
+                    setConfirm(true);
                   }}
                 >
                   Delete
@@ -613,11 +587,6 @@ export default function NewVoucher() {
                     cursor: "default",
                   }}
                   type="button"
-                  onClick={() => {
-                    // if (!order.details.filter((a) => a.item_uuid).length)
-                    //   return;
-                    // setPopup(true);
-                  }}
                 >
                   Total: {order?.order_grandtotal || 0}
                 </button>
@@ -629,484 +598,64 @@ export default function NewVoucher() {
         </div>
       </div>
       {promptState ? <Prompt {...promptState} /> : ""}
-
-      {popup ? (
-        <NewUserForm
-          onClose={() => setPopup(false)}
-          onSubmit={(e) => {
-            //console.log(e);
-            setAutoAdd(e.autoAdd);
-            if (e.stage === 4) setDeliveryPopup(true);
-            else {
-              onSubmit(e);
-            }
-          }}
-        />
-      ) : (
-        ""
-      )}
-      {deliveryPopup ? (
-        <DiliveryPopup
-          onSave={() => setDeliveryPopup(false)}
-          postOrderData={(obj) => onSubmit({ stage: 5, autoAdd, obj })}
-          setSelectedOrder={setOrder}
-          order={order}
-          ledgerData={ledgerData}
-          items={itemsData}
-        />
-      ) : (
-        ""
-      )}
-      {remarks ? (
+      {confirm ? (
         <div className="overlay">
           <div
-            className="modal"
-            style={{
-              height: "fit-content",
-              width: "max-content",
-              padding: "50px",
-              backgroundColor: "red",
-            }}
+            className="overlay"
+            style={{ position: "fixed", top: 0, left: 0, zIndex: 9999999999 }}
           >
-            <h3>{remarks}</h3>
-
-            <button onClick={() => setRemarks(false)} className="closeButton">
-              x
-            </button>
-          </div>
-        </div>
-      ) : (
-        ""
-      )}
-    </>
-  );
-}
-
-function NewUserForm({ onSubmit, onClose }) {
-  const [data, setData] = useState({ autoAdd: false, stage: 1 });
-  return (
-    <div className="overlay">
-      <div
-        className="modal"
-        style={{ height: "fit-content", width: "fit-content" }}
-      >
-        <div
-          className="content"
-          style={{
-            height: "fit-content",
-            padding: "20px",
-            width: "fit-content",
-          }}
-        >
-          <div style={{ overflowY: "scroll" }}>
-            <form
-              className="form"
-              onSubmit={(e) => {
-                e.preventDefault();
-                onSubmit(data);
-                onClose();
-              }}
-            >
-              <div className="formGroup">
-                <div className="row">
-                  <h3> Auto Add</h3>
-                  <div onClick={() => setData({ ...data, autoAdd: true })}>
-                    <input type="radio" checked={data.autoAdd} />
-                    Yes
-                  </div>
-                  <div onClick={() => setData({ ...data, autoAdd: false })}>
-                    <input type="radio" checked={!data.autoAdd} />
-                    No
-                  </div>
-                </div>
-                <div className="row">
-                  <h3>Stage</h3>
-                  <div onClick={() => setData({ ...data, stage: 1 })}>
-                    <input type="radio" checked={data.stage === 1} />
-                    Processing
-                  </div>
-                  <div onClick={() => setData({ ...data, stage: 2 })}>
-                    <input type="radio" checked={data.stage === 2} />
-                    Checking
-                  </div>
-                  <div onClick={() => setData({ ...data, stage: 3 })}>
-                    <input type="radio" checked={data.stage === 3} />
-                    Delivery
-                  </div>
-                  <div onClick={() => setData({ ...data, stage: 4 })}>
-                    <input type="radio" checked={data.stage === 4} />
-                    Complete
-                  </div>
-                </div>
-
-                <div className="row">
-                  <button type="submit" className="submit">
-                    Save
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-          <button onClick={onClose} className="closeButton">
-            x
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-function DiliveryPopup({
-  onSave,
-  postOrderData,
-  credit_allowed,
-  counters,
-  items,
-  order,
-  updateBilling,
-}) {
-  const [PaymentModes, setPaymentModes] = useState([]);
-  const [modes, setModes] = useState([]);
-  const [error, setError] = useState("");
-  const [popup, setPopup] = useState(false);
-  // const [coinPopup, setCoinPopup] = useState(false);
-  const [data, setData] = useState({});
-  const [outstanding, setOutstanding] = useState({});
-  useEffect(() => {
-    updateBilling({
-      replacement: data?.replacement || 0,
-      shortage: data?.shortage || 0,
-      adjustment: data?.adjustment || 0,
-      adjustment_remarks: data?.adjustment_remarks || "",
-    });
-  }, [data]);
-  const GetPaymentModes = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/paymentModes/GetPaymentModesList",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setPaymentModes(response.data.result);
-  };
-  useEffect(() => {
-    let time = new Date();
-    setOutstanding({
-      order_uuid: order.order_uuid,
-      amount: "",
-      user_uuid: localStorage.getItem("user_uuid"),
-      time: time.getTime(),
-      invoice_number: order.invoice_number,
-      trip_uuid: order.trip_uuid,
-      ledger_uuid: order.ledger_uuid,
-    });
-    GetPaymentModes();
-  }, []);
-  useEffect(() => {
-    if (PaymentModes.length)
-      setModes(
-        PaymentModes.map((a) => ({
-          ...a,
-          amt: "",
-          coin: "",
-          status:
-            a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002" ||
-            a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002"
-              ? "0"
-              : 1,
-        }))
-      );
-  }, [PaymentModes]);
-  const submitHandler = async () => {
-    setError("");
-    let billingData = await Billing({
-      creating_new: 1,
-      order_uuid: order?.order_uuid,
-      invoice_number: `${order?.order_type}${order?.invoice_number}`,
-      replacement: order.replacement,
-      shortage: order.shortage,
-      adjustment: order.adjustment,
-      counter: counters.find((a) => a.ledger_uuid === order.ledger_uuid),
-      items: order.details.map((a) => {
-        let itemData = items.find((b) => a.item_uuid === b.item_uuid);
-        return {
-          ...itemData,
-          ...a,
-          price: itemData?.price || 0,
-        };
-      }),
-    });
-    let Tempdata = {
-      ...order,
-      ...billingData,
-      details: billingData.items,
-      replacement: data?.replacement || 0,
-      shortage: data?.shortage || 0,
-      adjustment: data?.adjustment || 0,
-      adjustment_remarks: data?.adjustment_remarks || "",
-    };
-    let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
-    //console.log(
-    // Tempdata?.order_grandtotal,
-    //   +(+modeTotal + (+outstanding?.amount || 0))
-    // );
-    if (
-      +Tempdata?.order_grandtotal !==
-      +(+modeTotal + (+outstanding?.amount || 0))
-    ) {
-      setError("Invoice Amount and Payment mismatch");
-      return;
-    }
-    // let obj = modes.find((a) => a.mode_title === "Cash");
-    // if (obj?.amt && obj?.coin === "") {
-    //   setCoinPopup(true);
-    //   return;
-    // }
-
-    let obj = {
-      user_uuid: localStorage.getItem("user_uuid"),
-      modes: modes.map((a) =>
-        a.mode_title === "Cash" ? { ...a, coin: 0 } : a
-      ),
-    };
-
-    postOrderData({ ...obj, OutStanding: outstanding.amount });
-    onSave();
-  };
-  return (
-    <>
-      <div className="overlay">
-        <div
-          className="modal"
-          style={{ height: "fit-content", width: "max-content" }}
-        >
-          <div className="flex" style={{ justifyContent: "space-between" }}>
-            <h3>Payments</h3>
-            <h3>Rs. {order.order_grandtotal}</h3>
-          </div>
-          <div
-            className="content"
-            style={{
-              height: "fit-content",
-              padding: "10px",
-              width: "fit-content",
-            }}
-          >
-            <div style={{ overflowY: "scroll" }}>
-              <form className="form">
-                <div className="formGroup">
-                  {PaymentModes.map((item) => (
-                    <div
-                      className="row"
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                      key={item.mode_uuid}
-                    >
-                      <div style={{ width: "50px" }}>{item.mode_title}</div>
-                      <label
-                        className="selectLabel flex"
-                        style={{ width: "80px" }}
-                      >
-                        <input
-                          type="number"
-                          name="route_title"
-                          className="numberInput"
-                          value={
-                            modes.find((a) => a.mode_uuid === item.mode_uuid)
-                              ?.amt
-                          }
-                          style={{ width: "80px" }}
-                          onChange={(e) =>
-                            setModes((prev) =>
-                              prev.map((a) =>
-                                a.mode_uuid === item.mode_uuid
-                                  ? {
-                                      ...a,
-                                      amt: e.target.value,
-                                    }
-                                  : a
-                              )
-                            )
-                          }
-                          maxLength={42}
-                          onWheel={(e) => e.preventDefault()}
-                        />
-                        {/* {popupInfo.conversion || 0} */}
-                      </label>
-                    </div>
-                  ))}
-                  <div
-                    className="row"
-                    style={{ flexDirection: "row", alignItems: "center" }}
-                  >
-                    <div style={{ width: "50px" }}>UnPaid</div>
-                    <label
-                      className="selectLabel flex"
-                      style={{ width: "80px" }}
-                    >
-                      <input
-                        type="number"
-                        name="route_title"
-                        className="numberInput"
-                        value={outstanding?.amount}
-                        placeholder={
-                          !credit_allowed === "Y" ? "Not Allowed" : ""
-                        }
-                        style={
-                          !credit_allowed === "Y"
-                            ? {
-                                width: "90px",
-                                backgroundColor: "light",
-                                fontSize: "12px",
-                                color: "#fff",
-                              }
-                            : { width: "80px" }
-                        }
-                        onChange={(e) =>
-                          setOutstanding((prev) => ({
-                            ...prev,
-                            amount: e.target.value,
-                          }))
-                        }
-                        maxLength={42}
-                        onWheel={(e) => e.preventDefault()}
-                      />
-                      {/* {popupInfo.conversion || 0} */}
-                    </label>
-                  </div>
-                  <div
-                    className="row"
-                    style={{ flexDirection: "row", alignItems: "center" }}
-                  >
-                    <button
-                      type="button"
-                      className="submit"
-                      style={{ color: "#fff", backgroundColor: "#7990dd" }}
-                      onClick={() => setPopup(true)}
-                    >
-                      Deductions
-                    </button>
-                  </div>
-                  <i style={{ color: "red" }}>{error}</i>
-                </div>
-
-                <div
-                  className="flex"
-                  style={{ justifyContent: "space-between" }}
-                >
-                  <button
-                    type="button"
-                    style={{ backgroundColor: "red" }}
-                    className="submit"
-                    onClick={onSave}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="submit"
-                    onClick={submitHandler}
-                  >
-                    Save
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-      {popup ? (
-        <DiliveryReplaceMent
-          onSave={() => {
-            setPopup(false);
-          }}
-          setData={setData}
-          data={data}
-        />
-      ) : (
-        ""
-      )}
-      {/* {coinPopup ? (
-        <div className="overlay">
-          <div
-            className="modal"
-            style={{ height: "fit-content", width: "max-content" }}
-          >
-            <h3>Cash Coin</h3>
             <div
-              className="content"
-              style={{
-                height: "fit-content",
-                padding: "10px",
-                width: "fit-content",
-              }}
+              className="modal"
+              style={{ height: "fit-content", width: "fit-content" }}
             >
-              <div style={{ overflowY: "scroll" }}>
-                <form className="form">
-                  <div className="formGroup">
-                    <div
-                      className="row"
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      <div style={{ width: "50px" }}>Cash</div>
-
-                      <label
-                        className="selectLabel flex"
-                        style={{ width: "80px" }}
-                      >
-                        <input
-                          type="number"
-                          name="route_title"
-                          className="numberInput"
-                          placeholder="Coins"
-                          value={
-                            modes.find(
-                              (a) =>
-                                a.mode_uuid ===
-                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-                            )?.coin
-                          }
-                          style={{ width: "70px" }}
-                          onChange={(e) =>
-                            setModes((prev) =>
-                              prev.map((a) =>
-                                a.mode_uuid ===
-                                "c67b54ba-d2b6-11ec-9d64-0242ac120002"
-                                  ? {
-                                      ...a,
-                                      coin: e.target.value,
-                                    }
-                                  : a
-                              )
-                            )
-                          }
-                          maxLength={42}
-                          onWheel={(e) => e.preventDefault()}
-                        />
-                      </label>
-                    </div>
-                  </div>
-
-                  <div
-                    className="flex"
-                    style={{ justifyContent: "space-between" }}
+              <div
+                className="content"
+                style={{
+                  height: "fit-content",
+                  padding: "20px",
+                  width: "fit-content",
+                }}
+              >
+                <div style={{ overflowY: "scroll" }}>
+                  <form
+                    className="form"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      onSubmit(true);
+                    }}
                   >
-                    <button
-                      type="button"
-                      className="submit"
-                      onClick={() => submitHandler()}
-                    >
-                      Save
-                    </button>
-                  </div>
-                </form>
+                    <div className="formGroup">
+                      <div
+                        className="row"
+                        style={{ flexDirection: "column", alignItems: "start" }}
+                      >
+                        <h1 style={{ textAlign: "center" }}>Are you sure</h1>
+                      </div>
+
+                      <div className="row message-popup-actions">
+                        <button
+                          className="simple_Logout_button"
+                          type="button"
+                          style={{ backgroundColor: "red" }}
+                          onClick={() => setConfirm(false)}
+                        >
+                          Cancel
+                        </button>
+
+                        <button className="simple_Logout_button" type="submit">
+                          Confirm
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
         </div>
       ) : (
         ""
-      )} */}
+      )}
     </>
   );
 }

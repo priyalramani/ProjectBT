@@ -59,17 +59,21 @@ const CounterLegerReport = () => {
       },
     });
     console.log("activity", response);
-    if (response.data.success) setItems(response.data.result);
+    if (response.data.success) {
+      setItems(response.data.result);
+      sessionStorage.setItem("itemData", JSON.stringify(response.data.result));
+    }
   };
 
   useEffect(() => {
     let controller = new AbortController();
     let time = new Date();
     let prevData = JSON.parse(sessionStorage.getItem("ledgerData"));
-    console.log({prevData});
-    if (prevData) {
+    let itemData = JSON.parse(sessionStorage.getItem("itemData"));
+    console.log({ prevData });
+    if (prevData && itemData) {
       setSearchData(prevData);
-      getCompleteOrders(prevData);
+      setItems(itemData);
     } else {
       let curTime = "yy-mm-dd"
         .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))

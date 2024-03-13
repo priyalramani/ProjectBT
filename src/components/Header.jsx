@@ -61,13 +61,14 @@ const Header = () => {
           <h2>Bharat Traders</h2>
           <h4>{localStorage.getItem("user_title") || ""}</h4>
         </div>
-        <div style={{ marginRight: "50px" }}>
-          <GreenSwitch
-            onClick={(e) => setView(e.target.checked ? 1 : 0)}
-            checked={view}
-          />
-        </div>
-        <div className="header_toggle_btn">
+
+        <div className="header_toggle_btn" style={{position:"relative"}}>
+          <div style={{ right: "110px", position: "absolute" }}>
+            <GreenSwitch
+              onClick={(e) => setView(e.target.checked ? 1 : 0)}
+              checked={view}
+            />
+          </div>
           <ToggleOff
             className="icon_btn"
             onClick={() => {
