@@ -1052,7 +1052,7 @@ function NewUserForm({
             {
               uuid: uuid(),
 
-              date: getFormateDate(new Date()),
+              date: new Date().getTime(),
               amount: "",
             },
           ],
@@ -1100,6 +1100,11 @@ function NewUserForm({
     if (!json.route_uuid) {
       json = { ...json, route_uuid: "0" };
     }
+    json= {
+      ...json,
+      opening_balance: json.opening_balance.filter((a) => a.amount),
+    };
+    
     if (popupInfo?.type === "edit") {
       const response = await axios({
         method: "put",

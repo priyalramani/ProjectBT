@@ -360,19 +360,19 @@ export default function AddOrder() {
 
     console.log("orderJSon", data);
 
-    // const response = await axios({
-    //   method: "post",
-    //   url: "/orders/postOrder",
-    //   data,
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    // });
-    // console.log(response);
-    // if (response.data.success) {
-    //   // window.location.reload();
-    //   setOrder(getInititalValues());
-    // }
+    const response = await axios({
+      method: "post",
+      url: "/orders/postOrder",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    if (response.data.success) {
+      // window.location.reload();
+      setOrder(getInititalValues());
+    }
   };
 
   const callBilling = async (type = {}) => {
