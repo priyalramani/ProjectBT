@@ -496,7 +496,14 @@ export function OrderDetails({
       return;
     }
     setWaiting(true);
-    setTimeout(() => setWaiting(false), 60000);
+    let timeout = setTimeout(() => {
+      setNotification({
+        message: "Error Processing Request",
+        success: false,
+      });
+
+      setWaiting(false);
+    }, 45000);
     const response = await axios({
       method: "post",
       url: "/orders/sendPdf",
@@ -514,6 +521,7 @@ export function OrderDetails({
       },
     });
     if (response.data) {
+      clearTimeout(timeout);
       setNotification(response.data);
       setTimeout(() => setNotification(null), 5000);
       setCaptionPopup(null);
@@ -578,7 +586,7 @@ export function OrderDetails({
       .filter((a) => a.item_uuid && !a.free && a.state !== 3)
       .map((a) => ({
         ...a,
-        is_empty: !a.price,
+        is_empty: !+a.price,
       }))
       .find((a) => a.is_empty);
     if (empty_price) {
@@ -727,11 +735,19 @@ export function OrderDetails({
   };
 
   const updateOrder = async (param = {}) => {
+    let controller = new AbortController();
     if (waiting) {
       return;
     }
     setWaiting(true);
-    setTimeout(() => setWaiting(false), 60000);
+    setTimeout(() => {
+      setNotification({
+        message: "Error Processing Request",
+        success: false,
+      });
+      controller.abort();
+      setWaiting(false);
+    }, 45000);
     try {
       const { data = messagePopup, sendPaymentReminder } = param;
       const orderUpdateData = data;
@@ -750,6 +766,7 @@ export function OrderDetails({
       const response = await axios({
         method: "put",
         url: "/orders/putOrders",
+        signal: controller.signal,
         data: [
           {
             ...data,
@@ -779,11 +796,19 @@ export function OrderDetails({
   };
 
   const splitOrder = async (type = { stage: 0 }) => {
+    let controller = new AbortController();
     if (waiting) {
       return;
     }
     setWaiting(true);
-    setTimeout(() => setWaiting(false), 60000);
+    setTimeout(() => {
+      setNotification({
+        message: "Error Processing Request",
+        success: false,
+      });
+      controller.abort();
+      setWaiting(false);
+    }, 45000);
     let counter = counters.find(
       (a) => orderData?.counter_uuid === a.counter_uuid
     );
@@ -934,6 +959,7 @@ export function OrderDetails({
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
+      signal: controller.signal,
       data: [data],
       headers: {
         "Content-Type": "application/json",
@@ -945,6 +971,7 @@ export function OrderDetails({
     const response2 = await axios({
       method: "post",
       url: "/orders/postOrder",
+      signal: controller.signal,
       data: data2,
       headers: {
         "Content-Type": "application/json",
@@ -2602,24 +2629,28 @@ export function OrderDetails({
             )}
 
             <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-              {waiting?<div style={{ width: "40px" }}>
-                <svg viewBox="0 0 100 100">
-                  <path
-                    d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-                    fill="#000"
-                    stroke="none"
-                  >
-                    <animateTransform
-                      attributeName="transform"
-                      type="rotate"
-                      dur="1s"
-                      repeatCount="indefinite"
-                      keyTimes="0;1"
-                      values="0 50 51;360 50 51"
-                    ></animateTransform>
-                  </path>
-                </svg>
-              </div>:""}
+              {waiting ? (
+                <div style={{ width: "40px" }}>
+                  <svg viewBox="0 0 100 100">
+                    <path
+                      d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                      fill="#000"
+                      stroke="none"
+                    >
+                      <animateTransform
+                        attributeName="transform"
+                        type="rotate"
+                        dur="1s"
+                        repeatCount="indefinite"
+                        keyTimes="0;1"
+                        values="0 50 51;360 50 51"
+                      ></animateTransform>
+                    </path>
+                  </svg>
+                </div>
+              ) : (
+                ""
+              )}
 
               <button
                 type="button"

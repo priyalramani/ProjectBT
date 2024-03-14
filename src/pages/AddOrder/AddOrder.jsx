@@ -1262,12 +1262,12 @@ export default function AddOrder() {
                     .filter((a) => a.item_uuid && !a.free && a.state !== 3)
                     .map((a) => ({
                       ...a,
-                      is_empty: !a.p_price,
+                      is_empty: !+a.p_price,
                     }))
                     .find((a) => a.is_empty);
                   if (empty_price) {
                     setNotification({
-                      message: `item ${empty_item.item_title} has 0 price.`,
+                      message: `item ${empty_price?.item_title} has 0 price.`,
                       success: false,
                     });
                     setTimeout(() => setNotification(null), 2000);

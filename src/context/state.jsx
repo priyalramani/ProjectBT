@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import Context from "./context"
 import axios from "axios"
 
@@ -38,6 +38,12 @@ const State = props => {
 			?.item_special_price?.find(i => i.item_uuid === item.item_uuid)
 		return data
 	}
+	useEffect(() => {
+		if(notification){
+			setTimeout(() => setNotification(null), 3000)
+		}
+	}
+	, [notification])
 
 	const saveSpecialPrice = async (item, counter_uuid, setCounters, price) => {
 		try {

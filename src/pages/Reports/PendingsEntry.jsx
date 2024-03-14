@@ -110,7 +110,7 @@ const PendingsEntry = () => {
           Pcs: item.p || 0,
           Free: item.free || 0,
           "Item Price":
-            +(item.price || itemData?.item_price || 0) *
+            +(item.edit_price||item.price || itemData?.item_price || 0) *
             +(itemData?.conversion || 1),
           "Cash Credit":
             order.modes.filter(

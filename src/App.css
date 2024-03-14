@@ -708,3 +708,36 @@ label {
 	text-decoration: underline;
 	color: blue;
 }
+
+.loading-bar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 5px; /* Height of the loading bar */
+	background-color: #fff; /* Background color */
+	z-index: 9999999999999999999999;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+  }
+  
+  .loading-bar.show {
+	opacity: 1;
+  }
+  
+  .progress {
+	height: 100%;
+	width: 0%;
+	background-color: #44cd4a; /* Progress bar color */
+	animation: progressAnimation 2s linear infinite; /* Animation */
+  }
+  
+  @keyframes progressAnimation {
+	0% {
+	  width: 0%;
+	}
+	100% {
+	  width: 100%;
+	}
+  }
+  

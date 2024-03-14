@@ -61,7 +61,7 @@ import CashRegister from "./pages/QuikAccess/CashRegister";
 import Companies from "./pages/Master/Companies";
 import PerformanceSummary from "./pages/Reports/PerformanceSummary";
 import CounterCharges from "./pages/Reports/CounterCharges";
-import Loader from "./components/Loader";
+import "react-loading-bar/dist/index.css";
 import CounterReport from "./pages/Reports/CounterReport";
 import DeductionsReport from "./pages/Reports/DeductionsReport";
 import AdvanceOrdering from "./users/AdvanceOrdering";
@@ -82,7 +82,9 @@ import CounterLegerReport from "./pages/Reports/CounterLedgerReport";
 import StockValuationReport from "./pages/Reports/StockValuationReport";
 import BankStatementImport from "./pages/others/BankStatementImport";
 import BankReconciliation from "./pages/QuikAccess/BankReconciliation";
-export let Version = 273;
+import OpeningBalanceReport from "./pages/Reports/OpeningBalanceReport";
+
+export let Version = 274;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
@@ -378,7 +380,10 @@ function App() {
               element={<PurchaseInvoice />}
             />
             <Route path="/admin/addVoucher" element={<AddVoucher />} />
-            <Route path="/admin/editVoucher/:accounting_voucher_uuid" element={<AddVoucher />} />
+            <Route
+              path="/admin/editVoucher/:accounting_voucher_uuid"
+              element={<AddVoucher />}
+            />
 
             <Route path="/admin/AddOutStanding" element={<AddOutStanding />} />
             <Route path="/admin/addStock" element={<AddStock />} />
@@ -445,7 +450,14 @@ function App() {
             />
             <Route path="/admin/signedBills" element={<SignedBills />} />
             <Route path="/admin/tasks" element={<TasksPage />} />
-            <Route path="/admin/BankReconciliation" element={<BankReconciliation />} />
+            <Route
+              path="/admin/BankReconciliation"
+              element={<BankReconciliation />}
+            />
+             <Route
+              path="/admin/OpeningBalanceReport"
+              element={<OpeningBalanceReport />}
+            />
             <Route path="*" element={<Navigate replace to={"/trip"} />} />
           </>
         ) : (
@@ -460,7 +472,7 @@ function App() {
       </Routes>
       {calculationPopup ? (
         <CalculateLines />
-      ) : loading ? (
+      ) : loading || pageLoading ? (
         <div
           style={{
             width: "30px",
@@ -468,7 +480,7 @@ function App() {
             position: "fixed",
             bottom: "30px",
             left: "38px",
-            zIndex: "999999999",
+            zIndex: "999999999999999999",
           }}
         >
           <svg viewBox="0 0 100 100">
@@ -505,10 +517,10 @@ function App() {
       {isItemAvilableOpen && <ItemAvilibility />}
       {cashRegisterPopup && <CashRegister />}
       {bankStatementImport && <BankStatementImport />}
-      <Loader visible={pageLoading} />
-      {/* {window.location.pathname.split('/').at(-2) === 'processing' && <div id="console">
-        <h3>CONSOLE <button onClick={e => window.location.reload()}>Reload</button></h3>
-      </div>} */}
+
+      <div className={`loading-bar ${loading || pageLoading ? "show" : ""}`}>
+        <div className="progress"></div>
+      </div>
     </div>
   );
 }

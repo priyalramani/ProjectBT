@@ -4,12 +4,21 @@ import { Billing } from "../Apis/functions";
 import DiliveryReplaceMent from "./DiliveryReplaceMent";
 import Select from "react-select";
 
-const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
+const ChangeStage = ({
+  onClose,
+  orders,
+  stage,
+  counters,
+  items,
+  users,
+  isLoading,
+  setIsLoading,
+  setNotification,
+}) => {
   const [data, setData] = useState({ stage: stage === 3 ? 3.5 : stage + 1 });
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
-  const [waiting, setWaiting] = useState(false);
   const [cancelPopup, setCancelPopup] = useState();
   const [diliveredUser, setDiliveredUser] = useState("");
   useEffect(() => {
@@ -44,7 +53,17 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
   }, [orders]);
 
   const onSubmit = async (params = {}) => {
-    setWaiting(true);
+    if (isLoading) return;
+    let controller = new AbortController();
+    setIsLoading(true);
+    let timeout = setTimeout(() => {
+      setNotification({
+        message: "Error Processing Request",
+        success: false,
+      });
+      controller.abort();
+      setIsLoading(false);
+    }, 45000);
     try {
       let { selectedData = orders, reasons = {} } = params;
       let user_uuid = localStorage.getItem("user_uuid");
@@ -102,10 +121,8 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
               ]
           : stage === 3
           ? +data.stage === 3.5
-            ? [
-                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-              ]
-          : +data.stage === 4
+            ? [{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser }]
+            : +data.stage === 4
             ? [
                 // { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
                 { stage: 4, time: time.getTime(), user_uuid },
@@ -191,6 +208,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
 
         const response = await axios({
           method: "put",
+          signal: controller.signal,
           url: "/orders/putOrders",
           data: orderData,
           headers: {
@@ -198,16 +216,18 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
           },
         });
         if (response.data.success) {
+          clearTimeout(timeout);
           onClose();
         }
 
-        setWaiting(false);
+        setIsLoading(false);
         return;
       }
       const response = await axios({
         method: "put",
         url: "/orders/putOrders",
         data: selectedData,
+        signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
         },
@@ -218,7 +238,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
     } catch (error) {
       console.log(error);
     }
-    setWaiting(false);
+    setIsLoading(false);
   };
   const handleWarehouseChacking = async () => {
     let data = [];
@@ -249,17 +269,29 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
     }
   };
   const updateWarehouse = async (warehouse_uuid, orderData) => {
-    setWaiting(true);
+    if (isLoading) return;
+    setIsLoading(true);
+    let controller = new AbortController();
+    let timeout = setTimeout(() => {
+      setNotification({
+        message: "Error Processing Request",
+        success: false,
+      });
+      controller.abort();
+      setIsLoading(false);
+    }, 45000);
     try {
       const response = await axios({
         method: "put",
         url: "/orders/putOrders",
+        signal: controller.signal,
         data: [{ ...orderData, warehouse_uuid }],
         headers: {
           "Content-Type": "application/json",
         },
       });
       if (response.data.success) {
+        clearTimeout(timeout);
         setSelectedWarehouseOrders((prev) => {
           console.log(prev);
           if (prev?.length === 1) {
@@ -273,7 +305,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
         });
       }
     } catch (error) {}
-    setWaiting(false);
+    setIsLoading(false);
   };
   return (
     <>
@@ -435,30 +467,7 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
           </div>
         </div>
       </div>
-      {waiting ? (
-        <div className="overlay" style={{ zIndex: "99999999999999999" }}>
-          <div className="flex" style={{ width: "40px", height: "40px" }}>
-            <svg viewBox="0 0 100 100">
-              <path
-                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-                fill="#ffffff"
-                stroke="none"
-              >
-                <animateTransform
-                  attributeName="transform"
-                  type="rotate"
-                  dur="1s"
-                  repeatCount="indefinite"
-                  keyTimes="0;1"
-                  values="0 50 51;360 50 51"
-                ></animateTransform>
-              </path>
-            </svg>
-          </div>
-        </div>
-      ) : (
-        ""
-      )}
+
       {deliveryPopup ? (
         <DiliveryPopup
           onSave={() => setDeliveryPopup(false)}
@@ -467,6 +476,9 @@ const ChangeStage = ({ onClose, orders, stage, counters, items, users }) => {
           counters={counters}
           items={items}
           users={users}
+          isLoading={isLoading}
+          setIsLoading={setIsLoading}
+          setNotification={setNotification}
         />
       ) : (
         ""
@@ -500,12 +512,14 @@ function DiliveryPopup({
   counters,
   items,
   orders,
+  isLoading,
+  setIsLoading,
+  setNotification,
 }) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
   const [error, setError] = useState("");
   const [popup, setPopup] = useState(false);
-  const [waiting, setWaiting] = useState(false);
   const [data, setData] = useState({});
   const [outstanding, setOutstanding] = useState({});
   const [count, setCount] = useState(0);
@@ -612,11 +626,20 @@ function DiliveryPopup({
   };
 
   const submitHandler = async () => {
+    let controller = new AbortController();
     console.log({ orders });
-    if (waiting) {
+    if (isLoading) {
       return;
     }
-    setWaiting(true);
+    setIsLoading(true);
+    let timeout = setTimeout(() => {
+      setNotification({
+        message: "Error Processing Request",
+        success: false,
+      });
+      controller.abort();
+      setIsLoading(false);
+    }, 45000);
     setError("");
     // if (outstanding.amount && !outstanding.remarks) {
     // 	setError("Remarks is mandatory")
@@ -632,7 +655,7 @@ function DiliveryPopup({
       )
     ) {
       setError("Cheque number is mandatory");
-      setWaiting(false);
+      setIsLoading(false);
       return;
     }
 
@@ -642,7 +665,7 @@ function DiliveryPopup({
       +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {
       setError("Invoice Amount and Payment mismatch");
-      setWaiting(false);
+      setIsLoading(false);
       return;
     }
     // let obj = modes.find((a) => a.mode_title === "Cash");
@@ -669,6 +692,7 @@ function DiliveryPopup({
         method: "post",
         url: "/receipts/postReceipt",
         data: obj,
+        signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
         },
@@ -678,17 +702,19 @@ function DiliveryPopup({
       response = await axios({
         method: "post",
         url: "/Outstanding/postOutstanding",
+        signal: controller.signal,
         data: outstanding,
         headers: {
           "Content-Type": "application/json",
         },
       });
     if (response?.data?.success) {
+      clearTimeout(timeout);
       if (count + 1 === orders?.length) {
         postOrderData({
           selectedData: [...editedOrders, order],
         });
-        setWaiting(false);
+        setIsLoading(false);
         onSave();
       } else {
         setEditedOrders((prev) => [...prev, order]);
@@ -703,7 +729,7 @@ function DiliveryPopup({
         // setCoinPopup(false);
       }
     }
-    setWaiting(false);
+    setIsLoading(false);
   };
   useEffect(() => {
     updateBillingAmount({
@@ -942,30 +968,7 @@ function DiliveryPopup({
           </div>
         </div>
       </div>
-      {waiting ? (
-        <div className="overlay" style={{ zIndex: "99999999999999999" }}>
-          <div className="flex" style={{ width: "40px", height: "40px" }}>
-            <svg viewBox="0 0 100 100">
-              <path
-                d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
-                fill="#ffffff"
-                stroke="none"
-              >
-                <animateTransform
-                  attributeName="transform"
-                  type="rotate"
-                  dur="1s"
-                  repeatCount="indefinite"
-                  keyTimes="0;1"
-                  values="0 50 51;360 50 51"
-                ></animateTransform>
-              </path>
-            </svg>
-          </div>
-        </div>
-      ) : (
-        ""
-      )}
+
       {popup ? (
         <DiliveryReplaceMent
           onSave={() => {

@@ -14,6 +14,7 @@ import { Version } from "../App";
 
 let titleData = [
   { value: "RetailerMarginReport", name: "Retailer Margin Report" },
+  { value: "OpeningBalanceReport", name: "Opening Balance Report" },
   { value: "BankReconciliation", name: "Bank Reconciliation" },
   { value: "SalesmanItemSuggestion", name: "Salesman Item Suggestion" },
   { value: "InvoiceNumberWiseOrder", name: "Invoice Number Wise Order" },
@@ -218,6 +219,10 @@ const Sidebar = ({ setCollectionTags }) => {
                     name: "Stock Valuation",
                     link: "/admin/StockValuationReport",
                   },
+                  {
+                    name: "Opening Balance Report",
+                    link: "/admin/OpeningBalanceReport",
+                  },
                 ]
               : [
                   {
@@ -376,21 +381,6 @@ const Sidebar = ({ setCollectionTags }) => {
                 ]
           }
         />
-        {/* <div
-						className="nav_link_container"
-						onClick={updateMinLevel}
-						style={{ width: "100%" }}
-						>
-						<div className={`nav-link`}>
-							<>
-							<UpgradeOutlined sx={{ fontSize: 50 }} />
-							<p>
-								<span className={`nav_title`}>Update MinLevel</span>
-							</p>
-							</>
-							Submenu popup
-						</div>
-        			</div>*/}
       </div>
       <div style={{ position: "absolute", bottom: "5px", left: "25px" }}>
         <b>v{Version}</b>

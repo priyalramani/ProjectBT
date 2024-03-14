@@ -82,6 +82,7 @@ const MainAdmin = () => {
   const {
     updateServerPdf,
     setLoading,
+    loading,
     setNotification,
     skipStages,
     setSkipStages,
@@ -735,9 +736,8 @@ const MainAdmin = () => {
     }
   };
 
-  const [isLoading, setIsLoading] = useState();
   const markAsPendingPayment = async (updatedData) => {
-    setIsLoading(true);
+    setLoading(true);
     try {
       if (notesState?.index < selectedOrder?.length - 1) {
         setNotesState((prev) => ({
@@ -774,7 +774,7 @@ const MainAdmin = () => {
     } catch (error) {
       console.error(error);
     }
-    setIsLoading(false);
+    setLoading(false);
   };
 
   const handleRefresh = async () => {
@@ -792,7 +792,7 @@ const MainAdmin = () => {
 
   return (
     <>
-      <Loader visible={isLoading} />
+ 
       <div
         style={{
           position: "fixed",
@@ -2045,6 +2045,9 @@ const MainAdmin = () => {
           counters={counter}
           items={items}
           users={users}
+          isLoading={loading}
+          setIsLoading={setLoading}
+          setNotification={setNotification}
         />
       ) : (
         ""

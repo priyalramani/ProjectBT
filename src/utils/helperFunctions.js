@@ -57,6 +57,12 @@ export function getFormateDate(time) {
     .replace("dd", ("00" + time?.getDate()?.toString()).slice(-2));
   return curTime;
 }
+export function getMidnightTimestamp(now) {
+   // Current date and time
+  const midnight = new Date(now); // Copy current date
+  midnight.setHours(0, 0, 0, 0); // Set time to 00:00:00.000 (midnight)
+  return midnight.getTime(); // Return Unix timestamp in milliseconds
+}
 export function truncateDecimals(number, digits) {
   const stringNumber = number.toString();
   const decimalIndex = stringNumber.indexOf('.');
