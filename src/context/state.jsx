@@ -7,11 +7,69 @@ const State = props => {
 	const [cashRegisterPopup, setCashRegisterPopup] = useState(null)
 	const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false)
 	const [bankStatementImport, setBankStatementImport] = useState(false)
-	const [view, setView] = useState(0)
+	const [view, setView] = useState(sessionStorage.getItem("view") || 0)
 	const [skipStages, setSkipStages] = useState(false);
 	const [notification, setNotification] = useState(null)
 	const [loading, setLoading] = useState(null)
 	const [pageLoading, setPageLoading] = useState(null)
+	const updateOrder = async (param = {}) => {
+		let controller = new AbortController();
+		if (loading) {
+		  return;
+		}
+		setLoading(true);
+		setTimeout(() => {
+		  setNotification({
+			message: "Error Processing Request",
+			success: false,
+		  });
+		  controller.abort();
+		  setLoading(false);
+		}, 45000);
+		try {
+		  const { data , sendPaymentReminder } = param;
+		  const orderUpdateData = data;
+		  const maxState = Math.max(
+			...orderUpdateData?.status?.map((s) => +s.stage)
+		  );
+	
+		  if (+orderUpdateData?.payment_pending && maxState < 3.5) {
+			orderUpdateData.status.push({
+			  stage: 3.5,
+			  time: Date.now(),
+			  user_uuid: localStorage.getItem("user_uuid"),
+			});
+		  }
+	
+		  const response = await axios({
+			method: "put",
+			url: "/orders/putOrders",
+			signal: controller.signal,
+			data: [
+			  {
+				...data,
+				item_details: data.item_details?.map((i) => ({
+				  ...i,
+				  price: +(+i.price).toFixed(3),
+				})),
+			  },
+			],
+			headers: {
+			  "Content-Type": "application/json",
+			},
+		  });
+		  if (response.data.success) {
+			
+			
+			if (sendPaymentReminder)
+			  sendPaymentReminders([data?.counter_uuid]);
+		  }
+		  setLoading(false);
+		 
+		} catch (err) {
+		  setLoading(false);
+		}
+	  };
 	const CalculateLines = async (days, type) => {
 		setLoading(true)
 		const response = await axios({
@@ -44,6 +102,15 @@ const State = props => {
 		}
 	}
 	, [notification])
+	useEffect(() => {
+		if(loading){
+			setTimeout(() => setLoading(null), 10000)
+		}
+	}
+	, [loading])
+	useEffect(()=>{
+		sessionStorage.setItem("view", view)
+	},[view])
 
 	const saveSpecialPrice = async (item, counter_uuid, setCounters, price) => {
 		try {
@@ -108,7 +175,9 @@ const State = props => {
 				message: "Failed to send messages"
 			})
 		setTimeout(() => setNotification(null), 3000)
-	}
+	} 
+
+	  
 
 	return (
 		<Context.Provider
@@ -140,7 +209,8 @@ const State = props => {
 				view,
 				setView,
 				bankStatementImport,
-				setBankStatementImport
+				setBankStatementImport,
+				updateOrder,
 			}}
 		>
 			{props.children}

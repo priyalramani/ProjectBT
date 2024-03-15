@@ -65,7 +65,13 @@ const Header = () => {
         <div className="header_toggle_btn" style={{ position: "relative" }}>
           <div style={{ right: "150px", position: "absolute" }}>
             <GreenSwitch
-              onClick={(e) => setView(e.target.checked ? 1 : 0)}
+              onClick={(e) => {
+                if(view){
+                  Navigate("/trip");
+                }else{
+                  Navigate("/accounting_dashboard");
+                }
+              }}
               checked={view}
             />
           </div>

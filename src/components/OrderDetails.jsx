@@ -68,6 +68,7 @@ export function OrderDetails({
     saveSpecialPrice,
     spcPricePrompt,
     sendPaymentReminders,
+    updateOrder: updateCompleteOrder,
   } = useContext(context);
   const [printConfig, setPrintConfig] = useState({});
   const [routeData, setRoutesData] = useState([]);
@@ -728,7 +729,8 @@ export function OrderDetails({
     }
 
     if (completeOrder) {
-      updateOrder({ data });
+      updateCompleteOrder({ data });
+      onSave();
     } else {
       setMessagePopup(data);
     }
@@ -788,11 +790,10 @@ export function OrderDetails({
       }
       setWaiting(false);
       if (!completeOrder) {
-        
         setMessagePopup(false);
       }
-      if(completeOrder){
-        onSave()
+      if (completeOrder) {
+        onSave();
       }
     } catch (err) {
       setWaiting(false);

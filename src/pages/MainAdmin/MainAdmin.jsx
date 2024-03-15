@@ -86,6 +86,7 @@ const MainAdmin = () => {
     setNotification,
     skipStages,
     setSkipStages,
+    setView,
   } = useContext(context);
 
   let user_uuid = localStorage.getItem("user_uuid");
@@ -402,6 +403,7 @@ const MainAdmin = () => {
     getItemsDataReminder();
     GetPaymentModes();
     getWarehouseDAta(controller);
+    setView(0);
     return () => {
       controller.abort();
     };
@@ -792,7 +794,6 @@ const MainAdmin = () => {
 
   return (
     <>
- 
       <div
         style={{
           position: "fixed",
@@ -1891,8 +1892,10 @@ const MainAdmin = () => {
         <OrderDetails
           onSave={() => {
             setPopupOrder(null);
-            if (holdOrders) getRunningHoldOrders();
-            else getRunningOrders();
+            setTimeout(() => {
+              if (holdOrders) getRunningHoldOrders();
+              else getRunningOrders();
+            }, 3000);
           }}
           order_uuid={popupOrder.order_uuid}
           items={items}
@@ -1909,7 +1912,7 @@ const MainAdmin = () => {
                 category_title: category.find(
                   (b) =>
                     b.category_uuid ===
-                    items.find((b) => b.item_uuid === a.item_uuid).category_uuid
+                    items.find((b) => b.item_uuid === a.item_uuid)?.category_uuid
                 )?.category_title,
               }))
               .sort(

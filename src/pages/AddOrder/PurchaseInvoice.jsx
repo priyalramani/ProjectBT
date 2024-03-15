@@ -349,7 +349,16 @@ export default function PurchaseInvoice() {
                       .map((a) => ({
                         value: a.ledger_uuid,
                         label: a.ledger_title,
+                        closing_balance: a.closing_balance,
                       }))}
+                      getOptionLabel={(option) => (
+                        <div
+                          style={{ display: "flex", justifyContent: "space-between" }}
+                        >
+                          <span>{option.label}</span>
+                          <span>{option.closing_balance||0}</span>
+                        </div>
+                      )}
                     onChange={(doc) => {
                       setOrder((prev) => ({
                         ...prev,

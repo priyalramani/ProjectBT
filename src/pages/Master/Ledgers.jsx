@@ -230,6 +230,29 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
                   </div>
                 </div>
               </th>
+              <th>
+                <div className="t-head-element">
+                  <span>Closing Balance</span>
+                  <div className="sort-buttons-container">
+                    <button
+                      onClick={() => {
+                        setItems("closing_balance");
+                        setOrder("asc");
+                      }}
+                    >
+                      <ChevronUpIcon className="sort-up sort-button" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setItems("closing_balance");
+                        setOrder("desc");
+                      }}
+                    >
+                      <ChevronDownIcon className="sort-down sort-button" />
+                    </button>
+                  </div>
+                </div>
+              </th>
 
               <th></th>
             </tr>
@@ -259,6 +282,7 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
 
                   <td>{item.ledger_title}</td>
                   <td>{item.ledger_group_title}</td>
+                  <td>{item.closing_balance}</td>
 
                   <td>
                     <div

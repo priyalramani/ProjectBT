@@ -84,7 +84,7 @@ import BankStatementImport from "./pages/others/BankStatementImport";
 import BankReconciliation from "./pages/QuikAccess/BankReconciliation";
 import OpeningBalanceReport from "./pages/Reports/OpeningBalanceReport";
 
-export let Version = 274;
+export let Version = 275;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
@@ -311,14 +311,10 @@ function App() {
         ) : userType === "0" ? (
           <>
             {/* admin Routes */}
-            <Route
-              path="/admin"
-              element={view ? <MainAdmin1 /> : <MainAdmin />}
-            />
-            <Route
-              path="/trip"
-              element={view ? <MainAdmin1 /> : <MainAdmin />}
-            />
+            <Route path="/admin" element={<MainAdmin />} />
+            <Route path="/trip" element={<MainAdmin />} />
+            <Route path="/accounting_dashboard" element={<MainAdmin1 />} />
+
             <Route
               path="/admin/SalesmanItemSuggestion"
               element={<SalesmanItemSuggestion />}
@@ -454,11 +450,19 @@ function App() {
               path="/admin/BankReconciliation"
               element={<BankReconciliation />}
             />
-             <Route
+            <Route
               path="/admin/OpeningBalanceReport"
               element={<OpeningBalanceReport />}
             />
-            <Route path="*" element={<Navigate replace to={"/trip"} />} />
+            <Route
+              path="*"
+              element={
+                <Navigate
+                  replace
+                  to={view ? "/accounting_dashboard" : "/trip"}
+                />
+              }
+            />
           </>
         ) : (
           <>

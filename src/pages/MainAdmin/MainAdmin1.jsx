@@ -1,18 +1,17 @@
-
-
+import { useContext, useEffect } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./style.css";
-
-
+import context from "../../context/context";
 
 const MainAdmin1 = () => {
-
-
+  const { setView } = useContext(context);
+  useEffect(() => {
+    setView(1);
+  }, [setView]);
 
   return (
     <>
-
       <div
         style={{
           position: "fixed",
@@ -27,18 +26,11 @@ const MainAdmin1 = () => {
       >
         {}
       </div>
-      <Sidebar  />
-      <div
-        className="right-side"
-        
-      >
+      <Sidebar />
+      <div className="right-side">
         <Header />
 
-        <div
-          style={
-          { display: "flex", height: "100%" }
-          }
-        ></div>
+        <div style={{ display: "flex", height: "100%" }}></div>
       </div>
     </>
   );

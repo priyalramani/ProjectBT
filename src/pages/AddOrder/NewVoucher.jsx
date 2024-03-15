@@ -21,10 +21,7 @@ export let getInititalValues = () => {
     created_at: time.getTime(),
     amt: 0,
     details: [],
-    voucher_date: "yy-mm-dd"
-      .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
-      .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
-      .replace("dd", ("00" + time?.getDate().toString()).slice(-2)),
+    voucher_date: time.getTime(),
   };
 };
 let typeOptions = [
@@ -90,8 +87,8 @@ export default function NewVoucher() {
         details: data.details.map((a) => ({
           ...a,
           uuid: a.ledger_uuid,
-          add: a.amount > 0 ? truncateDecimals(a.amount,3) : 0,
-          sub: a.amount < 0 ? truncateDecimals(-a.amount,3) : 0,
+          add: a.amount > 0 ? a.amount : 0,
+          sub: a.amount < 0 ? -a.amount : 0,
         })),
       });
     }
@@ -109,13 +106,20 @@ export default function NewVoucher() {
 
   const totalSum = useMemo(() => {
     let total = order?.details.reduce((a, b) => a + +(b.add || 0), 0);
-    return truncateDecimals(total,3);
+    return truncateDecimals(total,2);
   }, [order.details]);
   const totalSub = useMemo(() => {
     let total = order?.details.reduce((a, b) => a + +(b.sub || 0), 0);
-    return truncateDecimals(total,3);
+    return truncateDecimals(total,2);
   }, [order.details]);
   const onSubmit = async (isDelete) => {
+    if (!isDelete && !order.type) {
+      setNotification({
+        message: "Please Select Voucher Type",
+        success: false,
+      });
+      return;
+    }
     // check all add and sub sum is 0
     if (totalSum !== totalSub && !isDelete) {
       setNotification({
@@ -127,7 +131,11 @@ export default function NewVoucher() {
     }
 
     const response = await axios({
-      method:isDelete?"delete": params.accounting_voucher_uuid ? "put" : "post",
+      method: isDelete
+        ? "delete"
+        : params.accounting_voucher_uuid
+        ? "put"
+        : "post",
       url: `/vouchers/${
         isDelete
           ? "deleteAccountVoucher"
@@ -271,6 +279,7 @@ export default function NewVoucher() {
           key: a.item_uuid,
           ledger_uuid: a.ledger_uuid,
           counter_uuid: a.counter_uuid,
+          closing_balance: a.closing_balance,
         })),
     [ledgerData, counters, order.details]
   );
@@ -299,7 +308,10 @@ export default function NewVoucher() {
                 ""
               )}
               <h2>
-                Voucher -
+                Voucher
+                {order.accounting_voucher_number || order.invoice_number
+                  ? "-"
+                  : ""}
                 {order.accounting_voucher_number || order.invoice_number || ""}{" "}
               </h2>
             </div>
@@ -424,9 +436,21 @@ export default function NewVoucher() {
                                       value: a.ledger_uuid || a.counter_uuid,
                                       label: a.counter_title || a.ledger_title,
                                       key: a.ledger_uuid || a.counter_uuid,
+                                      closing_balance: a.closing_balance,
                                     }))[0]
                                 : { value: "", label: "" }
                             }
+                            getOptionLabel={(option) => (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <span>{option.label}</span>
+                                <span>{option.closing_balance}</span>
+                              </div>
+                            )}
                             openMenuOnFocus={true}
                             autoFocus={
                               !params.accounting_voucher_uuid &&

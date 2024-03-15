@@ -14,6 +14,7 @@ import { Version } from "../App";
 
 let titleData = [
   { value: "RetailerMarginReport", name: "Retailer Margin Report" },
+  { value: "accounting_dashboard", name: "Accounting Dashboard" },
   { value: "OpeningBalanceReport", name: "Opening Balance Report" },
   { value: "BankReconciliation", name: "Bank Reconciliation" },
   { value: "SalesmanItemSuggestion", name: "Salesman Item Suggestion" },

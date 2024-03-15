@@ -73,5 +73,5 @@ export function truncateDecimals(number, digits) {
   }
   
   const truncatedString = stringNumber.slice(0, decimalIndex + 1 + digits);
-  return parseFloat(truncatedString).toFixed(2);
+  return parseFloat(truncatedString);
 }
