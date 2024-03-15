@@ -62,8 +62,8 @@ const Header = () => {
           <h4>{localStorage.getItem("user_title") || ""}</h4>
         </div>
 
-        <div className="header_toggle_btn" style={{position:"relative"}}>
-          <div style={{ right: "110px", position: "absolute" }}>
+        <div className="header_toggle_btn" style={{ position: "relative" }}>
+          <div style={{ right: "150px", position: "absolute" }}>
             <GreenSwitch
               onClick={(e) => setView(e.target.checked ? 1 : 0)}
               checked={view}

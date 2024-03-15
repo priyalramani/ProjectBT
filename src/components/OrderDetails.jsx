@@ -788,7 +788,11 @@ export function OrderDetails({
       }
       setWaiting(false);
       if (!completeOrder) {
+        
         setMessagePopup(false);
+      }
+      if(completeOrder){
+        onSave()
       }
     } catch (err) {
       setWaiting(false);
