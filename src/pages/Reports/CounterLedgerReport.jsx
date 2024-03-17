@@ -6,7 +6,7 @@ import Sidebar from "../../components/Sidebar";
 import Select from "react-select";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import { useNavigate } from "react-router-dom";
-import { get } from "react-scroll/modules/mixins/scroller";
+
 
 const CounterLegerReport = () => {
   const [ledgerData, setLedgerData] = useState([]);
@@ -70,11 +70,13 @@ const CounterLegerReport = () => {
     let time = new Date();
     let prevData = JSON.parse(sessionStorage.getItem("ledgerData"));
     let itemData = JSON.parse(sessionStorage.getItem("itemData"));
-    console.log({ prevData });
-    if (prevData && itemData) {
+    let isEditVoucher = JSON.parse(sessionStorage.getItem("isEditVoucher"));
+    if (prevData && itemData&& isEditVoucher) {
       setSearchData(prevData);
       setItems(itemData);
     } else {
+      sessionStorage.removeItem("ledgerData");
+      sessionStorage.removeItem("itemData");
       let curTime = "yy-mm-dd"
         .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
         .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
@@ -93,6 +95,7 @@ const CounterLegerReport = () => {
     getCounter(controller);
     getLedgerData(controller);
     return () => {
+      sessionStorage.removeItem("isEditVoucher");
       controller.abort();
     };
   }, []);

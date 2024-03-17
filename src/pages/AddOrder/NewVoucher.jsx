@@ -106,11 +106,11 @@ export default function NewVoucher() {
 
   const totalSum = useMemo(() => {
     let total = order?.details.reduce((a, b) => a + +(b.add || 0), 0);
-    return truncateDecimals(total,2);
+    return truncateDecimals(total, 2);
   }, [order.details]);
   const totalSub = useMemo(() => {
     let total = order?.details.reduce((a, b) => a + +(b.sub || 0), 0);
-    return truncateDecimals(total,2);
+    return truncateDecimals(total, 2);
   }, [order.details]);
   const onSubmit = async (isDelete) => {
     if (!isDelete && !order.type) {
@@ -164,6 +164,7 @@ export default function NewVoucher() {
           message: "Voucher Deleted",
           success: true,
         });
+        sessionStorage.setItem("isEditVoucher", 1);
         navigate(-1);
         return;
       }
@@ -172,6 +173,7 @@ export default function NewVoucher() {
           message: "Voucher Updated",
           success: true,
         });
+        sessionStorage.setItem("isEditVoucher", 1);
         navigate(-1);
         return;
       }
@@ -300,7 +302,10 @@ export default function NewVoucher() {
                     backgroundColor: "#000",
                     borderRadius: "50%",
                   }}
-                  onClick={() => navigate(-1)}
+                  onClick={() => {
+                    sessionStorage.setItem("isEditVoucher", 1);
+                    navigate(-1);
+                  }}
                 >
                   <ArrowBack style={{ fontSize: "40px", color: "#fff" }} />
                 </div>

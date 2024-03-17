@@ -290,12 +290,12 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
       .filter(
         (item) =>
           !item.unMatch ||
-          extraItems.find((a) => a.reference_no === item.reference_no)
+          extraItems.find((a) => a.sr === item.sr)
       )
       .map((a) => ({
         ...a,
         counter_uuid: a.counter_uuid || a.ledger_uuid,
-        ...(extraItems.find((b) => b.reference_no === a.reference_no) || {}),
+        ...(extraItems.find((b) => b.sr === a.sr) || {}),
       }));
     console.log(dataArray);
     let array = [];
@@ -523,8 +523,10 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                 >
                   <button
                     className="submit"
+                    type="button"
                     style={{ background: "red" }}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
                       setChangeTransition(null);
                     }}
                   >
@@ -552,7 +554,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                 className="form"
                 onSubmit={submitHandler}
                 style={{
-                  height: data ? "90vh" : "20vh",
+
                   justifyContent: "start",
                 }}
               >
@@ -591,7 +593,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                               color:
                                 !item.unMatch ||
                                 extraItems.find(
-                                  (a) => a.reference_no === item.reference_no
+                                  (a) => a.sr === item.sr
                                 )
                                   ? "green"
                                   : "red",
@@ -653,9 +655,9 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                             <td>{item.route_title}</td>
                             <td>{item.paid_amount || ""}</td>
                             <td>{item.received_amount || ""}</td>
-                            {item.unMatch && item.reference_no ? (
+                            {item.unMatch &&item.counter_uuid? (
                               extraItems.find(
-                                (a) => a.reference_no === item.reference_no
+                                (a) => a.sr=== item.sr
                               ) ? (
                                 <td
                                   style={{
@@ -670,7 +672,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                                     setExtraItems((prev) =>
                                       prev.filter(
                                         (a) =>
-                                          a.reference_no !== item.reference_no
+                                          a.sr !== item.sr
                                       )
                                     );
                                   }}
