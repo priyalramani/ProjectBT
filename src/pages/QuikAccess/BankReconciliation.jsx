@@ -240,10 +240,11 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
   const [errMassage, setErrorMassage] = useState("");
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
-  const [extraItems, setExtraItems] = useState([]);
   const [ledgerData, setLedgerData] = useState([]);
   const [changeTransition, setChangeTransition] = useState(null);
   const [counter, setCounter] = useState([]);
+  const [counterSelected, setCounterSelected] = useState(null);
+  const [multipleNarration, setMultipleNarration] = useState(null);
   const getCounter = async (controller = new AbortController()) => {
     const response = await axios({
       method: "post",
@@ -278,24 +279,21 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
   const counterList = useMemo(
     () =>
       [...counter, ...ledgerData].map((a) => ({
-        label: a.counter_title || a.ledger_title,
-        value: a.counter_uuid || a.ledger_uuid,
+        label:
+          (a.counter_title || a.ledger_title || "") +
+          (a.route_title ? `,${a.route_title}` : ""),
+        value: a?.counter_uuid || a.ledger_uuid,
         closing_balance: a.closing_balance,
       })),
     [counter, ledgerData]
   );
   const createImportedVouchers = async (e) => {
     e.preventDefault();
-    let dataArray = data.data
-      .filter(
-        (item) =>
-          !item.unMatch ||
-          extraItems.find((a) => a.sr === item.sr)
-      )
+    let dataArray = data
+      .filter((item) => !item.unMatch)
       .map((a) => ({
         ...a,
-        counter_uuid: a.counter_uuid || a.ledger_uuid,
-        ...(extraItems.find((b) => b.sr === a.sr) || {}),
+        counter_uuid: a?.counter_uuid || a.ledger_uuid,
       }));
     console.log(dataArray);
     let array = [];
@@ -305,7 +303,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
         voucher_uuid: uuid(),
         type:
           item.ledger_group_uuid === "9c2a6c85-c0f0-4acf-957e-dcea223f3d00" ||
-          item.counter_uuid
+          item?.counter_uuid
             ? "RCPT"
             : item.ledger_group_uuid === "004fd020-853c-4575-bebe-b29faefae3c9"
             ? "PAYMENT"
@@ -323,7 +321,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
             amount: item.paid_amount || -item.received_amount,
           },
           {
-            ledger_uuid: item.counter_uuid,
+            ledger_uuid: item?.counter_uuid,
             amount: -item.paid_amount || +item.received_amount,
           },
         ],
@@ -373,7 +371,8 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
       },
     });
     if (response.data.success) {
-      setData(response.data.result);
+      let a = response.data.result;
+      setData(a.map((a, i) => ({ ...a, match: !a.unMatch })));
 
       setLoading(false);
     } else {
@@ -403,7 +402,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
   const updateTransitionTags = async (e) => {
     e.preventDefault();
     let isCounter = counterList.find(
-      (a) => a.value === changeTransition.counter_uuid
+      (a) => a.value === changeTransition?.counter_uuid
     );
     const response = await axios({
       method: "post",
@@ -413,8 +412,8 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
       },
       data: {
         ...(isCounter
-          ? { counter_uuid: changeTransition.counter_uuid }
-          : { ledger_uuid: changeTransition.counter_uuid }),
+          ? { counter_uuid: changeTransition?.counter_uuid }
+          : { ledger_uuid: changeTransition?.counter_uuid }),
         transaction_tags: changeTransition.tags
           .filter((a) => a.checked)
           .map((a) => a.tag),
@@ -447,7 +446,98 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
   );
   return (
     <div className="overlay">
-      {changeTransition ? (
+      {multipleNarration ? (
+        <div className="modal" style={{ width: "fit-content" }}>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "20px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form
+                className="form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setMultipleNarration(null);
+                }}
+                style={{
+                  justifyContent: "start",
+                }}
+              >
+                <div className="row">
+                  <h1>
+                    Transition Tags for{" "}
+                    {counterList.find?.(
+                      (a) => a.value === changeTransition?.counter_uuid
+                    )?.label || ""}
+                  </h1>
+                </div>
+                <table className="user-table" style={{ tableLayout: "auto" }}>
+                  <thead>
+                    <tr>
+                      <th>Sr.</th>
+                      <th>Counter</th>
+
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody className="tbody">
+                    {multipleNarration.multipleNarration?.map((item, i) => (
+                      <tr
+                        key={Math.random()}
+                        style={{
+                          height: "30px",
+                        }}
+                      >
+                        <td>{i + 1}</td>
+                        <td>{item.counter_title || item.ledger_title || ""}</td>
+
+                        <td>
+                          <input
+                            type="radio"
+                            checked={
+                              item?.counter_uuid ===
+                              data.find((a) => a.sr === multipleNarration.sr)
+                                ?.counter_uuid
+                            }
+                            onChange={(e) => {
+                              setData((prev) =>
+                                prev.map((a) =>
+                                  a.sr === multipleNarration.sr
+                                    ? {
+                                        ...a,
+                                        counter_uuid: item?.counter_uuid,
+                                        counter_title: item.counter_title,
+                                        ledger_title: item.ledger_title,
+                                      }
+                                    : a
+                                )
+                              );
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <i style={{ color: "red" }}>
+                  {errMassage === "" ? "" : "Error: " + errMassage}
+                </i>
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between", minWidth: "300px" }}
+                >
+                  <button className="submit">Close</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      ) : changeTransition ? (
         <div className="modal" style={{ width: "fit-content" }}>
           <div
             className="content"
@@ -469,7 +559,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                   <h1>
                     Transition Tags for{" "}
                     {counterList.find?.(
-                      (a) => a.value === changeTransition.counter_uuid
+                      (a) => a.value === changeTransition?.counter_uuid
                     )?.label || ""}
                   </h1>
                 </div>
@@ -490,7 +580,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                           height: "30px",
                         }}
                       >
-                        <td>{item.sr}</td>
+                        <td>{i + 1}</td>
                         <td>{item.tag}</td>
 
                         <td>
@@ -554,19 +644,32 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                 className="form"
                 onSubmit={submitHandler}
                 style={{
-
                   justifyContent: "start",
                 }}
               >
                 {data ? (
                   <>
                     <div className="row" style={{ width: "90vw" }}>
-                      <h5>Total Recodes:{data?.total_recode || 0}</h5>
-                      <h5>Matched Recodes:{data?.matched_recode || 0}</h5>
-                      <h5>Unmatched Recodes:{data?.unmatched_recode || 0}</h5>
-                      <h5>Total Amount Paid:{data?.total_paid_amount || 0}</h5>
+                      <h5>Total Recodes:{data?.length || 0}</h5>
                       <h5>
-                        Total Amount Received:{data?.total_received_amount || 0}
+                        Matched Recodes:
+                        {data?.filter((a) => a.match).length || 0}
+                      </h5>
+                      <h5>
+                        Unmatched Recodes:
+                        {data?.filter((a) => !a.match).length || 0}
+                      </h5>
+                      <h5>
+                        Total Amount Paid:
+                        {data.reduce((a, b) => a + +(b.paid_amount || 0), 0) ||
+                          0}
+                      </h5>
+                      <h5>
+                        Total Amount Received:
+                        {data.reduce(
+                          (a, b) => a + +(b.received_amount || 0),
+                          0
+                        ) || 0}
                       </h5>
                     </div>
                     <table
@@ -585,115 +688,158 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                         </tr>
                       </thead>
                       <tbody className="tbody">
-                        {data?.data?.map((item, i) => (
+                        {data?.map((item, i) => (
                           <tr
                             key={Math.random()}
                             style={{
                               height: "30px",
-                              color:
-                                !item.unMatch ||
-                                extraItems.find(
-                                  (a) => a.sr === item.sr
-                                )
-                                  ? "green"
-                                  : "red",
+                              color: !item.unMatch ? "green" : "red",
                             }}
                           >
                             <td>{item.sr}</td>
                             <td>{item.reference_no || "Un Matched"}</td>
-                            {item.counter_uuid ? (
-                              <td>{item.counter_title}</td>
+                            {item?.counter_uuid ? (
+                              <>
+                                <td colSpan={item.narration ? 2 : 1}>
+                                  <div
+                                    className="flex"
+                                    style={{
+                                      justifyContent: "space-between",
+                                      width: "100%",
+                                    }}
+                                  >
+                                    {item.counter_title}
+                                    {item.narration ? (
+                                      <button
+                                        type="button"
+                                        className="submit"
+                                        style={{
+                                          padding: "5px 10px",
+                                          fontSize: "12px",
+                                          background: "red",
+                                          margin: 0,
+                                        }}
+                                        onClick={() =>
+                                          setData((prev) =>
+                                            prev.map((a) =>
+                                              item.sr === a.sr
+                                                ? {
+                                                    ...a,
+                                                    counter_uuid: "",
+                                                    counter_title: "",
+                                                  }
+                                                : a
+                                            )
+                                          )
+                                        }
+                                      >
+                                        X
+                                      </button>
+                                    ) : (
+                                      ""
+                                    )}
+                                  </div>
+                                </td>
+                                {!item.narration ? (
+                                  <td>{item.route_title}</td>
+                                ) : (
+                                  ""
+                                )}
+                              </>
                             ) : (
-                              <Select
-                                options={counterList}
-                                getOptionLabel={counterOptions}
-                                filterOption={filterOption}
-                                onChange={(doc) => {
-                                  setChangeTransition({
-                                    counter_uuid: doc.value,
-                                    tags: item.transaction_tags?.map((a) => ({
-                                      checked: false,
-                                      tag: a,
-                                    })),
-                                  });
-                                  setExtraItems((prev) =>
-                                    prev.find((a) => a.sr === item.sr)
-                                      ? prev.map((a) =>
-                                          a.sr === item.sr
+                              <td colSpan={2}>
+                                {counterSelected === item.sr ? (
+                                  <Select
+                                    options={counterList}
+                                    getOptionLabel={counterOptions}
+                                    filterOption={filterOption}
+                                    onChange={(doc) => {
+                                      setChangeTransition({
+                                        counter_uuid: doc.value,
+                                        tags: item.transaction_tags?.map(
+                                          (a) => ({
+                                            checked: false,
+                                            tag: a,
+                                          })
+                                        ),
+                                      });
+                                      setData((prev) =>
+                                        prev.map((a, j) =>
+                                          j === i
                                             ? {
+                                                ...a,
                                                 counter_uuid: doc.value,
+                                                counter_title: doc.label,
                                               }
                                             : a
                                         )
-                                      : [
-                                          ...prev,
-                                          { ...item, counter_uuid: doc.value },
-                                        ]
-                                  );
-                                }}
-                                value={
-                                  extraItems.find((a) => a.sr === item.sr)
-                                    ? counterList.find(
-                                        (a) =>
-                                          a.value ===
-                                          extraItems.find(
-                                            (b) => b.sr === item.sr
-                                          ).counter_uuid
-                                      )
-                                    : {
-                                        label: "Select Counter",
-                                        value: "",
+                                      );
+                                    }}
+                                    value={
+                                      item?.counter_uuid
+                                        ? {
+                                            label: item.counter_title,
+                                            value: item?.counter_uuid,
+                                          }
+                                        : {
+                                            label: "Select Counter",
+                                            value: "",
+                                          }
+                                    }
+                                    openMenuOnFocus={true}
+                                    menuPosition="fixed"
+                                    menuPlacement="auto"
+                                    placeholder="Select"
+                                  />
+                                ) : (
+                                  <div
+                                    className="flex"
+                                    style={{
+                                      justifyContent: "space-between",
+                                      width: "100%",
+                                    }}
+                                  >
+                                    {item.narration}
+                                    <button
+                                      type="button"
+                                      className="submit"
+                                      style={{
+                                        padding: "5px 10px",
+                                        fontSize: "12px",
+                                        margin: 0,
+                                      }}
+                                      onClick={() =>
+                                        setCounterSelected(item.sr)
                                       }
-                                }
-                                openMenuOnFocus={true}
-                                menuPosition="fixed"
-                                menuPlacement="auto"
-                                placeholder="Select"
-                              />
+                                    >
+                                      Counter
+                                    </button>
+                                  </div>
+                                )}
+                              </td>
                             )}
 
-                            <td>{item.route_title}</td>
                             <td>{item.paid_amount || ""}</td>
                             <td>{item.received_amount || ""}</td>
-                            {item.unMatch &&item.counter_uuid? (
-                              extraItems.find(
-                                (a) => a.sr=== item.sr
-                              ) ? (
-                                <td
-                                  style={{
-                                    cursor: "pointer",
-                                    color: "red",
-                                    fontSize: "20px",
-                                    fontWeight: "bolder",
-                                    width: "50px",
-                                    height: "50px",
-                                  }}
-                                  onClick={() => {
-                                    setExtraItems((prev) =>
-                                      prev.filter(
-                                        (a) =>
-                                          a.sr !== item.sr
+                            {!item.match && item?.counter_uuid ? (
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  checked={!item.unMatch}
+                                  onChange={(e) => {
+                                    if (item.multipleNarration?.length) {
+                                      setMultipleNarration(item);
+                                    }
+                                    setData((prev) =>
+                                      prev.map((a, j) =>
+                                        j === i
+                                          ? { ...a, unMatch: !e.target.checked }
+                                          : a
                                       )
                                     );
                                   }}
-                                >
-                                  X
-                                </td>
-                              ) : (
-                                <td
-                                  style={{
-                                    cursor: "pointer",
-                                    color: "green",
-                                    width: "50px",
-                                    height: "50px",
-                                  }}
-                                  onClick={() => {
-                                    setExtraItems((prev) => [...prev, item]);
-                                  }}
-                                >
-                                  <Check />
-                                </td>
-                              )
+                                />
+                              </td>
                             ) : (
                               <td
                                 style={{
@@ -780,7 +926,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                       Upload
                       <input
                         type="file"
-                        accept=".xls, .xlsx"
+                        accept=".xls, .xlsx, .csv"
                         id="file"
                         onChange={handleFileChange}
                         style={{ display: "none" }}

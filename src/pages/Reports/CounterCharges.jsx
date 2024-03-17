@@ -339,6 +339,19 @@ const CompanyForm = ({ close, onSubmit, data = {}, counters }) => {
                 value: i.counter_uuid,
                 label: i.counter_title,
               }))}
+              filterOptions={
+                counters
+                  ? (options, { inputValue }) => {
+                      return options.filter(
+                        (i) =>
+                          !inputValue ||
+                          i.label
+                            .toLowerCase()
+                            .includes(inputValue.toLowerCase())
+                      );
+                    }
+                  : null
+              }
               renderInput={(params) => (
                 <CssTextField
                   placeholder="None"
@@ -353,6 +366,7 @@ const CompanyForm = ({ close, onSubmit, data = {}, counters }) => {
                 </ListItem>
               )}
             />
+
             {/* <select
 							id="counter-selection"
 							className="form-input"
