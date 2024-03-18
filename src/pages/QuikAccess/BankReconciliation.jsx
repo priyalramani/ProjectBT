@@ -679,6 +679,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                       <thead>
                         <tr>
                           <th>Sr.</th>
+                          <th>Date</th>
                           <th>Reference No.</th>
                           <th>Counter Matches</th>
                           <th>Route</th>
@@ -697,6 +698,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                             }}
                           >
                             <td>{item.sr}</td>
+                            <td>{item.date}</td>
                             <td>{item.reference_no || "Un Matched"}</td>
                             {item?.counter_uuid ? (
                               <>
@@ -812,7 +814,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                                         setCounterSelected(item.sr)
                                       }
                                     >
-                                      Counter
+                                      Ledger
                                     </button>
                                   </div>
                                 )}
