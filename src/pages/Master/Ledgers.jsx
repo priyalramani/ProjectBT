@@ -323,12 +323,12 @@ function NewUserForm({ onSave, popupInfo, ledgerGroup }) {
     if (popupInfo?.type === "edit")
       setData({
         ...popupInfo.data,
-        opening_balance: popupInfo.data.opening_balance?.map((a) => ({
+        opening_balance: popupInfo?.data?.opening_balance?.map((a) => ({
           ...a,
           uuid: a.uuid || uuid(),
         })),
       });
-  }, [popupInfo.data, popupInfo.data.opening_balance, popupInfo?.type]);
+  }, [popupInfo.data, popupInfo?.data?.opening_balance, popupInfo?.type]);
 
   const submitHandler = async (e) => {
     let obj = { ...data, ledger_uuid: data.ledger_uuid || uuid() };

@@ -84,7 +84,7 @@ import BankStatementImport from "./pages/others/BankStatementImport";
 import BankReconciliation from "./pages/QuikAccess/BankReconciliation";
 import OpeningBalanceReport from "./pages/Reports/OpeningBalanceReport";
 
-export let Version = 279;
+export let Version = 280;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 

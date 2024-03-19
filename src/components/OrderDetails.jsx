@@ -164,7 +164,7 @@ export function OrderDetails({
     } else {
       getOrder(order_uuid);
     }
-  }, [orderJson, order_uuid]);
+  }, []);
 
   const getItemCategories = async () => {
     if (itemCategories.length) {
