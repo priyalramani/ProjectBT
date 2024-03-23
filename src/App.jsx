@@ -84,10 +84,11 @@ import BankStatementImport from "./pages/others/BankStatementImport";
 import BankReconciliation from "./pages/QuikAccess/BankReconciliation";
 import OpeningBalanceReport from "./pages/Reports/OpeningBalanceReport";
 import OpeningBalanceDate from "./pages/others/OpeningBalanceDate";
+import OrderPdf from "./components/prints/OrderPdf";
 
 export let Version = 281;
-// export const server = "http://localhost:9000";
-export const server = "https://api.btgondia.com";
+export const server = "http://localhost:9000";
+// export const server = "https://api.btgondia.com";
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
@@ -150,6 +151,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate replace to={"/users"} />} />
         <Route path="/Privacy_Policy" element={<PrivacyPolicy />} />
+        <Route path="/order/:order_uuid" element={<OrderPdf />} />
         <Route
           path="/counter/:short_link"
           element={
