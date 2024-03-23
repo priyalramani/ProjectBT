@@ -923,11 +923,24 @@ function NewUserForm({
 }) {
   const [data, setdata] = useState({});
   const [otppoup, setOtpPopup] = useState(false);
+  const [default_opening_balance_date, setDefaultOpeningBalanceDate] = useState(
+    new Date().getTime()
+  );
   const [otp, setOtp] = useState("");
   const [counterGroup, setCounterGroup] = useState([]);
   const [TripsData, setTripData] = useState([]);
   const [orderFrom, setOrderFrom] = useState([]);
   const [errMassage, setErrorMassage] = useState("");
+  const getBankStatementImport = async (controller = new AbortController()) => {
+    try {
+      const res = await axios.get("/details/getOpeningBalanceDate", {
+        signal: controller.signal,
+      });
+      setDefaultOpeningBalanceDate(res.data.result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const getTripData = async (controller = new AbortController()) => {
     const response = await axios({
       method: "post",
@@ -962,6 +975,7 @@ function NewUserForm({
     const controller = new AbortController();
     getItemsData(controller);
     getTripData(controller);
+    getBankStatementImport(controller);
     return () => {
       controller.abort();
     };
@@ -1100,11 +1114,11 @@ function NewUserForm({
     if (!json.route_uuid) {
       json = { ...json, route_uuid: "0" };
     }
-    json= {
+    json = {
       ...json,
       opening_balance: json.opening_balance.filter((a) => a.amount),
     };
-    
+
     if (popupInfo?.type === "edit") {
       const response = await axios({
         method: "put",
@@ -1634,15 +1648,13 @@ function NewUserForm({
                         <span
                           onClick={() => {
                             setdata((prev) => {
-                              let time = new Date();
-
                               return {
                                 ...prev,
                                 opening_balance: [
                                   ...(prev.opening_balance || []),
                                   {
                                     uuid: uuid(),
-                                    date: time.getTime(),
+                                    date: default_opening_balance_date,
                                     amount: "",
                                   },
                                 ],

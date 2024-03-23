@@ -4,16 +4,15 @@ import { useEffect, useRef, useState, useContext } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
-import { Billing, PurchaseInvoiceBilling } from "../../Apis/functions";
+import { PurchaseInvoiceBilling } from "../../Apis/functions";
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import Select from "react-select";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { FaSave } from "react-icons/fa";
-import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import Context from "../../context/context";
-import { getFormateDate } from "../../utils/helperFunctions";
+import { getFormateDate, truncateDecimals } from "../../utils/helperFunctions";
 import MessagePopup from "../../components/MessagePopup";
+import NotesPopup from "../../components/popups/NotesPopup";
 
 const customStyles = {
   option: (provided, state) => ({
@@ -57,7 +56,7 @@ export default function PurchaseInvoice() {
   const [order, setOrder] = useState(getInititalValues());
   const [ledgerData, setLedgerData] = useState([]);
   const [counterFilter] = useState("");
-
+  const [notesPopup, setNotesPoup] = useState();
   const [warehouse, setWarehouse] = useState([]);
   const [user_warehouse, setUser_warehouse] = useState([]);
   const [itemsData, setItemsData] = useState([]);
@@ -205,19 +204,19 @@ export default function PurchaseInvoice() {
 
     console.log("orderJSon", data);
 
-    // const response = await axios({
-    //   method: "post",
-    //   url: "/purchaseInvoice/postAccountVoucher",
-    //   data,
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    // });
-    // console.log(response);
-    // if (response.data.success) {
-    //   // window.location.reload();
-    //   setOrder(getInititalValues());
-    // }
+    const response = await axios({
+      method: "post",
+      url: "/purchaseInvoice/postAccountVoucher",
+      data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log(response);
+    if (response.data.success) {
+      // window.location.reload();
+      setOrder(getInititalValues());
+    }
   };
 
   const callBilling = async (type = {}) => {
@@ -349,16 +348,23 @@ export default function PurchaseInvoice() {
                       .map((a) => ({
                         value: a.ledger_uuid,
                         label: a.ledger_title,
-                        closing_balance: a.closing_balance,
+                        closing_balance: truncateDecimals(
+                          (a.closing_balance || 0) +
+                            +(a.opening_balance_amount || 0),
+                          2
+                        ),
                       }))}
-                      getOptionLabel={(option) => (
-                        <div
-                          style={{ display: "flex", justifyContent: "space-between" }}
-                        >
-                          <span>{option.label}</span>
-                          <span>{option.closing_balance||0}</span>
-                        </div>
-                      )}
+                    getOptionLabel={(option) => (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <span>{option.label}</span>
+                        <span>{option.closing_balance || 0}</span>
+                      </div>
+                    )}
                     onChange={(doc) => {
                       setOrder((prev) => ({
                         ...prev,
@@ -460,7 +466,7 @@ export default function PurchaseInvoice() {
                   />
                 </div>
               </div>
-              <div className="inputGroup" style={{ width: "50px" }}>
+              <div className="inputGroup" style={{ width: "30px" }}>
                 <label htmlFor="Warehouse">Rate</label>
                 <div className="inputGroup">
                   <Select
@@ -481,7 +487,7 @@ export default function PurchaseInvoice() {
                   />
                 </div>
               </div>
-              <div className="inputGroup" style={{ width: "100px" }}>
+              <div className="inputGroup" style={{ width: "30px" }}>
                 <label htmlFor="Warehouse">Party Invoice Date</label>
                 <div className="inputGroup">
                   <input
@@ -520,6 +526,18 @@ export default function PurchaseInvoice() {
                     onFocus={(e) => e.target.select()}
                   />
                 </div>
+              </div>
+              <div className="inputGroup" style={{ width: "100px" }}>
+                <button
+                  style={{ width: "fit-Content" }}
+                  className="theme-btn"
+                  onClick={(e) => {
+                    e.target.blur();
+                    setNotesPoup((prev) => !prev);
+                  }}
+                >
+                  Notes
+                </button>
               </div>
             </div>
 
@@ -1018,6 +1036,16 @@ export default function PurchaseInvoice() {
             </button>
           </div>
         </div>
+      ) : (
+        ""
+      )}
+      {notesPopup ? (
+        <NotesPopup
+          onSave={() => setNotesPoup(false)}
+          setSelectedOrder={setOrder}
+          notesPopup={notesPopup}
+          order={order}
+        />
       ) : (
         ""
       )}

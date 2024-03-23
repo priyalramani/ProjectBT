@@ -6,7 +6,7 @@ import Sidebar from "../../components/Sidebar";
 import Select from "react-select";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import { useNavigate } from "react-router-dom";
-
+import { truncateDecimals } from "../../utils/helperFunctions";
 
 const CounterLegerReport = () => {
   const [ledgerData, setLedgerData] = useState([]);
@@ -71,7 +71,7 @@ const CounterLegerReport = () => {
     let prevData = JSON.parse(sessionStorage.getItem("ledgerData"));
     let itemData = JSON.parse(sessionStorage.getItem("itemData"));
     let isEditVoucher = JSON.parse(sessionStorage.getItem("isEditVoucher"));
-    if (prevData && itemData&& isEditVoucher) {
+    if (prevData && itemData && isEditVoucher) {
       setSearchData(prevData);
       setItems(itemData);
     } else {
@@ -112,7 +112,10 @@ const CounterLegerReport = () => {
       [...counter, ...ledgerData].map((a) => ({
         label: a.counter_title || a.ledger_title,
         value: a.counter_uuid || a.ledger_uuid,
-        closing_balance: a.closing_balance,
+        closing_balance: truncateDecimals(
+          (a.closing_balance || 0) + +(a.opening_balance_amount || 0),
+          2
+        ),
       })),
     [counter, ledgerData]
   );

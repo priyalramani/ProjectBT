@@ -1086,14 +1086,24 @@ export default function AddOrder() {
                                       ? {
                                           ...a,
                                           charges_discount:
-                                            a.charges_discount.map((b) =>
-                                              b.title === "dsc1"
-                                                ? {
-                                                    ...b,
+                                            a.charges_discount.find(
+                                              (c) => c.title === "dsc1"
+                                            )
+                                              ? a.charges_discount.map((b) =>
+                                                  b.title === "dsc1"
+                                                    ? {
+                                                        ...b,
+                                                        value: e.target.value,
+                                                      }
+                                                    : b
+                                                )
+                                              : [
+                                                  ...a.charges_discount,
+                                                  {
+                                                    title: "dsc1",
                                                     value: e.target.value,
-                                                  }
-                                                : b
-                                            ),
+                                                  },
+                                                ],
                                         }
                                       : a
                                   ),
@@ -1130,14 +1140,24 @@ export default function AddOrder() {
                                       ? {
                                           ...a,
                                           charges_discount:
-                                            a.charges_discount.map((b) =>
-                                              b.title === "dsc2"
-                                                ? {
-                                                    ...b,
+                                            a.charges_discount.find(
+                                              (c) => c.title === "dsc2"
+                                            )
+                                              ? a.charges_discount.map((b) =>
+                                                  b.title === "dsc2"
+                                                    ? {
+                                                        ...b,
+                                                        value: e.target.value,
+                                                      }
+                                                    : b
+                                                )
+                                              : [
+                                                  ...a.charges_discount,
+                                                  {
+                                                    title: "dsc2",
                                                     value: e.target.value,
-                                                  }
-                                                : b
-                                            ),
+                                                  },
+                                                ],
                                         }
                                       : a
                                   ),

@@ -1,9 +1,9 @@
 import axios from "axios";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Billing } from "../Apis/functions";
 import DiliveryReplaceMent from "./DiliveryReplaceMent";
 import Select from "react-select";
-
+import context from "../context/context";
 const ChangeStage = ({
   onClose,
   orders,
@@ -21,6 +21,7 @@ const ChangeStage = ({
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
   const [cancelPopup, setCancelPopup] = useState();
   const [diliveredUser, setDiliveredUser] = useState("");
+  const { submitBulkOrders } = useContext(context);
   useEffect(() => {
     console.log(selectedWarehouseOrders);
     if (selectedWarehouseOrders?.length) {
@@ -52,194 +53,6 @@ const ChangeStage = ({
     }
   }, [orders]);
 
-  const onSubmit = async (params = {}) => {
-    if (isLoading) return;
-    let controller = new AbortController();
-    setIsLoading(true);
-    let timeout = setTimeout(() => {
-      setNotification({
-        message: "Error Processing Request",
-        success: false,
-      });
-      controller.abort();
-      setIsLoading(false);
-    }, 45000);
-    try {
-      let { selectedData = orders, reasons = {} } = params;
-      let user_uuid = localStorage.getItem("user_uuid");
-      let time = new Date();
-      let status =
-        +data.stage === 0
-          ? []
-          : stage === 1
-          ? +data.stage === 2
-            ? [{ stage: 2, time: time.getTime(), user_uuid }]
-            : +data.stage === 3
-            ? [
-                { stage: 2, time: time.getTime(), user_uuid },
-                { stage: 3, time: time.getTime(), user_uuid },
-              ]
-            : +data.stage === 3.5
-            ? [
-                { stage: 2, time: time.getTime(), user_uuid },
-                { stage: 3, time: time.getTime(), user_uuid },
-                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-              ]
-            : +data.stage === 4
-            ? [
-                { stage: 2, time: time.getTime(), user_uuid },
-                { stage: 3, time: time.getTime(), user_uuid },
-                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-                { stage: 4, time: time.getTime(), user_uuid },
-              ]
-            : [
-                { stage: 2, time: time.getTime(), user_uuid },
-                { stage: 3, time: time.getTime(), user_uuid },
-                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-                { stage: 4, time: time.getTime(), user_uuid },
-                { stage: 5, time: time.getTime(), user_uuid },
-              ]
-          : stage === 2
-          ? +data.stage === 3
-            ? [{ stage: 3, time: time.getTime(), user_uuid }]
-            : +data.stage === 3.5
-            ? [
-                { stage: 3, time: time.getTime(), user_uuid },
-                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-              ]
-            : +data.stage === 4
-            ? [
-                { stage: 3, time: time.getTime(), user_uuid },
-                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-                { stage: 4, time: time.getTime(), user_uuid },
-              ]
-            : [
-                { stage: 3, time: time.getTime(), user_uuid },
-                { stage: 4, time: time.getTime(), user_uuid },
-                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-                { stage: 5, time: time.getTime(), user_uuid },
-              ]
-          : stage === 3
-          ? +data.stage === 3.5
-            ? [{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser }]
-            : +data.stage === 4
-            ? [
-                // { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-                { stage: 4, time: time.getTime(), user_uuid },
-              ]
-            : [
-                // { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-                { stage: 4, time: time.getTime(), user_uuid },
-                { stage: 5, time: time.getTime(), user_uuid },
-              ]
-          : stage === 3.5
-          ? +data.stage === 4
-            ? [
-                // { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-                { stage: 4, time: time.getTime(), user_uuid },
-              ]
-            : [
-                // { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
-                { stage: 4, time: time.getTime(), user_uuid },
-                { stage: 5, time: time.getTime(), user_uuid },
-              ]
-          : [{ stage: 5, time: time.getTime(), user_uuid }];
-
-      selectedData = selectedData?.map((a) => ({
-        ...a,
-        status: +data.stage === 0 ? a.status : [...a.status, ...status],
-        hold: +data.stage === 0 ? "Y" : a.hold || "N",
-      }));
-
-      if (+data.stage === 5) {
-        let orderData = [];
-        for (let obj of selectedData) {
-          obj = {
-            ...obj,
-            processing_canceled:
-              +stage === 2
-                ? obj.processing_canceled?.length
-                  ? [...obj.processing_canceled, ...obj.item_details]
-                  : obj.item_details
-                : obj.processing_canceled || [],
-            delivery_return:
-              +stage === 4
-                ? obj.delivery_return?.length
-                  ? [...obj.delivery_return, ...obj.item_details]
-                  : obj.item_details
-                : obj.delivery_return || [],
-            item_details: obj.item_details.map((a) => ({
-              ...a,
-              b: 0,
-              p: 0,
-            })),
-          };
-
-          let billingData = await Billing({
-            order_uuid: obj?.order_uuid,
-            invoice_number: `${obj?.order_type}${obj?.invoice_number}`,
-            replacement: obj.replacement,
-            adjustment: obj.adjustment,
-            shortage: obj.shortage,
-            counter: counters.find((a) => a.counter_uuid === obj.counter_uuid),
-            ////add_discounts: true,
-            items: obj.item_details.map((a) => {
-              let itemData = items.find((b) => a.item_uuid === b.item_uuid);
-              return {
-                ...itemData,
-                ...a,
-              };
-            }),
-          });
-
-          const status = obj?.status?.map((_i) =>
-            +_i?.stage === 5
-              ? { ..._i, cancellation_reason: reasons[obj?.order_uuid] }
-              : _i
-          );
-
-          orderData.push({
-            ...obj,
-            ...billingData,
-            item_details: billingData.items,
-            status,
-          });
-        }
-
-        const response = await axios({
-          method: "put",
-          signal: controller.signal,
-          url: "/orders/putOrders",
-          data: orderData,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (response.data.success) {
-          clearTimeout(timeout);
-          onClose();
-        }
-
-        setIsLoading(false);
-        return;
-      }
-      const response = await axios({
-        method: "put",
-        url: "/orders/putOrders",
-        data: selectedData,
-        signal: controller.signal,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.data.success) {
-        onClose();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-    setIsLoading(false);
-  };
   const handleWarehouseChacking = async () => {
     let data = [];
 
@@ -331,7 +144,17 @@ const ChangeStage = ({
                     handleWarehouseChacking(true);
                   } else if (data.stage === 5) {
                     setCancelPopup(true);
-                  } else onSubmit();
+                  } else {
+                    submitBulkOrders({
+                      stage,
+                      orders,
+                      data,
+                      diliveredUser,
+                      counters,
+                      items,
+                    });
+                    onClose();
+                  }
                 }}
               >
                 <div className="formGroup">
@@ -471,7 +294,18 @@ const ChangeStage = ({
       {deliveryPopup ? (
         <DiliveryPopup
           onSave={() => setDeliveryPopup(false)}
-          postOrderData={onSubmit}
+          postOrderData={(params) => {
+            submitBulkOrders({
+              stage,
+              orders,
+              data,
+              diliveredUser,
+              counters,
+              items,
+              params,
+            });
+            onClose();
+          }}
           orders={orders}
           counters={counters}
           items={items}
@@ -496,7 +330,18 @@ const ChangeStage = ({
         <CancellationReasons
           close={() => setCancelPopup(false)}
           orders={orders}
-          submit={onSubmit}
+          submit={(params) => {
+            submitBulkOrders({
+              stage,
+              orders,
+              data,
+              diliveredUser,
+              counters,
+              items,
+              params,
+            });
+            onClose();
+          }}
         />
       )}
     </>

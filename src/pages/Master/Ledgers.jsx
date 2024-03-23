@@ -20,7 +20,6 @@ import { getFormateDate } from "../../utils/helperFunctions";
 const LedgersPage = () => {
   const [ledgerData, setLedgerData] = useState([]);
   const [ledgerGroup, setLedgerGroup] = useState([]);
-
   const [popupForm, setPopupForm] = useState(false);
   const [deletePopup, setDeletePopup] = useState(false);
   const [filterTitle, setFilterTitle] = useState("");
@@ -316,10 +315,21 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
 }
 function NewUserForm({ onSave, popupInfo, ledgerGroup }) {
   const [data, setData] = useState({ item_group_uuid: [] });
+  const [default_opening_balance_date, setDefaultOpeningBalanceDate] = useState(
+    new Date().getTime()
+  );
 
   const [errMassage, setErrorMassage] = useState("");
-
+  const getBankStatementImport = async () => {
+    try {
+      const res = await axios.get("/details/getOpeningBalanceDate");
+      setDefaultOpeningBalanceDate(res.data.result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useEffect(() => {
+    getBankStatementImport();
     if (popupInfo?.type === "edit")
       setData({
         ...popupInfo.data,
@@ -459,15 +469,13 @@ function NewUserForm({ onSave, popupInfo, ledgerGroup }) {
                     <span
                       onClick={() => {
                         setData((prev) => {
-                          let time = new Date();
-
                           return {
                             ...prev,
                             opening_balance: [
                               ...(prev.opening_balance || []),
                               {
                                 uuid: uuid(),
-                                date: time.getTime(),
+                                date: default_opening_balance_date,
                                 amount: "",
                               },
                             ],

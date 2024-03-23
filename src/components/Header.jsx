@@ -66,9 +66,9 @@ const Header = () => {
           <div style={{ right: "150px", position: "absolute" }}>
             <GreenSwitch
               onClick={(e) => {
-                if(view){
+                if (view) {
                   Navigate("/trip");
-                }else{
+                } else {
                   Navigate("/accounting_dashboard");
                 }
               }}
@@ -105,7 +105,16 @@ const Header = () => {
           )}
         </div>
         <div className="header_right">
-          <div className="header_right_link" onClick={() => Navigate("/trip")}>
+          <div
+            className="header_right_link"
+            onClick={() => {
+              if (!view) {
+                Navigate("/trip");
+              } else {
+                Navigate("/accounting_dashboard");
+              }
+            }}
+          >
             Dashboard
           </div>
           <div

@@ -1,221 +1,433 @@
-import React, { useEffect, useState } from "react"
-import Context from "./context"
-import axios from "axios"
+import React, { useEffect, useState } from "react";
+import Context from "./context";
+import axios from "axios";
+import { Billing } from "../Apis/functions";
 
-const State = props => {
-	const [calculationPopup, setcalculationPopup] = useState(null)
-	const [cashRegisterPopup, setCashRegisterPopup] = useState(null)
-	const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false)
-	const [bankStatementImport, setBankStatementImport] = useState(false)
-	const [view, setView] = useState(sessionStorage.getItem("view") || 0)
-	const [skipStages, setSkipStages] = useState(false);
-	const [notification, setNotification] = useState(null)
-	const [loading, setLoading] = useState(null)
-	const [pageLoading, setPageLoading] = useState(null)
-	const updateOrder = async (param = {}) => {
-		let controller = new AbortController();
-		if (loading) {
-		  return;
-		}
-		setLoading(true);
-		setTimeout(() => {
-		  setNotification({
-			message: "Error Processing Request",
-			success: false,
-		  });
-		  controller.abort();
-		  setLoading(false);
-		}, 45000);
-		try {
-		  const { data , sendPaymentReminder } = param;
-		  const orderUpdateData = data;
-		  const maxState = Math.max(
-			...orderUpdateData?.status?.map((s) => +s.stage)
-		  );
-	
-		  if (+orderUpdateData?.payment_pending && maxState < 3.5) {
-			orderUpdateData.status.push({
-			  stage: 3.5,
-			  time: Date.now(),
-			  user_uuid: localStorage.getItem("user_uuid"),
-			});
-		  }
-	
-		  const response = await axios({
-			method: "put",
-			url: "/orders/putOrders",
-			signal: controller.signal,
-			data: [
-			  {
-				...data,
-				item_details: data.item_details?.map((i) => ({
-				  ...i,
-				  price: +(+i.price).toFixed(3),
-				})),
-			  },
-			],
-			headers: {
-			  "Content-Type": "application/json",
-			},
-		  });
-		  if (response.data.success) {
-			
-			
-			if (sendPaymentReminder)
-			  sendPaymentReminders([data?.counter_uuid]);
-		  }
-		  setLoading(false);
-		 
-		} catch (err) {
-		  setLoading(false);
-		}
-	  };
-	const CalculateLines = async (days, type) => {
-		setLoading(true)
-		const response = await axios({
-			method: "put",
-			url: "/counters/CalculateLines",
-			data: { days, type },
-			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-		if (response.data.success) {
-			setLoading(false)
-		}
-	}
-	const updateServerPdf = async data => {
-		console.log(data)
-	}
+const State = (props) => {
+  const [calculationPopup, setcalculationPopup] = useState(null);
+  const [cashRegisterPopup, setCashRegisterPopup] = useState(null);
+  const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
+  const [openingBalanceDatePopup, setOpeningBalanceDatePopup] = useState(false);
+  const [bankStatementImport, setBankStatementImport] = useState(false);
+  const [view, setView] = useState(sessionStorage.getItem("view") || 0);
+  const [skipStages, setSkipStages] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [loading, setLoading] = useState(null);
+  const [pageLoading, setPageLoading] = useState(null);
+  const submitBulkOrders = async ({
+    stage,
+    orders,
+    data,
+    diliveredUser,
+    counters,
+	items,
+    params = {},
+  }) => {
+    if (loading) return;
+    let controller = new AbortController();
+    setLoading(true);
+    let timeout = setTimeout(() => {
+      setNotification({
+        message: "Error Processing Request",
+        success: false,
+      });
+      controller.abort();
+      setLoading(false);
+    }, 45000);
+    try {
+      let { selectedData = orders, reasons = {} } = params;
+      let user_uuid = localStorage.getItem("user_uuid");
+      let time = new Date();
+      let status =
+        +data.stage === 0
+          ? []
+          : stage === 1
+          ? +data.stage === 2
+            ? [{ stage: 2, time: time.getTime(), user_uuid }]
+            : +data.stage === 3
+            ? [
+                { stage: 2, time: time.getTime(), user_uuid },
+                { stage: 3, time: time.getTime(), user_uuid },
+              ]
+            : +data.stage === 3.5
+            ? [
+                { stage: 2, time: time.getTime(), user_uuid },
+                { stage: 3, time: time.getTime(), user_uuid },
+                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+              ]
+            : +data.stage === 4
+            ? [
+                { stage: 2, time: time.getTime(), user_uuid },
+                { stage: 3, time: time.getTime(), user_uuid },
+                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+                { stage: 4, time: time.getTime(), user_uuid },
+              ]
+            : [
+                { stage: 2, time: time.getTime(), user_uuid },
+                { stage: 3, time: time.getTime(), user_uuid },
+                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+                { stage: 4, time: time.getTime(), user_uuid },
+                { stage: 5, time: time.getTime(), user_uuid },
+              ]
+          : stage === 2
+          ? +data.stage === 3
+            ? [{ stage: 3, time: time.getTime(), user_uuid }]
+            : +data.stage === 3.5
+            ? [
+                { stage: 3, time: time.getTime(), user_uuid },
+                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+              ]
+            : +data.stage === 4
+            ? [
+                { stage: 3, time: time.getTime(), user_uuid },
+                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+                { stage: 4, time: time.getTime(), user_uuid },
+              ]
+            : [
+                { stage: 3, time: time.getTime(), user_uuid },
+                { stage: 4, time: time.getTime(), user_uuid },
+                { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+                { stage: 5, time: time.getTime(), user_uuid },
+              ]
+          : stage === 3
+          ? +data.stage === 3.5
+            ? [{ stage: 3.5, time: time.getTime(), user_uuid: diliveredUser }]
+            : +data.stage === 4
+            ? [
+                // { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+                { stage: 4, time: time.getTime(), user_uuid },
+              ]
+            : [
+                // { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+                { stage: 4, time: time.getTime(), user_uuid },
+                { stage: 5, time: time.getTime(), user_uuid },
+              ]
+          : stage === 3.5
+          ? +data.stage === 4
+            ? [
+                // { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+                { stage: 4, time: time.getTime(), user_uuid },
+              ]
+            : [
+                // { stage: 3.5, time: time.getTime(), user_uuid: diliveredUser },
+                { stage: 4, time: time.getTime(), user_uuid },
+                { stage: 5, time: time.getTime(), user_uuid },
+              ]
+          : [{ stage: 5, time: time.getTime(), user_uuid }];
 
-	const [promptState, setPromptState] = useState()
+      selectedData = selectedData?.map((a) => ({
+        ...a,
+        status: +data.stage === 0 ? a.status : [...a.status, ...status],
+        hold: +data.stage === 0 ? "Y" : a.hold || "N",
+      }));
 
-	const getSpecialPrice = (counters, item, counter_uuid) => {
-		const data = counters
-			?.find(i => i.counter_uuid === counter_uuid)
-			?.item_special_price?.find(i => i.item_uuid === item.item_uuid)
-		return data
-	}
-	useEffect(() => {
-		if(notification){
-			setTimeout(() => setNotification(null), 3000)
-		}
-	}
-	, [notification])
-	useEffect(() => {
-		if(loading){
-			setTimeout(() => setLoading(null), 10000)
-		}
-	}
-	, [loading])
-	useEffect(()=>{
-		sessionStorage.setItem("view", view)
-	},[view])
+      if (+data.stage === 5) {
+        let orderData = [];
+        for (let obj of selectedData) {
+          obj = {
+            ...obj,
+            processing_canceled:
+              +stage === 2
+                ? obj.processing_canceled?.length
+                  ? [...obj.processing_canceled, ...obj.item_details]
+                  : obj.item_details
+                : obj.processing_canceled || [],
+            delivery_return:
+              +stage === 4
+                ? obj.delivery_return?.length
+                  ? [...obj.delivery_return, ...obj.item_details]
+                  : obj.item_details
+                : obj.delivery_return || [],
+            item_details: obj.item_details.map((a) => ({
+              ...a,
+              b: 0,
+              p: 0,
+            })),
+          };
 
-	const saveSpecialPrice = async (item, counter_uuid, setCounters, price) => {
-		try {
-			console.log({ item, counter_uuid, setCounters })
-			const response = await axios({
-				method: "patch",
-				url: "/counters/item_special_price/" + counter_uuid,
-				data: [{ item_uuid: item.item_uuid, price: price || item.p_price }],
-				headers: { "Content-Type": "application/json" }
-			})
-			if (!response.data.success) return
-			setCounters(list => list.map(i => (i.counter_uuid === counter_uuid ? response.data.counter : i)))
-		} catch (error) {
-			console.log(error)
-		}
-	}
+          let billingData = await Billing({
+            order_uuid: obj?.order_uuid,
+            invoice_number: `${obj?.order_type}${obj?.invoice_number}`,
+            replacement: obj.replacement,
+            adjustment: obj.adjustment,
+            shortage: obj.shortage,
+            counter: counters.find((a) => a.counter_uuid === obj.counter_uuid),
+            ////add_discounts: true,
+            items: obj.item_details.map((a) => {
+              let itemData = items.find((b) => a.item_uuid === b.item_uuid);
+              return {
+                ...itemData,
+                ...a,
+              };
+            }),
+          });
 
-	const deleteSpecialPrice = async (item, counter_uuid, setCounters) => {
-		try {
-			console.log({ item, counter_uuid, setCounters })
-			setPromptState(null)
-			const response = await axios({
-				method: "patch",
-				url: "/counters/delete_special_price",
-				data: { item_uuid: item.item_uuid, counter_uuid: counter_uuid },
-				headers: { "Content-Type": "application/json" }
-			})
-			if (!response.data.success) return
-			setCounters(list => list.map(i => (i.counter_uuid === counter_uuid ? response.data.counter : i)))
-		} catch (error) {
-			console.log(error)
-		}
-	}
+          const status = obj?.status?.map((_i) =>
+            +_i?.stage === 5
+              ? { ..._i, cancellation_reason: reasons[obj?.order_uuid] }
+              : _i
+          );
 
-	const spcPricePrompt = (...params) => {
-		setPromptState({
-			active: true,
-			message: "Item special price will be deleted. Do you wish to continue?",
-			actions: [
-				{ label: "Cancel", classname: "cancel", action: () => setPromptState(null) },
-				{ label: "Confirm", classname: "confirm", action: () => deleteSpecialPrice(...params) }
-			]
-		})
-	}
+          orderData.push({
+            ...obj,
+            ...billingData,
+            item_details: billingData.items,
+            status,
+          });
+        }
 
-	const PAYMENT_REMINDER_NOTIFICATION = "7e65e044-9953-433b-a9d7-cced4730b189"
-	const sendPaymentReminders = async counter_ids => {
-		if (!counter_ids?.length) return
-		const response = await axios.post("/whatsapp_notifications/send_payment_reminders", {
-			notification_uuid: PAYMENT_REMINDER_NOTIFICATION,
-			counter_ids
-		})
+        const response = await axios({
+          method: "put",
+          signal: controller.signal,
+          url: "/orders/putOrders",
+          data: orderData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.data.success) {
+          clearTimeout(timeout);
+        }
 
-		if (response?.data?.success)
-			setNotification({
-				success: true,
-				message: "Messages sent successfully"
-			})
-		else
-			setNotification({
-				success: false,
-				message: "Failed to send messages"
-			})
-		setTimeout(() => setNotification(null), 3000)
-	} 
+        setLoading(false);
+        return;
+      }
+      const response = await axios({
+        method: "put",
+        url: "/orders/putOrders",
+        data: selectedData,
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        clearTimeout(timeout);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setLoading(false);
+  };
+  const updateOrder = async (param = {}) => {
+    let controller = new AbortController();
+    if (loading) {
+      return;
+    }
+    setLoading(true);
+    setTimeout(() => {
+      setNotification({
+        message: "Error Processing Request",
+        success: false,
+      });
+      controller.abort();
+      setLoading(false);
+    }, 45000);
+    try {
+      const { data, sendPaymentReminder } = param;
+      const orderUpdateData = data;
+      const maxState = Math.max(
+        ...orderUpdateData?.status?.map((s) => +s.stage)
+      );
 
-	  
+      if (+orderUpdateData?.payment_pending && maxState < 3.5) {
+        orderUpdateData.status.push({
+          stage: 3.5,
+          time: Date.now(),
+          user_uuid: localStorage.getItem("user_uuid"),
+        });
+      }
 
-	return (
-		<Context.Provider
-			value={{
-				calculationPopup,
-				setcalculationPopup,
-				CalculateLines,
-				loading,
-				setLoading,
-				notification,
-				setNotification,
-				updateServerPdf,
-				cashRegisterPopup,
-				setCashRegisterPopup,
-				isItemAvilableOpen,
-				setIsItemAvilableOpen,
-				promptState,
-				setPromptState,
-				getSpecialPrice,
-				saveSpecialPrice,
-				deleteSpecialPrice,
-				spcPricePrompt,
-				pageLoading,
-				setPageLoading,
-				PAYMENT_REMINDER_NOTIFICATION,
-				sendPaymentReminders,
-				skipStages,
-				setSkipStages,
-				view,
-				setView,
-				bankStatementImport,
-				setBankStatementImport,
-				updateOrder,
-			}}
-		>
-			{props.children}
-		</Context.Provider>
-	)
-}
+      const response = await axios({
+        method: "put",
+        url: "/orders/putOrders",
+        signal: controller.signal,
+        data: [
+          {
+            ...data,
+            item_details: data.item_details?.map((i) => ({
+              ...i,
+              price: +(+i.price).toFixed(3),
+            })),
+          },
+        ],
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        if (sendPaymentReminder) sendPaymentReminders([data?.counter_uuid]);
+      }
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+    }
+  };
+  const CalculateLines = async (days, type) => {
+    setLoading(true);
+    const response = await axios({
+      method: "put",
+      url: "/counters/CalculateLines",
+      data: { days, type },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setLoading(false);
+    }
+  };
+  const updateServerPdf = async (data) => {
+    console.log(data);
+  };
 
-export default State
+  const [promptState, setPromptState] = useState();
+
+  const getSpecialPrice = (counters, item, counter_uuid) => {
+    const data = counters
+      ?.find((i) => i.counter_uuid === counter_uuid)
+      ?.item_special_price?.find((i) => i.item_uuid === item.item_uuid);
+    return data;
+  };
+  useEffect(() => {
+    if (notification) {
+      setTimeout(() => setNotification(null), 3000);
+    }
+  }, [notification]);
+  useEffect(() => {
+    if (loading) {
+      setTimeout(() => setLoading(null), 10000);
+    }
+  }, [loading]);
+  useEffect(() => {
+    sessionStorage.setItem("view", view);
+  }, [view]);
+
+  const saveSpecialPrice = async (item, counter_uuid, setCounters, price) => {
+    try {
+      console.log({ item, counter_uuid, setCounters });
+      const response = await axios({
+        method: "patch",
+        url: "/counters/item_special_price/" + counter_uuid,
+        data: [{ item_uuid: item.item_uuid, price: price || item.p_price }],
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!response.data.success) return;
+      setCounters((list) =>
+        list.map((i) =>
+          i.counter_uuid === counter_uuid ? response.data.counter : i
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const deleteSpecialPrice = async (item, counter_uuid, setCounters) => {
+    try {
+      console.log({ item, counter_uuid, setCounters });
+      setPromptState(null);
+      const response = await axios({
+        method: "patch",
+        url: "/counters/delete_special_price",
+        data: { item_uuid: item.item_uuid, counter_uuid: counter_uuid },
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!response.data.success) return;
+      setCounters((list) =>
+        list.map((i) =>
+          i.counter_uuid === counter_uuid ? response.data.counter : i
+        )
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const spcPricePrompt = (...params) => {
+    setPromptState({
+      active: true,
+      message: "Item special price will be deleted. Do you wish to continue?",
+      actions: [
+        {
+          label: "Cancel",
+          classname: "cancel",
+          action: () => setPromptState(null),
+        },
+        {
+          label: "Confirm",
+          classname: "confirm",
+          action: () => deleteSpecialPrice(...params),
+        },
+      ],
+    });
+  };
+
+  const PAYMENT_REMINDER_NOTIFICATION = "7e65e044-9953-433b-a9d7-cced4730b189";
+  const sendPaymentReminders = async (counter_ids) => {
+    if (!counter_ids?.length) return;
+    const response = await axios.post(
+      "/whatsapp_notifications/send_payment_reminders",
+      {
+        notification_uuid: PAYMENT_REMINDER_NOTIFICATION,
+        counter_ids,
+      }
+    );
+
+    if (response?.data?.success)
+      setNotification({
+        success: true,
+        message: "Messages sent successfully",
+      });
+    else
+      setNotification({
+        success: false,
+        message: "Failed to send messages",
+      });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  return (
+    <Context.Provider
+      value={{
+        calculationPopup,
+        setcalculationPopup,
+        CalculateLines,
+        loading,
+        setLoading,
+        notification,
+        setNotification,
+        updateServerPdf,
+        cashRegisterPopup,
+        setCashRegisterPopup,
+        isItemAvilableOpen,
+        setIsItemAvilableOpen,
+        promptState,
+        setPromptState,
+        getSpecialPrice,
+        saveSpecialPrice,
+        deleteSpecialPrice,
+        spcPricePrompt,
+        pageLoading,
+        setPageLoading,
+        PAYMENT_REMINDER_NOTIFICATION,
+        sendPaymentReminders,
+        skipStages,
+        setSkipStages,
+        view,
+        setView,
+        bankStatementImport,
+        setBankStatementImport,
+        updateOrder,
+		submitBulkOrders,
+    setOpeningBalanceDatePopup,
+    openingBalanceDatePopup,
+
+      }}
+    >
+      {props.children}
+    </Context.Provider>
+  );
+};
+
+export default State;

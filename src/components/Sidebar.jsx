@@ -340,7 +340,12 @@ const Sidebar = ({ setCollectionTags }) => {
                   {
                     name: "Bank Statement Import",
                     link: "#",
+
                   },
+                  {
+                    name:"Opening Balance Date",
+                    link:"#"
+                  }
                 ]
               : [
                   {

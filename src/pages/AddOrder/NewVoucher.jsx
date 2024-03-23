@@ -11,7 +11,8 @@ import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
 import { useNavigate, useParams } from "react-router-dom";
 import { getFormateDate, truncateDecimals } from "../../utils/helperFunctions";
-
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import NotesPopup from "../../components/popups/NotesPopup";
 export let getInititalValues = () => {
   let time = new Date();
   return {
@@ -40,7 +41,7 @@ export default function NewVoucher() {
   const [isEdit, setIsEdit] = useState(true);
   const [confirm, setConfirm] = useState(false);
   const [order, setOrder] = useState(getInititalValues());
-
+  const [notesPopup, setNotesPoup] = useState();
   const [ledgerData, setLedgerData] = useState([]);
   const [counters, setCounters] = useState([]);
   const reactInputsRef = useRef({});
@@ -113,9 +114,27 @@ export default function NewVoucher() {
     return truncateDecimals(total, 2);
   }, [order.details]);
   const onSubmit = async (isDelete) => {
+    let is_empty = order.details.find(
+      (a) =>
+        a.add !== 0 &&
+        !a.add &&
+        a.sub !== 0 &&
+        !a.sub &&
+        (a.ledger_title || a.counter_title)
+    );
+
     if (!isDelete && !order.type) {
       setNotification({
         message: "Please Select Voucher Type",
+        success: false,
+      });
+      return;
+    }
+    if (is_empty) {
+      setNotification({
+        message:
+          "Please add quantity to Ledger " +
+          (is_empty.ledger_title || is_empty.counter_title),
         success: false,
       });
       return;
@@ -261,30 +280,34 @@ export default function NewVoucher() {
 
   const LedgerOptions = useMemo(
     () =>
-      [...ledgerData, ...counters]
+      [...counters, ...ledgerData]
         .filter(
           (a) =>
             !order.details.find(
               (b) =>
-                (a.ledger_uuid && b.ledger_uuid === a.ledger_uuid) ||
-                (a.counter_uuid && b.counter_uuid === a.counter_uuid)
+                (a.counter_uuid && b.ledger_uuid === a.counter_uuid) ||
+                (a.ledger_uuid && b.ledger_uuid === a.ledger_uuid)
             )
         )
-        .sort((a, b) =>
-          (a?.counter_title || a?.ledger_title)?.localeCompare(
-            b.counter_title || b.ledger_title
-          )
-        )
-        .map((a, j) => ({
-          value: a.ledger_uuid || a.counter_uuid,
+
+        .map((a) => ({
+          ...a,
           label: a.counter_title || a.ledger_title,
-          key: a.item_uuid,
-          ledger_uuid: a.ledger_uuid,
-          counter_uuid: a.counter_uuid,
-          closing_balance: a.closing_balance,
+          value: a.counter_uuid || a.ledger_uuid,
+          closing_balance: truncateDecimals(
+            (a.closing_balance || 0) + +(a.opening_balance_amount || 0),
+            2
+          ),
         })),
     [ledgerData, counters, order.details]
   );
+  const filterOption = (data, value) => {
+    let label = data.data.label;
+    if (label.toLowerCase().includes(value.toLowerCase())) return true;
+    return false;
+  };
+
+  console.log(LedgerOptions.filter((a) => a.value));
 
   return (
     <>
@@ -338,6 +361,7 @@ export default function NewVoucher() {
                     className="searchInput"
                     pattern="\d{4}-\d{2}-\d{2}"
                     disabled={!isEdit}
+                    filterOption={filterOption}
                   />
                 </div>
               </div>
@@ -369,6 +393,18 @@ export default function NewVoucher() {
                   />
                 </div>
               </div>
+              <div className="inputGroup" style={{ width: "100px" }}>
+                <button
+                  style={{ width: "fit-Content" }}
+                  className="theme-btn"
+                  onClick={(e) => {
+                    e.target.blur();
+                    setNotesPoup((prev) => !prev);
+                  }}
+                >
+                  Notes
+                </button>
+              </div>
             </div>
 
             <div
@@ -381,6 +417,10 @@ export default function NewVoucher() {
                     <th className="pa2 tl bb b--black-20 w-30">Ledger</th>
                     <th className="pa2 tc bb b--black-20">Debit</th>
                     <th className="pa2 tc bb b--black-20">Credit</th>
+                    <th className="pa2 tc bb b--black-20" colSpan={3}>
+                      Narration
+                    </th>
+                    <th className="pa2 tc bb b--black-20">Action</th>
                   </tr>
                 </thead>
 
@@ -398,13 +438,23 @@ export default function NewVoucher() {
                           style={{ width: "300px" }}
                         >
                           <Select
-                            ref={(ref) =>
-                              (reactInputsRef.current[item.uuid] = ref)
-                            }
-                            id={"item_uuid" + item.uuid}
-                            className="order-item-select"
                             options={LedgerOptions}
-                            isDisabled={!isEdit}
+                            getOptionLabel={(option) => (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <span>{option.label}</span>
+                                <span>{option.closing_balance}</span>
+                              </div>
+                            )}
+                            filterOption={filterOption}
+                            openMenuOnFocus={true}
+                            menuPosition="fixed"
+                            menuPlacement="auto"
+                            placeholder="Select"
                             onChange={(e) => {
                               setOrder((prev) => ({
                                 ...prev,
@@ -430,45 +480,22 @@ export default function NewVoucher() {
                             }}
                             value={
                               item.ledger_uuid
-                                ? [...counters, ...ledgerData]
-
-                                    .filter(
-                                      (a) =>
-                                        a.counter_uuid === item.ledger_uuid ||
-                                        a.ledger_uuid === item.ledger_uuid
-                                    )
-                                    .map((a, j) => ({
-                                      value: a.ledger_uuid || a.counter_uuid,
-                                      label: a.counter_title || a.ledger_title,
-                                      key: a.ledger_uuid || a.counter_uuid,
-                                      closing_balance: a.closing_balance,
-                                    }))[0]
+                                ? LedgerOptions.find(
+                                    (a) =>
+                                      a.counter_uuid === item.ledger_uuid ||
+                                      a.ledger_uuid === item.ledger_uuid
+                                  )
                                 : { value: "", label: "" }
                             }
-                            getOptionLabel={(option) => (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <span>{option.label}</span>
-                                <span>{option.closing_balance}</span>
-                              </div>
-                            )}
-                            openMenuOnFocus={true}
                             autoFocus={
                               !params.accounting_voucher_uuid &&
                               (focusedInputId ===
                                 `selectContainer-${item.uuid}` ||
                                 (i === 0 && focusedInputId === 0))
                             }
-                            menuPosition="fixed"
-                            menuPlacement="auto"
-                            placeholder="Item"
                           />
                         </div>
-                      </td>{" "}
+                      </td>
                       <td
                         className="ph2 pv1 tc bb b--black-20 bg-white"
                         style={{ textAlign: "center" }}
@@ -529,6 +556,58 @@ export default function NewVoucher() {
                               ? jumpToNextIndex("q" + item.uuid)
                               : ""
                           }
+                        />
+                      </td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                        color={3}
+                      >
+                        <input
+                          id={"q" + item.uuid}
+                          style={{ width: "300px" }}
+                          type="text"
+                          className="numberInput"
+                          onWheel={(e) => e.preventDefault()}
+                          index={listItemIndexCount++}
+                          disabled={!isEdit}
+                          value={item.narration || ""}
+                          onChange={(e) => {
+                            setOrder((prev) => {
+                              return {
+                                ...prev,
+                                details: prev.details.map((a) =>
+                                  a.uuid === item.uuid
+                                    ? { ...a, narration: e.target.value }
+                                    : a
+                                ),
+                              };
+                            });
+                          }}
+                          onFocus={(e) => e.target.select()}
+                          onKeyDown={(e) =>
+                            e.key === "Enter"
+                              ? jumpToNextIndex("q" + item.uuid)
+                              : ""
+                          }
+                        />
+                      </td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        <DeleteOutlineIcon
+                          style={{ color: "red" }}
+                          className="table-icon"
+                          onClick={() => {
+                            setOrder({
+                              ...order,
+                              item_details: order.item_details.filter(
+                                (a) => a.uuid !== item.uuid
+                              ),
+                            });
+                            //console.log(item);
+                          }}
                         />
                       </td>
                     </tr>
@@ -682,6 +761,16 @@ export default function NewVoucher() {
             </div>
           </div>
         </div>
+      ) : (
+        ""
+      )}
+      {notesPopup ? (
+        <NotesPopup
+          onSave={() => setNotesPoup(false)}
+          setSelectedOrder={setOrder}
+          notesPopup={notesPopup}
+          order={order}
+        />
       ) : (
         ""
       )}

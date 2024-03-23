@@ -83,8 +83,9 @@ import StockValuationReport from "./pages/Reports/StockValuationReport";
 import BankStatementImport from "./pages/others/BankStatementImport";
 import BankReconciliation from "./pages/QuikAccess/BankReconciliation";
 import OpeningBalanceReport from "./pages/Reports/OpeningBalanceReport";
+import OpeningBalanceDate from "./pages/others/OpeningBalanceDate";
 
-export let Version = 280;
+export let Version = 281;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
@@ -101,6 +102,8 @@ function App() {
     cashRegisterPopup,
     bankStatementImport,
     view,
+    setOpeningBalanceDatePopup,
+    openingBalanceDatePopup
   } = context;
   axios.defaults.baseURL = server;
 
@@ -521,6 +524,7 @@ function App() {
       {isItemAvilableOpen && <ItemAvilibility />}
       {cashRegisterPopup && <CashRegister />}
       {bankStatementImport && <BankStatementImport />}
+      {openingBalanceDatePopup && <OpeningBalanceDate />}
 
       <div className={`loading-bar ${loading || pageLoading ? "show" : ""}`}>
         <div className="progress"></div>

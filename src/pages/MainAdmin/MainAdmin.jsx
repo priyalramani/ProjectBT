@@ -2040,8 +2040,10 @@ const MainAdmin = () => {
             setChangeStatePopup(false);
             setSelectOrder("");
             setSelectedOrder([]);
-            if (holdOrders) getRunningHoldOrders();
-            else getRunningOrders();
+            setTimeout(() => {
+              if (holdOrders) getRunningHoldOrders();
+              else getRunningOrders();
+            }, 3000);
           }}
           orders={selectedOrder}
           stage={changesStatePopup}

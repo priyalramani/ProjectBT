@@ -9,6 +9,7 @@ import Sidebar from "../../components/Sidebar";
 import context from "../../context/context";
 import * as XLSX from "xlsx";
 import { FaCross } from "react-icons/fa";
+import { truncateDecimals } from "../../utils/helperFunctions";
 
 const BankReconciliation = () => {
   const [ledgerData, setLedgerData] = useState([]);
@@ -283,7 +284,10 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
           (a.counter_title || a.ledger_title || "") +
           (a.route_title ? `,${a.route_title}` : ""),
         value: a?.counter_uuid || a.ledger_uuid,
-        closing_balance: a.closing_balance,
+        closing_balance: truncateDecimals(
+          (a.closing_balance || 0) + +(a.opening_balance_amount || 0),
+          2
+        ),
       })),
     [counter, ledgerData]
   );

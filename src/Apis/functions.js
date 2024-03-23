@@ -69,7 +69,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
       } else return a;
     });
   }
-  //console.log("eligibleitems", eligibleItems);
+
   data = autobills?.filter(
     (a) =>
       a.type === "auto-item-add" &&
@@ -88,26 +88,26 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           (b) => a.item_group_uuid.filter((c) => c === b).length
         ).length
     );
-    console.log("eligible", eligibleAddItems);
+
     let eligiblesBox =
       eligibleAddItems.length > 1
         ? eligibleAddItems.map((a) => +a.b || 0).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
         ? +eligibleAddItems[0].b
         : 0;
-    console.log("eligibleBox", eligiblesBox);
+    
     let eligiblesPcs =
       eligibleAddItems.length > 1
         ? eligibleAddItems.map((a) => a.p).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
         ? +eligibleAddItems[0].p
         : 0;
-    console.log("eligiblePcs", eligiblesPcs);
+    
 
     let base_qty_arr = autobill.qty_details.filter(
       (b) => b.unit === "b" && +b.base_qty <= eligiblesBox
     );
-    console.log("baseqtyarr", base_qty_arr);
+   
     base_qty_arr =
       eligibleAddItems.length >= autobill.min_range
         ? base_qty_arr.find(
@@ -122,11 +122,11 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
                 : null)
           )
         : null;
-    console.log("baseqtyobj", base_qty_arr);
+
     let pice_qty_arr = autobill.qty_details.filter(
       (b) => b.unit === "p" && +b.base_qty <= eligiblesPcs
     );
-    // console.log("piceqtyarr", pice_qty_arr);
+
     pice_qty_arr =
       eligibleAddItems.length >= autobill.min_range
         ? pice_qty_arr.find(
@@ -141,7 +141,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
                 : null)
           )
         : null;
-    // console.log("piceqtyobj", pice_qty_arr);
+
 
     if (base_qty_arr?.add_items) {
       let dataItems = dbItems.filter(
@@ -162,7 +162,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
             .add_qty,
         };
       });
-      console.log("datapiceItems", dataItems);
+    
 
       let nonFiltered = eligibleItems.filter(
         (a) => !dataItems.filter((b) => a.item_uuid === b.item_uuid).length
@@ -178,7 +178,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           free: (data ? data.free : a.free) || 0,
         };
       });
-      console.log(nonFiltered, dataItems);
+     
       eligibleItems = nonFiltered.length
         ? dataItems.length
           ? [...nonFiltered, ...dataItems]
@@ -206,7 +206,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
             .add_qty,
         };
       });
-      // console.log("datapiceItems", dataItems);
+    
 
       let nonFiltered = eligibleItems.filter(
         (a) => !dataItems.filter((b) => a.item_uuid === b.item_uuid).length
@@ -222,7 +222,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           free: (data ? data.free : a.free) || 0,
         };
       });
-      console.log(nonFiltered, dataItems);
+     
       eligibleItems = nonFiltered.length
         ? dataItems.length
           ? [...nonFiltered, ...dataItems]
@@ -262,12 +262,12 @@ export const Billing = async ({
     );
     counterCharges = await counterCharges?.data?.result;
   } catch (error) {
-    console.error("Error occurred in fetching counter charges:", error);
+    
   }
   let newPriceItems = [];
   for (let item of items) {
     item = { ...item, item_total: 0 };
-    console.log(item);
+  
     let edit_price =
       +edit_prices.find((a) => a.item_uuid === item.item_uuid)?.item_price ||
       item.edit_price ||
@@ -278,7 +278,7 @@ export const Billing = async ({
     let salesManDiscounts = item.charges_discount?.find(
       (a) => a.title === "Salesperson Discount"
     ) || { title: "Salesperson Discount", value: item.discount };
-    console.log(add_discounts, item.edit);
+    
     let charges_discount = (
       item.edit ? [] : item.charges_discount?.filter((a) => a.value) || []
     ).filter(
@@ -376,7 +376,7 @@ export const Billing = async ({
         item_desc_total: (item.item_desc_total * (100 - descInputs)) / 100,
       };
     }
-    console.log({ item_desc_total: item.item_desc_total });
+   
     item = {
       ...item,
       item_desc_total:
@@ -483,7 +483,6 @@ export const PurchaseInvoiceBilling = async ({ items = [], rate_type }) => {
             3
           )
         : 0;
-    console.log({ item_price, item_total, rate_type, qty: item.qty });
     if (item_total) item_total = truncateDecimals(+item_total || 0, 3);
     item = {
       ...item,
@@ -508,10 +507,7 @@ export const PurchaseInvoiceBilling = async ({ items = [], rate_type }) => {
 export const updateIndexedDb = async (setNotification = () => {}) => {
   await deleteDB("BT", {
     blocked(currentVersion, blockedVersion, event) {
-      console.log("IDB DELETE REQUEST BLOCKED.", {
-        currentVersion,
-        blockedVersion,
-      });
+      
       window.location.reload();
     },
   });
@@ -524,7 +520,7 @@ export const updateIndexedDb = async (setNotification = () => {}) => {
     },
   });
 
-  console.log(response.data.success);
+
   if (!response.data.result.status) {
     localStorage.clear();
     sessionStorage.clear();
@@ -540,7 +536,7 @@ export const updateIndexedDb = async (setNotification = () => {}) => {
     },
   });
   let data = result.data.result;
-  console.log(data);
+
   const db = await openDB("BT", Version, {
     upgrade(db) {
       for (const property in data) {
@@ -583,7 +579,7 @@ export const updateIndexedDb = async (setNotification = () => {}) => {
             ? "mode_uuid"
             : ""
         ];
-      //console.log({ ...item, IDENTIFIER });
+    
       await store.put({ ...item, IDENTIFIER });
     }
     index = index + 1;
@@ -612,12 +608,10 @@ export const audioLoopFunction = ({
       return;
     }
     if (src?.[i]?.getAttribute("played") === "true") {
-      //console.log(`skipped number : ${i + 1}`);
+
       audioLoopFunction({ i: i + 1, recall, forcePlayCount, src, callback });
       return;
     }
-
-    //console.log(`trying to play audio number : ${i + 1}`);
 
     navigator.mediaSession.setActionHandler("play", function () {
       src[i].play();
@@ -635,18 +629,16 @@ export const audioLoopFunction = ({
         if (!forcePlayCount) {
           src[i].pause();
           navigator.mediaSession.playbackState = "paused";
-          //console.log(`Paused ${i + 1}/${src.length} audios`);
+       
         } else {
-          //console.log(`Playing ${i + 1}/${src.length} audios`);
+        
           navigator.mediaSession.playbackState = "playing";
-          //console.log("forcePlayCount:", forcePlayCount);
+        
         }
 
         let intervalId = setInterval(() => {
           if (src[i]?.duration - src[i].currentTime > 8.8)
-            return console.log(
-              `returning : ${src[i]?.duration - src[i].currentTime}`
-            );
+            return ;
 
           clearInterval(+sessionStorage.getItem("intervalId"));
           src[i].currentTime = src[i].duration;
@@ -656,7 +648,7 @@ export const audioLoopFunction = ({
           callback(src[i]?.elem_id);
 
           if (!src[i + 1]) return;
-          console.log(`no next audio : ${i + 1}`);
+   
 
           setTimeout(() => {
             audioLoopFunction({
@@ -673,15 +665,13 @@ export const audioLoopFunction = ({
       .catch((error) => {
         if (recall)
           setTimeout(() => {
-            console.log(
-              `could not play ${i} audio : ${error.message} recall : ${recall}`
-            );
+            
             audioLoopFunction({ i, recall, src, callback });
           }, 3000);
-        else console.log(`could not play ${i} audio : ${error.message}`);
+     
       });
   } catch (error) {
-    console.log(error.message);
+
   }
 };
 
@@ -696,7 +686,7 @@ export const audioAPIFunction = ({ speechString, elem_id, callback }) => {
     function (e) {
       if (audioElement.duration !== Infinity) {
         audioElement.remove();
-        //console.log(audioElement.duration);
+
         audioElement.elem_id = elem_id;
         callback(audioElement);
       }
@@ -715,18 +705,17 @@ export const jumpToNextIndex = (
   setFocusedInputId,
   appendData
 ) => {
-  //console.log(id);
+
   document.getElementById(id)?.blur();
   const index = +document.getElementById(id).getAttribute("index") + 1;
-  //console.log("this is next index", index);
 
   const nextElem = document.querySelector(`[index="${index}"]`);
   if (nextElem) {
     if (nextElem.id.includes(`REACT_SELECT_COMPONENT`)) {
-      //console.log("next select container id: ", nextElem.id);
+   
       reactInputsRef.current[nextElem.id].focus();
     } else {
-      //console.log("next input id: ", nextElem.id);
+
       setFocusedInputId("");
       setTimeout(
         () => document.querySelector(`[index="${index}"]`).focus(),
@@ -742,10 +731,7 @@ export const refreshDb = async () => {
 
   await deleteDB("BT", {
     blocked(currentVersion, blockedVersion, event) {
-      console.log("IDB DELETE REQUEST BLOCKED.", {
-        currentVersion,
-        blockedVersion,
-      });
+     
       window.location.reload();
     },
   });
