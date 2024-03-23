@@ -87,8 +87,8 @@ import OpeningBalanceDate from "./pages/others/OpeningBalanceDate";
 import OrderPdf from "./components/prints/OrderPdf";
 
 export let Version = 281;
-export const server = "http://localhost:9000";
-// export const server = "https://api.btgondia.com";
+// export const server = "http://localhost:9000";
+export const server = "https://api.btgondia.com";
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
