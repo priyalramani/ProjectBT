@@ -151,7 +151,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate replace to={"/users"} />} />
         <Route path="/Privacy_Policy" element={<PrivacyPolicy />} />
-        <Route path="/order/:order_uuid" element={<OrderPdf />} />
+        <Route path="/pdf/:order_uuid" element={<OrderPdf />} />
         <Route
           path="/counter/:short_link"
           element={
