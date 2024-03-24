@@ -1,11 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import axios from "axios";
-import { useEffect, useRef, useState, useContext } from "react";
+import { useEffect, useRef, useState, useContext, useMemo } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
 import { PurchaseInvoiceBilling } from "../../Apis/functions";
-import { AddCircle as AddIcon } from "@mui/icons-material";
+import { AddCircle as AddIcon, ArrowBack } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
 import Select from "react-select";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -13,6 +13,7 @@ import Context from "../../context/context";
 import { getFormateDate, truncateDecimals } from "../../utils/helperFunctions";
 import MessagePopup from "../../components/MessagePopup";
 import NotesPopup from "../../components/popups/NotesPopup";
+import { useNavigate, useParams } from "react-router-dom";
 
 const customStyles = {
   option: (provided, state) => ({
@@ -43,6 +44,7 @@ export let getInititalValues = () => ({
   order_type: "I",
   rate_type: "at",
   party_number: "",
+  deductions: [],
   time_1: 24 * 60 * 60 * 1000,
   time_2: (24 + 48) * 60 * 60 * 1000,
   warehouse_uuid: localStorage.getItem("warehouse")
@@ -53,9 +55,13 @@ export let getInititalValues = () => ({
 
 export default function PurchaseInvoice() {
   const { setNotification } = useContext(Context);
+  const { order_uuid } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState(getInititalValues());
+  const [deductionPopup, setDeductionPopup] = useState(false);
   const [ledgerData, setLedgerData] = useState([]);
-  const [counterFilter] = useState("");
+  const [allLedgerData, setAllLedgerData] = useState([]);
+  const [counter, setCounter] = useState([]);
   const [notesPopup, setNotesPoup] = useState();
   const [warehouse, setWarehouse] = useState([]);
   const [user_warehouse, setUser_warehouse] = useState([]);
@@ -73,6 +79,55 @@ export default function PurchaseInvoice() {
     } catch (error) {
       console.log(error);
     }
+  };
+  useEffect(() => {
+    let controller = new AbortController();
+    if (order_uuid) {
+      axios
+        .get(`/purchaseInvoice/getPurchaseInvoice/${order_uuid}`, {
+          signal: controller.signal,
+        })
+        .then((res) => {
+          if (res.data.success) {
+            let data = res.data.result;
+            data.item_details = data.item_details.map((a, i) => {
+              let itemData = itemsData.find((b) => b.item_uuid === a.item_uuid);
+              return {
+                ...itemData,
+                ...a,
+                uuid: a.item_uuid || uuid(),
+                sr: i + 1,
+                p_price: a.price,
+                b_price: a.price * itemData.conversion,
+              };
+            });
+            setOrder(
+              data
+                ? {
+                    ...data,
+                    item_details: data.item_details,
+                  }
+                : getInititalValues()
+            );
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+    return () => controller.abort();
+  }, [order_uuid, itemsData]);
+  const getCounter = async (controller = new AbortController()) => {
+    const response = await axios({
+      method: "post",
+      url: "/counters/GetCounterList",
+      signal: controller.signal,
+      data: { counters: [] },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setCounter(response.data.result);
   };
   const GetWarehouseList = async () => {
     const response = await axios({
@@ -112,7 +167,7 @@ export default function PurchaseInvoice() {
     if (response.data.success) setItemsData(response.data.result);
   };
 
-  const getCounter = async () => {
+  const getLedger = async () => {
     const response = await axios({
       method: "get",
       url: "/ledger/getLedger",
@@ -121,12 +176,14 @@ export default function PurchaseInvoice() {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success)
+    if (response.data.success) {
       setLedgerData(
         response.data.result.filter(
           (a) => a.ledger_group_uuid === "004fd020-853c-4575-bebe-b29faefae3c9"
         )
       );
+      setAllLedgerData(response.data.result);
+    }
   };
 
   useEffect(() => {
@@ -134,6 +191,7 @@ export default function PurchaseInvoice() {
     GetUserWarehouse();
     GetWarehouseList();
     fetchCompanies();
+    getLedger();
   }, []);
 
   useEffect(() => {
@@ -175,7 +233,7 @@ export default function PurchaseInvoice() {
     let autoBilling = await PurchaseInvoiceBilling({
       rate_type: order.rate_type,
 
-      items: data.item_details.map((a) => ({
+      item_details: data.item_details.map((a) => ({
         ...a,
         item_price: a.p_price || a.item_price,
       })),
@@ -184,9 +242,8 @@ export default function PurchaseInvoice() {
     data = {
       ...data,
       ...autoBilling,
-      order_uuid: uuid(),
       opened_by: 0,
-      item_details: autoBilling.items.map((a) => ({
+      item_details: autoBilling.item_details.map((a) => ({
         ...a,
         unit_price:
           a.item_total / (+(+a.conversion * a.b) + a.p + a.free) ||
@@ -205,8 +262,8 @@ export default function PurchaseInvoice() {
     console.log("orderJSon", data);
 
     const response = await axios({
-      method: "post",
-      url: "/purchaseInvoice/postAccountVoucher",
+      method: order_uuid ? "put" : "post",
+      url: `/purchaseInvoice/${order_uuid ? "put" : "post"}PurchaseInvoice`,
       data,
       headers: {
         "Content-Type": "application/json",
@@ -214,8 +271,19 @@ export default function PurchaseInvoice() {
     });
     console.log(response);
     if (response.data.success) {
-      // window.location.reload();
-      setOrder(getInititalValues());
+      if (order_uuid) {
+        setNotification({
+          message: "Purchase Invoice Updated Successfully",
+          severity: "success",
+        });
+        navigate(-1);
+      } else {
+        setNotification({
+          message: "Purchase Invoice Added Successfully",
+          severity: "success",
+        });
+        setOrder(getInititalValues());
+      }
     }
   };
 
@@ -224,15 +292,18 @@ export default function PurchaseInvoice() {
 
     let autoBilling = await PurchaseInvoiceBilling({
       rate_type: order.rate_type,
+      deductions: order.deductions,
 
-      items: order.item_details.map((a) => ({ ...a, item_price: a.p_price })),
+      item_details: order.item_details.map((a) => ({
+        ...a,
+        item_price: a.p_price,
+      })),
     });
 
     setConfirmPopup({
       ...order,
       ...autoBilling,
       ...type,
-      item_details: autoBilling.items,
     });
   };
 
@@ -320,6 +391,19 @@ export default function PurchaseInvoice() {
       }));
     }
   };
+  const LedgerOptions = useMemo(
+    () =>
+      [...counter, ...allLedgerData].map((a) => ({
+        ...a,
+        label: a.counter_title || a.ledger_title,
+        value: a.counter_uuid || a.ledger_uuid,
+        closing_balance: truncateDecimals(
+          (a.closing_balance || 0) + +(a.opening_balance_amount || 0),
+          2
+        ),
+      })),
+    [counter, allLedgerData]
+  );
   return (
     <>
       <Sidebar />
@@ -328,6 +412,24 @@ export default function PurchaseInvoice() {
         <div className="inventory">
           <div className="accountGroup" id="voucherForm" action="">
             <div className="inventory_header">
+              {order_uuid ? (
+                <div
+                  style={{
+                    cursor: "pointer",
+                    padding: "5px",
+                    backgroundColor: "#000",
+                    borderRadius: "50%",
+                  }}
+                  onClick={() => {
+                    sessionStorage.setItem("isEditVoucher", 1);
+                    navigate(-1);
+                  }}
+                >
+                  <ArrowBack style={{ fontSize: "40px", color: "#fff" }} />
+                </div>
+              ) : (
+                ""
+              )}
               <h2>Purchase Invoice </h2>
             </div>
 
@@ -337,23 +439,15 @@ export default function PurchaseInvoice() {
                 <div className="inputGroup">
                   <Select
                     ref={(ref) => (reactInputsRef.current["0"] = ref)}
-                    options={ledgerData
-                      ?.filter(
-                        (a) =>
-                          !counterFilter ||
-                          a.ledger_title
-                            ?.toLocaleLowerCase()
-                            ?.includes(counterFilter.toLocaleLowerCase())
-                      )
-                      .map((a) => ({
-                        value: a.ledger_uuid,
-                        label: a.ledger_title,
-                        closing_balance: truncateDecimals(
-                          (a.closing_balance || 0) +
-                            +(a.opening_balance_amount || 0),
-                          2
-                        ),
-                      }))}
+                    options={ledgerData.map((a) => ({
+                      value: a.ledger_uuid,
+                      label: a.ledger_title,
+                      closing_balance: truncateDecimals(
+                        (a.closing_balance || 0) +
+                          +(a.opening_balance_amount || 0),
+                        2
+                      ),
+                    }))}
                     getOptionLabel={(option) => (
                       <div
                         style={{
@@ -382,7 +476,7 @@ export default function PurchaseInvoice() {
                           }
                         : ""
                     }
-                    autoFocus={!order?.ledger_uuid}
+                    autoFocus={!order?.ledger_uuid && !order_uuid}
                     openMenuOnFocus={true}
                     menuPosition="fixed"
                     menuPlacement="auto"
@@ -691,9 +785,10 @@ export default function PurchaseInvoice() {
                               }
                               openMenuOnFocus={true}
                               autoFocus={
-                                focusedInputId ===
+                                (focusedInputId ===
                                   `selectContainer-${item.uuid}` ||
-                                (i === 0 && focusedInputId === 0)
+                                  (i === 0 && focusedInputId === 0)) &&
+                                !order_uuid
                               }
                               menuPosition="fixed"
                               menuPlacement="auto"
@@ -925,6 +1020,8 @@ export default function PurchaseInvoice() {
                     ))}
                     <tr>
                       <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
                         onClick={() =>
                           setOrder((prev) => ({
                             ...prev,
@@ -987,14 +1084,42 @@ export default function PurchaseInvoice() {
               {order?.order_grandtotal ? (
                 <button
                   style={{
-                    position: "fixed",
-                    bottom: "10px",
-                    right: "0",
+                   
                     cursor: "default",
                   }}
                   type="button"
                 >
                   Total: {order?.order_grandtotal || 0}
+                </button>
+              ) : (
+                ""
+              )}
+
+              <button
+                style={{
+                 
+                  cursor: "default",
+                }}
+                type="button"
+                onClick={() => {
+                  setDeductionPopup(true);
+                }}
+              >
+                Deductions
+              </button>
+
+              {order_uuid ? (
+                <button
+                  style={{
+                    
+                    cursor: "default",
+                  }}
+                  type="button"
+                  onClick={() => {
+                    navigate("/admin/editVoucher/" + order_uuid);
+                  }}
+                >
+                  A/c Voucher
                 </button>
               ) : (
                 ""
@@ -1046,6 +1171,147 @@ export default function PurchaseInvoice() {
           notesPopup={notesPopup}
           order={order}
         />
+      ) : (
+        ""
+      )}
+      {deductionPopup ? (
+        <div className="overlay">
+          <div className="modal">
+            <h3>Deductions</h3>
+            <div
+              className="items_table"
+              style={{
+                flex: "1",
+                height: "75vh",
+                overflow: "scroll",
+                width: "80vw",
+              }}
+            >
+              <table className="f6 w-100 center" cellSpacing="0">
+                <thead className="lh-copy" style={{ position: "static" }}>
+                  <tr className="white">
+                    <th className="pa2 tl bb b--black-20 w-30">Ledger</th>
+                    <th className="pa2 tl bb b--black-20 w-30">Amount</th>
+                    <th className="pa2 tl bb b--black-20 w-30"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {order.deductions?.map((a, i) => (
+                    <tr key={i}>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        <Select
+                          options={LedgerOptions}
+                          getOptionLabel={(option) => (
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                              }}
+                            >
+                              <span>{option.label}</span>
+                              <span>{option.closing_balance || 0}</span>
+                            </div>
+                          )}
+                          onChange={(doc) => {
+                            setOrder((prev) => ({
+                              ...prev,
+                              deductions: prev.deductions.map((b, j) =>
+                                i === j ? { ...b, ledger_uuid: doc?.value } : b
+                              ),
+                            }));
+                          }}
+                          styles={customStyles}
+                          value={
+                            a?.ledger_uuid
+                              ? LedgerOptions.find(
+                                  (j) =>
+                                    j.value === a.ledger_uuid ||
+                                    j.value === a.counter_uuid
+                                )
+                              : ""
+                          }
+                          openMenuOnFocus={true}
+                          menuPosition="fixed"
+                          menuPlacement="auto"
+                          placeholder="Select"
+                        />
+                      </td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        <input
+                          type="number"
+                          className="numberInput"
+                          onWheel={(e) => e.preventDefault()}
+                          value={a.amount}
+                          onChange={(e) => {
+                            setOrder((prev) => ({
+                              ...prev,
+                              deductions: prev.deductions.map((b, j) =>
+                                i === j ? { ...b, amount: e.target.value } : b
+                              ),
+                            }));
+                          }}
+                        />
+                      </td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        <DeleteOutlineIcon
+                          style={{ color: "red" }}
+                          onClick={() => {
+                            setOrder((prev) => ({
+                              ...prev,
+                              deductions: prev.deductions.filter(
+                                (b, j) => i !== j
+                              ),
+                            }));
+                          }}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                  <tr>
+                    <td
+                      colSpan={3}
+                      onClick={() =>
+                        setOrder((prev) => ({
+                          ...prev,
+                          deductions: [
+                            ...prev.deductions,
+                            {
+                              title: "",
+                              ledger_uuid: "",
+                              amount: 0,
+                              uuid: uuid(),
+                            },
+                          ],
+                        }))
+                      }
+                    >
+                      <AddIcon
+                        sx={{ fontSize: 40 }}
+                        style={{ color: "#4AC959", cursor: "pointer" }}
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <button
+              className="submit"
+              type="button"
+              onClick={() => setDeductionPopup(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
       ) : (
         ""
       )}

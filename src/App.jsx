@@ -85,8 +85,9 @@ import BankReconciliation from "./pages/QuikAccess/BankReconciliation";
 import OpeningBalanceReport from "./pages/Reports/OpeningBalanceReport";
 import OpeningBalanceDate from "./pages/others/OpeningBalanceDate";
 import OrderPdf from "./components/prints/OrderPdf";
+import TermsAndConditions from "./TermsAndConditions";
 
-export let Version = 281;
+export let Version = 282;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
@@ -104,7 +105,7 @@ function App() {
     bankStatementImport,
     view,
     setOpeningBalanceDatePopup,
-    openingBalanceDatePopup
+    openingBalanceDatePopup,
   } = context;
   axios.defaults.baseURL = server;
 
@@ -151,6 +152,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate replace to={"/users"} />} />
         <Route path="/Privacy_Policy" element={<PrivacyPolicy />} />
+        <Route path="/TnC" element={<TermsAndConditions />} />
         <Route path="/pdf/:order_uuid" element={<OrderPdf />} />
         <Route
           path="/counter/:short_link"
@@ -378,6 +380,10 @@ function App() {
             <Route path="/admin/addOrder" element={<AddOrder />} />
             <Route
               path="/admin/purchaseInvoice"
+              element={<PurchaseInvoice />}
+            />
+            <Route
+              path="/admin/editPurchaseInvoice/:order_uuid"
               element={<PurchaseInvoice />}
             />
             <Route path="/admin/addVoucher" element={<AddVoucher />} />

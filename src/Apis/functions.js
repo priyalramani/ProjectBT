@@ -95,19 +95,18 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
         : eligibleAddItems.length === 1
         ? +eligibleAddItems[0].b
         : 0;
-    
+
     let eligiblesPcs =
       eligibleAddItems.length > 1
         ? eligibleAddItems.map((a) => a.p).reduce((a, b) => a + b)
         : eligibleAddItems.length === 1
         ? +eligibleAddItems[0].p
         : 0;
-    
 
     let base_qty_arr = autobill.qty_details.filter(
       (b) => b.unit === "b" && +b.base_qty <= eligiblesBox
     );
-   
+
     base_qty_arr =
       eligibleAddItems.length >= autobill.min_range
         ? base_qty_arr.find(
@@ -142,7 +141,6 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           )
         : null;
 
-
     if (base_qty_arr?.add_items) {
       let dataItems = dbItems.filter(
         (a) =>
@@ -162,7 +160,6 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
             .add_qty,
         };
       });
-    
 
       let nonFiltered = eligibleItems.filter(
         (a) => !dataItems.filter((b) => a.item_uuid === b.item_uuid).length
@@ -178,7 +175,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           free: (data ? data.free : a.free) || 0,
         };
       });
-     
+
       eligibleItems = nonFiltered.length
         ? dataItems.length
           ? [...nonFiltered, ...dataItems]
@@ -206,7 +203,6 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
             .add_qty,
         };
       });
-    
 
       let nonFiltered = eligibleItems.filter(
         (a) => !dataItems.filter((b) => a.item_uuid === b.item_uuid).length
@@ -222,7 +218,7 @@ export const AutoAdd = async ({ counter, items, dbItems, autobills = [] }) => {
           free: (data ? data.free : a.free) || 0,
         };
       });
-     
+
       eligibleItems = nonFiltered.length
         ? dataItems.length
           ? [...nonFiltered, ...dataItems]
@@ -261,13 +257,11 @@ export const Billing = async ({
       creating_new ? { counter_uuid: counter.counter_uuid } : { invoice_number }
     );
     counterCharges = await counterCharges?.data?.result;
-  } catch (error) {
-    
-  }
+  } catch (error) {}
   let newPriceItems = [];
   for (let item of items) {
     item = { ...item, item_total: 0 };
-  
+
     let edit_price =
       +edit_prices.find((a) => a.item_uuid === item.item_uuid)?.item_price ||
       item.edit_price ||
@@ -278,7 +272,7 @@ export const Billing = async ({
     let salesManDiscounts = item.charges_discount?.find(
       (a) => a.title === "Salesperson Discount"
     ) || { title: "Salesperson Discount", value: item.discount };
-    
+
     let charges_discount = (
       item.edit ? [] : item.charges_discount?.filter((a) => a.value) || []
     ).filter(
@@ -376,7 +370,7 @@ export const Billing = async ({
         item_desc_total: (item.item_desc_total * (100 - descInputs)) / 100,
       };
     }
-   
+
     item = {
       ...item,
       item_desc_total:
@@ -455,9 +449,13 @@ export const Billing = async ({
     others,
   };
 };
-export const PurchaseInvoiceBilling = async ({ items = [], rate_type }) => {
+export const PurchaseInvoiceBilling = async ({
+  item_details = [],
+  rate_type,
+  deductions = [],
+}) => {
   let newPriceItems = [];
-  for (let item of items) {
+  for (let item of item_details) {
     item = { ...item, item_total: 0 };
 
     item = {
@@ -492,22 +490,22 @@ export const PurchaseInvoiceBilling = async ({ items = [], rate_type }) => {
 
     newPriceItems.push(item);
   }
-
+  let deductionsTotal = 
+    deductions.reduce((a, b) => a + +(b.amount || 0), 0) || 0;
   let order_grandtotal = truncateDecimals(
-    newPriceItems.reduce((a, b) => a + +b.item_total, 0),
+    newPriceItems.reduce((a, b) => a + +b.item_total, 0) - deductionsTotal,
     3
   );
 
   return {
     order_grandtotal,
-    items: newPriceItems,
+    item_details: newPriceItems,
   };
 };
 
 export const updateIndexedDb = async (setNotification = () => {}) => {
   await deleteDB("BT", {
     blocked(currentVersion, blockedVersion, event) {
-      
       window.location.reload();
     },
   });
@@ -519,7 +517,6 @@ export const updateIndexedDb = async (setNotification = () => {}) => {
       "Content-Type": "application/json",
     },
   });
-
 
   if (!response.data.result.status) {
     localStorage.clear();
@@ -579,7 +576,7 @@ export const updateIndexedDb = async (setNotification = () => {}) => {
             ? "mode_uuid"
             : ""
         ];
-    
+
       await store.put({ ...item, IDENTIFIER });
     }
     index = index + 1;
@@ -608,7 +605,6 @@ export const audioLoopFunction = ({
       return;
     }
     if (src?.[i]?.getAttribute("played") === "true") {
-
       audioLoopFunction({ i: i + 1, recall, forcePlayCount, src, callback });
       return;
     }
@@ -629,16 +625,12 @@ export const audioLoopFunction = ({
         if (!forcePlayCount) {
           src[i].pause();
           navigator.mediaSession.playbackState = "paused";
-       
         } else {
-        
           navigator.mediaSession.playbackState = "playing";
-        
         }
 
         let intervalId = setInterval(() => {
-          if (src[i]?.duration - src[i].currentTime > 8.8)
-            return ;
+          if (src[i]?.duration - src[i].currentTime > 8.8) return;
 
           clearInterval(+sessionStorage.getItem("intervalId"));
           src[i].currentTime = src[i].duration;
@@ -648,7 +640,6 @@ export const audioLoopFunction = ({
           callback(src[i]?.elem_id);
 
           if (!src[i + 1]) return;
-   
 
           setTimeout(() => {
             audioLoopFunction({
@@ -665,14 +656,10 @@ export const audioLoopFunction = ({
       .catch((error) => {
         if (recall)
           setTimeout(() => {
-            
             audioLoopFunction({ i, recall, src, callback });
           }, 3000);
-     
       });
-  } catch (error) {
-
-  }
+  } catch (error) {}
 };
 
 export const audioAPIFunction = ({ speechString, elem_id, callback }) => {
@@ -705,17 +692,14 @@ export const jumpToNextIndex = (
   setFocusedInputId,
   appendData
 ) => {
-
   document.getElementById(id)?.blur();
   const index = +document.getElementById(id).getAttribute("index") + 1;
 
   const nextElem = document.querySelector(`[index="${index}"]`);
   if (nextElem) {
     if (nextElem.id.includes(`REACT_SELECT_COMPONENT`)) {
-   
       reactInputsRef.current[nextElem.id].focus();
     } else {
-
       setFocusedInputId("");
       setTimeout(
         () => document.querySelector(`[index="${index}"]`).focus(),
@@ -731,7 +715,6 @@ export const refreshDb = async () => {
 
   await deleteDB("BT", {
     blocked(currentVersion, blockedVersion, event) {
-     
       window.location.reload();
     },
   });

@@ -281,15 +281,7 @@ export default function NewVoucher() {
   const LedgerOptions = useMemo(
     () =>
       [...counters, ...ledgerData]
-        .filter(
-          (a) =>
-            !order.details.find(
-              (b) =>
-                (a.counter_uuid && b.ledger_uuid === a.counter_uuid) ||
-                (a.ledger_uuid && b.ledger_uuid === a.ledger_uuid)
-            )
-        )
-
+        
         .map((a) => ({
           ...a,
           label: a.counter_title || a.ledger_title,
@@ -438,7 +430,15 @@ export default function NewVoucher() {
                           style={{ width: "300px" }}
                         >
                           <Select
-                            options={LedgerOptions}
+                            options={LedgerOptions.filter(
+                              (a) =>
+                                !order.details.find(
+                                  (b) =>
+                                    (a.counter_uuid && b.ledger_uuid === a.counter_uuid) ||
+                                    (a.ledger_uuid && b.ledger_uuid === a.ledger_uuid)
+                                )
+                            )
+                    }
                             getOptionLabel={(option) => (
                               <div
                                 style={{
@@ -493,6 +493,7 @@ export default function NewVoucher() {
                                 `selectContainer-${item.uuid}` ||
                                 (i === 0 && focusedInputId === 0))
                             }
+                            isDisabled={!isEdit}
                           />
                         </div>
                       </td>

@@ -55,6 +55,7 @@ export function getFormateDate(time) {
     .replace("mm", ("00" + (time?.getMonth() + 1)?.toString()).slice(-2))
     .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
     .replace("dd", ("00" + time?.getDate()?.toString()).slice(-2));
+    
   return curTime;
 }
 export function getMidnightTimestamp(now) {

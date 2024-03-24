@@ -395,13 +395,18 @@ export function OrderDetails({
     setOrderData({
       ...order,
       priority: order?.priority || 0,
-      item_details: order?.item_details?.map((a, i) => ({
-        ...itemsData.find((b) => b.item_uuid === a.item_uuid),
-        ...a,
-        uuid: uuid(),
-        default: true,
-        sr: i + 1,
-      })),
+      item_details: order?.item_details?.map((a, i) => {
+        let itemData = itemsData.find((b) => b.item_uuid === a.item_uuid);
+        return {
+          ...itemData,
+          ...a,
+          uuid: uuid(),
+          default: true,
+          sr: i + 1,
+          p_price: +(a?.edit_price || a.price),
+          b_price: +(a?.edit_price || a.price) * (itemData?.conversion || 0),
+        };
+      }),
       fulfillment: [],
     });
 
@@ -409,7 +414,58 @@ export function OrderDetails({
       setNotesPoup(true);
     }
   }, [itemsData, order]);
-
+  const onItemPriceChange = async (e, item) => {
+    // if (e.target.value.toString().toLowerCase().includes("no special")) {
+    //   await deleteSpecialPrice(item, order?.counter_uuid, setCounters);
+    //   e.target.value = +e.target.value
+    //     .split("")
+    //     .filter((i) => i)
+    //     .filter((i) => +i || +i === 0)
+    //     .join("");
+    // }
+    setOrderData((prev) => {
+      return {
+        ...prev,
+        item_details: prev.item_details.map((a) =>
+          a.uuid === item.uuid
+            ? {
+                ...a,
+                p_price: e.target.value,
+                b_price: (e.target.value * item.conversion || 0).toFixed(2),
+              }
+            : a
+        ),
+      };
+    });
+    setEditPrices((prev) =>
+      prev.filter((a) => a.item_uuid === item.item_uuid).length
+        ? prev.map((a) =>
+            a.item_uuid === item.item_uuid
+              ? {
+                  ...a,
+                  p_price: e.target.value,
+                  b_price: (e.target.value * item.conversion || 0).toFixed(2),
+                }
+              : a
+          )
+        : prev.length
+        ? [
+            ...prev,
+            {
+              ...item,
+              p_price: e.target.value,
+              b_price: (e.target.value * item.conversion || 0).toFixed(2),
+            },
+          ]
+        : [
+            {
+              ...item,
+              p_price: e.target.value,
+              b_price: (e.target.value * item.conversion || 0).toFixed(2),
+            },
+          ]
+    );
+  };
   useEffect(() => {
     if (
       counters
@@ -587,7 +643,7 @@ export function OrderDetails({
       .filter((a) => a.item_uuid && !a.free && a.state !== 3)
       .map((a) => ({
         ...a,
-        is_empty: !+a.price,
+        is_empty: !+a.p_price,
       }))
       .find((a) => a.is_empty);
     if (empty_price) {
@@ -639,7 +695,7 @@ export function OrderDetails({
       order_uuid: data?.order_uuid,
       invoice_number: `${data?.order_type}${data?.invoice_number}`,
       counter,
-      items: data.item_details,
+      items: data.item_details.map((a) => ({ ...a, item_price: a.p_price })),
       replacement: data.replacement,
       adjustment: data.adjustment,
       shortage: data.shortage,
@@ -659,7 +715,7 @@ export function OrderDetails({
         ...a,
         gst_percentage: a.item_gst,
         status: a.status || 0,
-        price: a?.price || a.item_price || 0,
+        price: a.p_price || a?.price || a.item_price || 0,
       })),
       order_status: data?.item_details?.filter((a) => a.price_approval === "N")
         ?.length
@@ -774,7 +830,7 @@ export function OrderDetails({
             ...data,
             item_details: data.item_details?.map((i) => ({
               ...i,
-              price: +(+i.price).toFixed(3),
+              price: +(+i.p_price || +i.price).toFixed(3),
             })),
           },
         ],
@@ -902,7 +958,7 @@ export function OrderDetails({
         ...a,
         gst_percentage: a.item_gst,
         status: a.status || 0,
-        price: a?.price || a.item_price || 0,
+        price: a.p_price || a?.price || a.item_price || 0,
       })),
       order_status: data?.item_details?.filter((a) => a.price_approval === "N")
         ?.length
@@ -1206,7 +1262,7 @@ export function OrderDetails({
           return {
             ..._itemData,
             ...a,
-            price: _itemData?.price || 0,
+            price: _itemData.p_price || _itemData?.price || 0,
           };
         }),
       });
@@ -2137,10 +2193,25 @@ export function OrderDetails({
                                 onChange={(e) => {
                                   setOrderData((prev) => ({
                                     ...prev,
-                                    item_details: prev.item_details?.map((a) =>
-                                      a.uuid === item.uuid
-                                        ? { ...a, status: e.value }
-                                        : a
+                                    item_details: prev.item_details?.map(
+                                      (a) => {
+                                        if (a.uuid === item.uuid) {
+                                          const p_price =
+                                            +getSpecialPrice(
+                                              counters,
+                                              item,
+                                              order?.counter_uuid
+                                            )?.price || item.item_price;
+                                          return {
+                                            ...a,
+                                            status: e.value,
+                                            p_price: p_price,
+                                            b_price: Math.floor(
+                                              p_price * item.conversion || 0
+                                            ),
+                                          };
+                                        } else return a;
+                                      }
                                     ),
                                   }));
                                   shiftFocus(item_status_component_id);
@@ -2278,47 +2349,8 @@ export function OrderDetails({
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
-                                value={(+(
-                                  item.edit_price ||
-                                  item.price ||
-                                  0
-                                )).toFixed(3)}
-                                onChange={(e) => {
-                                  setOrderData((prev) => {
-                                    return {
-                                      ...prev,
-                                      item_details: prev.item_details?.map(
-                                        (a) =>
-                                          a.uuid === item.uuid
-                                            ? {
-                                                ...a,
-                                                price: e.target.value,
-                                              }
-                                            : a
-                                      ),
-                                    };
-                                  });
-                                  setEditPrices((prev) =>
-                                    prev.find(
-                                      (a) => a.item_uuid === item.item_uuid
-                                    )
-                                      ? prev.map((a) =>
-                                          a.item_uuid === item.item_uuid
-                                            ? {
-                                                ...a,
-                                                item_price: e.target.value,
-                                              }
-                                            : a
-                                        )
-                                      : [
-                                          ...prev,
-                                          {
-                                            item_uuid: item.item_uuid,
-                                            item_price: e.target.value,
-                                          },
-                                        ]
-                                  );
-                                }}
+                                value={item?.p_price || 0}
+                                onChange={(e) => onItemPriceChange(e, item)}
                                 onFocus={(e) => {
                                   e.target.onwheel = () => false;
                                   e.target.select();
@@ -2331,7 +2363,7 @@ export function OrderDetails({
                                 disabled={!item.item_uuid}
                               />
                             ) : (
-                              "Rs:" + (item?.edit_price || item?.price || 0)
+                              "Rs:" + (item.p_price || 0)
                             )}
                           </td>
                           <td
@@ -2350,50 +2382,62 @@ export function OrderDetails({
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
-                                value={Math.floor(
-                                  (item.edit_price || item.price || 0) *
-                                    item.conversion || 0
-                                )}
+                                value={item?.b_price}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
                                     return {
                                       ...prev,
-                                      item_details: prev.item_details?.map(
-                                        (a) =>
-                                          a.uuid === item.uuid
-                                            ? {
-                                                ...a,
-                                                price: +(
-                                                  e.target.value /
-                                                  item.conversion
-                                                ),
-                                              }
-                                            : a
+                                      item_details: prev.item_details.map((a) =>
+                                        a.uuid === item.uuid
+                                          ? {
+                                              ...a,
+                                              b_price: e.target.value,
+                                              p_price: (
+                                                e.target.value /
+                                                  item.conversion || 0
+                                              ).toFixed(2),
+                                            }
+                                          : a
                                       ),
                                     };
                                   });
                                   setEditPrices((prev) =>
-                                    prev.find(
+                                    prev.filter(
                                       (a) => a.item_uuid === item.item_uuid
-                                    )
+                                    ).length
                                       ? prev.map((a) =>
                                           a.item_uuid === item.item_uuid
                                             ? {
                                                 ...a,
-                                                item_price: +(
+                                                b_price: e.target.value,
+                                                p_price: (
                                                   e.target.value /
-                                                  item.conversion
-                                                ),
+                                                    item.conversion || 0
+                                                ).toFixed(2),
                                               }
                                             : a
                                         )
-                                      : [
+                                      : prev.length
+                                      ? [
                                           ...prev,
                                           {
-                                            item_uuid: item.item_uuid,
-                                            item_price: +(
-                                              e.target.value / item.conversion
-                                            ),
+                                            ...item,
+                                            b_price: e.target.value,
+                                            p_price: (
+                                              e.target.value /
+                                                item.conversion || 0
+                                            ).toFixed(2),
+                                          },
+                                        ]
+                                      : [
+                                          {
+                                            ...item,
+
+                                            b_price: e.target.value,
+                                            p_price: (
+                                              e.target.value /
+                                                item.conversion || 0
+                                            ).toFixed(2),
                                           },
                                         ]
                                   );
@@ -2410,11 +2454,7 @@ export function OrderDetails({
                                 disabled={!item.item_uuid}
                               />
                             ) : (
-                              "Rs:" +
-                              (
-                                +(item?.edit_price || item.price) *
-                                  +item.conversion || 0
-                              ).toFixed(2)
+                              "Rs:" + item.b_price.toFixed(2)
                             )}
                           </td>
                           {editOrder ? (
@@ -2426,12 +2466,12 @@ export function OrderDetails({
                                 %
                               </td>
                               <td>
-                                {+item?.item_price !== +item?.price &&
+                                {+item?.item_price !== +item?.p_price &&
                                   (+getSpecialPrice(
                                     counters,
                                     item,
                                     orderData?.counter_uuid
-                                  )?.price === +item?.price ? (
+                                  )?.price === +item?.p_price ? (
                                     <IoCheckmarkDoneOutline
                                       className="table-icon checkmark"
                                       onClick={() =>
@@ -2451,7 +2491,7 @@ export function OrderDetails({
                                           item,
                                           orderData?.counter_uuid,
                                           setCounters,
-                                          +item?.price
+                                          +item?.p_price
                                         )
                                       }
                                     />
@@ -3174,7 +3214,7 @@ const DeleteOrderPopup = ({
         return {
           ...itemData,
           ...a,
-          price: itemData?.price || 0,
+          price: itemData?.p_price || 0,
         };
       }),
     });

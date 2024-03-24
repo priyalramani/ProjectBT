@@ -100,7 +100,7 @@ const CounterLegerReport = () => {
     };
   }, []);
   useEffect(() => {
-    if (counter.length)
+    if (counter.length && !sessionStorage.getItem("isEditVoucher"))
       setSearchData((prev) => ({
         ...prev,
         counter_uuid: counter[0].counter_uuid,
@@ -268,7 +268,11 @@ function Table({ itemsDetails, navigate }) {
               key={Math.random()}
               style={{ height: "30px" }}
               onClick={() =>
-                navigate("/admin/editVoucher/" + item.accounting_voucher_uuid)
+                item.type === "PURCHASE_INVOICE"
+                  ? navigate("/admin/editPurchaseInvoice/" + item.order_uuid)
+                  : navigate(
+                      "/admin/editVoucher/" + item.accounting_voucher_uuid
+                    )
               }
             >
               <td>{i + 1}</td>
