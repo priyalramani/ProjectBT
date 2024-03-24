@@ -99,13 +99,7 @@ const CounterLegerReport = () => {
       controller.abort();
     };
   }, []);
-  useEffect(() => {
-    if (counter.length && !sessionStorage.getItem("isEditVoucher"))
-      setSearchData((prev) => ({
-        ...prev,
-        counter_uuid: counter[0].counter_uuid,
-      }));
-  }, [counter]);
+
 
   const counterList = useMemo(
     () =>
