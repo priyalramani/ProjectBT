@@ -101,7 +101,7 @@
 	padding-top: 0;
 	justify-content: center;
 }
-.bottomContent > button,
+.bottomContent  button,
 .inputGroup > button,
 .order-total {
 	background-color: var(--mainColor);

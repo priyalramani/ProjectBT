@@ -184,7 +184,10 @@ const CounterLegerReport = () => {
                     ? counterList.find(
                         (a) => a.value === searchData?.counter_uuid
                       )
-                    : ""
+                    : {
+                        label: "Select Ledger",
+                        value: "",
+                    }
                 }
                 openMenuOnFocus={true}
                 menuPosition="fixed"

@@ -280,17 +280,15 @@ export default function NewVoucher() {
 
   const LedgerOptions = useMemo(
     () =>
-      [...counters, ...ledgerData]
-        
-        .map((a) => ({
-          ...a,
-          label: a.counter_title || a.ledger_title,
-          value: a.counter_uuid || a.ledger_uuid,
-          closing_balance: truncateDecimals(
-            (a.closing_balance || 0) + +(a.opening_balance_amount || 0),
-            2
-          ),
-        })),
+      [...counters, ...ledgerData].map((a) => ({
+        ...a,
+        label: a.counter_title || a.ledger_title,
+        value: a.counter_uuid || a.ledger_uuid,
+        closing_balance: truncateDecimals(
+          (a.closing_balance || 0) + +(a.opening_balance_amount || 0),
+          2
+        ),
+      })),
     [ledgerData, counters, order.details]
   );
   const filterOption = (data, value) => {
@@ -434,11 +432,12 @@ export default function NewVoucher() {
                               (a) =>
                                 !order.details.find(
                                   (b) =>
-                                    (a.counter_uuid && b.ledger_uuid === a.counter_uuid) ||
-                                    (a.ledger_uuid && b.ledger_uuid === a.ledger_uuid)
+                                    (a.counter_uuid &&
+                                      b.ledger_uuid === a.counter_uuid) ||
+                                    (a.ledger_uuid &&
+                                      b.ledger_uuid === a.ledger_uuid)
                                 )
-                            )
-                    }
+                            )}
                             getOptionLabel={(option) => (
                               <div
                                 style={{

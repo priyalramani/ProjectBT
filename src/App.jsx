@@ -87,7 +87,7 @@ import OpeningBalanceDate from "./pages/others/OpeningBalanceDate";
 import OrderPdf from "./components/prints/OrderPdf";
 import TermsAndConditions from "./TermsAndConditions";
 
-export let Version = 282;
+export let Version = 283;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 

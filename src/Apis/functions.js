@@ -493,7 +493,7 @@ export const PurchaseInvoiceBilling = async ({
   let deductionsTotal = 
     deductions.reduce((a, b) => a + +(b.amount || 0), 0) || 0;
   let order_grandtotal = truncateDecimals(
-    newPriceItems.reduce((a, b) => a + +b.item_total, 0) - deductionsTotal,
+    newPriceItems.reduce((a, b) => a + +b.item_total, 0) + deductionsTotal,
     3
   );
 

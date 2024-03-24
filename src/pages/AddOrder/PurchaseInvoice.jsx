@@ -274,13 +274,13 @@ export default function PurchaseInvoice() {
       if (order_uuid) {
         setNotification({
           message: "Purchase Invoice Updated Successfully",
-          severity: "success",
+          success:true
         });
         navigate(-1);
       } else {
         setNotification({
           message: "Purchase Invoice Added Successfully",
-          severity: "success",
+          success:true
         });
         setOrder(getInititalValues());
       }
@@ -401,7 +401,7 @@ export default function PurchaseInvoice() {
           (a.closing_balance || 0) + +(a.opening_balance_amount || 0),
           2
         ),
-      })),
+      })).sort((a, b) => a.label.localeCompare(b.label)),
     [counter, allLedgerData]
   );
   return (
@@ -433,7 +433,7 @@ export default function PurchaseInvoice() {
               <h2>Purchase Invoice </h2>
             </div>
 
-            <div className="topInputs">
+            <div className="topInputs" style={{ width: "80vw" }}>
               <div className="inputGroup" style={{ width: "50px" }}>
                 <label htmlFor="Warehouse">Ledger</label>
                 <div className="inputGroup">
@@ -481,6 +481,12 @@ export default function PurchaseInvoice() {
                     menuPosition="fixed"
                     menuPlacement="auto"
                     placeholder="Select"
+                    filterOption={(data, value) => {
+                      let label = data.data.label;
+                      if (label.toLowerCase().includes(value.toLowerCase()))
+                        return true;
+                      return false;
+                    }}
                   />
                 </div>
               </div>
@@ -1045,7 +1051,10 @@ export default function PurchaseInvoice() {
               </table>
             </div>
 
-            <div className="bottomContent" style={{ background: "white" }}>
+            <div
+              className="bottomContent"
+              style={{ background: "white", justifyContent: "flex-end" }}
+            >
               <button
                 type="button"
                 onClick={() => {
@@ -1081,49 +1090,54 @@ export default function PurchaseInvoice() {
               >
                 Bill
               </button>
-              {order?.order_grandtotal ? (
-                <button
-                  style={{
-                   
-                    cursor: "default",
-                  }}
-                  type="button"
-                >
-                  Total: {order?.order_grandtotal || 0}
-                </button>
-              ) : (
-                ""
-              )}
-
-              <button
+              <div
+                className="flex"
                 style={{
-                 
-                  cursor: "default",
-                }}
-                type="button"
-                onClick={() => {
-                  setDeductionPopup(true);
+                  display: "flex",
+                  gap: "10px",
+                  justifyContent: "flex-end",
+                  width: "45vw",
                 }}
               >
-                Deductions
-              </button>
-
-              {order_uuid ? (
+                {order?.order_grandtotal ? (
+                  <button
+                    style={{
+                      cursor: "default",
+                    }}
+                    type="button"
+                  >
+                    Total: {order?.order_grandtotal || 0}
+                  </button>
+                ) : (
+                  ""
+                )}
                 <button
                   style={{
-                    
                     cursor: "default",
                   }}
                   type="button"
                   onClick={() => {
-                    navigate("/admin/editVoucher/" + order_uuid);
+                    setDeductionPopup(true);
                   }}
                 >
-                  A/c Voucher
+                  Adjustment
                 </button>
-              ) : (
-                ""
-              )}
+                {order_uuid ? (
+                  <button
+                    style={{
+                      cursor: "default",
+                    }}
+                    type="button"
+                    onClick={() => {
+                      navigate("/admin/editVoucher/" + order_uuid);
+                    }}
+                  >
+                    A/c Voucher
+                  </button>
+                ) : (
+                  ""
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1184,7 +1198,7 @@ export default function PurchaseInvoice() {
                 flex: "1",
                 height: "75vh",
                 overflow: "scroll",
-                width: "80vw",
+                width: "40vw",
               }}
             >
               <table className="f6 w-100 center" cellSpacing="0">
@@ -1203,7 +1217,20 @@ export default function PurchaseInvoice() {
                         style={{ textAlign: "center" }}
                       >
                         <Select
-                          options={LedgerOptions}
+                          options={LedgerOptions.filter(
+                            (ledger) =>
+                              !order.deductions.find(
+                                (b) => b.ledger_uuid === ledger.value
+                              )
+                          )}
+                          filterOption={(data, value) => {
+                            let label = data.data.label;
+                            if (
+                              label.toLowerCase().includes(value.toLowerCase())
+                            )
+                              return true;
+                            return false;
+                          }}
                           getOptionLabel={(option) => (
                             <div
                               style={{
@@ -1277,27 +1304,29 @@ export default function PurchaseInvoice() {
                     </tr>
                   ))}
                   <tr>
-                    <td
-                      colSpan={3}
-                      onClick={() =>
-                        setOrder((prev) => ({
-                          ...prev,
-                          deductions: [
-                            ...prev.deductions,
-                            {
-                              title: "",
-                              ledger_uuid: "",
-                              amount: 0,
-                              uuid: uuid(),
-                            },
-                          ],
-                        }))
-                      }
-                    >
-                      <AddIcon
-                        sx={{ fontSize: 40 }}
-                        style={{ color: "#4AC959", cursor: "pointer" }}
-                      />
+                    <td colSpan={3}>
+                      <div
+                        onClick={() =>
+                          setOrder((prev) => ({
+                            ...prev,
+                            deductions: [
+                              ...prev.deductions,
+                              {
+                                title: "",
+                                ledger_uuid: "",
+                                amount: 0,
+                                uuid: uuid(),
+                              },
+                            ],
+                          }))
+                        }
+                      >
+                        
+                        <AddIcon
+                          sx={{ fontSize: 40 }}
+                          style={{ color: "#4AC959", cursor: "pointer" }}
+                        />
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -1308,7 +1337,7 @@ export default function PurchaseInvoice() {
               type="button"
               onClick={() => setDeductionPopup(false)}
             >
-              Close
+              Save
             </button>
           </div>
         </div>
