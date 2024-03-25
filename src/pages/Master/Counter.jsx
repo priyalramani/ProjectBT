@@ -1066,7 +1066,7 @@ function NewUserForm({
             {
               uuid: uuid(),
 
-              date: new Date().getTime(),
+              date: default_opening_balance_date,
               amount: "",
             },
           ],

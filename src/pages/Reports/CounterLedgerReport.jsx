@@ -259,7 +259,7 @@ function Table({ itemsDetails, navigate }) {
       </thead>
       <tbody className="tbody">
         {itemsDetails
-          ?.sort((a, b) => a.order_date - b.order_date)
+          ?.sort((a, b) => +b.voucher_date - +a.voucher_date)
           ?.map((item, i, array) => (
             <tr
               key={Math.random()}
@@ -273,7 +273,7 @@ function Table({ itemsDetails, navigate }) {
               }
             >
               <td>{i + 1}</td>
-              <td colSpan={3}>{new Date(item.created_at).toDateString()}</td>
+              <td colSpan={3}>{new Date(+item.voucher_date).toDateString()}</td>
               <td colSpan={2}>
                 {item.accounting_voucher_number || item.invoice_number || ""}
               </td>

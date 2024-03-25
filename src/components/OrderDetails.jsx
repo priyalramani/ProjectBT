@@ -37,6 +37,7 @@ import Prompt from "./Prompt";
 import OrderPrintWrapper from "./OrderPrintWrapper";
 import { getInititalValues } from "../pages/AddOrder/AddOrder";
 import NotesPopup from "./popups/NotesPopup";
+import { truncateDecimals } from "../utils/helperFunctions";
 
 const default_status = [
   { value: 0, label: "Preparing" },
@@ -133,8 +134,8 @@ export function OrderDetails({
       },
     });
     if (response.data.success) {
-      console.log({ response: response.data.result });
       setOrder(response.data.result);
+
       const reason = response?.data?.result?.status?.find(
         (s) => +s.stage === 5
       )?.cancellation_reason;
@@ -404,7 +405,10 @@ export function OrderDetails({
           default: true,
           sr: i + 1,
           p_price: +(a?.edit_price || a.price),
-          b_price: +(a?.edit_price || a.price) * (itemData?.conversion || 0),
+          b_price: truncateDecimals(
+            +(a?.edit_price || a.price) * +(itemData?.conversion || 0),
+            2
+          ),
         };
       }),
       fulfillment: [],
@@ -431,7 +435,10 @@ export function OrderDetails({
             ? {
                 ...a,
                 p_price: e.target.value,
-                b_price: (e.target.value * item.conversion || 0).toFixed(2),
+                b_price: truncateDecimals(
+                  e.target.value * item.conversion || 0,
+                  2
+                ),
               }
             : a
         ),
@@ -444,7 +451,10 @@ export function OrderDetails({
               ? {
                   ...a,
                   p_price: e.target.value,
-                  b_price: (e.target.value * item.conversion || 0).toFixed(2),
+                  b_price: truncateDecimals(
+                    e.target.value * item.conversion || 0,
+                    2
+                  ),
                 }
               : a
           )
@@ -454,14 +464,20 @@ export function OrderDetails({
             {
               ...item,
               p_price: e.target.value,
-              b_price: (e.target.value * item.conversion || 0).toFixed(2),
+              b_price: truncateDecimals(
+                e.target.value * item.conversion || 0,
+                2
+              ),
             },
           ]
         : [
             {
               ...item,
               p_price: e.target.value,
-              b_price: (e.target.value * item.conversion || 0).toFixed(2),
+              b_price: truncateDecimals(
+                e.target.value * item.conversion || 0,
+                2
+              ),
             },
           ]
     );
@@ -699,7 +715,10 @@ export function OrderDetails({
       replacement: data.replacement,
       adjustment: data.adjustment,
       shortage: data.shortage,
-      edit_prices,
+      edit_prices: edit_prices.map((a) => ({
+        ...a,
+        item_price: a.p_price,
+      })),
       others: {},
     });
     data = {
@@ -830,7 +849,7 @@ export function OrderDetails({
             ...data,
             item_details: data.item_details?.map((i) => ({
               ...i,
-              price: +(+i.p_price || +i.price).toFixed(3),
+              price: truncateDecimals(+i.p_price || +i.price, 3),
             })),
           },
         ],
@@ -924,7 +943,10 @@ export function OrderDetails({
       replacement: data.replacement,
       adjustment: data.adjustment,
       shortage: data.shortage,
-      edit_prices,
+      edit_prices: edit_prices.map((a) => ({
+        ...a,
+        item_price: a.p_price,
+      })),
       others: {},
     });
     data = {
@@ -940,7 +962,10 @@ export function OrderDetails({
       items: data2.item_details,
       replacement: data2.replacement,
       adjustment: data2.adjustment,
-      edit_prices,
+      edit_prices: edit_prices.map((a) => ({
+        ...a,
+        item_price: a.p_price,
+      })),
       shortage: data2.shortage,
       others: {},
     });
@@ -1255,7 +1280,10 @@ export function OrderDetails({
         replacement: newOrder.replacement,
         adjustment: newOrder.adjustment,
         shortage: newOrder.shortage,
-        edit_prices,
+        edit_prices: edit_prices.map((a) => ({
+          ...a,
+          item_price: a.p_price,
+        })),
         counter: counters.find((a) => a.counter_uuid === newOrder.counter_uuid),
         items: newOrder.item_details?.map((a) => {
           let _itemData = itemsData.find((b) => a.item_uuid === b.item_uuid);
@@ -2382,7 +2410,7 @@ export function OrderDetails({
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
-                                value={item?.b_price}
+                                value={item?.b_price || ""}
                                 onChange={(e) => {
                                   setOrderData((prev) => {
                                     return {
@@ -2392,10 +2420,11 @@ export function OrderDetails({
                                           ? {
                                               ...a,
                                               b_price: e.target.value,
-                                              p_price: (
+                                              p_price: truncateDecimals(
                                                 e.target.value /
-                                                  item.conversion || 0
-                                              ).toFixed(2),
+                                                  item.conversion || 0,
+                                                2
+                                              ),
                                             }
                                           : a
                                       ),
@@ -2410,10 +2439,11 @@ export function OrderDetails({
                                             ? {
                                                 ...a,
                                                 b_price: e.target.value,
-                                                p_price: (
+                                                p_price: truncateDecimals(
                                                   e.target.value /
-                                                    item.conversion || 0
-                                                ).toFixed(2),
+                                                    item.conversion || 0,
+                                                  2
+                                                ),
                                               }
                                             : a
                                         )
@@ -2423,10 +2453,11 @@ export function OrderDetails({
                                           {
                                             ...item,
                                             b_price: e.target.value,
-                                            p_price: (
+                                            p_price: truncateDecimals(
                                               e.target.value /
-                                                item.conversion || 0
-                                            ).toFixed(2),
+                                                item.conversion || 0,
+                                              2
+                                            ),
                                           },
                                         ]
                                       : [
@@ -2434,10 +2465,11 @@ export function OrderDetails({
                                             ...item,
 
                                             b_price: e.target.value,
-                                            p_price: (
+                                            p_price: truncateDecimals(
                                               e.target.value /
-                                                item.conversion || 0
-                                            ).toFixed(2),
+                                                item.conversion || 0,
+                                              2
+                                            ),
                                           },
                                         ]
                                   );
@@ -2454,7 +2486,7 @@ export function OrderDetails({
                                 disabled={!item.item_uuid}
                               />
                             ) : (
-                              "Rs:" + item.b_price.toFixed(2)
+                              "Rs:" + truncateDecimals(item?.b_price || 0, 2)
                             )}
                           </td>
                           {editOrder ? (
@@ -3090,7 +3122,10 @@ export function OrderDetails({
                 shortage: result?.shortage || 0,
                 adjustment: result?.adjustment || 0,
                 adjustment_remarks: result?.adjustment_remarks || "",
-                edit_prices,
+                edit_prices: edit_prices.map((a) => ({
+                  ...a,
+                  item_price: a.p_price,
+                })),
               },
               true
             )
@@ -3207,7 +3242,10 @@ const DeleteOrderPopup = ({
       replacement: data.replacement,
       adjustment: data.adjustment,
       shortage: data.shortage,
-      edit_prices,
+      edit_prices: edit_prices.map((a) => ({
+        ...a,
+        item_price: a.p_price,
+      })),
       counter: counters.find((a) => a.counter_uuid === data.counter_uuid),
       items: data.item_details?.map((a) => {
         let itemData = items.find((b) => a.item_uuid === b.item_uuid);

@@ -43,7 +43,7 @@ export let getInititalValues = () => ({
   priority: 0,
   order_type: "I",
   rate_type: "at",
-  party_number: "",
+  purchase_invoice_number: "",
   deductions: [],
   time_1: 24 * 60 * 60 * 1000,
   time_2: (24 + 48) * 60 * 60 * 1000,
@@ -219,52 +219,12 @@ export default function PurchaseInvoice() {
     }
   }, [order.ledger_uuid]);
 
-  const onSubmit = async (type, orderData = order) => {
-    let data = {
-      ...orderData,
-      item_details: order.item_details
-        .filter((a) => a.item_uuid)
-        .map((a) => ({
-          ...a,
-          item_price: a.p_price || a.item_price,
-        })),
-    };
-
-    let autoBilling = await PurchaseInvoiceBilling({
-      rate_type: order.rate_type,
-
-      item_details: data.item_details.map((a) => ({
-        ...a,
-        item_price: a.p_price || a.item_price,
-      })),
-    });
-
-    data = {
-      ...data,
-      ...autoBilling,
-      opened_by: 0,
-      item_details: autoBilling.item_details.map((a) => ({
-        ...a,
-        unit_price:
-          a.item_total / (+(+a.conversion * a.b) + a.p + a.free) ||
-          a.item_price ||
-          a.price,
-        gst_percentage: a.item_gst,
-        status: 0,
-        price: a.price || a.item_price || 0,
-      })),
-      ...(type?.obj || {}),
-    };
-
-    data.time_1 = data.time_1 + Date.now();
-    data.time_2 = data.time_2 + Date.now();
-
-    console.log("orderJSon", data);
-
+  const onSubmit = async (e) => {
+    e.preventDefault();
     const response = await axios({
       method: order_uuid ? "put" : "post",
       url: `/purchaseInvoice/${order_uuid ? "put" : "post"}PurchaseInvoice`,
-      data,
+      data:confirmPopup,
       headers: {
         "Content-Type": "application/json",
       },
@@ -274,14 +234,16 @@ export default function PurchaseInvoice() {
       if (order_uuid) {
         setNotification({
           message: "Purchase Invoice Updated Successfully",
-          success:true
+          success: true,
         });
+        sessionStorage.setItem("isEditVoucher", 1);
         navigate(-1);
       } else {
         setNotification({
           message: "Purchase Invoice Added Successfully",
-          success:true
+          success: true,
         });
+        setConfirmPopup(null);
         setOrder(getInititalValues());
       }
     }
@@ -393,15 +355,17 @@ export default function PurchaseInvoice() {
   };
   const LedgerOptions = useMemo(
     () =>
-      [...counter, ...allLedgerData].map((a) => ({
-        ...a,
-        label: a.counter_title || a.ledger_title,
-        value: a.counter_uuid || a.ledger_uuid,
-        closing_balance: truncateDecimals(
-          (a.closing_balance || 0) + +(a.opening_balance_amount || 0),
-          2
-        ),
-      })).sort((a, b) => a.label.localeCompare(b.label)),
+      [...counter, ...allLedgerData]
+        .map((a) => ({
+          ...a,
+          label: a.counter_title || a.ledger_title,
+          value: a.counter_uuid || a.ledger_uuid,
+          closing_balance: truncateDecimals(
+            (a.closing_balance || 0) + +(a.opening_balance_amount || 0),
+            2
+          ),
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
     [counter, allLedgerData]
   );
   return (
@@ -613,13 +577,13 @@ export default function PurchaseInvoice() {
                     type="text"
                     className="numberInput"
                     onWheel={(e) => e.preventDefault()}
-                    value={order.party_number || ""}
+                    value={order.purchase_invoice_number || ""}
                     onChange={(e) => {
                       if (e.target.value.length <= 30)
                         setOrder((prev) => {
                           return {
                             ...prev,
-                            party_number: e.target.value,
+                            purchase_invoice_number: e.target.value,
                           };
                         });
                     }}
@@ -1058,6 +1022,13 @@ export default function PurchaseInvoice() {
               <button
                 type="button"
                 onClick={() => {
+                  if (!order.purchase_invoice_number) {
+                    setNotification({
+                      message: "Party Invoice Number is required",
+                      success: false,
+                    });
+                    return;
+                  }
                   let empty_item = order.item_details
                     .filter((a) => a.item_uuid)
                     .map((a) => ({
@@ -1143,17 +1114,92 @@ export default function PurchaseInvoice() {
         </div>
       </div>
       {confirmPopup ? (
-        <MessagePopup
-          message="Are you sure you want to bill?"
-          message2={`Total: ${confirmPopup?.order_grandtotal || 0}`}
-          onSave={() => setConfirmPopup(false)}
-          onClose={() => {
-            onSubmit(confirmPopup.type, confirmPopup);
-            setConfirmPopup(false);
-          }}
-          button2="Cancel"
-          button1="Confirm"
-        />
+        <div
+          className="overlay"
+          style={{ position: "fixed", top: 0, left: 0, zIndex: 9999999999 }}
+        >
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "fit-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form
+                  className="form"
+                  onSubmit={onSubmit}
+                >
+                  <div className="formGroup">
+                    <div
+                      className="row"
+                      style={{ flexDirection: "column", alignItems: "start" }}
+                    >
+                      <h1 style={{ textAlign: "center" }}>
+                        Are you sure you want to bill?
+                      </h1>
+                      <div className="inputGroup" style={{ width: "100px" }}>
+                        <label htmlFor="Warehouse">Total</label>
+                        <div className="inputGroup">
+                          <input
+                            style={{ width: "200px" }}
+                            type="text"
+                            className="numberInput"
+                            onWheel={(e) => e.preventDefault()}
+                            value={confirmPopup.order_grandtotal || ""}
+                            onChange={(e) => {
+                              if (e.target.value.length <= 30)
+                                setConfirmPopup((prev) => {
+                                  return {
+                                    ...prev,
+                                    order_grandtotal: e.target.value,
+                                  };
+                                });
+                            }}
+                            onFocus={(e) => e.target.select()}
+                          />
+                        </div>
+                      </div>
+                      <h3 style={{ textAlign: "center" }}>
+                        RoundOff Value:{" "}
+                        {truncateDecimals(
+                          confirmPopup.order_grandtotal -
+                            confirmPopup.item_details.reduce(
+                              (a, b) => a + b.item_total,
+                              0
+                            ) -
+                            confirmPopup.deductions.reduce(
+                              (a, b) => a + +b.amount,
+                              0
+                            ) || 0,
+                          3
+                        )}
+                      </h3>
+                    </div>
+
+                    <div className="row message-popup-actions">
+                      <button
+                        className="simple_Logout_button"
+                        type="button"
+                        onClick={() => setConfirmPopup(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button className="simple_Logout_button" type="submit">
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
       ) : (
         ""
       )}
@@ -1321,7 +1367,6 @@ export default function PurchaseInvoice() {
                           }))
                         }
                       >
-                        
                         <AddIcon
                           sx={{ fontSize: 40 }}
                           style={{ color: "#4AC959", cursor: "pointer" }}
