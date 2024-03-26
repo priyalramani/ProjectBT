@@ -1161,7 +1161,7 @@ export default function PurchaseInvoice() {
                                     order_grandtotal: e.target.value,
                                     round_off: truncateDecimals(
                                       e.target.value - prev.old_grandtotal,
-                                      3
+                                      2
                                     ),
                                   };
                                 });
