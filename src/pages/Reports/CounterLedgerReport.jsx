@@ -259,7 +259,7 @@ function Table({ itemsDetails, navigate }) {
       </thead>
       <tbody className="tbody">
         {itemsDetails
-          ?.sort((a, b) => +b.voucher_date - +a.voucher_date)
+          ?.sort((a, b) => +a.voucher_date - +b.voucher_date)
           ?.map((item, i, array) => (
             <tr
               key={Math.random()}

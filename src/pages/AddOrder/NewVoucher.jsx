@@ -85,6 +85,7 @@ export default function NewVoucher() {
       setIsEdit(false);
       setOrder({
         ...data,
+      type: data.type==="RECEIPT_ORDER"?"RCPT":data.type,
         details: data.details.map((a) => ({
           ...a,
           uuid: a.ledger_uuid,
@@ -297,7 +298,7 @@ export default function NewVoucher() {
     return false;
   };
 
-  console.log(LedgerOptions.filter((a) => a.value));
+  console.log(order);
 
   return (
     <>
@@ -379,7 +380,7 @@ export default function NewVoucher() {
                     menuPosition="fixed"
                     menuPlacement="auto"
                     placeholder="Select"
-                    isDisabled={!isEdit}
+                    isDisabled={!isEdit||order?.type==="SALE_ORDER"||order?.type==="RCPT"}
                   />
                 </div>
               </div>

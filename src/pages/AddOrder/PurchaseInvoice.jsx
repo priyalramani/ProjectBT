@@ -97,8 +97,10 @@ export default function PurchaseInvoice() {
                 ...a,
                 uuid: a.item_uuid || uuid(),
                 sr: i + 1,
-                p_price: a.price,
-                b_price: a.price * itemData.conversion,
+                p_price: a.price || itemData.last_purchase_price || 0,
+                b_price:
+                  +(a.price || itemData.last_purchase_price || 0) *
+                  +(itemData.conversion || 0),
               };
             });
             setOrder(
@@ -224,7 +226,7 @@ export default function PurchaseInvoice() {
     const response = await axios({
       method: order_uuid ? "put" : "post",
       url: `/purchaseInvoice/${order_uuid ? "put" : "post"}PurchaseInvoice`,
-      data:confirmPopup,
+      data: confirmPopup,
       headers: {
         "Content-Type": "application/json",
       },
@@ -259,6 +261,8 @@ export default function PurchaseInvoice() {
       item_details: order.item_details.map((a) => ({
         ...a,
         item_price: a.p_price,
+        price: a.p_price,
+        gst_percentage: a.item_gst,
       })),
     });
 
@@ -1131,10 +1135,7 @@ export default function PurchaseInvoice() {
               }}
             >
               <div style={{ overflowY: "scroll" }}>
-                <form
-                  className="form"
-                  onSubmit={onSubmit}
-                >
+                <form className="form" onSubmit={onSubmit}>
                   <div className="formGroup">
                     <div
                       className="row"
@@ -1158,6 +1159,10 @@ export default function PurchaseInvoice() {
                                   return {
                                     ...prev,
                                     order_grandtotal: e.target.value,
+                                    round_off: truncateDecimals(
+                                      e.target.value - prev.old_grandtotal,
+                                      3
+                                    ),
                                   };
                                 });
                             }}
@@ -1166,19 +1171,7 @@ export default function PurchaseInvoice() {
                         </div>
                       </div>
                       <h3 style={{ textAlign: "center" }}>
-                        RoundOff Value:{" "}
-                        {truncateDecimals(
-                          confirmPopup.order_grandtotal -
-                            confirmPopup.item_details.reduce(
-                              (a, b) => a + b.item_total,
-                              0
-                            ) -
-                            confirmPopup.deductions.reduce(
-                              (a, b) => a + +b.amount,
-                              0
-                            ) || 0,
-                          3
-                        )}
+                        RoundOff Value: {confirmPopup.round_off || 0}
                       </h3>
                     </div>
 
