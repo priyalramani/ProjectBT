@@ -11,7 +11,6 @@ import Select from "react-select";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import Context from "../../context/context";
 import { getFormateDate, truncateDecimals } from "../../utils/helperFunctions";
-import MessagePopup from "../../components/MessagePopup";
 import NotesPopup from "../../components/popups/NotesPopup";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -1092,7 +1091,7 @@ export default function PurchaseInvoice() {
                   }}
                   type="button"
                   onClick={() => {
-                    setDeductionPopup(true);
+                    setDeductionPopup(order.deductions);
                   }}
                 >
                   Adjustment
@@ -1249,7 +1248,7 @@ export default function PurchaseInvoice() {
                   </tr>
                 </thead>
                 <tbody>
-                  {order.deductions?.map((a, i) => (
+                  {deductionPopup?.map((a, i) => (
                     <tr key={i}>
                       <td
                         className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -1282,12 +1281,11 @@ export default function PurchaseInvoice() {
                             </div>
                           )}
                           onChange={(doc) => {
-                            setOrder((prev) => ({
-                              ...prev,
-                              deductions: prev.deductions.map((b, j) =>
+                            setDeductionPopup((prev) =>
+                              prev.map((b, j) =>
                                 i === j ? { ...b, ledger_uuid: doc?.value } : b
-                              ),
-                            }));
+                              )
+                            );
                           }}
                           styles={customStyles}
                           value={
@@ -1315,12 +1313,11 @@ export default function PurchaseInvoice() {
                           onWheel={(e) => e.preventDefault()}
                           value={a.amount}
                           onChange={(e) => {
-                            setOrder((prev) => ({
-                              ...prev,
-                              deductions: prev.deductions.map((b, j) =>
+                            setOrder((prev) =>
+                              prev.map((b, j) =>
                                 i === j ? { ...b, amount: e.target.value } : b
-                              ),
-                            }));
+                              )
+                            );
                           }}
                         />
                       </td>
@@ -1331,12 +1328,7 @@ export default function PurchaseInvoice() {
                         <DeleteOutlineIcon
                           style={{ color: "red" }}
                           onClick={() => {
-                            setOrder((prev) => ({
-                              ...prev,
-                              deductions: prev.deductions.filter(
-                                (b, j) => i !== j
-                              ),
-                            }));
+                            setOrder((prev) => prev.filter((b, j) => i !== j));
                           }}
                         />
                       </td>
@@ -1346,18 +1338,15 @@ export default function PurchaseInvoice() {
                     <td colSpan={3}>
                       <div
                         onClick={() =>
-                          setOrder((prev) => ({
+                          setOrder((prev) => [
                             ...prev,
-                            deductions: [
-                              ...prev.deductions,
-                              {
-                                title: "",
-                                ledger_uuid: "",
-                                amount: 0,
-                                uuid: uuid(),
-                              },
-                            ],
-                          }))
+                            {
+                              title: "",
+                              ledger_uuid: "",
+                              amount: 0,
+                              uuid: uuid(),
+                            },
+                          ])
                         }
                       >
                         <AddIcon
@@ -1377,7 +1366,16 @@ export default function PurchaseInvoice() {
             >
               Save
             </button>
+            <button
+            onClick={() => {
+              setDeductionPopup(false);
+            }}
+            className="closeButton"
+          >
+            x
+          </button>
           </div>
+          
         </div>
       ) : (
         ""

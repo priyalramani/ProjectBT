@@ -1350,6 +1350,7 @@ export function OrderDetails({
         if (deliveryPopup === "edit") onSubmit();
         setDeliveryPopup(false);
       }}
+      onClose={() => setDeliveryPopup(false)}
       deliveryPopup={deliveryPopup}
       postOrderData={(diliveredUser) => onSubmit({ stage: 5, diliveredUser })}
       setSelectedOrder={setOrderData}
@@ -2130,6 +2131,14 @@ export function OrderDetails({
                                       item_price = itemData.item_price_b;
                                     if (item_rate === "c")
                                       item_price = itemData.item_price_c;
+                                    let p_price =
+                                      +getSpecialPrice(
+                                        counters,
+                                        itemData,
+                                        orderData?.counter_uuid
+                                      )?.price ||
+                                      item_price ||
+                                      0;
                                     setOrderData((prev) => ({
                                       ...prev,
                                       item_details: prev.item_details?.map(
@@ -2141,14 +2150,11 @@ export function OrderDetails({
                                                   (b) => b.item_uuid === e.value
                                                 ),
                                                 status: 0,
-                                                price:
-                                                  +getSpecialPrice(
-                                                    counters,
-                                                    itemData,
-                                                    orderData?.counter_uuid
-                                                  )?.price ||
-                                                  item_price ||
-                                                  0,
+                                                p_price,
+                                                b_price: Math.floor(
+                                                  p_price *
+                                                    itemData.conversion || 0
+                                                ),
                                               }
                                             : a
                                       ),
@@ -3828,6 +3834,7 @@ function DiliveryPopup({
   updateBilling,
   deliveryPopup,
   users,
+  onClose,
 }) {
   const [PaymentModes, setPaymentModes] = useState([]);
   const [modes, setModes] = useState([]);
@@ -3892,7 +3899,7 @@ function DiliveryPopup({
       url: "/receipts/getRecipt",
       data: {
         order_uuid: order?.order_uuid,
-        counter_uuid: order?.counter_uuid,
+        invoice_number: order?.invoice_number,
       },
       headers: {
         "Content-Type": "application/json",
@@ -4352,7 +4359,7 @@ function DiliveryPopup({
                     type="button"
                     style={{ backgroundColor: "red" }}
                     className="submit"
-                    onClick={onSave}
+                    onClick={onClose}
                   >
                     Cancel
                   </button>

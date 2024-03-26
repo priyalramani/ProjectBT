@@ -85,7 +85,7 @@ export default function NewVoucher() {
       setIsEdit(false);
       setOrder({
         ...data,
-      type: data.type==="RECEIPT_ORDER"?"RCPT":data.type,
+        type: data.type === "RECEIPT_ORDER" ? "RCPT" : data.type,
         details: data.details.map((a) => ({
           ...a,
           uuid: a.ledger_uuid,
@@ -380,7 +380,11 @@ export default function NewVoucher() {
                     menuPosition="fixed"
                     menuPlacement="auto"
                     placeholder="Select"
-                    isDisabled={!isEdit||order?.type==="SALE_ORDER"||order?.type==="RCPT"}
+                    isDisabled={
+                      !isEdit ||
+                      order?.type === "SALE_ORDER" ||
+                      order?.type === "RCPT"
+                    }
                   />
                 </div>
               </div>
@@ -431,6 +435,8 @@ export default function NewVoucher() {
                           <Select
                             options={LedgerOptions.filter(
                               (a) =>
+                                a.ledger_uuid !==
+                                  "ebab980c-4761-439a-9139-f70875e8a298" &&
                                 !order.details.find(
                                   (b) =>
                                     (a.counter_uuid &&
@@ -493,7 +499,11 @@ export default function NewVoucher() {
                                 `selectContainer-${item.uuid}` ||
                                 (i === 0 && focusedInputId === 0))
                             }
-                            isDisabled={!isEdit}
+                            isDisabled={
+                              !isEdit ||
+                              item.ledger_uuid ===
+                                "ebab980c-4761-439a-9139-f70875e8a298"
+                            }
                           />
                         </div>
                       </td>
@@ -523,7 +533,12 @@ export default function NewVoucher() {
                           }}
                           onFocus={(e) => e.target.select()}
                           onKeyDown={(e) => onPiecesKeyDown(e, item)}
-                          disabled={!isEdit || item.add}
+                          disabled={
+                            !isEdit ||
+                            item.add ||
+                            item.ledger_uuid ===
+                              "ebab980c-4761-439a-9139-f70875e8a298"
+                          }
                         />
                       </td>
                       <td
@@ -537,7 +552,12 @@ export default function NewVoucher() {
                           className="numberInput"
                           onWheel={(e) => e.preventDefault()}
                           index={listItemIndexCount++}
-                          disabled={!isEdit || item.sub}
+                          disabled={
+                            !isEdit ||
+                            item.sub ||
+                            item.ledger_uuid ===
+                              "ebab980c-4761-439a-9139-f70875e8a298"
+                          }
                           value={item.add || ""}
                           onChange={(e) => {
                             setOrder((prev) => {
@@ -571,7 +591,11 @@ export default function NewVoucher() {
                           className="numberInput"
                           onWheel={(e) => e.preventDefault()}
                           index={listItemIndexCount++}
-                          disabled={!isEdit}
+                          disabled={
+                            !isEdit ||
+                            item.ledger_uuid ===
+                              "ebab980c-4761-439a-9139-f70875e8a298"
+                          }
                           value={item.narration || ""}
                           onChange={(e) => {
                             setOrder((prev) => {
@@ -597,19 +621,25 @@ export default function NewVoucher() {
                         className="ph2 pv1 tc bb b--black-20 bg-white"
                         style={{ textAlign: "center" }}
                       >
-                        <DeleteOutlineIcon
-                          style={{ color: "red" }}
-                          className="table-icon"
-                          onClick={() => {
-                            setOrder({
-                              ...order,
-                              item_details: order.item_details.filter(
-                                (a) => a.uuid !== item.uuid
-                              ),
-                            });
-                            //console.log(item);
-                          }}
-                        />
+                        {!isEdit ||
+                        item.ledger_uuid ===
+                          "ebab980c-4761-439a-9139-f70875e8a298" ? (
+                          ""
+                        ) : (
+                          <DeleteOutlineIcon
+                            style={{ color: "red" }}
+                            className="table-icon"
+                            onClick={() => {
+                              setOrder({
+                                ...order,
+                                item_details: order.item_details.filter(
+                                  (a) => a.uuid !== item.uuid
+                                ),
+                              });
+                              //console.log(item);
+                            }}
+                          />
+                        )}
                       </td>
                     </tr>
                   ))}

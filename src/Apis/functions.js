@@ -398,7 +398,7 @@ export const Billing = async ({
               +item?.price ||
               +item.item_price ||
               0) * (+item.qty || 0),
-            3
+            2
           )
         : 0;
 
@@ -407,7 +407,7 @@ export const Billing = async ({
       item_total = item_total * +((100 - +billDiscounts.value) / 100);
     }
 
-    if (item_total) item_total = truncateDecimals(+item_total || 0, 3);
+    if (item_total) item_total = truncateDecimals(+item_total || 0, 2);
     item = {
       ...item,
       charges_discount: item_special_price
@@ -478,10 +478,10 @@ export const PurchaseInvoiceBilling = async ({
             item_price *
               (+item.qty || 0) *
               (rate_type === "bt" ? 1 + +(item.item_gst || 0) / 100 : 1),
-            3
+            2
           )
         : 0;
-    if (item_total) item_total = truncateDecimals(+item_total || 0, 3);
+    if (item_total) item_total = truncateDecimals(+item_total || 0, 2);
     item = {
       ...item,
       item_total,
@@ -494,7 +494,7 @@ export const PurchaseInvoiceBilling = async ({
     deductions.reduce((a, b) => a + +(b.amount || 0), 0) || 0;
   let order_grandtotal = truncateDecimals(
     newPriceItems.reduce((a, b) => a + +(b.item_total||0), 0) + deductionsTotal,
-    3
+    2
   );
 
   return {
