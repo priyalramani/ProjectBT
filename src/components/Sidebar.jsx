@@ -13,6 +13,7 @@ import context from "../context/context";
 import { Version } from "../App";
 
 let titleData = [
+  { value: "LedgerClosingBalance", name: "Ledger Closing Balance" },
   { value: "RetailerMarginReport", name: "Retailer Margin Report" },
   { value: "accounting_dashboard", name: "Accounting Dashboard" },
   { value: "OpeningBalanceReport", name: "Opening Balance Report" },
@@ -224,6 +225,10 @@ const Sidebar = ({ setCollectionTags }) => {
                     name: "Opening Balance Report",
                     link: "/admin/OpeningBalanceReport",
                   },
+                  {
+                    name:"Ledger Closing Balance",
+                    link:"/admin/LedgerClosingBalance"
+                  }
                 ]
               : [
                   {

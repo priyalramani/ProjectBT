@@ -86,8 +86,9 @@ import OpeningBalanceReport from "./pages/Reports/OpeningBalanceReport";
 import OpeningBalanceDate from "./pages/others/OpeningBalanceDate";
 import OrderPdf from "./components/prints/OrderPdf";
 import TermsAndConditions from "./TermsAndConditions";
+import LedgerClosingBalance from "./pages/Reports/LedgerClosingBalance";
 
-export let Version = 286;
+export let Version = 287;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
@@ -429,6 +430,10 @@ function App() {
             <Route
               path="/admin/RetailerMarginReport"
               element={<RetailerMarginReport />}
+            />
+            <Route
+              path="/admin/LedgerClosingBalance"
+              element={<LedgerClosingBalance />}
             />
             <Route path="/admin/cancelOrders" element={<CancelOrders />} />
             <Route path="/admin/ItemsReport" element={<ItemDetails />} />
