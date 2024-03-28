@@ -87,8 +87,9 @@ import OpeningBalanceDate from "./pages/others/OpeningBalanceDate";
 import OrderPdf from "./components/prints/OrderPdf";
 import TermsAndConditions from "./TermsAndConditions";
 import LedgerClosingBalance from "./pages/Reports/LedgerClosingBalance";
+import CheckAccountingBalance from "./pages/QuikAccess/CheckAccountingBalance";
 
-export let Version = 287;
+export let Version = 288;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
@@ -105,7 +106,8 @@ function App() {
     cashRegisterPopup,
     bankStatementImport,
     view,
-    setOpeningBalanceDatePopup,
+    checkAccountingBalance,
+    setCheckAccountingBalance,
     openingBalanceDatePopup,
   } = context;
   axios.defaults.baseURL = server;
@@ -538,7 +540,14 @@ function App() {
       {cashRegisterPopup && <CashRegister />}
       {bankStatementImport && <BankStatementImport />}
       {openingBalanceDatePopup && <OpeningBalanceDate />}
-
+      {checkAccountingBalance ? (
+        <CheckAccountingBalance
+          itemsData={checkAccountingBalance}
+          onSave={() => {
+            setCheckAccountingBalance(false);
+          }}
+        />
+      ):""}
       <div className={`loading-bar ${loading || pageLoading ? "show" : ""}`}>
         <div className="progress"></div>
       </div>

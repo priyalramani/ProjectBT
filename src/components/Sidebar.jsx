@@ -350,6 +350,10 @@ const Sidebar = ({ setCollectionTags }) => {
                   {
                     name:"Opening Balance Date",
                     link:"#"
+                  },
+                  {
+                    name:"Check Accounting Balance",
+                    link:"#"
                   }
                 ]
               : [

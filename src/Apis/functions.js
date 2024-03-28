@@ -261,6 +261,10 @@ export const Billing = async ({
   let newPriceItems = [];
   for (let item of items) {
     item = { ...item, item_total: 0 };
+    let descInputs =
+    item.charges_discount
+      ?.filter((a) => a.title === "dsc1" || a.title === "dsc2")
+      .reduce((a, b) => a + +(b.value || 0), 0) || 0;
 
     let edit_price =
       +edit_prices.find((a) => a.item_uuid === item.item_uuid)?.item_price ||
@@ -349,10 +353,7 @@ export const Billing = async ({
               ((100 - company_discount_percentage) / 100) || 0,
       };
     }
-    let descInputs =
-      charges_discount
-        ?.filter((a) => a.title === "dsc1" || a.title === "dsc2")
-        .reduce((a, b) => a + +(b.value || 0), 0) || 0;
+ 
     if (salesManDiscounts.value) {
       charges_discount?.push(salesManDiscounts);
       item = {

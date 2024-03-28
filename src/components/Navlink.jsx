@@ -21,6 +21,7 @@ const NavLink = ({
     view,
     setBankStatementImport,
     setOpeningBalanceDatePopup,
+    getAccountingBalanceDetails
   } = useContext(context);
   const [searchFilter, setSearchFilter] = useState();
   const sortList = (_list) => {
@@ -107,8 +108,10 @@ const NavLink = ({
                       setSkipStages(true);
                     } else if (menu.name === "Bank Statement Import") {
                       setBankStatementImport(true);
-                    }else if (menu.name === "Opening Balance Date") {
+                    } else if (menu.name === "Opening Balance Date") {
                       setOpeningBalanceDatePopup(true);
+                    } else if (menu.name === "Check Accounting Balance") {
+                      getAccountingBalanceDetails();
                     }
                   }}
                 >

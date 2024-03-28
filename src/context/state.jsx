@@ -14,13 +14,14 @@ const State = (props) => {
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(null);
   const [pageLoading, setPageLoading] = useState(null);
+  const [checkAccountingBalance, setCheckAccountingBalance] = useState(null);
   const submitBulkOrders = async ({
     stage,
     orders,
     data,
     diliveredUser,
     counters,
-	items,
+    items,
     params = {},
   }) => {
     if (loading) return;
@@ -386,6 +387,12 @@ const State = (props) => {
       });
     setTimeout(() => setNotification(null), 3000);
   };
+  const getAccountingBalanceDetails = async () => {
+    const response = await axios.get("/ledger/getAccountingBalanceDetails");
+    if (response.data.success) {
+      setCheckAccountingBalance(response.data.result);
+    }
+  };
 
   return (
     <Context.Provider
@@ -419,10 +426,12 @@ const State = (props) => {
         bankStatementImport,
         setBankStatementImport,
         updateOrder,
-		submitBulkOrders,
-    setOpeningBalanceDatePopup,
-    openingBalanceDatePopup,
-
+        submitBulkOrders,
+        setOpeningBalanceDatePopup,
+        openingBalanceDatePopup,
+        getAccountingBalanceDetails,
+        checkAccountingBalance,
+        setCheckAccountingBalance,
       }}
     >
       {props.children}

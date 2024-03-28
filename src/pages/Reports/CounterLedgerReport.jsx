@@ -62,6 +62,9 @@ const CounterLegerReport = () => {
     if (response.data.success) {
       setItems(response.data.result);
       sessionStorage.setItem("itemData", JSON.stringify(response.data.result));
+    }else{
+      setItems([])
+      sessionStorage.removeItem("itemData")
     }
   };
 
@@ -99,7 +102,6 @@ const CounterLegerReport = () => {
       controller.abort();
     };
   }, []);
-
 
   const counterList = useMemo(
     () =>
@@ -173,12 +175,13 @@ const CounterLegerReport = () => {
                   </div>
                 )}
                 filterOption={filterOption}
-                onChange={(doc) =>
+                onChange={(doc) => {
+                  console.log({doc})
                   setSearchData((prev) => ({
                     ...prev,
                     counter_uuid: doc.value,
-                  }))
-                }
+                  }));
+                }}
                 value={
                   searchData?.counter_uuid
                     ? counterList.find(
@@ -187,7 +190,7 @@ const CounterLegerReport = () => {
                     : {
                         label: "Select Ledger",
                         value: "",
-                    }
+                      }
                 }
                 openMenuOnFocus={true}
                 menuPosition="fixed"

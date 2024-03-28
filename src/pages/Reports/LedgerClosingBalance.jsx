@@ -95,7 +95,7 @@ const CampaignBody = () => {
             style={{
               display: "flex",
               alignItems: "center",
-        width: "100%",
+              width: "100%",
               justifyContent: "space-between",
             }}
           >
