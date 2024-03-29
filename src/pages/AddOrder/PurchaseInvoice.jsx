@@ -371,6 +371,25 @@ export default function PurchaseInvoice() {
         .sort((a, b) => a.label.localeCompare(b.label)),
     [counter, allLedgerData]
   );
+  const deletePurchaseInvoice = async () => {
+    const response = await axios({
+      method: "delete",
+      url: `/purchaseInvoice/deletePurchaseInvoice`,
+      data:{order_uuid},
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      setNotification({
+        message: "Purchase Invoice Deleted Successfully",
+        success: true,
+      });
+      sessionStorage.setItem("isEditVoucher", 1);
+      navigate(-1);
+    }
+  }
+
   return (
     <>
       <Sidebar />
@@ -1097,17 +1116,29 @@ export default function PurchaseInvoice() {
                   Adjustment
                 </button>
                 {order_uuid ? (
-                  <button
-                    style={{
-                      cursor: "default",
-                    }}
-                    type="button"
-                    onClick={() => {
-                      navigate("/admin/editVoucher/" + order_uuid);
-                    }}
-                  >
-                    A/c Voucher
-                  </button>
+                  <>
+                    <button
+                      style={{
+                        cursor: "default",
+                      }}
+                      type="button"
+                      onClick={() => {
+                        navigate("/admin/editVoucher/" + order_uuid);
+                      }}
+                    >
+                      A/c Voucher
+                    </button>
+                    <button
+                      style={{
+                        cursor: "default",
+                        background:"red"
+                      }}
+                      type="button"
+                      onClick={deletePurchaseInvoice}
+                    >
+                      Delete
+                    </button>
+                  </>
                 ) : (
                   ""
                 )}
@@ -1328,7 +1359,9 @@ export default function PurchaseInvoice() {
                         <DeleteOutlineIcon
                           style={{ color: "red" }}
                           onClick={() => {
-                            setOrder((prev) => prev.filter((b, j) => i !== j));
+                            setDeductionPopup((prev) =>
+                              prev.filter((b, j) => i !== j)
+                            );
                           }}
                         />
                       </td>
@@ -1338,8 +1371,8 @@ export default function PurchaseInvoice() {
                     <td colSpan={3}>
                       <div
                         onClick={() =>
-                          setOrder((prev) => [
-                            ...prev,
+                          setDeductionPopup((prev) => [
+                            ...(prev || []),
                             {
                               title: "",
                               ledger_uuid: "",
@@ -1367,15 +1400,14 @@ export default function PurchaseInvoice() {
               Save
             </button>
             <button
-            onClick={() => {
-              setDeductionPopup(false);
-            }}
-            className="closeButton"
-          >
-            x
-          </button>
+              onClick={() => {
+                setDeductionPopup(false);
+              }}
+              className="closeButton"
+            >
+              x
+            </button>
           </div>
-          
         </div>
       ) : (
         ""

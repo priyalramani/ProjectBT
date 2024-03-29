@@ -1581,16 +1581,23 @@ export function OrderDetails({
                   >
                     Deductions
                   </button>
-                  <button
-                    style={{ width: "fit-Content", backgroundColor: "#44cd4a" }}
-                    className="theme-btn"
-                    onClick={() => {
-                      handleWarehouseChacking(true, "complete");
-                      setCompleteOrder(true);
-                    }}
-                  >
-                    Complete Order
-                  </button>
+                  {!isCancelled ? (
+                    <button
+                      style={{
+                        width: "fit-Content",
+                        backgroundColor: "#44cd4a",
+                      }}
+                      className="theme-btn"
+                      onClick={() => {
+                        handleWarehouseChacking(true, "complete");
+                        setCompleteOrder(true);
+                      }}
+                    >
+                      Complete Order
+                    </button>
+                  ) : (
+                    ""
+                  )}
                   <button
                     style={{
                       width: "fit-Content",
@@ -1659,22 +1666,26 @@ export function OrderDetails({
                       Split Hold Order
                     </button>
                   )}
-                  <button
-                    style={{ width: "fit-Content" }}
-                    className="theme-btn"
-                    onClick={(e) => {
-                      reactInputsRef.current = {};
-                      e.target.blur();
-                      console.log({ editOrder });
-                      if (!editOrder) {
-                        getItemsData([]);
-                        getCounters([]);
-                      }
-                      setEditOrder((prev) => !prev);
-                    }}
-                  >
-                    Edit
-                  </button>
+                  {!isCancelled ? (
+                    <button
+                      style={{ width: "fit-Content" }}
+                      className="theme-btn"
+                      onClick={(e) => {
+                        reactInputsRef.current = {};
+                        e.target.blur();
+                        console.log({ editOrder });
+                        if (!editOrder) {
+                          getItemsData([]);
+                          getCounters([]);
+                        }
+                        setEditOrder((prev) => !prev);
+                      }}
+                    >
+                      Edit
+                    </button>
+                  ) : (
+                    ""
+                  )}
                   <button
                     style={{ width: "fit-Content" }}
                     className="theme-btn"

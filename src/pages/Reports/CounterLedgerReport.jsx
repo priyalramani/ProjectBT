@@ -140,7 +140,7 @@ const CounterLegerReport = () => {
       balance += +item.amount;
       result.push({
         ...item,
-        balance,
+        balance:truncateDecimals(balance,2)
       });
     }
     return result;

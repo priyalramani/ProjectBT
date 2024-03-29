@@ -111,7 +111,8 @@ export default function NewVoucher() {
     return truncateDecimals(total, 2);
   }, [order.details]);
   const totalSub = useMemo(() => {
-    let total = order?.details.reduce((a, b) => a + +(b.sub || 0), 0);
+    let total = order?.details.reduce((a, b) => a + +(b.sub || 0), 0).toFixed(3);
+
     return truncateDecimals(total, 2);
   }, [order.details]);
   const onSubmit = async (isDelete) => {
