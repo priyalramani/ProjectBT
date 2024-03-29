@@ -170,6 +170,7 @@ export default function NewVoucher() {
           return {
             ledger_uuid: a.ledger_uuid || a.counter_uuid,
             amount: a.add || -(a.sub || 0),
+            narration: a.narration,
           };
         }),
       },
@@ -535,7 +536,7 @@ export default function NewVoucher() {
                           onKeyDown={(e) => onPiecesKeyDown(e, item)}
                           disabled={
                             !isEdit ||
-                            item.add ||
+                            +item.add ||
                             item.ledger_uuid ===
                               "ebab980c-4761-439a-9139-f70875e8a298"
                           }
@@ -554,7 +555,7 @@ export default function NewVoucher() {
                           index={listItemIndexCount++}
                           disabled={
                             !isEdit ||
-                            item.sub ||
+                            +item.sub ||
                             item.ledger_uuid ===
                               "ebab980c-4761-439a-9139-f70875e8a298"
                           }
@@ -630,12 +631,12 @@ export default function NewVoucher() {
                             style={{ color: "red" }}
                             className="table-icon"
                             onClick={() => {
-                              setOrder({
-                                ...order,
-                                item_details: order.item_details.filter(
+                              setOrder((prev) => ({
+                                ...prev,
+                                details: prev.details.filter(
                                   (a) => a.uuid !== item.uuid
                                 ),
-                              });
+                              }));
                               //console.log(item);
                             }}
                           />

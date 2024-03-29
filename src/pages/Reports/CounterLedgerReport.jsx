@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { truncateDecimals } from "../../utils/helperFunctions";
 
 const CounterLegerReport = () => {
+  const [opening_balance_amount, setOpening_balance_amount] = useState(0);
   const [ledgerData, setLedgerData] = useState([]);
   const [searchData, setSearchData] = useState({
     startDate: "",
@@ -61,10 +62,17 @@ const CounterLegerReport = () => {
     console.log("activity", response);
     if (response.data.success) {
       setItems(response.data.result);
+      setOpening_balance_amount(response.data.opening_balance);
+      sessionStorage.setItem(
+        "opening_balance_amount",
+        response.data.opening_balance
+      );
       sessionStorage.setItem("itemData", JSON.stringify(response.data.result));
-    }else{
-      setItems([])
-      sessionStorage.removeItem("itemData")
+    } else {
+      setItems([]);
+      setOpening_balance_amount(0);
+      sessionStorage.removeItem("itemData");
+      sessionStorage.removeItem("opening_balance_amount");
     }
   };
 
@@ -77,9 +85,13 @@ const CounterLegerReport = () => {
     if (prevData && itemData && isEditVoucher) {
       setSearchData(prevData);
       setItems(itemData);
+      setOpening_balance_amount(
+        sessionStorage.getItem("opening_balance_amount")
+      );
     } else {
       sessionStorage.removeItem("ledgerData");
       sessionStorage.removeItem("itemData");
+      sessionStorage.removeItem("opening_balance_amount");
       let curTime = "yy-mm-dd"
         .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
         .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
@@ -120,7 +132,20 @@ const CounterLegerReport = () => {
     if (label.toLowerCase().includes(value.toLowerCase())) return true;
     return false;
   };
-
+  let itemsData = useMemo(() => {
+    let itemData = items?.sort((a, b) => +a.voucher_date - +b.voucher_date);
+    let result = [];
+    let balance = +opening_balance_amount?.amount||0;
+    for(let item of itemData) {
+      balance += +item.amount;
+      result.push({
+        ...item,
+        balance,
+      });
+    }
+    return result;
+  }, [items, opening_balance_amount]);
+console.log({itemsData,opening_balance_amount})
   return (
     <>
       <Sidebar />
@@ -176,7 +201,7 @@ const CounterLegerReport = () => {
                 )}
                 filterOption={filterOption}
                 onChange={(doc) => {
-                  console.log({doc})
+                  console.log({ doc });
                   setSearchData((prev) => ({
                     ...prev,
                     counter_uuid: doc.value,
@@ -205,7 +230,7 @@ const CounterLegerReport = () => {
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-            itemsDetails={items}
+            itemsDetails={itemsData}
             setPopupOrder={setPopupOrder}
             counter={counter}
             setPopupRecipt={setPopupRecipt}
@@ -261,31 +286,27 @@ function Table({ itemsDetails, navigate }) {
         </tr>
       </thead>
       <tbody className="tbody">
-        {itemsDetails
-          ?.sort((a, b) => +a.voucher_date - +b.voucher_date)
-          ?.map((item, i, array) => (
-            <tr
-              key={Math.random()}
-              style={{ height: "30px" }}
-              onClick={() =>
-                item.type === "PURCHASE_INVOICE"
-                  ? navigate("/admin/editPurchaseInvoice/" + item.order_uuid)
-                  : navigate(
-                      "/admin/editVoucher/" + item.accounting_voucher_uuid
-                    )
-              }
-            >
-              <td>{i + 1}</td>
-              <td colSpan={3}>{new Date(+item.voucher_date).toDateString()}</td>
-              <td colSpan={2}>
-                {item.accounting_voucher_number || item.invoice_number || ""}
-              </td>
-              <td colSpan={2}>{item.type}</td>
-              <td colSpan={1}>{item.amount < 0 ? -item.amount : ""}</td>
-              <td colSpan={1}>{item.amount > 0 ? item.amount : ""}</td>
-              <td colSpan={1}>{item.balance || ""}</td>
-            </tr>
-          ))}
+        {itemsDetails?.map((item, i, array) => (
+          <tr
+            key={Math.random()}
+            style={{ height: "30px" }}
+            onClick={() =>
+              item.type === "PURCHASE_INVOICE"
+                ? navigate("/admin/editPurchaseInvoice/" + item.order_uuid)
+                : navigate("/admin/editVoucher/" + item.accounting_voucher_uuid)
+            }
+          >
+            <td>{i + 1}</td>
+            <td colSpan={3}>{new Date(+item.voucher_date).toDateString()}</td>
+            <td colSpan={2}>
+              {item.accounting_voucher_number || item.invoice_number || ""}
+            </td>
+            <td colSpan={2}>{item.type}</td>
+            <td colSpan={1}>{item.amount < 0 ? -item.amount : ""}</td>
+            <td colSpan={1}>{item.amount > 0 ? item.amount : ""}</td>
+            <td colSpan={1}>{item.balance || ""}</td>
+          </tr>
+        ))}
       </tbody>
     </table>
   );
