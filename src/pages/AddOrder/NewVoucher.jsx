@@ -111,7 +111,9 @@ export default function NewVoucher() {
     return truncateDecimals(total, 2);
   }, [order.details]);
   const totalSub = useMemo(() => {
-    let total = order?.details.reduce((a, b) => a + +(b.sub || 0), 0).toFixed(3);
+    let total = order?.details
+      .reduce((a, b) => a + +(b.sub || 0), 0)
+      .toFixed(3);
 
     return truncateDecimals(total, 2);
   }, [order.details]);
@@ -697,15 +699,19 @@ export default function NewVoucher() {
             </div>
 
             <div className="bottomContent" style={{ background: "white" }}>
-              <button
-                type="button"
-                onClick={() => {
-                  if (isEdit) onSubmit();
-                  else setIsEdit(true);
-                }}
-              >
-                {isEdit ? "Save" : "Edit"}
-              </button>
+              {!(order.order_uuid || order.invoice_number) ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isEdit) onSubmit();
+                    else setIsEdit(true);
+                  }}
+                >
+                  {isEdit ? "Save" : "Edit"}
+                </button>
+              ) : (
+                ""
+              )}
               {params.accounting_voucher_uuid ? (
                 <button
                   type="button"
