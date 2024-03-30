@@ -69,6 +69,7 @@ export default function PurchaseInvoice() {
   const reactInputsRef = useRef({});
   const [focusedInputId, setFocusedInputId] = useState(0);
   const [company, setCompanies] = useState([]);
+  const [deletePopup, setDeletePopup] = useState(false);
   const [companyFilter, setCompanyFilter] = useState("all");
   const [remarks, setRemarks] = useState("");
   const fetchCompanies = async () => {
@@ -371,11 +372,12 @@ export default function PurchaseInvoice() {
         .sort((a, b) => a.label.localeCompare(b.label)),
     [counter, allLedgerData]
   );
-  const deletePurchaseInvoice = async () => {
+  const deletePurchaseInvoice = async (e) => {
+    e.preventDefault();
     const response = await axios({
       method: "delete",
       url: `/purchaseInvoice/deletePurchaseInvoice`,
-      data:{order_uuid},
+      data: { order_uuid },
       headers: {
         "Content-Type": "application/json",
       },
@@ -388,7 +390,7 @@ export default function PurchaseInvoice() {
       sessionStorage.setItem("isEditVoucher", 1);
       navigate(-1);
     }
-  }
+  };
 
   return (
     <>
@@ -1131,10 +1133,10 @@ export default function PurchaseInvoice() {
                     <button
                       style={{
                         cursor: "default",
-                        background:"red"
+                        background: "red",
                       }}
                       type="button"
-                      onClick={deletePurchaseInvoice}
+                      onClick={() => setDeletePopup(true)}
                     >
                       Delete
                     </button>
@@ -1215,6 +1217,60 @@ export default function PurchaseInvoice() {
                       </button>
                       <button className="simple_Logout_button" type="submit">
                         Save
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+      {deletePopup ? (
+        <div
+          className="overlay"
+          style={{ position: "fixed", top: 0, left: 0, zIndex: 9999999999 }}
+        >
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "fit-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form className="form" onSubmit={deletePurchaseInvoice}>
+                  <div className="formGroup">
+                    <div
+                      className="row"
+                      style={{ flexDirection: "column", alignItems: "start" }}
+                    >
+                      <h1 style={{ textAlign: "center" }}>
+                        Are you sure you want to Delete?
+                      </h1>
+                    </div>
+
+                    <div className="row message-popup-actions">
+                      <button
+                        className="simple_Logout_button"
+                        type="button"
+                        onClick={() => setDeletePopup(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="simple_Logout_button"
+                        type="submit"
+                        style={{ background: "red" }}
+                      >
+                        Confirm
                       </button>
                     </div>
                   </div>
