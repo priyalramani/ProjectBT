@@ -712,7 +712,8 @@ export default function NewVoucher() {
               ) : (
                 ""
               )}
-              {params.accounting_voucher_uuid ? (
+              {params.accounting_voucher_uuid &&
+              !(order.order_uuid || order.invoice_number) ? (
                 <button
                   type="button"
                   style={{ backgroundColor: "red" }}

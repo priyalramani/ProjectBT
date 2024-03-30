@@ -1344,7 +1344,7 @@ export default function PurchaseInvoice() {
                           onWheel={(e) => e.preventDefault()}
                           value={a.amount}
                           onChange={(e) => {
-                            setOrder((prev) =>
+                            setDeductionPopup((prev) =>
                               prev.map((b, j) =>
                                 i === j ? { ...b, amount: e.target.value } : b
                               )
