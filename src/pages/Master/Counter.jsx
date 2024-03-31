@@ -1087,6 +1087,7 @@ function NewUserForm({
     asyncCall();
   }, [paymentModes, popupInfo.data, popupInfo?.type]);
 
+
   const submitHandler = async (e) => {
     e?.preventDefault();
     let json = { ...data, counter_title: data?.counter_title?.trim() };

@@ -108,7 +108,7 @@ const NavLink = ({
                       setSkipStages(true);
                     } else if (menu.name === "Bank Statement Import") {
                       setBankStatementImport(true);
-                    } else if (menu.name === "Opening Balance Date") {
+                    } else if (menu.name === "Current Financial Year") {
                       setOpeningBalanceDatePopup(true);
                     } else if (menu.name === "Check Accounting Balance") {
                       getAccountingBalanceDetails();

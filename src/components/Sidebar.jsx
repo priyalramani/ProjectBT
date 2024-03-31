@@ -227,13 +227,13 @@ const Sidebar = ({ setCollectionTags }) => {
                     link: "/admin/OpeningBalanceReport",
                   },
                   {
-                    name:"Ledger Closing Balance",
-                    link:"/admin/LedgerClosingBalance"
+                    name: "Ledger Closing Balance",
+                    link: "/admin/LedgerClosingBalance",
                   },
                   {
                     name: "Cheque Number Search",
                     link: "/admin/ChequeNumberSearch",
-                  }
+                  },
                 ]
               : [
                   {
@@ -350,16 +350,15 @@ const Sidebar = ({ setCollectionTags }) => {
                   {
                     name: "Bank Statement Import",
                     link: "#",
-
                   },
                   {
-                    name:"Opening Balance Date",
-                    link:"#"
+                    name: "Current Financial Year",
+                    link: "#",
                   },
                   {
-                    name:"Check Accounting Balance",
-                    link:"#"
-                  }
+                    name: "Check Accounting Balance",
+                    link: "#",
+                  },
                 ]
               : [
                   {

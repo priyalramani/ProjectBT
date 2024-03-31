@@ -10,7 +10,11 @@ import Select from "react-select";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
 import { useNavigate, useParams } from "react-router-dom";
-import { getFormateDate, truncateDecimals } from "../../utils/helperFunctions";
+import {
+  getFormateDate,
+  getMidnightTimestamp,
+  truncateDecimals,
+} from "../../utils/helperFunctions";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import NotesPopup from "../../components/popups/NotesPopup";
 export let getInititalValues = () => {
@@ -332,10 +336,10 @@ export default function NewVoucher() {
               )}
               <h2>
                 Voucher
-                {order.accounting_voucher_number || order.invoice_number
+                {order.accounting_voucher_number || order.invoice_number?.length
                   ? "-"
                   : ""}
-                {order.accounting_voucher_number || order.invoice_number || ""}{" "}
+                {order.accounting_voucher_number || (order.invoice_number||[]).join(", ") || ""}{" "}
               </h2>
             </div>
 
@@ -345,17 +349,18 @@ export default function NewVoucher() {
                 <div className="inputGroup">
                   <input
                     type="date"
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setOrder((prev) => ({
                         ...prev,
-                        voucher_date: new Date(e.target.value).getTime(),
-                      }))
-                    }
+                        voucher_date: getMidnightTimestamp(e.target.value),
+                      }));
+                      onSubmit();
+                    }}
                     value={getFormateDate(new Date(+order.voucher_date))}
                     placeholder="Search Counter Title..."
                     className="searchInput"
                     pattern="\d{4}-\d{2}-\d{2}"
-                    disabled={!isEdit}
+                    // disabled={!isEdit}
                     filterOption={filterOption}
                   />
                 </div>
@@ -393,16 +398,20 @@ export default function NewVoucher() {
                 </div>
               </div>
               <div className="inputGroup" style={{ width: "100px" }}>
-                <button
-                  style={{ width: "fit-Content" }}
-                  className="theme-btn"
-                  onClick={(e) => {
-                    e.target.blur();
-                    setNotesPoup((prev) => !prev);
-                  }}
-                >
-                  Notes
-                </button>
+                {isEdit ? (
+                  <button
+                    style={{ width: "fit-Content" }}
+                    className="theme-btn"
+                    onClick={(e) => {
+                      e.target.blur();
+                      setNotesPoup((prev) => !prev);
+                    }}
+                  >
+                    Notes
+                  </button>
+                ) : (
+                  ""
+                )}
               </div>
             </div>
 
@@ -699,7 +708,7 @@ export default function NewVoucher() {
             </div>
 
             <div className="bottomContent" style={{ background: "white" }}>
-              {!(order.order_uuid || order.invoice_number) ? (
+              {!(order.order_uuid || order.invoice_number?.length) ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -713,7 +722,7 @@ export default function NewVoucher() {
                 ""
               )}
               {params.accounting_voucher_uuid &&
-              !(order.order_uuid || order.invoice_number) ? (
+              !(order.order_uuid || order.invoice_number?.length) ? (
                 <button
                   type="button"
                   style={{ backgroundColor: "red" }}

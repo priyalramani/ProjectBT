@@ -345,7 +345,12 @@ function DiliveryPopup({
                                     setOpeningBalance((prev) =>
                                       prev.map((b) =>
                                         b.uuid === a.uuid
-                                          ? { ...b, date: e.target.value }
+                                          ? {
+                                              ...b,
+                                              date: new Date(
+                                                e.target.value
+                                              ).getTime(),
+                                            }
                                           : b
                                       )
                                     )
@@ -469,7 +474,7 @@ const OpeningBalanceDate = ({ date, setDate, getOpeningBalanceReport }) => {
           <div style={{ overflowY: "scroll" }}>
             <form className="form" onSubmit={getOpeningBalanceReport}>
               <div className="row">
-                <h1>Opening Balance Default Date</h1>
+                <h1>Opening Balance </h1>
               </div>
 
               <div className="form">
@@ -479,7 +484,7 @@ const OpeningBalanceDate = ({ date, setDate, getOpeningBalanceReport }) => {
                     <input
                       type="date"
                       onChange={(e) =>
-                        setDate(new Date(e.target.value).getTime())
+                        setDate(getMidnightTimestamp(new Date(e.target.value).getTime()))
                       }
                       value={date !== 0 ? getFormateDate(new Date(+date)) : ""}
                       placeholder="Search Counter Title..."

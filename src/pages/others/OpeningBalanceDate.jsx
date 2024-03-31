@@ -1,7 +1,10 @@
 import axios from "axios";
 import React, { useState, useContext, useEffect } from "react";
 import context from "../../context/context";
-import { getFormateDate } from "../../utils/helperFunctions";
+import {
+  getFormateDate,
+  getMidnightTimestamp,
+} from "../../utils/helperFunctions";
 
 export default function OpeningBalanceDate() {
   const [data, setData] = useState(new Date().getTime());
@@ -15,8 +18,8 @@ export default function OpeningBalanceDate() {
     const res = await axios({
       method: "put",
       url: "/details/putOpeningBalanceDate",
-      data:{
-        date:data
+      data: {
+        date: data,
       },
       headers: {
         "Content-Type": "application/json",
@@ -68,7 +71,11 @@ export default function OpeningBalanceDate() {
                     <input
                       type="date"
                       onChange={(e) =>
-                        setData(new Date(e.target.value).getTime())
+                        setData(
+                          getMidnightTimestamp(
+                            new Date(e.target.value).getTime()
+                          )
+                        )
                       }
                       value={getFormateDate(new Date(+data))}
                       placeholder="Search Counter Title..."

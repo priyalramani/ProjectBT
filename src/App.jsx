@@ -90,7 +90,7 @@ import LedgerClosingBalance from "./pages/Reports/LedgerClosingBalance";
 import CheckAccountingBalance from "./pages/QuikAccess/CheckAccountingBalance";
 import ChequeNumberSearch from "./pages/Reports/ChequeNumberSearch";
 
-export let Version = 295;
+export let Version = 297;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 

@@ -391,6 +391,15 @@ const State = (props) => {
     const response = await axios.get("/ledger/getAccountingBalanceDetails");
     if (response.data.success) {
       setCheckAccountingBalance(response.data.result);
+      setNotification({
+        success: true,
+        message: "Accounting Balance Details Fetched Successfully",
+      });
+    }else{
+      setNotification({
+        success: true,
+        message: "No Accounting Balance Details Difference Found",
+      });
     }
   };
 
