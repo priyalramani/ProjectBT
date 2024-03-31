@@ -96,8 +96,9 @@ const CounterLegerReport = () => {
         .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
         .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
         .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
+      time = new Date(time.getTime() - 30 * 24 * 60 * 60 * 1000);
       let sTime = "yy-mm-dd"
-        .replace("mm", ("00" + time?.getMonth().toString()).slice(-2))
+        .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
         .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
         .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
       setSearchData((prev) => ({
@@ -135,17 +136,17 @@ const CounterLegerReport = () => {
   let itemsData = useMemo(() => {
     let itemData = items?.sort((a, b) => +a.voucher_date - +b.voucher_date);
     let result = [];
-    let balance = +opening_balance_amount?.amount||0;
-    for(let item of itemData) {
+    let balance = +opening_balance_amount?.amount || 0;
+    for (let item of itemData) {
       balance += +item.amount;
       result.push({
         ...item,
-        balance:truncateDecimals(balance,2)
+        balance: truncateDecimals(balance, 2),
       });
     }
     return result;
   }, [items, opening_balance_amount]);
-console.log({itemsData,opening_balance_amount})
+  console.log({ itemsData, opening_balance_amount });
   return (
     <>
       <Sidebar />
@@ -174,7 +175,7 @@ console.log({itemsData,opening_balance_amount})
                 }))
               }
               value={searchData.startDate}
-              placeholder="Search Counter Title..."
+              placeholder="Search Route Title..."
               className="searchInput"
               pattern="\d{4}-\d{2}-\d{2}"
             />

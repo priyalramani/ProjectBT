@@ -1451,7 +1451,13 @@ export default function PurchaseInvoice() {
             <button
               className="submit"
               type="button"
-              onClick={() => setDeductionPopup(false)}
+              onClick={() => {
+                setOrder((prev) => ({
+                  ...prev,
+                  deductions: deductionPopup,
+                }));
+                setDeductionPopup(false);
+              }}
             >
               Save
             </button>

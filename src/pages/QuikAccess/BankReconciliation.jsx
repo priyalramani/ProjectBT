@@ -18,7 +18,7 @@ const BankReconciliation = () => {
   const [popupForm, setPopupForm] = useState(false);
   const [filterTitle, setFilterTitle] = useState("");
 
-  const { setNotification } = useContext(context);
+  const { setNotification, loading, setLoading } = useContext(context);
 
   const getLedgerData = async (controller = new AbortController()) => {
     const response = await axios({
@@ -133,6 +133,8 @@ const BankReconciliation = () => {
           setLedgerData={setLedgerData}
           popupInfo={popupForm}
           setNotification={setNotification}
+          loading={loading}
+          setLoading={setLoading}
         />
       ) : (
         ""
@@ -237,15 +239,22 @@ function Table({ itemsDetails, setPopupForm }) {
   );
 }
 
-function ImportStatements({ onSave, popupInfo, setNotification }) {
+function ImportStatements({
+  onSave,
+  popupInfo,
+  setNotification,
+  loading,
+  setLoading,
+}) {
   const [errMassage, setErrorMassage] = useState("");
-  const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const [ledgerData, setLedgerData] = useState([]);
   const [changeTransition, setChangeTransition] = useState(null);
   const [counter, setCounter] = useState([]);
   const [counterSelected, setCounterSelected] = useState(null);
   const [multipleNarration, setMultipleNarration] = useState(null);
+  const [confirmPopup, setConfirmPopup] = useState(false);
+  const [matchPricePopup, setMatchPricePopup] = useState(false);
   const getCounter = async (controller = new AbortController()) => {
     const response = await axios({
       method: "post",
@@ -291,8 +300,9 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
       })),
     [counter, ledgerData]
   );
-  const createImportedVouchers = async (e) => {
-    e.preventDefault();
+  const createImportedVouchers = async (mark_entry) => {
+    if (loading) return;
+    setLoading(true);
     let dataArray = data
       .filter((item) => !item.unMatch)
       .map((a) => ({
@@ -303,36 +313,45 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
     let array = [];
     let time = new Date();
     for (let item of dataArray) {
-      array.push({
-        voucher_uuid: uuid(),
-        type:
-          item.ledger_group_uuid === "9c2a6c85-c0f0-4acf-957e-dcea223f3d00" ||
-          item?.counter_uuid
-            ? "RCPT"
-            : item.ledger_group_uuid === "004fd020-853c-4575-bebe-b29faefae3c9"
-            ? "PAYMENT"
-            : item.ledger_group_uuid ===
-                "8550248f-41e9-4f5f-aea0-927b12a7146c" ||
-              item.ledger_group_uuid === "0c0c8cbd-1a2a-4adc-9b65-d5c807f275c7"
-            ? "CNTR"
-            : "",
-        created_by: localStorage.getItem("user_uuid"),
-        created_at: time.getTime(),
-        amt: item.paid_amount || item.received_amount,
-        details: [
-          {
-            ledger_uuid: popupInfo.ledger_uuid,
-            amount: item.paid_amount || -item.received_amount,
-          },
-          {
-            ledger_uuid: item?.counter_uuid,
-            amount: -item.paid_amount || +item.received_amount,
-          },
-        ],
-        voucher_date: item.date,
-      });
+        array.push({
+          voucher_uuid: uuid(),
+          mark_entry,
+          type:
+            item.ledger_group_uuid === "9c2a6c85-c0f0-4acf-957e-dcea223f3d00" ||
+            item?.counter_uuid
+              ? "RCPT"
+              : item.ledger_group_uuid ===
+                "004fd020-853c-4575-bebe-b29faefae3c9"
+              ? "PAYMENT"
+              : item.ledger_group_uuid ===
+                  "8550248f-41e9-4f5f-aea0-927b12a7146c" ||
+                item.ledger_group_uuid ===
+                  "0c0c8cbd-1a2a-4adc-9b65-d5c807f275c7"
+              ? "CNTR"
+              : "",
+          created_by: localStorage.getItem("user_uuid"),
+          created_at: time.getTime(),
+          amt: item.paid_amount || item.received_amount,
+          invoice_number: item.reference_no,
+          order_uuid: item.order_uuid,
+          mode_uuid: item.mode_uuid,
+          transaction_tags: item.transaction_tags,
+          details: [
+            {
+              ledger_uuid: popupInfo.ledger_uuid,
+              amount: item.paid_amount || -item.received_amount,
+              narration: "Ref no: " + item.reference_no.join(", "),
+            },
+            {
+              ledger_uuid: item?.counter_uuid,
+              amount: -item.paid_amount || +item.received_amount,
+              narration: "Ref no: " + item.reference_no.join(", "),
+            },
+          ],
+          voucher_date: item.date,
+        });
     }
-
+    console.log(array);
     const response = await axios({
       method: "post",
       url: "/vouchers/postAccountVouchers",
@@ -359,6 +378,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
     setTimeout(() => {
       setNotification(null);
     }, 5000);
+    setLoading(false);
   };
 
   const submitHandler = async (data) => {
@@ -450,7 +470,188 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
   );
   return (
     <div className="overlay">
-      {multipleNarration ? (
+      {confirmPopup ? (
+        <div
+          className="overlay"
+          style={{ position: "fixed", top: 0, left: 0, zIndex: 9999999999 }}
+        >
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "fit-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form
+                  className="form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    createImportedVouchers(1);
+                  }}
+                >
+                  <div className="formGroup">
+                    <div
+                      className="row"
+                      style={{ flexDirection: "column", alignItems: "start" }}
+                    >
+                      <h1 style={{ textAlign: "center" }}>Mark Entry Done</h1>
+                    </div>
+
+                    <div className="row message-popup-actions">
+                      <button
+                        className="simple_Logout_button"
+                        type="button"
+                        onClick={() => createImportedVouchers(0)}
+                        style={{ background: "red" }}
+                      >
+                        No
+                      </button>
+                      <button className="simple_Logout_button" type="submit">
+                        Yes
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setConfirmPopup(false);
+                    }}
+                    className="closeButton"
+                  >
+                    x
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : matchPricePopup ? (
+        <div className="modal" style={{ width: "fit-content" }}>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "20px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form
+                className="form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setData((prev) =>
+                    prev.map((a) =>
+                      a.sr === matchPricePopup.sr
+                        ? {
+                            ...matchPricePopup,
+                            reference_no: matchPricePopup.otherReciptsData
+                              .filter((a) => a.checked)
+                              .map((a) => a.invoice_number),
+                            unMatch: false,
+                          }
+                        : a
+                    )
+                  );
+                  setMatchPricePopup(null);
+                }}
+                style={{
+                  justifyContent: "start",
+                }}
+              >
+                <div className="row">
+                  <h1>Match Price for {matchPricePopup.counter_title}</h1>
+                </div>
+                <div className="row">
+                  <h2>
+                    Total:{" "}
+                    {matchPricePopup.otherReciptsData
+                      .filter((a) => a.checked)
+                      .reduce((a, b) => a + b.amount, 0)}{" "}
+                    / {matchPricePopup.received_amount}
+                  </h2>
+                </div>
+                <table className="user-table" style={{ tableLayout: "auto" }}>
+                  <thead>
+                    <tr>
+                      <th>Sr.</th>
+                      <th>Invoice</th>
+                      <th>Amount</th>
+
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody className="tbody">
+                    {matchPricePopup.otherReciptsData?.map((item, i) => (
+                      <tr
+                        key={Math.random()}
+                        style={{
+                          height: "30px",
+                        }}
+                      >
+                        <td>{i + 1}</td>
+                        <td>{item.invoice_number}</td>
+                        <td>{item.amount}</td>
+
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={item?.checked}
+                            onChange={(e) => {
+                              setMatchPricePopup((prev) => ({
+                                ...prev,
+                                otherReciptsData: prev.otherReciptsData.map(
+                                  (a, j) =>
+                                    j === i
+                                      ? {
+                                          ...a,
+                                          checked: item.checked ? false : true,
+                                        }
+                                      : a
+                                ),
+                              }));
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {+matchPricePopup.received_amount ===
+                +matchPricePopup.otherReciptsData
+                  .filter((a) => a.checked)
+                  .reduce((a, b) => a + b.amount, 0) ? (
+                  <div
+                    className="flex"
+                    style={{
+                      justifyContent: "space-between",
+                      minWidth: "300px",
+                    }}
+                  >
+                    <button className="submit">Save</button>
+                  </div>
+                ) : (
+                  ""
+                )}
+                <button
+                  onClick={() => {
+                    setMatchPricePopup(false);
+                  }}
+                  className="closeButton"
+                >
+                  x
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      ) : multipleNarration ? (
         <div className="modal" style={{ width: "fit-content" }}>
           <div
             className="content"
@@ -703,7 +904,7 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                           >
                             <td>{item.sr}</td>
                             <td>{item.date}</td>
-                            <td>{item.reference_no || "Un Matched"}</td>
+                            <td>{item.reference_no.length? (item.reference_no||[]).join(", ") :"Un Matched"}</td>
                             {item?.counter_uuid ? (
                               <>
                                 <td colSpan={item.narration ? 2 : 1}>
@@ -833,6 +1034,10 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                                   type="checkbox"
                                   checked={!item.unMatch}
                                   onChange={(e) => {
+                                    if (!item.reference_no) {
+                                      setMatchPricePopup(item);
+                                      return;
+                                    }
                                     if (item.multipleNarration?.length) {
                                       setMultipleNarration(item);
                                     }
@@ -913,7 +1118,13 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                       </svg>
                     </button>
                   ) : data ? (
-                    <button className="submit" onClick={createImportedVouchers}>
+                    <button
+                      className="submit"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setConfirmPopup(true);
+                      }}
+                    >
                       Import Matched
                     </button>
                   ) : (

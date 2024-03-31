@@ -89,7 +89,7 @@ import TermsAndConditions from "./TermsAndConditions";
 import LedgerClosingBalance from "./pages/Reports/LedgerClosingBalance";
 import CheckAccountingBalance from "./pages/QuikAccess/CheckAccountingBalance";
 
-export let Version = 292;
+export let Version = 293;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
