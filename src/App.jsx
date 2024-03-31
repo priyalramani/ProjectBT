@@ -88,8 +88,9 @@ import OrderPdf from "./components/prints/OrderPdf";
 import TermsAndConditions from "./TermsAndConditions";
 import LedgerClosingBalance from "./pages/Reports/LedgerClosingBalance";
 import CheckAccountingBalance from "./pages/QuikAccess/CheckAccountingBalance";
+import ChequeNumberSearch from "./pages/Reports/ChequeNumberSearch";
 
-export let Version = 293;
+export let Version = 294;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
@@ -345,6 +346,7 @@ function App() {
             <Route path="/admin/items" element={<ItemsPage />} />
             <Route path="/admin/ledgers" element={<LedgersPage />} />
             <Route path="/admin/ledgerGroup" element={<LedgerGroups />} />
+            <Route path="/admin/ChequeNumberSearch" element={<ChequeNumberSearch />} />
             <Route
               path="/admin/StockValuationReport"
               element={<StockValuationReport />}
