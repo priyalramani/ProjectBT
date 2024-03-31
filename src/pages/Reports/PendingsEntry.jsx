@@ -100,7 +100,7 @@ const PendingsEntry = () => {
           "Party Code":
             counters.find((b) => b.counter_uuid === order.counter_uuid)
               ?.counter_code || "",
-          "Invoice Number": "N" + order.invoice_number,
+          "Invoice Number": order.invoice_number,
           "Invoice Date": "dd/mm/yy"
             .replace("mm", ("00" + (date?.getMonth() + 1).toString()).slice(-2))
             .replace("yy", ("0000" + date?.getFullYear().toString()).slice(-4))

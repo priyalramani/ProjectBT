@@ -2,19 +2,9 @@ import React, { useState, useEffect, useMemo, useContext } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
-import { v4 as uuid } from "uuid";
 import axios from "axios";
-import {
-  Add,
-  ArrowDropDown,
-  ArrowDropUp,
-  CopyAll,
-  DeleteOutline,
-} from "@mui/icons-material";
-
 import Context from "../../context/context";
-import { server } from "../../App";
-import noimg from "../../assets/noimg.jpg";
+
 
 const LedgerClosingBalance = () => {
   return (
@@ -73,7 +63,7 @@ const CampaignBody = () => {
               ?.toLocaleLowerCase()
               ?.includes(filterRoute?.toLocaleLowerCase())) &&
           (!balanceOnly || a.closing_balance)
-      ),
+      ).sort((a, b) => a.title.localeCompare(b.title)),
     [itemsData, filterTitle, filterGroup, filterRoute, balanceOnly]
   );
 

@@ -121,7 +121,7 @@ const PendingReciptsEntry = () => {
 				Cash: order.modes.find(a => a.mode_uuid === "c67b54ba-d2b6-11ec-9d64-0242ac120002")?.amt || 0,
 				Cheque: order.modes.find(a => a.mode_uuid === "c67b5794-d2b6-11ec-9d64-0242ac120002")?.amt || 0,
 				UPI: order.modes.find(a => a.mode_uuid === "c67b5988-d2b6-11ec-9d64-0242ac120002")?.amt || 0,
-				"REM 1": "N" + order.invoice_number,
+				"REM 1": order.invoice_number,
 				"REM 2": order.user_title,
 				"Voucher No.": order.receipt_number,
 			})
