@@ -141,12 +141,12 @@ const CounterLegerReport = () => {
       balance += +item.amount;
       result.push({
         ...item,
-        balance: truncateDecimals(balance, 2),
+        balance: truncateDecimals(balance + opening_balance_amount?.amount, 2),
       });
     }
     return result;
   }, [items, opening_balance_amount]);
-  console.log({ itemsData, opening_balance_amount });
+
   return (
     <>
       <Sidebar />

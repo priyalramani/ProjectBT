@@ -64,7 +64,7 @@ const InvoiceNumberWiseOrder = () => {
 							width: "100%",
 						}}>
 						<input
-							type="number"
+							type="text"
 							onChange={e => setInvoiceNumberFilter(e.target.value)}
 							value={invoiceNumberFilter}
 							placeholder="Search Invoice Number..."

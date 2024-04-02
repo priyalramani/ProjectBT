@@ -66,7 +66,7 @@ export default function NewVoucher() {
   };
   const getCounter = async () => {
     const response = await axios({
-      method: "get",
+      method: "post",
       url: "/counters/GetCounterList",
 
       headers: {
@@ -111,15 +111,19 @@ export default function NewVoucher() {
   }, [params.accounting_voucher_uuid]);
 
   const totalSum = useMemo(() => {
-    let total = order?.details.reduce((a, b) => a + +(b.add || 0), 0);
-    return truncateDecimals(total, 2);
+    let total = 0;
+    for (let item of order.details) {
+      total += +truncateDecimals(item.add || 0, 2);
+    }
+    return total.toFixed(2);
   }, [order.details]);
   const totalSub = useMemo(() => {
-    let total = order?.details
-      .reduce((a, b) => a + +(b.sub || 0), 0)
-      .toFixed(3);
+    let total = 0;
+    for (let item of order.details) {
+      total += +truncateDecimals(item.sub || 0, 2);
+    }
 
-    return truncateDecimals(total, 2);
+    return total.toFixed(2);
   }, [order.details]);
   const onSubmit = async (isDelete) => {
     let is_empty = order.details.find(
@@ -339,7 +343,9 @@ export default function NewVoucher() {
                 {order.accounting_voucher_number || order.invoice_number?.length
                   ? "-"
                   : ""}
-                {order.accounting_voucher_number || (order.invoice_number||[]).join(", ") || ""}{" "}
+                {order.accounting_voucher_number ||
+                  (order.invoice_number || []).join(", ") ||
+                  ""}{" "}
               </h2>
             </div>
 
@@ -354,7 +360,11 @@ export default function NewVoucher() {
                         ...prev,
                         voucher_date: getMidnightTimestamp(e.target.value),
                       }));
-                      onSubmit();
+                      if (
+                        order.type === "SALE_ORDER" ||
+                        order.type === "RECEIPT_ORDER"
+                      )
+                        onSubmit();
                     }}
                     value={getFormateDate(new Date(+order.voucher_date))}
                     placeholder="Search Counter Title..."
