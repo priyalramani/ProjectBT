@@ -261,10 +261,16 @@ export const Billing = async ({
   let newPriceItems = [];
   for (let item of items) {
     item = { ...item, item_total: 0 };
-    let descInputs =
-    item.charges_discount
-      ?.filter((a) => a.title === "dsc1" || a.title === "dsc2")
-      .reduce((a, b) => a + +(b.value || 0), 0) || 0;
+    let descInputs = 0;
+
+    for (let desc of (item.charges_discount||[])?.filter(
+      (a) =>
+        a.title === "dsc1" || a.title === "dsc2" || a.title === "Item Discount"
+    )) {
+      descInputs = +desc.value + +(descInputs||0);
+      console.log({descInputs})
+      descInputs = (descInputs||0).toFixed(2);
+    }
 
     let edit_price =
       +edit_prices.find((a) => a.item_uuid === item.item_uuid)?.item_price ||
@@ -353,7 +359,7 @@ export const Billing = async ({
               ((100 - company_discount_percentage) / 100) || 0,
       };
     }
- 
+
     if (salesManDiscounts.value) {
       charges_discount?.push(salesManDiscounts);
       item = {
@@ -491,10 +497,11 @@ export const PurchaseInvoiceBilling = async ({
 
     newPriceItems.push(item);
   }
-  let deductionsTotal = 
+  let deductionsTotal =
     deductions.reduce((a, b) => a + +(b.amount || 0), 0) || 0;
   let order_grandtotal = truncateDecimals(
-    newPriceItems.reduce((a, b) => a + +(b.item_total||0), 0) + deductionsTotal,
+    newPriceItems.reduce((a, b) => a + +(b.item_total || 0), 0) +
+      deductionsTotal,
     2
   );
 

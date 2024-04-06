@@ -287,7 +287,7 @@ export default function AddOrder() {
                 stage: 1,
                 time: data?.others?.time || new Date().getTime(),
                 user_uuid:
-                  data.others.user_uuid || localStorage.getItem("user_uuid"),
+                  data?.others?.user_uuid || localStorage.getItem("user_uuid"),
               },
             ]
           : type.stage === 2
@@ -296,13 +296,13 @@ export default function AddOrder() {
                 stage: 1,
                 time: data?.others?.time || new Date().getTime(),
                 user_uuid:
-                  data.others.user_uuid || localStorage.getItem("user_uuid"),
+                  data?.others?.user_uuid || localStorage.getItem("user_uuid"),
               },
               {
                 stage: 2,
                 time: data?.others?.time || new Date().getTime(),
                 user_uuid:
-                  data.others.user_uuid || localStorage.getItem("user_uuid"),
+                  data?.others?.user_uuid || localStorage.getItem("user_uuid"),
               },
             ]
           : type.stage === 3
@@ -311,19 +311,19 @@ export default function AddOrder() {
                 stage: 1,
                 time: data?.others?.time || new Date().getTime(),
                 user_uuid:
-                  data.others.user_uuid || localStorage.getItem("user_uuid"),
+                  data?.others?.user_uuid || localStorage.getItem("user_uuid"),
               },
               {
                 stage: 2,
                 time: data?.others?.time || new Date().getTime(),
                 user_uuid:
-                  data.others.user_uuid || localStorage.getItem("user_uuid"),
+                  data?.others?.user_uuid || localStorage.getItem("user_uuid"),
               },
               {
                 stage: 3,
                 time: data?.others?.time || new Date().getTime(),
                 user_uuid:
-                  data.others.user_uuid || localStorage.getItem("user_uuid"),
+                  data?.others?.user_uuid || localStorage.getItem("user_uuid"),
               },
             ]
           : [
@@ -331,25 +331,25 @@ export default function AddOrder() {
                 stage: 1,
                 time: data?.others?.time || new Date().getTime(),
                 user_uuid:
-                  data.others.user_uuid || localStorage.getItem("user_uuid"),
+                  data?.others?.user_uuid || localStorage.getItem("user_uuid"),
               },
               {
                 stage: 2,
                 time: data?.others?.time || new Date().getTime(),
                 user_uuid:
-                  data.others.user_uuid || localStorage.getItem("user_uuid"),
+                  data?.others?.user_uuid || localStorage.getItem("user_uuid"),
               },
               {
                 stage: 3,
                 time: data?.others?.time || new Date().getTime(),
                 user_uuid:
-                  data.others.user_uuid || localStorage.getItem("user_uuid"),
+                  data?.others?.user_uuid || localStorage.getItem("user_uuid"),
               },
               {
                 stage: 4,
                 time: data?.others?.time || new Date().getTime(),
                 user_uuid:
-                  data.others.user_uuid || localStorage.getItem("user_uuid"),
+                  data?.others?.user_uuid || localStorage.getItem("user_uuid"),
               },
             ],
       ...(type.obj || {}),

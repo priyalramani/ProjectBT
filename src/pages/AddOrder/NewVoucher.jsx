@@ -113,17 +113,19 @@ export default function NewVoucher() {
   const totalSum = useMemo(() => {
     let total = 0;
     for (let item of order.details) {
-      total += +truncateDecimals(item.add || 0, 2);
+      total = +(item.add ||0)+ +total;
+      total = total.toFixed(2);
     }
-    return total.toFixed(2);
+    return total;
   }, [order.details]);
   const totalSub = useMemo(() => {
     let total = 0;
     for (let item of order.details) {
-      total += +truncateDecimals(item.sub || 0, 2);
+      total = +(item.sub||0) + +total;
+      total = total.toFixed(2);
     }
 
-    return total.toFixed(2);
+    return total;
   }, [order.details]);
   const onSubmit = async (isDelete) => {
     let is_empty = order.details.find(
@@ -401,8 +403,8 @@ export default function NewVoucher() {
                     placeholder="Select"
                     isDisabled={
                       !isEdit ||
-                      order?.type === "SALE_ORDER" ||
-                      order?.type === "RCPT"
+                      ((order?.type === "SALE_ORDER" ||
+                      order?.type === "RCPT")&&order.order_uuid)
                     }
                   />
                 </div>

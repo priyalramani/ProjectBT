@@ -54,6 +54,7 @@ let titleData = [
   { value: "signedBills", name: "Signed Bills" },
   { value: "addOrder", name: "New Order" },
   { value: "purchaseInvoice", name: "Purchase Invoice" },
+  { value: "creditNote", name: "Credit Note" },
   { value: "addStock", name: "New Stock Tranfer" },
   { value: "adjustStock", name: "Adjust Stock" },
   { value: "ItemsReport", name: "Items Report" },
@@ -94,6 +95,10 @@ const Sidebar = ({ setCollectionTags }) => {
                   {
                     name: "New Voucher",
                     link: "/admin/addVoucher",
+                  },
+                  {
+                    name: "Credit Note",
+                    link: "/admin/creditNote",
                   },
                 ]
               : [

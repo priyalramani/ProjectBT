@@ -313,43 +313,41 @@ function ImportStatements({
     let array = [];
     let time = new Date();
     for (let item of dataArray) {
-        array.push({
-          voucher_uuid: uuid(),
-          mark_entry,
-          type:
-            item.ledger_group_uuid === "9c2a6c85-c0f0-4acf-957e-dcea223f3d00" ||
-            item?.counter_uuid
-              ? "RCPT"
-              : item.ledger_group_uuid ===
-                "004fd020-853c-4575-bebe-b29faefae3c9"
-              ? "PAYMENT"
-              : item.ledger_group_uuid ===
-                  "8550248f-41e9-4f5f-aea0-927b12a7146c" ||
-                item.ledger_group_uuid ===
-                  "0c0c8cbd-1a2a-4adc-9b65-d5c807f275c7"
-              ? "CNTR"
-              : "",
-          created_by: localStorage.getItem("user_uuid"),
-          created_at: time.getTime(),
-          amt: item.paid_amount || item.received_amount,
-          invoice_number: item.reference_no,
-          order_uuid: item.order_uuid,
-          mode_uuid: item.mode_uuid,
-          transaction_tags: item.transaction_tags,
-          details: [
-            {
-              ledger_uuid: popupInfo.ledger_uuid,
-              amount: item.paid_amount || -item.received_amount,
-              narration: "Ref no: " + item.reference_no.join(", "),
-            },
-            {
-              ledger_uuid: item?.counter_uuid,
-              amount: -item.paid_amount || +item.received_amount,
-              narration: "Ref no: " + item.reference_no.join(", "),
-            },
-          ],
-          voucher_date: item.date,
-        });
+      array.push({
+        voucher_uuid: uuid(),
+        mark_entry,
+        type:
+          item.ledger_group_uuid === "9c2a6c85-c0f0-4acf-957e-dcea223f3d00" ||
+          item?.counter_uuid
+            ? "RCPT"
+            : item.ledger_group_uuid === "004fd020-853c-4575-bebe-b29faefae3c9"
+            ? "PAYMENT"
+            : item.ledger_group_uuid ===
+                "8550248f-41e9-4f5f-aea0-927b12a7146c" ||
+              item.ledger_group_uuid === "0c0c8cbd-1a2a-4adc-9b65-d5c807f275c7"
+            ? "CNTR"
+            : "",
+        created_by: localStorage.getItem("user_uuid"),
+        created_at: time.getTime(),
+        amt: item.paid_amount || item.received_amount,
+        invoice_number: item.reference_no,
+        order_uuid: item.order_uuid,
+        mode_uuid: item.mode_uuid,
+        transaction_tags: item.transaction_tags,
+        details: [
+          {
+            ledger_uuid: popupInfo.ledger_uuid,
+            amount: item.paid_amount || -item.received_amount,
+            narration: "Ref no: " + item.reference_no.join(", "),
+          },
+          {
+            ledger_uuid: item?.counter_uuid,
+            amount: -item.paid_amount || +item.received_amount,
+            narration: "Ref no: " + item.reference_no.join(", "),
+          },
+        ],
+        voucher_date: item.date,
+      });
     }
     console.log(array);
     const response = await axios({
@@ -545,14 +543,18 @@ function ImportStatements({
                 className="form"
                 onSubmit={(e) => {
                   e.preventDefault();
+                  let reference_no = matchPricePopup.otherReciptsData
+                    .filter((a) => a.checked)
+                    .map((a) => a.invoice_number);
+                  reference_no = reference_no.find((a) => a === "Unknown")
+                    ? []
+                    : reference_no;
                   setData((prev) =>
                     prev.map((a) =>
                       a.sr === matchPricePopup.sr
                         ? {
                             ...matchPricePopup,
-                            reference_no: matchPricePopup.otherReciptsData
-                              .filter((a) => a.checked)
-                              .map((a) => a.invoice_number),
+                            reference_no,
                             unMatch: false,
                           }
                         : a
@@ -603,6 +605,24 @@ function ImportStatements({
                             type="checkbox"
                             checked={item?.checked}
                             onChange={(e) => {
+                              if (
+                                item.invoice_number === "Unknown" &&
+                                !item.checked
+                              ) {
+                                setMatchPricePopup((prev) => ({
+                                  ...prev,
+                                  otherReciptsData: prev.otherReciptsData.map(
+                                    (a, j) => ({
+                                      ...a,
+                                      checked:
+                                        item.invoice_number === "Unknown"
+                                          ? true
+                                          : false,
+                                    })
+                                  ),
+                                }));
+                                return;
+                              }
                               setMatchPricePopup((prev) => ({
                                 ...prev,
                                 otherReciptsData: prev.otherReciptsData.map(
@@ -904,7 +924,11 @@ function ImportStatements({
                           >
                             <td>{item.sr}</td>
                             <td>{item.date}</td>
-                            <td>{item.reference_no.length? (item.reference_no||[]).join(", ") :"Un Matched"}</td>
+                            <td>
+                              {item.reference_no.length
+                                ? (item.reference_no || []).join(", ")
+                                : "Un Matched"}
+                            </td>
                             {item?.counter_uuid ? (
                               <>
                                 <td colSpan={item.narration ? 2 : 1}>

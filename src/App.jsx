@@ -89,8 +89,9 @@ import TermsAndConditions from "./TermsAndConditions";
 import LedgerClosingBalance from "./pages/Reports/LedgerClosingBalance";
 import CheckAccountingBalance from "./pages/QuikAccess/CheckAccountingBalance";
 import ChequeNumberSearch from "./pages/Reports/ChequeNumberSearch";
+import CreditNote from "./pages/AddOrder/CreditNote";
 
-export let Version = 298;
+export let Version = 300;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
@@ -390,6 +391,14 @@ function App() {
             <Route
               path="/admin/editPurchaseInvoice/:order_uuid"
               element={<PurchaseInvoice />}
+            />
+            <Route
+              path="/admin/creditNote"
+              element={<CreditNote />}
+            />
+            <Route
+              path="/admin/editCreditNote/:order_uuid"
+              element={<CreditNote />}
             />
             <Route path="/admin/addVoucher" element={<AddVoucher />} />
             <Route

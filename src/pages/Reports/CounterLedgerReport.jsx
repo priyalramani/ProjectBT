@@ -6,11 +6,18 @@ import Sidebar from "../../components/Sidebar";
 import Select from "react-select";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import { useNavigate } from "react-router-dom";
-import { truncateDecimals } from "../../utils/helperFunctions";
+import {
+  getFormateDate,
+  getMidnightTimestamp,
+  truncateDecimals,
+} from "../../utils/helperFunctions";
 
 const CounterLegerReport = () => {
   const [opening_balance_amount, setOpening_balance_amount] = useState(0);
+  const [showUnknown, setShowUnknown] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
   const [ledgerData, setLedgerData] = useState([]);
+  const [changeDatePopup, setChangeDatePopup] = useState(false);
   const [searchData, setSearchData] = useState({
     startDate: "",
     endDate: "",
@@ -121,10 +128,9 @@ const CounterLegerReport = () => {
       [...counter, ...ledgerData].map((a) => ({
         label: a.counter_title || a.ledger_title,
         value: a.counter_uuid || a.ledger_uuid,
-        closing_balance: truncateDecimals(
-          (a.closing_balance || 0) + +(a.opening_balance_amount || 0),
-          2
-        ),
+        closing_balance: (
+          (a.closing_balance || 0) + +(a.opening_balance_amount || 0)
+        ).toFixed(2),
       })),
     [counter, ledgerData]
   );
@@ -138,7 +144,8 @@ const CounterLegerReport = () => {
     let result = [];
     let balance = +opening_balance_amount?.amount || 0;
     for (let item of itemData) {
-      balance += +item.amount;
+      balance = +item.amount + +balance;
+      balance = (balance || 0).toFixed(2);
       result.push({
         ...item,
         balance: truncateDecimals(balance + opening_balance_amount?.amount, 2),
@@ -155,7 +162,13 @@ const CounterLegerReport = () => {
         <div id="heading">
           <h2>Ledger</h2>
         </div>
-        <div id="item-sales-top">
+        <div
+          id="item-sales-top"
+          onContextMenu={(e) => {
+            e.preventDefault();
+            setSelectionMode((prev) => (prev ? false : []));
+          }}
+        >
           <div
             id="date-input-container"
             style={{
@@ -189,7 +202,7 @@ const CounterLegerReport = () => {
               className="searchInput"
               pattern="\d{4}-\d{2}-\d{2}"
             />
-            <div className="inputGroup" style={{ width: "50%" }}>
+            <div className="inputGroup" style={{ width: "40%" }}>
               <Select
                 options={counterList}
                 getOptionLabel={(option) => (
@@ -227,18 +240,69 @@ const CounterLegerReport = () => {
             <button className="theme-btn" onClick={() => getCompleteOrders()}>
               Search
             </button>
+            {selectionMode.length ? (
+              <button
+                className="theme-btn"
+                onClick={() => setChangeDatePopup(true)}
+              >
+                Change Date
+              </button>
+            ) : (
+              ""
+            )}
+
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "8px",
+                cursor: "pointer",
+                width: "fit-content",
+              }}
+            >
+              <input
+                type="checkbox"
+                onChange={(e) => setShowUnknown(e.target.checked)}
+                value={showUnknown}
+                className="searchInput"
+                style={{ scale: "1.2" }}
+              />
+              <span>Show Unknown</span>
+            </label>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
           <Table
-            itemsDetails={itemsData}
+            itemsDetails={itemsData.filter(
+              (a) => showUnknown || a.voucher_date
+            )}
             setPopupOrder={setPopupOrder}
             counter={counter}
             setPopupRecipt={setPopupRecipt}
             navigate={navigate}
+            selectionMode={selectionMode}
+            setSelectionMode={setSelectionMode}
           />
         </div>
       </div>
+
+      {changeDatePopup ? (
+        <OpeningBalanceDate
+          setNotification={(e) => {
+            setChangeDatePopup(false);
+          }}
+          setSelectionMode={setSelectionMode}
+          selectionMode={selectionMode}
+          setChangeDatePopup={() => {
+            getCompleteOrders();
+            setChangeDatePopup(false);
+    
+          }}
+        />
+      ) : (
+        ""
+      )}
       {popupOrder ? (
         <OrderDetails
           onSave={() => {
@@ -269,7 +333,7 @@ const CounterLegerReport = () => {
 
 export default CounterLegerReport;
 
-function Table({ itemsDetails, navigate }) {
+function Table({ itemsDetails, navigate, selectionMode, setSelectionMode }) {
   return (
     <table
       className="user-table"
@@ -291,14 +355,49 @@ function Table({ itemsDetails, navigate }) {
           <tr
             key={Math.random()}
             style={{ height: "30px" }}
-            onClick={() =>
-              item.type === "PURCHASE_INVOICE"
-                ? navigate("/admin/editPurchaseInvoice/" + item.order_uuid)
-                : navigate("/admin/editVoucher/" + item.accounting_voucher_uuid)
-            }
+            onClick={(e) => {
+              e.stopPropagation();
+              if (item.type === "PURCHASE_INVOICE")
+                navigate("/admin/editPurchaseInvoice/" + item.order_uuid);
+              else
+                navigate("/admin/editVoucher/" + item.accounting_voucher_uuid);
+            }}
           >
-            <td>{i + 1}</td>
-            <td colSpan={3}>{new Date(+item.voucher_date).toDateString()}</td>
+            <td>
+              {i + 1}{" "}
+              {selectionMode ? (
+                <input
+                  type="checkbox"
+                  checked={selectionMode?.find(
+                    (a) =>
+                      a.accounting_voucher_uuid === item.accounting_voucher_uuid
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectionMode((prev) =>
+                      prev.find(
+                        (a) =>
+                          a.accounting_voucher_uuid ===
+                          item.accounting_voucher_uuid
+                      )
+                        ? prev.filter(
+                            (a) =>
+                              a.accounting_voucher_uuid !==
+                              item.accounting_voucher_uuid
+                          )
+                        : [...prev, item]
+                    );
+                  }}
+                />
+              ) : (
+                ""
+              )}
+            </td>
+            <td colSpan={3}>
+              {item.voucher_date
+                ? new Date(+item.voucher_date).toDateString()
+                : "Unknown"}
+            </td>
             <td colSpan={2}>
               {item.accounting_voucher_number || item.invoice_number || ""}
             </td>
@@ -472,7 +571,11 @@ function DiliveryPopup({
       adjustment_remarks: data?.adjustment_remarks || "",
     });
     setError("");
-    let modeTotal = modes?.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
+    let modeTotal = 0;
+    for (let mode of modes) {
+      modeTotal = +mode.amt + modeTotal;
+      modeTotal = modeTotal.toFixed(2);
+    }
     //console.log(
     // Tempdata?.order_grandtotal,
     //   +(+modeTotal + (+outstanding?.amount || 0))
@@ -828,5 +931,101 @@ function DiliveryPopup({
         ""
       )}
     </>
+  );
+}
+
+function OpeningBalanceDate({
+  setNotification,
+  setSelectionMode,
+  setChangeDatePopup,
+  selectionMode,
+}) {
+  const [data, setData] = useState(new Date().getTime());
+
+  //post request to save bank statement import
+  const saveBankStatementImport = async (e) => {
+    e.preventDefault();
+
+    const res = await axios({
+      method: "put",
+      url: "/vouchers/updateAccountVoucherDate",
+      data: {
+        accounting_voucher_uuid: selectionMode.map(
+          (a) => a.accounting_voucher_uuid
+        ),
+        voucher_date: data,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    setNotification(res.data);
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+    if (res.data.success) {
+      setSelectionMode(false);
+      setChangeDatePopup(false);
+    }
+  };
+  //get request to get bank statement import
+
+
+  return (
+    <div className="overlay" style={{ zIndex: "999999" }}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form" onSubmit={saveBankStatementImport}>
+              <div className="row">
+                <h1>Change Date</h1>
+              </div>
+
+              <div className="form">
+                <div className="row">
+                  <label className="selectLabel">
+                    Date
+                    <input
+                      type="date"
+                      onChange={(e) =>
+                        setData(
+                          getMidnightTimestamp(
+                            new Date(e.target.value).getTime()
+                          )
+                        )
+                      }
+                      value={getFormateDate(new Date(+data))}
+                      placeholder="Search Counter Title..."
+                      className="searchInput"
+                      pattern="\d{4}-\d{2}-\d{2}"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" className="submit">
+                Save changes
+              </button>
+            </form>
+          </div>
+          <button
+            onClick={() => setChangeDatePopup(false)}
+            className="closeButton"
+          >
+            x
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
