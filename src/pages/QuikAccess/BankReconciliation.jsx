@@ -546,9 +546,6 @@ function ImportStatements({
                   let reference_no = matchPricePopup.otherReciptsData
                     .filter((a) => a.checked)
                     .map((a) => a.invoice_number);
-                  reference_no = reference_no.find((a) => a === "Unknown")
-                    ? []
-                    : reference_no;
                   setData((prev) =>
                     prev.map((a) =>
                       a.sr === matchPricePopup.sr
@@ -605,24 +602,6 @@ function ImportStatements({
                             type="checkbox"
                             checked={item?.checked}
                             onChange={(e) => {
-                              if (
-                                item.invoice_number === "Unknown" &&
-                                !item.checked
-                              ) {
-                                setMatchPricePopup((prev) => ({
-                                  ...prev,
-                                  otherReciptsData: prev.otherReciptsData.map(
-                                    (a, j) => ({
-                                      ...a,
-                                      checked:
-                                        item.invoice_number === "Unknown"
-                                          ? true
-                                          : false,
-                                    })
-                                  ),
-                                }));
-                                return;
-                              }
                               setMatchPricePopup((prev) => ({
                                 ...prev,
                                 otherReciptsData: prev.otherReciptsData.map(
@@ -642,23 +621,51 @@ function ImportStatements({
                     ))}
                   </tbody>
                 </table>
-
-                {+matchPricePopup.received_amount ===
-                +matchPricePopup.otherReciptsData
-                  .filter((a) => a.checked)
-                  .reduce((a, b) => a + b.amount, 0) ? (
+                <div className="flex">
+                  {" "}
                   <div
                     className="flex"
                     style={{
                       justifyContent: "space-between",
                       minWidth: "300px",
                     }}
+                    onClick={() => {
+                      setData((prev) =>
+                        prev.map((a) =>
+                          a.sr === matchPricePopup.sr
+                            ? {
+                                ...matchPricePopup,
+                                reference_no: [],
+                                unMatch: false,
+                              }
+                            : a
+                        )
+                      );
+                      setMatchPricePopup(null);
+                    }}
                   >
-                    <button className="submit">Save</button>
+                    <button className="submit" type="button">
+                      Unknown
+                    </button>
                   </div>
-                ) : (
-                  ""
-                )}
+                  {+matchPricePopup.received_amount ===
+                  +matchPricePopup.otherReciptsData
+                    .filter((a) => a.checked)
+                    .reduce((a, b) => a + b.amount, 0) ? (
+                    <div
+                      className="flex"
+                      style={{
+                        justifyContent: "space-between",
+                        minWidth: "300px",
+                      }}
+                    >
+                      <button className="submit">Save</button>
+                    </div>
+                  ) : (
+                    ""
+                  )}
+                </div>
+
                 <button
                   onClick={() => {
                     setMatchPricePopup(false);
