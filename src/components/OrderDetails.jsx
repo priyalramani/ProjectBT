@@ -405,9 +405,8 @@ export function OrderDetails({
           default: true,
           sr: i + 1,
           p_price: +(a?.edit_price || a.price),
-          b_price: truncateDecimals(
-            +(a?.edit_price || a.price) * +(itemData?.conversion || 0),
-            2
+          b_price: chcekIfDecimal(
+            +(a?.edit_price || a.price) * +(itemData?.conversion || 0)
           ),
         };
       }),
@@ -1340,7 +1339,14 @@ export function OrderDetails({
   };
 
   const isCancelled = order?.status?.find((i) => +i.stage === 5);
-
+	const chcekIfDecimal = (value) => {
+		console.log({value,isDecimal:value.toString().includes(".")});
+		if (value.toString().includes(".")) {
+		  return (parseFloat(value||0)).toFixed(2);
+		} else {
+		  return value;
+		}
+	  }
   return deliveryPopup ? (
     <DiliveryPopup
       onSave={() => {
@@ -2394,7 +2400,7 @@ export function OrderDetails({
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
-                                value={item?.p_price || 0}
+                                value={chcekIfDecimal(item?.p_price || 0)}
                                 onChange={(e) => onItemPriceChange(e, item)}
                                 onFocus={(e) => {
                                   e.target.onwheel = () => false;
@@ -2408,7 +2414,7 @@ export function OrderDetails({
                                 disabled={!item.item_uuid}
                               />
                             ) : (
-                              "Rs:" + (item.p_price || 0)
+                              "Rs:" + chcekIfDecimal(item.p_price || 0)
                             )}
                           </td>
                           <td
@@ -2440,7 +2446,7 @@ export function OrderDetails({
                                               p_price: truncateDecimals(
                                                 e.target.value /
                                                   item.conversion || 0,
-                                                2
+                                                4
                                               ),
                                             }
                                           : a
@@ -2459,7 +2465,7 @@ export function OrderDetails({
                                                 p_price: truncateDecimals(
                                                   e.target.value /
                                                     item.conversion || 0,
-                                                  2
+                                                  4
                                                 ),
                                               }
                                             : a
@@ -2473,7 +2479,7 @@ export function OrderDetails({
                                             p_price: truncateDecimals(
                                               e.target.value /
                                                 item.conversion || 0,
-                                              2
+                                              4
                                             ),
                                           },
                                         ]
@@ -2485,7 +2491,7 @@ export function OrderDetails({
                                             p_price: truncateDecimals(
                                               e.target.value /
                                                 item.conversion || 0,
-                                              2
+                                              4
                                             ),
                                           },
                                         ]

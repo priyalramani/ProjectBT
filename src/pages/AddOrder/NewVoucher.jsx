@@ -34,6 +34,7 @@ let typeOptions = [
   { value: "PAYMENT", label: "Payment" },
   { value: "SALE", label: "Sales" },
   { value: "RCPT", label: "Receipt" },
+  { value: "RECEIPT_ORDER", label: "Receipt" },
   { value: "JPNL", label: "Journal" },
   { value: "CNTR", label: "Contra" },
   { value: "SALE_ORDER", label: "Sale Order" },
@@ -89,7 +90,6 @@ export default function NewVoucher() {
       setIsEdit(false);
       setOrder({
         ...data,
-        type: data.type === "RECEIPT_ORDER" ? "RCPT" : data.type,
         details: data.details.map((a) => ({
           ...a,
           uuid: a.ledger_uuid,
@@ -113,7 +113,7 @@ export default function NewVoucher() {
   const totalSum = useMemo(() => {
     let total = 0;
     for (let item of order.details) {
-      total = +(item.add ||0)+ +total;
+      total = +(item.add || 0) + +total;
       total = total.toFixed(2);
     }
     return total;
@@ -121,13 +121,13 @@ export default function NewVoucher() {
   const totalSub = useMemo(() => {
     let total = 0;
     for (let item of order.details) {
-      total = +(item.sub||0) + +total;
+      total = +(item.sub || 0) + +total;
       total = total.toFixed(2);
     }
 
     return total;
   }, [order.details]);
-  const onSubmit = async (isDelete) => {
+  const onSubmit = async ({isDelete=false,voucher_date=order.voucher_date}) => {
     let is_empty = order.details.find(
       (a) =>
         a.add !== 0 &&
@@ -352,9 +352,10 @@ export default function NewVoucher() {
             </div>
 
             <div className="topInputs">
-              <div className="inputGroup" style={{ width: "50px" }}>
-                <label htmlFor="Warehouse">Ledger</label>
+              <div className="inputGroup" >
+                <label htmlFor="Warehouse">Voucher date</label>
                 <div className="inputGroup">
+                  <div className="flex">
                   <input
                     type="date"
                     onChange={(e) => {
@@ -366,16 +367,37 @@ export default function NewVoucher() {
                         order.type === "SALE_ORDER" ||
                         order.type === "RECEIPT_ORDER"
                       )
-                        onSubmit();
+                        onSubmit({voucher_date:getMidnightTimestamp(e.target.value)});
                     }}
-                    value={getFormateDate(new Date(+order.voucher_date))}
+                    value={order.voucher_date?getFormateDate(new Date(+order.voucher_date)):""}
                     placeholder="Search Counter Title..."
                     className="searchInput"
                     pattern="\d{4}-\d{2}-\d{2}"
                     // disabled={!isEdit}
                     filterOption={filterOption}
                   />
+                    <button
+                    type="button"
+                    onClick={(e) => {
+                      setOrder((prev) => ({
+                        ...prev,
+                        voucher_date: "",
+                      }));
+                      if (
+                        order.type === "SALE_ORDER" ||
+                        order.type === "RECEIPT_ORDER"
+                      )
+                        onSubmit({voucher_date:""});
+                    }}
+                    value={order.voucher_date?getFormateDate(new Date(+order.voucher_date)):""}
+   
+                    className="theme-btn"
+               
+                    // disabled={!isEdit}
+                    filterOption={filterOption}
+                  >Unknown</button></div>
                 </div>
+                
               </div>
               <div className="inputGroup" style={{ width: "100px" }}>
                 <label htmlFor="Warehouse">Type</label>
@@ -404,7 +426,8 @@ export default function NewVoucher() {
                     isDisabled={
                       !isEdit ||
                       ((order?.type === "SALE_ORDER" ||
-                      order?.type === "RCPT")&&order.order_uuid)
+                        order?.type === "RECEIPT_ORDER") &&
+                        order.order_uuid)
                     }
                   />
                 </div>
@@ -720,7 +743,7 @@ export default function NewVoucher() {
             </div>
 
             <div className="bottomContent" style={{ background: "white" }}>
-              {!(order.order_uuid || order.invoice_number?.length) ? (
+              {!(order.type==="RECEIPT_ORDER" || order.type==="SALES_ORDER") ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -734,7 +757,7 @@ export default function NewVoucher() {
                 ""
               )}
               {params.accounting_voucher_uuid &&
-              !(order.order_uuid || order.invoice_number?.length) ? (
+              !(order.type==="RECEIPT_ORDER" || order.type==="SALES_ORDER") ? (
                 <button
                   type="button"
                   style={{ backgroundColor: "red" }}
@@ -790,7 +813,7 @@ export default function NewVoucher() {
                     className="form"
                     onSubmit={(e) => {
                       e.preventDefault();
-                      onSubmit(true);
+                      onSubmit({isDelete:true});
                     }}
                   >
                     <div className="formGroup">

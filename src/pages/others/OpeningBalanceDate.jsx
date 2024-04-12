@@ -71,11 +71,7 @@ export default function OpeningBalanceDate() {
                     <input
                       type="date"
                       onChange={(e) =>
-                        setData(
-                          getMidnightTimestamp(
-                            new Date(e.target.value).getTime()
-                          )
-                        )
+                        setData(new Date(e.target.value).getTime())
                       }
                       value={getFormateDate(new Date(+data))}
                       placeholder="Search Counter Title..."

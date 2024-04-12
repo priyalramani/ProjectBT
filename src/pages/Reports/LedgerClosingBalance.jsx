@@ -4,7 +4,7 @@ import Sidebar from "../../components/Sidebar";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import axios from "axios";
 import Context from "../../context/context";
-
+import { FaLaptopHouse } from "react-icons/fa";
 
 const LedgerClosingBalance = () => {
   return (
@@ -13,7 +13,7 @@ const LedgerClosingBalance = () => {
       <Header />
       <div className="item-sales-container orders-report-container">
         <div id="heading">
-          <h2 style={{ width: "100%" }}>Ledger Closing Balance</h2>
+          <h2 style={{ width: "100%" }}>Closing and Current Balance</h2>
         </div>
         <CampaignBody />
       </div>
@@ -28,6 +28,7 @@ const CampaignBody = () => {
   const [filterGroup, setFilterGroup] = useState("");
   const [filterRoute, setFilterRoute] = useState("");
   const [balanceOnly, setBalanceOnly] = useState(false);
+  const [isOpeningBalance, setIsOpeningBalance] = useState(true);
 
   const { setNotification } = context;
   const getItemsData = async (controller = new AbortController()) => {
@@ -48,28 +49,32 @@ const CampaignBody = () => {
   }, []);
   const filteredItemData = useMemo(
     () =>
-      itemsData.filter(
-        (a) =>
-          (!filterTitle ||
-            a.title
-              ?.toLocaleLowerCase()
-              ?.includes(filterTitle?.toLocaleLowerCase())) &&
-          (!filterGroup ||
-            a.ledger_group_title
-              ?.toLocaleLowerCase()
-              ?.includes(filterGroup?.toLocaleLowerCase())) &&
-          (!filterRoute ||
-            a.route_title
-              ?.toLocaleLowerCase()
-              ?.includes(filterRoute?.toLocaleLowerCase())) &&
-          (!balanceOnly || a.closing_balance)
-      ).sort((a, b) => a.title.localeCompare(b.title)),
-    [itemsData, filterTitle, filterGroup, filterRoute, balanceOnly]
+      itemsData.map((item, i) => ({
+        ...item,
+        closing_balance:isOpeningBalance === "closing_balance" ? item.closing_balance : +(item.closing_balance||0) + +(item.opening_balance||0),
+      }))
+        .filter(
+          (a) =>
+            (!filterTitle ||
+              a.title
+                ?.toLocaleLowerCase()
+                ?.includes(filterTitle?.toLocaleLowerCase())) &&
+            (!filterGroup ||
+              a.ledger_group_title
+                ?.toLocaleLowerCase()
+                ?.includes(filterGroup?.toLocaleLowerCase())) &&
+            (!filterRoute ||
+              a.route_title
+                ?.toLocaleLowerCase()
+                ?.includes(filterRoute?.toLocaleLowerCase())) &&
+            (!balanceOnly || a.closing_balance)
+        )
+        .sort((a, b) => a.title.localeCompare(b.title)),
+    [itemsData, isOpeningBalance, filterTitle, filterGroup, filterRoute, balanceOnly]
   );
 
   return (
     <>
-      {" "}
       <div id="item-sales-top">
         <div
           id="date-input-container"
@@ -136,6 +141,7 @@ const CampaignBody = () => {
         <Table
           itemsDetails={filteredItemData}
           setPopupOrderForm={setPopupOrderForm}
+          isOpeningBalance={isOpeningBalance}
         />
       </div>
       {popupOrderForm ? (
@@ -147,6 +153,11 @@ const CampaignBody = () => {
           popupForm={popupOrderForm}
           setNotification={setNotification}
         />
+      ) : (
+        ""
+      )}
+      {isOpeningBalance === true ? (
+        <OpeningBalanceDate setIsOpeningBalance={setIsOpeningBalance} />
       ) : (
         ""
       )}
@@ -385,3 +396,62 @@ function IncentiveOrderPopup({ onSave, popupForm, setNotification }) {
     </div>
   );
 }
+const OpeningBalanceDate = ({ setIsOpeningBalance }) => {
+  return (
+    <div className="overlay" style={{ zIndex: "999999" }}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form
+              className="form"
+              onSubmit={(e) => {
+                e.preventDefault();
+              }}
+            >
+              <div className="form">
+                <div className="row">
+                  <label
+                    className="selectLabel flex"
+                    style={{ flexDirection: "row" }}
+                  >
+                    <input
+                      type="checkbox"
+                      onChange={(e) => setIsOpeningBalance("closing_balance")}
+                      value={FaLaptopHouse}
+                      placeholder="Search Counter Title..."
+                      className="searchInput"
+                    />{" "}
+                    Closing Balance
+                  </label>
+                  <label
+                    className="selectLabel flex"
+                    style={{ flexDirection: "row" }}
+                  >
+                    <input
+                      type="checkbox"
+                      onChange={(e) => setIsOpeningBalance("current_balance")}
+                      placeholder="Search Counter Title..."
+                      pattern="\d{4}-\d{2}-\d{2}"
+                      style={{ width: "20px" }}
+                    />{" "}
+                    Current Balance (Closing + Opening)
+                  </label>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

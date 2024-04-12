@@ -553,6 +553,14 @@ export default function AddOrder() {
       }));
     }
   };
+  const chcekIfDecimal = (value) => {
+    console.log({ value, isDecimal: value.toString().includes(".") });
+    if (value.toString().includes(".")) {
+      return parseFloat(value || 0).toFixed(2);
+    } else {
+      return value;
+    }
+  };
   return (
     <>
       <Sidebar />
@@ -980,7 +988,7 @@ export default function AddOrder() {
                             className="numberInput"
                             min={1}
                             onWheel={(e) => e.preventDefault()}
-                            value={item?.p_price || 0}
+                            value={chcekIfDecimal(item?.p_price || 0)}
                             onChange={(e) => onItemPriceChange(e, item)}
                           />
                         </td>
@@ -1008,7 +1016,7 @@ export default function AddOrder() {
                                           p_price: (
                                             e.target.value / item.conversion ||
                                             0
-                                          ).toFixed(2),
+                                          ).toFixed(4),
                                         }
                                       : a
                                   ),
@@ -1026,7 +1034,7 @@ export default function AddOrder() {
                                             p_price: (
                                               e.target.value /
                                                 item.conversion || 0
-                                            ).toFixed(2),
+                                            ).toFixed(4),
                                           }
                                         : a
                                     )
@@ -1038,7 +1046,7 @@ export default function AddOrder() {
                                         b_price: e.target.value,
                                         p_price: (
                                           e.target.value / item.conversion || 0
-                                        ).toFixed(2),
+                                        ).toFixed(4),
                                       },
                                     ]
                                   : [
@@ -1048,7 +1056,7 @@ export default function AddOrder() {
                                         b_price: e.target.value,
                                         p_price: (
                                           e.target.value / item.conversion || 0
-                                        ).toFixed(2),
+                                        ).toFixed(4),
                                       },
                                     ]
                               );

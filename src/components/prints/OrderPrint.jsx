@@ -18,7 +18,14 @@ const OrderPrint = ({
 	const isEstimate = order?.order_type === "E"
 	const [gstValues, setGstVAlues] = useState([])
 	const [appliedCounterCharges, setAppliedCounterCharges] = useState(null)
-
+	const chcekIfDecimal = (value) => {
+		console.log({value,isDecimal:value.toString().includes(".")});
+		if (value.toString().includes(".")) {
+		  return (parseFloat(value||0)).toFixed(2);
+		} else {
+		  return value;
+		}
+	  }
 	const getAppliedCounterCharges = async charges_uuid => {
 		try {
 			const response = await axios.post(`/counterCharges/list`, {
@@ -251,7 +258,7 @@ const OrderPrint = ({
 				</tr>
 				<tr>
 					<td style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={7}>
-						{isEstimate ? `Estimate: E${order?.invoice_number}` : `Invoice: N${order?.invoice_number}`}
+						{isEstimate ? `Estimate: E${order?.invoice_number}` : `Invoice: ${order?.invoice_number}`}
 					</td>
 					<td style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={7}>
 						Date:{" "}
@@ -420,7 +427,7 @@ const OrderPrint = ({
 								}}
 								colSpan={2}
 							>
-								{item?.price || item?.item_price || unit_price || 0}
+								{chcekIfDecimal(item?.price || item?.item_price || unit_price || 0)}
 							</td>
 							<td
 								style={{
@@ -470,7 +477,7 @@ const OrderPrint = ({
 								}}
 								colSpan={2}
 							>
-								{(unit_price || 0).toFixed(2)}
+								{chcekIfDecimal(unit_price || 0)}
 							</td>
 							<td
 								style={{

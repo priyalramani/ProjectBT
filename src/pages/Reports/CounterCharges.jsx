@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
 import { RiSearchLine } from "react-icons/ri";
@@ -7,7 +7,7 @@ import { IoCloseOutline } from "react-icons/io5";
 import { MdOutlineEdit } from "react-icons/md";
 import { IoIosCloseCircle } from "react-icons/io";
 import { ImCheckboxChecked, ImCheckboxUnchecked } from "react-icons/im";
-
+import Select from "react-select";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
 import axios from "axios";
@@ -302,7 +302,12 @@ const CompanyForm = ({ close, onSubmit, data = {}, counters }) => {
       attributes: { placeholder: "Counter charge remarks" },
     },
   ];
-  console.log({ charge });
+  const counterOptions = useMemo(() => {
+    return counters?.map((i) => ({
+      value: i.counter_uuid,
+      label: i.counter_title,
+    }));
+  }, [counters]);
   return (
     <div className="overlay-wrapper">
       <div id="company-form">
@@ -326,67 +331,24 @@ const CompanyForm = ({ close, onSubmit, data = {}, counters }) => {
               />
             </div>
           ))}
-
-          <div>
-            <label htmlFor={"counter-selection"}>Counter</label>
-            <Autocomplete
-              disablePortal
-              value={charge?.counter_uuid || ""}
-              onChange={(e, { value }) =>
-                setCharge((prev) => ({ ...prev, counter_uuid: value }))
-              }
-              options={counters?.map((i) => ({
-                value: i.counter_uuid,
-                label: i.counter_title,
-              }))}
-              filterOptions={
-                counters
-                  ? (options, { inputValue }) => {
-                      return options.filter(
-                        (i) =>
-                          !inputValue ||
-                          i.label
-                            .toLowerCase()
-                            .includes(inputValue.toLowerCase())
-                      );
-                    }
-                  : null
-              }
-              renderInput={(params) => (
-                <CssTextField
-                  placeholder="None"
-                  {...params}
-                  variant="standard"
-                  className="form-input"
-                />
-              )}
-              renderOption={(props, option) => (
-                <ListItem sx={{ fontSize: ".8rem" }} {...props}>
-                  {option.label}
-                </ListItem>
-              )}
-            />
-
-            {/* <select
-							id="counter-selection"
-							className="form-input"
-							value={charge?.counter_uuid}
-							name="counter_uuid"
-							onChange={onChange}
-							disabled={!counters?.[0]}
-							required
-						>
-							<option value="" disabled selected>
-								Select counter
-							</option>
-							{counters?.map(({ counter_uuid, counter_title }) => (
-								<option key={counter_uuid} value={counter_uuid}>
-									{counter_title}
-								</option>
-							))}
-						</select> */}
+          <div className="inputGroup" style={{ flexDirection: "row" }}>
+            <label htmlFor="Warehouse">Counter</label>
+            <div className="inputGroup">
+              <Select
+                options={counterOptions}
+                onChange={(doc) => {
+                  setCharge((prev) => ({ ...prev, counter_uuid: doc.value }));
+                }}
+                value={
+                  counterOptions?.find((i) => i.value === charge?.counter_uuid) || ""
+                }
+                openMenuOnFocus={true}
+                menuPlacement="auto"
+                placeholder="Select"
+              />
+            </div>
           </div>
-
+       
           <button type="submit" className="theme-btn round">
             Submit
           </button>

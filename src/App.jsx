@@ -90,8 +90,9 @@ import LedgerClosingBalance from "./pages/Reports/LedgerClosingBalance";
 import CheckAccountingBalance from "./pages/QuikAccess/CheckAccountingBalance";
 import ChequeNumberSearch from "./pages/Reports/ChequeNumberSearch";
 import CreditNote from "./pages/AddOrder/CreditNote";
+import UknownVouchers from "./pages/Reports/UknownVouchers";
 
-export let Version = 300;
+export let Version = 303;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
@@ -410,6 +411,8 @@ function App() {
             <Route path="/admin/addStock" element={<AddStock />} />
             <Route path="/admin/adjustStock" element={<AdjustStock />} />
             <Route path="/admin/userActivity" element={<UserActivity />} />
+            <Route path="/admin/unknownEntry" element={<UknownVouchers />} />
+
             <Route
               path="/admin/performanceSummary"
               element={<PerformanceSummary />}

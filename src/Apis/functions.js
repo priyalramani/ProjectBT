@@ -263,13 +263,12 @@ export const Billing = async ({
     item = { ...item, item_total: 0 };
     let descInputs = 0;
 
-    for (let desc of (item.charges_discount||[])?.filter(
+    for (let desc of (item.charges_discount || [])?.filter(
       (a) =>
         a.title === "dsc1" || a.title === "dsc2" || a.title === "Item Discount"
     )) {
-      descInputs = +desc.value + +(descInputs||0);
-      console.log({descInputs})
-      descInputs = (descInputs||0).toFixed(2);
+      descInputs = +desc.value + +(descInputs || 0);
+      descInputs = descInputs || 0;
     }
 
     let edit_price =
@@ -331,6 +330,7 @@ export const Billing = async ({
     }
 
     if (item.edit || (add_discounts && item.item_discount)) {
+      charges_discount=charges_discount.filter((a)=>a.title!=="Item Discount")
       charges_discount?.push({
         title: "Item Discount",
         value: item.item_discount,
@@ -374,7 +374,10 @@ export const Billing = async ({
     if (descInputs) {
       item = {
         ...item,
-        item_desc_total: (item.item_desc_total * (100 - descInputs)) / 100,
+        item_desc_total: item.item_desc_total
+          ? item.item_desc_total * ((100 - descInputs) / 100) || 0
+          : (+edit_price || +item?.price || +item.item_price || 0) *
+              ((100 - descInputs) / 100) || 0,
       };
     }
 

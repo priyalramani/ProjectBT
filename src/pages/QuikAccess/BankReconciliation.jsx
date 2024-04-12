@@ -334,19 +334,20 @@ function ImportStatements({
         order_uuid: item.order_uuid,
         mode_uuid: item.mode_uuid,
         transaction_tags: item.transaction_tags,
+        matched_entry:item.matched_entry,
         details: [
           {
             ledger_uuid: popupInfo.ledger_uuid,
             amount: item.paid_amount || -item.received_amount,
-            narration: "Ref no: " + item.reference_no.join(", "),
+            narration: "Ref no: " + (item.reference_no||[]).join(", "),
           },
           {
             ledger_uuid: item?.counter_uuid,
             amount: -item.paid_amount || +item.received_amount,
-            narration: "Ref no: " + item.reference_no.join(", "),
+            narration: "Ref no: " + (item.reference_no||[]).join(", "),
           },
         ],
-        voucher_date: item.date,
+        voucher_date: item.date_time_stamp,
       });
     }
     console.log(array);
@@ -1065,7 +1066,7 @@ function ImportStatements({
                                   type="checkbox"
                                   checked={!item.unMatch}
                                   onChange={(e) => {
-                                    if (!item.reference_no) {
+                                    if (!item.reference_no&&item.otherReciptsData?.length) {
                                       setMatchPricePopup(item);
                                       return;
                                     }

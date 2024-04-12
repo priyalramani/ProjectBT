@@ -14,6 +14,7 @@ import { Version } from "../App";
 
 let titleData = [
   { value: "LedgerClosingBalance", name: "Ledger Closing Balance" },
+  { value: "unknownEntry", name: "Unknown Entry" },
   { value: "ChequeNumberSearch", name: "Cheque Number Search" },
   { value: "RetailerMarginReport", name: "Retailer Margin Report" },
   { value: "accounting_dashboard", name: "Accounting Dashboard" },
@@ -232,13 +233,17 @@ const Sidebar = ({ setCollectionTags }) => {
                     link: "/admin/OpeningBalanceReport",
                   },
                   {
-                    name: "Ledger Closing Balance",
+                    name: "Closing and Current Balance",
                     link: "/admin/LedgerClosingBalance",
                   },
                   {
                     name: "Cheque Number Search",
                     link: "/admin/ChequeNumberSearch",
                   },
+                  {
+                    name: "Unknown Entry",
+                    link: "/admin/unknownEntry",
+                  }
                 ]
               : [
                   {

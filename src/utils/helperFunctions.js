@@ -59,9 +59,9 @@ export function getFormateDate(time) {
   return curTime;
 }
 export function getMidnightTimestamp(now) {
-   // Current date and time
+  // Current date and time
   const midnight = new Date(now); // Copy current date
-  midnight.setHours(0, 0, 0, 0); // Set time to 00:00:00.000 (midnight)
+  midnight.setUTCHours(0, 0, 0, 0); // Set time to 00:00:00.000 UTC (midnight)
   return midnight.getTime(); // Return Unix timestamp in milliseconds
 }
 export function truncateDecimals(number, digits) {
