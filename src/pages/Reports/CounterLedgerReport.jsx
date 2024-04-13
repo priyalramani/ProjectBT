@@ -144,6 +144,10 @@ const CounterLegerReport = () => {
     let result = [];
     let balance = +opening_balance_amount?.amount || 0;
     for (let item of itemData) {
+      if (!item.voucher_date) {
+        result.push(item)
+        continue;
+      }
       balance = +item.amount + +balance;
       balance = (balance || 0).toFixed(2);
       result.push({
@@ -297,7 +301,6 @@ const CounterLegerReport = () => {
           setChangeDatePopup={() => {
             getCompleteOrders();
             setChangeDatePopup(false);
-    
           }}
         />
       ) : (
@@ -969,7 +972,6 @@ function OpeningBalanceDate({
     }
   };
   //get request to get bank statement import
-
 
   return (
     <div className="overlay" style={{ zIndex: "999999" }}>
