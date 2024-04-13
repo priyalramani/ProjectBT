@@ -248,6 +248,7 @@ function ImportStatements({
 }) {
   const [errMassage, setErrorMassage] = useState("");
   const [data, setData] = useState(null);
+  const [defaultData, setDefaultData] = useState(null);
   const [ledgerData, setLedgerData] = useState([]);
   const [changeTransition, setChangeTransition] = useState(null);
   const [counter, setCounter] = useState([]);
@@ -396,6 +397,8 @@ function ImportStatements({
     if (response.data.success) {
       let a = response.data.result;
       setData(a.map((a, i) => ({ ...a, match: !a.unMatch })));
+      setDefaultData(a.map((a, i) => ({ ...a, match: !a.unMatch })));
+
 
       setLoading(false);
     } else {
@@ -1076,7 +1079,7 @@ function ImportStatements({
                                     setData((prev) =>
                                       prev.map((a, j) =>
                                         j === i
-                                          ? { ...a, unMatch: !e.target.checked }
+                                          ? defaultData[i]
                                           : a
                                       )
                                     );

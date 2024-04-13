@@ -179,6 +179,7 @@ export default function NewVoucher() {
       data: {
         ...order,
         amt: totalSum,
+        voucher_date,
         details: order.details.map((a) => {
           return {
             ledger_uuid: a.ledger_uuid || a.counter_uuid,
@@ -743,11 +744,12 @@ export default function NewVoucher() {
             </div>
 
             <div className="bottomContent" style={{ background: "white" }}>
-              {!(order.type==="RECEIPT_ORDER" || order.type==="SALES_ORDER") ? (
+
+              {!(order.type==="RECEIPT_ORDER" || order.type==="SALE_ORDER") ? (
                 <button
                   type="button"
                   onClick={() => {
-                    if (isEdit) onSubmit();
+                    if (isEdit) onSubmit({});
                     else setIsEdit(true);
                   }}
                 >
@@ -757,7 +759,7 @@ export default function NewVoucher() {
                 ""
               )}
               {params.accounting_voucher_uuid &&
-              !(order.type==="RECEIPT_ORDER" || order.type==="SALES_ORDER") ? (
+              !(order.type==="RECEIPT_ORDER" || order.type==="SALE_ORDER") ? (
                 <button
                   type="button"
                   style={{ backgroundColor: "red" }}

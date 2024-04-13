@@ -447,15 +447,18 @@ export const Billing = async ({
         adjustment
       : 0
   );
+  let chargesTotal=0
   if (counterCharges?.length) {
     counter_charges = counterCharges.map((i) => i.charge_uuid);
-    order_grandtotal += counterCharges.reduce((total, i) => total + i.amt, 0);
+    chargesTotal=counterCharges.reduce((total, i) => total + i.amt, 0);
+    order_grandtotal += chargesTotal;
   }
   return {
     counter_charges,
     counter_uuid: counter.counter_uuid,
     order_grandtotal,
     items: newPriceItems,
+    chargesTotal,
     others,
   };
 };

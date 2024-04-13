@@ -145,7 +145,7 @@ const CounterLegerReport = () => {
     let balance = +opening_balance_amount?.amount || 0;
     for (let item of itemData) {
       if (!item.voucher_date) {
-        result.push(item)
+        result.push(item);
         continue;
       }
       balance = +item.amount + +balance;
@@ -162,17 +162,17 @@ const CounterLegerReport = () => {
     <>
       <Sidebar />
       <Header />
-      <div className="item-sales-container orders-report-container">
+      <div
+        className="item-sales-container orders-report-container"
+        onContextMenu={(e) => {
+          e.preventDefault();
+          setSelectionMode((prev) => (prev ? false : []));
+        }}
+      >
         <div id="heading">
           <h2>Ledger</h2>
         </div>
-        <div
-          id="item-sales-top"
-          onContextMenu={(e) => {
-            e.preventDefault();
-            setSelectionMode((prev) => (prev ? false : []));
-          }}
-        >
+        <div id="item-sales-top">
           <div
             id="date-input-container"
             style={{
@@ -357,9 +357,35 @@ function Table({ itemsDetails, navigate, selectionMode, setSelectionMode }) {
         {itemsDetails?.map((item, i, array) => (
           <tr
             key={Math.random()}
-            style={{ height: "30px" }}
+            style={{
+              height: "30px",
+              cursor: "pointer",
+              color: (selectionMode||[])?.find(
+                (b) =>
+                  b.accounting_voucher_uuid === item.accounting_voucher_uuid
+              )
+                ?
+      
+                  "#4169E1"
+                : "#000",
+            }}
             onClick={(e) => {
               e.stopPropagation();
+              if (selectionMode) {
+                setSelectionMode((prev) =>
+                  prev.find(
+                    (a) =>
+                      a.accounting_voucher_uuid === item.accounting_voucher_uuid
+                  )
+                    ? prev.filter(
+                        (a) =>
+                          a.accounting_voucher_uuid !==
+                          item.accounting_voucher_uuid
+                      )
+                    : [...prev, item]
+                );
+                return;
+              }
               if (item.type === "PURCHASE_INVOICE")
                 navigate("/admin/editPurchaseInvoice/" + item.order_uuid);
               else

@@ -91,8 +91,9 @@ import CheckAccountingBalance from "./pages/QuikAccess/CheckAccountingBalance";
 import ChequeNumberSearch from "./pages/Reports/ChequeNumberSearch";
 import CreditNote from "./pages/AddOrder/CreditNote";
 import UknownVouchers from "./pages/Reports/UknownVouchers";
+import SearchTransitionTags from "./pages/Reports/SearchTransitionTangs";
 
-export let Version = 303;
+export let Version = 304;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 
@@ -412,6 +413,7 @@ function App() {
             <Route path="/admin/adjustStock" element={<AdjustStock />} />
             <Route path="/admin/userActivity" element={<UserActivity />} />
             <Route path="/admin/unknownEntry" element={<UknownVouchers />} />
+            <Route path="/admin/SearchTransitionTags" element={<SearchTransitionTags />} />
 
             <Route
               path="/admin/performanceSummary"

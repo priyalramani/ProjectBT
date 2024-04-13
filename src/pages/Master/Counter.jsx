@@ -1821,11 +1821,11 @@ function NewUserForm({
                             className="numberInput"
                             value={a?.mobile}
                             style={{ width: "15ch" }}
-                            disabled={a.lable?.find(
-                              (c) =>
-                                (c.type === "cal" || c.type === "wa") &&
-                                +c.varification
-                            )}
+                            // disabled={a.lable?.find(
+                            //   (c) =>
+                            //     (c.type === "cal" || c.type === "wa") &&
+                            //     +c.varification
+                            // )}
                             onChange={(e) => {
                               if (
                                 e.target.value.length > 10 ||

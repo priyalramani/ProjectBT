@@ -14,6 +14,7 @@ import { Version } from "../App";
 
 let titleData = [
   { value: "LedgerClosingBalance", name: "Ledger Closing Balance" },
+  { value: "SearchTransitionTags", name: "Search Transition Tags" },
   { value: "unknownEntry", name: "Unknown Entry" },
   { value: "ChequeNumberSearch", name: "Cheque Number Search" },
   { value: "RetailerMarginReport", name: "Retailer Margin Report" },
@@ -243,7 +244,11 @@ const Sidebar = ({ setCollectionTags }) => {
                   {
                     name: "Unknown Entry",
                     link: "/admin/unknownEntry",
-                  }
+                  },
+                  {
+                    name: "Search Transition Tags",
+                    link: "/admin/SearchTransitionTags",
+                  },
                 ]
               : [
                   {
