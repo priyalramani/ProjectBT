@@ -371,7 +371,7 @@ const Sidebar = ({ setCollectionTags }) => {
                     link: "#",
                   },
                   {
-                    name: "Check Accounting Balance",
+                    name: "Error Checking",
                     link: "#",
                   },
                 ]

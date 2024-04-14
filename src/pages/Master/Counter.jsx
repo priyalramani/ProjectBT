@@ -17,7 +17,6 @@ import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { v4 as uuid } from "uuid";
 import Context from "../../context/context";
-import { get } from "react-scroll/modules/mixins/scroller";
 import { getFormateDate } from "../../utils/helperFunctions";
 const Counter = () => {
   const [counter, setCounter] = useState([]);
@@ -1828,12 +1827,13 @@ function NewUserForm({
                             // )}
                             onChange={(e) => {
                               if (
-                                e.target.value.length > 10 ||
-                                a.lable?.find(
-                                  (c) =>
-                                    (c.type === "cal" || c.type === "wa") &&
-                                    +c.varification
-                                )
+                                e.target.value.length > 10
+                                //  ||
+                                // a.lable?.find(
+                                //   (c) =>
+                                //     (c.type === "cal" || c.type === "wa") &&
+                                //     +c.varification
+                                // )
                               ) {
                                 return;
                               }

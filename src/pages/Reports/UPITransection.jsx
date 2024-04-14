@@ -330,7 +330,7 @@ function Table({
 
               <td colSpan={3}>{item.counter_title || ""}</td>
               <td colSpan={2}>{item.amt || ""}</td>
-              <td colSpan={2}>N{item.invoice_number || ""}</td>
+              <td colSpan={2}>{item.invoice_number || ""}</td>
 
               <td colSpan={2}>
                 {new Date(item.order_date).toDateString()} -

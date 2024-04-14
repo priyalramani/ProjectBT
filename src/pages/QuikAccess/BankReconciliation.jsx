@@ -319,7 +319,7 @@ function ImportStatements({
         mark_entry,
         type:
           item.ledger_group_uuid === "9c2a6c85-c0f0-4acf-957e-dcea223f3d00" ||
-          item?.counter_uuid
+          (!item.ledger_group_uuid && item?.counter_uuid)
             ? "RCPT"
             : item.ledger_group_uuid === "004fd020-853c-4575-bebe-b29faefae3c9"
             ? "PAYMENT"
@@ -335,17 +335,17 @@ function ImportStatements({
         order_uuid: item.order_uuid,
         mode_uuid: item.mode_uuid,
         transaction_tags: item.transaction_tags,
-        matched_entry:item.matched_entry,
+        matched_entry: item.matched_entry,
         details: [
           {
             ledger_uuid: popupInfo.ledger_uuid,
             amount: item.paid_amount || -item.received_amount,
-            narration: "Ref no: " + (item.reference_no||[]).join(", "),
+            narration: "Ref no: " + (item.reference_no || []).join(", "),
           },
           {
             ledger_uuid: item?.counter_uuid,
             amount: -item.paid_amount || +item.received_amount,
-            narration: "Ref no: " + (item.reference_no||[]).join(", "),
+            narration: "Ref no: " + (item.reference_no || []).join(", "),
           },
         ],
         voucher_date: item.date_time_stamp,
@@ -398,7 +398,6 @@ function ImportStatements({
       let a = response.data.result;
       setData(a.map((a, i) => ({ ...a, match: !a.unMatch })));
       setDefaultData(a.map((a, i) => ({ ...a, match: !a.unMatch })));
-
 
       setLoading(false);
     } else {
@@ -1069,7 +1068,10 @@ function ImportStatements({
                                   type="checkbox"
                                   checked={!item.unMatch}
                                   onChange={(e) => {
-                                    if (!item.reference_no&&item.otherReciptsData?.length) {
+                                    if (
+                                      !item.reference_no &&
+                                      item.otherReciptsData?.length
+                                    ) {
                                       setMatchPricePopup(item);
                                       return;
                                     }
@@ -1078,9 +1080,7 @@ function ImportStatements({
                                     }
                                     setData((prev) =>
                                       prev.map((a, j) =>
-                                        j === i
-                                          ? defaultData[i]
-                                          : a
+                                        j === i ? defaultData[i] : a
                                       )
                                     );
                                   }}

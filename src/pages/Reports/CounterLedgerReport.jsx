@@ -1,5 +1,11 @@
 import axios from "axios";
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Header from "../../components/Header";
 import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
@@ -11,7 +17,10 @@ import {
   getMidnightTimestamp,
   truncateDecimals,
 } from "../../utils/helperFunctions";
-
+import LedgerReportPDF from "../../components/prints/LedgerReportPDF";
+import { useReactToPrint } from "react-to-print";
+import * as XLSX from "xlsx";
+import * as FileSaver from "file-saver";
 const CounterLegerReport = () => {
   const [opening_balance_amount, setOpening_balance_amount] = useState(0);
   const [showUnknown, setShowUnknown] = useState(false);
@@ -23,12 +32,21 @@ const CounterLegerReport = () => {
     endDate: "",
     counter_uuid: "",
   });
+  const fileExtension = ".xlsx";
   const [popupOrder, setPopupOrder] = useState(null);
   const [popupRecipt, setPopupRecipt] = useState(null);
   const [items, setItems] = useState([]);
   const [counter, setCounter] = useState([]);
   const navigate = useNavigate();
-
+  const componentRef = useRef(null);
+  const reactToPrintContent = useCallback(() => {
+    return componentRef.current;
+  }, []);
+  const invokePrint = useReactToPrint({
+    content: reactToPrintContent,
+    documentTitle: "Statement",
+    removeAfterPrint: true,
+  });
   const getCounter = async (controller = new AbortController()) => {
     const response = await axios({
       method: "post",
@@ -157,7 +175,36 @@ const CounterLegerReport = () => {
     }
     return result;
   }, [items, opening_balance_amount]);
+  const getLedgerNames = (data = []) => {
+    let ledgers = data.filter((a) => a.ledger_uuid !== searchData.counter_uuid);
+    ledgers = ledgers.map(
+      (a) => counterList.find((b) => b.value === a.ledger_uuid)?.label
+    );
+    return (ledgers || []).join(", ");
+  };
 
+  const downloadHandler = async () => {
+    let sheetData = itemsData
+      .filter((a) => showUnknown || a.voucher_date)
+      .map((a) => {
+        return {
+          Date: new Date(+a.voucher_date).toDateString(),
+          Ledger: getLedgerNames(a.details),
+          "Ref. #": a.accounting_voucher_number || a.invoice_number || "",
+          Type: a.type,
+          Debit: a.amount < 0 ? -a.amount : "",
+          Credit: a.amount > 0 ? a.amount : "",
+          Balance: a.balance || "",
+        };
+      });
+    const fileType =
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const ws = XLSX.utils.json_to_sheet(sheetData);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(data, "Ledger Report" + fileExtension);
+  };
   return (
     <>
       <Sidebar />
@@ -287,8 +334,32 @@ const CounterLegerReport = () => {
             navigate={navigate}
             selectionMode={selectionMode}
             setSelectionMode={setSelectionMode}
+            getLedgerNames={getLedgerNames}
           />
         </div>
+
+        {itemsData.length ? (
+          <div className="flex" style={{ justifyContent: "space-between" }}>
+            <button
+              className="theme-btn"
+              onClick={() => {
+                invokePrint();
+              }}
+            >
+              Print PDF
+            </button>
+            <button
+              className="theme-btn"
+              onClick={() => {
+                downloadHandler();
+              }}
+            >
+              Download Excel
+            </button>
+          </div>
+        ) : (
+          ""
+        )}
       </div>
 
       {changeDatePopup ? (
@@ -330,13 +401,31 @@ const CounterLegerReport = () => {
       ) : (
         ""
       )}
+      {itemsData.length ? (
+        <LedgerReportPDF
+          componentRef={componentRef}
+          data={itemsData.filter((a) => showUnknown || a.voucher_date)}
+          counter={counterList.find((a) => a.value === searchData.counter_uuid)}
+          from_date={new Date(searchData.startDate)}
+          to_date={new Date(searchData.endDate)}
+          getLedgerNames={getLedgerNames}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
 export default CounterLegerReport;
 
-function Table({ itemsDetails, navigate, selectionMode, setSelectionMode }) {
+function Table({
+  itemsDetails,
+  navigate,
+  selectionMode,
+  setSelectionMode,
+  getLedgerNames,
+}) {
   return (
     <table
       className="user-table"
@@ -346,11 +435,12 @@ function Table({ itemsDetails, navigate, selectionMode, setSelectionMode }) {
         <tr>
           <th>S.N</th>
           <th colSpan={3}>Date</th>
-          <th colSpan={2}>Reference Number</th>
-          <th colSpan={2}>Type</th>
-          <th colSpan={1}>Debit</th>
-          <th colSpan={1}>Credit</th>
-          <th colSpan={1}>Balance</th>
+          <th colSpan={10}>Ledger</th>
+          <th colSpan={3}>Ref. #</th>
+          <th colSpan={3}>Type</th>
+          <th colSpan={2}>Debit</th>
+          <th colSpan={2}>Credit</th>
+          <th colSpan={2}>Balance</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -360,13 +450,12 @@ function Table({ itemsDetails, navigate, selectionMode, setSelectionMode }) {
             style={{
               height: "30px",
               cursor: "pointer",
-              color: (selectionMode||[])?.find(
+              width: "fit-content",
+              color: (selectionMode || [])?.find(
                 (b) =>
                   b.accounting_voucher_uuid === item.accounting_voucher_uuid
               )
-                ?
-      
-                  "#4169E1"
+                ? "#4169E1"
                 : "#000",
             }}
             onClick={(e) => {
@@ -427,13 +516,14 @@ function Table({ itemsDetails, navigate, selectionMode, setSelectionMode }) {
                 ? new Date(+item.voucher_date).toDateString()
                 : "Unknown"}
             </td>
-            <td colSpan={2}>
+            <td colSpan={10}>{getLedgerNames(item.details)}</td>
+            <td colSpan={3}>
               {item.accounting_voucher_number || item.invoice_number || ""}
             </td>
-            <td colSpan={2}>{item.type}</td>
-            <td colSpan={1}>{item.amount < 0 ? -item.amount : ""}</td>
-            <td colSpan={1}>{item.amount > 0 ? item.amount : ""}</td>
-            <td colSpan={1}>{item.balance || ""}</td>
+            <td colSpan={3}>{item.type}</td>
+            <td colSpan={2}>{item.amount < 0 ? -item.amount : ""}</td>
+            <td colSpan={2}>{item.amount > 0 ? item.amount : ""}</td>
+            <td colSpan={2}>{item.balance || ""}</td>
           </tr>
         ))}
       </tbody>
