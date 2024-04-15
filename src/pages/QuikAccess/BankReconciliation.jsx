@@ -1080,7 +1080,11 @@ function ImportStatements({
                                     }
                                     setData((prev) =>
                                       prev.map((a, j) =>
-                                        j === i ? defaultData[i] : a
+                                        j === i
+                                          ? !a.unMatch
+                                            ? defaultData[i]
+                                            : { ...a, unMatch: false }
+                                          : a
                                       )
                                     );
                                   }}

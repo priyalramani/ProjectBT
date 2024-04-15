@@ -4,7 +4,6 @@ const LedgerReportPDF = ({
   data = [],
   from_date = new Date(),
   to_date = new Date(),
-  counter,
   getLedgerNames = (details) => "",
   componentRef,
 }) => {
@@ -23,51 +22,82 @@ const LedgerReportPDF = ({
           }}
         >
           <table style={{ width: "100%" }}>
-            <tr>
-              <>
-                <td style={{ width: "50%" }} colSpan={28}>
-                  <table>
+           
                     <tr>
                       <td
                         style={{
                           fontWeight: "600",
                           fontSize: "larger",
                           lineHeight: 0.5,
+                          textAlign: "center",
                         }}
+                        colSpan={28}
                       >
                         Bharat Traders
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ fontWeight: "600", fontSize: "x-small" }}>
+                      <td
+                        style={{
+                          fontWeight: "600",
+                          fontSize: "x-small",
+                          textAlign: "center",
+                        }}
+                        colSpan={28}
+                      >
                         Ganesh Nagar, Near Sharda Convent School,
                         <br /> Ganesh Nagar, Gondia - 441401
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ fontWeight: "600", fontSize: "x-small" }}>
+                      <td
+                        style={{
+                          fontWeight: "600",
+                          fontSize: "x-small",
+                          textAlign: "center",
+                        }}
+                        colSpan={28}
+                      >
                         Phone: 9422551074
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ fontWeight: "600", fontSize: "x-small" }}>
+                      <td
+                        style={{
+                          fontWeight: "600",
+                          fontSize: "x-small",
+                          textAlign: "center",
+                        }}
+                        colSpan={28}
+                      >
                         Email: bharattradersgondia96@gmail.com
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ fontWeight: "600", fontSize: "x-small" }}>
+                      <td
+                        style={{
+                          fontWeight: "600",
+                          fontSize: "x-small",
+                          textAlign: "center",
+                        }}
+                        colSpan={28}
+                      >
                         GSTIN: 27ABIPR1186M1Z2
                       </td>
                     </tr>
                     <tr>
-                      <td style={{ fontWeight: "600", fontSize: "x-small" }}>
+                      <td
+                        style={{
+                          fontWeight: "600",
+                          fontSize: "x-small",
+                          textAlign: "center",
+                        }}
+                        colSpan={28}
+                      >
                         FSSAI : 20230106104339794
                       </td>
                     </tr>
-                  </table>
-                </td>
-              </>
-            </tr>
+                  
             <tr>
               <th colSpan={28}>
                 <hr

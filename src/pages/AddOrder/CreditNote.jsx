@@ -423,15 +423,7 @@ export default function CreditNotes() {
                 <div className="inputGroup">
                   <Select
                     ref={(ref) => (reactInputsRef.current["0"] = ref)}
-                    options={ledgerData.map((a) => ({
-                      value: a.ledger_uuid,
-                      label: a.ledger_title,
-                      closing_balance: truncateDecimals(
-                        (a.closing_balance || 0) +
-                          +(a.opening_balance_amount || 0),
-                        2
-                      ),
-                    }))}
+                    options={LedgerOptions}
                     getOptionLabel={(option) => (
                       <div
                         style={{

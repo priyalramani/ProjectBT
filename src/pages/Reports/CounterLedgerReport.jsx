@@ -21,6 +21,8 @@ import LedgerReportPDF from "../../components/prints/LedgerReportPDF";
 import { useReactToPrint } from "react-to-print";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
+import { BsFilePdf } from "react-icons/bs";
+import { RiFileExcelLine } from "react-icons/ri";
 const CounterLegerReport = () => {
   const [opening_balance_amount, setOpening_balance_amount] = useState(0);
   const [showUnknown, setShowUnknown] = useState(false);
@@ -321,6 +323,40 @@ const CounterLegerReport = () => {
               />
               <span>Show Unknown</span>
             </label>
+            {itemsData.length ? (
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                <div
+                  style={{
+                    border: "1px solid #000",
+                    margin: "0 10px",
+                    padding: "5px",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    invokePrint();
+                  }}
+                >
+                  <BsFilePdf fontSize="30" />
+                </div>
+                <div
+                  style={{
+                    border: "1px solid #000",
+                    margin: "0 10px",
+                    padding: "5px",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    downloadHandler();
+                  }}
+                >
+                  <RiFileExcelLine fontSize="30" />
+                </div>
+              </div>
+            ) : (
+              ""
+            )}
           </div>
         </div>
         <div className="table-container-user item-sales-container">
@@ -337,29 +373,6 @@ const CounterLegerReport = () => {
             getLedgerNames={getLedgerNames}
           />
         </div>
-
-        {itemsData.length ? (
-          <div className="flex" style={{ justifyContent: "space-between" }}>
-            <button
-              className="theme-btn"
-              onClick={() => {
-                invokePrint();
-              }}
-            >
-              Print PDF
-            </button>
-            <button
-              className="theme-btn"
-              onClick={() => {
-                downloadHandler();
-              }}
-            >
-              Download Excel
-            </button>
-          </div>
-        ) : (
-          ""
-        )}
       </div>
 
       {changeDatePopup ? (
