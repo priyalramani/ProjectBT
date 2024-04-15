@@ -84,7 +84,7 @@ export default function CreditNotes() {
     let controller = new AbortController();
     if (order_uuid) {
       axios
-        .get(`/creditNode/getCreditNote/${order_uuid}`, {
+        .get(`/creditNote/getCreditNote/${order_uuid}`, {
           signal: controller.signal,
         })
         .then((res) => {
@@ -443,14 +443,8 @@ export default function CreditNotes() {
                     }}
                     styles={customStyles}
                     value={
-                      order?.ledger_uuid
-                        ? {
-                            value: order?.ledger_uuid,
-                            label: ledgerData?.find(
-                              (j) => j.ledger_uuid === order.ledger_uuid
-                            )?.ledger_title,
-                          }
-                        : ""
+                      LedgerOptions.find((a) => a.value === order.ledger_uuid) ||
+                      ""
                     }
                     autoFocus={!order?.ledger_uuid && !order_uuid}
                     openMenuOnFocus={true}

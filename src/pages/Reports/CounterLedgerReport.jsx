@@ -490,6 +490,8 @@ function Table({
               }
               if (item.type === "PURCHASE_INVOICE")
                 navigate("/admin/editPurchaseInvoice/" + item.order_uuid);
+              if(item.type === "CREDIT_NOTE")
+                navigate("/admin/editCreditNote/" + item.order_uuid);
               else
                 navigate("/admin/editVoucher/" + item.accounting_voucher_uuid);
             }}

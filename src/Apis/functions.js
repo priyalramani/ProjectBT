@@ -330,7 +330,9 @@ export const Billing = async ({
     }
 
     if (item.edit || (add_discounts && item.item_discount)) {
-      charges_discount=charges_discount.filter((a)=>a.title!=="Item Discount")
+      charges_discount = charges_discount.filter(
+        (a) => a.title !== "Item Discount"
+      );
       charges_discount?.push({
         title: "Item Discount",
         value: item.item_discount,
@@ -447,10 +449,10 @@ export const Billing = async ({
         adjustment
       : 0
   );
-  let chargesTotal=0
+  let chargesTotal = 0;
   if (counterCharges?.length) {
     counter_charges = counterCharges.map((i) => i.charge_uuid);
-    chargesTotal=counterCharges.reduce((total, i) => total + i.amt, 0);
+    chargesTotal = counterCharges.reduce((total, i) => total + i.amt, 0);
     order_grandtotal += chargesTotal;
   }
   return {
@@ -503,12 +505,10 @@ export const PurchaseInvoiceBilling = async ({
 
     newPriceItems.push(item);
   }
-  let deductionsTotal =
-    deductions.reduce((a, b) => a + +(b.amount || 0), 0) || 0;
-  let order_grandtotal = truncateDecimals(
-    newPriceItems.reduce((a, b) => a + +(b.item_total || 0), 0) +
-      deductionsTotal,
-    2
+
+  let order_grandtotal = Math.round(
+    newPriceItems.map((a) => +a.item_total || 0).reduce((a, b) => a + b, 0) -
+      +deductions.reduce((a, b) => a + b, 0)
   );
 
   return {
