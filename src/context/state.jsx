@@ -225,13 +225,101 @@ const State = (props) => {
       setLoading(false);
     }, 45000);
     try {
-      const { data, sendPaymentReminder } = param;
+      const {
+        data,
+        sendPaymentReminder,
+        completeOrder,
+        modes,
+        outstanding,
+        modeTotal,
+        location,
+      } = param;
+      if (modes) {
+        if (
+          location.includes("completeOrderReport") ||
+          location.includes("signedBills") ||
+          location.includes("pendingEntry") ||
+          location.includes("upiTransactionReport")
+        ) {
+      
+            await axios({
+              method: "put",
+              url: "/receipts/putReceipt",
+              data: {
+                modes,
+                order_uuid: data?.order_uuid,
+                counter_uuid: data?.counter_uuid,
+              },
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+          
+    
+            await axios({
+              method: "put",
+              url: "/Outstanding/putOutstanding",
+              data: {
+                ...outstanding,
+                order_uuid: data?.order_uuid,
+                counter_uuid: data?.counter_uuid,
+              },
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+          
+        } else {
+          // let obj = modes.find((a) => a.mode_title === "Cash");
+          // if (obj?.amt && obj?.coin === "") {
+          //   setCoinPopup(true);
+          //   return;
+          // }
+          let time = new Date();
+          let obj = {
+            user_uuid: localStorage.getItem("user_uuid"),
+            time: time.getTime(),
+            order_uuid: data?.order_uuid,
+            counter_uuid: data?.counter_uuid,
+            trip_uuid: data?.trip_uuid,
+            invoice_number: data?.invoice_number,
+            order_grandtotal: data?.order_grandtotal,
+            modes: modes?.map((a) =>
+              a.mode_title === "Cash" ? { ...a, coin: 0 } : a
+            ),
+          };
+
+          if (modeTotal) {
+            await axios({
+              method: "post",
+              url: "/receipts/postReceipt",
+              data: obj,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+          }
+          if (outstanding?.amount)
+            await axios({
+              method: "post",
+              url: "/Outstanding/postOutstanding",
+              data: outstanding,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+        }
+      }
       const orderUpdateData = data;
       const maxState = Math.max(
         ...orderUpdateData?.status?.map((s) => +s.stage)
       );
 
-      if (+orderUpdateData?.payment_pending && maxState < 3.5) {
+      if (
+        +orderUpdateData?.payment_pending &&
+        maxState < 3.5 &&
+        completeOrder
+      ) {
         orderUpdateData.status.push({
           stage: 3.5,
           time: Date.now(),
@@ -395,7 +483,7 @@ const State = (props) => {
         success: true,
         message: "Accounting Balance Details Fetched Successfully",
       });
-    }else{
+    } else {
       setNotification({
         success: true,
         message: "No Accounting Balance Details Difference Found",

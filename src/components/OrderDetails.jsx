@@ -632,10 +632,13 @@ export function OrderDetails({
     };
   }, [order]);
 
-  const onSubmit = async (
+  const onSubmit = async ({
     type = { stage: 0, diliveredUser: "" },
-    completedOrderEdited
-  ) => {
+    completedOrderEdited,
+    modes,
+    outstanding,
+    modeTotal,
+  }) => {
     let empty_item = orderData.item_details
       .filter((a) => a.item_uuid)
       .map((a) => ({
@@ -803,10 +806,24 @@ export function OrderDetails({
     }
 
     if (completeOrder) {
-      updateCompleteOrder({ data });
+      updateCompleteOrder({
+        data,
+        completeOrder,
+        modes,
+        outstanding,
+        modeTotal,
+        location: window.location.pathname,
+      });
       onSave();
     } else {
-      setMessagePopup(data);
+      setMessagePopup({
+        data,
+        completeOrder,
+        modes,
+        outstanding,
+        modeTotal,
+        location: window.location.pathname,
+      });
     }
   };
 
@@ -825,43 +842,12 @@ export function OrderDetails({
       setWaiting(false);
     }, 45000);
     try {
-      const { data = messagePopup, sendPaymentReminder } = param;
-      const orderUpdateData = data;
-      const maxState = Math.max(
-        ...orderUpdateData?.status?.map((s) => +s.stage)
-      );
-
-      if (+orderUpdateData?.payment_pending && maxState < 3.5) {
-        orderUpdateData.status.push({
-          stage: 3.5,
-          time: Date.now(),
-          user_uuid: localStorage.getItem("user_uuid"),
-        });
-      }
-
-      const response = await axios({
-        method: "put",
-        url: "/orders/putOrders",
-        signal: controller.signal,
-        data: [
-          {
-            ...data,
-            item_details: data.item_details?.map((i) => ({
-              ...i,
-              price: truncateDecimals(+i.p_price || +i.price, 3),
-            })),
-          },
-        ],
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.data.success) {
+      console.log({param});
+      updateCompleteOrder(param);
+      setTimeout(() => {
         getOrder(order_uuid, true);
-        setEditOrder(false);
-        if (sendPaymentReminder)
-          sendPaymentReminders([orderData?.counter_uuid]);
-      }
+      }, 2000);
+      setEditOrder(false);
       setWaiting(false);
       if (!completeOrder) {
         setMessagePopup(false);
@@ -1160,25 +1146,17 @@ export function OrderDetails({
     } else handlePrint();
   };
   const postOrderData = async () => {
-    const response = await axios({
-      method: "put",
-      url: "/orders/putOrders",
-      data: [
-        {
-          order_uuid: orderData.order_uuid,
-          invoice_number: orderData.invoice_number,
-          trip_uuid:
-            +selectedTrip.trip_uuid === 0 ? "" : selectedTrip?.trip_uuid,
-          warehouse_uuid:
-            +selectedTrip?.trip_uuid === 0 ? "" : selectedTrip?.warehouse_uuid,
-          // warehouse_uuid: selectedTrip?.warehouse_uuid,
-        },
-      ],
-      headers: {
-        "Content-Type": "application/json",
+    updateCompleteOrder({
+      data: {
+        order_uuid: orderData.order_uuid,
+        invoice_number: orderData.invoice_number,
+        trip_uuid: +selectedTrip.trip_uuid === 0 ? "" : selectedTrip?.trip_uuid,
+        warehouse_uuid:
+          +selectedTrip?.trip_uuid === 0 ? "" : selectedTrip?.warehouse_uuid,
+        // warehouse_uuid: selectedTrip?.warehouse_uuid,
       },
     });
-    if (response.data.success) {
+    setTimeout(() => {
       setOrderData((prev) => ({
         ...prev,
         trip_uuid: +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.trip_uuid,
@@ -1186,7 +1164,7 @@ export function OrderDetails({
           +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.warehouse_uuid,
       }));
       setSelectedTrip({ trip_uuid: 0, warehouse_uuid: "" });
-    }
+    }, 2000);
   };
 
   const [dateTimeUpdating, setDateTimeUpdating] = useState(0);
@@ -1339,26 +1317,34 @@ export function OrderDetails({
   };
 
   const isCancelled = order?.status?.find((i) => +i.stage === 5);
-	const chcekIfDecimal = (value) => {
-		console.log({value,isDecimal:value.toString().includes(".")});
-		if (value.toString().includes(".")) {
-		  return (parseFloat(value||0)).toFixed(2);
-		} else {
-		  return value;
-		}
-	  }
+  const chcekIfDecimal = (value) => {
+    console.log({ value, isDecimal: value.toString().includes(".") });
+    if (value.toString().includes(".")) {
+      return parseFloat(value || 0).toFixed(2);
+    } else {
+      return value;
+    }
+  };
   return deliveryPopup ? (
     <DiliveryPopup
-      onSave={() => {
+      onSave={({ modes, outstanding, modeTotal }) => {
         if (order?.receipt_number) {
           onSave();
         }
-        if (deliveryPopup === "edit") onSubmit();
+        if (deliveryPopup === "edit")
+          onSubmit({ modes, outstanding, modeTotal });
         setDeliveryPopup(false);
       }}
       onClose={() => setDeliveryPopup(false)}
       deliveryPopup={deliveryPopup}
-      postOrderData={(diliveredUser) => onSubmit({ stage: 5, diliveredUser })}
+      postOrderData={({ diliveredUser, modes, outstanding, modeTotal }) =>
+        onSubmit({
+          type: { stage: 5, diliveredUser },
+          modes,
+          outstanding,
+          modeTotal,
+        })
+      }
       setSelectedOrder={setOrderData}
       order={orderData}
       counters={counters}
@@ -2718,7 +2704,11 @@ export function OrderDetails({
                   window.location.pathname.includes("completeOrderReport") ||
                   window.location.pathname.includes("pendingEntry") ||
                   window.location.pathname.includes("upiTransactionReport")
-                    ? () => onSubmit({ stage: 0, diliveredUser: "" }, 1)
+                    ? () =>
+                        onSubmit({
+                          type: { stage: 0, diliveredUser: "" },
+                          completedOrderEdited: 1,
+                        })
                     : () => onSubmit()
                 }
               >
@@ -2797,14 +2787,17 @@ export function OrderDetails({
       )}
       {messagePopup ? (
         <MessagePopup
-          onClose={updateOrder}
+          onClose={() =>
+            updateOrder({ sendPaymentReminder: false, ...messagePopup })
+          }
           message="Update Amount"
-          message2={"Rs. " + messagePopup?.order_grandtotal}
+          message2={"Rs. " + messagePopup?.data?.order_grandtotal}
           button1="Save"
           button2="Cancel"
           button={{
             label: "Save & Send WhatsApp Notification",
-            action: () => updateOrder({ sendPaymentReminder: true }),
+            action: () =>
+              updateOrder({ sendPaymentReminder: true, ...messagePopup }),
             visible: true,
           }}
           onSave={() => setMessagePopup(false)}
@@ -2892,6 +2885,7 @@ export function OrderDetails({
           item_details={order?.item_details}
           HoldOrder={HoldOrder}
           edit_prices={edit_prices}
+          updateCompleteOrder={updateCompleteOrder}
         />
       ) : (
         ""
@@ -3170,6 +3164,7 @@ const DeleteOrderPopup = ({
   deletePopup,
   edit_prices,
   HoldOrder,
+  updateCompleteOrder,
 }) => {
   const [disable, setDisabled] = useState(true);
   const [reason, setReason] = useState("");
@@ -3286,17 +3281,8 @@ const DeleteOrderPopup = ({
       item_details: billingData.items,
       edit: true,
     };
-    const response = await axios({
-      method: "put",
-      url: "/orders/putOrders",
-      data: [data],
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) {
-      onDeleted();
-    }
+    updateCompleteOrder({ data });
+    onDeleted();
   };
   console.log({ messageTemplate });
   return (
@@ -4038,88 +4024,17 @@ function DiliveryPopup({
       setWaiting(false);
       return;
     }
+    let location = window.location.pathname;
     if (
-      window.location.pathname.includes("completeOrderReport") ||
-      window.location.pathname.includes("signedBills") ||
-      window.location.pathname.includes("pendingEntry") ||
-      window.location.pathname.includes("upiTransactionReport")
+      location.includes("completeOrderReport") ||
+      location.includes("signedBills") ||
+      location.includes("pendingEntry") ||
+      location.includes("upiTransactionReport")
     ) {
-      let response;
-      if (modeTotal) {
-        response = await axios({
-          method: "put",
-          url: "/receipts/putReceipt",
-          data: {
-            modes,
-            order_uuid: order?.order_uuid,
-            counter_uuid: order?.counter_uuid,
-          },
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      }
-      if (outstanding?.amount) {
-        response = await axios({
-          method: "put",
-          url: "/Outstanding/putOutstanding",
-          data: {
-            ...outstanding,
-            order_uuid: order?.order_uuid,
-            counter_uuid: order?.counter_uuid,
-          },
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      }
-
-      if (response.data.success) {
-        onSave();
-      }
+      onSave({ modes, outstanding, modeTotal });
     } else {
-      // let obj = modes.find((a) => a.mode_title === "Cash");
-      // if (obj?.amt && obj?.coin === "") {
-      //   setCoinPopup(true);
-      //   return;
-      // }
-      let time = new Date();
-      let obj = {
-        user_uuid: localStorage.getItem("user_uuid"),
-        time: time.getTime(),
-        order_uuid: order?.order_uuid,
-        counter_uuid: order?.counter_uuid,
-        trip_uuid: order?.trip_uuid,
-        invoice_number: order?.invoice_number,
-        order_grandtotal: order?.order_grandtotal,
-        modes: modes?.map((a) =>
-          a.mode_title === "Cash" ? { ...a, coin: 0 } : a
-        ),
-      };
-      let response;
-      if (modeTotal) {
-        response = await axios({
-          method: "post",
-          url: "/receipts/postReceipt",
-          data: obj,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      }
-      if (outstanding?.amount)
-        response = await axios({
-          method: "post",
-          url: "/Outstanding/postOutstanding",
-          data: outstanding,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      if (response.data.success) {
-        postOrderData(diliveredUser);
-        onSave();
-      }
+      postOrderData({ diliveredUser, modes, outstanding, modeTotal });
+      onSave();
     }
     setWaiting(false);
   };
