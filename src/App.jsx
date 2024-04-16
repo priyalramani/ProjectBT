@@ -93,7 +93,7 @@ import CreditNote from "./pages/AddOrder/CreditNote";
 import UknownVouchers from "./pages/Reports/UknownVouchers";
 import SearchTransitionTags from "./pages/Reports/SearchTransitionTangs";
 
-export let Version = 307;
+export let Version = 308;
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
 

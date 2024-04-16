@@ -111,6 +111,7 @@ export default function PurchaseInvoice() {
                   }
                 : getInititalValues()
             );
+            if(data.notes.length) setNotesPoup(data.notes);
           }
         })
         .catch((err) => {
@@ -1309,6 +1310,7 @@ export default function PurchaseInvoice() {
           setSelectedOrder={setOrder}
           notesPopup={notesPopup}
           order={order}
+          isPurchaseInvoice={true}
         />
       ) : (
         ""

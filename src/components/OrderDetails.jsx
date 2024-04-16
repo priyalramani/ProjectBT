@@ -68,7 +68,6 @@ export function OrderDetails({
     getSpecialPrice,
     saveSpecialPrice,
     spcPricePrompt,
-    sendPaymentReminders,
     updateOrder: updateCompleteOrder,
   } = useContext(context);
   const [printConfig, setPrintConfig] = useState({});
@@ -1146,6 +1145,7 @@ export function OrderDetails({
     } else handlePrint();
   };
   const postOrderData = async () => {
+    console.log("postOrderData");
     updateCompleteOrder({
       data: {
         order_uuid: orderData.order_uuid,
@@ -1685,7 +1685,7 @@ export function OrderDetails({
                       reactInputsRef.current = {};
                       e.target.blur();
                       setPopupForm(true);
-                      setSelectedTrip(orderData?.trip_uuid || 0);
+                      setSelectedTrip({trip_uuid:orderData?.trip_uuid || 0,warehouse_uuid:orderData?.warehouse_uuid || ""});
                     }}
                   >
                     Assign Trip
@@ -2709,7 +2709,7 @@ export function OrderDetails({
                           type: { stage: 0, diliveredUser: "" },
                           completedOrderEdited: 1,
                         })
-                    : () => onSubmit({ type : { stage: 0, diliveredUser: "" },})
+                    : () => onSubmit({ type: { stage: 0, diliveredUser: "" },})
                 }
               >
                 Save
@@ -3096,7 +3096,8 @@ export function OrderDetails({
         <TripPopup
           onSave={() => {
             setPopupForm(false);
-            postOrderData();
+            getOrder(orderData.order_uuid)
+
           }}
           selectedTrip={selectedTrip}
           setSelectedTrip={setSelectedTrip}
@@ -4540,10 +4541,24 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
     </div>
   );
 }
-function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose }) {
+function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose,orders }) {
   const submitHandler = async (e) => {
     e.preventDefault();
-    onSave();
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrders",
+      data: [{
+        order_uuid: orders.order_uuid,
+        trip_uuid: selectedTrip.trip_uuid,
+      }],
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+    }
+    
   };
   return (
     <div className="overlay" style={{ zIndex: "99999999999" }}>

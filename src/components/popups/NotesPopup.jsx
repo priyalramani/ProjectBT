@@ -10,17 +10,59 @@ function NotesPopup({
   customSubmit,
   orderInfo,
   counterName,
-  mainDashboard
+  mainDashboard,
+  isCreditNote,
+  isPurchaseInvoice,
 }) {
   const [notes, setNotes] = useState([]);
+  const [narrations, setNarration] = useState([]);
   const [edit, setEdit] = useState(false);
 
   useEffect(() => {
-    if (customSubmit&&mainDashboard && order.notes?.length) return customSubmit(order);
+    if (customSubmit && mainDashboard && order.notes?.length)
+      return customSubmit(order);
     if (order?.notes?.length) setNotes(order?.notes);
+    if (order?.narrations?.length) setNarration(order?.narrations);
   }, [customSubmit, mainDashboard, order]);
 
   const submitHandler = async () => {
+    if (isPurchaseInvoice) {
+      const response = await axios({
+        method:"put",
+        url: `/purchaseInvoice/putPurchaseInvoice`,
+        data: {...order, notes},
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        setSelectedOrder((prev) => ({
+          ...prev,
+          notes,
+        }));
+        close();
+      }
+      return;
+    }
+    if(isCreditNote){
+      const response = await axios({
+        method:"put",
+        url: `/creditNote/putCreditNote`,
+        data: {...order, notes, narrations},
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        setSelectedOrder((prev) => ({
+          ...prev,
+          notes,
+          narrations,
+        }));
+        close();
+      }
+      return;
+    }
     if (customSubmit) return customSubmit({ ...order, notes });
     const response = await axios({
       method: "put",
@@ -97,6 +139,31 @@ function NotesPopup({
                       />
                     </label>
                   </div>
+                  {isCreditNote ? (
+                    <div
+                      className="row"
+                      style={{ flexDirection: "row", alignItems: "start" }}
+                    >
+                      <div style={{ width: "50px" }}>Narration</div>
+                      <label
+                        className="selectLabel flex"
+                        style={{ width: "200px" }}
+                      >
+                        <textarea
+                          name="route_title"
+                          className="numberInput"
+                          style={{ width: "200px", height: "200px" }}
+                          value={narrations?.toString()?.replace(/,/g, "\n")}
+                          onChange={(e) => {
+                            setNarration(e.target.value.split("\n"));
+                            setEdit(true);
+                          }}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    ""
+                  )}
                 </div>
 
                 <div

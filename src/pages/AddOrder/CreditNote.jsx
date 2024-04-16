@@ -111,6 +111,7 @@ export default function CreditNotes() {
                   }
                 : getInititalValues()
             );
+            if(data.notes.length) setNotesPoup(true)
           }
         })
         .catch((err) => {
@@ -1271,6 +1272,7 @@ export default function CreditNotes() {
           setSelectedOrder={setOrder}
           notesPopup={notesPopup}
           order={order}
+          isCreditNote={true}
         />
       ) : (
         ""
