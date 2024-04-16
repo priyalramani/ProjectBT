@@ -1332,7 +1332,7 @@ export function OrderDetails({
           onSave();
         }
         if (deliveryPopup === "edit")
-          onSubmit({ modes, outstanding, modeTotal });
+          onSubmit({ type : { stage: 0, diliveredUser: "" }, modes, outstanding, modeTotal });
         setDeliveryPopup(false);
       }}
       onClose={() => setDeliveryPopup(false)}
@@ -2709,7 +2709,7 @@ export function OrderDetails({
                           type: { stage: 0, diliveredUser: "" },
                           completedOrderEdited: 1,
                         })
-                    : () => onSubmit()
+                    : () => onSubmit({ type : { stage: 0, diliveredUser: "" },})
                 }
               >
                 Save
