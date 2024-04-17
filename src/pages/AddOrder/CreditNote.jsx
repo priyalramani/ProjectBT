@@ -42,14 +42,14 @@ export let getInititalValues = () => ({
   priority: 0,
   order_type: "I",
   rate_type: "at",
-  credit_note_invoice_number: "",
+  credit_notes_invoice_number: "",
   deductions: [],
   time_1: 24 * 60 * 60 * 1000,
   time_2: (24 + 48) * 60 * 60 * 1000,
   warehouse_uuid: localStorage.getItem("warehouse")
     ? JSON.parse(localStorage.getItem("warehouse")) || ""
     : "",
-  credit_note_date: new Date().getTime(),
+    credit_notes_invoice_date: new Date().getTime(),
 });
 
 export default function CreditNotes() {
@@ -99,8 +99,8 @@ export default function CreditNotes() {
                 sr: i + 1,
                 p_price: a.price || itemData.item_price || 0,
                 b_price:
-                  +(a.price || itemData.item_price || 0) *
-                  +(itemData.conversion || 0),
+                  (+(a.price || itemData.item_price || 0) *
+                  +(itemData.conversion || 0)).toFixed(4),
               };
             });
             setOrder(
@@ -546,10 +546,10 @@ export default function CreditNotes() {
                     onChange={(e) => {
                       setOrder((prev) => ({
                         ...prev,
-                        credit_note_date: new Date(e.target.value).getTime(),
+                        credit_notes_invoice_date: new Date(e.target.value).getTime(),
                       }));
                     }}
-                    value={getFormateDate(new Date(order.credit_note_date))}
+                    value={getFormateDate(new Date(order.credit_notes_invoice_date))}
                     placeholder="Search Counter Title..."
                     className="searchInput"
                     pattern="\d{4}-\d{2}-\d{2}"
@@ -564,13 +564,13 @@ export default function CreditNotes() {
                     type="text"
                     className="numberInput"
                     onWheel={(e) => e.preventDefault()}
-                    value={order.credit_note_invoice_number || ""}
+                    value={order.credit_notes_invoice_number || ""}
                     onChange={(e) => {
                       if (e.target.value.length <= 30)
                         setOrder((prev) => {
                           return {
                             ...prev,
-                            credit_note_invoice_number: e.target.value,
+                            credit_notes_invoice_number: e.target.value,
                           };
                         });
                     }}
@@ -1009,7 +1009,7 @@ export default function CreditNotes() {
               <button
                 type="button"
                 onClick={() => {
-                  if (!order.credit_note_invoice_number) {
+                  if (!order.credit_notes_invoice_number) {
                     setNotification({
                       message: "Credit Invoice Number is required",
                       success: false,

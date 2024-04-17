@@ -29,6 +29,7 @@ const CounterLegerReport = () => {
   const [selectionMode, setSelectionMode] = useState(false);
   const [ledgerData, setLedgerData] = useState([]);
   const [changeDatePopup, setChangeDatePopup] = useState(false);
+  const [defaultView, setDefaultView] = useState("narration");
   const [searchData, setSearchData] = useState({
     startDate: "",
     endDate: "",
@@ -178,6 +179,11 @@ const CounterLegerReport = () => {
     return result;
   }, [items, opening_balance_amount]);
   const getLedgerNames = (data = []) => {
+    if (defaultView === "narration")
+      return (
+        data.find((a) => a.ledger_uuid === searchData.counter_uuid)
+          ?.narration || ""
+      );
     let ledgers = data.filter((a) => a.ledger_uuid !== searchData.counter_uuid);
     ledgers = ledgers.map(
       (a) => counterList.find((b) => b.value === a.ledger_uuid)?.label
@@ -371,6 +377,8 @@ const CounterLegerReport = () => {
             selectionMode={selectionMode}
             setSelectionMode={setSelectionMode}
             getLedgerNames={getLedgerNames}
+            defaultView={defaultView}
+            setDefaultView={setDefaultView}
           />
         </div>
       </div>
@@ -438,7 +446,12 @@ function Table({
   selectionMode,
   setSelectionMode,
   getLedgerNames,
+  defaultView,
+  setDefaultView,
 }) {
+  const colourStyles = {
+    control: (styles) => ({ ...styles, backgroundColor: "transparent" }),
+  };
   return (
     <table
       className="user-table"
@@ -448,7 +461,28 @@ function Table({
         <tr>
           <th>S.N</th>
           <th colSpan={3}>Date</th>
-          <th colSpan={10}>Ledger</th>
+          <th colSpan={10} style={{ padding: 0 }}>
+            <div className="inputGroup">
+              <Select
+                options={["narration", "ledger"].map((a) => ({
+                  label: a.toLocaleUpperCase(),
+                  value: a,
+                }))}
+                onChange={(doc) => {
+                  setDefaultView(doc.value);
+                }}
+                value={{
+                  label: defaultView.toLocaleUpperCase(),
+                  value: defaultView,
+                }}
+                openMenuOnFocus={true}
+                menuPosition="fixed"
+                menuPlacement="auto"
+                placeholder="Select"
+                styles={colourStyles}
+              />
+            </div>
+          </th>
           <th colSpan={3}>Ref. #</th>
           <th colSpan={3}>Type</th>
           <th colSpan={2}>Debit</th>
@@ -490,7 +524,7 @@ function Table({
               }
               if (item.type === "PURCHASE_INVOICE")
                 navigate("/admin/editPurchaseInvoice/" + item.order_uuid);
-              if(item.type === "CREDIT_NOTE")
+              if (item.type === "CREDIT_NOTE")
                 navigate("/admin/editCreditNote/" + item.order_uuid);
               else
                 navigate("/admin/editVoucher/" + item.accounting_voucher_uuid);
