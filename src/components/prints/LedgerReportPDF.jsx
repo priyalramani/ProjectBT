@@ -6,6 +6,9 @@ const LedgerReportPDF = ({
   to_date = new Date(),
   getLedgerNames = (details) => "",
   componentRef,
+  openBalance = 0,
+  creditTotal = 0,
+  debitTotal = 0,
 }) => {
   return (
     <div className="order-print-layout">
@@ -313,6 +316,86 @@ const LedgerReportPDF = ({
                 </td>
               </tr>
             ))}
+            <tr
+                key={Math.random()}
+                style={{
+                  height: "30px",
+                  cursor: "pointer",
+                  width: "fit-content",
+                  borderTop: "1px solid black",
+                }}
+              >
+                <td
+                  style={{
+                    fontWeight: "600",
+                    fontSize: "x-small",
+                    textAlign: "center",
+                  }}
+                >
+              
+                </td>
+               
+                <td
+                  style={{
+                    fontWeight: "600",
+                    fontSize: "x-small",
+                    textAlign: "center",
+                  }}
+                  colSpan={13}
+                >
+                  Opening Balance:{openBalance}
+                </td>
+                <td
+                  style={{
+                    fontWeight: "600",
+                    fontSize: "x-small",
+                    textAlign: "center",
+                  }}
+                  colSpan={3}
+                >
+                 
+                </td>
+                <td
+                  style={{
+                    fontWeight: "600",
+                    fontSize: "x-small",
+                    textAlign: "center",
+                  }}
+                  colSpan={3}
+                >
+       
+                </td>
+                <td
+                  style={{
+                    fontWeight: "600",
+                    fontSize: "x-small",
+                    textAlign: "center",
+                  }}
+                  colSpan={2}
+                >
+                  {debitTotal}
+                </td>
+                <td
+                  style={{
+                    fontWeight: "600",
+                    fontSize: "x-small",
+                    textAlign: "center",
+                  }}
+                  colSpan={2}
+                >
+                  {creditTotal}
+                </td>
+                <td
+                  style={{
+                    fontWeight: "600",
+                    fontSize: "x-small",
+                    textAlign: "center",
+                  }}
+                  colSpan={2}
+                >
+            
+                </td>
+              </tr>
           </table>
         </div>
       </div>

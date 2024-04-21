@@ -264,8 +264,7 @@ export const Billing = async ({
     let descInputs = 0;
 
     for (let desc of (item.charges_discount || [])?.filter(
-      (a) =>
-        a.title === "dsc1" || a.title === "dsc2" || a.title === "Item Discount"
+      (a) => a.title === "dsc1" || a.title === "dsc2"
     )) {
       descInputs = +desc.value + +(descInputs || 0);
       descInputs = descInputs || 0;

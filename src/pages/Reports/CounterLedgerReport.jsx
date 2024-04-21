@@ -25,6 +25,7 @@ import { BsFilePdf } from "react-icons/bs";
 import { RiFileExcelLine } from "react-icons/ri";
 const CounterLegerReport = () => {
   const [opening_balance_amount, setOpening_balance_amount] = useState(0);
+  const [oldBalance, setOldBalance] = useState(0);
   const [showUnknown, setShowUnknown] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [ledgerData, setLedgerData] = useState([]);
@@ -91,6 +92,8 @@ const CounterLegerReport = () => {
     if (response.data.success) {
       setItems(response.data.result);
       setOpening_balance_amount(response.data.opening_balance);
+      setOldBalance(response.data.oldBalance);
+      sessionStorage.setItem("oldBalance", response.data.oldBalance);
       sessionStorage.setItem(
         "opening_balance_amount",
         response.data.opening_balance
@@ -116,26 +119,28 @@ const CounterLegerReport = () => {
       setOpening_balance_amount(
         sessionStorage.getItem("opening_balance_amount")
       );
+      setOldBalance(sessionStorage.getItem("oldBalance"));
     } else {
       sessionStorage.removeItem("ledgerData");
       sessionStorage.removeItem("itemData");
       sessionStorage.removeItem("opening_balance_amount");
+      sessionStorage.removeItem("oldBalance");
       let curTime = "yy-mm-dd"
         .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
         .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
         .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
       time = new Date(time.getTime() - 30 * 24 * 60 * 60 * 1000);
-      let sTime = "yy-mm-dd"
-        .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
-        .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
-        .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
+      // let sTime = "yy-mm-dd"
+      //   .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
+      //   .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
+      //   .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
       setSearchData((prev) => ({
         ...prev,
-        startDate: sTime,
+        // startDate: sTime,
         endDate: curTime,
       }));
     }
-
+    getBankStatementImport(controller);
     getCounter(controller);
     getLedgerData(controller);
     return () => {
@@ -143,7 +148,26 @@ const CounterLegerReport = () => {
       controller.abort();
     };
   }, []);
-
+  const getBankStatementImport = async (controller = new AbortController()) => {
+    try {
+      const res = await axios.get("/details/getOpeningBalanceDate", {
+        signal: controller.signal,
+      });
+      if (res.data.success) {
+        let time = new Date(res.data.result);
+        let sTime = "yy-mm-dd"
+          .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
+          .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
+          .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
+        setSearchData((prev) => ({
+          ...prev,
+          startDate: sTime,
+        }));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const counterList = useMemo(
     () =>
       [...counter, ...ledgerData].map((a) => ({
@@ -163,7 +187,8 @@ const CounterLegerReport = () => {
   let itemsData = useMemo(() => {
     let itemData = items?.sort((a, b) => +a.voucher_date - +b.voucher_date);
     let result = [];
-    let balance = +opening_balance_amount?.amount || 0;
+    let balance = +(opening_balance_amount?.amount || 0) + +(oldBalance || 0);
+    console.log({ balance, opening_balance_amount, oldBalance });
     for (let item of itemData) {
       if (!item.voucher_date) {
         result.push(item);
@@ -177,7 +202,7 @@ const CounterLegerReport = () => {
       });
     }
     return result;
-  }, [items, opening_balance_amount]);
+  }, [items, oldBalance, opening_balance_amount]);
   const getLedgerNames = (data = []) => {
     if (defaultView === "narration")
       return (
@@ -205,6 +230,15 @@ const CounterLegerReport = () => {
           Balance: a.balance || "",
         };
       });
+      sheetData.push({
+        Date: "",
+        Ledger: "Opening Balance: "+(+(opening_balance_amount || 0) + +(oldBalance || 0)),
+        "Ref. #": "",
+        Type: "",
+        Debit: DebitTotal,
+        Credit: CreditTotal,
+        Balance: "",
+      });
     const fileType =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const ws = XLSX.utils.json_to_sheet(sheetData);
@@ -213,6 +247,22 @@ const CounterLegerReport = () => {
     const data = new Blob([excelBuffer], { type: fileType });
     FileSaver.saveAs(data, "Ledger Report" + fileExtension);
   };
+  const DebitTotal = useMemo(() => {
+    return itemsData
+      .filter((a) => showUnknown || a.voucher_date)
+      .reduce((a, b) => {
+        if (b.amount < 0) return a + -b.amount;
+        return a;
+      }, 0);
+  }, [itemsData, showUnknown]);
+  const CreditTotal = useMemo(() => {
+    return itemsData
+      .filter((a) => showUnknown || a.voucher_date)
+      .reduce((a, b) => {
+        if (b.amount > 0) return a + b.amount;
+        return a;
+      }, 0);
+  }, [itemsData, showUnknown]);
   return (
     <>
       <Sidebar />
@@ -381,6 +431,22 @@ const CounterLegerReport = () => {
             setDefaultView={setDefaultView}
           />
         </div>
+        <div
+          className="flex"
+          style={{
+            justifyContent: "space-between",
+            padding: "10px 40px",
+            fontSize: "15px",
+            fontWeight: "bolder",
+          }}
+        >
+          <div>
+            Opening Balance:{" "}
+            {+(opening_balance_amount || 0) + +(oldBalance || 0)}
+          </div>
+          <div>Debit Total: {DebitTotal}</div>
+          <div>Credit Total: {CreditTotal}</div>
+        </div>
       </div>
 
       {changeDatePopup ? (
@@ -430,6 +496,9 @@ const CounterLegerReport = () => {
           from_date={new Date(searchData.startDate)}
           to_date={new Date(searchData.endDate)}
           getLedgerNames={getLedgerNames}
+          openBalance={+(opening_balance_amount || 0) + +(oldBalance || 0)}
+          creditTotal={CreditTotal}
+          debitTotal={DebitTotal}
         />
       ) : (
         ""
