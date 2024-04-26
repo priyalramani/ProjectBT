@@ -10,7 +10,7 @@ const OrderPdf = () => {
   const [user, setUser] = useState({});
   const [reminderDate, setReminderDate] = useState();
   const [itemData, setItemsData] = useState([]);
-  const [route, setRoute] = useState("");
+  const [route, setRoute] = useState([]);
 
   const getCounters = async (counter_uuid) => {
     const response = await axios({
@@ -31,7 +31,7 @@ const OrderPdf = () => {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setRoute(response.data.result.route_name);
+    if (response.data.success) setRoute(response.data.result);
   };
 
   const getItemsData = async (items) => {

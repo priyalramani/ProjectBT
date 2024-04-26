@@ -583,6 +583,7 @@ function ImportStatements({
                     <tr>
                       <th>Sr.</th>
                       <th>Invoice</th>
+                      {matchPricePopup.multipleCounter?<th>Counter</th>:""}
                       <th>Amount</th>
 
                       <th></th>
@@ -598,6 +599,7 @@ function ImportStatements({
                       >
                         <td>{i + 1}</td>
                         <td>{item.invoice_number}</td>
+                        {matchPricePopup.multipleCounter?<td>{item.counter_title}</td>:""}
                         <td>{item.amount}</td>
 
                         <td>
@@ -647,9 +649,9 @@ function ImportStatements({
                       setMatchPricePopup(null);
                     }}
                   >
-                    <button className="submit" type="button">
+                    {!matchPricePopup.multipleCounter?<button className="submit" type="button">
                       Unknown
-                    </button>
+                    </button>:""}
                   </div>
                   {+matchPricePopup.received_amount ===
                   +matchPricePopup.otherReciptsData
@@ -1062,7 +1064,7 @@ function ImportStatements({
 
                             <td>{item.paid_amount || ""}</td>
                             <td>{item.received_amount || ""}</td>
-                            {!item.match && item?.counter_uuid ? (
+                            {!item.match && item?.otherReciptsData?.length ? (
                               <td>
                                 <input
                                   type="checkbox"
