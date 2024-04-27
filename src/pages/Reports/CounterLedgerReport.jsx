@@ -188,7 +188,6 @@ const CounterLegerReport = () => {
     let itemData = items?.sort((a, b) => +a.voucher_date - +b.voucher_date);
     let result = [];
     let balance = +(opening_balance_amount?.amount || 0) + +(oldBalance || 0);
-    console.log({ balance, opening_balance_amount, oldBalance });
     for (let item of itemData) {
       if (!item.voucher_date) {
         result.push(item);
@@ -230,15 +229,17 @@ const CounterLegerReport = () => {
           Balance: a.balance || "",
         };
       });
-      sheetData.push({
-        Date: "",
-        Ledger: "Opening Balance: "+(+(opening_balance_amount || 0) + +(oldBalance || 0)),
-        "Ref. #": "",
-        Type: "",
-        Debit: DebitTotal,
-        Credit: CreditTotal,
-        Balance: "",
-      });
+    sheetData.push({
+      Date: "",
+      Ledger:
+        "Opening Balance: " +
+        (+(opening_balance_amount || 0)),
+      "Ref. #": "",
+      Type: "",
+      Debit: DebitTotal,
+      Credit: CreditTotal,
+      Balance: "",
+    });
     const fileType =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const ws = XLSX.utils.json_to_sheet(sheetData);
@@ -442,7 +443,7 @@ const CounterLegerReport = () => {
         >
           <div>
             Opening Balance:{" "}
-            {+(opening_balance_amount || 0) + +(oldBalance || 0)}
+            {+(opening_balance_amount || 0)}
           </div>
           <div>Debit Total: {DebitTotal}</div>
           <div>Credit Total: {CreditTotal}</div>
@@ -496,7 +497,7 @@ const CounterLegerReport = () => {
           from_date={new Date(searchData.startDate)}
           to_date={new Date(searchData.endDate)}
           getLedgerNames={getLedgerNames}
-          openBalance={+(opening_balance_amount || 0) + +(oldBalance || 0)}
+          openBalance={+(opening_balance_amount || 0)}
           creditTotal={CreditTotal}
           debitTotal={DebitTotal}
         />

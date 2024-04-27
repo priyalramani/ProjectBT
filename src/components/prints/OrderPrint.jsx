@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 const OrderPrint = ({
   renderID,
-  counter = [],
+  counter,
   order = { item_details: [] },
   allOrderItems,
   date = "",

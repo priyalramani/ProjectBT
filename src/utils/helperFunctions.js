@@ -55,24 +55,24 @@ export function getFormateDate(time) {
     .replace("mm", ("00" + (time?.getMonth() + 1)?.toString()).slice(-2))
     .replace("yy", ("0000" + time?.getFullYear()?.toString()).slice(-4))
     .replace("dd", ("00" + time?.getDate()?.toString()).slice(-2));
-    
+
   return curTime;
 }
 export function getMidnightTimestamp(now) {
   // Current date and time
-  const midnight = new Date(now); // Copy current date
-  midnight.setUTCHours(0, 0, 0, 0); // Set time to 00:00:00.000 UTC (midnight)
-  return midnight.getTime(); // Return Unix timestamp in milliseconds
+  const midnight = new Date(now).toUTCString(); // Copy current date
+  return new Date(midnight).getTime(); // Return Unix timestamp in milliseconds
+  // Return Unix timestamp in milliseconds
 }
 export function truncateDecimals(number, digits) {
   const stringNumber = number.toString();
-  const decimalIndex = stringNumber.indexOf('.');
-  
+  const decimalIndex = stringNumber.indexOf(".");
+
   if (decimalIndex === -1) {
-      // If there's no decimal point, return the original number
-      return number;
+    // If there's no decimal point, return the original number
+    return number;
   }
-  
+
   const truncatedString = stringNumber.slice(0, decimalIndex + 1 + digits);
   return parseFloat(truncatedString);
 }
