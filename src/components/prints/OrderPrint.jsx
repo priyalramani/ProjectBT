@@ -862,7 +862,7 @@ const OrderPrint = ({
                       textAlign: "left",
                     }}
                   >
-                    {counter.credit_rating || ""}
+                    {counter?.credit_rating || ""}
                   </td>
                 </tr>
               </>
