@@ -1064,7 +1064,7 @@ function ImportStatements({
 
                             <td>{item.paid_amount || ""}</td>
                             <td>{item.received_amount || ""}</td>
-                            {!item.match && item?.otherReciptsData?.length ? (
+                            {!item.match ? (
                               <td>
                                 <input
                                   type="checkbox"
@@ -1080,6 +1080,7 @@ function ImportStatements({
                                     if (item.multipleNarration?.length) {
                                       setMultipleNarration(item);
                                     }
+                                    if(item?.counter_uuid){
                                     setData((prev) =>
                                       prev.map((a, j) =>
                                         j === i
@@ -1089,6 +1090,7 @@ function ImportStatements({
                                           : a
                                       )
                                     );
+                                  }
                                   }}
                                 />
                               </td>
