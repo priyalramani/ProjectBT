@@ -469,404 +469,10 @@ function ImportStatements({
       <span>{option.closing_balance}</span>
     </div>
   );
+
   return (
-    <div className="overlay">
-      {confirmPopup ? (
-        <div
-          className="overlay"
-          style={{ position: "fixed", top: 0, left: 0, zIndex: 9999999999 }}
-        >
-          <div
-            className="modal"
-            style={{ height: "fit-content", width: "fit-content" }}
-          >
-            <div
-              className="content"
-              style={{
-                height: "fit-content",
-                padding: "20px",
-                width: "fit-content",
-              }}
-            >
-              <div style={{ overflowY: "scroll" }}>
-                <form
-                  className="form"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    createImportedVouchers(1);
-                  }}
-                >
-                  <div className="formGroup">
-                    <div
-                      className="row"
-                      style={{ flexDirection: "column", alignItems: "start" }}
-                    >
-                      <h1 style={{ textAlign: "center" }}>Mark Entry Done</h1>
-                    </div>
-
-                    <div className="row message-popup-actions">
-                      <button
-                        className="simple_Logout_button"
-                        type="button"
-                        onClick={() => createImportedVouchers(0)}
-                        style={{ background: "red" }}
-                      >
-                        No
-                      </button>
-                      <button className="simple_Logout_button" type="submit">
-                        Yes
-                      </button>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setConfirmPopup(false);
-                    }}
-                    className="closeButton"
-                  >
-                    x
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : matchPricePopup ? (
-        <div className="modal" style={{ width: "fit-content" }}>
-          <div
-            className="content"
-            style={{
-              height: "fit-content",
-              padding: "20px",
-              width: "fit-content",
-            }}
-          >
-            <div style={{ overflowY: "scroll" }}>
-              <form
-                className="form"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  let reference_no = matchPricePopup.otherReciptsData
-                    .filter((a) => a.checked)
-                    .map((a) => a.invoice_number);
-                  setData((prev) =>
-                    prev.map((a) =>
-                      a.sr === matchPricePopup.sr
-                        ? {
-                            ...matchPricePopup,
-                            reference_no,
-                            unMatch: false,
-                          }
-                        : a
-                    )
-                  );
-                  setMatchPricePopup(null);
-                }}
-                style={{
-                  justifyContent: "start",
-                }}
-              >
-                <div className="row">
-                  <h1>Match Price for {matchPricePopup.counter_title}</h1>
-                </div>
-                <div className="row">
-                  <h2>
-                    Total:{" "}
-                    {matchPricePopup.otherReciptsData
-                      .filter((a) => a.checked)
-                      .reduce((a, b) => a + b.amount, 0)}{" "}
-                    / {matchPricePopup.received_amount}
-                  </h2>
-                </div>
-                <table className="user-table" style={{ tableLayout: "auto" }}>
-                  <thead>
-                    <tr>
-                      <th>Sr.</th>
-                      <th>Invoice</th>
-                      {matchPricePopup.multipleCounter?<th>Counter</th>:""}
-                      <th>Amount</th>
-
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody className="tbody">
-                    {matchPricePopup.otherReciptsData?.map((item, i) => (
-                      <tr
-                        key={Math.random()}
-                        style={{
-                          height: "30px",
-                        }}
-                      >
-                        <td>{i + 1}</td>
-                        <td>{item.invoice_number}</td>
-                        {matchPricePopup.multipleCounter?<td>{item.counter_title}</td>:""}
-                        <td>{item.amount}</td>
-
-                        <td>
-                          <input
-                            type="checkbox"
-                            checked={item?.checked}
-                            onChange={(e) => {
-                              setMatchPricePopup((prev) => ({
-                                ...prev,
-                                otherReciptsData: prev.otherReciptsData.map(
-                                  (a, j) =>
-                                    j === i
-                                      ? {
-                                          ...a,
-                                          checked: item.checked ? false : true,
-                                        }
-                                      : a
-                                ),
-                              }));
-                            }}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="flex">
-                  {" "}
-                  <div
-                    className="flex"
-                    style={{
-                      justifyContent: "space-between",
-                      minWidth: "300px",
-                    }}
-                    onClick={() => {
-                      setData((prev) =>
-                        prev.map((a) =>
-                          a.sr === matchPricePopup.sr
-                            ? {
-                                ...matchPricePopup,
-                                reference_no: [],
-                                unMatch: false,
-                              }
-                            : a
-                        )
-                      );
-                      setMatchPricePopup(null);
-                    }}
-                  >
-                    {!matchPricePopup.multipleCounter?<button className="submit" type="button">
-                      Unknown
-                    </button>:""}
-                  </div>
-                  {+matchPricePopup.received_amount ===
-                  +matchPricePopup.otherReciptsData
-                    .filter((a) => a.checked)
-                    .reduce((a, b) => a + b.amount, 0) ? (
-                    <div
-                      className="flex"
-                      style={{
-                        justifyContent: "space-between",
-                        minWidth: "300px",
-                      }}
-                    >
-                      <button className="submit">Save</button>
-                    </div>
-                  ) : (
-                    ""
-                  )}
-                </div>
-
-                <button
-                  onClick={() => {
-                    setMatchPricePopup(false);
-                  }}
-                  className="closeButton"
-                >
-                  x
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      ) : multipleNarration ? (
-        <div className="modal" style={{ width: "fit-content" }}>
-          <div
-            className="content"
-            style={{
-              height: "fit-content",
-              padding: "20px",
-              width: "fit-content",
-            }}
-          >
-            <div style={{ overflowY: "scroll" }}>
-              <form
-                className="form"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setMultipleNarration(null);
-                }}
-                style={{
-                  justifyContent: "start",
-                }}
-              >
-                <div className="row">
-                  <h1>
-                    Transition Tags for{" "}
-                    {counterList.find?.(
-                      (a) => a.value === changeTransition?.counter_uuid
-                    )?.label || ""}
-                  </h1>
-                </div>
-                <table className="user-table" style={{ tableLayout: "auto" }}>
-                  <thead>
-                    <tr>
-                      <th>Sr.</th>
-                      <th>Counter</th>
-
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody className="tbody">
-                    {multipleNarration.multipleNarration?.map((item, i) => (
-                      <tr
-                        key={Math.random()}
-                        style={{
-                          height: "30px",
-                        }}
-                      >
-                        <td>{i + 1}</td>
-                        <td>{item.counter_title || item.ledger_title || ""}</td>
-
-                        <td>
-                          <input
-                            type="radio"
-                            checked={
-                              item?.counter_uuid ===
-                              data.find((a) => a.sr === multipleNarration.sr)
-                                ?.counter_uuid
-                            }
-                            onChange={(e) => {
-                              setData((prev) =>
-                                prev.map((a) =>
-                                  a.sr === multipleNarration.sr
-                                    ? {
-                                        ...a,
-                                        counter_uuid: item?.counter_uuid,
-                                        counter_title: item.counter_title,
-                                        ledger_title: item.ledger_title,
-                                      }
-                                    : a
-                                )
-                              );
-                            }}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                <i style={{ color: "red" }}>
-                  {errMassage === "" ? "" : "Error: " + errMassage}
-                </i>
-                <div
-                  className="flex"
-                  style={{ justifyContent: "space-between", minWidth: "300px" }}
-                >
-                  <button className="submit">Close</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      ) : changeTransition ? (
-        <div className="modal" style={{ width: "fit-content" }}>
-          <div
-            className="content"
-            style={{
-              height: "fit-content",
-              padding: "20px",
-              width: "fit-content",
-            }}
-          >
-            <div style={{ overflowY: "scroll" }}>
-              <form
-                className="form"
-                onSubmit={updateTransitionTags}
-                style={{
-                  justifyContent: "start",
-                }}
-              >
-                <div className="row">
-                  <h1>
-                    Transition Tags for{" "}
-                    {counterList.find?.(
-                      (a) => a.value === changeTransition?.counter_uuid
-                    )?.label || ""}
-                  </h1>
-                </div>
-                <table className="user-table" style={{ tableLayout: "auto" }}>
-                  <thead>
-                    <tr>
-                      <th>Sr.</th>
-                      <th>Tag</th>
-
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody className="tbody">
-                    {changeTransition.tags?.map((item, i) => (
-                      <tr
-                        key={Math.random()}
-                        style={{
-                          height: "30px",
-                        }}
-                      >
-                        <td>{i + 1}</td>
-                        <td>{item.tag}</td>
-
-                        <td>
-                          <input
-                            type="checkbox"
-                            checked={item.checked}
-                            onChange={(e) => {
-                              setChangeTransition((prev) => ({
-                                ...prev,
-                                tags: prev.tags.map((a, j) =>
-                                  j === i
-                                    ? { ...a, checked: e.target.checked }
-                                    : a
-                                ),
-                              }));
-                            }}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                <i style={{ color: "red" }}>
-                  {errMassage === "" ? "" : "Error: " + errMassage}
-                </i>
-                <div
-                  className="flex"
-                  style={{ justifyContent: "space-between", minWidth: "300px" }}
-                >
-                  <button
-                    className="submit"
-                    type="button"
-                    style={{ background: "red" }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setChangeTransition(null);
-                    }}
-                  >
-                    Cancel
-                  </button>
-
-                  <button className="submit">Update</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      ) : (
+    <>
+      <div className="overlay">
         <div className="modal" style={{ width: "fit-content" }}>
           <div
             className="content"
@@ -1080,17 +686,17 @@ function ImportStatements({
                                     if (item.multipleNarration?.length) {
                                       setMultipleNarration(item);
                                     }
-                                    if(item?.counter_uuid){
-                                    setData((prev) =>
-                                      prev.map((a, j) =>
-                                        j === i
-                                          ? !a.unMatch
-                                            ? defaultData[i]
-                                            : { ...a, unMatch: false }
-                                          : a
-                                      )
-                                    );
-                                  }
+                                    if (item?.counter_uuid) {
+                                      setData((prev) =>
+                                        prev.map((a, j) =>
+                                          j === i
+                                            ? !a.unMatch
+                                              ? defaultData[i]
+                                              : { ...a, unMatch: false }
+                                            : a
+                                        )
+                                      );
+                                    }
                                   }}
                                 />
                               </td>
@@ -1198,7 +804,445 @@ function ImportStatements({
             </div>
           </div>
         </div>
+      </div>
+      {confirmPopup ? (
+        <div
+          className="overlay"
+          style={{ position: "fixed", top: 0, left: 0, zIndex: 9999999999 }}
+        >
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "fit-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form
+                  className="form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    createImportedVouchers(1);
+                  }}
+                >
+                  <div className="formGroup">
+                    <div
+                      className="row"
+                      style={{ flexDirection: "column", alignItems: "start" }}
+                    >
+                      <h1 style={{ textAlign: "center" }}>Mark Entry Done</h1>
+                    </div>
+
+                    <div className="row message-popup-actions">
+                      <button
+                        className="simple_Logout_button"
+                        type="button"
+                        onClick={() => createImportedVouchers(0)}
+                        style={{ background: "red" }}
+                      >
+                        No
+                      </button>
+                      <button className="simple_Logout_button" type="submit">
+                        Yes
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setConfirmPopup(false);
+                    }}
+                    className="closeButton"
+                  >
+                    x
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : matchPricePopup ? (
+        <div className="overlay">
+          <div className="modal" style={{ width: "fit-content" }}>
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form
+                  className="form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    let reference_no = matchPricePopup.otherReciptsData
+                      .filter((a) => a.checked)
+                      .map((a) => a.invoice_number);
+                    setData((prev) =>
+                      prev.map((a) =>
+                        a.sr === matchPricePopup.sr
+                          ? {
+                              ...matchPricePopup,
+                              reference_no,
+                              unMatch: false,
+                            }
+                          : a
+                      )
+                    );
+                    setMatchPricePopup(null);
+                  }}
+                  style={{
+                    justifyContent: "start",
+                  }}
+                >
+                  <div className="row">
+                    <h1>Match Price for {matchPricePopup.counter_title}</h1>
+                  </div>
+                  <div className="row">
+                    <h2>
+                      Total:{" "}
+                      {matchPricePopup.otherReciptsData
+                        .filter((a) => a.checked)
+                        .reduce((a, b) => a + b.amount, 0)}{" "}
+                      / {matchPricePopup.received_amount}
+                    </h2>
+                  </div>
+                  <table className="user-table" style={{ tableLayout: "auto" }}>
+                    <thead>
+                      <tr>
+                        <th>Sr.</th>
+                        <th>Invoice</th>
+                        {matchPricePopup.multipleCounter ? (
+                          <th>Counter</th>
+                        ) : (
+                          ""
+                        )}
+                        <th>Amount</th>
+
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody className="tbody">
+                      {matchPricePopup.otherReciptsData?.map((item, i) => (
+                        <tr
+                          key={Math.random()}
+                          style={{
+                            height: "30px",
+                          }}
+                        >
+                          <td>{i + 1}</td>
+                          <td>{item.invoice_number}</td>
+                          {matchPricePopup.multipleCounter ? (
+                            <td>{item.counter_title}</td>
+                          ) : (
+                            ""
+                          )}
+                          <td>{item.amount}</td>
+
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={item?.checked}
+                              onChange={(e) => {
+                                setMatchPricePopup((prev) => ({
+                                  ...prev,
+                                  otherReciptsData: prev.otherReciptsData.map(
+                                    (a, j) =>
+                                      j === i
+                                        ? {
+                                            ...a,
+                                            checked: item.checked
+                                              ? false
+                                              : true,
+                                          }
+                                        : a
+                                  ),
+                                }));
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="flex">
+                    {" "}
+                    <div
+                      className="flex"
+                      style={{
+                        justifyContent: "space-between",
+                        minWidth: "300px",
+                      }}
+                      onClick={() => {
+                        setData((prev) =>
+                          prev.map((a) =>
+                            a.sr === matchPricePopup.sr
+                              ? {
+                                  ...matchPricePopup,
+                                  reference_no: [],
+                                  unMatch: false,
+                                }
+                              : a
+                          )
+                        );
+                        setMatchPricePopup(null);
+                      }}
+                    >
+                      {!matchPricePopup.multipleCounter ? (
+                        <button className="submit" type="button">
+                          Unknown
+                        </button>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                    {+matchPricePopup.received_amount ===
+                    +matchPricePopup.otherReciptsData
+                      .filter((a) => a.checked)
+                      .reduce((a, b) => a + b.amount, 0) ? (
+                      <div
+                        className="flex"
+                        style={{
+                          justifyContent: "space-between",
+                          minWidth: "300px",
+                        }}
+                      >
+                        <button className="submit">Save</button>
+                      </div>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setMatchPricePopup(false);
+                    }}
+                    className="closeButton"
+                  >
+                    x
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : multipleNarration ? (
+        <div className="overlay">
+          <div className="modal" style={{ width: "fit-content" }}>
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form
+                  className="form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setMultipleNarration(null);
+                  }}
+                  style={{
+                    justifyContent: "start",
+                  }}
+                >
+                  <div className="row">
+                    <h1>Transition Tags </h1>
+                  </div>{" "}
+                  <h5>{multipleNarration.narration}</h5>
+                  <table className="user-table" style={{ tableLayout: "auto" }}>
+                    <thead>
+                      <tr>
+                        <th>Sr.</th>
+                        <th>Counter</th>
+
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody className="tbody">
+                      {multipleNarration.multipleNarration?.map((item, i) => (
+                        <tr
+                          key={Math.random()}
+                          style={{
+                            height: "30px",
+                          }}
+                        >
+                          <td>{i + 1}</td>
+                          <td>
+                            {item.counter_title || item.ledger_title || ""}
+                          </td>
+                          {console.log(item)}
+                          <td>
+                            <input
+                              type="radio"
+                              checked={
+                                multipleNarration.counter_uuid ===
+                                (item.counter_uuid || item.ledger_uuid)
+                              }
+                              onChange={(e) => {
+                                setMultipleNarration((prev) => ({
+                                  ...prev,
+                                  counter_uuid:
+                                    item.counter_uuid || item.ledger_uuid,
+                                  counter_title:
+                                    item.counter_title || item.ledger_title,
+                                }));
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <i style={{ color: "red" }}>
+                    {errMassage === "" ? "" : "Error: " + errMassage}
+                  </i>
+                  {multipleNarration.counter_uuid ||
+                  multipleNarration.ledger_uuid ? (
+                    <div
+                      className="flex"
+                      style={{
+                        justifyContent: "space-between",
+                        minWidth: "300px",
+                      }}
+                    >
+                      <button className="submit">Save</button>
+                    </div>
+                  ) : (
+                    ""
+                  )}
+                  <button
+                    onClick={() => {
+                      setMultipleNarration(false);
+                      setData((prev) =>
+                        prev.map((a) =>
+                          a.sr === multipleNarration.sr
+                            ? {
+                                ...multipleNarration,
+                                match: false,
+                              }
+                            : a
+                        )
+                      );
+                    }}
+                    className="closeButton"
+                  >
+                    x
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : changeTransition ? (
+        <div className="overlay">
+          <div className="modal" style={{ width: "fit-content" }}>
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form
+                  className="form"
+                  onSubmit={updateTransitionTags}
+                  style={{
+                    justifyContent: "start",
+                  }}
+                >
+                  <div className="row">
+                    <h1>
+                      Transition Tags for{" "}
+                      {counterList.find?.(
+                        (a) => a.value === changeTransition?.counter_uuid
+                      )?.label || ""}
+                    </h1>
+                  </div>
+                  <table className="user-table" style={{ tableLayout: "auto" }}>
+                    <thead>
+                      <tr>
+                        <th>Sr.</th>
+                        <th>Tag</th>
+
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody className="tbody">
+                      {changeTransition.tags?.map((item, i) => (
+                        <tr
+                          key={Math.random()}
+                          style={{
+                            height: "30px",
+                          }}
+                        >
+                          <td>{i + 1}</td>
+                          <td>{item.tag}</td>
+
+                          <td>
+                            <input
+                              type="checkbox"
+                              checked={item.checked}
+                              onChange={(e) => {
+                                setChangeTransition((prev) => ({
+                                  ...prev,
+                                  tags: prev.tags.map((a, j) =>
+                                    j === i
+                                      ? { ...a, checked: e.target.checked }
+                                      : a
+                                  ),
+                                }));
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <i style={{ color: "red" }}>
+                    {errMassage === "" ? "" : "Error: " + errMassage}
+                  </i>
+                  <div
+                    className="flex"
+                    style={{
+                      justifyContent: "space-between",
+                      minWidth: "300px",
+                    }}
+                  >
+                    <button
+                      className="submit"
+                      type="button"
+                      style={{ background: "red" }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setChangeTransition(null);
+                      }}
+                    >
+                      Cancel
+                    </button>
+
+                    <button className="submit">Update</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        ""
       )}
-    </div>
+    </>
   );
 }
