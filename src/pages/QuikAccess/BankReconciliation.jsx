@@ -640,6 +640,16 @@ function ImportStatements({
                                     menuPlacement="auto"
                                     placeholder="Select"
                                   />
+                                ) : item?.otherReciptsData?.length ? (
+                                  <div
+                                    className="flex"
+                                    style={{
+                                      justifyContent: "space-between",
+                                      width: "100%",
+                                    }}
+                                  >
+                                    {item.otherReciptsData.length} orders
+                                  </div>
                                 ) : (
                                   <div
                                     className="flex"

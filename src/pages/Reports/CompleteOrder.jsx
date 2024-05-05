@@ -89,7 +89,7 @@ const CompleteOrder = () => {
               overflow: "visible",
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
+              justifyContent: "flex-start",
               width: "100%",
             }}
           >
