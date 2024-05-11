@@ -69,7 +69,7 @@ let titleData = [
   { value: "ledgers", name: "Ledgers" },
   { value: "admin", name: "DASHBOARD - Route" },
 ];
-const Sidebar = ({ setCollectionTags }) => {
+const Sidebar = ({ setCollectionTags,allAmountValue }) => {
   const { setcalculationPopup, view } = useContext(context);
   const location = useLocation();
   document.title = useMemo(() => {
@@ -416,6 +416,9 @@ const Sidebar = ({ setCollectionTags }) => {
           }
         />
       </div>
+      {allAmountValue?<div style={{ position: "absolute", bottom: "25px", left: "25px" }}>
+        <b>{allAmountValue}</b>
+      </div>:""}
       <div style={{ position: "absolute", bottom: "5px", left: "25px" }}>
         <b>v{Version}</b>
       </div>

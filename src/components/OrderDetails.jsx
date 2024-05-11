@@ -248,7 +248,7 @@ export function OrderDetails({
     let autoBilling = await Billing({
       order_edit: true,
       order_uuid: data?.order_uuid,
-      invoice_number: `${data?.order_type}${data?.invoice_number}`,
+      invoice_number: `${data?.order_type||""}${data?.invoice_number}`,
       shortage: data.shortage,
       adjustment: data.adjustment,
       replacement: data.replacement,
@@ -710,7 +710,7 @@ export function OrderDetails({
     let autoBilling = await Billing({
       order_edit: true,
       order_uuid: data?.order_uuid,
-      invoice_number: `${data?.order_type}${data?.invoice_number}`,
+      invoice_number: `${data?.order_type??""}${data?.invoice_number}`,
       counter,
       items: data.item_details.map((a) => ({ ...a, item_price: a.p_price })),
       replacement: data.replacement,
@@ -921,7 +921,7 @@ export function OrderDetails({
     let autoBilling = await Billing({
       order_edit: true,
       order_uuid: data?.order_uuid,
-      invoice_number: `${data?.order_type}${data?.invoice_number}`,
+      invoice_number: `${data?.order_type||""}${data?.invoice_number}`,
       counter,
       items: data.item_details,
       replacement: data.replacement,
@@ -941,7 +941,7 @@ export function OrderDetails({
     let autoBilling2 = await Billing({
       order_edit: true,
       order_uuid: data2?.order_uuid,
-      invoice_number: `${data2?.order_type}${data2?.invoice_number}`,
+      invoice_number: `${data2?.order_type||""}${data2?.invoice_number}`,
       counter,
       items: data2.item_details,
       replacement: data2.replacement,
@@ -1236,7 +1236,7 @@ export function OrderDetails({
         time_1: copyStages ? oldOrder?.time_1 : time_1 + Date.now(),
         time_2: copyStages ? oldOrder?.time_2 : time_2 + Date.now(),
         priority: oldOrder?.priority,
-        order_type: oldOrder?.order_type,
+        order_type: oldOrder?.order_type||"",
         item_details: oldOrder?.item_details?.map((item) => ({
           ...item,
           b: item?.original_qty?.b,
@@ -3257,7 +3257,7 @@ const DeleteOrderPopup = ({
     let billingData = await Billing({
       order_edit: true,
       order_uuid: data?.order_uuid,
-      invoice_number: `${data?.order_type}${data?.invoice_number}`,
+      invoice_number: `${data?.order_type||""}${data?.invoice_number}`,
       replacement: data.replacement,
       adjustment: data.adjustment,
       shortage: data.shortage,

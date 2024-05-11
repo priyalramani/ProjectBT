@@ -327,7 +327,9 @@ function ImportStatements({
                 "8550248f-41e9-4f5f-aea0-927b12a7146c" ||
               item.ledger_group_uuid === "0c0c8cbd-1a2a-4adc-9b65-d5c807f275c7"
             ? "CNTR"
-            : "",
+            : +item.received_amount
+            ? "RCPT"
+            : "PAYMENT",
         created_by: localStorage.getItem("user_uuid"),
         created_at: time.getTime(),
         amt: item.paid_amount || item.received_amount,
@@ -540,6 +542,7 @@ function ImportStatements({
                               color: !item.unMatch ? "green" : "red",
                             }}
                           >
+                            {item.sr==18?console.log({item}):""}
                             <td>{item.sr}</td>
                             <td>{item.date}</td>
                             <td>
@@ -891,15 +894,12 @@ function ImportStatements({
                   className="form"
                   onSubmit={(e) => {
                     e.preventDefault();
-                    let reference_no = matchPricePopup.otherReciptsData
-                      .filter((a) => a.checked)
-                      .map((a) => a.invoice_number);
+                 
                     setData((prev) =>
                       prev.map((a) =>
                         a.sr === matchPricePopup.sr
                           ? {
                               ...matchPricePopup,
-                              reference_no,
                               unMatch: false,
                             }
                           : a
@@ -1059,6 +1059,16 @@ function ImportStatements({
                   className="form"
                   onSubmit={(e) => {
                     e.preventDefault();
+                    setData((prev) =>
+                      prev.map((a) =>
+                        a.sr === multipleNarration.sr
+                          ? {
+                              ...multipleNarration,
+                              unMatch: false,
+                            }
+                          : a
+                      )
+                    );
                     setMultipleNarration(null);
                   }}
                   style={{
@@ -1066,8 +1076,9 @@ function ImportStatements({
                   }}
                 >
                   <div className="row">
-                    <h1>Transition Tags </h1>
+                    <h1>Narration </h1>
                   </div>{" "}
+                  {console.log({multipleNarration})}
                   <h5>{multipleNarration.narration}</h5>
                   <table className="user-table" style={{ tableLayout: "auto" }}>
                     <thead>
@@ -1090,7 +1101,7 @@ function ImportStatements({
                           <td>
                             {item.counter_title || item.ledger_title || ""}
                           </td>
-                          {console.log(item)}
+                          {console.log({item})}
                           <td>
                             <input
                               type="radio"
@@ -1138,7 +1149,7 @@ function ImportStatements({
                           a.sr === multipleNarration.sr
                             ? {
                                 ...multipleNarration,
-                                match: false,
+                                unMatch: true,
                               }
                             : a
                         )

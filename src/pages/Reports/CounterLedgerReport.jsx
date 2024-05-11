@@ -25,6 +25,7 @@ import { BsFilePdf } from "react-icons/bs";
 import { RiFileExcelLine } from "react-icons/ri";
 const CounterLegerReport = () => {
   const [opening_balance_amount, setOpening_balance_amount] = useState(0);
+  const [allAmountValue, setAllAmountValue] = useState([]);
   const [oldBalance, setOldBalance] = useState(0);
   const [showUnknown, setShowUnknown] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
@@ -120,11 +121,14 @@ const CounterLegerReport = () => {
         sessionStorage.getItem("opening_balance_amount")
       );
       setOldBalance(sessionStorage.getItem("oldBalance"));
+      setDefaultView(sessionStorage.getItem("defaultView"));
     } else {
       sessionStorage.removeItem("ledgerData");
       sessionStorage.removeItem("itemData");
       sessionStorage.removeItem("opening_balance_amount");
       sessionStorage.removeItem("oldBalance");
+      sessionStorage.removeItem("defaultView");
+
       let curTime = "yy-mm-dd"
         .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
         .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
@@ -134,13 +138,14 @@ const CounterLegerReport = () => {
       //   .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
       //   .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
       //   .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
+      getBankStatementImport(controller);
       setSearchData((prev) => ({
         ...prev,
         // startDate: sTime,
         endDate: curTime,
       }));
     }
-    getBankStatementImport(controller);
+  
     getCounter(controller);
     getLedgerData(controller);
     return () => {
@@ -231,9 +236,7 @@ const CounterLegerReport = () => {
       });
     sheetData.push({
       Date: "",
-      Ledger:
-        "Opening Balance: " +
-        (+(opening_balance_amount || 0)),
+      Ledger: "Opening Balance: " + +(opening_balance_amount || 0),
       "Ref. #": "",
       Type: "",
       Debit: DebitTotal,
@@ -264,9 +267,16 @@ const CounterLegerReport = () => {
         return a;
       }, 0);
   }, [itemsData, showUnknown]);
+  const totalAmount = useMemo(() => {
+    let total = 0;
+    for (let item of allAmountValue) {
+      total += item.amount;
+    }
+    return total;
+  }, [allAmountValue]);
   return (
     <>
-      <Sidebar />
+      <Sidebar allAmountValue={totalAmount} />
       <Header />
       <div
         className="item-sales-container orders-report-container"
@@ -430,6 +440,8 @@ const CounterLegerReport = () => {
             getLedgerNames={getLedgerNames}
             defaultView={defaultView}
             setDefaultView={setDefaultView}
+            setAllAmountValue={setAllAmountValue}
+            allAmountValue={allAmountValue}
           />
         </div>
         <div
@@ -441,10 +453,7 @@ const CounterLegerReport = () => {
             fontWeight: "bolder",
           }}
         >
-          <div>
-            Opening Balance:{" "}
-            {+(opening_balance_amount || 0)}
-          </div>
+          <div>Opening Balance: {+(opening_balance_amount || 0)}</div>
           <div>Debit Total: {DebitTotal}</div>
           <div>Credit Total: {CreditTotal}</div>
         </div>
@@ -518,6 +527,8 @@ function Table({
   getLedgerNames,
   defaultView,
   setDefaultView,
+  setAllAmountValue,
+  allAmountValue,
 }) {
   const colourStyles = {
     control: (styles) => ({ ...styles, backgroundColor: "transparent" }),
@@ -540,9 +551,10 @@ function Table({
                 }))}
                 onChange={(doc) => {
                   setDefaultView(doc.value);
+                  sessionStorage.setItem("defaultView", doc.value);
                 }}
                 value={{
-                  label: defaultView.toLocaleUpperCase(),
+                  label: defaultView?.toLocaleUpperCase(),
                   value: defaultView,
                 }}
                 openMenuOnFocus={true}
@@ -639,7 +651,64 @@ function Table({
             <td colSpan={3}>
               {item.accounting_voucher_number || item.invoice_number || ""}
             </td>
-            <td colSpan={3}>{item.type}</td>
+            <td colSpan={3}>
+              {item.type}
+              {selectionMode ? (
+                <button
+                  type="button"
+                  // className="submit"
+                  style={{
+                    width: "30px",
+                    height: "30px",
+                    padding: "2px",
+                    borderRadius: "50%",
+                    backgroundColor: allAmountValue.find(
+                      (a) =>
+                        a.accounting_voucher_uuid ===
+                        item.accounting_voucher_uuid
+                    )
+                      ? "red"
+                      : "green",
+                    color: "white",
+                    border: "none",
+                    cursor: "pointer",
+                    marginLeft: "50px",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAllAmountValue((prev) =>
+                      prev.find(
+                        (a) =>
+                          a.accounting_voucher_uuid ===
+                          item.accounting_voucher_uuid
+                      )
+                        ? prev.filter(
+                            (a) =>
+                              a.accounting_voucher_uuid !==
+                              item.accounting_voucher_uuid
+                          )
+                        : [
+                            ...prev,
+                            {
+                              accounting_voucher_uuid:
+                                item.accounting_voucher_uuid,
+                              amount: item.amount,
+                            },
+                          ]
+                    );
+                  }}
+                >
+                  {allAmountValue.find(
+                    (a) =>
+                      a.accounting_voucher_uuid === item.accounting_voucher_uuid
+                  )
+                    ? "-"
+                    : "+"}
+                </button>
+              ) : (
+                ""
+              )}
+            </td>
             <td colSpan={2}>{item.amount < 0 ? -item.amount : ""}</td>
             <td colSpan={2}>{item.amount > 0 ? item.amount : ""}</td>
             <td colSpan={2}>{item.balance || ""}</td>
