@@ -566,7 +566,7 @@ function Table({
             </div>
           </th>
           <th colSpan={3}>Ref. #</th>
-          <th colSpan={3}>Type</th>
+          <th colSpan={5}>Type</th>
           <th colSpan={2}>Debit</th>
           <th colSpan={2}>Credit</th>
           <th colSpan={2}>Balance</th>
@@ -651,7 +651,7 @@ function Table({
             <td colSpan={3}>
               {item.accounting_voucher_number || item.invoice_number || ""}
             </td>
-            <td colSpan={3}>
+            <td colSpan={5}>
               {item.type}
               {selectionMode ? (
                 <button
@@ -702,8 +702,8 @@ function Table({
                     (a) =>
                       a.accounting_voucher_uuid === item.accounting_voucher_uuid
                   )
-                    ? "-"
-                    : "+"}
+                    ? "Sub"
+                    : "Add"}
                 </button>
               ) : (
                 ""

@@ -15,6 +15,7 @@ import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
 import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
+import { get } from "react-scroll/modules/mixins/scroller";
 
 const options = {
   priorityOptions: [
@@ -372,6 +373,23 @@ export default function AddOrder() {
     if (response.data.success) {
       // window.location.reload();
       setOrder(getInititalValues());
+      getCounter();
+      setItemsData([]);
+      setEditPrices([]);
+      setAutoAdd(false);
+      setPopup(false);
+      setAutoBills([]);
+      setDeliveryPopup(false);
+      setHoldPopup(false);
+      setFocusedInputId("");
+      setRemarks("");
+      setCompanyFilter("all");
+      getItemsData();
+      getAutoBill();
+      setNotification({
+        message: "Order Added Successfully",
+        severity: "success",
+      });
     }
   };
 

@@ -69,8 +69,9 @@ let titleData = [
   { value: "ledgers", name: "Ledgers" },
   { value: "admin", name: "DASHBOARD - Route" },
 ];
-const Sidebar = ({ setCollectionTags,allAmountValue }) => {
-  const { setcalculationPopup, view } = useContext(context);
+const Sidebar = ({ setCollectionTags, allAmountValue }) => {
+  const { setcalculationPopup, view, setCounterNotesPopup } =
+    useContext(context);
   const location = useLocation();
   document.title = useMemo(() => {
     let title = titleData.find((a) => location.pathname.includes(a.value));
@@ -82,6 +83,15 @@ const Sidebar = ({ setCollectionTags,allAmountValue }) => {
       className="left-panel"
       style={{ position: "relative", zIndex: "9000000" }}
     >
+      <button
+        className="submit"
+        style={{ margin: 0, borderRadius: 0 }}
+        onClick={() => {
+          setCounterNotesPopup(true);
+        }}
+      >
+        Notes
+      </button>
       <div className="nav" style={{ height: "100vh" }}>
         <NavLink
           title="New"
@@ -416,9 +426,13 @@ const Sidebar = ({ setCollectionTags,allAmountValue }) => {
           }
         />
       </div>
-      {allAmountValue?<div style={{ position: "absolute", bottom: "25px", left: "25px" }}>
-        <b>{allAmountValue}</b>
-      </div>:""}
+      {allAmountValue ? (
+        <div style={{ position: "absolute", bottom: "25px", left: "25px" }}>
+          <b>{allAmountValue}</b>
+        </div>
+      ) : (
+        ""
+      )}
       <div style={{ position: "absolute", bottom: "5px", left: "25px" }}>
         <b>v{Version}</b>
       </div>

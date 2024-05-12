@@ -5,6 +5,7 @@ import { Billing } from "../Apis/functions";
 
 const State = (props) => {
   const [calculationPopup, setcalculationPopup] = useState(null);
+  const [counterNotesPopup, setCounterNotesPopup] = useState(null);
   const [cashRegisterPopup, setCashRegisterPopup] = useState(null);
   const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
   const [openingBalanceDatePopup, setOpeningBalanceDatePopup] = useState(false);
@@ -241,34 +242,31 @@ const State = (props) => {
           location.includes("pendingEntry") ||
           location.includes("upiTransactionReport")
         ) {
-      
-            await axios({
-              method: "put",
-              url: "/receipts/putReceipt",
-              data: {
-                modes,
-                order_uuid: data?.order_uuid,
-                counter_uuid: data?.counter_uuid,
-              },
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
-          
-    
-            await axios({
-              method: "put",
-              url: "/Outstanding/putOutstanding",
-              data: {
-                ...outstanding,
-                order_uuid: data?.order_uuid,
-                counter_uuid: data?.counter_uuid,
-              },
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
-          
+          await axios({
+            method: "put",
+            url: "/receipts/putReceipt",
+            data: {
+              modes,
+              order_uuid: data?.order_uuid,
+              counter_uuid: data?.counter_uuid,
+            },
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          await axios({
+            method: "put",
+            url: "/Outstanding/putOutstanding",
+            data: {
+              ...outstanding,
+              order_uuid: data?.order_uuid,
+              counter_uuid: data?.counter_uuid,
+            },
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
         } else {
           // let obj = modes.find((a) => a.mode_title === "Cash");
           // if (obj?.amt && obj?.coin === "") {
@@ -529,6 +527,8 @@ const State = (props) => {
         getAccountingBalanceDetails,
         checkAccountingBalance,
         setCheckAccountingBalance,
+        counterNotesPopup,
+        setCounterNotesPopup,
       }}
     >
       {props.children}

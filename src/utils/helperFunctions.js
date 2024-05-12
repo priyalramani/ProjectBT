@@ -76,3 +76,23 @@ export function truncateDecimals(number, digits) {
   const truncatedString = stringNumber.slice(0, decimalIndex + 1 + digits);
   return parseFloat(truncatedString);
 }
+export function compareObjects(obj1, obj2) {
+  // Check if both objects have the same keys
+  const obj1Keys = Object.keys(obj1);
+  const obj2Keys = Object.keys(obj2);
+
+  if (obj1Keys.length !== obj2Keys.length) {
+    console.log("key length not equal", obj1Keys.length, obj2Keys.length);
+      return true; // If number of keys is different, there are changes
+  }
+
+  // Check if the values of each key are equal
+  for (let key of obj1Keys) {
+      if (obj1[key] !== obj2[key]) {
+        console.log("key value not equal", obj1[key], obj2[key]);
+          return true; // If any value is different, there are changes
+      }
+  }
+
+  return false; // If reached here, no changes found
+}

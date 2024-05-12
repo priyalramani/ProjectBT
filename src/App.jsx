@@ -92,10 +92,11 @@ import ChequeNumberSearch from "./pages/Reports/ChequeNumberSearch";
 import CreditNote from "./pages/AddOrder/CreditNote";
 import UknownVouchers from "./pages/Reports/UknownVouchers";
 import SearchTransitionTags from "./pages/Reports/SearchTransitionTangs";
+import CounterNotesPopup from "./pages/AddOrder/CounterNotesPopup";
 
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
-export let Version = 316;
+export let Version = 317;
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
@@ -113,6 +114,7 @@ function App() {
     checkAccountingBalance,
     setCheckAccountingBalance,
     openingBalanceDatePopup,
+    counterNotesPopup
   } = context;
   axios.defaults.baseURL = server;
 
@@ -349,7 +351,10 @@ function App() {
             <Route path="/admin/items" element={<ItemsPage />} />
             <Route path="/admin/ledgers" element={<LedgersPage />} />
             <Route path="/admin/ledgerGroup" element={<LedgerGroups />} />
-            <Route path="/admin/ChequeNumberSearch" element={<ChequeNumberSearch />} />
+            <Route
+              path="/admin/ChequeNumberSearch"
+              element={<ChequeNumberSearch />}
+            />
             <Route
               path="/admin/StockValuationReport"
               element={<StockValuationReport />}
@@ -394,10 +399,7 @@ function App() {
               path="/admin/editPurchaseInvoice/:order_uuid"
               element={<PurchaseInvoice />}
             />
-            <Route
-              path="/admin/creditNote"
-              element={<CreditNote />}
-            />
+            <Route path="/admin/creditNote" element={<CreditNote />} />
             <Route
               path="/admin/editCreditNote/:order_uuid"
               element={<CreditNote />}
@@ -413,7 +415,10 @@ function App() {
             <Route path="/admin/adjustStock" element={<AdjustStock />} />
             <Route path="/admin/userActivity" element={<UserActivity />} />
             <Route path="/admin/unknownEntry" element={<UknownVouchers />} />
-            <Route path="/admin/SearchTransitionTags" element={<SearchTransitionTags />} />
+            <Route
+              path="/admin/SearchTransitionTags"
+              element={<SearchTransitionTags />}
+            />
 
             <Route
               path="/admin/performanceSummary"
@@ -556,6 +561,7 @@ function App() {
       {cashRegisterPopup && <CashRegister />}
       {bankStatementImport && <BankStatementImport />}
       {openingBalanceDatePopup && <OpeningBalanceDate />}
+      {counterNotesPopup && <CounterNotesPopup />}
       {checkAccountingBalance ? (
         <CheckAccountingBalance
           itemsData={checkAccountingBalance}
@@ -563,7 +569,9 @@ function App() {
             setCheckAccountingBalance(false);
           }}
         />
-      ):""}
+      ) : (
+        ""
+      )}
       <div className={`loading-bar ${loading || pageLoading ? "show" : ""}`}>
         <div className="progress"></div>
       </div>

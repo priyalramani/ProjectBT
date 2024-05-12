@@ -314,6 +314,7 @@ function ImportStatements({
     let array = [];
     let time = new Date();
     for (let item of dataArray) {
+      if (!item.existVoucher) continue;
       array.push({
         voucher_uuid: uuid(),
         mark_entry,
@@ -399,7 +400,12 @@ function ImportStatements({
     if (response.data.success) {
       let a = response.data.result;
       setData(a.map((a, i) => ({ ...a, match: !a.unMatch })));
-      setDefaultData(a.map((a, i) => ({ ...a, match: !a.unMatch })));
+      setDefaultData(
+        a.map((a, i) => ({
+          ...a,
+          match: a.otherReciptsData.length ? false : !a.unMatch,
+        }))
+      );
 
       setLoading(false);
     } else {
@@ -539,10 +545,14 @@ function ImportStatements({
                             key={Math.random()}
                             style={{
                               height: "30px",
-                              color: !item.unMatch ? "green" : "red",
+                              color: item.existVoucher
+                                ? !item.unMatch
+                                  ? "green"
+                                  : "red"
+                                : "blue",
                             }}
                           >
-                            {item.sr==18?console.log({item}):""}
+                            {item.sr == 18 ? console.log({ item }) : ""}
                             <td>{item.sr}</td>
                             <td>{item.date}</td>
                             <td>
@@ -561,7 +571,7 @@ function ImportStatements({
                                     }}
                                   >
                                     {item.counter_title}
-                                    {item.narration ? (
+                                    {item.existVoucher&&item.narration ? (
                                       <button
                                         type="button"
                                         className="submit"
@@ -894,7 +904,7 @@ function ImportStatements({
                   className="form"
                   onSubmit={(e) => {
                     e.preventDefault();
-                 
+
                     setData((prev) =>
                       prev.map((a) =>
                         a.sr === matchPricePopup.sr
@@ -1078,7 +1088,7 @@ function ImportStatements({
                   <div className="row">
                     <h1>Narration </h1>
                   </div>{" "}
-                  {console.log({multipleNarration})}
+                  {console.log({ multipleNarration })}
                   <h5>{multipleNarration.narration}</h5>
                   <table className="user-table" style={{ tableLayout: "auto" }}>
                     <thead>
@@ -1101,7 +1111,7 @@ function ImportStatements({
                           <td>
                             {item.counter_title || item.ledger_title || ""}
                           </td>
-                          {console.log({item})}
+                          {console.log({ item })}
                           <td>
                             <input
                               type="radio"
