@@ -314,7 +314,7 @@ function ImportStatements({
     let array = [];
     let time = new Date();
     for (let item of dataArray) {
-      if (!item.existVoucher) continue;
+      if (item.existVoucher===false) continue;
       array.push({
         voucher_uuid: uuid(),
         mark_entry,
@@ -545,14 +545,14 @@ function ImportStatements({
                             key={Math.random()}
                             style={{
                               height: "30px",
-                              color: item.existVoucher
-                                ? !item.unMatch
+                              color:
+                                item.existVoucher === false
+                                  ? "blue"
+                                  : !item.unMatch
                                   ? "green"
-                                  : "red"
-                                : "blue",
+                                  : "red",
                             }}
                           >
-                            {item.sr == 18 ? console.log({ item }) : ""}
                             <td>{item.sr}</td>
                             <td>{item.date}</td>
                             <td>
@@ -571,7 +571,7 @@ function ImportStatements({
                                     }}
                                   >
                                     {item.counter_title}
-                                    {item.existVoucher&&item.narration ? (
+                                    {item.existVoucher && item.narration ? (
                                       <button
                                         type="button"
                                         className="submit"

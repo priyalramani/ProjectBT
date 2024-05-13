@@ -96,7 +96,7 @@ import CounterNotesPopup from "./pages/AddOrder/CounterNotesPopup";
 
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
-export let Version = 317;
+export let Version = 318;
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
