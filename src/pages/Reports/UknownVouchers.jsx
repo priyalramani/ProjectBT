@@ -156,7 +156,7 @@ function Table({ itemsDetails, navigate, selectionMode, setSelectionMode }) {
             <td colSpan={3}>{item.ledger_title || item.counter_title || ""}</td>
             <td colSpan={2}>{item.type}</td>
             <td colSpan={2}>{getFormateDate(new Date(+item.created_at))}</td>
-            <td colSpan={1}>{item.receipt_number}</td>
+            <td colSpan={1}>{item.reference_no}</td>
             <td colSpan={1}>{item.amt || ""}</td>
           </tr>
         ))}

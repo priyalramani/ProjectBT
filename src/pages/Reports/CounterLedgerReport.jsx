@@ -145,7 +145,7 @@ const CounterLegerReport = () => {
         endDate: curTime,
       }));
     }
-  
+
     getCounter(controller);
     getLedgerData(controller);
     return () => {
@@ -274,6 +274,11 @@ const CounterLegerReport = () => {
     }
     return total;
   }, [allAmountValue]);
+  useEffect(() => {
+    if (!selectionMode) {
+      setAllAmountValue([]);
+    }
+  }, [selectionMode]);
   return (
     <>
       <Sidebar allAmountValue={totalAmount} />
@@ -540,7 +545,7 @@ function Table({
     >
       <thead>
         <tr>
-          <th>S.N</th>
+          <th colSpan={2}>S.N</th>
           <th colSpan={3}>Date</th>
           <th colSpan={10} style={{ padding: 0 }}>
             <div className="inputGroup">
@@ -612,7 +617,7 @@ function Table({
                 navigate("/admin/editVoucher/" + item.accounting_voucher_uuid);
             }}
           >
-            <td>
+            <td colSpan={2}>
               {i + 1}{" "}
               {selectionMode ? (
                 <input
@@ -652,62 +657,64 @@ function Table({
               {item.accounting_voucher_number || item.invoice_number || ""}
             </td>
             <td colSpan={5}>
-              {item.type}
-              {selectionMode ? (
-                <button
-                  type="button"
-                  // className="submit"
-                  style={{
-                    width: "30px",
-                    height: "30px",
-                    padding: "2px",
-                    borderRadius: "50%",
-                    backgroundColor: allAmountValue.find(
-                      (a) =>
-                        a.accounting_voucher_uuid ===
-                        item.accounting_voucher_uuid
-                    )
-                      ? "red"
-                      : "green",
-                    color: "white",
-                    border: "none",
-                    cursor: "pointer",
-                    marginLeft: "50px",
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setAllAmountValue((prev) =>
-                      prev.find(
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                {item.type}
+                {selectionMode ? (
+                  <div
+                    className="flex"
+                    // className="submit"
+                    style={{
+                      
+                      padding: "2px 5px",
+                      borderRadius: "10%",
+                      backgroundColor: allAmountValue.find(
                         (a) =>
                           a.accounting_voucher_uuid ===
                           item.accounting_voucher_uuid
                       )
-                        ? prev.filter(
-                            (a) =>
-                              a.accounting_voucher_uuid !==
-                              item.accounting_voucher_uuid
-                          )
-                        : [
-                            ...prev,
-                            {
-                              accounting_voucher_uuid:
-                                item.accounting_voucher_uuid,
-                              amount: item.amount,
-                            },
-                          ]
-                    );
-                  }}
-                >
-                  {allAmountValue.find(
-                    (a) =>
-                      a.accounting_voucher_uuid === item.accounting_voucher_uuid
-                  )
-                    ? "Sub"
-                    : "Add"}
-                </button>
-              ) : (
-                ""
-              )}
+                        ? "red"
+                        : "green",
+                      color: "white",
+                      border: "none",
+                      cursor: "pointer",
+                      margin: 0,
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setAllAmountValue((prev) =>
+                        prev.find(
+                          (a) =>
+                            a.accounting_voucher_uuid ===
+                            item.accounting_voucher_uuid
+                        )
+                          ? prev.filter(
+                              (a) =>
+                                a.accounting_voucher_uuid !==
+                                item.accounting_voucher_uuid
+                            )
+                          : [
+                              ...prev,
+                              {
+                                accounting_voucher_uuid:
+                                  item.accounting_voucher_uuid,
+                                amount: item.amount,
+                              },
+                            ]
+                      );
+                    }}
+                  >
+                    {allAmountValue.find(
+                      (a) =>
+                        a.accounting_voucher_uuid ===
+                        item.accounting_voucher_uuid
+                    )
+                      ? "Sub"
+                      : "Add"}
+                  </div>
+                ) : (
+                  ""
+                )}
+              </div>
             </td>
             <td colSpan={2}>{item.amount < 0 ? -item.amount : ""}</td>
             <td colSpan={2}>{item.amount > 0 ? item.amount : ""}</td>
