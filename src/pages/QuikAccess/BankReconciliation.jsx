@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useContext } from "react";
+import React, { useState, useEffect, useMemo, useContext, useCallback } from "react";
 import axios from "axios";
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid";
 import { Check, ExitToApp, UploadFile } from "@mui/icons-material";
@@ -253,7 +253,6 @@ function ImportStatements({
   const [changeTransition, setChangeTransition] = useState(null);
   const [counter, setCounter] = useState([]);
   const [counterSelected, setCounterSelected] = useState(null);
-  const [multipleNarration, setMultipleNarration] = useState(null);
   const [confirmPopup, setConfirmPopup] = useState(false);
   const [matchPricePopup, setMatchPricePopup] = useState(false);
   const getCounter = async (controller = new AbortController()) => {
@@ -287,9 +286,11 @@ function ImportStatements({
       controller.abort();
     };
   }, []);
-  const counterList = useMemo(
-    () =>
-      [...counter, ...ledgerData].map((a) => ({
+  const counterList = useCallback(
+    (counterList=[]) =>
+      [...counter, ...ledgerData].filter(a=>!counterList.length||
+        counterList.find((b) => b === (a?.counter_uuid || a?.ledger_uuid))
+      ).map((a) => ({
         label:
           (a.counter_title || a.ledger_title || "") +
           (a.route_title ? `,${a.route_title}` : ""),
@@ -314,7 +315,38 @@ function ImportStatements({
     let array = [];
     let time = new Date();
     for (let item of dataArray) {
-      if (item.existVoucher===false) continue;
+      if (item.existVoucher === false) continue;
+      if (item?.otherReciptsData?.length&&!item.multipleNarration?.length) {
+        for (let other of item.otherReciptsData) {
+          array.push({
+            voucher_uuid: uuid(),
+            mark_entry,
+            type: "RCPT",
+            created_by: localStorage.getItem("user_uuid"),
+            created_at: time.getTime(),
+            amt: other.amount,
+            invoice_number: [other.invoice_number],
+            order_uuid: item.order_uuid,
+            mode_uuid: item.mode_uuid,
+            transaction_tags: item.transaction_tags,
+            matched_entry: item.matched_entry,
+            details: [
+              {
+                ledger_uuid: popupInfo.ledger_uuid,
+                amount: -other.amount,
+                narration: "Ref no: " + other.invoice_number,
+              },
+              {
+                ledger_uuid: item.counter_uuid,
+                amount: other.amount,
+                narration: "Ref no: " + other.invoice_number,
+              },
+            ],
+            voucher_date: item.date_time_stamp,
+          });
+        }
+        continue;
+      }
       array.push({
         voucher_uuid: uuid(),
         mark_entry,
@@ -546,7 +578,8 @@ function ImportStatements({
                             style={{
                               height: "30px",
                               color:
-                                item.existVoucher === false
+                                item.existVoucher === false ||
+                                (item.multipleNarration?.length && item.unMatch)
                                   ? "blue"
                                   : !item.unMatch
                                   ? "green"
@@ -560,7 +593,46 @@ function ImportStatements({
                                 ? (item.reference_no || []).join(", ")
                                 : "Un Matched"}
                             </td>
-                            {item?.counter_uuid ? (
+                            {item.multipleNarration?.length ? (
+                              <td colSpan={2}>
+                         
+                                  <Select
+                                    options={counterList(item.multipleNarration.map(a=>a.counter_uuid))}
+                                    getOptionLabel={counterOptions}
+                                    filterOption={filterOption}
+                                    onChange={(doc) => {
+                                     
+                                      setData((prev) =>
+                                        prev.map((a, j) =>
+                                          j === i
+                                            ? {
+                                                ...a,
+                                                counter_uuid: doc.value,
+                                                counter_title: doc.label,
+                                              }
+                                            : a
+                                        )
+                                      );
+                                    }}
+                                    value={
+                                      item?.counter_uuid
+                                        ? {
+                                            label: item.counter_title,
+                                            value: item?.counter_uuid,
+                                          }
+                                        : {
+                                            label: "Select Counter",
+                                            value: "",
+                                          }
+                                    }
+                                    openMenuOnFocus={true}
+                                    menuPosition="fixed"
+                                    menuPlacement="auto"
+                                    placeholder="Select"
+                                  />
+                               
+                              </td>
+                            ) : item?.counter_uuid ? (
                               <>
                                 <td colSpan={item.narration ? 2 : 1}>
                                   <div
@@ -612,7 +684,7 @@ function ImportStatements({
                               <td colSpan={2}>
                                 {counterSelected === item.sr ? (
                                   <Select
-                                    options={counterList}
+                                    options={counterList()}
                                     getOptionLabel={counterOptions}
                                     filterOption={filterOption}
                                     onChange={(doc) => {
@@ -706,9 +778,7 @@ function ImportStatements({
                                       setMatchPricePopup(item);
                                       return;
                                     }
-                                    if (item.multipleNarration?.length) {
-                                      setMultipleNarration(item);
-                                    }
+                                   
                                     if (item?.counter_uuid) {
                                       setData((prev) =>
                                         prev.map((a, j) =>
@@ -949,7 +1019,7 @@ function ImportStatements({
                       </tr>
                     </thead>
                     <tbody className="tbody">
-                      {matchPricePopup.otherReciptsData?.map((item, i) => (
+                      {matchPricePopup.otherReciptsData.filter(a=>a.counter_uuid===matchPricePopup.counter_uuid)?.map((item, i) => (
                         <tr
                           key={Math.random()}
                           style={{
@@ -1053,128 +1123,7 @@ function ImportStatements({
             </div>
           </div>
         </div>
-      ) : multipleNarration ? (
-        <div className="overlay">
-          <div className="modal" style={{ width: "fit-content" }}>
-            <div
-              className="content"
-              style={{
-                height: "fit-content",
-                padding: "20px",
-                width: "fit-content",
-              }}
-            >
-              <div style={{ overflowY: "scroll" }}>
-                <form
-                  className="form"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    setData((prev) =>
-                      prev.map((a) =>
-                        a.sr === multipleNarration.sr
-                          ? {
-                              ...multipleNarration,
-                              unMatch: false,
-                            }
-                          : a
-                      )
-                    );
-                    setMultipleNarration(null);
-                  }}
-                  style={{
-                    justifyContent: "start",
-                  }}
-                >
-                  <div className="row">
-                    <h1>Narration </h1>
-                  </div>{" "}
-                  {console.log({ multipleNarration })}
-                  <h5>{multipleNarration.narration}</h5>
-                  <table className="user-table" style={{ tableLayout: "auto" }}>
-                    <thead>
-                      <tr>
-                        <th>Sr.</th>
-                        <th>Counter</th>
-
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody className="tbody">
-                      {multipleNarration.multipleNarration?.map((item, i) => (
-                        <tr
-                          key={Math.random()}
-                          style={{
-                            height: "30px",
-                          }}
-                        >
-                          <td>{i + 1}</td>
-                          <td>
-                            {item.counter_title || item.ledger_title || ""}
-                          </td>
-                          {console.log({ item })}
-                          <td>
-                            <input
-                              type="radio"
-                              checked={
-                                multipleNarration.counter_uuid ===
-                                (item.counter_uuid || item.ledger_uuid)
-                              }
-                              onChange={(e) => {
-                                setMultipleNarration((prev) => ({
-                                  ...prev,
-                                  counter_uuid:
-                                    item.counter_uuid || item.ledger_uuid,
-                                  counter_title:
-                                    item.counter_title || item.ledger_title,
-                                }));
-                              }}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <i style={{ color: "red" }}>
-                    {errMassage === "" ? "" : "Error: " + errMassage}
-                  </i>
-                  {multipleNarration.counter_uuid ||
-                  multipleNarration.ledger_uuid ? (
-                    <div
-                      className="flex"
-                      style={{
-                        justifyContent: "space-between",
-                        minWidth: "300px",
-                      }}
-                    >
-                      <button className="submit">Save</button>
-                    </div>
-                  ) : (
-                    ""
-                  )}
-                  <button
-                    onClick={() => {
-                      setMultipleNarration(false);
-                      setData((prev) =>
-                        prev.map((a) =>
-                          a.sr === multipleNarration.sr
-                            ? {
-                                ...multipleNarration,
-                                unMatch: true,
-                              }
-                            : a
-                        )
-                      );
-                    }}
-                    className="closeButton"
-                  >
-                    x
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : changeTransition ? (
+      ) :  changeTransition ? (
         <div className="overlay">
           <div className="modal" style={{ width: "fit-content" }}>
             <div
@@ -1196,7 +1145,7 @@ function ImportStatements({
                   <div className="row">
                     <h1>
                       Transition Tags for{" "}
-                      {counterList.find?.(
+                      {counterList().find?.(
                         (a) => a.value === changeTransition?.counter_uuid
                       )?.label || ""}
                     </h1>

@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useMemo } from "react";
 import context from "../../context/context";
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
@@ -15,7 +15,7 @@ export default function CounterNotesPopup() {
     const response = await axios({
       method: "post",
       url: "/counters/GetCounterData",
-      data: ["counter_uuid", "counter_title", "counter_notes"],
+      data: ["counter_uuid", "counter_title", "counter_notes", "route_title", "route_uuid"],
 
       headers: {
         "Content-Type": "application/json",
@@ -52,43 +52,13 @@ export default function CounterNotesPopup() {
       setCounterNotesPopup(null);
     }
   };
+  let prevData =useMemo(()=> counters?.find(
+    (a) => a?.counter_uuid === data?.counter_uuid
+  )
+  ,[data.counter_uuid,counters])
   return (
     <div className="overlay" style={{ zIndex: "999999" }}>
-      {confirm ? (
-        <div
-          className="modal"
-          style={{
-            height: "fit-content",
-            width: "max-content",
-            paddingTop: "50px",
-          }}
-        >
-          <h3>Do you want to Save Changes?</h3>
-          <div className="flex" style={{ justifyContent: "space-between" }}>
-            <button
-              type="submit"
-              className="submit"
-              onClick={(e) => {
-                e.preventDefault();
-                setCounterNotesPopup(null);
-              }}
-              style={{ backgroundColor: "red" }}
-            >
-              Discard
-            </button>
-            <button
-              type="submit"
-              className="submit"
-              onClick={(e) => {
-                e.preventDefault();
-                submitHandler();
-              }}
-            >
-              Confirm
-            </button>
-          </div>
-        </div>
-      ) : (
+      
         <div
           className="modal"
           style={{ height: "fit-content", width: "fit-content" }}
@@ -98,7 +68,7 @@ export default function CounterNotesPopup() {
             style={{
               height: "fit-content",
               padding: "20px",
-              width: "500px",
+              minWidth: "500px",
             }}
           >
             <div style={{ overflowY: "scroll" }}>
@@ -114,7 +84,7 @@ export default function CounterNotesPopup() {
                       <Select
                         options={counters.map((a) => ({
                           value: a.counter_uuid,
-                          label: a.counter_title,
+                          label: a.counter_title + " , " + a.route_title,
                           counter_notes: a.counter_notes,
                         }))}
                         onChange={(doc) => {
@@ -172,6 +142,7 @@ export default function CounterNotesPopup() {
                             <td>
                               <input
                                 type="date"
+                                style={{marginLeft:"10px",marginRight:"10px"}}
                                 onChange={(e) =>
                                   setData((prev) => ({
                                     ...prev,
@@ -199,7 +170,7 @@ export default function CounterNotesPopup() {
                             >
                               <input
                                 id={"p" + item.uuid}
-                                style={{ width: "100px" }}
+                                style={{ width: "50vw" ,marginLeft:"10px",marginRight:"10px"}}
                                 type="text"
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
@@ -226,7 +197,7 @@ export default function CounterNotesPopup() {
                               style={{ textAlign: "center" }}
                             >
                               <DeleteOutlineIcon
-                                style={{ color: "red" }}
+                                style={{ color: "red",marginLeft:"10px",marginRight:"10px" }}
                                 className="table-icon"
                                 onClick={() => {
                                   setData((prev) => ({
@@ -270,20 +241,20 @@ export default function CounterNotesPopup() {
                     )}
                   </table>
                 </div>
-                {/* <button type="submit" className="submit">
+                {
+          
+                compareObjects(prevData,data)?<button type="button" className="submit" style={{
+                  maxWidth: "250px",
+                }} onClick={()=>{
+                  submitHandler();
+                
+                }}>
                 Save changes
-              </button> */}
+              </button>:""}
               </div>
             </div>
             <button
               onClick={() => {
-                let prevData = counters.find(
-                  (a) => a.counter_uuid === data.counter_uuid
-                );
-          
-                if(compareObjects(prevData,data))
-                setConfirm(true);
-                else
                 setCounterNotesPopup(null);
               }}
               className="closeButton"
@@ -292,7 +263,7 @@ export default function CounterNotesPopup() {
             </button>
           </div>
         </div>
-      )}
+     
     </div>
   );
 }

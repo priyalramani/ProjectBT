@@ -77,7 +77,11 @@ export function truncateDecimals(number, digits) {
   return parseFloat(truncatedString);
 }
 export function compareObjects(obj1, obj2) {
-  // Check if both objects have the same keys
+  console.log("obj1", obj1);
+  console.log("obj2", obj2);
+  if(!obj1&&obj2){
+    return true;
+  }
   const obj1Keys = Object.keys(obj1);
   const obj2Keys = Object.keys(obj2);
 

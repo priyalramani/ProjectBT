@@ -71,6 +71,7 @@ export function OrderDetails({
     updateOrder: updateCompleteOrder,
   } = useContext(context);
   const [printConfig, setPrintConfig] = useState({});
+  const [company, setCompanies] = useState([]);
   const [routeData, setRoutesData] = useState([]);
   const [counters, setCounters] = useState([]);
   const [waiting, setWaiting] = useState(false);
@@ -122,6 +123,14 @@ export function OrderDetails({
     });
     if (response.data.success) setRoutesData(response.data.result);
   };
+  const fetchCompanies = async () => {
+    try {
+      const response = await axios.get("/companies/getCompanies");
+      if (response?.data?.result?.[0]) setCompanies(response?.data?.result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useEffect(CONTROL_AUTO_REFRESH, []);
   const getOrder = async (order_uuid) => {
     const response = await axios({
@@ -164,6 +173,7 @@ export function OrderDetails({
     } else {
       getOrder(order_uuid);
     }
+    fetchCompanies();
   }, []);
 
   const getItemCategories = async () => {
@@ -1315,7 +1325,13 @@ export function OrderDetails({
       ],
     });
   };
-
+  const CovertedQty = (qty, conversion) => {
+    let b = qty / +conversion;
+    b = Math.sign(b) * Math.floor(Math.sign(b) * b);
+    let p = Math.floor(qty % +conversion);
+    return b + ":" + p;
+  };
+  
   const isCancelled = order?.status?.find((i) => +i.stage === 5);
   const chcekIfDecimal = (value) => {
     console.log({ value, isDecimal: value.toString().includes(".") });
@@ -2105,10 +2121,24 @@ export function OrderDetails({
                                     .sort((a, b) =>
                                       a?.item_title?.localeCompare(b.item_title)
                                     )
-                                    ?.map((a, j) => ({
+                                    .map((a, j) => ({
                                       value: a.item_uuid,
-                                      label: a.item_title + "______" + a.mrp,
+                                      label:
+                                        a.item_title +
+                                        "______" +
+                                        a.mrp +
+                                        `, ${
+                                          company.find(
+                                            (b) => b.company_uuid === a.company_uuid
+                                          )?.company_title
+                                        }` +
+                                        (a.qty > 0
+                                          ? " _______[" +
+                                            CovertedQty(a.qty || 0, a.conversion) +
+                                            "]"
+                                          : ""),
                                       key: a.item_uuid,
+                                      qty: a.qty,
                                     }))}
                                   onChange={(e) => {
                                     let itemData = itemsData.find(
