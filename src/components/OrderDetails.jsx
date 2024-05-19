@@ -442,7 +442,7 @@ export function OrderDetails({
           a.uuid === item.uuid
             ? {
                 ...a,
-                p_price: e.target.value,
+                p_price: truncateDecimals(e.target.value,4),
                 b_price: truncateDecimals(
                   e.target.value * item.conversion || 0,
                   2
@@ -2268,7 +2268,7 @@ export function OrderDetails({
                                               counters,
                                               item,
                                               order?.counter_uuid
-                                            )?.price || item.item_price;
+                                            )?.price || item.p_price;
                                           return {
                                             ...a,
                                             status: e.value,
@@ -2416,7 +2416,7 @@ export function OrderDetails({
                                 className="numberInput"
                                 onWheel={(e) => e.preventDefault()}
                                 index={listItemIndexCount++}
-                                value={chcekIfDecimal(item?.p_price || 0)}
+                                value={item?.p_price || 0}
                                 onChange={(e) => onItemPriceChange(e, item)}
                                 onFocus={(e) => {
                                   e.target.onwheel = () => false;

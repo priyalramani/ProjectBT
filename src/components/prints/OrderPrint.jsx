@@ -105,6 +105,33 @@ const OrderPrint = ({
 
   const route_title =
     route?.find((a) => a.route_uuid === counter?.route_uuid)?.route_title || "";
+  function getNextChar(char) {
+    if (char < "a" || char > "z") {
+      throw new Error("Input must be a lowercase letter from a to z");
+    }
+
+    let charCode = char.charCodeAt(0);
+
+    charCode++;
+
+    if (charCode > "z".charCodeAt(0)) {
+      charCode = "a".charCodeAt(0);
+    }
+
+    return String.fromCharCode(charCode);
+  }
+  const hsn_code = useMemo(() => {
+    let hsn = [];
+    let char = "a";
+    for (let item of itemData) {
+      console.log({ item });
+      if (item.hsn && !hsn.find((a) => a.hsn === item.hsn)) {
+        hsn.push({ hsn: item.hsn, char });
+        char = getNextChar(char);
+      }
+    }
+    return hsn;
+  }, [itemData]);
 
   return (
     <div
@@ -336,6 +363,9 @@ const OrderPrint = ({
             Product
           </th>
           <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
+            Hsn
+          </th>
+          <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
             Pack
           </th>
           <th style={{ fontWeight: "600", fontSize: "x-small" }} colSpan={2}>
@@ -406,6 +436,7 @@ const OrderPrint = ({
               <td style={{ fontWeight: "600", fontSize: "x-small" }}>
                 {item?.sr || i + 1}.
               </td>
+
               <td
                 style={
                   boldedItem
@@ -419,6 +450,16 @@ const OrderPrint = ({
                 colSpan={3}
               >
                 {itemInfo?.item_title || ""}
+              </td>
+              <td
+                style={{
+                  fontWeight: "600",
+                  fontSize: "x-small",
+                  textAlign: "center",
+                }}
+                colSpan={2}
+              >
+                {hsn_code?.find((a) => a.hsn === itemInfo?.hsn)?.char || ""}
               </td>
               <td
                 style={{
@@ -828,6 +869,7 @@ const OrderPrint = ({
                             </td>
                           </tr>
                         ))}
+
                       <tr>
                         <td
                           style={{
@@ -863,6 +905,7 @@ const OrderPrint = ({
                     }}
                   >
                     {counter?.credit_rating || ""}
+                    {", "} HSN codes:: {hsn_code?.map((a) => `${a.char}:${a.hsn}`).join(", ")} 
                   </td>
                 </tr>
               </>

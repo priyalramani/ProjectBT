@@ -21,7 +21,8 @@ const NavLink = ({
     view,
     setBankStatementImport,
     setOpeningBalanceDatePopup,
-    getAccountingBalanceDetails
+    getAccountingBalanceDetails,
+    setGstReportPopup,
   } = useContext(context);
   const [searchFilter, setSearchFilter] = useState();
   const sortList = (_list) => {
@@ -112,6 +113,8 @@ const NavLink = ({
                       setOpeningBalanceDatePopup(true);
                     } else if (menu.name === "Error Checking") {
                       getAccountingBalanceDetails();
+                    } else if (menu.name === "GST Report") {
+                      setGstReportPopup(true);
                     }
                   }}
                 >

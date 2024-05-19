@@ -93,10 +93,13 @@ import CreditNote from "./pages/AddOrder/CreditNote";
 import UknownVouchers from "./pages/Reports/UknownVouchers";
 import SearchTransitionTags from "./pages/Reports/SearchTransitionTangs";
 import CounterNotesPopup from "./pages/AddOrder/CounterNotesPopup";
+import GSTReport from "./pages/Reports/GST";
+import { Tooltip } from "react-tooltip";
+import 'react-tooltip/dist/react-tooltip.css'
 
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
-export let Version = 319;
+export let Version = 321;
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
@@ -114,7 +117,8 @@ function App() {
     checkAccountingBalance,
     setCheckAccountingBalance,
     openingBalanceDatePopup,
-    counterNotesPopup
+    counterNotesPopup,
+    gstReportPopup
   } = context;
   axios.defaults.baseURL = server;
 
@@ -562,6 +566,7 @@ function App() {
       {bankStatementImport && <BankStatementImport />}
       {openingBalanceDatePopup && <OpeningBalanceDate />}
       {counterNotesPopup && <CounterNotesPopup />}
+      {gstReportPopup && <GSTReport />}
       {checkAccountingBalance ? (
         <CheckAccountingBalance
           itemsData={checkAccountingBalance}
@@ -575,6 +580,7 @@ function App() {
       <div className={`loading-bar ${loading || pageLoading ? "show" : ""}`}>
         <div className="progress"></div>
       </div>
+      <Tooltip id="my-tooltip" />
     </div>
   );
 }

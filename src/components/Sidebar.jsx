@@ -259,6 +259,10 @@ const Sidebar = ({ setCollectionTags, allAmountValue }) => {
                     name: "Search Transition Tags",
                     link: "/admin/SearchTransitionTags",
                   },
+                  {
+                    name:"GST Report",
+                    link:"#"
+                  }
                 ]
               : [
                   {

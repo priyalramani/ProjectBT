@@ -6,8 +6,19 @@ import { OrderDetails } from "../../components/OrderDetails";
 import * as XLSX from "xlsx";
 import Context from "../../context/context";
 import * as FileSaver from "file-saver";
-import { CopyAll, WhatsApp } from "@mui/icons-material";
+import {
+  Check,
+  CommentOutlined,
+  CopyAll,
+  PaymentRounded,
+  WhatsApp,
+} from "@mui/icons-material";
 import Select from "react-select";
+import { compareObjects, getFormateDate } from "../../utils/helperFunctions";
+import context from "../../context/context";
+import { AddCircle as AddIcon } from "@mui/icons-material";
+import { v4 as uuid } from "uuid";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 const fileExtension = ".xlsx";
 const fileType =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -25,6 +36,7 @@ const UPITransection = () => {
   const [popupOrder, setPopupOrder] = useState(null);
   const [loading, setLoading] = useState(false);
   const [remarksPopup, setRemarksPoup] = useState();
+  const [commentPopup, setCommentPoup] = useState();
   const [type, setType] = useState("All");
 
   const [items, setItems] = useState([]);
@@ -51,6 +63,36 @@ const UPITransection = () => {
     });
     console.log("transactions", response);
     if (response.data.success) setPopupOrder(response.data.result);
+  };
+  const getCounter = async (counter_uuid) => {
+    const response = await axios({
+      method: "post",
+      url: "/counters/getFilteredList",
+      data: {
+        counterList: [counter_uuid],
+        jsonList: ["payment_remarks", "counter_uuid", "counter_title"],
+      },
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.result.length) setRemarksPoup(response.data.result[0]);
+  };
+  const getCommentRecipt = async (order_uuid, counter_uuid) => {
+    const response = await axios({
+      method: "post",
+      url: "/receipts/getComments",
+      data: {
+        order_uuid,
+        counter_uuid,
+      },
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.result) setCommentPoup(response.data.result);
   };
   const putActivityData = async (order_uuid, mode_uuid, invoice_number) => {
     const response = await axios({
@@ -156,6 +198,8 @@ const UPITransection = () => {
             setRemarksPoup={setRemarksPoup}
             loading={loading}
             setLoading={setLoading}
+            getCounter={getCounter}
+            getCommentRecipt={getCommentRecipt}
           />
         </div>
       </div>
@@ -208,6 +252,20 @@ const UPITransection = () => {
       ) : (
         ""
       )}
+      {commentPopup ? (
+        <ReciptsCommentsPopup
+          commentPopup={commentPopup}
+          onClose={() => {
+            setCommentPoup(null);
+          }}
+          onSave={() => {
+            setCommentPoup(null);
+            getActivityData();
+          }}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
@@ -221,6 +279,8 @@ function Table({
   loading,
   setLoading,
   Counters,
+  getCounter,
+  getCommentRecipt,
 }) {
   const context = useContext(Context);
 
@@ -302,7 +362,7 @@ function Table({
           <th>Type</th>
           <th>Days</th>
 
-          <th colSpan={6}>Action</th>
+          <th colSpan={5}>Action</th>
         </tr>
       </thead>
       <tbody className="tbody">
@@ -362,22 +422,41 @@ function Table({
               >
                 <CopyAll />
               </td>
-              <td colSpan={2}>
-                <button
-                  type="button"
-                  className="theme-btn"
+              <td>
+                <div
+                  data-tooltip-id="my-tooltip"
+                  data-tooltip-content="Payment Remarks"
+                  style={{ color: "green" }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setRemarksPoup(item);
+                    getCounter(item.counter_uuid);
                   }}
                 >
-                  Remarks
-                </button>
+                  <PaymentRounded />
+                </div>
               </td>
-              <td colSpan={2}>
+              <td>
+                <div
+                  data-tooltip-id="my-tooltip"
+                  data-tooltip-content="Comment"
+                  style={{ color: "green" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    getCommentRecipt(item.order_uuid, item.counter_uuid);
+                  }}
+                >
+                  <CommentOutlined />
+                </div>
+              </td>
+              <td>
                 {loading?.order_uuid === item.order_uuid &&
                 loading?.mode_uuid === item?.mode_uuid ? (
-                  <button className="theme-btn" id="loading-screen">
+                  <div
+                    type="button"
+                    className="submit"
+                    style={{ width: "fit-content" }}
+                    id="loading-screen"
+                  >
                     <svg viewBox="0 0 100 100">
                       <path
                         d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
@@ -394,11 +473,12 @@ function Table({
                         ></animateTransform>
                       </path>
                     </svg>
-                  </button>
+                  </div>
                 ) : (
-                  <button
-                    type="button"
-                    className="theme-btn"
+                  <div
+                    data-tooltip-id="my-tooltip"
+                    data-tooltip-content="Complete"
+                    style={{ color: "green" }}
                     onClick={(e) => {
                       e.stopPropagation();
                       setLoading({
@@ -412,8 +492,8 @@ function Table({
                       );
                     }}
                   >
-                    Complete
-                  </button>
+                    <Check />
+                  </div>
                 )}
               </td>
             </tr>
@@ -427,18 +507,19 @@ function NotesPopup({ onSave, setItems, notesPopup }) {
   const [edit, setEdit] = useState(false);
 
   useEffect(() => {
-    console.log(notesPopup?.remarks);
-    setNotes(notesPopup?.remarks || []);
+    console.log(notesPopup?.payment_remarks);
+    setNotes(notesPopup?.payment_remarks || []);
   }, [notesPopup]);
   const submitHandler = async () => {
     const response = await axios({
       method: "put",
-      url: "/receipts/putRemarks",
-      data: {
-        remarks: notes,
-        invoice_number: notesPopup.invoice_number,
-        mode_uuid: notesPopup.mode_uuid,
-      },
+      url: "/counters/putCounter",
+      data: [
+        {
+          payment_remarks: notes,
+          counter_uuid: notesPopup.counter_uuid,
+        },
+      ],
       headers: {
         "Content-Type": "application/json",
       },
@@ -455,7 +536,11 @@ function NotesPopup({ onSave, setItems, notesPopup }) {
           style={{ height: "fit-content", width: "max-content" }}
         >
           <div className="flex" style={{ justifyContent: "space-between" }}>
-            <h3>Please Enter Remarks</h3>
+            <h3>
+              {" "}
+              Payment Remarks for <br />
+              {notesPopup.counter_title}
+            </h3>
           </div>
           <div
             className="content"
@@ -480,7 +565,7 @@ function NotesPopup({ onSave, setItems, notesPopup }) {
                       <textarea
                         name="route_title"
                         className="numberInput"
-                        style={{ width: "200px", height: "200px" }}
+                        style={{ height: "200px" }}
                         value={notes?.toString()?.replace(/,/g, "\n")}
                         onChange={(e) => {
                           setNotes(e.target.value.split("\n"));
@@ -516,5 +601,176 @@ function NotesPopup({ onSave, setItems, notesPopup }) {
         </div>
       </div>
     </>
+  );
+}
+function ReciptsCommentsPopup({ commentPopup, onClose, onSave }) {
+  const [data, setData] = useState({});
+
+  //post request to save bank statement import
+
+  //get request to get bank statement import
+
+  useEffect(() => {
+    setData(commentPopup);
+  }, [commentPopup]);
+  const customStyles = {
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.data.isHighlighted
+        ? "red"
+        : provided.backgroundColor,
+      color: state.data.isHighlighted ? "white" : provided.color,
+    }),
+  };
+  const submitHandler = async () => {
+    const response = await axios({
+      method: "put",
+      url: "/receipts/putSingleReceipt",
+      data: data,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+    }
+  };
+
+  return (
+    <div className="overlay" style={{ zIndex: "999999" }}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            minWidth: "500px",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <div className="form">
+              <div className="row">
+                <h1>Recipt Notes</h1>
+           
+              </div>
+              <div className="row">
+     <h3>Counter: {data.counter_title}</h3>
+              </div>
+              <div
+                className="items_table"
+                style={{ flex: "1", height: "75vh", overflow: "scroll" }}
+              >
+                <table className="f6 w-100 center" cellSpacing="0">
+                  <thead className="lh-copy" style={{ position: "static" }}>
+                    <tr className="white">
+                      <th className="pa2 tc bb b--black-20">Notes</th>
+                      <th className="pa2 tc bb b--black-20">Created At</th>
+                     
+                    </tr>
+                  </thead>
+                  {data.counter_uuid ? (
+                    <tbody className="lh-copy">
+                      {data?.comment?.map((item, i) => (
+                        <tr
+                          key={item.uuid}
+                          item-billing-type={item?.billing_type}
+                        >
+                      
+                          <td
+                            className="ph2 pv1 tc bb b--black-20 bg-white"
+                            style={{ textAlign: "center" }}
+                          >
+                            <input
+                              id={"p" + item.uuid}
+                              style={{
+                                width: "50vw",
+                                marginLeft: "10px",
+                                marginRight: "10px",
+                              }}
+                              type="text"
+                              className="numberInput"
+                              onWheel={(e) => e.preventDefault()}
+                              value={item.note || ""}
+                              onChange={(e) => {
+                                setData((prev) => ({
+                                  ...prev,
+                                  comment: prev.comment.map((a) =>
+                                    a.uuid === item.uuid
+                                      ? { ...a, note: e.target.value }
+                                      : a
+                                  ),
+                                }));
+                              }}
+                              onFocus={(e) => e.target.select()}
+                            />
+                          </td>
+                          <td style={{marginRight:"5px"}}>
+                            {new Date(item.created_at).toLocaleDateString()}
+                          </td>
+
+                          
+                        </tr>
+                      ))}
+                      <tr>
+                        <td
+                          onClick={() =>
+                            setData((prev) => ({
+                              ...prev,
+                              comment: [
+                                ...(prev.comment || []),
+                                {
+                                  uuid: uuid(),
+                                  date: new Date().toUTCString(),
+                                  created_at: new Date().toUTCString(),
+                                  note: "",
+                                },
+                              ],
+                            }))
+                          }
+                        >
+                          <AddIcon
+                            sx={{ fontSize: 40 }}
+                            style={{ color: "#4AC959", cursor: "pointer" }}
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  ) : (
+                    ""
+                  )}
+                </table>
+              </div>
+              {compareObjects(commentPopup, data) ? (
+                <button
+                  type="button"
+                  className="submit"
+                  style={{
+                    maxWidth: "250px",
+                  }}
+                  onClick={() => {
+                    submitHandler();
+                  }}
+                >
+                  Save changes
+                </button>
+              ) : (
+                ""
+              )}
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              onClose();
+            }}
+            className="closeButton"
+          >
+            x
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

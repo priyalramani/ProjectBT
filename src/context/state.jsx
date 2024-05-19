@@ -15,6 +15,7 @@ const State = (props) => {
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(null);
   const [pageLoading, setPageLoading] = useState(null);
+  const [gstReportPopup, setGstReportPopup] = useState(false);
   const [checkAccountingBalance, setCheckAccountingBalance] = useState(null);
   const submitBulkOrders = async ({
     stage,
@@ -529,6 +530,8 @@ const State = (props) => {
         setCheckAccountingBalance,
         counterNotesPopup,
         setCounterNotesPopup,
+        gstReportPopup,
+        setGstReportPopup,
       }}
     >
       {props.children}

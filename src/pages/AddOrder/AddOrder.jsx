@@ -388,7 +388,7 @@ export default function AddOrder() {
       getAutoBill();
       setNotification({
         message: "Order Added Successfully",
-        severity: "success",
+        success: true,
       });
     }
   };

@@ -287,8 +287,8 @@ function ImportStatements({
     };
   }, []);
   const counterList = useCallback(
-    (counterList=[]) =>
-      [...counter, ...ledgerData].filter(a=>!counterList.length||
+    (counterLists=[]) =>
+      [...counter, ...ledgerData].filter(a=>!counterLists.length||
         counterList.find((b) => b === (a?.counter_uuid || a?.ledger_uuid))
       ).map((a) => ({
         label:
@@ -435,7 +435,7 @@ function ImportStatements({
       setDefaultData(
         a.map((a, i) => ({
           ...a,
-          match: a.otherReciptsData.length ? false : !a.unMatch,
+          match: a?.otherReciptsData?.length ? false : !a.unMatch,
         }))
       );
 
@@ -466,7 +466,7 @@ function ImportStatements({
   };
   const updateTransitionTags = async (e) => {
     e.preventDefault();
-    let isCounter = counterList.find(
+    let isCounter = counterList()?.find(
       (a) => a.value === changeTransition?.counter_uuid
     );
     const response = await axios({
@@ -489,7 +489,7 @@ function ImportStatements({
         message: "Transition Tags Updated Successfully",
         success: true,
       });
-
+      getOtherReceiptsData(changeTransition.counter_uuid, changeTransition.narration,changeTransition.sr);
       setChangeTransition(null);
     } else {
       setNotification({
@@ -498,6 +498,32 @@ function ImportStatements({
       });
     }
   };
+  const getOtherReceiptsData = async (counter_uuid, tags,sr) => {
+    const response = await axios({
+      method:"post",
+      url: "/ledger/getOtherReceiptsData",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: {
+        counter_uuid,
+        narration: tags.map((a) => a.tag),
+      },
+    });
+    if (response.data.success) {
+      setData((prev) =>
+        prev.map((a) =>
+          a.s === sr
+            ? {
+                ...a,
+                otherReciptsData: response.data.result,
+              }
+            : a
+        )
+      );
+    }
+  };
+
   const counterOptions = (option) => (
     <div
       style={{
