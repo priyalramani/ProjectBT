@@ -145,7 +145,7 @@ const CounterReport = () => {
 			const routesResponse = await axios.get("/routes/GetRouteList")
 			if (routesResponse?.data?.result?.[0]) {
 				let data = routesResponse?.data?.result
-					?.filter(i => +i.order_status)
+					// ?.filter(i => +i.order_status)
 					?.map(i => ({
 						route_title: i.route_title,
 						route_uuid: i.route_uuid
@@ -174,7 +174,7 @@ const CounterReport = () => {
 			key: "route_uuid"
 		}
 	]
-
+console.log({routes})
 	const getRenderValue = (selected, type, key, label, selectedValues, menu_items) => (
 		<span style={{ fontSize: ".9rem" }}>
 			{selected.length === 0 ? (

@@ -289,7 +289,7 @@ function ImportStatements({
   const counterList = useCallback(
     (counterLists=[]) =>
       [...counter, ...ledgerData].filter(a=>!counterLists.length||
-        counterList.find((b) => b === (a?.counter_uuid || a?.ledger_uuid))
+        counterLists?.find((b) => b === (a?.counter_uuid || a?.ledger_uuid))
       ).map((a) => ({
         label:
           (a.counter_title || a.ledger_title || "") +
