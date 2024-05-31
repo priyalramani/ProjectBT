@@ -79,7 +79,7 @@ export function truncateDecimals(number, digits) {
 export function compareObjects(obj1, obj2) {
   console.log("obj1", obj1);
   console.log("obj2", obj2);
-  if(!obj1&&obj2){
+  if (!obj1 && obj2) {
     return true;
   }
   const obj1Keys = Object.keys(obj1);
@@ -87,16 +87,46 @@ export function compareObjects(obj1, obj2) {
 
   if (obj1Keys.length !== obj2Keys.length) {
     console.log("key length not equal", obj1Keys.length, obj2Keys.length);
-      return true; // If number of keys is different, there are changes
+    return true; // If number of keys is different, there are changes
   }
 
   // Check if the values of each key are equal
   for (let key of obj1Keys) {
-      if (obj1[key] !== obj2[key]) {
-        console.log("key value not equal", obj1[key], obj2[key]);
-          return true; // If any value is different, there are changes
-      }
+    if (obj1[key] !== obj2[key]) {
+      console.log("key value not equal", obj1[key], obj2[key]);
+      return true; // If any value is different, there are changes
+    }
   }
 
   return false; // If reached here, no changes found
 }
+
+export function checkDecimalPlaces(value) {
+  // Convert the value to a string
+  let valueString = value.toString();
+
+  // Find the decimal point
+  let decimalIndex = valueString.indexOf(".");
+
+  // Check if there is a decimal point
+  if (decimalIndex !== -1) {
+    // Get the number of decimal places
+    let decimalPlaces = valueString.length - decimalIndex - 1;
+
+    // Return nothing if there are more than 4 decimal places
+    if (decimalPlaces > 4) {
+      return;
+    }
+  }
+
+  // Return the value if it has 4 or fewer decimal places
+  return value;
+}
+export const chcekIfDecimal = (value, digit = 2) => {
+  console.log({ value, isDecimal: value.toString().includes(".") });
+  if (value.toString().includes(".")) {
+    return parseFloat(value || 0).toFixed(digit);
+  } else {
+    return value;
+  }
+};

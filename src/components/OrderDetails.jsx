@@ -37,7 +37,8 @@ import Prompt from "./Prompt";
 import OrderPrintWrapper from "./OrderPrintWrapper";
 import { getInititalValues } from "../pages/AddOrder/AddOrder";
 import NotesPopup from "./popups/NotesPopup";
-import { truncateDecimals } from "../utils/helperFunctions";
+import { chcekIfDecimal, checkDecimalPlaces, truncateDecimals } from "../utils/helperFunctions";
+import { useLocation } from "react-router-dom";
 
 const default_status = [
   { value: 0, label: "Preparing" },
@@ -109,7 +110,7 @@ export function OrderDetails({
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
-
+  const location= useLocation()
   const [deductionsPopup, setDeductionsPopup] = useState();
   const [deductionsData, setDeductionsData] = useState();
   const getRoutesData = async () => {
@@ -258,7 +259,7 @@ export function OrderDetails({
     let autoBilling = await Billing({
       order_edit: true,
       order_uuid: data?.order_uuid,
-      invoice_number: `${data?.order_type||""}${data?.invoice_number}`,
+      invoice_number: `${data?.order_type || ""}${data?.invoice_number}`,
       shortage: data.shortage,
       adjustment: data.adjustment,
       replacement: data.replacement,
@@ -426,6 +427,7 @@ export function OrderDetails({
       setNotesPoup(true);
     }
   }, [itemsData, order]);
+  
   const onItemPriceChange = async (e, item) => {
     // if (e.target.value.toString().toLowerCase().includes("no special")) {
     //   await deleteSpecialPrice(item, order?.counter_uuid, setCounters);
@@ -442,8 +444,8 @@ export function OrderDetails({
           a.uuid === item.uuid
             ? {
                 ...a,
-                p_price: truncateDecimals(e.target.value,4),
-                b_price: truncateDecimals(
+                p_price: checkDecimalPlaces(e.target.value),
+                b_price: chcekIfDecimal(
                   e.target.value * item.conversion || 0,
                   2
                 ),
@@ -458,8 +460,8 @@ export function OrderDetails({
             a.item_uuid === item.item_uuid
               ? {
                   ...a,
-                  p_price: e.target.value,
-                  b_price: truncateDecimals(
+                  p_price: checkDecimalPlaces(e.target.value),
+                  b_price: chcekIfDecimal(
                     e.target.value * item.conversion || 0,
                     2
                   ),
@@ -471,8 +473,8 @@ export function OrderDetails({
             ...prev,
             {
               ...item,
-              p_price: e.target.value,
-              b_price: truncateDecimals(
+              p_price: checkDecimalPlaces(e.target.value),
+              b_price: chcekIfDecimal(
                 e.target.value * item.conversion || 0,
                 2
               ),
@@ -481,8 +483,8 @@ export function OrderDetails({
         : [
             {
               ...item,
-              p_price: e.target.value,
-              b_price: truncateDecimals(
+              p_price: checkDecimalPlaces(e.target.value),
+              b_price: chcekIfDecimal(
                 e.target.value * item.conversion || 0,
                 2
               ),
@@ -720,7 +722,7 @@ export function OrderDetails({
     let autoBilling = await Billing({
       order_edit: true,
       order_uuid: data?.order_uuid,
-      invoice_number: `${data?.order_type??""}${data?.invoice_number}`,
+      invoice_number: `${data?.order_type ?? ""}${data?.invoice_number}`,
       counter,
       items: data.item_details.map((a) => ({ ...a, item_price: a.p_price })),
       replacement: data.replacement,
@@ -851,7 +853,7 @@ export function OrderDetails({
       setWaiting(false);
     }, 45000);
     try {
-      console.log({param});
+      console.log({ param });
       updateCompleteOrder(param);
       setTimeout(() => {
         getOrder(order_uuid, true);
@@ -931,7 +933,7 @@ export function OrderDetails({
     let autoBilling = await Billing({
       order_edit: true,
       order_uuid: data?.order_uuid,
-      invoice_number: `${data?.order_type||""}${data?.invoice_number}`,
+      invoice_number: `${data?.order_type || ""}${data?.invoice_number}`,
       counter,
       items: data.item_details,
       replacement: data.replacement,
@@ -951,7 +953,7 @@ export function OrderDetails({
     let autoBilling2 = await Billing({
       order_edit: true,
       order_uuid: data2?.order_uuid,
-      invoice_number: `${data2?.order_type||""}${data2?.invoice_number}`,
+      invoice_number: `${data2?.order_type || ""}${data2?.invoice_number}`,
       counter,
       items: data2.item_details,
       replacement: data2.replacement,
@@ -1246,7 +1248,7 @@ export function OrderDetails({
         time_1: copyStages ? oldOrder?.time_1 : time_1 + Date.now(),
         time_2: copyStages ? oldOrder?.time_2 : time_2 + Date.now(),
         priority: oldOrder?.priority,
-        order_type: oldOrder?.order_type||"",
+        order_type: oldOrder?.order_type || "",
         item_details: oldOrder?.item_details?.map((item) => ({
           ...item,
           b: item?.original_qty?.b,
@@ -1331,24 +1333,22 @@ export function OrderDetails({
     let p = Math.floor(qty % +conversion);
     return b + ":" + p;
   };
-  
+
   const isCancelled = order?.status?.find((i) => +i.stage === 5);
-  const chcekIfDecimal = (value) => {
-    console.log({ value, isDecimal: value.toString().includes(".") });
-    if (value.toString().includes(".")) {
-      return parseFloat(value || 0).toFixed(2);
-    } else {
-      return value;
-    }
-  };
+
   return deliveryPopup ? (
     <DiliveryPopup
       onSave={({ modes, outstanding, modeTotal }) => {
         if (order?.receipt_number) {
           onSave();
         }
-        if (deliveryPopup === "edit")
-          onSubmit({ type : { stage: 0, diliveredUser: "" }, modes, outstanding, modeTotal });
+        if (deliveryPopup === "edit"||deliveryPopup === "adjustment")
+          onSubmit({
+            type: { stage: 0, diliveredUser: "" },
+            modes,
+            outstanding,
+            modeTotal,
+          });
         setDeliveryPopup(false);
       }}
       onClose={() => setDeliveryPopup(false)}
@@ -1701,7 +1701,10 @@ export function OrderDetails({
                       reactInputsRef.current = {};
                       e.target.blur();
                       setPopupForm(true);
-                      setSelectedTrip({trip_uuid:orderData?.trip_uuid || 0,warehouse_uuid:orderData?.warehouse_uuid || ""});
+                      setSelectedTrip({
+                        trip_uuid: orderData?.trip_uuid || 0,
+                        warehouse_uuid: orderData?.warehouse_uuid || "",
+                      });
                     }}
                   >
                     Assign Trip
@@ -2129,12 +2132,16 @@ export function OrderDetails({
                                         a.mrp +
                                         `, ${
                                           company.find(
-                                            (b) => b.company_uuid === a.company_uuid
+                                            (b) =>
+                                              b.company_uuid === a.company_uuid
                                           )?.company_title
                                         }` +
                                         (a.qty > 0
                                           ? " _______[" +
-                                            CovertedQty(a.qty || 0, a.conversion) +
+                                            CovertedQty(
+                                              a.qty || 0,
+                                              a.conversion
+                                            ) +
                                             "]"
                                           : ""),
                                       key: a.item_uuid,
@@ -2272,8 +2279,8 @@ export function OrderDetails({
                                           return {
                                             ...a,
                                             status: e.value,
-                                            p_price: p_price,
-                                            b_price: Math.floor(
+                                            p_price: checkDecimalPlaces(p_price),
+                                            b_price: chcekIfDecimal(
                                               p_price * item.conversion || 0
                                             ),
                                           };
@@ -2478,7 +2485,7 @@ export function OrderDetails({
                                             ? {
                                                 ...a,
                                                 b_price: e.target.value,
-                                                p_price: truncateDecimals(
+                                                p_price: checkDecimalPlaces(
                                                   e.target.value /
                                                     item.conversion || 0,
                                                   4
@@ -2492,7 +2499,7 @@ export function OrderDetails({
                                           {
                                             ...item,
                                             b_price: e.target.value,
-                                            p_price: truncateDecimals(
+                                            p_price: checkDecimalPlaces(
                                               e.target.value /
                                                 item.conversion || 0,
                                               4
@@ -2504,7 +2511,7 @@ export function OrderDetails({
                                             ...item,
 
                                             b_price: e.target.value,
-                                            p_price: truncateDecimals(
+                                            p_price: checkDecimalPlaces(
                                               e.target.value /
                                                 item.conversion || 0,
                                               4
@@ -2739,7 +2746,7 @@ export function OrderDetails({
                           type: { stage: 0, diliveredUser: "" },
                           completedOrderEdited: 1,
                         })
-                    : () => onSubmit({ type: { stage: 0, diliveredUser: "" },})
+                    : () => onSubmit({ type: { stage: 0, diliveredUser: "" } })
                 }
               >
                 Save
@@ -3126,8 +3133,7 @@ export function OrderDetails({
         <TripPopup
           onSave={() => {
             setPopupForm(false);
-            getOrder(orderData.order_uuid)
-
+            getOrder(orderData.order_uuid);
           }}
           selectedTrip={selectedTrip}
           setSelectedTrip={setSelectedTrip}
@@ -3162,7 +3168,21 @@ export function OrderDetails({
           onSave={() => setDeductionsPopup(false)}
           data={deductionsData}
           setData={setDeductionsData}
-          updateBilling={(result) =>
+          updateBilling={(result) => {
+            if(location.pathname.includes("completeOrderReport") || location.pathname.includes("pendingEntry") || location.pathname.includes("upiTransactionReport")){
+            setOrderData((prev) => ({
+              ...prev,
+              replacement: result?.replacement || 0,
+              shortage: result?.shortage || 0,
+              adjustment: result?.adjustment || 0,
+              adjustment_remarks: result?.adjustment_remarks || "",
+              edit_prices: edit_prices.map((a) => ({
+                ...a,
+                item_price: a.p_price,
+              })),
+            }));
+            setDeliveryPopup("adjustment");
+          }else{
             callBilling(
               {
                 ...order,
@@ -3176,8 +3196,8 @@ export function OrderDetails({
                 })),
               },
               true
-            )
-          }
+            )}
+          }}
         />
       ) : (
         ""
@@ -3287,7 +3307,7 @@ const DeleteOrderPopup = ({
     let billingData = await Billing({
       order_edit: true,
       order_uuid: data?.order_uuid,
-      invoice_number: `${data?.order_type||""}${data?.invoice_number}`,
+      invoice_number: `${data?.order_type || ""}${data?.invoice_number}`,
       replacement: data.replacement,
       adjustment: data.adjustment,
       shortage: data.shortage,
@@ -3971,7 +3991,11 @@ function DiliveryPopup({
     }
   };
   useEffect(() => {
-    if (deliveryPopup === "put" || deliveryPopup === "edit") {
+    if (
+      deliveryPopup === "put" ||
+      deliveryPopup === "edit" ||
+      deliveryPopup === "adjustment"
+    ) {
       GetOutstanding();
     } else {
       let time = new Date();
@@ -3989,17 +4013,21 @@ function DiliveryPopup({
     }
     GetPaymentModes();
     if (order.trip_uuid) getTripData(order.trip_uuid);
-  }, [
-    deliveryPopup,
-    order?.counter_uuid,
-    order?.invoice_number,
-    order?.order_uuid,
-    order?.trip_uuid,
-    reminder,
-    type,
-    order.trip_uuid,
-  ]);
-
+  }, [deliveryPopup, order, reminder, type]);
+  useEffect(() => {
+    if (deliveryPopup === "adjustment") {
+      updateBilling({
+        order_edit: true,
+        ...order,
+      });
+      setData({
+        replacement: order?.replacement || 0,
+        shortage: order?.shortage || 0,
+        adjustment: order?.adjustment || 0,
+        adjustment_remarks: order?.adjustment_remarks || "",
+      });
+    }
+  }, [deliveryPopup]);
   useEffect(() => {
     if (PaymentModes?.length)
       setModes(
@@ -4571,16 +4599,25 @@ function NewUserForm({ popupInfo, updateChanges, onClose }) {
     </div>
   );
 }
-function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose,orders }) {
+function TripPopup({
+  onSave,
+  setSelectedTrip,
+  selectedTrip,
+  trips,
+  onClose,
+  orders,
+}) {
   const submitHandler = async (e) => {
     e.preventDefault();
     const response = await axios({
       method: "put",
       url: "/orders/putOrders",
-      data: [{
-        order_uuid: orders.order_uuid,
-        trip_uuid: selectedTrip.trip_uuid,
-      }],
+      data: [
+        {
+          order_uuid: orders.order_uuid,
+          trip_uuid: selectedTrip.trip_uuid,
+        },
+      ],
       headers: {
         "Content-Type": "application/json",
       },
@@ -4588,7 +4625,6 @@ function TripPopup({ onSave, setSelectedTrip, selectedTrip, trips, onClose,order
     if (response.data.success) {
       onSave();
     }
-    
   };
   return (
     <div className="overlay" style={{ zIndex: "99999999999" }}>

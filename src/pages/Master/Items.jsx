@@ -434,6 +434,29 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
               </th>
               <th>
                 <div className="t-head-element">
+                  <span>HSN</span>
+                  <div className="sort-buttons-container">
+                    <button
+                      onClick={() => {
+                        setItems("hsn");
+                        setOrder("asc");
+                      }}
+                    >
+                      <ChevronUpIcon className="sort-up sort-button" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setItems("hsn");
+                        setOrder("desc");
+                      }}
+                    >
+                      <ChevronDownIcon className="sort-down sort-button" />
+                    </button>
+                  </div>
+                </div>
+              </th>
+              <th>
+                <div className="t-head-element">
                   <span>GST(%)</span>
                   <div className="sort-buttons-container">
                     <button
@@ -511,6 +534,7 @@ function Table({ itemsDetails, setPopupForm, setDeletePopup }) {
                   <td>{item.item_discount || 0}</td>
                   <td>{item.item_price}</td>
                   <td>{item.conversion}</td>
+                  <td>{item.hsn}</td>
                   <td>{item.item_gst}</td>
                   <td>{item.one_pack}</td>
                   <td>

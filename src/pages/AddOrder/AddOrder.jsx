@@ -16,6 +16,7 @@ import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
 import { get } from "react-scroll/modules/mixins/scroller";
+import { checkDecimalPlaces } from "../../utils/helperFunctions";
 
 const options = {
   priorityOptions: [
@@ -510,7 +511,7 @@ export default function AddOrder() {
           a.uuid === item.uuid
             ? {
                 ...a,
-                p_price: e.target.value,
+                p_price: checkDecimalPlaces(e.target.value),
                 b_price: (e.target.value * item.conversion || 0).toFixed(2),
               }
             : a
@@ -523,8 +524,8 @@ export default function AddOrder() {
             a.item_uuid === item.item_uuid
               ? {
                   ...a,
-                  p_price: e.target.value,
-                  b_price: (e.target.value * item.conversion || 0).toFixed(2),
+                  p_price: checkDecimalPlaces(e.target.value),
+                  b_price: chcekIfDecimal(e.target.value * item.conversion || 0),
                 }
               : a
           )
@@ -533,15 +534,15 @@ export default function AddOrder() {
             ...prev,
             {
               ...item,
-              p_price: e.target.value,
-              b_price: (e.target.value * item.conversion || 0).toFixed(2),
+              p_price: checkDecimalPlaces(e.target.value),
+              b_price: chcekIfDecimal(e.target.value * item.conversion || 0),
             },
           ]
         : [
             {
               ...item,
-              p_price: e.target.value,
-              b_price: (e.target.value * item.conversion || 0).toFixed(2),
+              p_price: checkDecimalPlaces(e.target.value),
+              b_price: chcekIfDecimal(e.target.value * item.conversion || 0),
             },
           ]
     );
@@ -1030,11 +1031,11 @@ export default function AddOrder() {
                                     a.uuid === item.uuid
                                       ? {
                                           ...a,
-                                          b_price: e.target.value,
-                                          p_price: (
+                                          b_price: chcekIfDecimal(e.target.value),
+                                          p_price: checkDecimalPlaces(
                                             e.target.value / item.conversion ||
                                             0
-                                          ).toFixed(4),
+                                          ),
                                         }
                                       : a
                                   ),
@@ -1048,11 +1049,11 @@ export default function AddOrder() {
                                       a.item_uuid === item.item_uuid
                                         ? {
                                             ...a,
-                                            b_price: e.target.value,
-                                            p_price: (
+                                            b_price: chcekIfDecimal(e.target.value),
+                                            p_price: checkDecimalPlaces(
                                               e.target.value /
                                                 item.conversion || 0
-                                            ).toFixed(4),
+                                            ),
                                           }
                                         : a
                                     )
@@ -1061,20 +1062,20 @@ export default function AddOrder() {
                                       ...prev,
                                       {
                                         ...item,
-                                        b_price: e.target.value,
-                                        p_price: (
+                                        b_price: chcekIfDecimal(e.target.value),
+                                        p_price: checkDecimalPlaces(
                                           e.target.value / item.conversion || 0
-                                        ).toFixed(4),
+                                        ),
                                       },
                                     ]
                                   : [
                                       {
                                         ...item,
 
-                                        b_price: e.target.value,
-                                        p_price: (
+                                        b_price: chcekIfDecimal(e.target.value),
+                                        p_price: checkDecimalPlaces(
                                           e.target.value / item.conversion || 0
-                                        ).toFixed(4),
+                                        ),
                                       },
                                     ]
                               );
