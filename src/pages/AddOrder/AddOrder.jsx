@@ -525,7 +525,9 @@ export default function AddOrder() {
               ? {
                   ...a,
                   p_price: checkDecimalPlaces(e.target.value),
-                  b_price: chcekIfDecimal(e.target.value * item.conversion || 0),
+                  b_price: chcekIfDecimal(
+                    e.target.value * item.conversion || 0
+                  ),
                 }
               : a
           )
@@ -1031,10 +1033,11 @@ export default function AddOrder() {
                                     a.uuid === item.uuid
                                       ? {
                                           ...a,
-                                          b_price: chcekIfDecimal(e.target.value),
+                                          b_price: chcekIfDecimal(
+                                            e.target.value
+                                          ),
                                           p_price: checkDecimalPlaces(
-                                            e.target.value / item.conversion ||
-                                            0
+                                            e.target.value / item.conversion
                                           ),
                                         }
                                       : a
@@ -1049,10 +1052,11 @@ export default function AddOrder() {
                                       a.item_uuid === item.item_uuid
                                         ? {
                                             ...a,
-                                            b_price: chcekIfDecimal(e.target.value),
+                                            b_price: chcekIfDecimal(
+                                              e.target.value
+                                            ),
                                             p_price: checkDecimalPlaces(
-                                              e.target.value /
-                                                item.conversion || 0
+                                              e.target.value / item.conversion
                                             ),
                                           }
                                         : a
@@ -1064,7 +1068,7 @@ export default function AddOrder() {
                                         ...item,
                                         b_price: chcekIfDecimal(e.target.value),
                                         p_price: checkDecimalPlaces(
-                                          e.target.value / item.conversion || 0
+                                          e.target.value / item.conversion
                                         ),
                                       },
                                     ]
@@ -1074,7 +1078,7 @@ export default function AddOrder() {
 
                                         b_price: chcekIfDecimal(e.target.value),
                                         p_price: checkDecimalPlaces(
-                                          e.target.value / item.conversion || 0
+                                          e.target.value / item.conversion
                                         ),
                                       },
                                     ]
@@ -1285,15 +1289,12 @@ export default function AddOrder() {
                         borderBottom: "2px solid #fff",
                       }}
                     >
-                     
                       <td
                         className="ph2 pv1 tc bb b--black-20 bg-white"
                         style={{ textAlign: "center" }}
                       >
                         <div className="inputGroup">Total</div>
                       </td>
-
-                     
 
                       <td
                         className="ph2 pv1 tc bb b--black-20 bg-white"
