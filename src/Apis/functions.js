@@ -248,6 +248,7 @@ export const Billing = async ({
   invoice_number,
   edit_prices = [],
   new_order,
+  coin=0,
 }) => {
   let counterCharges = [];
   let counter_charges = [];
@@ -435,7 +436,7 @@ export const Billing = async ({
   }
 
   let order_grandtotal = Math.round(
-    newPriceItems.length > 1
+    (newPriceItems.length > 1
       ? newPriceItems
           .map((a) => +a.item_total || 0)
           .reduce((a, b) => a + b, 0) -
@@ -447,7 +448,7 @@ export const Billing = async ({
         replacement -
         shortage -
         adjustment
-      : 0
+      : 0)- coin
   );
   let chargesTotal = 0;
   if (counterCharges?.length) {

@@ -16,6 +16,8 @@ import {
 } from "../Apis/functions";
 import {
   Add,
+  AddCircle,
+  AddCircleOutline,
   CheckCircle,
   ContentCopy,
   DeleteOutline,
@@ -37,7 +39,11 @@ import Prompt from "./Prompt";
 import OrderPrintWrapper from "./OrderPrintWrapper";
 import { getInititalValues } from "../pages/AddOrder/AddOrder";
 import NotesPopup from "./popups/NotesPopup";
-import { chcekIfDecimal, checkDecimalPlaces, truncateDecimals } from "../utils/helperFunctions";
+import {
+  chcekIfDecimal,
+  checkDecimalPlaces,
+  truncateDecimals,
+} from "../utils/helperFunctions";
 import { useLocation } from "react-router-dom";
 
 const default_status = [
@@ -110,8 +116,9 @@ export function OrderDetails({
   const componentRef = useRef(null);
   const [deletePopup, setDeletePopup] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
-  const location= useLocation()
+  const location = useLocation();
   const [deductionsPopup, setDeductionsPopup] = useState();
+  const [deductionsCoinPopup, setDeductionsCoinPopup] = useState();
   const [deductionsData, setDeductionsData] = useState();
   const getRoutesData = async () => {
     const response = await axios({
@@ -264,6 +271,7 @@ export function OrderDetails({
       adjustment: data.adjustment,
       replacement: data.replacement,
       counter_uuid: data.counter_uuid,
+      coin:data.coin,
       counter,
       items: orderData?.item_details,
       others: {
@@ -427,7 +435,7 @@ export function OrderDetails({
       setNotesPoup(true);
     }
   }, [itemsData, order]);
-  
+
   const onItemPriceChange = async (e, item) => {
     // if (e.target.value.toString().toLowerCase().includes("no special")) {
     //   await deleteSpecialPrice(item, order?.counter_uuid, setCounters);
@@ -474,20 +482,14 @@ export function OrderDetails({
             {
               ...item,
               p_price: checkDecimalPlaces(e.target.value),
-              b_price: chcekIfDecimal(
-                e.target.value * item.conversion || 0,
-                2
-              ),
+              b_price: chcekIfDecimal(e.target.value * item.conversion || 0, 2),
             },
           ]
         : [
             {
               ...item,
               p_price: checkDecimalPlaces(e.target.value),
-              b_price: chcekIfDecimal(
-                e.target.value * item.conversion || 0,
-                2
-              ),
+              b_price: chcekIfDecimal(e.target.value * item.conversion || 0, 2),
             },
           ]
     );
@@ -1342,7 +1344,7 @@ export function OrderDetails({
         if (order?.receipt_number) {
           onSave();
         }
-        if (deliveryPopup === "edit"||deliveryPopup === "adjustment")
+        if (deliveryPopup === "edit" || deliveryPopup === "adjustment")
           onSubmit({
             type: { stage: 0, diliveredUser: "" },
             modes,
@@ -2279,7 +2281,8 @@ export function OrderDetails({
                                           return {
                                             ...a,
                                             status: e.value,
-                                            p_price: checkDecimalPlaces(p_price),
+                                            p_price:
+                                              checkDecimalPlaces(p_price),
                                             b_price: chcekIfDecimal(
                                               p_price * item.conversion || 0
                                             ),
@@ -2796,6 +2799,21 @@ export function OrderDetails({
               </button>
               <button
                 type="button"
+                onClick={() => {
+                  setDeductionsCoinPopup(true);
+                }}
+                style={{
+                  width: "max-content",
+                  padding: "10px 0",
+                  backgroundColor: "#fff",
+                  color: "var(--main)",
+                  border: "none",
+                }}
+              >
+                <AddCircleOutline />
+              </button>
+              <button
+                type="button"
                 className="order-total"
                 style={{
                   width: "max-content",
@@ -3169,23 +3187,13 @@ export function OrderDetails({
           data={deductionsData}
           setData={setDeductionsData}
           updateBilling={(result) => {
-            if(location.pathname.includes("completeOrderReport") || location.pathname.includes("pendingEntry") || location.pathname.includes("upiTransactionReport")){
-            setOrderData((prev) => ({
-              ...prev,
-              replacement: result?.replacement || 0,
-              shortage: result?.shortage || 0,
-              adjustment: result?.adjustment || 0,
-              adjustment_remarks: result?.adjustment_remarks || "",
-              edit_prices: edit_prices.map((a) => ({
-                ...a,
-                item_price: a.p_price,
-              })),
-            }));
-            setDeliveryPopup("adjustment");
-          }else{
-            callBilling(
-              {
-                ...order,
+            if (
+              location.pathname.includes("completeOrderReport") ||
+              location.pathname.includes("pendingEntry") ||
+              location.pathname.includes("upiTransactionReport")
+            ) {
+              setOrderData((prev) => ({
+                ...prev,
                 replacement: result?.replacement || 0,
                 shortage: result?.shortage || 0,
                 adjustment: result?.adjustment || 0,
@@ -3194,9 +3202,61 @@ export function OrderDetails({
                   ...a,
                   item_price: a.p_price,
                 })),
-              },
-              true
-            )}
+              }));
+              setDeliveryPopup("adjustment");
+            } else {
+              callBilling(
+                {
+                  ...order,
+                  replacement: result?.replacement || 0,
+                  shortage: result?.shortage || 0,
+                  adjustment: result?.adjustment || 0,
+                  adjustment_remarks: result?.adjustment_remarks || "",
+                  edit_prices: edit_prices.map((a) => ({
+                    ...a,
+                    item_price: a.p_price,
+                  })),
+                },
+                true
+              );
+            }
+          }}
+        />
+      ) : (
+        ""
+      )}
+      {deductionsCoinPopup ? (
+        <AddCoinPopup
+          onSave={() => setDeductionsCoinPopup(false)}
+          data={orderData.coin}
+          updateBilling={(result) => {
+            if (
+              location.pathname.includes("completeOrderReport") ||
+              location.pathname.includes("pendingEntry") ||
+              location.pathname.includes("upiTransactionReport")
+            ) {
+              setOrderData((prev) => ({
+                ...prev,
+                coin: result,
+                edit_prices: edit_prices.map((a) => ({
+                  ...a,
+                  item_price: a.p_price,
+                })),
+              }));
+              setDeliveryPopup("adjustment");
+            } else {
+              callBilling(
+                {
+                  ...order,
+                  coin: result,
+                  edit_prices: edit_prices.map((a) => ({
+                    ...a,
+                    item_price: a.p_price,
+                  })),
+                },
+                true
+              );
+            }
           }}
         />
       ) : (
@@ -4764,3 +4824,77 @@ const UserSelection = ({ users, selection, setSelection }) => {
     </div>
   );
 };
+
+function AddCoinPopup({ onSave, data = 0, updateBilling = () => {} }) {
+  const [values, setValues] = useState(false);
+  useEffect(() => {
+    setValues(data);
+  }, [data]);
+  return (
+    <div className="overlay" style={{ zIndex: "9999999999999" }}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "max-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            width: "fit-content",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <form className="form">
+              <div className="formGroup">
+                <div
+                  className="row"
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                >
+                  <div style={{ width: "100px" }}>Adjustment</div>
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={values}
+                      style={{ width: "100px" }}
+                      onChange={(e) => setValues(e.target.value)}
+                      maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
+                    />
+                    {/* {popupInfo.conversion || 0} */}
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex" style={{ justifyContent: "space-between" }}>
+                <button
+                  type="button"
+                  style={{ backgroundColor: "red" }}
+                  className="submit"
+                  onClick={onSave}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="submit"
+                  onClick={() => {
+                    updateBilling(values);
+                    onSave();
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
