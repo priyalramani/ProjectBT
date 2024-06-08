@@ -99,7 +99,7 @@ import 'react-tooltip/dist/react-tooltip.css'
 
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
-export let Version = 322;
+export let Version = 323;
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
@@ -580,7 +580,7 @@ function App() {
       <div className={`loading-bar ${loading || pageLoading ? "show" : ""}`}>
         <div className="progress"></div>
       </div>
-      <Tooltip id="my-tooltip" />
+      <Tooltip id="my-tooltip" style={{zIndex:"999999999999999"}}/>
     </div>
   );
 }

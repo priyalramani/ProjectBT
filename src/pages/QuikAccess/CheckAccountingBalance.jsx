@@ -1,8 +1,22 @@
+import axios from "axios";
 import React, { useMemo } from "react";
 
 const CheckAccountingBalance = ({ onSave, itemsData }) => {
   const items = useMemo(() => itemsData, [itemsData]);
-
+  const fixAll = async () => {
+    const response = await axios({
+      method: "put",
+      url: "/ledger/fixeBalance",
+      data: itemsData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log({ response });
+    if (response.data.success) {
+      onSave();
+    }
+  };
   return (
     <div className="overlay" style={{ zIndex: 99999999999 }}>
       <div
@@ -13,7 +27,18 @@ const CheckAccountingBalance = ({ onSave, itemsData }) => {
           minWidth: "250px",
         }}
       >
-        <h1>Accounting Balance</h1>
+        <div className="row">
+          <h1>Accounting Balance</h1>
+          <button
+            type="button"
+            onClick={fixAll}
+            className="submit"
+            style={{ width: "300px", marginRight: "100px" }}
+          >
+            Fix All
+          </button>
+        </div>
+
         <div
           className="content"
           style={{

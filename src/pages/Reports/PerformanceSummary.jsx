@@ -262,7 +262,7 @@ function PerformancePopup({ onSave, itemDetails }) {
                           {formatAMPM(new Date(item.date))} {new Date(item.date)?.toDateString() || ""}
                         </td>
                         <td colSpan={2}>{item.counter_title || ""}</td>
-                        <td colSpan={2}>N{item.invoice_number || ""}</td>
+                        <td colSpan={2}>{item.invoice_number || ""}</td>
                         <td colSpan={2}>{item.order_grandtotal || 0}</td>
                       </tr>
                     );

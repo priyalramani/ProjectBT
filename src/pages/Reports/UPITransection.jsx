@@ -1,5 +1,11 @@
 import axios from "axios";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import { OrderDetails } from "../../components/OrderDetails";
@@ -11,10 +17,15 @@ import {
   CommentOutlined,
   CopyAll,
   PaymentRounded,
+  UploadFile,
   WhatsApp,
 } from "@mui/icons-material";
 import Select from "react-select";
-import { compareObjects, getFormateDate } from "../../utils/helperFunctions";
+import {
+  compareObjects,
+  getFormateDate,
+  truncateDecimals,
+} from "../../utils/helperFunctions";
 import context from "../../context/context";
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
@@ -38,6 +49,7 @@ const UPITransection = () => {
   const [remarksPopup, setRemarksPoup] = useState();
   const [commentPopup, setCommentPoup] = useState();
   const [type, setType] = useState("All");
+  const [checkVouceherPopup, setCheckVoucherPopup] = useState(false);
 
   const [items, setItems] = useState([]);
   const getActivityData = async (controller = new AbortController()) => {
@@ -188,6 +200,16 @@ const UPITransection = () => {
                 placeholder="Select Type"
               />
             </div>
+            <div className="inputGroup" style={{ width: "20%" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setCheckVoucherPopup(true);
+                }}
+              >
+                X
+              </button>
+            </div>
           </div>
         </div>
         <div className="table-container-user item-sales-container">
@@ -252,6 +274,7 @@ const UPITransection = () => {
       ) : (
         ""
       )}
+
       {commentPopup ? (
         <ReciptsCommentsPopup
           commentPopup={commentPopup}
@@ -262,6 +285,16 @@ const UPITransection = () => {
             setCommentPoup(null);
             getActivityData();
           }}
+        />
+      ) : (
+        ""
+      )}
+      {checkVouceherPopup ? (
+        <ImportStatements
+          onSave={() => {
+            setCheckVoucherPopup(false);
+          }}
+          setNotification={setItems}
         />
       ) : (
         ""
@@ -654,10 +687,9 @@ function ReciptsCommentsPopup({ commentPopup, onClose, onSave }) {
             <div className="form">
               <div className="row">
                 <h1>Recipt Notes</h1>
-           
               </div>
               <div className="row">
-     <h3>Counter: {data.counter_title}</h3>
+                <h3>Counter: {data.counter_title}</h3>
               </div>
               <div
                 className="items_table"
@@ -668,7 +700,6 @@ function ReciptsCommentsPopup({ commentPopup, onClose, onSave }) {
                     <tr className="white">
                       <th className="pa2 tc bb b--black-20">Notes</th>
                       <th className="pa2 tc bb b--black-20">Created At</th>
-                     
                     </tr>
                   </thead>
                   {data.counter_uuid ? (
@@ -678,7 +709,6 @@ function ReciptsCommentsPopup({ commentPopup, onClose, onSave }) {
                           key={item.uuid}
                           item-billing-type={item?.billing_type}
                         >
-                      
                           <td
                             className="ph2 pv1 tc bb b--black-20 bg-white"
                             style={{ textAlign: "center" }}
@@ -707,11 +737,9 @@ function ReciptsCommentsPopup({ commentPopup, onClose, onSave }) {
                               onFocus={(e) => e.target.select()}
                             />
                           </td>
-                          <td style={{marginRight:"5px"}}>
+                          <td style={{ marginRight: "5px" }}>
                             {new Date(item.created_at).toLocaleDateString()}
                           </td>
-
-                          
                         </tr>
                       ))}
                       <tr>
@@ -772,5 +800,277 @@ function ReciptsCommentsPopup({ commentPopup, onClose, onSave }) {
         </div>
       </div>
     </div>
+  );
+}
+function ImportStatements({ onSave, popupInfo, setNotification }) {
+  const [loading, setLoading] = useState(true);
+  const [confirmPopup, setConfirmPopup] = useState(false);
+  const [listData, setListData] = useState([]);
+  const getCounter = async (controller = new AbortController()) => {
+    const response = await axios({
+      method: "get",
+      url: "/vouchers/getCompleteVoucherList",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) setListData(response.data.result);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    getCounter(controller);
+    return () => {
+      controller.abort();
+    };
+  }, []);
+  console.log({ listData });
+
+  const submitHandler = async (data) => {
+    //receipts/putBulkReceiptUPIStatus
+    setLoading(true);
+    const response = await axios({
+      method: "put",
+      url: "/receipts/putBulkReceiptUPIStatus",
+      data: listData.filter((a) => a.checked),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.data.success) {
+      onSave();
+    }
+  };
+
+  return (
+    <>
+      <div className="overlay" style={{ zIndex: 9999999 }}>
+        <div className="modal" style={{ width: "fit-content" }}>
+          <div
+            className="content"
+            style={{
+              height: "fit-content",
+              padding: "20px",
+              width: "fit-content",
+            }}
+          >
+            <div style={{ overflowY: "scroll" }}>
+              <form
+                className="form"
+                onSubmit={submitHandler}
+                style={{
+                  justifyContent: "start",
+                }}
+              >
+                {listData.length ? (
+                  <>
+                    <div className="row" style={{ width: "90vw" }}>
+                      <h5>Total Recodes:{listData?.length || 0}</h5>
+                    </div>
+                    <table
+                      className="user-table"
+                      style={{ tableLayout: "auto" }}
+                    >
+                      <thead>
+                        <tr>
+                          <th>Sr.</th>
+                          <th>Voucher Date</th>
+
+                          <th>Counter</th>
+                          <th>Invoice Number</th>
+                          <th>Mode</th>
+                          <th>Amt</th>
+                          <th>
+                            <input
+                              type="checkbox"
+                              onChange={(e) => {
+                                setListData((prev) =>
+                                  prev.map((a) => ({
+                                    ...a,
+                                    checked: e.target.checked,
+                                  }))
+                                );
+                              }}
+                              checked={listData?.every((a) => a.checked)}
+                            />
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="tbody">
+                        {listData?.map((item, i) => (
+                          <tr
+                            key={Math.random()}
+                            style={{
+                              height: "30px",
+                              color:
+                                item.existVoucher === false ||
+                                (item.multipleNarration?.length && item.unMatch)
+                                  ? "blue"
+                                  : !item.unMatch
+                                  ? "green"
+                                  : "red",
+                            }}
+                          >
+                            <td>{i + 1}</td>
+                            <td>
+                              {new Date(+item.voucher_date).toDateString()}
+                            </td>
+                            <td>{item.counter_title || ""}</td>
+                            <td>{item.invoice_number || ""}</td>{" "}
+                            <td>{item.mode_title || ""}</td>
+                            <td>{item.amt || ""}</td>
+                            <td>
+                              <input
+                                type="checkbox"
+                                checked={item.checked}
+                                onChange={(e) => {
+                                  setListData((prev) =>
+                                    prev.map((a) =>
+                                      a.accounting_voucher_uuid ===
+                                      item.accounting_voucher_uuid
+                                        ? { ...a, checked: e.target.checked }
+                                        : a
+                                    )
+                                  );
+                                }}
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </>
+                ) : (
+                  ""
+                )}
+                {loading || listData.length ? (
+                  ""
+                ) : (
+                  <div className="row">
+                    <h1>No Data Found</h1>
+                  </div>
+                )}
+
+                <div
+                  className="flex"
+                  style={{ justifyContent: "space-between", minWidth: "300px" }}
+                >
+                  <button
+                    className="submit"
+                    style={{ background: "red" }}
+                    onClick={() => {
+                      onSave();
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  {loading ? (
+                    <button
+                      className="submit"
+                      id="loading-screen"
+                      style={{ width: "120px" }}
+                    >
+                      <svg viewBox="0 0 100 100">
+                        <path
+                          d="M10 50A40 40 0 0 0 90 50A40 44.8 0 0 1 10 50"
+                          fill="#ffffff"
+                          stroke="none"
+                        >
+                          <animateTransform
+                            attributeName="transform"
+                            type="rotate"
+                            dur="1s"
+                            repeatCount="indefinite"
+                            keyTimes="0;1"
+                            values="0 50 51;360 50 51"
+                          ></animateTransform>
+                        </path>
+                      </svg>
+                    </button>
+                  ) : listData.length ? (
+                    <button
+                      className="submit"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setConfirmPopup(true);
+                      }}
+                    >
+                      Mark Done
+                    </button>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {confirmPopup ? (
+        <div
+          className="overlay"
+          style={{ position: "fixed", top: 0, left: 0, zIndex: 9999999999 }}
+        >
+          <div
+            className="modal"
+            style={{ height: "fit-content", width: "fit-content" }}
+          >
+            <div
+              className="content"
+              style={{
+                height: "fit-content",
+                padding: "20px",
+                width: "fit-content",
+              }}
+            >
+              <div style={{ overflowY: "scroll" }}>
+                <form
+                  className="form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    // createImportedVouchers(1);
+                  }}
+                >
+                  <div className="formGroup">
+                    <div
+                      className="row"
+                      style={{ flexDirection: "column", alignItems: "start" }}
+                    >
+                      <h1 style={{ textAlign: "center" }}>Mark Entry Done</h1>
+                    </div>
+
+                    <div className="row message-popup-actions">
+                      <button
+                        className="simple_Logout_button"
+                        type="button"
+                        onClick={() => {}}
+                        style={{ background: "red" }}
+                      >
+                        No
+                      </button>
+                      <button className="simple_Logout_button" type="submit">
+                        Yes
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setConfirmPopup(false);
+                    }}
+                    className="closeButton"
+                  >
+                    x
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
+    </>
   );
 }

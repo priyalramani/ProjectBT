@@ -8,6 +8,9 @@ import {
 } from "react";
 import axios from "axios";
 import Select from "react-select";
+import { LuClipboardEdit } from "react-icons/lu";
+import { ImScissors } from "react-icons/im";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { v4 as uuid } from "uuid";
 import {
   Billing,
@@ -18,11 +21,19 @@ import {
   Add,
   AddCircle,
   AddCircleOutline,
+  Cancel,
   CheckCircle,
+  Comment,
   ContentCopy,
+  ContentCut,
   DeleteOutline,
+  DeliveryDiningRounded,
+  Edit,
+  Note,
   NoteAdd,
+  Print,
   Refresh,
+  Splitscreen,
   WhatsApp,
 } from "@mui/icons-material";
 import { useReactToPrint } from "react-to-print";
@@ -42,9 +53,12 @@ import NotesPopup from "./popups/NotesPopup";
 import {
   chcekIfDecimal,
   checkDecimalPlaces,
+  compareObjects,
+  getFormateDate,
   truncateDecimals,
 } from "../utils/helperFunctions";
 import { useLocation } from "react-router-dom";
+import { MinusCircleIcon } from "@heroicons/react/solid";
 
 const default_status = [
   { value: 0, label: "Preparing" },
@@ -95,7 +109,7 @@ export function OrderDetails({
   const [holdPopup, setHoldPopup] = useState(false);
   const [messagePopup, setMessagePopup] = useState(false);
   const [splitHoldPopup, setSplitHold] = useState(false);
-
+  const [commentPopup, setCommentPoup] = useState(false);
   const [complete, setComplete] = useState(false);
   const [completeOrder, setCompleteOrder] = useState(false);
   const [order, setOrder] = useState({});
@@ -271,7 +285,7 @@ export function OrderDetails({
       adjustment: data.adjustment,
       replacement: data.replacement,
       counter_uuid: data.counter_uuid,
-      coin:data.coin,
+      coin: data.coin,
       counter,
       items: orderData?.item_details,
       others: {
@@ -386,30 +400,6 @@ export function OrderDetails({
     if (response.data.success) setUsers(response.data.result);
   };
 
-  // const getAutoBill = async () => {
-  //   let data = [];
-  //   const response = await axios({
-  //     method: "get",
-  //     url: "/autoBill/autoBillItem",
-
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //   });
-  //   if (response.data.success) data = response;
-  //   const response1 = await axios({
-  //     method: "get",
-  //     url: "/autoBill/autoBillQty",
-
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //   });
-  //   if (response1.data.success)
-  //     data = data ? response1.data.result : [...data, ...response1.data.result];
-  //   // console.log(data);
-  // };
-
   useEffect(() => {
     setOrderData({
       ...order,
@@ -437,14 +427,6 @@ export function OrderDetails({
   }, [itemsData, order]);
 
   const onItemPriceChange = async (e, item) => {
-    // if (e.target.value.toString().toLowerCase().includes("no special")) {
-    //   await deleteSpecialPrice(item, order?.counter_uuid, setCounters);
-    //   e.target.value = +e.target.value
-    //     .split("")
-    //     .filter((i) => i)
-    //     .filter((i) => +i || +i === 0)
-    //     .join("");
-    // }
     setOrderData((prev) => {
       return {
         ...prev,
@@ -1158,28 +1140,6 @@ export function OrderDetails({
       setTaskPopup(response.data.result);
     } else handlePrint();
   };
-  const postOrderData = async () => {
-    console.log("postOrderData");
-    updateCompleteOrder({
-      data: {
-        order_uuid: orderData.order_uuid,
-        invoice_number: orderData.invoice_number,
-        trip_uuid: +selectedTrip.trip_uuid === 0 ? "" : selectedTrip?.trip_uuid,
-        warehouse_uuid:
-          +selectedTrip?.trip_uuid === 0 ? "" : selectedTrip?.warehouse_uuid,
-        // warehouse_uuid: selectedTrip?.warehouse_uuid,
-      },
-    });
-    setTimeout(() => {
-      setOrderData((prev) => ({
-        ...prev,
-        trip_uuid: +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.trip_uuid,
-        warehouse_uuid:
-          +selectedTrip.trip_uuid === 0 ? "" : selectedTrip.warehouse_uuid,
-      }));
-      setSelectedTrip({ trip_uuid: 0, warehouse_uuid: "" });
-    }, 2000);
-  };
 
   const [dateTimeUpdating, setDateTimeUpdating] = useState(0);
   const handleDateTimeUpdate = async (e) => {
@@ -1203,27 +1163,6 @@ export function OrderDetails({
       setDateTimeUpdating(0);
     }
   };
-
-  // const print_items_length = orderData?.order_type !== "E" ? 16 : 19
-  // const getPrintData = () => {
-  // 	const sourceArray = printData?.item_details
-  // 	const arrayOfArrays = []
-  // 	const l = print_items_length
-
-  // 	for (let i = 0; i < sourceArray.length; i += l) {
-  // 		if (l - 4 < sourceArray.length - i && sourceArray.length - i < l) {
-  // 			arrayOfArrays.push(sourceArray.slice(i, i + (l - 4)))
-  // 			arrayOfArrays.push(sourceArray.slice(i + (l - 4), i + l))
-  // 		} else {
-  // 			arrayOfArrays.push(sourceArray.slice(i, i + l))
-  // 		}
-  // 		console.log(i, sourceArray.length, arrayOfArrays)
-  // 	}
-
-  // 	const result = arrayOfArrays?.map(_i => ({ ...printData, item_details: _i }))
-  // 	console.log({ arrayOfArrays, result })
-  // 	return result
-  // }
 
   const [additionalNumbers, setAdditionalNumbers] = useState({
     count: 0,
@@ -1378,7 +1317,7 @@ export function OrderDetails({
           style={{
             maxHeight: "100vh",
             height: "max-content",
-            width: "90vw",
+            maxWidth: "60vw",
             padding: "0",
             zIndex: "999999999",
             border: "2px solid #000",
@@ -1408,7 +1347,7 @@ export function OrderDetails({
                   <>
                     <div className="inputGroup order-edit-select">
                       <label htmlFor="Warehouse">Counter</label>
-                      <div className="inputGroup">
+                      <div className="inputGroup" style={{ maxWidth: "12vw" }}>
                         <Select
                           options={counters?.map((a) => ({
                             value: a.counter_uuid,
@@ -1441,7 +1380,7 @@ export function OrderDetails({
                     </div>
                     <div className="inputGroup order-edit-select">
                       <label htmlFor="Warehouse">Priority</label>
-                      <div className="inputGroup">
+                      <div className="inputGroup" style={{ maxWidth: "12vw" }}>
                         <Select
                           options={priorityOptions}
                           onChange={(doc) =>
@@ -1513,7 +1452,17 @@ export function OrderDetails({
                     </div>
                   </>
                 ) : (
-                  <h2 className="flex">
+                  <h2
+                    className="flex"
+                    data-tooltip-id="my-tooltip"
+                    data-tooltip-content={`${
+                      counters
+                        .find((a) => a.counter_uuid === orderData?.counter_uuid)
+                        ?.mobile?.map((a) => a.mobile)
+                        ?.filter((a) => a)
+                        ?.join(", ") || ""
+                    }`}
+                  >
                     <span
                       className="flex"
                       style={{
@@ -1532,8 +1481,16 @@ export function OrderDetails({
                       <NoteAdd />
                       {counters.find(
                         (a) => a.counter_uuid === orderData?.counter_uuid
-                      )?.counter_title || ""}{" "}
-                      : {orderData?.invoice_number || ""}
+                      )?.counter_title || ""}
+                      {", "}
+                      {routeData.find(
+                        (a) =>
+                          a.route_uuid ===
+                          counters.find(
+                            (a) => a.counter_uuid === orderData?.counter_uuid
+                          )?.route_uuid
+                      )?.route_title || ""}
+                      - {orderData?.invoice_number || ""}
                     </span>
                   </h2>
                 )}
@@ -1556,12 +1513,14 @@ export function OrderDetails({
                       style={{ width: "fit-Content", backgroundColor: "red" }}
                       className="theme-btn"
                       onClick={() => setDeletePopup("Delete")}
+                      data-tooltip-id="my-tooltip"
+                      data-tooltip-content="Cancel Order"
                     >
-                      Cancel Order
+                      <Cancel />
                     </button>
                   )}
 
-                  {order?.hold !== "Y" ? (
+                  {/* {order?.hold !== "Y" ? (
                     <button
                       style={{ width: "fit-Content", backgroundColor: "blue" }}
                       className="theme-btn"
@@ -1583,13 +1542,15 @@ export function OrderDetails({
                     >
                       Cancel Hold
                     </button>
-                  )}
+                  )} */}
                   <button
                     style={{ width: "fit-Content", backgroundColor: "blue" }}
                     className="theme-btn"
                     onClick={() => setDeductionsPopup(true)}
+                    data-tooltip-id="my-tooltip"
+                    data-tooltip-content="Deductions"
                   >
-                    Deductions
+                    <ImScissors />
                   </button>
                   {!isCancelled ? (
                     <button
@@ -1598,12 +1559,14 @@ export function OrderDetails({
                         backgroundColor: "#44cd4a",
                       }}
                       className="theme-btn"
+                      data-tooltip-id="my-tooltip"
+                      data-tooltip-content="Complete Order"
                       onClick={() => {
                         handleWarehouseChacking(true, "complete");
                         setCompleteOrder(true);
                       }}
                     >
-                      Complete Order
+                      <CheckCircle />
                     </button>
                   ) : (
                     ""
@@ -1629,11 +1592,13 @@ export function OrderDetails({
                         handlePrint();
                       }
                     }}
+                    data-tooltip-id="my-tooltip"
+                    data-tooltip-content="Print"
                   >
                     <span
                       style={printLoading ? { color: "transparent" } : null}
                     >
-                      Print
+                      <Print />
                     </span>
                     {printLoading ? (
                       <span
@@ -1672,8 +1637,10 @@ export function OrderDetails({
                         width: "max-content",
                       }}
                       onClick={() => setSplitHold(true)}
+                      data-tooltip-id="my-tooltip"
+                      data-tooltip-content="Split Order"
                     >
-                      Split Hold Order
+                      <Splitscreen />
                     </button>
                   )}
                   {!isCancelled ? (
@@ -1690,8 +1657,10 @@ export function OrderDetails({
                         }
                         setEditOrder((prev) => !prev);
                       }}
+                      data-tooltip-id="my-tooltip"
+                      data-tooltip-content="Edit Order"
                     >
-                      Edit
+                      <Edit />
                     </button>
                   ) : (
                     ""
@@ -1699,6 +1668,8 @@ export function OrderDetails({
                   <button
                     style={{ width: "fit-Content" }}
                     className="theme-btn"
+                    data-tooltip-id="my-tooltip"
+                    data-tooltip-content="Assign Trip"
                     onClick={(e) => {
                       reactInputsRef.current = {};
                       e.target.blur();
@@ -1709,7 +1680,7 @@ export function OrderDetails({
                       });
                     }}
                   >
-                    Assign Trip
+                    <DeliveryDiningRounded />
                   </button>
                   <button
                     style={{ width: "fit-Content" }}
@@ -1718,8 +1689,22 @@ export function OrderDetails({
                       e.target.blur();
                       setNotesPoup((prev) => !prev);
                     }}
+                    data-tooltip-id="my-tooltip"
+                    data-tooltip-content="Notes"
                   >
-                    Notes
+                    <LuClipboardEdit />
+                  </button>
+                  <button
+                    style={{ width: "fit-Content" }}
+                    className="theme-btn"
+                    onClick={(e) => {
+                      e.target.blur();
+                      setCommentPoup((prev) => !prev);
+                    }}
+                    data-tooltip-id="my-tooltip"
+                    data-tooltip-content="Comments"
+                  >
+                    <Comment />
                   </button>
                 </div>
               </div>
@@ -2677,9 +2662,6 @@ export function OrderDetails({
                 </table>
               </div>
             </div>
-            <button onClick={onSave} className="closeButton">
-              x
-            </button>
           </div>
 
           <div
@@ -2826,6 +2808,9 @@ export function OrderDetails({
             </div>
           </div>
         </div>
+        <button onClick={onSave} className="closeButton">
+          x
+        </button>
       </div>
 
       {promptLocalState?.active && <Prompt {...promptLocalState} />}
@@ -3258,6 +3243,18 @@ export function OrderDetails({
               );
             }
           }}
+        />
+      ) : (
+        ""
+      )}
+      {commentPopup ? (
+        <CommentPopup
+          comments={orderData?.comments || []}
+          setOrderData={setOrderData}
+          onSave={() => {
+            setCommentPoup(false);
+          }}
+          invoice_number={orderData?.invoice_number}
         />
       ) : (
         ""
@@ -4893,6 +4890,187 @@ function AddCoinPopup({ onSave, data = 0, updateBilling = () => {} }) {
               </div>
             </form>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CommentPopup({ comments, onSave, invoice_number, setOrderData }) {
+  const [data, setData] = useState([]);
+
+  //post request to save bank statement import
+
+  //get request to get bank statement import
+
+  useEffect(() => {
+    setData(comments || []);
+  }, [comments]);
+
+  const submitHandler = async () => {
+    const response = await axios({
+      method: "put",
+      url: "/orders/putOrderComments",
+      data: {
+        invoice_number,
+        comments: data,
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log({response});
+    if (response.data.success) {
+      setOrderData((prev) => ({
+        ...prev,
+        comments: data,
+      }));
+      onSave();
+    }
+  };
+
+  return (
+    <div className="overlay" style={{ zIndex: "99999999999999" }}>
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "fit-content" }}
+      >
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+            minWidth: "500px",
+          }}
+        >
+          <div style={{ overflowY: "scroll" }}>
+            <div className="form">
+              <div className="row">
+                <h1>Comments</h1>
+              </div>
+
+              <div
+                className="items_table"
+                style={{ flex: "1", height: "75vh", overflow: "scroll" }}
+              >
+                <table className="f6 w-100 center" cellSpacing="0">
+                  <thead className="lh-copy" style={{ position: "static" }}>
+                    <tr className="white">
+                      <th className="pa2 tc bb b--black-20">Notes</th>
+                      <th className="pa2 tc bb b--black-20">Created At</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="lh-copy">
+                    {data?.map((item, i) => (
+                      <tr
+                        key={item.uuid}
+                        item-billing-type={item?.billing_type}
+                      >
+                        <td
+                          className="ph2 pv1 tc bb b--black-20 bg-white"
+                          style={{ textAlign: "center" }}
+                        >
+                          <input
+                            id={"p" + item.uuid}
+                            style={{
+                              width: "50vw",
+                              marginLeft: "10px",
+                              marginRight: "10px",
+                            }}
+                            type="text"
+                            className="numberInput"
+                            onWheel={(e) => e.preventDefault()}
+                            value={item.note || ""}
+                            onChange={(e) => {
+                              setData((prev) =>
+                                prev.map((a) =>
+                                  a.uuid === item.uuid
+                                    ? { ...a, note: e.target.value }
+                                    : a
+                                )
+                              );
+                            }}
+                            onFocus={(e) => e.target.select()}
+                          />
+                        </td>
+                        <td>
+                          {new Date(item.created_at).toLocaleDateString()}
+                        </td>
+
+                        <td
+                          className="ph2 pv1 tc bb b--black-20 bg-white"
+                          style={{ textAlign: "center" }}
+                        >
+                          <DeleteOutlineIcon
+                            style={{
+                              color: "red",
+                              marginLeft: "10px",
+                              marginRight: "10px",
+                            }}
+                            className="table-icon"
+                            onClick={() => {
+                              setData((prev) => ({
+                                ...prev,
+                                counter_notes: prev.counter_notes.filter(
+                                  (a) => a.uuid !== item.uuid
+                                ),
+                              }));
+                              //console.log(item);
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                    <tr>
+                      <td
+                        onClick={() =>
+                          setData((prev) => [
+                            ...(prev || []),
+                            {
+                              uuid: uuid(),
+                              created_at: new Date().toUTCString(),
+                              note: "",
+                            },
+                          ])
+                        }
+                      >
+                        <AddIcon
+                          sx={{ fontSize: 40 }}
+                          style={{ color: "#4AC959", cursor: "pointer" }}
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              {compareObjects(comments, data) ? (
+                <button
+                  type="button"
+                  className="submit"
+                  style={{
+                    maxWidth: "250px",
+                  }}
+                  onClick={() => {
+                    submitHandler();
+                  }}
+                >
+                  Save changes
+                </button>
+              ) : (
+                ""
+              )}
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              onSave(null);
+            }}
+            className="closeButton"
+          >
+            x
+          </button>
         </div>
       </div>
     </div>

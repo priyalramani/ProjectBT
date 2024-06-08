@@ -858,7 +858,7 @@ input#item-sales-searchbar {
 
 .theme-btn {
 	border: none;
-	min-width: 100px;
+	min-width: 50px;
 	text-align: center;
 	padding: 12px 20px;
 	font-weight: bold;
