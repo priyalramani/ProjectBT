@@ -1311,7 +1311,23 @@ export function OrderDetails({
     />
   ) : (
     <>
-      <div className="overlay">
+      <div className="overlay flex" style={{ flexDirection: "column" }}>
+        <button
+          onClick={onSave}
+          style={{
+            top: "-5px",
+            border: "none",
+            color: "white",
+            backgroundColor: "red",
+            borderRadius: "100px",
+            padding: "8px 15px",
+            marginBottom: "10px",
+            fontSize: "25px",
+            fontWeight: "400",
+          }}
+        >
+          x
+        </button>
         <div
           className="modal"
           style={{
@@ -2808,9 +2824,6 @@ export function OrderDetails({
             </div>
           </div>
         </div>
-        <button onClick={onSave} className="closeButton">
-          x
-        </button>
       </div>
 
       {promptLocalState?.active && <Prompt {...promptLocalState} />}
@@ -3215,21 +3228,7 @@ export function OrderDetails({
           onSave={() => setDeductionsCoinPopup(false)}
           data={orderData.coin}
           updateBilling={(result) => {
-            if (
-              location.pathname.includes("completeOrderReport") ||
-              location.pathname.includes("pendingEntry") ||
-              location.pathname.includes("upiTransactionReport")
-            ) {
-              setOrderData((prev) => ({
-                ...prev,
-                coin: result,
-                edit_prices: edit_prices.map((a) => ({
-                  ...a,
-                  item_price: a.p_price,
-                })),
-              }));
-              setDeliveryPopup("adjustment");
-            } else {
+           
               callBilling(
                 {
                   ...order,
@@ -3241,7 +3240,7 @@ export function OrderDetails({
                 },
                 true
               );
-            }
+            
           }}
         />
       ) : (
@@ -4823,9 +4822,14 @@ const UserSelection = ({ users, selection, setSelection }) => {
 };
 
 function AddCoinPopup({ onSave, data = 0, updateBilling = () => {} }) {
-  const [values, setValues] = useState(false);
+  const [add, setAdd] = useState(0);
+  const [sub, setSub] = useState(0);
   useEffect(() => {
-    setValues(data);
+    if (data > 0) {
+      setSub(data);
+    } else {
+      setAdd(-data);
+    }
   }, [data]);
   return (
     <div className="overlay" style={{ zIndex: "9999999999999" }}>
@@ -4841,6 +4845,7 @@ function AddCoinPopup({ onSave, data = 0, updateBilling = () => {} }) {
             width: "fit-content",
           }}
         >
+          <h2>Adjustment</h2>
           <div style={{ overflowY: "scroll" }}>
             <form className="form">
               <div className="formGroup">
@@ -4848,20 +4853,39 @@ function AddCoinPopup({ onSave, data = 0, updateBilling = () => {} }) {
                   className="row"
                   style={{ flexDirection: "row", alignItems: "center" }}
                 >
-                  <div style={{ width: "100px" }}>Adjustment</div>
                   <label
                     className="selectLabel flex"
                     style={{ width: "100px" }}
                   >
+                    +
                     <input
                       type="number"
                       name="route_title"
                       className="numberInput"
-                      value={values}
+                      value={add}
                       style={{ width: "100px" }}
-                      onChange={(e) => setValues(e.target.value)}
+                      onChange={(e) => setAdd(e.target.value)}
                       maxLength={42}
                       onWheel={(e) => e.preventDefault()}
+                      disabled={sub > 0}
+                    />
+                    {/* {popupInfo.conversion || 0} */}
+                  </label>
+                  <label
+                    className="selectLabel flex"
+                    style={{ width: "100px" }}
+                  >
+                    -
+                    <input
+                      type="number"
+                      name="route_title"
+                      className="numberInput"
+                      value={sub}
+                      style={{ width: "100px" }}
+                      onChange={(e) => setSub(e.target.value)}
+                      maxLength={42}
+                      onWheel={(e) => e.preventDefault()}
+                      disabled={add > 0}
                     />
                     {/* {popupInfo.conversion || 0} */}
                   </label>
@@ -4881,7 +4905,7 @@ function AddCoinPopup({ onSave, data = 0, updateBilling = () => {} }) {
                   type="button"
                   className="submit"
                   onClick={() => {
-                    updateBilling(values);
+                    updateBilling(-add || sub);
                     onSave();
                   }}
                 >
@@ -4919,7 +4943,7 @@ function CommentPopup({ comments, onSave, invoice_number, setOrderData }) {
         "Content-Type": "application/json",
       },
     });
-    console.log({response});
+    console.log({ response });
     if (response.data.success) {
       setOrderData((prev) => ({
         ...prev,

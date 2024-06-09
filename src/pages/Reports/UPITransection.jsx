@@ -859,7 +859,6 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
             <div style={{ overflowY: "scroll" }}>
               <form
                 className="form"
-                onSubmit={submitHandler}
                 style={{
                   justifyContent: "start",
                 }}
@@ -992,9 +991,10 @@ function ImportStatements({ onSave, popupInfo, setNotification }) {
                   ) : listData.length ? (
                     <button
                       className="submit"
+                      type="button"
                       onClick={(e) => {
                         e.preventDefault();
-                        setConfirmPopup(true);
+                        submitHandler()
                       }}
                     >
                       Mark Done

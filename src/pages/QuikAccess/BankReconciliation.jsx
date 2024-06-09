@@ -10,6 +10,7 @@ import context from "../../context/context";
 import * as XLSX from "xlsx";
 import { FaCross } from "react-icons/fa";
 import { truncateDecimals } from "../../utils/helperFunctions";
+import { get } from "react-scroll/modules/mixins/scroller";
 
 const BankReconciliation = () => {
   const [ledgerData, setLedgerData] = useState([]);
@@ -317,6 +318,37 @@ function ImportStatements({
     let time = new Date();
     for (let item of dataArray) {
       if (item.existVoucher === false) continue;
+      if(item?.otherCheckReciptsData){
+        for (let other of item.otherCheckReciptsData) {
+          array.push({
+            voucher_uuid: uuid(),
+            mark_entry,
+            type: "RCPT",
+            created_by: localStorage.getItem("user_uuid"),
+            created_at: time.getTime(),
+            amt: other.amount,
+            invoice_number: [other.invoice_number],
+            order_uuid: item.order_uuid,
+            mode_uuid: item.mode_uuid,
+            transaction_tags: item.transaction_tags,
+            matched_entry: item.matched_entry,
+            details: [
+              {
+                ledger_uuid: popupInfo.ledger_uuid,
+                amount: -other.amount,
+                narration: "Ref no: " + other.invoice_number,
+              },
+              {
+                ledger_uuid: item.counter_uuid,
+                amount: other.amount,
+                narration: "Ref no: " + other.invoice_number,
+              },
+            ],
+            voucher_date: item.date_time_stamp,
+          });
+        }
+        continue;
+      }
       if (item?.otherReciptsData?.length&&!item.multipleNarration?.length) {
         for (let other of item.otherReciptsData) {
           array.push({
@@ -1280,13 +1312,11 @@ function ImportStatements({
                         setOtherCheckReciptsData(null);
                       }}
                     >
-                      {!otherCheckReciptsData.multipleCounter ? (
+             
                         <button className="submit" type="button">
                           Unknown
                         </button>
-                      ) : (
-                        ""
-                      )}
+                     
                     </div>
                     {+otherCheckReciptsData.received_amount ===
                     +otherCheckReciptsData.otherCheckReciptsData
@@ -1403,6 +1433,11 @@ function ImportStatements({
                       style={{ background: "red" }}
                       onClick={(e) => {
                         e.preventDefault();
+                        getOtherReceiptsData(
+                          changeTransition.counter_uuid,
+                          changeTransition.tags,
+                          changeTransition.sr
+                        );
                         setChangeTransition(null);
                       }}
                     >

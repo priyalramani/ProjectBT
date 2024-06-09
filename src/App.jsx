@@ -99,7 +99,7 @@ import 'react-tooltip/dist/react-tooltip.css'
 
 // export const server = "http://localhost:9000";
 export const server = "https://api.btgondia.com";
-export let Version = 323;
+export let Version = 324;
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
