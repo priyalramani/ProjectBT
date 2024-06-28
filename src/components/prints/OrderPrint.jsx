@@ -123,7 +123,7 @@ const OrderPrint = ({
   const hsn_code = useMemo(() => {
     let hsn = [];
     let char = "a";
-    for (let item of itemData) {
+    for (let item of item_details) {
       console.log({ item });
       if (item.hsn && !hsn.find((a) => a.hsn === item.hsn)) {
         hsn.push({ hsn: item.hsn, char });
@@ -131,7 +131,7 @@ const OrderPrint = ({
       }
     }
     return hsn;
-  }, [itemData]);
+  }, [item_details]);
 
   return (
     <div
