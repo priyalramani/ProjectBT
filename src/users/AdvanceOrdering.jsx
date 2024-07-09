@@ -452,17 +452,26 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
   };
 
   const GetPaymentModes = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/paymentModes/GetPaymentModesList",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response.data.result);
-    if (response.data.success) setPaymentModes(response.data.result);
+    const cachedData = localStorage.getItem('paymentModesData');
+  
+    if (cachedData) {
+      setPaymentModes(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/paymentModes/GetPaymentModesList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response.data.result);
+      if (response.data.success) {
+        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        setPaymentModes(response.data.result);
+      }
+    }
   };
+  
   useEffect(() => {
     getRoutesData();
     GetPaymentModes();
@@ -944,17 +953,27 @@ function SelectCategoryPopup({ onSave }) {
     if (response.data.success)
       setCategories(response.data.result.map((a) => ({ ...a, expand: true })));
   };
+  
   const getCounter = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/companies/getCompanies",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setCompanies(response.data.result);
-  };
+    const cachedData = localStorage.getItem('companiesData');
+    
+    if (cachedData) {
+      setCompanies(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/companies/getCompanies",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+        setCompanies(response.data.result);
+      }
+    }
+  };  
 
   useEffect(() => {
     getRoutesData();

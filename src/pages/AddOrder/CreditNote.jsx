@@ -73,9 +73,17 @@ export default function CreditNotes() {
   const [companyFilter, setCompanyFilter] = useState("all");
   const [remarks, setRemarks] = useState("");
   const fetchCompanies = async () => {
+    const cachedData = localStorage.getItem('companiesData');
     try {
-      const response = await axios.get("/companies/getCompanies");
-      if (response?.data?.result?.[0]) setCompanies(response?.data?.result);
+      if (cachedData) {
+        setCompanies(JSON.parse(cachedData));
+      } else {
+        const response = await axios.get("/companies/getCompanies");
+        if (response?.data?.result?.[0]) {
+          localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+          setCompanies(response.data.result);
+        }
+      }
     } catch (error) {
       console.log(error);
     }

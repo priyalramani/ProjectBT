@@ -86,13 +86,22 @@ export default function AddOrder() {
   const [companyFilter, setCompanyFilter] = useState("all");
   const [remarks, setRemarks] = useState("");
   const fetchCompanies = async () => {
+    const cachedData = localStorage.getItem('companiesData');
     try {
-      const response = await axios.get("/companies/getCompanies");
-      if (response?.data?.result?.[0]) setCompanies(response?.data?.result);
+      if (cachedData) {
+        setCompanies(JSON.parse(cachedData));
+      } else {
+        const response = await axios.get("/companies/getCompanies");
+        if (response?.data?.result?.[0]) {
+          localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+          setCompanies(response.data.result);
+        }
+      }
     } catch (error) {
       console.log(error);
     }
   };
+  
   const GetWarehouseList = async () => {
     const response = await axios({
       method: "get",
@@ -1570,15 +1579,24 @@ function DiliveryPopup({
     });
   }, [data]);
   const GetPaymentModes = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/paymentModes/GetPaymentModesList",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setPaymentModes(response.data.result);
+    const cachedData = localStorage.getItem('paymentModesData');
+  
+    if (cachedData) {
+      setPaymentModes(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/paymentModes/GetPaymentModesList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        setPaymentModes(response.data.result);
+      }
+    }
   };
   useEffect(() => {
     let time = new Date();

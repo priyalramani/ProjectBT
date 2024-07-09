@@ -95,17 +95,26 @@ const ItemsPage = () => {
       itemsData,
     ]
   );
-  const getCompanies = async (controller = new AbortController()) => {
-    const response = await axios({
-      method: "get",
-      url: "/companies/getCompanies",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setCompanies(response.data.result);
-  };
+  const getCompanies = async () => {
+    const cachedData = localStorage.getItem('companiesData');
+    
+    if (cachedData) {
+      setCompanies(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/companies/getCompanies",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+        setCompanies(response.data.result);
+      }
+    }
+  };  
   useEffect(() => {
     const controller = new AbortController();
     getCompanies(controller);

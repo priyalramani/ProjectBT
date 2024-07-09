@@ -74,17 +74,26 @@ const PendingReciptsEntry = () => {
 		})
 		if (response.data.success) setCounters(response.data.result)
 	}
+
 	const getItemsData = async () => {
-		const response = await axios({
+		const cachedData = localStorage.getItem('itemsData');
+		if (cachedData) {
+			setItemsData(JSON.parse(cachedData));
+		} else {
+		  const response = await axios({
 			method: "get",
 			url: "/items/GetItemList",
-
 			headers: {
-				"Content-Type": "application/json",
+			  "Content-Type": "application/json",
 			},
-		})
-		if (response.data.success) setItemsData(response.data.result)
-	}
+		  });
+		  if (response.data.success) {
+			localStorage.setItem('itemsData', JSON.stringify(response.data.result));
+			setItemsData(response.data.result);
+		  }
+		}
+	  };
+
 	useEffect(() => {
 		getItemsData()
 		getCounter()

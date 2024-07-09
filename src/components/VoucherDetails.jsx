@@ -153,17 +153,26 @@ export default function VoucherDetails({ order, onSave, orderStatus }) {
 					})) || []
 		})
 	}, [orderData])
+	
+
 	const getItemsData = async () => {
-		const response = await axios({
+		const cachedData = localStorage.getItem('itemsData');
+		if (cachedData) {
+			setItemsData(JSON.parse(cachedData));
+		} else {
+		  const response = await axios({
 			method: "get",
 			url: "/items/GetItemList",
-
 			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-		if (response.data.success) setItemsData(response.data.result)
-	}
+			  "Content-Type": "application/json",
+			},
+		  });
+		  if (response.data.success) {
+			localStorage.setItem('itemsData', JSON.stringify(response.data.result));
+			setItemsData(response.data.result);
+		  }
+		}
+	  };
 
 	useEffect(() => {
 		getItemsData()

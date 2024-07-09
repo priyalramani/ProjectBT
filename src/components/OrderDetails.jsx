@@ -135,24 +135,43 @@ export function OrderDetails({
   const [deductionsCoinPopup, setDeductionsCoinPopup] = useState();
   const [deductionsData, setDeductionsData] = useState();
   const getRoutesData = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/routes/GetOrderRouteList",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setRoutesData(response.data.result);
+    const cachedData = localStorage.getItem('routesData');
+    
+    if (cachedData) {
+      setRoutesData(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/routes/GetOrderRouteList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem('routesData', JSON.stringify(response.data.result));
+        setRoutesData(response.data.result);
+      }
+    }
   };
+
   const fetchCompanies = async () => {
+    const cachedData = localStorage.getItem('companiesData');
     try {
-      const response = await axios.get("/companies/getCompanies");
-      if (response?.data?.result?.[0]) setCompanies(response?.data?.result);
+      if (cachedData) {
+        setCompanies(JSON.parse(cachedData));
+      } else {
+        const response = await axios.get("/companies/getCompanies");
+        if (response?.data?.result?.[0]) {
+          localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+          setCompanies(response.data.result);
+        }
+      }
     } catch (error) {
       console.log(error);
     }
   };
+  
   useEffect(CONTROL_AUTO_REFRESH, []);
   const getOrder = async (order_uuid) => {
     const response = await axios({
@@ -513,17 +532,24 @@ export function OrderDetails({
     }));
   }, [category, orderData]);
 
-  const getItemsData = async (item, controller = new AbortController()) => {
-    const response = await axios({
-      method: "post",
-      url: "/items/GetItemList",
-      data: { items: item },
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setItemsData(response.data.result);
+
+  const getItemsData = async () => {
+    const cachedData = localStorage.getItem('itemsData');
+    if (cachedData) {
+      setItemsData(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/items/GetItemList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        localStorage.setItem('itemsData', JSON.stringify(response.data.result));
+        setItemsData(response.data.result);
+      }
+    }
   };
 
   const getItemsDataReminder = async () => {
@@ -3975,17 +4001,25 @@ function DiliveryPopup({
   }, [counters, order?.counter_uuid]);
   console.log(outstanding);
   const GetPaymentModes = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/paymentModes/GetPaymentModesList",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) {
-      setPaymentModes(response.data.result);
+    const cachedData = localStorage.getItem('paymentModesData');
+  
+    if (cachedData) {
+      setPaymentModes(JSON.parse(cachedData));
       GetReciptsModes();
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/paymentModes/GetPaymentModesList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        setPaymentModes(response.data.result);
+        GetReciptsModes();
+      }
     }
   };
   const getTripData = async (trip_uuid) => {

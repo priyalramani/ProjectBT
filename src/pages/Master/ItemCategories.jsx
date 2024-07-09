@@ -30,16 +30,25 @@ const ItemCompanies = () => {
 			)
 	}
 	const getCompanies = async () => {
-		const response = await axios({
+		const cachedData = localStorage.getItem('companiesData');
+		
+		if (cachedData) {
+		  setCompanies(JSON.parse(cachedData));
+		} else {
+		  const response = await axios({
 			method: "get",
 			url: "/companies/getCompanies",
-
 			headers: {
-				"Content-Type": "application/json",
+			  "Content-Type": "application/json",
 			},
-		})
-		if (response.data.success) setCompanies(response.data.result)
-	}
+		  });
+	  
+		  if (response.data.success) {
+			localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+			setCompanies(response.data.result);
+		  }
+		}
+	  };  
 	useEffect(() => {
 		getItemCategories()
 	}, [popupForm, companies])

@@ -129,32 +129,50 @@ const CounterReport = () => {
 	}
 
 	useEffect(() => {
-		;(async () => {
-			const companiesResponse = await axios.get("/companies/getCompanies")
-			if (companiesResponse?.data?.result?.[0]) {
-				let data = companiesResponse?.data?.result
-					?.filter(i => +i.status)
-					?.map(i => ({
-						company_title: i.company_title,
-						company_uuid: i.company_uuid
-					}))
-				setCompanies(data)
-				setSelectedCompanies(data.map(i => i.company_uuid))
+		(async () => {
+		  const cachedCompaniesData = localStorage.getItem('companiesData');
+	
+		  if (cachedCompaniesData) {
+			const data = JSON.parse(cachedCompaniesData)
+			  .filter(i => +i.status)
+			  .map(i => ({
+				company_title: i.company_title,
+				company_uuid: i.company_uuid
+			  }));
+			setCompanies(data);
+			setSelectedCompanies(data.map(i => i.company_uuid));
+		  } else {
+			try {
+			  const companiesResponse = await axios.get("/companies/getCompanies");
+			  if (companiesResponse?.data?.result?.[0]) {
+				let data = companiesResponse.data.result
+				  .filter(i => +i.status)
+				  .map(i => ({
+					company_title: i.company_title,
+					company_uuid: i.company_uuid
+				  }));
+				localStorage.setItem('companiesData', JSON.stringify(companiesResponse.data.result));
+				setCompanies(data);
+				setSelectedCompanies(data.map(i => i.company_uuid));
+			  }
+			} catch (error) {
+			  console.log(error);
 			}
-
-			const routesResponse = await axios.get("/routes/GetRouteList")
-			if (routesResponse?.data?.result?.[0]) {
-				let data = routesResponse?.data?.result
-					// ?.filter(i => +i.order_status)
-					?.map(i => ({
-						route_title: i.route_title,
-						route_uuid: i.route_uuid
-					}))
-				setRoutes(data)
-				setSelectedRoutes(data.map(i => i.route_uuid))
-			}
-		})()
-	}, [])
+		  }
+	
+		  const routesResponse = await axios.get("/routes/GetRouteList");
+		  if (routesResponse?.data?.result?.[0]) {
+			let data = routesResponse.data.result
+			  .map(i => ({
+				route_title: i.route_title,
+				route_uuid: i.route_uuid
+			  }));
+			setRoutes(data);
+			setSelectedRoutes(data.map(i => i.route_uuid));
+		  }
+		})();
+	  }, []);
+	
 
 	const options = [
 		{

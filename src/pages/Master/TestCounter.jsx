@@ -49,17 +49,25 @@ const Counter = () => {
 		if (response.data.success) setCounter(response.data.result)
 	}
 	const GetPaymentModes = async () => {
-		const response = await axios({
+		const cachedData = localStorage.getItem('paymentModesData');
+	  
+		if (cachedData) {
+		  setPaymentModes(JSON.parse(cachedData));
+		} else {
+		  const response = await axios({
 			method: "get",
 			url: "/paymentModes/GetPaymentModesList",
-
 			headers: {
-				"Content-Type": "application/json",
+			  "Content-Type": "application/json",
 			},
-		})
-		console.log(response.data.result)
-		if (response.data.success) setPaymentModes(response.data.result)
-	}
+		  });
+		  console.log(response.data.result);
+		  if (response.data.success) {
+			localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+			setPaymentModes(response.data.result);
+		  }
+		}
+	  };
 
 	useEffect(() => {
 		getCounter()
@@ -925,39 +933,69 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
 		if (response.data.success) setItemCategories(response.data.result)
 	}
 	const getItemsData = async () => {
+		const cachedData = localStorage.getItem('itemsData');
+		if (cachedData) {
+		  const localData = JSON.parse(cachedData)
+		  setItemsData(
+			localData.map((b) => ({
+			  ...b,
+			  company_title:
+				companies.find((a) => a.company_uuid === b.company_uuid)
+				  ?.company_title || "-",
+			  category_title:
+				itemCategories.find((a) => a.category_uuid === b.category_uuid)
+				  ?.category_title || "-",
+			}))
+		  );
+		} else {
 		const response = await axios({
-			method: "get",
-			url: "/items/GetItemList",
-
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-		if (response.data.success)
-			setItemsData(
-				response.data.result.map(b => ({
-					...b,
-					company_title: companies.find(a => a.company_uuid === b.company_uuid)?.company_title || "-",
-					category_title:
-						itemCategories.find(a => a.category_uuid === b.category_uuid)?.category_title || "-",
-				}))
-			)
-	}
+		  method: "get",
+		  url: "/items/GetItemList",
+	
+		  headers: {
+			"Content-Type": "application/json",
+		  },
+		});
+		if (response.data.success){
+		  localStorage.setItem('itemsData', JSON.stringify(response.data.result));
+		  setItemsData(
+			response.data.result.map((b) => ({
+			  ...b,
+			  company_title:
+				companies.find((a) => a.company_uuid === b.company_uuid)
+				  ?.company_title || "-",
+			  category_title:
+				itemCategories.find((a) => a.category_uuid === b.category_uuid)
+				  ?.category_title || "-",
+			}))
+		  );
+		}}
+	  };
 	useEffect(() => {
 		getItemsData()
 	}, [itemCategories, companies])
 
 	const getCompanies = async () => {
-		const response = await axios({
+		const cachedData = localStorage.getItem('companiesData');
+		
+		if (cachedData) {
+		  setCompanies(JSON.parse(cachedData));
+		} else {
+		  const response = await axios({
 			method: "get",
 			url: "/companies/getCompanies",
-
 			headers: {
-				"Content-Type": "application/json",
+			  "Content-Type": "application/json",
 			},
-		})
-		if (response.data.success) setCompanies(response.data.result)
-	}
+		  });
+	  
+		  if (response.data.success) {
+			localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+			setCompanies(response.data.result);
+		  }
+		}
+	  };  
+
 	useEffect(() => {
 		getCompanies()
 		getItemCategories()

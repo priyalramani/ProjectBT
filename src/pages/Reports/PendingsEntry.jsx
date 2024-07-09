@@ -50,17 +50,25 @@ const PendingsEntry = () => {
     });
     if (response.data.success) setCounters(response.data.result);
   };
+  
   const getItemsData = async (controller = new AbortController()) => {
-    const response = await axios({
-      method: "get",
-      url: "/items/GetItemList",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setItemsData(response.data.result);
-  };
+		const cachedData = localStorage.getItem('itemsData');
+		if (cachedData) {
+			setItemsData(JSON.parse(cachedData));
+		} else {
+		  const response = await axios({
+			method: "get",
+			url: "/items/GetItemList",
+			headers: {
+			  "Content-Type": "application/json",
+			},
+		  });
+		  if (response.data.success) {
+			localStorage.setItem('itemsData', JSON.stringify(response.data.result));
+			setItemsData(response.data.result);
+		  }
+		}
+	  };
   useEffect(() => {}, []);
   useEffect(() => {
     let controller = new AbortController();

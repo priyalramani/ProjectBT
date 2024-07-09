@@ -427,16 +427,25 @@ function NewUserForm({ onSave, popupForm }) {
 			)
 	}
 	const getCompanies = async () => {
-		const response = await axios({
+		const cachedData = localStorage.getItem('companiesData');
+		
+		if (cachedData) {
+			setCompany(JSON.parse(cachedData));
+		} else {
+		  const response = await axios({
 			method: "get",
 			url: "/companies/getCompanies",
-
 			headers: {
-				"Content-Type": "application/json",
+			  "Content-Type": "application/json",
 			},
-		})
-		if (response.data.success) setCompany(response.data.result)
-	}
+		  });
+	  
+		  if (response.data.success) {
+			localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+			setCompany(response.data.result);
+		  }
+		}
+	  };  
 	const getUsers = async () => {
 		const response = await axios({
 			method: "get",

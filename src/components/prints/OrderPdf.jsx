@@ -34,17 +34,25 @@ const OrderPdf = () => {
     if (response.data.success) setRoute(response.data.result);
   };
 
-  const getItemsData = async (items) => {
-    const response = await axios({
-      method: "post",
-      url: "/items/GetItemList",
-      data: { items },
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setItemsData(response.data.result);
-  };
+  const getItemsData = async () => {
+		const cachedData = localStorage.getItem('itemsData');
+		if (cachedData) {
+			setItemsData(JSON.parse(cachedData));
+		} else {
+		  const response = await axios({
+			method: "get",
+			url: "/items/GetItemList",
+			headers: {
+			  "Content-Type": "application/json",
+			},
+		  });
+		  if (response.data.success) {
+			localStorage.setItem('itemsData', JSON.stringify(response.data.result));
+			setItemsData(response.data.result);
+		  }
+		}
+	  };
+
 
   const getUser = async (user_uuid) => {
     const response = await axios({

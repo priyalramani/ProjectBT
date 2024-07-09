@@ -97,16 +97,24 @@ const Counter = () => {
   };
 
   const GetPaymentModes = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/paymentModes/GetPaymentModesList",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log(response.data.result);
-    if (response.data.success) setPaymentModes(response.data.result);
+    const cachedData = localStorage.getItem('paymentModesData');
+  
+    if (cachedData) {
+      setPaymentModes(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/paymentModes/GetPaymentModesList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response.data.result);
+      if (response.data.success) {
+        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        setPaymentModes(response.data.result);
+      }
+    }
   };
 
   useEffect(() => {
@@ -2031,7 +2039,24 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
     });
     if (response.data.success) setItemCategories(response.data.result);
   };
+
+
   const getItemsData = async () => {
+    const cachedData = localStorage.getItem('itemsData');
+    if (cachedData) {
+      const localData = JSON.parse(cachedData)
+      setItemsData(
+        localData.map((b) => ({
+          ...b,
+          company_title:
+            companies.find((a) => a.company_uuid === b.company_uuid)
+              ?.company_title || "-",
+          category_title:
+            itemCategories.find((a) => a.category_uuid === b.category_uuid)
+              ?.category_title || "-",
+        }))
+      );
+    } else {
     const response = await axios({
       method: "get",
       url: "/items/GetItemList",
@@ -2040,7 +2065,8 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success)
+    if (response.data.success){
+      localStorage.setItem('itemsData', JSON.stringify(response.data.result));
       setItemsData(
         response.data.result.map((b) => ({
           ...b,
@@ -2052,22 +2078,33 @@ const ItemPopup = ({ onSave, itemPopupId, items, objData, itemPopup }) => {
               ?.category_title || "-",
         }))
       );
+    }}
   };
   useEffect(() => {
     getItemsData();
   }, [itemCategories, companies]);
 
   const getCompanies = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/companies/getCompanies",
+    const cachedData = localStorage.getItem('companiesData');
+    
+    if (cachedData) {
+      setCompanies(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/companies/getCompanies",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+        setCompanies(response.data.result);
+      }
+    }
+  };  
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setCompanies(response.data.result);
-  };
   useEffect(() => {
     getCompanies();
     getItemCategories();
@@ -2470,16 +2507,26 @@ const CounterRatesAndDiscounts = ({ onSave, itemPopup }) => {
   console.log({ value });
 
   const getCompanies = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/companies/getCompanies",
+    const cachedData = localStorage.getItem('companiesData');
+    
+    if (cachedData) {
+      setCompanies(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/companies/getCompanies",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+        setCompanies(response.data.result);
+      }
+    }
+  };  
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setCompanies(response.data.result);
-  };
   useEffect(() => {
     getCompanies();
     getCounterData();

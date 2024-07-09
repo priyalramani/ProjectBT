@@ -40,16 +40,31 @@ const OrderForms = () => {
 	)
 
 	const getCompanies = async (controller = new AbortController()) => {
-		const response = await axios({
-			method: "get",
-			url: "/companies/getCompanies",
-			signal: controller.signal,
-			headers: {
+		const cachedData = localStorage.getItem('companiesData');
+	  
+		if (cachedData) {
+		  setCompanies(JSON.parse(cachedData));
+		} else {
+		  try {
+			const response = await axios({
+			  method: "get",
+			  url: "/companies/getCompanies",
+			  signal: controller.signal,
+			  headers: {
 				"Content-Type": "application/json",
-			},
-		})
-		if (response.data.success) setCompanies(response.data.result)
-	}
+			  },
+			});
+	  
+			if (response.data.success) {
+			  localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+			  setCompanies(response.data.result);
+			}
+		  } catch (error) {
+			console.log(error);
+		  }
+		}
+	  };
+	  
 	useEffect(() => {
 		const controller = new AbortController()
 		getCompanies(controller)

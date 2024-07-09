@@ -81,18 +81,14 @@ const PartyWiseCompanyDiscount = () => {
 		})
 		if (response.data.success) setRoutes(response.data.result)
 	}
-	const getCompanies = async () => {
-		const response = await axios({
-			method: "get",
-			url: "/companies/getCompanies",
 
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-		if (response.data.success)
+	const getCompanies = async () => {
+		const cachedData = localStorage.getItem('companiesData');
+
+		if (cachedData) {
+			const localData = JSON.parse(cachedData);
 			setCompanies(
-				response.data.result.map(a => ({
+				localData.map(a => ({
 					...a,
 					id: a.company_uuid,
 					name: a.company_title,
@@ -104,6 +100,32 @@ const PartyWiseCompanyDiscount = () => {
 					cover: null,
 				}))
 			)
+		} else {
+			const response = await axios({
+				method: "get",
+				url: "/companies/getCompanies",
+
+				headers: {
+					"Content-Type": "application/json",
+				},
+			})
+			if (response.data.success) {
+				localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+				setCompanies(
+					response.data.result.map(a => ({
+						...a,
+						id: a.company_uuid,
+						name: a.company_title,
+						slug: a.company_title,
+						type: "Main",
+						locale: "en",
+						created_at: "2021-11-15T08:27:23.000Z",
+						updated_at: "2021-11-15T08:27:23.000Z",
+						cover: null,
+					}))
+				)
+			}
+		}
 	}
 	useEffect(() => {
 		getCompanies()

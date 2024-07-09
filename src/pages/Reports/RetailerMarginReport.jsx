@@ -37,17 +37,24 @@ const RetailerMarginReport = () => {
 	const fileExtension = ".xlsx"
 	const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8"
 	const getItemsData = async () => {
-		const response = await axios({
+		const cachedData = localStorage.getItem('itemsData');
+		if (cachedData) {
+			const localData = JSON.parse(cachedData)
+			setItemsData(localData.filter(a => a.item_title));
+		} else {
+		  const response = await axios({
 			method: "get",
 			url: "/items/GetItemList",
-
 			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-		console.log("users", response)
-		if (response.data.success) setItemsData(response.data.result.filter(a => a.item_title))
-	}
+			  "Content-Type": "application/json",
+			},
+		  });
+		  if (response.data.success) {
+			localStorage.setItem('itemsData', JSON.stringify(response.data.result));
+			setItemsData(response.data.result.filter(a => a.item_title));
+		  }
+		}
+	  };
 	const getItemCategories = async () => {
 		const response = await axios({
 			method: "get",
@@ -59,17 +66,28 @@ const RetailerMarginReport = () => {
 		})
 		if (response.data.success) setItemCategories(response.data.result)
 	}
+
 	const getCompanies = async () => {
-		const response = await axios({
+		const cachedData = localStorage.getItem('companiesData');
+		
+		if (cachedData) {
+		  setCompanies(JSON.parse(cachedData));
+		} else {
+		  const response = await axios({
 			method: "get",
 			url: "/companies/getCompanies",
-
 			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-		if (response.data.success) setCompanies(response.data.result)
-	}
+			  "Content-Type": "application/json",
+			},
+		  });
+	  
+		  if (response.data.success) {
+			localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+			setCompanies(response.data.result);
+		  }
+		}
+	  };  
+	
 	useEffect(() => {
 		getCompanies()
 		getItemCategories()

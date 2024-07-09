@@ -397,16 +397,25 @@ function DiliveryPopup({
         ?.outstanding_type || 0
     );
   }, [counters, order.counter_uuid]);
-  const GetPaymentModes = async (controller) => {
-    const response = await axios({
-      method: "get",
-      url: "/paymentModes/GetPaymentModesList",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setPaymentModes(response.data.result);
+  const GetPaymentModes = async () => {
+    const cachedData = localStorage.getItem('paymentModesData');
+  
+    if (cachedData) {
+      setPaymentModes(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/paymentModes/GetPaymentModesList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        setPaymentModes(response.data.result);
+      }
+    }
   };
   useEffect(() => {
     let time = new Date();

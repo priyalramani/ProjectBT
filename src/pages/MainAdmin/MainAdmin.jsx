@@ -78,6 +78,7 @@ const MainAdmin = () => {
   const [selectedtasks, setSelectedTasks] = useState(false);
   const location = useLocation();
   const [notesState, setNotesState] = useState();
+  const [isCooldown, setIsCooldown] = useState(false);
 
   const {
     updateServerPdf,
@@ -171,16 +172,26 @@ const MainAdmin = () => {
   }, [selectedWarehouseOrders]);
 
   const getCompanies = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/companies/getCompanies",
+    const cachedData = localStorage.getItem('companiesData');
+    
+    if (cachedData) {
+      setCompanies(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/companies/getCompanies",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+        setCompanies(response.data.result);
+      }
+    }
+  };  
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setCompanies(response.data.result);
-  };
   const reactToPrintContent = useCallback(() => {
     return componentRef.current;
   }, [componentRef]);
@@ -212,17 +223,26 @@ const MainAdmin = () => {
     documentTitle: "Statement",
     removeAfterPrint: true,
   });
-  const getItemsData = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/items/GetItemList",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setItems(response.data.result);
+  const getItemsData = async () => {
+    const cachedData = localStorage.getItem('itemsData');
+    if (cachedData) {
+      setItems(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/items/GetItemList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        localStorage.setItem('itemsData', JSON.stringify(response.data.result));
+        setItems(response.data.result);
+      }
+    }
   };
+  
   const getUsers = async () => {
     const response = await axios({
       method: "get",
@@ -269,17 +289,28 @@ const MainAdmin = () => {
   useEffect(() => {
     if (tasks?.length) setSelectedTasks(tasks[0]);
   }, [tasks]);
-  const getRoutesData = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/routes/GetOrderRouteList",
 
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setRoutesData(response.data.result);
+  const getRoutesData = async () => {
+    const cachedData = localStorage.getItem('routesData');
+    
+    if (cachedData) {
+      setRoutesData(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/routes/GetOrderRouteList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem('routesData', JSON.stringify(response.data.result));
+        setRoutesData(response.data.result);
+      }
+    }
   };
+  
   const handleWarehouseChacking = async () => {
     let data = [];
 
@@ -359,7 +390,7 @@ const MainAdmin = () => {
       if (+sessionStorage.getItem("PREVENT_AUTO_REFRESH") === 1) return;
       if (holdOrders) await getRunningHoldOrders();
       else await getRunningOrders(controller);
-    }, 180000);
+    }, 600000);
 
     return () => {
       clearInterval(intervalOrder);
@@ -379,18 +410,28 @@ const MainAdmin = () => {
       controller.abort();
     };
   }, [location.pathname]);
+
   const GetPaymentModes = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/paymentModes/GetPaymentModesList",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setPaymentModes(response.data.result);
+    const cachedData = localStorage.getItem('paymentModesData');
+  
+    if (cachedData) {
+      setPaymentModes(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/paymentModes/GetPaymentModesList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        setPaymentModes(response.data.result);
+      }
+    }
   };
-
+  
   useEffect(() => {
     const controller = new AbortController();
     getCounter();
@@ -780,7 +821,11 @@ const MainAdmin = () => {
   };
 
   const handleRefresh = async () => {
+    if (isCooldown) return; 
+
     setOrdersSpinner(true);
+    setIsCooldown(true);
+
     try {
       if (holdOrders) await getRunningHoldOrders();
       else await getRunningOrders(null, false);
@@ -788,8 +833,11 @@ const MainAdmin = () => {
     } catch (error) {
       setNotification({ success: false, message: "Failed to refresh!" });
     }
+
     setTimeout(() => setNotification(null), 5000);
     setOrdersSpinner(null);
+
+    setTimeout(() => setIsCooldown(false), 10000);
   };
 
   return (
@@ -820,17 +868,18 @@ const MainAdmin = () => {
       >
         <Header />
         <AiOutlineReload
-          style={{
-            position: "fixed",
-            fontSize: "20px",
-            zIndex: "99999",
-            top: "10px",
-            right: "280px",
-            cursor: "pointer",
-          }}
-          className={ordersSpinner ? "rotating" : ""}
-          onClick={handleRefresh}
-        />
+        style={{
+          position: "fixed",
+          fontSize: "20px",
+          zIndex: "99999",
+          top: "10px",
+          right: "280px",
+          cursor: isCooldown ? "not-allowed" : "pointer",
+          color: isCooldown ? "grey" : "inherit", // Optional: change color during cooldown
+        }}
+        className={ordersSpinner ? "rotating" : ""}
+        onClick={handleRefresh}
+      />
         {selectedPrintOrder.length ? (
           <div
             style={{

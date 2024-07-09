@@ -409,17 +409,25 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 	}
 
 	const GetPaymentModes = async () => {
-		const response = await axios({
+		const cachedData = localStorage.getItem('paymentModesData');
+	  
+		if (cachedData) {
+		  setPaymentModes(JSON.parse(cachedData));
+		} else {
+		  const response = await axios({
 			method: "get",
 			url: "/paymentModes/GetPaymentModesList",
-
 			headers: {
-				"Content-Type": "application/json"
-			}
-		})
-		console.log(response.data.result)
-		if (response.data.success) setPaymentModes(response.data.result)
-	}
+			  "Content-Type": "application/json",
+			},
+		  });
+		  console.log(response.data.result);
+		  if (response.data.success) {
+			localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+			setPaymentModes(response.data.result);
+		  }
+		}
+	  };
 	useEffect(() => {
 		getRoutesData()
 		GetPaymentModes()

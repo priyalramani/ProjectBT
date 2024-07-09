@@ -82,16 +82,25 @@ const ItemDetails = () => {
   };
 
   const getCompanies = async () => {
-    const response = await axios({
-      method: "get",
-      url: "/companies/getCompanies",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.data.success) setCompanies(response.data.result);
-  };
+    const cachedData = localStorage.getItem('companiesData');
+    
+    if (cachedData) {
+      setCompanies(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/companies/getCompanies",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+        setCompanies(response.data.result);
+      }
+    }
+  };  
 
   const search = async (last_item) => {
     if (!last_item) {

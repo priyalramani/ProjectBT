@@ -97,8 +97,8 @@ import GSTReport from "./pages/Reports/GST";
 import { Tooltip } from "react-tooltip";
 import 'react-tooltip/dist/react-tooltip.css'
 
-// export const server = "http://localhost:9000";
-export const server = "https://api.btgondia.com";
+export const server = "http://localhost:9000";
+// export const server = "https://api.btgondia.com";
 export let Version = 225;
 
 function App() {
@@ -157,6 +157,25 @@ function App() {
       }
     }
   }, [userType]);
+
+  const clearLocalStorageKeys = () => {
+    const keysToClear = ['itemsData', 'routesData', 'companiesData', 'paymentModesData'];
+    keysToClear.forEach(key => {
+      localStorage.removeItem(key);
+    });
+  };
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      clearLocalStorageKeys();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   document.title = "BT";
 
