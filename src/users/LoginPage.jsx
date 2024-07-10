@@ -38,7 +38,7 @@ const LoginPage = ({ setUserType }) => {
 				sessionStorage.setItem("userType", response.data.result.user_type)
 				if (+data.user_type === 0) {
 					setUserType(response.data.result.user_type || false)
-					Navigate("/admin")
+					Navigate("/trip")
 					return
 				}
 				const result = await axios({

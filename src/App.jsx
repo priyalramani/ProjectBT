@@ -97,9 +97,9 @@ import GSTReport from "./pages/Reports/GST";
 import { Tooltip } from "react-tooltip";
 import 'react-tooltip/dist/react-tooltip.css'
 
-export const server = "http://localhost:9000";
-// export const server = "https://api.btgondia.com";
-export let Version = 225;
+// export const server = "http://localhost:9000";
+export const server = "https://api.btgondia.com";
+export let Version = 326;
 
 function App() {
   const [userType, setUserType] = useState(sessionStorage.getItem("userType"));
@@ -515,6 +515,10 @@ function App() {
             <Route
               path="/admin/OpeningBalanceReport"
               element={<OpeningBalanceReport />}
+            />
+            <Route
+              path="/login"
+              element={<LoginPage setUserType={setUserType} />}
             />
             <Route
               path="*"
