@@ -154,24 +154,17 @@ const CounterLegerReport = () => {
     };
   }, []);
   const getBankStatementImport = async (controller = new AbortController()) => {
-    try {
-      const res = await axios.get("/details/getOpeningBalanceDate", {
-        signal: controller.signal,
-      });
-      if (res.data.success) {
-        let time = new Date(res.data.result);
-        let sTime = "yy-mm-dd"
-          .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
-          .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
-          .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
-        setSearchData((prev) => ({
-          ...prev,
-          startDate: sTime,
-        }));
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    const res = new Date();
+    let time = new Date(res);
+    time.setDate(time.getDate() - 7);
+    let sTime = "yy-mm-dd"
+      .replace("mm", ("00" + (time?.getMonth() + 1).toString()).slice(-2))
+      .replace("yy", ("0000" + time?.getFullYear().toString()).slice(-4))
+      .replace("dd", ("00" + time?.getDate().toString()).slice(-2));
+    setSearchData((prev) => ({
+      ...prev,
+      startDate: sTime,
+    }));
   };
   const counterList = useMemo(
     () =>
