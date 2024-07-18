@@ -1,4 +1,3 @@
-import "./App.css";
 import { Routes, Route, Navigate } from "react-router-dom";
 import MainAdmin from "./pages/MainAdmin/MainAdmin";
 import RoutesPage from "./pages/Master/Routes";
@@ -61,7 +60,6 @@ import CashRegister from "./pages/QuikAccess/CashRegister";
 import Companies from "./pages/Master/Companies";
 import PerformanceSummary from "./pages/Reports/PerformanceSummary";
 import CounterCharges from "./pages/Reports/CounterCharges";
-import "react-loading-bar/dist/index.css";
 import CounterReport from "./pages/Reports/CounterReport";
 import DeductionsReport from "./pages/Reports/DeductionsReport";
 import AdvanceOrdering from "./users/AdvanceOrdering";
@@ -95,6 +93,8 @@ import SearchTransitionTags from "./pages/Reports/SearchTransitionTangs";
 import CounterNotesPopup from "./pages/AddOrder/CounterNotesPopup";
 import GSTReport from "./pages/Reports/GST";
 import { Tooltip } from "react-tooltip";
+import "./App.css";
+import "react-loading-bar/dist/index.css";
 import 'react-tooltip/dist/react-tooltip.css'
 
 // export const server = "http://localhost:9000";
@@ -515,10 +515,6 @@ function App() {
             <Route
               path="/admin/OpeningBalanceReport"
               element={<OpeningBalanceReport />}
-            />
-            <Route
-              path="/login"
-              element={<LoginPage setUserType={setUserType} />}
             />
             <Route
               path="*"
