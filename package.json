@@ -11,15 +11,11 @@
     "@heroicons/react": "^1.0.6",
     "@mui/icons-material": "^5.8.0",
     "@mui/material": "^5.8.1",
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.2.0",
-    "@testing-library/user-event": "^13.5.0",
     "axios": "^0.27.2",
     "compressorjs": "^1.1.1",
     "file-saver": "^2.0.5",
     "idb": "^7.0.1",
     "react": "^17.0.2",
-    "react-datepicker": "^6.6.0",
     "react-dom": "^17.0.2",
     "react-icons": "^4.12.0",
     "react-idle-timer": "^5.2.0",
@@ -33,7 +29,6 @@
     "react-to-print": "^2.14.7",
     "react-tooltip": "^5.26.4",
     "uuid": "^8.3.2",
-    "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"
   },
   "scripts": {
