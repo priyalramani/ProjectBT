@@ -508,7 +508,7 @@ export const PurchaseInvoiceBilling = async ({
   }
 
   let order_grandtotal = Math.round(
-    +newPriceItems.reduce((a, b) => +a + +b?.item_total, 0) - +deductions.reduce((a, b) => +a + +b?.amount, 0)
+    +newPriceItems.reduce((a, b) => +a + +b?.item_total, 0) + +deductions.reduce((a, b) => +a + +b?.amount, 0)
   );
 
   return {
