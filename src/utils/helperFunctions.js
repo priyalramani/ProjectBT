@@ -115,7 +115,7 @@ export function checkDecimalPlaces(value) {
 
     // Return nothing if there are more than 4 decimal places
     if (decimalPlaces > 4) {
-      return;
+      return parseFloat(value || 0).toFixed(4);
     }
   }
 
@@ -123,7 +123,6 @@ export function checkDecimalPlaces(value) {
   return value;
 }
 export const chcekIfDecimal = (value, digit = 2) => {
-  console.log({ value, isDecimal: value.toString().includes(".") });
   if (value.toString().includes(".")) {
     return parseFloat(value || 0).toFixed(digit);
   } else {
