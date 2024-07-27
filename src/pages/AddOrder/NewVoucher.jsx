@@ -90,11 +90,11 @@ export default function NewVoucher() {
       setIsEdit(false);
       setOrder({
         ...data,
-        details: data.details.map((a) => ({
+        details: data.details.map((a, i) => ({
           ...a,
           uuid: a.ledger_uuid,
-          add: a.amount > 0 ? a.amount : 0,
-          sub: a.amount < 0 ? -a.amount : 0,
+          add: a.amount > 0 && (![4, 6].includes(i))? a.amount : i===3 ? -a.amount : 0,
+          sub: a.amount < 0 && i!==3 ? a.amount : 0,
         })),
       });
     }
