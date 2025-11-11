@@ -38,19 +38,18 @@ export default function CashRegister() {
 
   const handlePrint = useReactToPrint({
     content: reactToPrintContent,
-    documentTitle: "Statement",
     removeAfterPrint: true,
   });
 
   const statementContent = useCallback(() => {
-    console.log(statementRef.current);
+   
     if (statementData) return statementRef.current;
     else return <></>;
   }, [statementData]);
 
   const printStatement = useReactToPrint({
     content: statementContent,
-    documentTitle: "Statement",
+    
     removeAfterPrint: true,
   });
 
@@ -101,7 +100,7 @@ export default function CashRegister() {
         "Content-Type": "application/json",
       },
     });
-    console.log("users", response);
+   
     if (response.data.success)
       setUsers(
         response.data.result
@@ -147,7 +146,7 @@ export default function CashRegister() {
       },
     });
     if (response.data.success) {
-      console.log(response);
+     
       setStatementTrip(response.data.result);
       setStatementTrip_uuid(false);
       setTimeout(handlePrint, 2000);
@@ -167,17 +166,17 @@ export default function CashRegister() {
 
   return (
     <>
-      <div className="itemavilablelity">
+      <div className="item-availability">
         <div
-          className="itemavilabelitycontainer"
+          className="item-availability-container"
           style={{ position: "relative" }}
         >
-          <div className="itemavilablelity_header">
+          <div className="item-availability_header">
             <h2>Cash Registrations</h2>
           </div>
 
           <div className="availablecontainer">
-            <div className="itemavilablelitybox">
+            <div className="item-availabilitybox">
               <div
                 className="flex"
                 style={{ justifyContent: "space-between", width: "50%" }}

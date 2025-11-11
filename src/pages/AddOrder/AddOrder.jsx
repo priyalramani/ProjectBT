@@ -1,22 +1,21 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import axios from "axios";
-import { useEffect, useRef, useState, useContext, useMemo } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import Header from "../../components/Header";
 import Sidebar from "../../components/Sidebar";
 import "./index.css";
 import { Billing, AutoAdd } from "../../Apis/functions";
 import { AddCircle as AddIcon } from "@mui/icons-material";
 import { v4 as uuid } from "uuid";
-import Select from "react-select";
+import Select, {components} from "react-select";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { FaSave } from "react-icons/fa";
 import FreeItems from "../../components/FreeItems";
 import DiliveryReplaceMent from "../../components/DiliveryReplaceMent";
-import { IoCheckmarkDoneOutline } from "react-icons/io5";
 import Context from "../../context/context";
 import Prompt from "../../components/Prompt";
-import { get } from "react-scroll/modules/mixins/scroller";
 import { checkDecimalPlaces } from "../../utils/helperFunctions";
+import { getInitialOrderValue } from "../../utils/constants";
 
 const options = {
   priorityOptions: [
@@ -45,38 +44,23 @@ const CovertedQty = (qty, conversion) => {
   return b + ":" + p;
 };
 
-export let getInititalValues = () => ({
-  counter_uuid: "",
-  item_details: [{ uuid: uuid(), b: 0, p: 0, sr: 1 }],
-  item: [],
-  priority: 0,
-  order_type: "I",
-  time_1: 24 * 60 * 60 * 1000,
-  time_2: (24 + 48) * 60 * 60 * 1000,
-  warehouse_uuid: localStorage.getItem("warehouse")
-    ? JSON.parse(localStorage.getItem("warehouse")) || ""
-    : "",
-});
-
 export default function AddOrder() {
   const {
     promptState,
-    setPromptState,
     getSpecialPrice,
     saveSpecialPrice,
     deleteSpecialPrice,
     spcPricePrompt,
     setNotification,
   } = useContext(Context);
-  const [order, setOrder] = useState(getInititalValues());
-  const [deliveryPopup, setDeliveryPopup] = useState(false);
+  const [order, setOrder] = useState(getInitialOrderValue());
+  const [paymentModal, setPaymentModal] = useState(false);
   const [counters, setCounters] = useState([]);
-  const [counterFilter] = useState("");
-  const [holdPopup, setHoldPopup] = useState(false);
+  const [freeItemsModal, setFreeItemsModal] = useState(false);
   const [warehouse, setWarehouse] = useState([]);
   const [user_warehouse, setUser_warehouse] = useState([]);
   const [itemsData, setItemsData] = useState([]);
-  const [popup, setPopup] = useState(false);
+  const [orderPreSave, setOrderPreSave] = useState(false);
   const [autoBills, setAutoBills] = useState([]);
   const reactInputsRef = useRef({});
   const [focusedInputId, setFocusedInputId] = useState(0);
@@ -84,24 +68,27 @@ export default function AddOrder() {
   const [autoAdd, setAutoAdd] = useState(false);
   const [company, setCompanies] = useState([]);
   const [companyFilter, setCompanyFilter] = useState("all");
-  const [remarks, setRemarks] = useState("");
+  const [lockedCounterRemarks, setLockedCounterRemarks] = useState("");
+
   const fetchCompanies = async () => {
-    const cachedData = localStorage.getItem('companiesData');
+    const cachedData = localStorage.getItem("companiesData");
     try {
       if (cachedData) {
         setCompanies(JSON.parse(cachedData));
       } else {
         const response = await axios.get("/companies/getCompanies");
         if (response?.data?.result?.[0]) {
-          localStorage.setItem('companiesData', JSON.stringify(response.data.result));
+          localStorage.setItem(
+            "companiesData",
+            JSON.stringify(response.data.result)
+          );
           setCompanies(response.data.result);
         }
       }
     } catch (error) {
-      console.log(error);
     }
   };
-  
+
   const GetWarehouseList = async () => {
     const response = await axios({
       method: "get",
@@ -162,19 +149,30 @@ export default function AddOrder() {
     const response = await axios({
       method: "get",
       url: "/items/GetItemStockList/" + order.warehouse_uuid,
-
       headers: {
         "Content-Type": "application/json",
       },
     });
-    if (response.data.success) setItemsData(response.data.result);
+    if (response.data.success) setItemsData(
+        response.data.result
+        ?.sort((a, b) => a?.item_title?.localeCompare(b.item_title))
+        ?.map(i => {
+          const companyJson = company?.find((b) => b.company_uuid === i.company_uuid)
+          return {
+            ...i,
+            company_title: companyJson?.company_title,
+            label: i.item_title + " " + companyJson?.company_title,
+            value: i.item_uuid
+          }
+        })
+      )
   };
 
   const getCounter = async () => {
     const response = await axios({
       method: "get",
       url: "/counters/GetCounterList",
-
+      params: {filterHidden:true},
       headers: {
         "Content-Type": "application/json",
       },
@@ -191,9 +189,9 @@ export default function AddOrder() {
   }, []);
 
   useEffect(() => {
-    console.log({ order });
-    if (order?.warehouse_uuid) getItemsData();
-  }, [order.warehouse_uuid]);
+    if (order?.warehouse_uuid && company?.length > 0) getItemsData();
+  }, [order.warehouse_uuid, company]);
+
   useEffect(() => {
     if (order?.counter_uuid) {
       const counterData = counters.find(
@@ -204,29 +202,28 @@ export default function AddOrder() {
           let item_rate = counterData?.company_discount?.find(
             (a) => a.company_uuid === item.company_uuid
           )?.item_rate;
-          console.log({ item_rate, item_title: item.item_title });
           let item_price = item.item_price;
-          if (item_rate === "a") item_price = item.item_price_a;
-          if (item_rate === "b") item_price = item.item_price_b;
-          if (item_rate === "c") item_price = item.item_price_c;
-
-          return { ...item, item_price };
+          if (item_rate === "a") item_price = item.item_price_a || 0;
+          else if (item_rate === "b") item_price = item.item_price_b || 0;
+          else if (item_rate === "c") item_price = item.item_price_c || 0;
+          else if (item_rate === "d") item_price = item.item_price_d || 0;
+          else item_rate = null
+          return { ...item, item_rate, item_price };
         })
       );
     }
   }, [order.counter_uuid]);
 
-  const setQuantity = () => {
-    console.count("qty_details");
-    setOrder((prev) => ({
-      ...prev,
-      item_details: prev.item_details.map((a) => ({
-        ...a,
-        b: +a.b + parseInt((+a.p || 0) / +a.conversion || 0),
-        p: a.p ? +a.p % +a.conversion : 0,
-      })),
-    }));
-  };
+  // const setQuantity = () => {
+  //   setOrder((prev) => ({
+  //     ...prev,
+  //     item_details: prev.item_details.map((a) => ({
+  //       ...a,
+  //       b: +a.b + parseInt((+a.p || 0) / +a.conversion || 0),
+  //       p: a.p ? +a.p % +a.conversion : 0,
+  //     })),
+  //   }));
+  // };
 
   const onSubmit = async (type) => {
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
@@ -288,6 +285,7 @@ export default function AddOrder() {
           a.item_price ||
           a.price,
         gst_percentage: a.item_gst,
+        css_percentage: a.item_css,
         status: 0,
         price: a.price || a.item_price || 0,
       })),
@@ -369,7 +367,6 @@ export default function AddOrder() {
     data.time_1 = data.time_1 + Date.now();
     data.time_2 = data.time_2 + Date.now();
 
-    console.log("orderJSon", data);
 
     const response = await axios({
       method: "post",
@@ -379,20 +376,19 @@ export default function AddOrder() {
         "Content-Type": "application/json",
       },
     });
-    console.log(response);
     if (response.data.success) {
       // window.location.reload();
-      setOrder(getInititalValues());
+      setOrder(getInitialOrderValue());
       getCounter();
       setItemsData([]);
       setEditPrices([]);
       setAutoAdd(false);
-      setPopup(false);
+      setOrderPreSave(false);
       setAutoBills([]);
-      setDeliveryPopup(false);
-      setHoldPopup(false);
+      setPaymentModal(false);
+      setFreeItemsModal(false);
       setFocusedInputId("");
-      setRemarks("");
+      setLockedCounterRemarks("");
       setCompanyFilter("all");
       getItemsData();
       getAutoBill();
@@ -403,37 +399,30 @@ export default function AddOrder() {
     }
   };
 
-  const callBilling = async (type = {}) => {
-    const getType = (code, match = true) =>
-      ["Estimate", "Invoice"]?.find((i) => (i[0] === code) === match);
-
-    if (!order.item_details.filter((a) => a.item_uuid).length) return;
+  const preBillingFlag = () => {
+    if (!order.item_details.filter((a) => a.item_uuid).length) return false;
     else if (
       order?.item_details
         .filter((a) => a.item_uuid)
         ?.some((i) => i.billing_type !== order?.order_type)
-    )
-      return setPromptState({
-        message: `${getType(
-          order?.order_type,
-          false
-        )} items are not allowed in ${getType(order?.order_type)} order type.`,
-        actions: [
-          {
-            label: "Ok",
-            classname: "text-btns",
-            action: () => setPromptState(null),
-          },
-        ],
+    ) {
+      setNotification({
+        message: "Invoice and Estimate together not allowed",
+        success: false,
       });
+      return false
+    }
 
-    setPopup(true);
+    return true
+  }
+  const callBilling = async (type = {}) => {
+    if (!preBillingFlag()) return
+
     let counter = counters.find((a) => order.counter_uuid === a.counter_uuid);
     let time = new Date();
     let autoBilling = await Billing({
       creating_new: 1,
       new_order: 1,
-      order_uuid: order?.order_uuid,
       invoice_number: `${order?.order_type}${order?.invoice_number}`,
       replacement: order.replacement,
       adjustment: order.adjustment,
@@ -444,7 +433,6 @@ export default function AddOrder() {
         stage: 1,
         user_uuid: localStorage.getItem("user_uuid"),
         time: time.getTime(),
-
         type: "NEW",
       },
       add_discounts: true,
@@ -583,14 +571,41 @@ export default function AddOrder() {
       }));
     }
   };
+
   const chcekIfDecimal = (value) => {
-    console.log({ value, isDecimal: value.toString().includes(".") });
     if (value.toString().includes(".")) {
       return parseFloat(value || 0).toFixed(2);
     } else {
       return value;
     }
   };
+
+  const constructItem = (item_uuid) => {
+		const itemData = itemsData.find(a => a.item_uuid === item_uuid)
+    if (!itemData) return
+    const p_price = +getSpecialPrice(counters, itemData, order?.counter_uuid)?.price || itemData.item_price
+
+		const constructedItem = {
+			...itemData,
+			p_price,
+			b_price: Math.floor(p_price * itemData.conversion || 0),
+      charges_discount: [
+        { title: "dsc1", value: 0 },
+        { title: "dsc2", value: 0 },
+      ],
+		}
+		return constructedItem
+	}
+
+  const handleFreeItems = ({item_details, newFreeItems}) => {
+		setOrder(prev => ({
+			...prev,
+			item_details: item_details
+			.concat(newFreeItems.map(i => ({ ...constructItem(i.uuid), ...i  })))
+		}))
+		setFreeItemsModal(false)
+	}
+
   return (
     <>
       <Sidebar />
@@ -610,20 +625,13 @@ export default function AddOrder() {
                   <Select
                     ref={(ref) => (reactInputsRef.current["0"] = ref)}
                     options={counters
-                      ?.filter(
-                        (a) =>
-                          !counterFilter ||
-                          a.counter_title
-                            ?.toLocaleLowerCase()
-                            ?.includes(counterFilter.toLocaleLowerCase())
-                      )
                       .map((a) => ({
                         value: a.counter_uuid,
                         label: a.counter_title + " , " + a.route_title,
                         isHighlighted: a.status === 2 ? a.remarks : "",
                       }))}
                     onChange={(doc) => {
-                      if (doc?.isHighlighted) setRemarks(doc?.isHighlighted);
+                      if (doc?.isHighlighted) setLockedCounterRemarks(doc?.isHighlighted);
                       else
                         setOrder((prev) => ({
                           ...prev,
@@ -648,22 +656,6 @@ export default function AddOrder() {
                     placeholder="Select"
                   />
                 </div>
-
-                {order.counter_uuid ? (
-                  <button
-                    className="theme-btn"
-                    style={{
-                      width: "max-content",
-                      position: "fixed",
-                      right: "100px",
-                    }}
-                    onClick={() => setHoldPopup("Summary")}
-                  >
-                    Free
-                  </button>
-                ) : (
-                  ""
-                )}
               </div>
               <div className="inputGroup" style={{ width: "100px" }}>
                 <label htmlFor="Warehouse">Warehouse</label>
@@ -776,6 +768,15 @@ export default function AddOrder() {
                   />
                 </div>
               </div>
+              {order.counter_uuid ? (
+                <button
+                  className="theme-btn order-total"
+                  style={{marginTop:"auto",width:"fit-content"}}
+                  onClick={() => setFreeItemsModal(true)}
+                >
+                  Free
+                </button>
+              ) : null}
             </div>
 
             <div
@@ -792,10 +793,7 @@ export default function AddOrder() {
                     <th className="pa2 tc bb b--black-20 ">Price (box)</th>
                     <th className="pa2 tc bb b--black-20 ">Dsc1</th>
                     <th className="pa2 tc bb b--black-20 ">Dsc2</th>
-
-                    <th className="pa2 tc bb b--black-20 ">Special Price</th>
-                    <th className="pa2 tc bb b--black-20 ">Item Total</th>
-
+                    <th className="pa2 tc bb b--black-20 ">Special Prc</th>
                     <th className="pa2 tc bb b--black-20 "></th>
                   </tr>
                 </thead>
@@ -817,120 +815,36 @@ export default function AddOrder() {
                             style={{ width: "300px" }}
                           >
                             <Select
-                              ref={(ref) =>
-                                (reactInputsRef.current[item.uuid] = ref)
-                              }
+                              ref={(ref) => (reactInputsRef.current[item.uuid] = ref)}
                               id={"item_uuid" + item.uuid}
                               className="order-item-select"
-                              options={itemsData
-                                .filter(
-                                  (a) =>
-                                    !order?.item_details.filter(
-                                      (b) => a.item_uuid === b.item_uuid
-                                    ).length &&
-                                    a.status !== 0 &&
-                                    (companyFilter === "all" ||
-                                      a.company_uuid === companyFilter)
-                                )
-                                .sort((a, b) =>
-                                  a?.item_title?.localeCompare(b.item_title)
-                                )
-                                .map((a, j) => ({
-                                  value: a.item_uuid,
-                                  label:
-                                    a.item_title +
-                                    "______" +
-                                    a.mrp +
-                                    `, ${
-                                      company.find(
-                                        (b) => b.company_uuid === a.company_uuid
-                                      )?.company_title
-                                    }` +
-                                    (a.qty > 0
-                                      ? " _______[" +
-                                        CovertedQty(a.qty || 0, a.conversion) +
-                                        "]"
-                                      : ""),
-                                  key: a.item_uuid,
-                                  qty: a.qty,
-                                }))}
+                              components={{ MenuList: ItemsMenuList, Option: ItemOption }}
                               styles={{
-                                option: (a, b) => {
-                                  return {
-                                    ...a,
-                                    color:
-                                      b.data.qty === 0
-                                        ? ""
-                                        : b.data.qty > 0
-                                        ? "#4ac959"
-                                        : "red",
-                                  };
-                                },
+                                option:styles => ({
+                                  ...styles,
+                                  padding: 0
+                                })
                               }}
+                              options={
+                                itemsData.filter(
+                                  (a) =>
+                                    !order?.item_details.filter((b) => a.item_uuid === b.item_uuid).length &&
+                                    a.status !== 0 &&
+                                    (companyFilter === "all" || a.company_uuid === companyFilter) &&
+                                    a.billing_type === order?.order_type
+                                )
+                              }
                               onChange={(e) => {
                                 setOrder((prev) => ({
                                   ...prev,
-                                  item_details: prev.item_details.map((a) => {
-                                    if (a.uuid === item.uuid) {
-                                      let item = itemsData.find(
-                                        (b) => b.item_uuid === e.value
-                                      );
-                                      const p_price =
-                                        +getSpecialPrice(
-                                          counters,
-                                          item,
-                                          order?.counter_uuid
-                                        )?.price || item.item_price;
-                                      return {
-                                        ...a,
-                                        ...item,
-                                        p_price,
-                                        charges_discount: [
-                                          {
-                                            title: "dsc1",
-                                            value: 0,
-                                          },
-                                          {
-                                            title: "dsc2",
-                                            value: 0,
-                                          },
-                                        ],
-                                        b_price: Math.floor(
-                                          p_price * item.conversion || 0
-                                        ),
-                                      };
-                                    } else return a;
-                                  }),
+                                  item_details: prev.item_details.map((a) => (a.uuid === item.uuid) ? {
+                                      ...a,
+                                      ...constructItem(e.value),
+                                    } : a),
                                 }));
                                 jumpToNextIndex(`selectContainer-${item.uuid}`);
                               }}
-                              value={
-                                itemsData
-
-                                  .filter((a) => a.item_uuid === item.uuid)
-                                  .map((a, j) => ({
-                                    value: a.item_uuid,
-                                    label:
-                                      a.item_title +
-                                      "______" +
-                                      a.mrp +
-                                      `, ${
-                                        company.find(
-                                          (b) =>
-                                            b.company_uuid === a.company_uuid
-                                        )?.company_title
-                                      }` +
-                                      (a.qty > 0
-                                        ? "[" +
-                                          CovertedQty(
-                                            a.qty || 0,
-                                            a.conversion
-                                          ) +
-                                          "]"
-                                        : ""),
-                                    key: a.item_uuid,
-                                  }))[0]
-                              }
+                              value={itemsData.filter((a) => a.item_uuid === item.uuid)[0]}
                               openMenuOnFocus={true}
                               autoFocus={
                                 focusedInputId ===
@@ -1032,6 +946,7 @@ export default function AddOrder() {
                             type="text"
                             className="numberInput"
                             min={1}
+                            style={{width:"100px"}}
                             onWheel={(e) => e.preventDefault()}
                             value={item?.b_price}
                             onChange={(e) => {
@@ -1158,7 +1073,7 @@ export default function AddOrder() {
                           className="ph2 pv1 tc bb b--black-20 bg-white"
                           style={{ textAlign: "center" }}
                         >
-                          {console.log(item)}
+                          
                           <input
                             style={{ width: "100px" }}
                             type="number"
@@ -1217,22 +1132,19 @@ export default function AddOrder() {
                           />
                         </td>
                         <td className="ph2 pv1 tc bb b--black-20 bg-white">
-                          {+item?.item_price !== +item?.p_price &&
-                            (+getSpecialPrice(
-                              counters,
-                              item,
-                              order?.counter_uuid
-                            )?.price === +item?.p_price ? (
-                              <IoCheckmarkDoneOutline
-                                className="table-icon checkmark"
-                                onClick={() =>
-                                  spcPricePrompt(
-                                    item,
-                                    order?.counter_uuid,
-                                    setCounters
-                                  )
-                                }
-                              />
+                          {+item?.item_price !== +item?.p_price
+                            ? (+getSpecialPrice(counters,item,order?.counter_uuid)?.price === +item?.p_price ? (
+                                <span
+                                  className="table-icon checkmark"
+                                  style={{margin:'auto',textAlign:'center'}}
+                                  onClick={() =>
+                                    spcPricePrompt(
+                                      item,
+                                      order?.counter_uuid,
+                                      setCounters
+                                    )
+                                  }
+                                >{"S"}</span>
                             ) : (
                               <FaSave
                                 className="table-icon"
@@ -1245,13 +1157,9 @@ export default function AddOrder() {
                                   )
                                 }
                               />
-                            ))}
-                        </td>
-                        <td
-                          className="ph2 pv1 tc bb b--black-20 bg-white"
-                          style={{ textAlign: "center" }}
-                        >
-                          {item?.item_total || ""}
+                            )) : item.item_rate
+                            ? <span className="table-icon checkmark" style={{margin:'auto',textAlign:'center'}}>{item.item_rate?.toUpperCase()}</span>
+                            : null}
                         </td>
                         <td
                           className="ph2 pv1 tc bb b--black-20 bg-white"
@@ -1267,7 +1175,6 @@ export default function AddOrder() {
                                   (a) => a.uuid !== item.uuid
                                 ),
                               });
-                              //console.log(item);
                             }}
                           />
                         </td>
@@ -1287,7 +1194,7 @@ export default function AddOrder() {
                       >
                         <AddIcon
                           sx={{ fontSize: 40 }}
-                          style={{ color: "#4AC959", cursor: "pointer" }}
+                          style={{ color: "#32bd33", cursor: "pointer" }}
                         />
                       </td>
                     </tr>
@@ -1369,12 +1276,7 @@ export default function AddOrder() {
                     return;
                   }
                   let empty_price = order.item_details
-                    .filter((a) => a.item_uuid && !a.free && a.state !== 3)
-                    .map((a) => ({
-                      ...a,
-                      is_empty: !+a.p_price,
-                    }))
-                    .find((a) => a.is_empty);
+                    .filter((a) => a.item_uuid && !a.free && a.state !== 3 && !+a.p_price)?.[0]
                   if (empty_price) {
                     setNotification({
                       message: `item ${empty_price?.item_title} has 0 price.`,
@@ -1387,7 +1289,10 @@ export default function AddOrder() {
                     ...prev,
                     item_details: prev.item_details.filter((a) => a.item_uuid),
                   }));
-                  callBilling();
+                  if (preBillingFlag()) {
+                    setOrderPreSave(true)
+                    callBilling();
+                  }
                 }}
               >
                 Bill
@@ -1417,24 +1322,22 @@ export default function AddOrder() {
         </div>
       </div>
       {promptState ? <Prompt {...promptState} /> : ""}
-      {holdPopup ? (
+      {freeItemsModal ? (
         <FreeItems
-          onSave={() => setHoldPopup(false)}
+          close={() => setFreeItemsModal(false)}
+          updateOrder={handleFreeItems}
           orders={order}
-          holdPopup={holdPopup}
           itemsData={itemsData}
-          setOrder={setOrder}
         />
       ) : (
         ""
       )}
-      {popup ? (
-        <NewUserForm
-          onClose={() => setPopup(false)}
+      {orderPreSave ? (
+        <OrderPreSave
+          onClose={() => setOrderPreSave(false)}
           onSubmit={(e) => {
-            //console.log(e);
             setAutoAdd(e.autoAdd);
-            if (e.stage === 4) setDeliveryPopup(true);
+            if (e.stage === 4) setPaymentModal(true);
             else {
               onSubmit(e);
             }
@@ -1443,9 +1346,9 @@ export default function AddOrder() {
       ) : (
         ""
       )}
-      {deliveryPopup ? (
-        <DiliveryPopup
-          onSave={() => setDeliveryPopup(false)}
+      {paymentModal ? (
+        <PaymentModal
+          onSave={() => setPaymentModal(false)}
           postOrderData={(obj) => onSubmit({ stage: 5, autoAdd, obj })}
           setSelectedOrder={setOrder}
           order={order}
@@ -1456,20 +1359,16 @@ export default function AddOrder() {
       ) : (
         ""
       )}
-      {remarks ? (
+      {lockedCounterRemarks ? (
         <div className="overlay">
           <div
             className="modal"
-            style={{
-              height: "fit-content",
-              width: "max-content",
-              padding: "50px",
-              backgroundColor: "red",
-            }}
+            style={{ height: "fit-content", width: "max-content" }}
           >
-            <h3>{remarks}</h3>
-
-            <button onClick={() => setRemarks(false)} className="closeButton">
+            <div style={{padding: "30px", margin:'10px', border:'4px solid red',borderRadius:'14px'}}>
+                <h3>{lockedCounterRemarks}</h3>
+            </div>
+            <button onClick={() => setLockedCounterRemarks(false)} className="closeButton">
               x
             </button>
           </div>
@@ -1481,7 +1380,7 @@ export default function AddOrder() {
   );
 }
 
-function NewUserForm({ onSubmit, onClose }) {
+function OrderPreSave({ onSubmit, onClose }) {
   const [data, setData] = useState({ autoAdd: false, stage: 1 });
   return (
     <div className="overlay">
@@ -1508,7 +1407,7 @@ function NewUserForm({ onSubmit, onClose }) {
             >
               <div className="formGroup">
                 <div className="row">
-                  <h3> Auto Add</h3>
+                  <h3>Auto Add</h3>
                   <div onClick={() => setData({ ...data, autoAdd: true })}>
                     <input type="radio" checked={data.autoAdd} />
                     Yes
@@ -1554,7 +1453,8 @@ function NewUserForm({ onSubmit, onClose }) {
     </div>
   );
 }
-function DiliveryPopup({
+
+function PaymentModal({
   onSave,
   postOrderData,
   credit_allowed,
@@ -1579,8 +1479,8 @@ function DiliveryPopup({
     });
   }, [data]);
   const GetPaymentModes = async () => {
-    const cachedData = localStorage.getItem('paymentModesData');
-  
+    const cachedData = localStorage.getItem("paymentModesData");
+
     if (cachedData) {
       setPaymentModes(JSON.parse(cachedData));
     } else {
@@ -1591,9 +1491,12 @@ function DiliveryPopup({
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.data.success) {
-        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "paymentModesData",
+          JSON.stringify(response.data.result)
+        );
         setPaymentModes(response.data.result);
       }
     }
@@ -1656,7 +1559,6 @@ function DiliveryPopup({
       adjustment_remarks: data?.adjustment_remarks || "",
     };
     let modeTotal = modes.map((a) => +a.amt || 0)?.reduce((a, b) => a + b);
-    //console.log(
     // Tempdata?.order_grandtotal,
     //   +(+modeTotal + (+outstanding?.amount || 0))
     // );
@@ -1919,3 +1821,57 @@ function DiliveryPopup({
     </>
   );
 }
+
+const ItemsMenuList = ({ children, ...props }) => (
+  <components.MenuList {...props} style={{maxHeight:'50vh',overflow:'auto'}} onClick={(e) => {
+    const target = e.target.closest("[data-item-uuid]")
+    if (target) {
+      props.setValue({
+        label: target.getAttribute("data-item-title"),
+        value: target.getAttribute("data-item-uuid")
+      })
+    }
+  }}>
+    {children}
+  </components.MenuList>
+)
+
+const ItemOption = ({ data, isFocused, ...props }) => (
+    <components.Option
+        {...props}
+        data-item-title={data.label}
+        data-item-uuid={data.value}
+      >
+      <div style={{
+        padding: "5px 10px 5px 16px ",
+        borderBottom: "0.5px solid #dadada",
+        background:isFocused?'#2196f33d':'white',
+        cursor: "pointer",
+        position:'relative'
+      }}>
+        <div
+          style={{
+            background:data.qty === 0 ? "transparent" : data.qty > 0 ? "var(--mainColor)" : "red",
+            width:'6px',
+            height:'calc(100% + 1px)',
+            position:'absolute',
+            top:"-1px",
+            left:0,
+          }} />
+        <div style={{ marginBottom: "2px" }}>
+          <b>{data.item_title}</b>
+        </div>
+        <div style={{ fontSize: "15px" }}>
+          {data.mrp&&<span style={{ marginRight: "10px" }}>₹{data.mrp}</span>}
+          <span style={{ marginRight: "10px" }}>
+            {data.company_title}
+          </span>
+          {data.qty > 0 && (
+            <span>
+              [{CovertedQty(data.qty, data.conversion)}]
+            </span>
+          )}
+        </div>
+      </div>
+    </components.Option>
+  )

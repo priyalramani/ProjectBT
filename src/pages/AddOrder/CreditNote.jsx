@@ -85,7 +85,7 @@ export default function CreditNotes() {
         }
       }
     } catch (error) {
-      console.log(error);
+     
     }
   };
   useEffect(() => {
@@ -123,7 +123,7 @@ export default function CreditNotes() {
           }
         })
         .catch((err) => {
-          console.log(err);
+         
         });
     }
     return () => controller.abort();
@@ -214,11 +214,12 @@ export default function CreditNotes() {
           let item_rate = counterData?.company_discount?.find(
             (a) => a.company_uuid === item.company_uuid
           )?.item_rate;
-          console.log({ item_rate, item_title: item.item_title });
+         
           let item_price = item.item_price;
           if (item_rate === "a") item_price = item.item_price_a;
           if (item_rate === "b") item_price = item.item_price_b;
           if (item_rate === "c") item_price = item.item_price_c;
+          if (item_rate === "d") item_price = item.item_price_d;
 
           return { ...item, item_price };
         })
@@ -236,7 +237,7 @@ export default function CreditNotes() {
         "Content-Type": "application/json",
       },
     });
-    console.log(response);
+   
     if (response.data.success) {
       if (order_uuid) {
         setNotification({
@@ -268,6 +269,7 @@ export default function CreditNotes() {
         item_price: a.p_price,
         price: a.p_price,
         gst_percentage: a.item_gst,
+        css_percentage: a.item_css
       })),
     });
 
@@ -683,7 +685,7 @@ export default function CreditNotes() {
                                       b.data.qty === 0
                                         ? ""
                                         : b.data.qty > 0
-                                        ? "#4ac959"
+                                        ? "#32bd33"
                                         : "red",
                                   };
                                 },
@@ -977,7 +979,7 @@ export default function CreditNotes() {
                                   (a) => a.uuid !== item.uuid
                                 ),
                               });
-                              //console.log(item);
+                              
                             }}
                           />
                         </td>
@@ -999,7 +1001,7 @@ export default function CreditNotes() {
                       >
                         <AddIcon
                           sx={{ fontSize: 40 }}
-                          style={{ color: "#4AC959", cursor: "pointer" }}
+                          style={{ color: "#32bd33", cursor: "pointer" }}
                         />
                       </td>
                     </tr>
@@ -1031,13 +1033,7 @@ export default function CreditNotes() {
                       is_empty: !((+a.p || 0) + (+a.b || 0) + (+a.free || 0)),
                     }))
                     .find((a) => a.is_empty);
-                  console.log({
-                    empty_item,
-                    order: order.item_details.map((a) => ({
-                      ...a,
-                      is_empty: !(+a.p + +a.b + +a.free),
-                    })),
-                  });
+                  
                   if (empty_item) {
                     setNotification({
                       message: `${empty_item.item_title} has 0 Qty.
@@ -1412,7 +1408,7 @@ export default function CreditNotes() {
                       >
                         <AddIcon
                           sx={{ fontSize: 40 }}
-                          style={{ color: "#4AC959", cursor: "pointer" }}
+                          style={{ color: "#32bd33", cursor: "pointer" }}
                         />
                       </div>
                     </td>

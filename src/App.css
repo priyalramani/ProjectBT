@@ -143,20 +143,22 @@ svg.table-icon {
 }
 
 .table-icon.checkmark {
-	padding: 8px;
-	background: none;
+	background: #32bd33;
 	border-radius: 50%;
-	display: block;
-	width: 36px;
-	height: 36px;
-	color: #4ac959;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 33px;
+	height: 33px;
+	color: white;
 	cursor: pointer;
+	line-height: 0.9em;
 	transition: all 0.5s ease;
+	border: 1px solid transparent;
 }
 
 .table-icon.checkmark:hover {
-	background: #4ac95921;
-	border: 1px solid #4ac95912;
+	border-color:#4ac95912;
 	scale: 1.2;
 }
 
@@ -175,14 +177,15 @@ svg.table-icon {
 	width: 50vw;
 	translate: calc(50vw - 50%) calc(50vh - 50%);
 	background: white;
-	padding: 18px 22px;
-	border-radius: 5px;
+	padding: 22px 28px;
+	border-radius: 16px;
 	min-width: 320px;
 	position: relative;
 	overflow: hidden;
 }
 
-.prompt #spinner-wrapper {
+.prompt #spinner-wrapper,
+#spinner-overlay-wrapper {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -195,12 +198,12 @@ svg.table-icon {
 }
 
 .prompt h2 {
-	font-size: 20px;
+	font-size: 24px;
 }
 
 .prompt p {
-	font-size: 1rem;
-	margin: 5px 0 30px;
+	font-size: 1.25rem;
+	margin: 8px 0 36px;
 }
 
 .prompt-actions {
@@ -212,9 +215,18 @@ svg.table-icon {
 .prompt-actions button {
 	border: none;
 	background: none;
-	padding: 8px 14px;
-	border-radius: 5px;
-	font-size: 1rem;
+	padding: 12px 20px;
+	border-radius: 8px;
+	font-size: 1.1rem;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 500;
+}
+
+.prompt-actions button:disabled {
+	opacity: .7;
+	cursor: unset;
 }
 
 .prompt-actions button.black {
@@ -223,18 +235,20 @@ svg.table-icon {
 }
 
 .prompt-actions button.cancel {
-	border: 1px solid red;
-	color: red;
+	color: white;
+	background: red;
+	font-weight: 600;
 }
 
 .prompt-actions button.confirm {
-	background: #44cd4a;
+	background: var(--mainColor);
 	color: white;
+	font-weight: 600;
 }
 
 .prompt-actions button.backSafely {
-	border: 1px solid #44cd4a;
-	color: #44cd4a;
+	border: 1px solid var(--mainColor);
+	color: var(--mainColor);
 }
 
 .prompt-actions button.delete {
@@ -672,7 +686,9 @@ label {
 .nav-menu-search > input {
 	border: none;
 	border-bottom: 1px solid darkgray;
+	background: rgb(232, 237, 233);
 	padding: 14px;
+	padding-top: 18px;
 	width: 100%;
 	outline: none;
 }
@@ -704,7 +720,7 @@ label {
 		transform: rotate(360deg);
 	}
 }
-.hoverLink:hover{
+.hoverLink:hover {
 	text-decoration: underline;
 	color: blue;
 }
@@ -719,33 +735,33 @@ label {
 	z-index: 9999999999999999999999;
 	opacity: 0;
 	transition: opacity 0.3s ease;
-  }
-  
-  .loading-bar.show {
+}
+
+.loading-bar.show {
 	opacity: 1;
-  }
-  
-  .progress {
+}
+
+.progress {
 	height: 100%;
 	width: 0%;
 	background-color: #44cd4a; /* Progress bar color */
 	animation: progressAnimation 2s linear infinite; /* Animation */
-  }
-  
-  @keyframes progressAnimation {
+}
+
+@keyframes progressAnimation {
 	0% {
-	  width: 0%;
+		width: 0%;
 	}
 	100% {
-	  width: 100%;
+		width: 100%;
 	}
-  }
-  .tooltip {
+}
+.tooltip {
 	position: relative;
 	display: inline-block;
-  }
-  
-  .tooltip .tooltiptext {
+}
+
+.tooltip .tooltiptext {
 	visibility: hidden;
 	width: 120px;
 	background-color: black;
@@ -760,10 +776,9 @@ label {
 	margin-left: -60px; /* Center the tooltip */
 	opacity: 0;
 	transition: opacity 0.3s;
-  }
-  
-  .tooltip:hover .tooltiptext {
+}
+
+.tooltip:hover .tooltiptext {
 	visibility: visible;
 	opacity: 1;
-  }
-  
+}

@@ -93,8 +93,8 @@ export default function NewVoucher() {
         details: data.details.map((a, i) => ({
           ...a,
           uuid: a.ledger_uuid,
-          add: a.amount > 0 && (![4, 6].includes(i))? a.amount : i===3 ? -a.amount : 0,
-          sub: a.amount < 0 && i!==3 ? a.amount : 0,
+          add: a.amount > 0 ? Math.abs(a.amount) : 0,
+          sub: a.amount < 0 ? Math.abs(a.amount) : 0,
         })),
       });
     }
@@ -313,7 +313,7 @@ export default function NewVoucher() {
     return false;
   };
 
-  console.log(order);
+ 
 
   return (
     <>
@@ -370,7 +370,7 @@ export default function NewVoucher() {
                       )
                         onSubmit({voucher_date:getMidnightTimestamp(e.target.value)});
                     }}
-                    value={order.voucher_date?getFormateDate(new Date(+order.voucher_date)):""}
+                    value={order.voucher_date?getFormateDate(new Date(+order.voucher_date)):0}
                     placeholder="Search Counter Title..."
                     className="searchInput"
                     pattern="\d{4}-\d{2}-\d{2}"
@@ -382,15 +382,15 @@ export default function NewVoucher() {
                     onClick={(e) => {
                       setOrder((prev) => ({
                         ...prev,
-                        voucher_date: "",
+                        voucher_date: 0,
                       }));
                       if (
                         order.type === "SALE_ORDER" ||
                         order.type === "RECEIPT_ORDER"
                       )
-                        onSubmit({voucher_date:""});
+                        onSubmit({voucher_date:0});
                     }}
-                    value={order.voucher_date?getFormateDate(new Date(+order.voucher_date)):""}
+                    value={order.voucher_date?getFormateDate(new Date(+order.voucher_date)):0}
    
                     className="theme-btn"
                
@@ -685,7 +685,7 @@ export default function NewVoucher() {
                                   (a) => a.uuid !== item.uuid
                                 ),
                               }));
-                              //console.log(item);
+                              
                             }}
                           />
                         )}
@@ -708,7 +708,7 @@ export default function NewVoucher() {
                     >
                       <AddIcon
                         sx={{ fontSize: 40 }}
-                        style={{ color: "#4AC959", cursor: "pointer" }}
+                        style={{ color: "#32bd33", cursor: "pointer" }}
                       />
                     </td>
                   </tr>

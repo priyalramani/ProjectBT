@@ -15,7 +15,7 @@ const ChangeStage = ({
   setIsLoading,
   setNotification,
 }) => {
-  const [data, setData] = useState({ stage: stage === 3 ? 3.5 : stage + 1 });
+  const [data, setData] = useState({ stage: stage === 3 ? 3.5 : stage === 3.5 ? 4 : stage + 1 });
   const [deliveryPopup, setDeliveryPopup] = useState(false);
   const [selectedWarehouseOrders, setSelectedWarehouseOrders] = useState([]);
   const [selectedWarehouseOrder, setSelectedWarehouseOrder] = useState(false);
@@ -23,7 +23,7 @@ const ChangeStage = ({
   const [diliveredUser, setDiliveredUser] = useState("");
   const { submitBulkOrders } = useContext(context);
   useEffect(() => {
-    console.log(selectedWarehouseOrders);
+   
     if (selectedWarehouseOrders?.length) {
       setSelectedWarehouseOrder(selectedWarehouseOrders[0]);
     } else {
@@ -40,7 +40,7 @@ const ChangeStage = ({
       },
     });
     if (response.data.success) {
-      console.log("dilivereduser", response.data.result[0]?.users[0]);
+     
       if (response.data.result[0]?.users[0])
         setDiliveredUser(response.data.result[0]?.users[0]);
     }
@@ -64,17 +64,17 @@ const ChangeStage = ({
         +warehouse_uuid !== 0 &&
         warehouse_uuid !== orderData.warehouse_uuid
       ) {
-        console.log(orderData.warehouse_uuid);
+       
         if (!orderData.warehouse_uuid) {
           updateWarehouse(warehouse_uuid, orderData);
         } else {
-          console.log(warehouse_uuid, orderData);
+         
           data.push({ warehouse_uuid, orderData });
         }
       }
     }
 
-    console.log(data);
+   
     if (data?.length) {
       setSelectedWarehouseOrders(data);
     } else {
@@ -106,7 +106,7 @@ const ChangeStage = ({
       if (response.data.success) {
         clearTimeout(timeout);
         setSelectedWarehouseOrders((prev) => {
-          console.log(prev);
+         
           if (prev?.length === 1) {
             setDeliveryPopup(true);
             return [];
@@ -117,9 +117,10 @@ const ChangeStage = ({
           }
         });
       }
-    } catch (error) {}
+    } catch (error) { console.error(error) }
     setIsLoading(false);
   };
+  console.log({stage:data.stage})
   return (
     <>
       <div className="overlay">
@@ -452,7 +453,7 @@ function DiliveryPopup({
       );
   }, [PaymentModes]);
   const updateBillingAmount = async (selectedOrder) => {
-    console.log(selectedOrder);
+   
     let billingData = await Billing({
       order_uuid: selectedOrder?.order_uuid,
       invoice_number: `${selectedOrder?.order_type}${selectedOrder?.invoice_number}`,
@@ -481,7 +482,7 @@ function DiliveryPopup({
 
   const submitHandler = async () => {
     let controller = new AbortController();
-    console.log({ orders });
+   
     if (isLoading) {
       return;
     }
@@ -944,7 +945,7 @@ function WarehouseUpdatePopup({ popupInfo, updateChanges, onClose }) {
   }, [popupInfo]);
   const submitHandler = async (e) => {
     e.preventDefault();
-    console.log(data, popupInfo);
+   
     updateChanges(data, popupInfo.orderData);
     onClose();
   };

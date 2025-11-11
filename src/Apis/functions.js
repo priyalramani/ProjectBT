@@ -250,16 +250,20 @@ export const Billing = async ({
   new_order,
   coin=0,
 }) => {
+  if (creating_new || new_order) {
+    if (counter?.status === 0) throw new Error("Counter inactive")
+    if (counter?.status === 2) throw new Error("Counter locked, " + counter?.remarks)
+  }
+
   let counterCharges = [];
   let counter_charges = [];
-  console.log("invoice_number", invoice_number);
   try {
     counterCharges = await axios.post(
       `/counterCharges/list`,
       creating_new ? { counter_uuid: counter.counter_uuid } : { invoice_number }
     );
     counterCharges = await counterCharges?.data?.result;
-  } catch (error) {}
+  } catch (error) { console.error(error) }
   let newPriceItems = [];
   for (let item of items) {
     item = { ...item, item_total: 0 };
@@ -293,12 +297,12 @@ export const Billing = async ({
           new_order
         )
     );
-    let price = +(add_discounts || item.edit
+    let price = +((add_discounts || item.edit)
       ? counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
           ?.price || 0
       : 0);
     let special_discount_percentage =
-      add_discounts || item.edit
+      (add_discounts || item.edit)
         ? counter?.item_special_discount?.find(
             (a) => a.item_uuid === item.item_uuid
           )?.discount || 0
@@ -399,9 +403,11 @@ export const Billing = async ({
               : 1),
       edit_price,
     };
+
     let item_special_price =
       counter?.item_special_price?.find((a) => a.item_uuid === item.item_uuid)
         ?.price || 0;
+
     let item_total =
       item.status !== 3
         ? truncateDecimals(
@@ -450,6 +456,7 @@ export const Billing = async ({
         adjustment
       : 0)- coin
   );
+
   let chargesTotal = 0;
   if (counterCharges?.length) {
     counter_charges = counterCharges.map((i) => i.charge_uuid);
@@ -674,7 +681,7 @@ export const audioLoopFunction = ({
             audioLoopFunction({ i, recall, src, callback });
           }, 3000);
       });
-  } catch (error) {}
+  } catch (error) { console.error(error) }
 };
 
 export const audioAPIFunction = ({ speechString, elem_id, callback }) => {

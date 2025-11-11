@@ -1,11 +1,12 @@
 import axios from "axios";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Header from "../../components/Header";
 import { OrderDetails } from "../../components/OrderDetails";
 import Sidebar from "../../components/Sidebar";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { CheckCircle, Close, Download } from "@mui/icons-material";
+import Prompt from "../../components/Prompt";
 const fileExtension = ".xlsx";
 const fileType =
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -18,26 +19,50 @@ const PendingsEntry = () => {
   const [allDoneConfimation, setAllDoneConfimation] = useState(false);
   const [doneDisabled, setDoneDisabled] = useState(false);
   const [excelDownloadPopup, setExcelDownloadPopup] = useState(false);
-
+  const [loading, setLoading] = useState(false); 
   const [counters, setCounters] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
+  const [formatSelectPopup, setFormatSelectPopup] = useState(false)
+  const [promptState, setPromptState] = useState({})
+
+  const showPrompt = async ({ heading, message }) => {
+		setPromptState({
+			active: true,
+			heading: heading,
+			message: message,
+			actions: [
+				{
+					label: "Okay",
+					classname: "confirm",
+					action: () => setPromptState(null)
+				},
+			]
+		})
+	}
+  
   useEffect(() => {
     if (allDoneConfimation) {
       setDoneDisabled(true);
       setTimeout(() => setDoneDisabled(false), 5000);
     }
   }, [allDoneConfimation]);
-  const getOrders = async (controller = new AbortController()) => {
-    const response = await axios({
-      method: "get",
-      url: "/orders/getPendingEntry",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log("users", response);
-    if (response.data.success) setOrders(response.data.result);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef();
+
+  const getOrders = async (page = 1) => {
+    setLoading(true);
+    const response = await axios.get(
+      `/orders/getPendingEntry?page=${page}&limit=300`
+    );
+    if (response.data.success) {
+      setOrders((prevOrders) => [...prevOrders, ...response.data.result]);
+     
+      if (response.data.result.length < 300) {
+        setHasMore(false); // No more data if returned less than limit
+      }
+    }
+    setLoading(false);
   };
   const getCounter = async (controller = new AbortController()) => {
     const response = await axios({
@@ -50,35 +75,37 @@ const PendingsEntry = () => {
     });
     if (response.data.success) setCounters(response.data.result);
   };
-  
+
   const getItemsData = async (controller = new AbortController()) => {
-		const cachedData = localStorage.getItem('itemsData');
-		if (cachedData) {
-			setItemsData(JSON.parse(cachedData));
-		} else {
-		  const response = await axios({
-			method: "get",
-			url: "/items/GetItemList",
-			headers: {
-			  "Content-Type": "application/json",
-			},
-		  });
-		  if (response.data.success) {
-			localStorage.setItem('itemsData', JSON.stringify(response.data.result));
-			setItemsData(response.data.result);
-		  }
-		}
-	  };
-  useEffect(() => {}, []);
+    const cachedData = localStorage.getItem("itemsData");
+    if (cachedData) {
+      setItemsData(JSON.parse(cachedData));
+    } else {
+      const response = await axios({
+        method: "get",
+        url: "/items/GetItemList",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data.success) {
+        localStorage.setItem("itemsData", JSON.stringify(response.data.result));
+        setItemsData(response.data.result);
+      }
+    }
+  };
   useEffect(() => {
     let controller = new AbortController();
-    getOrders(controller);
+
     getItemsData(controller);
     getCounter(controller);
     return () => {
       controller.abort();
     };
   }, []);
+  useEffect(() => {
+    getOrders(page);
+  }, [page]);
   const putOrder = async (invoice_number) => {
     const response = await axios({
       method: "put",
@@ -89,13 +116,15 @@ const PendingsEntry = () => {
       },
     });
     if (response.data.success) {
-      getOrders();
+      setOrders((prev) =>
+        prev.filter((a) => a.invoice_number !== invoice_number)
+      );
       return;
     }
   };
-  const downloadHandler = async () => {
+  const margFormatExport = async () => {
     let sheetData = [];
-    // console.log(sheetData)
+    
     for (let order of selectedOrders?.sort(
       (a, b) => +a.invoice_number - +b.invoice_number
     )) {
@@ -118,7 +147,7 @@ const PendingsEntry = () => {
           Pcs: item.p || 0,
           Free: item.free || 0,
           "Item Price":
-            +(item.edit_price||item.price || itemData?.item_price || 0) *
+            +(item.edit_price || item.price || itemData?.item_price || 0) *
             +(itemData?.conversion || 1),
           "Cash Credit":
             order.modes.filter(
@@ -142,16 +171,122 @@ const PendingsEntry = () => {
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const data = new Blob([excelBuffer], { type: fileType });
     FileSaver.saveAs(data, "Book" + fileExtension);
-    // setSelectedOrders([]);
+  }
+  const odooFormatExport = async () => {
+    const sheetData = [];
+    const missingData = {
+      counterIds:[],
+      itemIds:[],
+    }
+    
+    if (!counters.length) {
+      alert('Counters not found')
+      return
+    }
+    for (const order of selectedOrders
+      .filter((a) => a.replacement)
+      ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
+        const date = new Date(+order.status[0]?.time);
+        const dateStr = [
+          date.getFullYear(),
+          date.getMonth() + 1,
+          date.getDay()
+        ].map(i => i.toString().padStart(2, '0')).join('-')
+        const counter = counters.find(i => i.counter_uuid === order.counter_uuid)
+        
+        if (!counter) continue
+        if (
+          !counter?.odoo_counter_id &&
+          !missingData.counterIds.includes(counter?.counter_title)
+        ) missingData.counterIds.push(counter?.counter_title)
+
+        const oSheet = {
+          "number": order.invoice_number,
+          "invoice_date": dateStr,
+          "partner_id/id": counter?.odoo_counter_id
+        };
+        
+        for (let index = 0; index < order.item_details.length; index++) {
+          const orderItem = order.item_details[index];
+          const item = itemsData.find(i => i.item_uuid === orderItem.item_uuid)
+          const discount = (() => {
+            let sum = 0
+            let prod = 1
+
+            for (const i of orderItem.charges_discount || []) {
+              if (!i.title.toLowerCase().includes('discount')) continue
+              sum += i.value
+              prod *= i.value
+            }
+            
+            if (!sum) return 0
+            return +(sum - prod / 100).toFixed(2)
+          })()
+
+          if (
+            !item.odoo_item_id &&
+            !missingData.itemIds.includes(item.item_title)
+          ) missingData.itemIds.push(item.item_title)
+
+          const iSheet = {
+            ...(index === 0 ? oSheet : {}),
+            "invoice_line_ids/product_id/id": item.odoo_item_id,
+            "invoice_line_ids/quantity": ((+orderItem.q || 0) * +item.conversion) + (+orderItem.p || 0),
+            "invoice_line_ids/price_unit": orderItem.unit_price,
+            "invoice_line_ids/discount": discount,
+          }
+
+          sheetData.push(iSheet)
+        }
+    }
+
+    if (missingData.counterIds.length > 0 || missingData.itemIds.length > 0) {
+      showPrompt({
+        heading: `Odoo ids missing for ` + [
+          missingData.counterIds.length > 0 ? `counters (${missingData.counterIds.length})` : null,
+          missingData.itemIds.length > 0 ? `items (${missingData.itemIds.length})` : null,
+        ].filter(i => i).join(' and '),
+        message: <div style={{
+          maxHeight:'200px',
+          overflow:'auto'
+        }}>
+          {missingData.counterIds.length > 0 && <>
+            <h5>Counter titles</h5>
+            <ol>
+              {missingData.counterIds.map((i, idx) => <li key={`missing-counter-${i}`}><small>{idx+1}.</small> {i}</li>)}
+            </ol>
+          </>}
+          {missingData.itemIds.length > 0 && <>
+            <h5 style={{display:'block',marginTop:'10px'}}>Item titles</h5>
+            <ol>
+              {missingData.itemIds.map((i, idx) => <li key={`missing-item-${i}`}><small>{idx+1}.</small> {i}</li>)}
+            </ol>
+          </>}
+        </div>
+      })
+      return
+    }
+
+    const ws = XLSX.utils.json_to_sheet(sheetData);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(data, "Odoo" + fileExtension);
+  }
+  const downloadHandler = async (format) => {
+    if (!formatSelectPopup) return setFormatSelectPopup(true)
+    if (format === 'marg') await margFormatExport()
+    else if (format === 'odoo') await odooFormatExport()
+    setFormatSelectPopup(true)
   };
   const downloadHandlerTwo = async () => {
     let sheetData = [];
-    // console.log(sheetData)
+    
     for (let order of selectedOrders
       .filter((a) => a.replacement)
       ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
       let date = new Date(+order.status[0]?.time);
-console.log(order)
+     
       sheetData.push({
         "Party Code":
           counters.find((b) => b.counter_uuid === order.counter_uuid)
@@ -181,7 +316,7 @@ console.log(order)
       .filter((a) => a.adjustment)
       ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
       let date = new Date(+order.status[0]?.time);
-      console.log(order)
+     
       sheetData.push({
         "Party Code":
           counters.find((b) => b.counter_uuid === order.counter_uuid)
@@ -211,7 +346,7 @@ console.log(order)
       .filter((a) => a.shortage)
       ?.sort((a, b) => +a.invoice_number - +b.invoice_number)) {
       let date = new Date(+order.status[0]?.time);
-      console.log(order)
+     
       sheetData.push({
         "Party Code":
           counters.find((b) => b.counter_uuid === order.counter_uuid)
@@ -254,6 +389,26 @@ console.log(order)
       })),
     [counters, orders]
   );
+  const lastOrderElementRef = useRef();
+
+  useEffect(() => {
+    if (observer.current) observer.current.disconnect();
+
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore && !loading) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    });
+
+    if (lastOrderElementRef.current) {
+      observer.current.observe(lastOrderElementRef.current);
+    }
+
+    return () => {
+      if (observer.current) observer.current.disconnect();
+    };
+  }, [hasMore, loading]);
+
   return (
     <>
       <Sidebar />
@@ -293,7 +448,16 @@ console.log(order)
             selectedOrders={selectedOrders}
             setSelectedOrders={setSelectedOrders}
             getOrders={getOrders}
+            hasMore={hasMore}
           />
+          {orders.length ? (
+            <div
+              ref={lastOrderElementRef}
+              style={{ height: 20, backgroundColor: "transparent" }}
+            ></div>
+          ) : (
+            ""
+          )}
         </div>
         {selectedOrders.length ? (
           <div className="flex" style={{ justifyContent: "start" }}>
@@ -367,8 +531,8 @@ console.log(order)
         <OrderDetails
           onSave={() => {
             setPopupOrder(null);
-            getOrders();
           }}
+          setOrders={setOrders}
           order_uuid={popupOrder.order_uuid}
           orderStatus="edit"
         />
@@ -530,19 +694,17 @@ console.log(order)
       )}
       {excelDownloadPopup ? (
         <ConfirmPopup
-          onSave={(type) => {
-            if (type === "invoice") {
-              downloadHandler();
-            } else {
-              downloadHandlerTwo();
-            }
-            // downloadHandler()
-          }}
+          onSave={(type) => type === "invoice" ? downloadHandler() : downloadHandlerTwo()}
           onClose={() => setExcelDownloadPopup(false)}
         />
-      ) : (
-        ""
-      )}
+      ) : null}
+      {formatSelectPopup ? (
+        <FormatConfirmPopup
+          onSave={downloadHandler}
+          onClose={() => setFormatSelectPopup(false)}
+        />
+      ) : null}
+      {promptState?.active && <Prompt {...promptState} />}
     </>
   );
 };
@@ -554,8 +716,9 @@ function Table({
   selectedOrders,
   setSelectedOrders,
   getOrders,
+  hasMore
 }) {
-  console.log(selectedOrders);
+ 
   return (
     <table
       className="user-table"
@@ -578,8 +741,8 @@ function Table({
         {itemsDetails
           ?.sort((a, b) => +a.invoice_number - +b.invoice_number)
           ?.map((item, i, array) => (
+            <React.Fragment key={i.invoice_number}>
             <tr
-              key={Math.random()}
               style={{ height: "30px" }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -642,6 +805,22 @@ function Table({
                 </button>
               </td>
             </tr>
+            {i === array.length - 1 && hasMore ? <tr style={{ border:"none", cursor:"progress", pointerEvents:"none" }}>
+              <td colSpan={17}>
+                <div className="flex" style={{paddingBlock:"12px"}}>
+                  <span className="loader" style={{
+                    display: "block",
+                    width: "28px",
+                    height: "28px",
+                    marginRight:"10px",
+                    aspectRatio: 1,
+                  }} />
+                  <span>Loading...</span>
+                </div>
+              </td>
+            </tr>
+            : null}
+            </React.Fragment>
           ))}
       </tbody>
     </table>
@@ -699,12 +878,81 @@ function ConfirmPopup({ onSave, onClose }) {
                   type="button"
                   className="submit"
                   onClick={(e) => {
-                    e.preventDefault();
-                    setItemClicked("return");
-                    onSave("return");
+                    e.preventDefault()
+                    setItemClicked("return")
+                    onSave("return")
                   }}
                 >
                   {itemClicked === "return" ? <CheckCircle /> : <Download />}
+                </button>
+              </div>
+            </form>
+          </div>
+          <button onClick={onClose} className="closeButton">
+            <Close />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FormatConfirmPopup({ onSave, onClose }) {
+  const [itemClicked, setItemClicked] = useState("");
+  return (
+    <div className="overlay">
+      <div
+        className="modal"
+        style={{ height: "fit-content", width: "400px", padding: "20px" }}
+      >
+        <h2 style={{ textAlign: "center" }}>Select Download Format</h2>
+        <div
+          className="content"
+          style={{
+            height: "fit-content",
+            padding: "20px",
+          }}
+        >
+          <div style={{ overflowY: "scroll", width: "100%" }}>
+            <form className="form">
+              <div
+                className="flex"
+                style={{
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <h3 style={{ marginTop: "15px" }}>Odoo (New format)</h3>
+                <button
+                  type="button"
+                  className="submit"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setItemClicked("odoo");
+                    onSave("odoo");
+                  }}
+                >
+                  {itemClicked === "odoo" ? <CheckCircle /> : <Download />}
+                </button>
+              </div>
+              <div
+                className="flex"
+                style={{
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <h3 style={{ marginTop: "15px" }}>Marg (Old format)</h3>
+                <button
+                  type="button"
+                  className="submit"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setItemClicked("marg");
+                    onSave("marg");
+                  }}
+                >
+                  {itemClicked === "marg" ? <CheckCircle /> : <Download />}
                 </button>
               </div>
             </form>

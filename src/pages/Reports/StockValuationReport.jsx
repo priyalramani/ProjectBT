@@ -28,6 +28,7 @@ let ValutionOptions = [
   { value: "item_price_a", label: "Price A" },
   { value: "item_price_b", label: "Price B" },
   { value: "item_price_c", label: "Price C" },
+  { value: "item_price_d", label: "Price D" },
 ];
 
 const StockValuationReport = () => {
@@ -863,7 +864,6 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
             qty,
           },
         ];
-    console.log(stock);
     const response = await axios({
       method: "put",
       url: "/items/putItem",
@@ -896,7 +896,6 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
         "Content-Type": "application/json",
       },
     });
-    console.log("activity", response);
     if (response.data.success) {
       setItemDetails(response.data.result);
       setTotal(response.data.total);
@@ -905,7 +904,6 @@ function QuantityChanged({ onSave, popupInfo, item, update }) {
       setTotal(null);
     }
   };
-  console.log(popupInfo);
   const checkPassword = async (e) => {
     e.preventDefault();
     const response = await axios({
@@ -1201,7 +1199,6 @@ function FlushPopup({ onSave, warehouseData }) {
   const submitHandler = async (e) => {
     setLoading(true);
     e.preventDefault();
-    console.log(data);
     const response = await axios({
       method: "put",
       url: "/items/flushWarehouse",
@@ -1220,7 +1217,6 @@ function FlushPopup({ onSave, warehouseData }) {
       target: { value },
     } = event;
 
-    console.log(value);
 
     const filterdValue = value.filter(
       (item) => data.findIndex((o) => o.id === item.id) >= 0
@@ -1230,14 +1226,12 @@ function FlushPopup({ onSave, warehouseData }) {
       value.findIndex((o, oIndex) => o.id === item.id && oIndex !== itemIndex)
     );
 
-    // console.log(duplicatesRemoved);
 
     // let map = {};
 
     // for (let list of value) {
     //   map[Object.values(list).join('')] = list;
     // }
-    // console.log('Using Map', Object.values(map));
 
     let duplicateRemoved = [];
 

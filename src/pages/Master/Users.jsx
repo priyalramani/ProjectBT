@@ -3,6 +3,18 @@ import Header from "../../components/Header"
 import Sidebar from "../../components/Sidebar"
 import axios from "axios"
 import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/solid"
+
+const USER_ROLES = [
+	{ value: "1", label: "Order" },
+	{ value: "7", label: "Advance Ordering" },
+	{ value: "2", label: "Processing" },
+	{ value: "3", label: "Checking" },
+	{ value: "4", label: "Delivery" },
+	{ value: "5", label: "Stock Transfer" },
+	{ value: "6", label: "Collection" },
+	{ value: "8", label: "Stock Adjustment" }
+]
+
 const Users = () => {
 	const [users, setUsers] = useState([])
 	const [routes, setRoutes] = useState([])
@@ -19,10 +31,10 @@ const Users = () => {
 			url: "/users/GetUserList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
-		console.log("users", response)
+
 		if (response.data.success) setUsers(response.data.result)
 	}
 
@@ -36,7 +48,9 @@ const Users = () => {
 					.filter(a => a.user_title)
 					.filter(a => disabledItem || a.status)
 					.filter(
-						a => !usersTitle || a.user_title?.toLocaleLowerCase()?.includes(usersTitle.toLocaleLowerCase())
+						a =>
+							!usersTitle ||
+							a.user_title?.toLocaleLowerCase()?.includes(usersTitle.toLocaleLowerCase())
 					)
 			),
 		[disabledItem, users, usersTitle]
@@ -47,8 +61,8 @@ const Users = () => {
 			url: "/routes/GetRouteList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setRoutes(response.data.result)
 	}
@@ -58,8 +72,8 @@ const Users = () => {
 			url: "/warehouse/GetWarehouseList",
 
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) setWarehouseData(response.data.result)
 	}
@@ -83,8 +97,9 @@ const Users = () => {
 							display: "flex",
 							alignItems: "center",
 							justifyContent: "space-between",
-							width: "100%",
-						}}>
+							width: "100%"
+						}}
+					>
 						<input
 							type="text"
 							onChange={e => setUsersTitle(e.target.value)}
@@ -99,8 +114,9 @@ const Users = () => {
 								display: "flex",
 								width: "120px",
 								alignItems: "center",
-								justifyContent: "space-between",
-							}}>
+								justifyContent: "space-between"
+							}}
+						>
 							<input
 								type="checkbox"
 								onChange={e => setDisabledItem(e.target.checked)}
@@ -117,7 +133,11 @@ const Users = () => {
 					</div>
 				</div>
 				<div className="table-container-user item-sales-container">
-					<Table itemsDetails={filterUsers} setPopupForm={setPopupForm} setPayoutPopup={setPayoutPopup} />
+					<Table
+						itemsDetails={filterUsers}
+						setPopupForm={setPopupForm}
+						setPayoutPopup={setPayoutPopup}
+					/>
 				</div>
 			</div>
 			{popupForm ? (
@@ -132,7 +152,11 @@ const Users = () => {
 				""
 			)}
 			{payoutPopup ? (
-				<UserPayouts onSave={() => setPayoutPopup(false)} popupInfo={payoutPopup} getUsers={getUsers} />
+				<UserPayouts
+					onSave={() => setPayoutPopup(false)}
+					popupInfo={payoutPopup}
+					getUsers={getUsers}
+				/>
 			) : (
 				""
 			)}
@@ -145,7 +169,10 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
 	const [items, setItems] = useState("user_title")
 	const [order, setOrder] = useState("asc")
 	return (
-		<table className="user-table" style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
+		<table
+			className="user-table"
+			style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}
+		>
 			<thead>
 				<tr>
 					<th>S.N</th>
@@ -158,14 +185,16 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
 									onClick={() => {
 										setItems("user_title")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("user_title")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -186,14 +215,16 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
 									onClick={() => {
 										setItems("login_username")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("login_username")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -207,14 +238,16 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
 									onClick={() => {
 										setItems("incentive_balance")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("incentive_balance")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -231,14 +264,16 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
 									onClick={() => {
 										setItems("status")
 										setOrder("asc")
-									}}>
+									}}
+								>
 									<ChevronUpIcon className="sort-up sort-button" />
 								</button>
 								<button
 									onClick={() => {
 										setItems("status")
 										setOrder("desc")
-									}}>
+									}}
+								>
 									<ChevronDownIcon className="sort-down sort-button" />
 								</button>
 							</div>
@@ -265,7 +300,8 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
 							onClick={e => {
 								e.stopPropagation()
 								setPopupForm({ type: "edit", data: item })
-							}}>
+							}}
+						>
 							<td>{i + 1}</td>
 							<td colSpan={2}>{item.user_title}</td>
 							<td colSpan={2}>{+item.user_type === 0 ? "Admin" : "Other"}</td>
@@ -278,7 +314,8 @@ function Table({ itemsDetails, setPopupForm, setPayoutPopup }) {
 									onClick={e => {
 										e.stopPropagation()
 										setPayoutPopup(item)
-									}}>
+									}}
+								>
 									Payout
 								</button>
 							</td>
@@ -295,9 +332,18 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 	const [data, setdata] = useState({
 		user_mobile: "",
 		user_type: "1",
-		status: "1",
+		status: "1"
 	})
 	const [errMassage, setErrorMassage] = useState("")
+	const [companies, setCompanies] = useState([])
+
+	useEffect(() => {
+		;(async () => {
+			const response = await axios.get("/companies/list")
+			if (response.data.success) setCompanies(response.data.result)
+		})()
+	}, [])
+
 	useEffect(() => {
 		if (popupInfo?.type === "edit") setdata(popupInfo.data)
 	}, [popupInfo.data, popupInfo?.type])
@@ -317,8 +363,8 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 				url: "/users/putUser",
 				data,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				setUsers(prev => prev.map(i => (i.user_uuid === data.user_uuid ? data : i)))
@@ -330,8 +376,8 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 				url: "/users/postUser",
 				data,
 				headers: {
-					"Content-Type": "application/json",
-				},
+					"Content-Type": "application/json"
+				}
 			})
 			if (response.data.success) {
 				setUsers(prev => [...prev, data])
@@ -347,16 +393,17 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 					className="content"
 					style={{
 						height: "fit-content",
-						padding: "20px",
 						width: "fit-content",
-					}}>
-					<div style={{ overflowY: "scroll" }}>
+						padding: 0
+					}}
+				>
+					<div>
 						<form className="form" onSubmit={submitHandler}>
-							<div className="row">
+							<div className="row" style={{ margin: "0 0 20px" }}>
 								<h1>{popupInfo.type === "edit" ? "Edit" : "Add"} User </h1>
 							</div>
 
-							<div className="form">
+							<div className="form" style={{ overflowY: "scroll", maxHeight: "60vh" }}>
 								<div className="row">
 									<label className="selectLabel">
 										User Title
@@ -368,7 +415,7 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 											onChange={e =>
 												setdata({
 													...data,
-													user_title: e.target.value,
+													user_title: e.target.value
 												})
 											}
 											maxLength={42}
@@ -385,7 +432,7 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 											onChange={e =>
 												setdata({
 													...data,
-													login_username: e.target.value,
+													login_username: e.target.value
 												})
 											}
 										/>
@@ -402,7 +449,7 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 											onChange={e =>
 												setdata({
 													...data,
-													login_password: e.target.value,
+													login_password: e.target.value
 												})
 											}
 										/>
@@ -418,7 +465,7 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 											onChange={e =>
 												setdata({
 													...data,
-													user_mobile: e.target.value,
+													user_mobile: e.target.value
 												})
 											}
 										/>
@@ -428,8 +475,9 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 									<label
 										className="selectLabel"
 										style={{
-											width: "50%",
-										}}>
+											width: "50%"
+										}}
+									>
 										User Type
 										<select
 											type="text"
@@ -439,21 +487,38 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 											onChange={e =>
 												setdata({
 													...data,
-													user_type: e.target.value,
+													user_type: e.target.value
 												})
 											}
-											// style={{ height: "150px" }}
 										>
 											<option value={0}>Admin</option>
 											<option value={1}>Others</option>
 										</select>
 									</label>
+									<label className="selectLabel" style={{ width: "50%" }}>
+										DMS ERP Id
+										<input
+											onWheel={e => e.target.blur()}
+											name="dms_erp_id"
+											className="numberInput"
+											value={data?.dms_erp_id}
+											onChange={e =>
+												setdata({
+													...data,
+													dms_erp_id: e.target.value
+												})
+											}
+										/>
+									</label>
+								</div>
+								<div>
 									<label
 										className="selectLabel"
 										style={{
 											flexDirection: "row",
-											alignItems: "center",
-										}}>
+											alignItems: "center"
+										}}
+									>
 										Status
 										<input
 											type="radio"
@@ -463,7 +528,7 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 											onClick={e =>
 												setdata(prev => ({
 													...data,
-													status: +prev.status === 1 ? 0 : 1,
+													status: +prev.status === 1 ? 0 : 1
 												}))
 											}
 										/>
@@ -471,72 +536,101 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 								</div>
 								<div className="row">
 									{+data.user_type ? (
-										<label className="selectLabel" style={{ height: "100px" }}>
-											Roles
-											<select
-												name="user_type"
-												className="select"
-												value={data?.user_role}
-												style={{ height: "100px" }}
-												onChange={e => {
-													let catData = data?.user_role || []
-													let options = Array.from(
-														e.target.selectedOptions,
-														option => option.value
-													)
-													for (let i of options) {
-														if (catData.filter(a => a === i).length)
-															catData = catData.filter(a => a !== i)
-														else catData = [...catData, i]
-													}
-													// data = occasionsData.filter(a => options.filter(b => b === a.occ_uuid).length)
-													console.log(options, catData)
-
-													setdata({ ...data, user_role: catData })
-												}}
-												multiple>
-												<option value="1">Order</option>
-												<option value="7">Advance Ordering</option>
-												<option value="2">Processing</option>
-												<option value="3">Checking</option>
-												<option value="4">Delivery</option>
-												<option value="5">Stock Transfer</option>
-												<option value="6">Collection</option>
-												<option value="8">Stock Adjustment</option>
-											</select>
-										</label>
+										<>
+											<div style={{ display: "block" }}>
+												<span className="inputLabel">Roles</span>
+												<div
+													value={data?.user_role || []}
+													style={{
+														width: "100%",
+														height: "fit-content",
+														borderRadius: "5px",
+														display: "block",
+														marginTop: "10px",
+														border: ".5px solid gray"
+													}}
+												>
+													{USER_ROLES.map(({ value, label }) => (
+														<div
+															key={`user-role:${value}`}
+															value={value}
+															onClick={e =>
+																setdata(prev => {
+																	let curr = prev?.user_role || []
+																	if (curr.includes(value)) curr = curr.filter(i => i !== value)
+																	else curr.push(value)
+																	return { ...prev, user_role: curr }
+																})
+															}
+															style={{
+																padding: "5px 8px",
+																cursor: "pointer",
+																fontWeight: 500,
+																color: "#000000bf",
+																...(data.user_role?.includes(value)
+																	? { background: "#1967d226", color: "#1967d2" }
+																	: {})
+															}}
+														>
+															{label}
+														</div>
+													))}
+												</div>
+											</div>
+											<label className="selectLabel">
+												Default Company
+												<select
+													type="text"
+													name="sort_order"
+													className="numberInput"
+													value={data?.default_company}
+													onChange={e => {
+														setdata(prev => ({
+															...prev,
+															default_company:
+																e.target.selectedIndex === 0
+																	? null
+																	: e.target.selectedOptions[0]?.value
+														}))
+													}}
+												>
+													<option>None</option>
+													{companies?.map(i => (
+														<option value={i.company_uuid}>{i.company_title}</option>
+													))}
+												</select>
+											</label>
+										</>
 									) : (
 										<>
 											<label className="selectLabel" style={{ width: "50%" }}>
 												Routes
-												<div
-													className="formGroup"
-													style={{ height: "200px", overflow: "scroll" }}>
+												<div className="formGroup" style={{ height: "200px", overflow: "scroll" }}>
 													<div
 														style={{
 															marginBottom: "5px",
 															textAlign: "center",
 															backgroundColor: data.routes?.filter(a => +a === 1).length
 																? "#caf0f8"
-																: "#fff",
+																: "#fff"
 														}}
 														onClick={e => {
 															e.stopPropagation()
 															setdata(prev => ({
 																...prev,
-																routes: [1],
+																routes: [1]
 															}))
-														}}>
+														}}
+													>
 														All
 													</div>
 													<div
 														style={{
 															marginBottom: "5px",
 															textAlign: "center",
-															backgroundColor: data.routes?.filter(a => a === "none")
-																.length
+															backgroundColor: data.routes?.filter(a => a === "none").length
 																? "#caf0f8"
-																: "#fff",
+																: "#fff"
 														}}
 														onClick={e => {
 															e.stopPropagation()
@@ -549,10 +643,11 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 																	: ["none"]
 																return {
 																	...prev,
-																	routes,
+																	routes
 																}
 															})
-														}}>
+														}}
+													>
 														UnKnown
 													</div>
 													{routes.map(occ => (
@@ -560,28 +655,24 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 															style={{
 																marginBottom: "5px",
 																textAlign: "center",
-																backgroundColor: data.routes?.filter(
-																	a => a === occ.route_uuid
-																).length
+																backgroundColor: data.routes?.filter(a => a === occ.route_uuid)
+																	.length
 																	? "#caf0f8"
-																	: "#fff",
+																	: "#fff"
 															}}
 															onClick={e => {
 																e.stopPropagation()
 																setdata(prev => ({
 																	...prev,
-																	routes: prev?.routes?.find(
-																		a => a === occ.route_uuid
-																	)
-																		? prev?.routes?.filter(
-																				a => a !== occ.route_uuid
-																		  )
+																	routes: prev?.routes?.find(a => a === occ.route_uuid)
+																		? prev?.routes?.filter(a => a !== occ.route_uuid)
 																		: prev?.routes?.length &&
 																		  !prev.routes.filter(a => +a === 1).length
 																		? [...prev?.routes, occ?.route_uuid]
-																		: [occ?.route_uuid],
+																		: [occ?.route_uuid]
 																}))
-															}}>
+															}}
+														>
 															{occ.route_title}
 														</div>
 													))}
@@ -589,9 +680,7 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 											</label>
 											<label className="selectLabel" style={{ width: "50%" }}>
 												Warehouse
-												<div
-													className="formGroup"
-													style={{ height: "200px", overflow: "scroll" }}>
+												<div className="formGroup" style={{ height: "200px", overflow: "scroll" }}>
 													{/* <div
                             style={{
                               marginBottom: "5px",
@@ -649,7 +738,7 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 																	a => a === occ.warehouse_uuid
 																).length
 																	? "#caf0f8"
-																	: "#fff",
+																	: "#fff"
 															}}
 															onClick={e => {
 																e.stopPropagation()
@@ -667,9 +756,10 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 																		//       .length
 																		//   ? [...prev?.warehouse, occ?.warehouse_uuid]
 																		//   :
-																		[occ?.warehouse_uuid],
+																		[occ?.warehouse_uuid]
 																}))
-															}}>
+															}}
+														>
 															{occ.warehouse_title}
 														</div>
 													))}
@@ -697,22 +787,21 @@ function NewUserForm({ onSave, popupInfo, setUsers, routes, warehouseData }) {
 function UserPayouts({ onSave, popupInfo, getUsers }) {
 	const [data, setdata] = useState({
 		amount: 0,
-		remarks: "",
+		remarks: ""
 	})
 	const [errMassage, setErrorMassage] = useState("")
 
 	const submitHandler = async e => {
 		e.preventDefault()
 
-		console.log(data)
 		let obj = { user_uuid: popupInfo.user_uuid, ...data }
 		const response = await axios({
 			method: "post",
 			url: "/incentiveStatment/postIncentiveStatment",
 			data: obj,
 			headers: {
-				"Content-Type": "application/json",
-			},
+				"Content-Type": "application/json"
+			}
 		})
 		if (response.data.success) {
 			getUsers()
@@ -728,8 +817,9 @@ function UserPayouts({ onSave, popupInfo, getUsers }) {
 					style={{
 						height: "fit-content",
 						padding: "20px",
-						width: "fit-content",
-					}}>
+						width: "fit-content"
+					}}
+				>
 					<div style={{ overflowY: "scroll" }}>
 						<form className="form" onSubmit={submitHandler}>
 							<div className="row">
@@ -748,7 +838,7 @@ function UserPayouts({ onSave, popupInfo, getUsers }) {
 											onChange={e =>
 												setdata({
 													...data,
-													amount: e.target.value,
+													amount: e.target.value
 												})
 											}
 											maxLength={42}
@@ -766,7 +856,7 @@ function UserPayouts({ onSave, popupInfo, getUsers }) {
 											onChange={e =>
 												setdata({
 													...data,
-													login_username: e.target.value,
+													login_username: e.target.value
 												})
 											}
 											style={{ height: "150px" }}

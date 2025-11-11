@@ -49,7 +49,7 @@ const CounterLegerReport = () => {
   }, []);
   const invokePrint = useReactToPrint({
     content: reactToPrintContent,
-    documentTitle: "Statement",
+    
     removeAfterPrint: true,
   });
   const getCounter = async (controller = new AbortController()) => {
@@ -89,7 +89,7 @@ const CounterLegerReport = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("activity", response);
+   
     if (response.data.success) {
       setItems(response.data.result);
       setOpening_balance_amount(response.data.opening_balance);
@@ -169,7 +169,11 @@ const CounterLegerReport = () => {
   const counterList = useMemo(
     () =>
       [...counter, ...ledgerData].map((a) => ({
-        label: a.counter_title || a.ledger_title,
+        label: a.counter_title
+          ? `${a.counter_title} ,${a.route_title}`
+          : a.ledger_title
+          ? `${a.ledger_title} ,${a.ledger_group_title}`
+          : "",
         value: a.counter_uuid || a.ledger_uuid,
         closing_balance: (
           (a.closing_balance || 0) + +(a.opening_balance_amount || 0)
@@ -192,10 +196,9 @@ const CounterLegerReport = () => {
         continue;
       }
       balance = +item.amount + +balance;
-      balance = (balance || 0).toFixed(2);
       result.push({
         ...item,
-        balance: truncateDecimals(balance + opening_balance_amount?.amount, 2),
+        balance,
       });
     }
     return result;
@@ -254,7 +257,8 @@ const CounterLegerReport = () => {
   }, [itemsData, showUnknown]);
   const CreditTotal = useMemo(() => {
     return itemsData
-      .filter((a) => showUnknown || a.voucher_date)
+      .filter((a) => showUnknown || 
+      +a.voucher_date)
       .reduce((a, b) => {
         if (b.amount > 0) return a + b.amount;
         return a;
@@ -333,7 +337,7 @@ const CounterLegerReport = () => {
                 )}
                 filterOption={filterOption}
                 onChange={(doc) => {
-                  console.log({ doc });
+                 
                   setSearchData((prev) => ({
                     ...prev,
                     counter_uuid: doc.value,
@@ -657,7 +661,6 @@ function Table({
                     className="flex"
                     // className="submit"
                     style={{
-                      
                       padding: "2px 5px",
                       borderRadius: "10%",
                       backgroundColor: allAmountValue.find(
@@ -752,7 +755,7 @@ function DiliveryPopup({
         ?.outstanding_type || 0
     );
   }, [counters, order.counter_uuid]);
-  console.log(outstanding);
+ 
   const getCounter = async () => {
     const response = await axios({
       method: "get",
@@ -765,8 +768,8 @@ function DiliveryPopup({
     if (response.data.success) setCounters(response.data.result);
   };
   const GetPaymentModes = async () => {
-    const cachedData = localStorage.getItem('paymentModesData');
-  
+    const cachedData = localStorage.getItem("paymentModesData");
+
     if (cachedData) {
       setPaymentModes(JSON.parse(cachedData));
       GetReciptsModes();
@@ -778,15 +781,18 @@ function DiliveryPopup({
           "Content-Type": "application/json",
         },
       });
-      console.log(response.data.result);
+     
       if (response.data.success) {
-        localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
+        localStorage.setItem(
+          "paymentModesData",
+          JSON.stringify(response.data.result)
+        );
         setPaymentModes(response.data.result);
         GetReciptsModes();
       }
     }
   };
-  
+
   const GetReciptsModes = async () => {
     const response = await axios({
       method: "post",
@@ -892,10 +898,6 @@ function DiliveryPopup({
       modeTotal = +mode.amt + modeTotal;
       modeTotal = modeTotal.toFixed(2);
     }
-    //console.log(
-    // Tempdata?.order_grandtotal,
-    //   +(+modeTotal + (+outstanding?.amount || 0))
-    // );
     if (
       +order?.order_grandtotal !== +(+modeTotal + (+outstanding?.amount || 0))
     ) {

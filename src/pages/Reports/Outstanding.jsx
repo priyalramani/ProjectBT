@@ -37,7 +37,7 @@ const Outstanding = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setTags(response.data.result)
 	}
 
@@ -53,7 +53,7 @@ const Outstanding = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 	const getOutstanding = async () => {
@@ -65,7 +65,7 @@ const Outstanding = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setOutstanding(response.data.result)
 	}
 	const getCounter = async () => {
@@ -132,7 +132,7 @@ const Outstanding = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("transactions", response)
+		
 		if (response.data.success) setPopupOrder(response.data.result)
 	}
 	return (
@@ -320,21 +320,6 @@ function Table({
 	const context = useContext(Context)
 
 	const { setNotification } = context
-	const sendMessage = async item => {
-		let response = await axios({
-			method: "post",
-			url: "/orders/sendMsg",
-			data: {
-				...item,
-				notification_uuid: "outstanding-manual-reminder",
-				user_uuid: localStorage.getItem("user_uuid"),
-			},
-		})
-
-		console.log(response.data)
-		setNotification(response.data)
-		setTimeout(() => setNotification(null), 3000)
-	}
 	function formatAMPM(date) {
 		var hours = date.getHours()
 		var minutes = date.getMinutes()
@@ -444,14 +429,7 @@ function Table({
 							<td colSpan={2}>{format(+item.time)}</td>
 							<td colSpan={2}>{item.amount || ""}</td>
 							<td colSpan={2}>{item.tag_title || ""}</td>
-							<td
-								style={{ color: "green" }}
-								onClick={e => {
-									e.stopPropagation()
-									sendMessage(item)
-								}}>
-								<WhatsApp />
-							</td>
+							<td></td>
 							<td colSpan={2}>
 								<button
 									className="theme-btn"
@@ -523,7 +501,7 @@ function DiliveryPopup({
 				}))
 			)
 	}, [PaymentModes])
-	console.log(order.collection_tag_uuid)
+	
 	const submitHandler = async () => {
 		if (waiting) {
 			return
@@ -1079,7 +1057,7 @@ function TagPopup({ onSave }) {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 

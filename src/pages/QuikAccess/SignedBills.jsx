@@ -24,7 +24,7 @@ const PendingsEntry = () => {
 	}
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
-		documentTitle: "Statement",
+		
 		removeAfterPrint: true,
 	})
 	const getOrders = async () => {
@@ -36,7 +36,7 @@ const PendingsEntry = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setOrders(response.data.result)
 		else setOrders([])
 	}

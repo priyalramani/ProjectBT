@@ -55,13 +55,10 @@ const Orders = ({ refreshDb }) => {
 				"Content-Type": "application/json"
 			}
 		})
-		if (response.data.success) {
-			console.log(response)
-		}
 	}
 
 	const locationHandler = () => {
-		if (!navigator.geolocation) return console.log("Geolocation is not supported by this browser.")
+		if (!navigator.geolocation) return
 		try {
 			const counter_uuid = locationState?.counter_uuid
 			setLocationState(i => ({ ...i, active: false }))
@@ -94,7 +91,7 @@ const Orders = ({ refreshDb }) => {
 				}
 			})
 		} catch (err) {
-			console.log(err)
+			
 		} finally {
 			setLoading(false)
 		}
@@ -252,7 +249,7 @@ const Orders = ({ refreshDb }) => {
 																	}
 																}}
 																className="user_Back_icon"
-																style={{ color: "#4ac959" }}
+																style={{ color: "#32bd33" }}
 															/>
 														) : (
 															""
@@ -421,7 +418,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 			  "Content-Type": "application/json",
 			},
 		  });
-		  console.log(response.data.result);
+		 
 		  if (response.data.success) {
 			localStorage.setItem('paymentModesData', JSON.stringify(response.data.result));
 			setPaymentModes(response.data.result);
@@ -450,7 +447,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 			}))
 		})
 	}, [paymentModes])
-	console.log(data)
+	
 	const submitHandler = async e => {
 		e.preventDefault()
 		if (!data.counter_title) {
@@ -489,7 +486,7 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 			else temp = [...temp, i]
 		}
 		// temp = data.filter(a => options.filter(b => b === a.user_uuid).length)
-		console.log(options, temp)
+		
 
 		setdata(prev => ({ ...prev, payment_modes: temp }))
 	}
@@ -743,12 +740,12 @@ function NewUserForm({ onSave, popupInfo, refreshDbC }) {
 											name="one_pack"
 											className="numberInput"
 											value={data?.counter_code}
-											onChange={e =>
-												setdata({
-													...data,
-													counter_code: e.target.value
-												})
-											}
+                                                                               onChange={e =>
+                                                                               setdata({
+                                                                               ...data,
+                                                                               counter_code: e.target.value.replace(/\s/g, "")
+                                                                               })
+                                                                               }
 										/>
 									</label>
 								</div>
@@ -793,14 +790,14 @@ const PhoneList = ({ onSave, mobile }) => {
 				style={{
 					height: "fit-content",
 					width: "max-content",
-					minWidth: "250px"
+					minWidth: "250px",
+					maxWidth: "480px"
 				}}
 			>
 				<div
 					className="content"
 					style={{
 						height: "fit-content",
-						padding: "20px",
 						width: "fit-content"
 					}}
 				>
@@ -828,13 +825,14 @@ const PhoneList = ({ onSave, mobile }) => {
 													<td
 														colSpan={3}
 														className="flex"
+														style={{justifyContent:"left"}}
 														onClick={() => {
 															window.location.assign("tel:" + item?.mobile)
 															onSave()
 														}}
 													>
 														<Phone style={{ marginRight: "10px" }} />
-														{item?.mobile}
+														{"Hello Singh" + " — "+ item?.mobile}
 													</td>
 												</tr>
 											))}

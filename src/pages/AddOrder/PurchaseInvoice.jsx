@@ -85,7 +85,7 @@ export default function PurchaseInvoice() {
         }
       }
     } catch (error) {
-      console.log(error);
+     
     }
   };
   useEffect(() => {
@@ -123,7 +123,7 @@ export default function PurchaseInvoice() {
           }
         })
         .catch((err) => {
-          console.log(err);
+         
         });
     }
     return () => controller.abort();
@@ -218,11 +218,12 @@ export default function PurchaseInvoice() {
           let item_rate = counterData?.company_discount?.find(
             (a) => a.company_uuid === item.company_uuid
           )?.item_rate;
-          console.log({ item_rate, item_title: item.item_title });
+         
           let item_price = item.item_price;
           if (item_rate === "a") item_price = item.item_price_a;
           if (item_rate === "b") item_price = item.item_price_b;
           if (item_rate === "c") item_price = item.item_price_c;
+          if (item_rate === "d") item_price = item.item_price_d;
 
           return { ...item, item_price };
         })
@@ -240,7 +241,7 @@ export default function PurchaseInvoice() {
         "Content-Type": "application/json",
       },
     });
-    console.log(response);
+   
     if (response.data.success) {
       if (order_uuid) {
         setNotification({
@@ -272,6 +273,7 @@ export default function PurchaseInvoice() {
         item_price: a.p_price,
         price: a.p_price,
         gst_percentage: a.item_gst,
+        css_percentage: a.item_css,
       })),
     });
 
@@ -721,7 +723,7 @@ export default function PurchaseInvoice() {
                                       b.data.qty === 0
                                         ? ""
                                         : b.data.qty > 0
-                                        ? "#4ac959"
+                                        ? "#32bd33"
                                         : "red",
                                   };
                                 },
@@ -1015,7 +1017,7 @@ export default function PurchaseInvoice() {
                                   (a) => a.uuid !== item.uuid
                                 ),
                               });
-                              //console.log(item);
+                              
                             }}
                           />
                         </td>
@@ -1037,9 +1039,59 @@ export default function PurchaseInvoice() {
                       >
                         <AddIcon
                           sx={{ fontSize: 40 }}
-                          style={{ color: "#4AC959", cursor: "pointer" }}
+                          style={{ color: "#32bd33", cursor: "pointer" }}
                         />
                       </td>
+                    </tr>
+                    <tr
+                      style={{
+                        height: "50px",
+
+                        borderBottom: "2px solid #fff",
+                      }}
+                    >
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        <div className="inputGroup">Total</div>
+                      </td>
+
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        {(order?.item_details?.length > 1
+                          ? order?.item_details
+                              ?.map((a) => +a?.b || 0)
+                              .reduce((a, b) => a + b)
+                          : order?.item_details?.length
+                          ? order?.item_details[0]?.b
+                          : 0) || 0}
+                      </td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      >
+                        {(order?.item_details?.length > 1
+                          ? order?.item_details
+                              ?.map((a) => +a?.p || 0)
+                              .reduce((a, b) => a + b)
+                          : order?.item_details?.length
+                          ? order?.item_details[0]?.p
+                          : 0) || 0}
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      ></td>
+                      <td
+                        className="ph2 pv1 tc bb b--black-20 bg-white"
+                        style={{ textAlign: "center" }}
+                      ></td>
+                      <td></td>
                     </tr>
                   </tbody>
                 ) : (
@@ -1069,13 +1121,6 @@ export default function PurchaseInvoice() {
                       is_empty: !((+a.p || 0) + (+a.b || 0) + (+a.free || 0)),
                     }))
                     .find((a) => a.is_empty);
-                  console.log({
-                    empty_item,
-                    order: order.item_details.map((a) => ({
-                      ...a,
-                      is_empty: !(+a.p + +a.b + +a.free),
-                    })),
-                  });
                   if (empty_item) {
                     setNotification({
                       message: `${empty_item.item_title} has 0 Qty.
@@ -1450,7 +1495,7 @@ export default function PurchaseInvoice() {
                       >
                         <AddIcon
                           sx={{ fontSize: 40 }}
-                          style={{ color: "#4AC959", cursor: "pointer" }}
+                          style={{ color: "#32bd33", cursor: "pointer" }}
                         />
                       </div>
                     </td>

@@ -1,5 +1,6 @@
-import React from "react"
+import React, { useCallback, useMemo } from "react"
 import OrderPrint from "./prints/OrderPrint"
+import OrderPrint2 from "./prints/OrderPrint2"
 import PendingPaymentsSummary from "./prints/PendingPaymentsSummary"
 
 const OrderPrintWrapper = ({
@@ -9,7 +10,6 @@ const OrderPrintWrapper = ({
 	reminderDate,
 	users,
 	items,
-
 	pendingPayments,
 	counterOrders,
 	print,
@@ -18,9 +18,38 @@ const OrderPrintWrapper = ({
 	...props
 }) => {
 	const getPrintData = order => {
-		const max_count = order?.order_type !== "E" ? 15 : 19
-		const min_count = max_count - 7
-		const sourceArray = order?.item_details
+		const itemsWithFreeRows = []
+
+		for (const item of order.item_details) {
+			if (+item.p || +item.b) itemsWithFreeRows.push({...item, free: 0 })
+			if (+item.free > 0) itemsWithFreeRows.push({
+				...item,
+				p: 0,
+				b: 0,
+				gst_percentage: 0,
+				css_percentage: 0,
+				price: 0,
+				item_total: 0,
+				item_price: 0,
+				unit_price: 0,
+				charges_discount: [],
+			})
+		}
+
+		const max_count = order?.dms_details?.invoice_number ? 9 : order?.order_type !== "E" ? 15 : 19
+		const min_count = order?.dms_details?.invoice_number ? 9 : max_count - 7
+		const sourceArray = order?.dms_details?.invoice_number
+			? itemsWithFreeRows
+					?.sort((a, b) => {
+						let item_a_title = items.find(c => c.item_uuid === a.item_uuid)?.dms_item_name || ""
+						let item_b_title = items.find(c => c.item_uuid === b.item_uuid)?.dms_item_name || ""
+						return item_a_title.localeCompare(item_b_title)
+					})
+					.map((a, i) => ({
+						...a,
+						sr: i + 1
+					}))
+			: itemsWithFreeRows
 		const arrayOfArrays = []
 
 		if (sourceArray.length > max_count) {
@@ -42,9 +71,42 @@ const OrderPrintWrapper = ({
 			arrayOfArrays[arrayOfArrays.length - 2] = arrayOfArrays.at(-2).slice(0, arrayOfArrays.at(-2).length - 1)
 		}
 
-		const result = arrayOfArrays?.map(_i => ({ ...order, item_details: _i }))
+		const result = arrayOfArrays?.map(_i => ({
+			...order,
+			item_details: _i,
+			total_page: arrayOfArrays.length,
+			current_page: arrayOfArrays.indexOf(_i) + 1
+		}))
 		return result
 	}
+
+	function getNextChar(char) {
+		if (char < "a" || char > "z") {
+			throw new Error("Input must be a lowercase letter from a to z")
+		}
+
+		let charCode = char.charCodeAt(0)
+
+		charCode++
+
+		if (charCode > "z".charCodeAt(0)) {
+			charCode = "a".charCodeAt(0)
+		}
+
+		return String.fromCharCode(charCode)
+	}
+
+	const hsn_code = useCallback((item_details = []) => {
+		let hsn = []
+		let char = "a"
+		for (let item of item_details) {
+			if (item.hsn && !hsn.find(a => a.hsn === item.hsn)) {
+				hsn.push({ hsn: item.hsn, char })
+				char = getNextChar(char)
+			}
+		}
+		return hsn
+	}, [])
 
 	return (
 		<div className="order-print-layout">
@@ -78,26 +140,59 @@ const OrderPrintWrapper = ({
 							.map((a, i) => ({ ...a, sr: i + 1 }))
 					}))
 					?.map(__order => {
-						return getPrintData(__order)?.map((order, i, array) => (
-							<OrderPrint
-								counter={counters.find(a => a.counter_uuid === order?.counter_uuid)}
-								reminderDate={reminderDate}
-								order={order}
-								defaultOrder={__order}
-								date={new Date(order?.status[0]?.time)}
-								user={users.find(a => a.user_uuid === order?.status[0]?.user_uuid)?.user_title || ""}
-								itemData={items}
-								item_details={order?.item_details}
-								allOrderItems={__order?.item_details}
-							
-								footer={i + 1 === array.length}
-								category={category}
-								route={route}
-								{...props}
-							/>
-						))
+						let order_hsn = hsn_code(__order?.item_details)
+						return getPrintData(__order)?.map((order, i, array) =>
+							order?.dms_details?.invoice_number ? (
+								<OrderPrint2
+									counter={counters.find(a => a.counter_uuid === order?.counter_uuid)}
+									reminderDate={reminderDate}
+									order={order}
+									defaultOrder={__order}
+									date={
+										order?.status?.length
+											? new Date(order?.status?.reduce((a, b) => (a.time < b.time ? a : b)).time)
+											: ""
+									}
+									user={users.find(a => a.user_uuid === order?.status[0]?.user_uuid)}
+									itemData={items}
+									item_details={order?.item_details}
+									allOrderItems={__order?.item_details}
+									footer={i + 1 === array.length}
+									category={category}
+									route={route}
+									hsn_code={order_hsn}
+									total_page={order.total_page}
+									current_page={order.current_page}
+									{...props}
+								/>
+							) : (
+								<OrderPrint
+									counter={counters.find(a => a.counter_uuid === order?.counter_uuid)}
+									reminderDate={reminderDate}
+									order={order}
+									defaultOrder={__order}
+									date={new Date(order?.status[0]?.time)}
+									user={users.find(a => a.user_uuid === order?.status[0]?.user_uuid)?.user_title || ""}
+									itemData={items}
+									item_details={order?.item_details}
+									allOrderItems={__order?.item_details}
+									footer={i + 1 === array.length}
+									category={category}
+									route={route}
+									hsn_code={order_hsn}
+									{...props}
+								/>
+							)
+						)
 					})}
-				{pendingPayments && <PendingPaymentsSummary counterOrders={counterOrders} print={print} />}
+				{pendingPayments && (
+					<PendingPaymentsSummary
+						counterOrders={counterOrders}
+						print={print}
+						counters={counters}
+						routers={route}
+					/>
+				)}
 			</div>
 		</div>
 	)

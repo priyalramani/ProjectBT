@@ -1,5 +1,5 @@
 import axios from "axios"
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, useRef } from "react"
 import Header from "../../components/Header"
 import { OrderDetails } from "../../components/OrderDetails"
 import Sidebar from "../../components/Sidebar"
@@ -11,7 +11,10 @@ const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sh
 const PendingReciptsEntry = () => {
 	const [orders, setOrders] = useState([])
 	const [itemsData, setItemsData] = useState([])
-
+	const [page, setPage] = useState(1); // Added pagination state
+	const [hasMore, setHasMore] = useState(true);
+	const [loading, setLoading] = useState(false);
+	const observer = useRef();
 	const [popupOrder, setPopupOrder] = useState(false)
 	const [allDoneConfimation, setAllDoneConfimation] = useState(false)
 	const [doneDisabled, setDoneDisabled] = useState(false)
@@ -34,25 +37,24 @@ const PendingReciptsEntry = () => {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 
 	useEffect(() => {
 		getUsers()
 	}, [])
-	const getOrders = async () => {
-		const response = await axios({
-			method: "get",
-			url: "/receipts/getPendingEntry",
-
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-		console.log("users", response)
-		if (response.data.success) setOrders(response.data.result)
-	}
+	const getOrders = async (page = 1) => {
+		setLoading(true);
+		const response = await axios.get(`/receipts/getPendingEntry?page=${page}&limit=300`);
+		if (response.data.success) {
+		  setOrders((prevOrders) => [...prevOrders, ...response.data.result]);
+		  if (response.data.result.length < 300) {
+			setHasMore(false); // No more data if less than limit is returned
+		  }
+		}
+		setLoading(false);
+	  };
 	const orderList = useMemo(
 		() =>
 			orders.map(a => ({
@@ -99,8 +101,8 @@ const PendingReciptsEntry = () => {
 		getCounter()
 	}, [])
 	useEffect(() => {
-		getOrders()
-	}, [])
+		getOrders(page);
+	  }, [page]);
 	const putOrder = async receipt_number => {
 		const response = await axios({
 			method: "put",
@@ -111,13 +113,13 @@ const PendingReciptsEntry = () => {
 			},
 		})
 		if (response.data.success) {
-			getOrders()
+			setOrders(prev => prev.filter(a => a.receipt_number !== receipt_number))
 			return
 		}
 	}
 	const downloadHandler = async () => {
 		let sheetData = []
-		// console.log(sheetData)
+		
 		for (let order of selectedOrders?.sort((a, b) => +a.receipt_number - +b.receipt_number)) {
 			sheetData.push({
 				Amount: order.modes.map(a => +a.amt).reduce((a, b) => a + b) || "0",
@@ -143,6 +145,24 @@ const PendingReciptsEntry = () => {
 		FileSaver.saveAs(data, "Recipts" + fileExtension)
 		// setSelectedOrders([]);
 	}
+	const lastOrderElementRef = useRef();
+	useEffect(() => {
+		if (observer.current) observer.current.disconnect();
+	
+		observer.current = new IntersectionObserver((entries) => {
+		  if (entries[0].isIntersecting && hasMore && !loading) {
+			setPage((prevPage) => prevPage + 1);
+		  }
+		});
+	
+		if (lastOrderElementRef.current) {
+		  observer.current.observe(lastOrderElementRef.current);
+		}
+	
+		return () => {
+		  if (observer.current) observer.current.disconnect();
+		};
+	  }, [hasMore, loading]);
 	return (
 		<>
 			<Sidebar />
@@ -214,8 +234,9 @@ const PendingReciptsEntry = () => {
 				<OrderDetails
 					onSave={() => {
 						setPopupOrder(null)
-						getOrders()
+					
 					}}
+					setOrders={setOrders}
 					order_uuid={popupOrder.order_uuid}
 					orderStatus="edit"
 				/>
@@ -274,7 +295,7 @@ const PendingReciptsEntry = () => {
 }
 
 function Table({ itemsDetails, setPopupOrder, putOrder, selectedOrders, setSelectedOrders, getOrders }) {
-	console.log(selectedOrders)
+	
 	return (
 		<table className="user-table" style={{ maxWidth: "100vw", height: "fit-content", overflowX: "scroll" }}>
 			<thead>

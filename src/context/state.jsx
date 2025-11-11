@@ -7,16 +7,17 @@ const State = (props) => {
   const [calculationPopup, setcalculationPopup] = useState(null);
   const [counterNotesPopup, setCounterNotesPopup] = useState(null);
   const [cashRegisterPopup, setCashRegisterPopup] = useState(null);
-  const [isItemAvilableOpen, setIsItemAvilableOpen] = useState(false);
+  const [isTripsModalOpen, setIsTripsModalOpen] = useState(false);
   const [openingBalanceDatePopup, setOpeningBalanceDatePopup] = useState(false);
   const [bankStatementImport, setBankStatementImport] = useState(false);
-  const [view, setView] = useState(sessionStorage.getItem("view") || 0);
+  const [view, setView] = useState(parseInt(sessionStorage.getItem("view")) || 0);
   const [skipStages, setSkipStages] = useState(false);
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(null);
   const [pageLoading, setPageLoading] = useState(null);
   const [gstReportPopup, setGstReportPopup] = useState(false);
   const [checkAccountingBalance, setCheckAccountingBalance] = useState(null);
+  const [printTypePopup, setPrintTypePopup] = useState(false);
   const submitBulkOrders = async ({
     stage,
     orders,
@@ -208,7 +209,7 @@ const State = (props) => {
         clearTimeout(timeout);
       }
     } catch (error) {
-      console.log(error);
+     
     }
     setLoading(false);
   };
@@ -366,7 +367,7 @@ const State = (props) => {
     }
   };
   const updateServerPdf = async (data) => {
-    console.log(data);
+   
   };
 
   const [promptState, setPromptState] = useState();
@@ -393,7 +394,7 @@ const State = (props) => {
 
   const saveSpecialPrice = async (item, counter_uuid, setCounters, price) => {
     try {
-      console.log({ item, counter_uuid, setCounters });
+     
       const response = await axios({
         method: "patch",
         url: "/counters/item_special_price/" + counter_uuid,
@@ -407,13 +408,13 @@ const State = (props) => {
         )
       );
     } catch (error) {
-      console.log(error);
+     
     }
   };
 
   const deleteSpecialPrice = async (item, counter_uuid, setCounters) => {
     try {
-      console.log({ item, counter_uuid, setCounters });
+     
       setPromptState(null);
       const response = await axios({
         method: "patch",
@@ -428,7 +429,7 @@ const State = (props) => {
         )
       );
     } catch (error) {
-      console.log(error);
+     
     }
   };
 
@@ -475,9 +476,13 @@ const State = (props) => {
     setTimeout(() => setNotification(null), 3000);
   };
   const getAccountingBalanceDetails = async () => {
+    setLoading(true);
     const response = await axios.get("/ledger/getAccountingBalanceDetails");
     if (response.data.success) {
-      setCheckAccountingBalance(response.data.result);
+      setCheckAccountingBalance({
+        data: response.data.result,
+        type: "accounting",
+      });
       setNotification({
         success: true,
         message: "Accounting Balance Details Fetched Successfully",
@@ -487,6 +492,66 @@ const State = (props) => {
         success: true,
         message: "No Accounting Balance Details Difference Found",
       });
+    }
+    setLoading(false);
+  };
+  const getDebitCreditBalanceDetails = async () => {
+    setLoading(true);
+    const response = await axios.get(
+      "/ledger/getDebitCreditAccountingBalanceDetails"
+    );
+    if (response.data.success) {
+      setCheckAccountingBalance({
+        data: response.data.result,
+        type: "Debit/Credit",
+      });
+      setNotification({
+        success: true,
+        message: "Debit/Credit Balance Details Fetched Successfully",
+      });
+    } else {
+      setNotification({
+        success: true,
+        message: "No Credit/Debit Balance Details Difference Found",
+      });
+    }
+    setLoading(false);
+  };
+  const getGSTErrorDetails = async () => {
+    setLoading(true);
+    const response = await axios.get("/ledger/getGSTErrorDetails");
+    if (response.data.success) {
+      setCheckAccountingBalance({
+        data: response.data.result,
+        type: "GST Error",
+      });
+      setNotification({
+        success: true,
+        message: "GST Error Details Fetched Successfully",
+      });
+    } else {
+      setNotification({
+        success: true,
+        message: "No GST Error Details Found",
+      });
+    }
+    setLoading(false);
+  };
+  const fixAllGST = async (checked) => {
+    setLoading(true);
+    const response = await axios({
+      method: "post",
+      url: "/ledger/removeGSTError",
+      data: checked,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+   
+    if (response.data.success) {
+      setLoading(false);
+      setNotification({ success: true, message: "Data Updated" });
+      getGSTErrorDetails();
     }
   };
 
@@ -503,8 +568,8 @@ const State = (props) => {
         updateServerPdf,
         cashRegisterPopup,
         setCashRegisterPopup,
-        isItemAvilableOpen,
-        setIsItemAvilableOpen,
+        isTripsModalOpen,
+        setIsTripsModalOpen,
         promptState,
         setPromptState,
         getSpecialPrice,
@@ -532,6 +597,11 @@ const State = (props) => {
         setCounterNotesPopup,
         gstReportPopup,
         setGstReportPopup,
+        getDebitCreditBalanceDetails,
+        getGSTErrorDetails,
+        fixAllGST,
+        printTypePopup,
+    setPrintTypePopup,
       }}
     >
       {props.children}

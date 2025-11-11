@@ -5,7 +5,7 @@ import PopupTripOrderTable from "../../components/PopupTripOrderTable"
 import TripPage from "../../components/TripPage"
 import { Add, ArrowDropDown } from "@mui/icons-material"
 import Select from "react-select"
-export default function CollectionTag({ setIsItemAvilableOpen }) {
+export default function CollectionTag({ setIsTripsModalOpen }) {
 	const [itemsData, setItemsData] = useState([])
 	const [popup, setPopup] = useState(null)
 	const [users, setUsers] = useState([])
@@ -23,7 +23,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 
 	const handlePrint = useReactToPrint({
 		content: reactToPrintContent,
-		documentTitle: "Statement",
+		
 		removeAfterPrint: true,
 	})
 
@@ -46,7 +46,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success)
 			setUsers(
 				response.data.result
@@ -93,7 +93,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 			},
 		})
 		if (response.data.success) {
-			console.log(response)
+			
 			setStatementTrip(response.data.result)
 			setStatementcollection_tag_uuid(false)
 			setTimeout(handlePrint, 2000)
@@ -127,17 +127,17 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 			setBtn(prev => !prev)
 		}
 	}
-	console.log(statementTrip)
+	
 	return (
 		<>
-			<div className="itemavilablelity">
-				<div className="itemavilabelitycontainer" style={{ position: "relative" }}>
-					<div className="itemavilablelity_header">
+			<div className="item-availability">
+				<div className="item-availability-container" style={{ position: "relative" }}>
+					<div className="item-availability_header">
 						<h2>Collection Tags</h2>
 					</div>
 
 					<div className="availablecontainer">
-						<div className="itemavilablelitybox">
+						<div className="item-availabilitybox">
 							<input
 								className="numberInput"
 								type="text"
@@ -363,7 +363,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 					</div>
 					<button
 						onClick={() => {
-							setIsItemAvilableOpen(false)
+							setIsTripsModalOpen(false)
 						}}
 						className="closeButton">
 						x
@@ -371,7 +371,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 
 					<div
 						onClick={() => {
-							setIsItemAvilableOpen(false)
+							setIsTripsModalOpen(false)
 						}}>
 						<button className="savebtn">Done</button>
 					</div>
@@ -443,7 +443,7 @@ export default function CollectionTag({ setIsItemAvilableOpen }) {
 }
 function NewUserForm({ onSave, popupInfo, users, completeFunction }) {
 	const [data, setdata] = useState([])
-	console.log(data)
+	
 	useEffect(() => {
 		setdata(popupInfo?.assigned_to.filter(a => a) || [])
 	}, [popupInfo?.assigned_to])
@@ -630,7 +630,7 @@ function AssignTagPopup({ onSave, selectedOrders }) {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setTags(response.data.result)
 	}
 
@@ -787,7 +787,7 @@ function TagPopup({ onSave }) {
 				"Content-Type": "application/json",
 			},
 		})
-		console.log("users", response)
+		
 		if (response.data.success) setUsers(response.data.result)
 	}
 

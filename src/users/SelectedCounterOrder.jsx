@@ -1,21 +1,26 @@
 import { AiOutlineSearch } from "react-icons/ai";
 import { IoArrowBackOutline } from "react-icons/io5";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useContext } from "react";
 import { openDB } from "idb";
 import { useNavigate, useParams } from "react-router-dom";
 import { AutoAdd, Billing } from "../Apis/functions";
 import { Link as ScrollLink } from "react-scroll";
 import { v4 as uuid } from "uuid";
 import axios from "axios";
-
+import Context from "../context/context";
 import CloseIcon from "@mui/icons-material/Close";
 import MobileNumberPopup from "../components/MobileNumberPopup";
+import { companyLoadRates } from "../utils/constants"
 const SelectedCounterOrder = () => {
+  const {
+  
+    setNotification,
+  } = useContext(Context);
   const [items, setItems] = useState([]);
-  const [foodLicensePopup, setFoodLicencePopup] = useState(false);
+  // const [foodLicensePopup, setFoodLicencePopup] = useState(false);
   const [checkNumberPopup, setCheckNumberPopup] = useState(false);
   const [pricePopup, setPricePopup] = useState(false);
-  const [number, setNumber] = useState(false);
+  // const [number, setNumber] = useState(false);
   const [confirmItemsPopup, setConfirmItemPopup] = useState(false);
   const [enable, setEnable] = useState(false);
   const [userData, setUserData] = useState({});
@@ -31,7 +36,7 @@ const SelectedCounterOrder = () => {
   const [filterItemTitle, setFilterItemTile] = useState("");
   const [filterCompany, setFilterCompany] = useState("");
   const [itemsCategory, setItemsCategory] = useState([]);
-  const [companies, setCompanies] = useState([]);
+  const [companies, setCompanies] = useState({});
   const [popupForm, setPopupForm] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
   const [total, setTotal] = useState(0);
@@ -79,23 +84,23 @@ const SelectedCounterOrder = () => {
   useEffect(() => {
     callBilling();
   }, [order?.items]);
-  useEffect(() => {
-    if (counter?.mobile?.length) {
-      if (
-        counter?.mobile.filter((a) =>
-          a?.lable?.find((b) => b.type === "wa" && +b.varification)
-        )?.length &&
-        counter?.mobile.filter(
-          (a) =>
-            a?.lable?.find((b) => b.type === "cal" && +b.varification)?.length
-        )
-      ) {
-        setNumber(false);
-      } else {
-        setNumber(true);
-      }
-    }
-  }, [counter?.mobile]);
+  // useEffect(() => {
+  //   if (counter?.mobile?.length) {
+  //     if (
+  //       counter?.mobile.filter((a) =>
+  //         a?.lable?.find((b) => b.type === "wa" && +b.varification)
+  //       )?.length &&
+  //       counter?.mobile.filter(
+  //         (a) =>
+  //           a?.lable?.find((b) => b.type === "cal" && +b.varification)?.length
+  //       )
+  //     ) {
+  //       setNumber(false);
+  //     } else {
+  //       setNumber(true);
+  //     }
+  //   }
+  // }, [counter?.mobile]);
   const getCounter = async () => {
     const response = await axios({
       method: "post",
@@ -108,7 +113,7 @@ const SelectedCounterOrder = () => {
     if (response.data.success) {
       setCounter(response.data.result);
       if (!response.data.result.food_license) {
-        setFoodLicencePopup(true);
+        // setFoodLicencePopup(true);
       } else {
         // setCheckNumberPopup(true);
       }
@@ -123,8 +128,11 @@ const SelectedCounterOrder = () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("users", response);
-    if (response.data.success) setUserData(response.data.result);
+   
+    if (response.data.success) {
+      setFilterCompany(response.data.result?.default_company || companies?.[0]?.company_uuid)
+      setUserData(response.data.result);
+    }
   };
 
   useEffect(() => {
@@ -160,7 +168,7 @@ const SelectedCounterOrder = () => {
       },
     });
     if (response.data.success) {
-      setFoodLicencePopup(false);
+      // setFoodLicencePopup(false);
       // setCheckNumberPopup(true);
     }
   };
@@ -184,6 +192,7 @@ const SelectedCounterOrder = () => {
           ...a,
           item_price: a.item_price || 0,
           gst_percentage: a.gst_percentage || 0,
+          css_percentage: a.css_percentage || 0,
         }))
     );
     let projectionItems = localStorage.getItem("projectionItems");
@@ -211,8 +220,7 @@ const SelectedCounterOrder = () => {
       .transaction("companies", "readwrite")
       .objectStore("companies");
     let company = await store.getAll();
-    setCompanies(company);
-    setFilterCompany(company[0]?.company_uuid);
+    setCompanies(company.reduce((obj, i) => ({...obj, [i.company_uuid]:i}), {}));
     store = await db
       .transaction("item_category", "readwrite")
       .objectStore("item_category");
@@ -234,27 +242,34 @@ const SelectedCounterOrder = () => {
   useEffect(() => {
     setItems((prev) =>
       prev?.map((a) => {
-        let item_price=a.item_price;
-        let item_special_price=counter?.item_special_price?.find((b) => b.item_uuid === a.item_uuid)?.price;
-        let item_rate=counter?.company_discount?.find((b) => b.company_uuid === a.company_uuid)?.item_rate;
+        let item_price = a.item_price;
+        let item_special_price = counter?.item_special_price?.find(
+          (b) => b.item_uuid === a.item_uuid
+        )?.price;
+        let item_rate = counter?.company_discount?.find(
+          (b) => b.company_uuid === a.company_uuid
+        )?.item_rate;
 
-        if(item_special_price){
-          item_price=item_special_price;
-        }else if(item_rate==="a"){
-          item_price=a.item_price_a;
-        }else if(item_rate==="b"){
-          item_price=a.item_price_b;
-        }else if(item_rate==="c"){
-          item_price=a.item_price_c;
+        if (item_special_price) {
+          item_price = item_special_price;
+        } else if (item_rate === "a") {
+          item_price = a.item_price_a;
+        } else if (item_rate === "b") {
+          item_price = a.item_price_b;
+        } else if (item_rate === "c") {
+          item_price = a.item_price_c;
+        } else if (item_rate === "d") {
+          item_price = a.item_price_d;
         }
 
-        return{
-        ...a,
-        item_price,
-        b: 0,
-        p: 0,
-        status: 0,
-      }})
+        return {
+          ...a,
+          item_price,
+          b: 0,
+          p: 0,
+          status: 0,
+        };
+      })
     );
   }, [counter]);
 
@@ -265,18 +280,19 @@ const SelectedCounterOrder = () => {
         order_status: orderData?.order_status || "R",
         order_uuid: uuid(),
         opened_by: 0,
+        order_type: orderData.items[0].billing_type,
         item_details: orderData.items.map((a) => {
-          
-          
-          return{
-          ...a,
-          b: a.b,
-          p: a.p,
-          unit_price: a.price,
-          gst_percentage: a.item_gst,
-          status: 0,
-          price: a.item_price,
-        }}),
+          return {
+            ...a,
+            b: a.b,
+            p: a.p,
+            unit_price: a.price,
+            gst_percentage: a.item_gst,
+            css_percentage: a.item_css,
+            status: 0,
+            price: a.item_price,
+          };
+        }),
         status: [
           {
             stage: orderData.others.stage,
@@ -285,7 +301,7 @@ const SelectedCounterOrder = () => {
           },
         ],
       };
-      console.log(data);
+     
       const response = await axios({
         method: "post",
         url: "/orders/postOrder",
@@ -295,7 +311,7 @@ const SelectedCounterOrder = () => {
         },
       });
       if (response.data.success) {
-        console.log(response.data);
+       
         setInvioceNumber(response.data.result.invoice_number);
         let qty = `${
           data?.item_details?.length > 1
@@ -321,7 +337,7 @@ const SelectedCounterOrder = () => {
         }
       }
     } catch (error) {
-      console.log(error);
+     
     } finally {
       setLoading(false);
     }
@@ -349,7 +365,7 @@ const SelectedCounterOrder = () => {
       },
     });
     if (response.data.success) {
-      console.log(response);
+     
     }
   };
   useEffect(() => {
@@ -357,21 +373,18 @@ const SelectedCounterOrder = () => {
       postActivity({ activity: "Order Start" });
       setOrderCreated(true);
     }
-    console.log({ order });
+   
   }, [order]);
+
+  const getLoadRate = (item) => {
+    const loadRate = companies[filterCompany].load_rate
+    if (loadRate === companyLoadRates[2].value) return `${+(item.item_price * +item.one_pack).toFixed(2)}/pack`
+    if (loadRate === companyLoadRates[1].value) return `${+(item.item_price * +item.conversion).toFixed(2)}/box`
+    return `${item.item_price}/unit`
+  }
 
   return (
     <>
-      {number ? (
-        <MobileNumberPopup
-          counter={counter}
-          getCounter={getCounter}
-          onSave={() => setNumber(false)}
-        />
-      ) : (
-        ""
-      )}
-
       <nav
         className="user_nav nav_styling"
         style={
@@ -393,7 +406,7 @@ const SelectedCounterOrder = () => {
               className="theme-btn"
               style={{
                 width: "max-content",
-                backgroundColor: "#4ac959",
+                backgroundColor: "#32bd33",
               }}
               onClick={() => setPopupState(true)}
             >
@@ -403,7 +416,7 @@ const SelectedCounterOrder = () => {
               className="theme-btn"
               style={{
                 width: "max-content",
-                backgroundColor: "#4ac959",
+                backgroundColor: "#32bd33",
               }}
               onClick={() => setDiscountPopup("Summary")}
             >
@@ -413,49 +426,43 @@ const SelectedCounterOrder = () => {
               className="theme-btn"
               style={{
                 width: "max-content",
-                backgroundColor: "#4ac959",
+                backgroundColor: "#32bd33",
               }}
               onClick={() => setHoldPopup("Summary")}
             >
               Free
             </button>
           </>
-        ) : (
-          ""
-        )}
-        {!cartPage ? (
-          <>
-            <div className="user_searchbar flex">
-              <AiOutlineSearch className="user_search_icon" />
-              <input
-                style={{ width: "200px" }}
-                className="searchInput"
-                type="text"
-                placeholder="search"
-                value={filterItemTitle}
-                onChange={(e) => setFilterItemTile(e.target.value)}
-              />
-              <CloseIcon
-                className="user_cross_icon"
-                onClick={() => setFilterItemTile("")}
-              />
-            </div>
+        ) : <>
+          <div className="user_searchbar flex">
+            <AiOutlineSearch className="user_search_icon" />
+            <input
+              style={{ width: "200px" }}
+              className="searchInput"
+              type="text"
+              placeholder="search"
+              value={filterItemTitle}
+              onChange={(e) => setFilterItemTile(e.target.value)}
+            />
+            <CloseIcon
+              className="user_cross_icon"
+              onClick={() => setFilterItemTile("")}
+            />
+          </div>
 
-            <div>
-              <select
-                className="searchInput selectInput"
-                value={filterCompany}
-                onChange={(e) => setFilterCompany(e.target.value)}
-              >
-                {companies?.map((a) => (
-                  <option value={a.company_uuid}>{a.company_title}</option>
-                ))}
-              </select>
-            </div>
-          </>
-        ) : (
-          ""
-        )}
+          <div>
+            <select
+              className="searchInput selectInput"
+              value={filterCompany}
+              onChange={(e) => setFilterCompany(e.target.value)}
+              style={{opacity:filterCompany?1:0}}
+            >
+              {companies && Object.values(companies)?.map((a) => (
+                <option value={a.company_uuid}>{a.company_title}</option>
+              ))}
+            </select>
+          </div>
+        </>}
       </nav>
       <div className="home">
         <div className="container" style={{ maxWidth: "500px" }}>
@@ -590,7 +597,7 @@ const SelectedCounterOrder = () => {
                                           justifyContent: "space-between",
                                         }}
                                       >
-                                        <h3
+                                        <div
                                           className={`item-price`}
                                           style={{ cursor: "pointer" }}
                                         >
@@ -603,7 +610,7 @@ const SelectedCounterOrder = () => {
                                                     "line-through",
                                                 }}
                                               >
-                                                Price: {item?.item_price}
+                                                <b>Price:</b> {item.item_price}
                                               </span>
                                               <br />
                                               <span
@@ -619,12 +626,12 @@ const SelectedCounterOrder = () => {
                                               </span>
                                             </>
                                           ) : (
-                                            <>Price: {item?.item_price}</>
+                                            <><b>Price:</b> {getLoadRate(item)}</>
                                           )}
-                                          <span style={{ marginLeft: "20px" }}>
+                                          {/* <span style={{ marginLeft: "20px" }}>
                                             Stock {getStock(item)}
-                                          </span>
-                                        </h3>
+                                          </span> */}
+                                        </div>
                                         <h3 className={`item-price`}>
                                           MRP: {item?.mrp || ""}
                                         </h3>
@@ -840,7 +847,7 @@ const SelectedCounterOrder = () => {
                   className="menus"
                   style={{
                     position: "fixed",
-                    boxShadow: "#4ac959 0 0 50px -10px",
+                    boxShadow: "#32bd33 0 0 50px -10px",
                     width: "100vw",
                     maxWidth: "500px",
                     maxHeight: "80vh",
@@ -1188,14 +1195,27 @@ const SelectedCounterOrder = () => {
                     })),
                   }));
                   setTimeout(async () => {
+                    let checkItemHaveSameBillingType = order.items.find(
+                      (a) => a.billing_type !== order.items[0].billing_type
+                    );
+                   
+                    if (checkItemHaveSameBillingType) {
+                      setLoading(false);
+                      return setNotification({
+                        message: "Invoice and Estimate together not allowed",
+                        success: false,
+                      });
+                    }
+
                     let time = new Date();
                     Billing({
                       new_order: 1,
                       order_uuid: order?.order_uuid,
-                      invoice_number: `${order?.order_type}${order?.invoice_number}`,
+                      invoice_number: `${order.items[0].billing_type}${order?.invoice_number}`,
                       creating_new: true,
                       counter,
                       items: data.items,
+                      order_type:order.items[0].billing_type,
                       others: {
                         stage: 1,
                         user_uuid: localStorage.getItem("user_uuid"),
@@ -1313,7 +1333,7 @@ const SelectedCounterOrder = () => {
       ) : (
         ""
       )}
-      {foodLicensePopup ? (
+      {/* {foodLicensePopup ? (
         <div className="overlay">
           <div
             className="modal"
@@ -1368,7 +1388,7 @@ const SelectedCounterOrder = () => {
         </div>
       ) : (
         ""
-      )}
+      )} */}
       {invoice_number ? (
         <div className="overlay">
           <div
@@ -1447,10 +1467,10 @@ function HoldPopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
       ? NonFilterItem
       : [];
     setOrder((prev) => ({ ...prev, items: item_details }));
-    console.log(item_details);
+   
     onSave();
   };
-  console.log(orders);
+ 
   return (
     <div className="overlay" style={{ zIndex: 999999999 }}>
       <div
@@ -1579,7 +1599,7 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
         ...data,
         p_price: data.item_price,
         b_price: Math.floor(data.item_price * data.conversion || 0),
-        discount: data.discount|| 0,
+        discount: data.discount || 0,
       };
     });
   }, []);
@@ -1595,10 +1615,10 @@ function PricePopup({ onSave, orders, itemsData, holdPopup, setOrder }) {
         : a
     );
     setOrder((prev) => ({ ...prev, order_status: "A", items: item_details }));
-    console.log(item_details);
+   
     onSave();
   };
-  console.log(orders);
+ 
   return (
     <div className="overlay" style={{ zIndex: 999999999 }}>
       <div
